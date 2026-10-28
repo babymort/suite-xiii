@@ -5393,6 +5393,170 @@ const XTOUR = (() => {
 })();
 
 // =====================================================================
+//  SUITE XIII — connexion IA multi-services (XAI)
+//  Claude (Anthropic), Gemini (Google), ChatGPT (OpenAI), Mistral, OpenRouter, Groq, DeepSeek, Ollama (local), API compatible OpenAI.
+//  La clé reste dans ce navigateur (localStorage « xiii.ai ») et n'est envoyée qu'au service choisi.
+// =====================================================================
+const XAI = (() => {
+    const KEY = 'xiii.ai';
+    const P = {
+        anthropic: { n: 'Claude (Anthropic)', kind: 'anthropic', url: 'https://api.anthropic.com/v1/messages', vision: true, models: [['claude-sonnet-5-5', 'Claude Sonnet — recommandé'], ['claude-opus-5-5', 'Claude Opus — le plus précis'], ['claude-haiku-5-5', 'Claude Haiku — rapide et économique']], ph: 'sk-ant-…',
+            tuto: ['Ouvrez <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">console.anthropic.com → API Keys</a> et créez un compte.', 'Ajoutez un moyen de paiement dans <b>Billing</b> (quelques euros de crédit suffisent pour des centaines de requêtes).', '<b>Create Key</b>, nommez-la « SUITE XIII », copiez la clé <code>sk-ant-…</code> et collez-la ci-dessous.'], note: 'Excellent pour lire des croquis et rédiger en français. Payant à l\'usage. Sur claude.ai, l\'IA fonctionne déjà sans clé.' },
+        gemini: { n: 'Gemini (Google)', kind: 'gemini', url: 'https://generativelanguage.googleapis.com/v1beta/models/', vision: true, models: [['gemini-flash-latest', 'Gemini Flash (toujours la dernière version) — recommandé'], ['gemini-pro-latest', 'Gemini Pro (dernière version) — le plus précis'], ['gemini-flash-lite-latest', 'Gemini Flash-Lite — très économique']], ph: 'AIza…',
+            tuto: ['Ouvrez <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com → Get API key</a> avec votre compte Google.', '<b>Create API key</b> (choisissez ou créez un projet Google Cloud), puis copiez la clé <code>AIza…</code>.', 'Collez-la ci-dessous. Une offre gratuite (avec limites de débit) permet de tester ; activez la facturation du projet pour un usage intensif.'], note: 'Offre gratuite généreuse pour démarrer. En gratuit, Google peut utiliser les requêtes pour améliorer ses modèles : évitez d\'y envoyer des informations confidentielles.' },
+        openai: { n: 'ChatGPT (OpenAI)', kind: 'openai', url: 'https://api.openai.com/v1/chat/completions', vision: true, models: [['gpt-4.1', 'GPT-4.1 — recommandé'], ['gpt-4.1-mini', 'GPT-4.1 mini — économique'], ['gpt-4o', 'GPT-4o'], ['gpt-4o-mini', 'GPT-4o mini']], ph: 'sk-…',
+            tuto: ['Ouvrez <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener">platform.openai.com → API keys</a> (différent de l\'abonnement ChatGPT Plus).', 'Ajoutez du crédit dans <b>Settings → Billing</b>.', '<b>Create new secret key</b>, copiez la clé <code>sk-…</code> et collez-la ci-dessous.'], note: 'L\'abonnement ChatGPT ne donne pas accès à l\'API : le crédit API est séparé.' },
+        mistral: { n: 'Mistral AI (France)', kind: 'openai', url: 'https://api.mistral.ai/v1/chat/completions', vision: true, models: [['mistral-medium-latest', 'Mistral Medium — recommandé (lit les images)'], ['mistral-large-latest', 'Mistral Large'], ['pixtral-large-latest', 'Pixtral Large — spécialiste des images'], ['mistral-small-latest', 'Mistral Small — économique']], ph: 'clé Mistral',
+            tuto: ['Ouvrez <a href="https://console.mistral.ai/api-keys" target="_blank" rel="noopener">console.mistral.ai → API Keys</a>.', 'Choisissez une offre (une offre d\'essai gratuite existe), puis <b>Create new key</b>.', 'Copiez la clé et collez-la ci-dessous.'], note: 'Service européen, hébergé en Europe.' },
+        openrouter: { n: 'Connexion en un clic (Claude, Gemini, ChatGPT… via OpenRouter)', kind: 'openai', url: 'https://openrouter.ai/api/v1/chat/completions', vision: true, models: [['openrouter/auto', 'Automatique — le meilleur modèle pour chaque demande']], ph: 'sk-or-…',
+            tuto: ['Créez un compte sur <a href="https://openrouter.ai/keys" target="_blank" rel="noopener">openrouter.ai → Keys</a>.', 'Ajoutez du crédit (<b>Credits</b>), puis <b>Create Key</b>.', 'Collez la clé ci-dessous et choisissez n\'importe quel modèle de leur catalogue (nom exact visible sur openrouter.ai/models).'], note: 'Une seule clé pour des centaines de modèles (Claude, GPT, Gemini, Llama, Mistral…).' },
+        groq: { n: 'Groq (très rapide)', kind: 'openai', url: 'https://api.groq.com/openai/v1/chat/completions', vision: true, models: [['meta-llama/llama-4-scout-17b-16e-instruct', 'Llama 4 Scout — lit les images'], ['llama-3.3-70b-versatile', 'Llama 3.3 70B — texte']], ph: 'gsk_…',
+            tuto: ['Ouvrez <a href="https://console.groq.com/keys" target="_blank" rel="noopener">console.groq.com → API Keys</a>.', '<b>Create API Key</b> (offre gratuite avec limites).', 'Collez la clé ci-dessous.'], note: 'Gratuit pour tester, réponses quasi instantanées ; modèles open source, un peu moins précis sur les croquis.' },
+        deepseek: { n: 'DeepSeek', kind: 'openai', url: 'https://api.deepseek.com/chat/completions', vision: false, models: [['deepseek-chat', 'DeepSeek Chat']], ph: 'sk-…',
+            tuto: ['Ouvrez <a href="https://platform.deepseek.com/api_keys" target="_blank" rel="noopener">platform.deepseek.com → API keys</a>.', 'Ajoutez du crédit, créez une clé.', 'Collez-la ci-dessous.'], note: 'Texte uniquement : ne lit pas les images (croquis → synoptique indisponible).' },
+        ollama: { n: 'Ollama (IA locale, hors ligne)', kind: 'openai', url: 'http://localhost:11434/v1/chat/completions', vision: true, nokey: true, editUrl: true, models: [['qwen2.5vl', 'Qwen 2.5 VL — lit les images'], ['llama3.2-vision', 'Llama 3.2 Vision'], ['gemma3', 'Gemma 3'], ['mistral-small3.1', 'Mistral Small 3.1']], ph: '',
+            tuto: ['Installez <a href="https://ollama.com/download" target="_blank" rel="noopener">Ollama</a> sur votre ordinateur, puis téléchargez un modèle : <code>ollama pull qwen2.5vl</code>.', 'Autorisez la page à l\'appeler : définissez la variable d\'environnement <code>OLLAMA_ORIGINS=*</code> puis relancez Ollama (Windows : Paramètres système → Variables d\'environnement ; Mac : <code>launchctl setenv OLLAMA_ORIGINS "*"</code>).', 'Laissez l\'adresse <code>http://localhost:11434/v1/chat/completions</code> et choisissez le modèle téléchargé.'], note: 'Gratuit, privé, fonctionne sans internet ; il faut un ordinateur puissant (idéalement une carte graphique récente). Le navigateur peut demander l\'autorisation d\'accéder au réseau local.' },
+        custom: { n: 'Autre service compatible OpenAI', kind: 'openai', url: '', vision: true, editUrl: true, models: [], ph: 'clé (si nécessaire)',
+            tuto: ['Renseignez l\'adresse « chat/completions » de votre service (ex. LM Studio <code>http://localhost:1234/v1/chat/completions</code>, Azure, xAI, Together, Perplexity…).', 'Collez la clé si le service en demande une, et le nom exact du modèle.', 'Le service doit autoriser les appels depuis un navigateur (CORS).'], note: '' }
+    };
+    const ORDER = ['anthropic', 'gemini', 'openai', 'mistral', 'openrouter', 'groq', 'deepseek', 'ollama', 'custom'];
+    function load() {
+        let c = null; try { c = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) { }
+        if (!c) { c = { p: '', keys: {}, models: {}, urls: {} }; try { const k = (localStorage.getItem('synoptique_anthropic_key') || '').trim(); if (k) { c.p = 'anthropic'; c.keys.anthropic = k; c.models.anthropic = localStorage.getItem('synoptique_ai_model') || 'claude-sonnet-5-5'; } } catch (e) { } }
+        c.keys = c.keys || {}; c.models = c.models || {}; c.urls = c.urls || {}; return c;
+    }
+    const save = c => { try { localStorage.setItem(KEY, JSON.stringify(c)); return true; } catch (e) { return false; } };
+    const cur = () => { const c = load(), id = c.p; if (!id || !P[id]) return null; const d = P[id]; return { id, d, key: (c.keys[id] || '').trim(), model: (c.models[id] || (d.models[0] && d.models[0][0]) || '').trim(), url: (d.editUrl && c.urls[id]) || d.url }; };
+    function configured() { const x = cur(); return !!(x && x.url && x.model && (x.key || x.d.nokey || x.id === 'custom')); }
+    function label() { const x = cur(); return x ? x.d.n.replace(/ \(.*\)$/, '') + ' · ' + x.model : 'non configurée'; }
+    function canSee() { const x = cur(); return !!(x && x.d.vision); }
+
+    async function call(x, prompt, o) {
+        o = o || {}; const img = o.image, max = o.maxTokens || 8000; let res, data;
+        try {
+            if (x.d.kind === 'anthropic') {
+                const content = []; if (img) content.push({ type: 'image', source: { type: 'base64', media_type: img.mediaType, data: img.base64 } }); content.push({ type: 'text', text: prompt });
+                res = await fetch(x.url, { method: 'POST', signal: o.signal, headers: { 'content-type': 'application/json', 'x-api-key': x.key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' }, body: JSON.stringify({ model: x.model, max_tokens: max, messages: [{ role: 'user', content }] }) });
+            } else if (x.d.kind === 'gemini') {
+                const parts = []; if (img) parts.push({ inline_data: { mime_type: img.mediaType, data: img.base64 } }); parts.push({ text: prompt });
+                res = await fetch(x.url + encodeURIComponent(x.model) + ':generateContent?key=' + encodeURIComponent(x.key), { method: 'POST', signal: o.signal, headers: { 'content-type': 'application/json' }, body: JSON.stringify({ contents: [{ role: 'user', parts }], generationConfig: { maxOutputTokens: Math.max(max, 8192) } }) });
+            } else {
+                const content = img ? [{ type: 'text', text: prompt }, { type: 'image_url', image_url: { url: 'data:' + img.mediaType + ';base64,' + img.base64 } }] : prompt;
+                const body = { model: x.model, messages: [{ role: 'user', content }] }; if (x.id === 'openai') body.max_completion_tokens = max; else body.max_tokens = max;
+                const h = { 'content-type': 'application/json' }; if (x.key) h.authorization = 'Bearer ' + x.key; if (x.id === 'openrouter') { h['HTTP-Referer'] = location.origin; h['X-Title'] = 'SUITE XIII'; }
+                res = await fetch(x.url, { method: 'POST', signal: o.signal, headers: h, body: JSON.stringify(body) });
+            }
+        } catch (e) {
+            if (e && e.name === 'AbortError') throw e;
+            throw new Error(x.id === 'ollama' ? 'Ollama injoignable : vérifiez qu\'il tourne et que OLLAMA_ORIGINS=* est défini (voir le tutoriel).' : 'Service IA injoignable (réseau, adresse erronée, ou le service refuse les appels depuis un navigateur).');
+        }
+        try { data = await res.json(); } catch (e) { data = null; }
+        if (!res.ok) {
+            const msg = (data && (data.error && (data.error.message || data.error) || data.message)) || ('erreur ' + res.status);
+            if (res.status === 401 || res.status === 403 || /api key|invalid.*key|unauthori/i.test(msg)) throw new Error('Clé API refusée par ' + x.d.n + ' (vérifiez-la dans ⚙️ Connexion IA).');
+            if (res.status === 429) throw new Error('Limite atteinte chez ' + x.d.n + ' (quota ou débit) : patientez ou vérifiez votre crédit.');
+            if (res.status === 402 || /credit|billing|quota|insufficient/i.test(msg)) throw new Error('Crédit insuffisant sur votre compte ' + x.d.n + '.');
+            if ((res.status === 404 || /model.*(not found|not supported|does not exist|deprecat|retired)|no longer/i.test(msg)) && !o._retry) { const nm = await bestModel(x).catch(() => ''); if (nm && nm !== x.model) { const c = load(); c.models[x.id] = nm; save(c); return call(Object.assign({}, x, { model: nm }), prompt, Object.assign({}, o, { _retry: 1 })); } } // modèle retiré : on bascule seul sur le plus récent
+            if (res.status === 404 || /model/i.test(msg)) throw new Error('Modèle « ' + x.model + ' » introuvable chez ' + x.d.n + ' : choisissez-en un autre.');
+            throw new Error(x.d.n + ' : ' + (typeof msg === 'string' ? msg : JSON.stringify(msg)));
+        }
+        let text = '';
+        if (x.d.kind === 'anthropic') text = (data.content || []).filter(b => b.type === 'text').map(b => b.text).join('');
+        else if (x.d.kind === 'gemini') { const c = data.candidates && data.candidates[0]; text = c && c.content && c.content.parts ? c.content.parts.map(p => p.text || '').join('') : ''; if (!text && c && c.finishReason) throw new Error('Gemini n\'a pas répondu (' + c.finishReason + ').'); }
+        else { const m = data.choices && data.choices[0] && data.choices[0].message; text = m ? (typeof m.content === 'string' ? m.content : (m.content || []).map(p => p.text || '').join('')) : ''; }
+        if (!text) throw new Error('Réponse vide de ' + x.d.n + '.');
+        return text;
+    }
+    // 🔎 modèles réellement disponibles chez le service (les noms changent souvent : on ne dépend plus d'une liste figée)
+    async function listModels(x) {
+        if (x.d.kind === 'gemini') { const j = await (await fetch('https://generativelanguage.googleapis.com/v1beta/models?pageSize=200&key=' + encodeURIComponent(x.key))).json(); return (j.models || []).filter(m => (m.supportedGenerationMethods || []).includes('generateContent')).map(m => m.name.replace(/^models\//, '')); }
+        if (x.d.kind === 'anthropic') { const j = await (await fetch('https://api.anthropic.com/v1/models?limit=100', { headers: { 'x-api-key': x.key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' } })).json(); return (j.data || []).map(m => m.id); }
+        if (x.id === 'openrouter') { const j = await (await fetch('https://openrouter.ai/api/v1/models')).json(); return (j.data || []).sort((a, b) => (b.created || 0) - (a.created || 0)).map(m => m.id); }
+        const base = x.url.replace(/\/chat\/completions.*$/, ''); const h = x.key ? { authorization: 'Bearer ' + x.key } : {}; const j = await (await fetch(base + '/models', { headers: h })).json(); return (j.data || []).map(m => m.id);
+    }
+    async function bestModel(x, fam) {
+        const L = await listModels(x); if (!L.length) return '';
+        const pick = (re, no) => L.find(m => re.test(m) && !(no || /image|audio|tts|embed|vision-preview|live|search|realtime|transcribe|moderation|instruct|codex|dall|whisper|robotics|lyria|veo|imagen/i).test(m));
+        if (x.d.kind === 'gemini') return pick(/flash-latest$/) || pick(/^gemini-[\d.]+-flash(-\d+)?$/) || pick(/flash/) || L[0];
+        if (x.d.kind === 'anthropic') return pick(/sonnet/) || L[0];
+        if (x.id === 'openrouter') { const F = { claude: /^anthropic\/claude-.*sonnet/, gemini: /^google\/gemini-[\d.]+-flash(?!-lite)/, chatgpt: /^openai\/gpt-[\d.]+(-mini)?$/, free: /:free$/ }; return F[fam] ? (pick(F[fam]) || 'openrouter/auto') : 'openrouter/auto'; }
+        if (x.id === 'openai') return pick(/^gpt-[\d.]+-mini$/) || pick(/^gpt-[\d.]+$/) || L[0];
+        return L[0];
+    }
+    // 🔐 connexion en un clic (OpenRouter, OAuth PKCE) : l'utilisateur se connecte avec son compte, aucune clé à copier
+    const b64u = a => btoa(String.fromCharCode.apply(null, new Uint8Array(a))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    async function login(fam) {
+        const v = b64u(crypto.getRandomValues(new Uint8Array(48))), ch = b64u(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(v))), state = b64u(crypto.getRandomValues(new Uint8Array(12)));
+        try { localStorage.setItem('xiii.ai.pkce', JSON.stringify({ v, state, fam: fam || 'auto', at: Date.now() })); } catch (e) { }
+        const cb = location.origin + location.pathname;
+        location.href = 'https://openrouter.ai/auth?callback_url=' + encodeURIComponent(cb) + '&code_challenge=' + ch + '&code_challenge_method=S256&state=' + state + '&key_label=' + encodeURIComponent('SUITE XIII');
+    }
+    async function finishLogin() {
+        const q = new URLSearchParams(location.search), code = q.get('code'); if (!code) return;
+        let pk = null; try { pk = JSON.parse(localStorage.getItem('xiii.ai.pkce') || 'null'); } catch (e) { } if (!pk || Date.now() - pk.at > 20 * 60000) return;
+        if (q.get('state') && q.get('state') !== pk.state) return;
+        localStorage.removeItem('xiii.ai.pkce'); history.replaceState(null, '', location.pathname + location.hash);
+        try {
+            const r = await fetch('https://openrouter.ai/api/v1/auth/keys', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ code, code_verifier: pk.v, code_challenge_method: 'S256' }) }), j = await r.json();
+            if (!j.key) throw new Error(j.error && j.error.message || 'refus');
+            const c = load(); c.p = 'openrouter'; c.keys.openrouter = j.key; c.models.openrouter = 'openrouter/auto'; save(c);
+            try { const m = await bestModel(cur(), pk.fam); if (m) { const c2 = load(); c2.models.openrouter = m; save(c2); } } catch (e) { }
+            note('✅ IA connectée (' + label() + ') — prête dans toute la SUITE XIII.');
+        } catch (e) { note('❌ Connexion IA interrompue : ' + e.message); }
+    }
+    function note(t) { const n = document.createElement('div'); n.textContent = t; n.style.cssText = 'position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:2147483000;background:#1d1a17;color:#f3ede6;border:1px solid #f0b429;border-radius:10px;padding:12px 16px;font:14px "Segoe UI",system-ui,sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.4)'; (document.body || document.documentElement).appendChild(n); setTimeout(() => n.remove(), 6000); }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', finishLogin); else finishLogin();
+    async function ask(prompt, o) {
+        const x = cur(); if (!configured()) { const e = new Error('NO_AI'); throw e; }
+        if (o && o.image && !x.d.vision) throw new Error(x.d.n + ' ne lit pas les images : choisissez un autre service dans ⚙️ Connexion IA.');
+        return call(x, prompt, o);
+    }
+    function json(text) { let t = String(text || '').trim().replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/i, '').trim(); const a = t.indexOf('{'), b = t.lastIndexOf('}'); if (a >= 0 && b > a) t = t.slice(a, b + 1); return JSON.parse(t); }
+
+    // ---------- fenêtre de réglage + tutoriel ----------
+    const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    function openSettings(onDone) {
+        const old = document.getElementById('xai-ov'); if (old) old.remove();
+        if (!document.getElementById('xai-css')) { const st = document.createElement('style'); st.id = 'xai-css'; st.textContent = '.xai-hero{border:1px solid rgba(240,180,41,.55);background:linear-gradient(135deg,rgba(240,180,41,.16),rgba(240,180,41,.04));border-radius:14px;padding:14px;margin:6px 0 12px}.xai-hero b{font-size:15px}.xai-hero p{margin:6px 0 10px;font-size:13px;opacity:.9}.xai-hero small{display:block;margin-top:8px;opacity:.65;font-size:11.5px}.xai-fam{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.xai-fam button{padding:10px 6px;border-radius:10px;border:1px solid rgba(240,180,41,.5);background:rgba(0,0,0,.25);color:inherit;font-weight:700;cursor:pointer}.xai-fam button:hover{background:#f0b429;color:#1b1406}@media(max-width:520px){.xai-fam{grid-template-columns:1fr 1fr}}#xai-adv{margin:4px 0 8px}#xai-adv>summary{cursor:pointer;opacity:.85;margin:6px 0}#xai-ov{position:fixed;inset:0;z-index:2147482000;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;font:13px "Segoe UI",Tahoma,sans-serif;color:#eee}#xai-box{background:#26262b;border:1px solid #444;border-radius:12px;width:min(760px,94vw);max-height:90vh;overflow:auto;padding:18px 20px;box-shadow:0 10px 40px rgba(0,0,0,.6)}#xai-box h3{margin:0 0 4px;display:flex;justify-content:space-between;font-size:17px}#xai-box h3 span{cursor:pointer;color:#999}#xai-box .sub{color:#aaa;margin:0 0 12px;line-height:1.5}#xai-box label{display:flex;flex-direction:column;gap:4px;margin:8px 0;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:#999}#xai-box input,#xai-box select{font:13px "Segoe UI",sans-serif;background:#3a3a40;color:#fff;border:1px solid #555;border-radius:6px;padding:8px 10px;text-transform:none;letter-spacing:0}#xai-box .row{display:flex;gap:8px;align-items:flex-end}#xai-box .row>*{flex:1}#xai-box .tuto{background:#1e1e22;border:1px solid #3a3a40;border-left:4px solid rgb(240,179,120);border-radius:8px;padding:10px 14px;margin:10px 0}#xai-box .tuto ol{margin:6px 0;padding-left:20px;line-height:1.6}#xai-box .tuto a{color:rgb(240,179,120)}#xai-box code{background:#333;padding:1px 5px;border-radius:4px;font-size:12px}#xai-box .note{color:#bbb;font-size:12px;margin:6px 0 0}#xai-box .acts{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:12px}#xai-box button{font:600 13px "Segoe UI",sans-serif;color:#fff;background:#3a3a40;border:1px solid #555;border-radius:8px;padding:8px 14px;cursor:pointer}#xai-box button.ok{background:rgba(240,179,120,.35);border-color:rgb(240,179,120)}#xai-box button:hover{border-color:rgb(240,179,120)}#xai-st{margin-top:8px;min-height:18px;font-size:12.5px}#xai-st.ok{color:#81c784}#xai-st.ko{color:#ef9a9a}#xai-box details{margin-top:10px;color:#bbb}#xai-box details li{margin:3px 0;line-height:1.5}'; document.head.appendChild(st); }
+        const c = load(); let p = c.p || 'gemini';
+        const ov = document.createElement('div'); ov.id = 'xai-ov'; document.body.appendChild(ov);
+        const render = () => {
+            const d = P[p];
+            ov.innerHTML = '<div id="xai-box" role="dialog"><h3>🤖 Connexion IA<span data-x title="Fermer">✕</span></h3><p class="sub">Les fonctions IA de la SUITE XIII (croquis → synoptique, recherche de connecteurs, brouillons de textes…) peuvent utiliser <b>le service IA de votre choix</b>. Sur claude.ai elles marchent sans réglage ; ailleurs (Netlify, fichier local), branchez ici votre propre clé. Réglage commun à tous les outils de la suite.</p>' +
+                (() => { const on = c.p === 'openrouter' && c.keys.openrouter; return '<div class="xai-hero"><b>' + (on ? '✅ IA connectée' : '🔐 Connectez votre IA en un clic') + '</b><p>' + (on ? 'Modèle actuel : <code>' + esc(c.models.openrouter || 'openrouter/auto') + '</code>. Changez de famille à tout moment :' : 'Choisissez votre IA, connectez-vous avec un compte (Google, e-mail…) : aucune clé à copier. Un seul compte donne accès à Claude, Gemini et ChatGPT (quelques euros de crédit). 🆓 Gratuit : modèles gratuits, sans carte bancaire, avec un nombre de demandes limité par jour.') + '</p><div class="xai-fam">' + [['claude', 'Claude', '🟠'], ['gemini', 'Gemini', '🔷'], ['chatgpt', 'ChatGPT', '🟢'], ['free', 'Gratuit', '🆓']].map(f => '<button data-fam="' + f[0] + '">' + f[2] + ' ' + f[1] + '</button>').join('') + '</div><small>Connexion sécurisée via OpenRouter : votre compte, votre crédit ; la clé reste dans ce navigateur.</small></div>'; })() +
+                '<details id="xai-adv"' + (c.p && c.p !== 'openrouter' ? ' open' : '') + '><summary>⚙️ Avancé : utiliser ma propre clé API (Anthropic, Google AI Studio, OpenAI, Mistral, IA locale…)</summary>' +
+                '<label>Service<select id="xai-p">' + ORDER.map(k => '<option value="' + k + '"' + (k === p ? ' selected' : '') + '>' + esc(P[k].n) + '</option>').join('') + '</select></label>' +
+                '<div class="tuto"><b>Comment obtenir l\'accès — ' + esc(d.n) + '</b><ol>' + d.tuto.map(t => '<li>' + t + '</li>').join('') + '</ol>' + (d.note ? '<p class="note">💡 ' + d.note + '</p>' : '') + (d.vision ? '' : '<p class="note">⚠️ Ce service ne lit pas les images.</p>') + '</div>' +
+                (d.editUrl ? '<label>Adresse de l\'API<input id="xai-u" value="' + esc(c.urls[p] || d.url) + '" placeholder="https://…/v1/chat/completions"></label>' : '') +
+                '<div class="row">' + (d.nokey ? '' : '<label>Clé API<input id="xai-k" type="password" autocomplete="off" placeholder="' + esc(d.ph) + '" value="' + esc(c.keys[p] || '') + '"></label>') +
+                '<label>Modèle<input id="xai-m" list="xai-ml" value="' + esc(c.models[p] || (d.models[0] && d.models[0][0]) || '') + '" placeholder="nom exact du modèle"><datalist id="xai-ml">' + d.models.map(m => '<option value="' + esc(m[0]) + '">' + esc(m[1]) + '</option>').join('') + '</datalist></label></div>' +
+                '<p class="note">Modèles suggérés : ' + (d.models.map(m => '<code>' + esc(m[0]) + '</code> ' + esc(m[1].split(' — ')[1] || '')).join(' · ') || '—') + '. Vous pouvez taper le nom de tout modèle plus récent proposé par le service.</p>' +
+                '<p><button data-detect>🔄 Détecter les modèles disponibles</button></p></details>' +
+                '<div id="xai-st"></div>' +
+                '<details><summary>🔒 Conseils pour une connexion dans les meilleures conditions</summary><ul><li><b>Votre clé reste dans ce navigateur</b> (aucun serveur SUITE XIII) et n\'est envoyée qu\'au service choisi. Sur un ordinateur partagé, effacez-la après usage.</li><li>Fixez un <b>plafond de dépenses</b> dans la console du service (Billing / Limits) et créez une clé dédiée « SUITE XIII » que vous pourrez révoquer.</li><li>Pour lire des <b>croquis et photos</b>, choisissez un modèle qui lit les images (Claude, Gemini, GPT-4.1/4o, Mistral Medium/Pixtral, Llama 4 Scout, Qwen-VL en local).</li><li>Pour des <b>données confidentielles</b> (contrats, contacts), préférez une offre payante (non utilisée pour l\'entraînement) ou Ollama en local.</li><li>Si un service refuse la connexion depuis le navigateur, passez par OpenRouter (compatible avec tous les grands modèles).</li><li>Cliquez sur <b>Tester</b> après chaque changement : la réponse confirme clé, modèle et accès réseau.</li></ul></details>' +
+                '<div class="acts"><button data-clear>Effacer la clé</button><button data-off>Désactiver</button><button data-test>🔌 Tester</button><button class="ok" data-save>Enregistrer</button></div></div>';
+            ov.querySelectorAll('[data-fam]').forEach(b => b.onclick = async () => { const f = b.dataset.fam; if (c.p === 'openrouter' && c.keys.openrouter) { st('Recherche du meilleur modèle ' + b.textContent.trim() + '…', ''); try { c.models.openrouter = await bestModel(Object.assign({}, cur() || {}, { id: 'openrouter', d: P.openrouter, key: c.keys.openrouter, url: P.openrouter.url }), f); save(c); render(); st('✅ ' + label(), 'ok'); } catch (e) { st('❌ Liste des modèles injoignable.', 'ko'); } } else { grab(); save(c); login(f); } });
+            const dt = ov.querySelector('[data-detect]'); if (dt) dt.onclick = async () => { grab(); const x = { id: p, d: P[p], key: (c.keys[p] || '').trim(), url: (P[p].editUrl && c.urls[p]) || P[p].url, model: c.models[p] || '' }; st('Recherche des modèles…', ''); try { const L = await listModels(x), best = await bestModel(x); const dl = ov.querySelector('#xai-ml'); if (dl) dl.innerHTML = L.slice(0, 80).map(m => '<option value="' + esc(m) + '">').join(''); const m = ov.querySelector('#xai-m'); if (m && best) m.value = best; st('✅ ' + L.length + ' modèle(s) trouvé(s) — sélectionné : <code>' + esc(best) + '</code>', 'ok'); } catch (e) { st('❌ Impossible de lister les modèles : vérifiez la clé.', 'ko'); } };
+            ov.querySelector('[data-x]').onclick = close; ov.onclick = e => { if (e.target === ov) close(); };
+            ov.querySelector('#xai-p').onchange = e => { grab(); p = e.target.value; render(); };
+            ov.querySelector('[data-save]').onclick = () => { grab(); c.p = p; if (save(c)) { st('✅ Enregistré : ' + label(), 'ok'); setTimeout(close, 700); } else st('Mémoire du navigateur saturée.', 'ko'); };
+            ov.querySelector('[data-clear]').onclick = () => { delete c.keys[p]; const k = ov.querySelector('#xai-k'); if (k) k.value = ''; save(c); st('Clé effacée.', 'ok'); };
+            ov.querySelector('[data-off]').onclick = () => { c.p = ''; save(c); st('IA personnelle désactivée.', 'ok'); };
+            ov.querySelector('[data-test]').onclick = async () => {
+                grab(); const saved = load(); c.p = p; save(c); st('Test en cours…', '');
+                try { const t = await ask('Réponds uniquement par le mot : OK'); st('✅ Connexion réussie avec ' + label() + ' — réponse : « ' + esc(t.trim().slice(0, 40)) + ' »', 'ok'); }
+                catch (e) { save(saved); st('❌ ' + esc(e.message === 'NO_AI' ? 'Renseignez la clé et le modèle.' : e.message), 'ko'); }
+            };
+        };
+        const grab = () => { const k = ov.querySelector('#xai-k'), m = ov.querySelector('#xai-m'), u = ov.querySelector('#xai-u'); if (k) { if (k.value.trim()) c.keys[p] = k.value.trim(); } if (m) c.models[p] = m.value.trim(); if (u) c.urls[p] = u.value.trim(); };
+        const st = (t, k) => { const e = ov.querySelector('#xai-st'); if (e) { e.innerHTML = t; e.className = k || ''; } };
+        function close() { ov.remove(); if (typeof onDone === 'function') onDone(configured()); }
+        render();
+    }
+    return { PROVIDERS: P, configured, label, canSee, ask, json, openSettings, config: load, login, listModels, bestModel };
+})();
+
+// =====================================================================
 //  XSET : bouton ⚙️ Paramètres commun à tous les outils SUITE XIII (pages bureau)
 //  • un seul emplacement pour tous : en bas à droite, AU-DESSUS du badge « Powered by Netlify »
 //  • panneau latéral : Affichage (thème, thème commun à la suite) · Aide (guide, tutoriels…)
@@ -5544,8 +5708,9 @@ body.presentation-mode #xs-gear,body.exporting #xs-gear,body.xs-hide-gear #xs-ge
         const ov = document.createElement('div'); ov.id = 'xs-ov';
         const secs = (c.sections || []).filter(x => !x.hidden || !x.hidden());
         const items = (arr) => arr.filter(Boolean).map((it, i) => '<button type="button" class="xs-item" data-run="' + i + '"><span class="i">' + it.icon + '</span><span class="g">' + esc(it.label) + (it.sub ? '<small>' + esc(it.sub) + '</small>' : '') + '</span><span>›</span></button>').join('');
-        const help = (c.help || []).filter(Boolean).concat((window.XSET_HELP || []).filter(x => !(c.help || []).some(h => h && h.label === x.label))).concat(typeof XTOUR !== 'undefined' ? [{ icon: '🧭', label: 'Visite guidée', sub: 'Revoir le tutoriel interactif de l\'interface', run: () => setTimeout(() => XTOUR.start(true), 250) }] : []).concat(typeof XAI !== 'undefined' ? [{ icon: '🤖', label: 'Connexion IA', sub: 'Claude, Gemini, ChatGPT, Mistral, IA locale… — actuel : ' + XAI.label(), run: () => XAI.openSettings() }] : []), tools = (c.tools || []).filter(Boolean);
+        const help = (c.help || []).filter(Boolean).concat((window.XSET_HELP || []).filter(x => !(c.help || []).some(h => h && h.label === x.label))).concat(typeof XTOUR !== 'undefined' ? [{ icon: '🧭', label: 'Visite guidée', sub: 'Revoir le tutoriel interactif de l\'interface', run: () => setTimeout(() => XTOUR.start(true), 250) }] : []), tools = (c.tools || []).filter(Boolean);
         ov.innerHTML = '<div id="xs-panel" role="dialog" aria-label="Paramètres"><div class="xs-h"><span style="font-size:20px">⚙️</span><b>Paramètres<small>' + esc(c.title || '') + ' XIII' + (c.version ? ' · ' + esc(c.version) : '') + '</small></b><button type="button" class="xs-x" data-close aria-label="Fermer">✕</button></div><div class="xs-b">' +
+            (typeof XAI !== 'undefined' ? '<details class="xs-sec" data-sec="ia"' + (XAI.configured() ? '' : ' open') + '><summary>🤖 Intelligence artificielle <small>' + esc(XAI.configured() ? '✅ ' + XAI.label() : 'non connectée') + '</small></summary><div class="xs-in"><button type="button" class="xs-item" data-xai><span class="i">🤖</span><span class="g">' + (XAI.configured() ? 'Changer d\'IA ou de modèle' : 'Connecter mon IA en un clic') + '<small>Claude, Gemini ou ChatGPT avec votre compte — ou votre propre clé API</small></span><span>›</span></button></div></details>' : '') +
             '<details class="xs-sec" data-sec="aff"><summary>🎨 Affichage</summary><div class="xs-in">' +
             '<div class="xs-f"><label>Thème</label><div class="xs-c"><span class="xs-seg"><button type="button" data-theme="dark" class="' + (th === 'dark' ? 'on' : '') + '">🌙 Sombre</button><button type="button" data-theme="light" class="' + (th === 'light' ? 'on' : '') + '">☀️ Clair</button></span></div></div>' +
             '<div class="xs-f"><label>Même thème pour toute la suite<small>Les autres outils XIII adoptent ce thème à leur ouverture.</small></label><div class="xs-c"><label class="xs-sw"><input type="checkbox" data-global' + (s.globalTheme ? ' checked' : '') + '><span></span></label></div></div>' +
@@ -5565,6 +5730,7 @@ body.presentation-mode #xs-gear,body.exporting #xs-gear,body.xs-hide-gear #xs-ge
         ov.addEventListener('mousedown', e => { if (e.target === ov) close(); });
         ov.querySelector('[data-close]').onclick = close;
         const xsh = ov.querySelector('[data-share]'); if (xsh) xsh.onclick = () => { close(); setTimeout(() => XSHARE.open(), 30); };
+        const xai = ov.querySelector('[data-xai]'); if (xai) xai.onclick = () => { close(); setTimeout(() => XAI.openSettings(), 30); };
         const xpr = ov.querySelector('[data-projet]'); if (xpr) xpr.onclick = () => { close(); setTimeout(() => XPROJET.open(), 30); };
         const xif = ov.querySelector('[data-ifttt]'); if (xif) xif.onclick = () => { close(); setTimeout(() => XIFTTT.panel(), 30); };
         const xch = ov.querySelector('[data-charte]'); if (xch) xch.onclick = () => { close(); setTimeout(() => XCHARTE.panel(), 30); };
