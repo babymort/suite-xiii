@@ -4405,7 +4405,7 @@ body.presentation-mode #xs-gear,body.exporting #xs-gear,body.xs-hide-gear #xs-ge
             secs.map(x => '<details class="xs-sec" data-sec="' + x.id + '"' + (x.id === sectionId ? ' open' : '') + '><summary>' + (x.icon || '') + ' ' + esc(x.title) + (x.badge ? ' <small>' + esc(x.badge()) + '</small>' : '') + '</summary><div class="xs-in">' + (x.desc ? '<p class="xs-desc">' + x.desc + '</p>' : '') + (x.fields || []).map(fieldHtml).join('') + (x.actions ? '<div class="xs-acts">' + x.actions.map((a, i) => '<button type="button" class="xs-btn' + (a.danger ? ' danger' : '') + '" data-sact="' + x.id + ':' + i + '">' + esc(a.label) + '</button>').join('') + '</div>' : '') + '</div></details>').join('') +
             (tools.length ? '<details class="xs-sec" data-sec="tools"' + '' + '><summary>🧰 Options de l\'outil</summary><div class="xs-in" data-list="tools">' + items(tools) + '</div></details>' : '') +
             (typeof XSHARE !== 'undefined' && document.getElementById('xsh-btn') ? '<details class="xs-sec" data-sec="share"><summary>🔗 Partager en lecture seule</summary><div class="xs-in"><button type="button" class="xs-item" data-share><span class="i">🔗</span><span class="g">Envoyer ce document en lecture seule<small>Lien, QR code ou page autonome, sans compte</small></span><span>›</span></button></div></details>' : '') +
-            (typeof XPROJET !== 'undefined' ? '<details class="xs-sec" data-sec="projet"><summary>🎬 Projet XIII</summary><div class="xs-in"><button type="button" class="xs-item" data-projet><span class="i">🎬</span><span class="g">Fiche complète du projet en cours<small>Nom, type, infos, technique, équipe, nom dans chaque outil, export / import</small></span><span>›</span></button></div></details>' : '') +
+            (typeof XPROJET !== 'undefined' ? '<details class="xs-sec" data-sec="projet"><summary>🎬 Projet XIII</summary><div class="xs-in"><button type="button" class="xs-item" data-projet><span class="i">🎬</span><span class="g">Fiche complète du projet en cours<small>Nom, type, infos, technique, équipe, nom dans chaque outil, export / import</small></span><span>›</span></button>' + (typeof XIFTTT !== 'undefined' ? '<button type="button" class="xs-item" data-ifttt><span class="i">🔗</span><span class="g">Automatisations IFTTT<small>Fin d\'émission, rushes vérifiés, convocations envoyées → SMS, e-mail, Slack…</small></span><span>›</span></button>' : '') + '</div></details>' : '') +
             (typeof XCHARTE !== 'undefined' ? '<details class="xs-sec" data-sec="charte"><summary>🎨 Charte du projet</summary><div class="xs-in"><button type="button" class="xs-item" data-charte><span class="i">🎨</span><span class="g">Logo, couleur et pied de page sur tous les PDF<small>Commun à toute la suite' + (XCHARTE.get().on ? ' · activée' : '') + '</small></span><span>›</span></button></div></details>' : '') +
             (typeof XPWA !== 'undefined' ? '<details class="xs-sec" data-sec="pwa"><summary>📲 Installer la suite</summary><div class="xs-in"><button type="button" class="xs-item" data-pwa><span class="i">📲</span><span class="g">Installer la suite comme une application<small>En ligne seulement, ou en ligne + hors ligne</small></span><span>›</span></button></div></details>' : '') +
             (typeof XBUNDLE !== 'undefined' ? '<details class="xs-sec" data-sec="bundle"><summary>📦 Projet complet XIII</summary><div class="xs-in"><button type="button" class="xs-item" data-bundle><span class="i">📦</span><span class="g">Exporter / ouvrir un projet complet<small>Tous les outils de la suite dans un seul fichier .xiii</small></span><span>›</span></button></div></details>' : '') +
@@ -4417,6 +4417,7 @@ body.presentation-mode #xs-gear,body.exporting #xs-gear,body.xs-hide-gear #xs-ge
         ov.querySelector('[data-close]').onclick = close;
         const xsh = ov.querySelector('[data-share]'); if (xsh) xsh.onclick = () => { close(); setTimeout(() => XSHARE.open(), 30); };
         const xpr = ov.querySelector('[data-projet]'); if (xpr) xpr.onclick = () => { close(); setTimeout(() => XPROJET.open(), 30); };
+        const xif = ov.querySelector('[data-ifttt]'); if (xif) xif.onclick = () => { close(); setTimeout(() => XIFTTT.panel(), 30); };
         const xch = ov.querySelector('[data-charte]'); if (xch) xch.onclick = () => { close(); setTimeout(() => XCHARTE.panel(), 30); };
         const xpw = ov.querySelector('[data-pwa]'); if (xpw) xpw.onclick = () => { close(); setTimeout(() => XPWA.panel(), 30); };
         const xb = ov.querySelector('[data-bundle]'); if (xb) xb.onclick = () => { close(); setTimeout(() => XBUNDLE.panel(), 30); };
@@ -6111,6 +6112,34 @@ const XFILES = (() => {
         saveMap(); const o = {}; Object.keys(data).forEach(k => { const v = data[k]; o[k] = typeof v === 'string' && v.indexOf('xiiif:') > -1 ? v.replace(RF, (t, id) => got[id] || t) : v; }); return o;
     }
     return { prepare, pack, unpack, key };
+})();
+
+// =====================================================================
+//  SUITE XIII — XIFTTT : 🔗 automatisations IFTTT (service « Webhooks »)
+//  Événements de la suite → IFTTT, qui enchaîne ce que vous voulez (SMS, e-mail, Slack, lampe connectée…).
+//  Événements : xiii_fin_emission (CONDUCO), xiii_rushes_ok (BACKUPO, carte vérifiée), xiii_convocations (CALL SHEETO).
+//  Réglage dans ⚙️ › 🔗 Automatisations : clé Webhooks (gardée sur cet appareil) et choix des événements.
+// =====================================================================
+const XIFTTT = (() => {
+    const K = 'xiii.ifttt', J = () => { try { return JSON.parse(localStorage.getItem(K)) || {}; } catch (e) { return {}; } };
+    const EV = [['xiii_fin_emission', "🏁 Fin d'émission (CONDUCO)"], ['xiii_rushes_ok', '💽 Carte copiée et vérifiée (BACKUPO)'], ['xiii_convocations', '📨 Convocations envoyées (CALL SHEETO)']];
+    function fire(ev, v1, v2, v3) {
+        const c = J(); if (!c.key || (c.off || {})[ev]) return false;
+        const u = 'https://maker.ifttt.com/trigger/' + ev + '/with/key/' + encodeURIComponent(c.key) + '?value1=' + encodeURIComponent(v1 || '') + '&value2=' + encodeURIComponent(v2 || '') + '&value3=' + encodeURIComponent(v3 || '');
+        try { fetch(u, { mode: 'no-cors' }).catch(() => { }); } catch (e) { } return true;
+    }
+    function panel() {
+        const c = J(), o = document.createElement('div'); o.style.cssText = 'position:fixed;inset:0;z-index:9995;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;padding:16px';
+        o.innerHTML = '<div style="background:var(--bg-panel,#232323);color:inherit;border:1px solid var(--border-color,#444);border-radius:12px;padding:18px;width:min(520px,100%);font:14px/1.5 \'Segoe UI\',system-ui,sans-serif"><b style="font-size:16px">🔗 Automatisations IFTTT</b><p style="opacity:.8;margin:6px 0 10px">Reliez la SUITE XIII à IFTTT (service <b>Webhooks</b>) : à chaque événement coché, IFTTT lance l\'action de votre choix — SMS ou message à l\'équipe, e-mail, notification…</p>' +
+            '<label style="display:block;font-size:12px;opacity:.75">Clé Webhooks (ifttt.com › Webhooks › Documentation)</label><input id="xif-k" value="' + (c.key || '').replace(/"/g, '') + '" placeholder="ex. dA1b2C3…" style="width:100%;box-sizing:border-box;padding:8px;margin:4px 0 10px;border-radius:8px;border:1px solid #555;background:#111;color:inherit">' +
+            EV.map(e => '<label style="display:flex;gap:8px;align-items:center;margin:4px 0"><input type="checkbox" data-ev="' + e[0] + '"' + ((c.off || {})[e[0]] ? '' : ' checked') + '> ' + e[1] + ' <code style="opacity:.6;font-size:11px">' + e[0] + '</code></label>').join('') +
+            '<p style="opacity:.7;font-size:12px">Dans IFTTT : « If This » = Webhooks › « Receive a web request » avec le nom d\'événement ci-dessus ; les détails arrivent dans Value1 à Value3. Le service Webhooks d\'IFTTT peut demander un abonnement IFTTT Pro.</p>' +
+            '<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px"><button id="xif-t">Tester</button><button id="xif-x">Fermer</button><button id="xif-s" style="background:#f0b429;color:#1b1406;border:0;border-radius:8px;padding:6px 14px;font-weight:700">Enregistrer</button></div></div>';
+        document.body.appendChild(o); const save = () => { const off = {}; o.querySelectorAll('[data-ev]').forEach(i => { if (!i.checked) off[i.dataset.ev] = 1; }); localStorage.setItem(K, JSON.stringify({ key: o.querySelector('#xif-k').value.trim(), off })); };
+        o.querySelector('#xif-x').onclick = () => o.remove(); o.querySelector('#xif-s').onclick = () => { save(); o.remove(); };
+        o.querySelector('#xif-t').onclick = () => { save(); const ok = fire('xiii_test', 'Test SUITE XIII', new Date().toLocaleString('fr-FR'), ''); alert(ok ? 'Événement « xiii_test » envoyé : vérifiez l\'activité de votre applet IFTTT.' : 'Indiquez d\'abord votre clé Webhooks.'); };
+    }
+    return { fire, panel, EV };
 })();
 
 // =====================================================================
