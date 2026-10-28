@@ -1453,6 +1453,8 @@ const XBOOT = (() => {
     setTimeout(reveal, 3000);
     return { ready, idle, reveal, run };
 })();
+// 🧪 BETA : bandeau affiché uniquement sur le site d'essai (beta--suite-xiii.netlify.app), jamais sur le site public
+(function () { try { if (!/^beta--/.test(location.hostname)) return; const add = () => { if (document.getElementById('xiii-beta')) return; const b = document.createElement('div'); b.id = 'xiii-beta'; b.textContent = 'BETA'; b.title = 'Site d\'essai : les modifications ne sont pas encore publiées'; b.style.cssText = 'position:fixed;top:0;left:50%;transform:translateX(-50%);z-index:2147483646;background:#f0b429;color:#1b1406;font:800 12px/1 "Segoe UI",system-ui,sans-serif;letter-spacing:.2em;padding:4px 14px 5px;border-radius:0 0 8px 8px;box-shadow:0 2px 10px rgba(0,0,0,.35);pointer-events:none'; document.body.appendChild(b); }; if (document.body) add(); else document.addEventListener('DOMContentLoaded', add); } catch (e) { } })();
 
 // =====================================================================
 //  SUITE XIII — XBUNDLE : projet complet en un seul fichier .xiii
