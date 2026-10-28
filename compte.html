@@ -119,6 +119,7 @@ const TN = k => ((TOOLS.find(t => t[0] === k) || [k, k])[1]).split(' — ')[0];
 const toolSel = (id, cur) => '<select id="' + id + '">' + TOOLS.map(t => '<option value="' + t[0] + '"' + (t[0] === cur ? ' selected' : '') + '>' + t[1] + '</option>').join('') + '</select>';
 
 const $ = id => document.getElementById(id);
+if (typeof supabase === 'undefined') { document.addEventListener('DOMContentLoaded', () => { const m = document.getElementById('msg'); if (m) { m.textContent = '⚠️ Service de comptes injoignable (connexion internet ?). Réessayez dans un instant.'; m.className = 'msg on err'; } }); throw new Error('supabase indisponible'); }
 const sb = supabase.createClient(SB_URL, SB_KEY, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: 'pkce' } });
 const Q = new URLSearchParams(location.search), FROM = /^[a-z]+$/.test(Q.get('from') || '') ? Q.get('from') : '';
 if (FROM) { $('back').href = FROM + '.html'; $('back').textContent = '← Retour à l\'outil'; }
