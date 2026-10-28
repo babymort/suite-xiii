@@ -6114,6 +6114,41 @@ const XFILES = (() => {
 })();
 
 // =====================================================================
+//  SUITE XIII — XLIVE : ⚡ synchro instantanée de l'équipe (Supabase Realtime, canal « broadcast »)
+//  Le Drive du projet reste la seule source des données. XLIVE ne transporte qu'un signal « l'outil X a changé
+//  (révision n) » entre les appareils du même projet : chacun relit aussitôt le Drive au lieu d'attendre le
+//  prochain passage (4 à 20 s). Aucune donnée du projet ne transite par Supabase.
+//  Canal : empreinte SHA-256 de l'adresse du Drive du projet (non devinable sans le lien du projet).
+//  Hors ligne ou Supabase indisponible : tout continue comme avant (relecture périodique).
+// =====================================================================
+const XLIVE = (() => {
+    const WS = 'wss://abvvsoccbdftticlmpgi.supabase.co/realtime/v1/websocket?apikey=sb_publishable_wB5kIn6lQtO-YWdUlt3gfg_IBIgBMuL&vsn=1.0.0';
+    const J = k => { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } };
+    const ME = Math.random().toString(36).slice(2, 10), L = new Set();
+    let ws = null, topic = '', ref = 0, hb = null, retry = 0, joined = false, wantUrl = '', q = [];
+    async function hash(s) { const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('xiii|' + s)); return [...new Uint8Array(b)].slice(0, 16).map(x => x.toString(16).padStart(2, '0')).join(''); }
+    const send = o => { try { if (ws && ws.readyState === 1) ws.send(JSON.stringify(o)); } catch (e) { } };
+    async function connect() {
+        const c = J('xiii.drive'); if (!c || !c.url || typeof WebSocket === 'undefined' || !crypto.subtle) return;
+        if (ws && wantUrl === c.url && ws.readyState <= 1) return; wantUrl = c.url;
+        try { if (ws) ws.close(); } catch (e) { }
+        topic = 'realtime:xiii-' + await hash(c.url.split('?')[0]); joined = false;
+        try { ws = new WebSocket(WS); } catch (e) { return; }
+        ws.onopen = () => { retry = 0; send({ topic, event: 'phx_join', payload: { config: { broadcast: { self: false, ack: false }, presence: { key: '' }, private: false } }, ref: String(++ref) }); clearInterval(hb); hb = setInterval(() => send({ topic: 'phoenix', event: 'heartbeat', payload: {}, ref: String(++ref) }), 25000); };
+        ws.onmessage = e => { let m; try { m = JSON.parse(e.data); } catch (x) { return; }
+            if (m.event === 'phx_reply' && m.topic === topic && m.payload && m.payload.status === 'ok') { joined = true; const Q = q; q = []; Q.forEach(p => ping(p)); }
+            if (m.event === 'broadcast' && m.payload && m.payload.event === 'xiii') { const p = m.payload.payload || {}; if (p.from === ME) return; L.forEach(fn => { try { fn(p); } catch (x) { } }); } };
+        ws.onclose = () => { joined = false; clearInterval(hb); if (!J('xiii.drive')) return; const d = Math.min(30000, 1000 * Math.pow(2, retry++)); setTimeout(() => { if (document.visibilityState === 'visible') connect(); }, d); };
+        ws.onerror = () => { };
+    }
+    function ping(p) { p = Object.assign({ from: ME, at: Date.now() }, p || {}); if (!joined) { q.push(p); if (q.length > 20) q.shift(); connect(); return; } send({ topic, event: 'broadcast', payload: { type: 'broadcast', event: 'xiii', payload: p }, ref: String(++ref) }); }
+    const on = fn => { L.add(fn); connect(); return () => L.delete(fn); };
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') connect(); });
+    addEventListener('storage', e => { if (e.key === 'xiii.drive') connect(); });
+    return { on, ping, connect, live: () => joined };
+})();
+
+// =====================================================================
 //  SUITE XIII — XDRIVE : ☁️ Drive du projet
 //  Les données de chaque outil sont rangées dans un Google Sheets du Drive du Master, via un petit script
 //  Google Apps Script qu'il installe lui-même (drive.html). Les membres n'ont besoin d'aucun compte :
@@ -6225,7 +6260,7 @@ const XDRIVE = (() => {
     const ERR = { pending: 'en attente de validation par le Master', readonly: 'lecture seule', forbidden: 'outil non partagé avec vous', expired: 'lien expiré : demandez-en un nouveau au Master', revoked: 'accès retiré par le Master', admin: 'réservé au Master', net: 'hors connexion ou Drive injoignable', code: 'code d\'équipe refusé (il a peut-être été changé)', not_installed: 'script non installé (fonction « installer » à exécuter)', busy: 'Drive occupé, nouvel essai bientôt', conflict: 'conflit', script: 'erreur du script Google' };
     async function push(data, base) {
         const b = J(K_BASE(APP), null), r = await api('put', { app: APP, base, data, by: me(), sum: summary(b && b.data, data) });
-        if (r.ok) { W(K_BASE(APP), { rev: r.rev, ts: r.ts, by: me(), data }); return r; }
+        if (r.ok) { W(K_BASE(APP), { rev: r.rev, ts: r.ts, by: me(), data }); try { XLIVE.ping({ app: APP, rev: r.rev, by: me() }); } catch (e) { } return r; }
         return r;
     }
     const idle = () => Date.now() - lastInput > 8000 && !document.querySelector('input:focus,textarea:focus,select:focus,[contenteditable]:focus') && !document.querySelector('#xdl-ov,#xdr-ov,.modal-overlay.show,.modal.show,.modal-overlay[style*="flex"]');
@@ -6362,6 +6397,7 @@ const XDRIVE = (() => {
             setInterval(() => { if (lockKey && Date.now() - lockEdit < 15000) lockSend(true); else if (lockSent) lockSend(true); locks(); }, 5000);
             let nT = 0; timer = setInterval(() => { look(); if (document.visibilityState !== 'visible') return; nT++; if (around().length || nT % 3 === 0) tick(false); }, 4000); look(); // synchro toutes les 4 s quand d'autres sont là, 12 s sinon
             document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') tick(false); });
+            try { XLIVE.on(p => { if (!p.app || p.app === APP) setTimeout(() => tick(false), 150 + Math.random() * 400); }); } catch (e) { } // ⚡ un équipier vient d'enregistrer : relecture immédiate
             // en quittant la page : dernier envoi (sans attendre de réponse)
             addEventListener('pagehide', () => { try { if (lastBeat) beat(true); } catch (e) { } try { const c = cfg(), b = J(K_BASE(APP), null); if (!c || why() || !b || pend || !navigator.sendBeacon) return; const mine = local(); if (!differs(b.data, mine)) return; navigator.sendBeacon(c.url, new Blob([JSON.stringify({ a: 'put', code: c.code, app: APP, base: b.rev, data: mine, by: me(), sum: summary(b.data, mine) })], { type: 'text/plain' })); } catch (e) { } });
         };
@@ -6386,7 +6422,7 @@ const XDRIVE = (() => {
                 card.insertAdjacentHTML('beforeend', '<span class="xdr-pin ' + cls + '" title="' + esc(cls === 'busy' ? t.slice(3) + ' modifie cet outil en ce moment' : 'Modifié par ' + v.by + ' ' + fmt(v.ts)) + '">' + esc(cls === 'busy' ? t + ' modifie' : t) + '</span>');
             });
         };
-        const go = () => { run(); setInterval(run, 12000); document.addEventListener('visibilitychange', run); };
+        const go = () => { run(); setInterval(run, 12000); document.addEventListener('visibilitychange', run); try { XLIVE.on(() => setTimeout(run, 300)); } catch (e) { } };
         XBOOT.ready(go, 600);
     }
     return { init, tick, panel, status: () => st, _pres: () => PRES, unionMemo, perm: () => perm(), me: () => me(), cfg: () => cfg() };
