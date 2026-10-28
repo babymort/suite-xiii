@@ -3554,6 +3554,7 @@ var XCI = window.XCI || (() => {
         if (!cfg()) return;
         const tick = async () => { if (document.visibilityState !== 'visible') return; const o = await load(); if (!o) return; const g = JSON.stringify(o); if (g === sig) return; sig = g; if (app === 'callsheeto') decorate(); if (app === 'jour' && typeof render === 'function') try { render(); } catch (e) { } };
         setTimeout(tick, 2500); setInterval(tick, 20000);
+        try { XLIVE.on(p => { if (p.app === 'ci') setTimeout(tick, 200); }); } catch (e) { } // ⚡ arrivée pointée depuis l'app équipe
         if (app === 'callsheeto') { let t = null; new MutationObserver(() => { clearTimeout(t); t = setTimeout(decorate, 400); }).observe(document.body, { childList: true, subtree: true }); }
     }
     return { init, show, find, load, get };
