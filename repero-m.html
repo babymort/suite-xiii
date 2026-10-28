@@ -1,0 +1,1540 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#222222">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>REPERO XIII · Mobile</title>
+<style>
+/* SUITE XIII — socle mobile (partagé par toutes les pages *-m.html) */
+:root { color-scheme: dark; --bg-main:#1e1e1e; --bg-panel:#2d2d2d; --bg-panel-alt:#252525; --bg-header:#1a1a1a; --bg-topbar:#222; --bg-input:#3a3a3a; --bg-menu:#2d2d2d; --border-color:#444; --border-soft:#333; --text-main:#fff; --text-muted:#aaa; --text-dim:#888; --row-bg:#262626; --row-alt:#2a2a2a;
+  --accent:240,179,120; --accent-text:rgb(240,179,120); --btn-bg:rgba(var(--accent),.12); --btn-border:rgba(var(--accent),.35); --blue:#007acc; --danger:#e53935; --warn:#ffa726; --ok:#66bb6a;
+  --sat: env(safe-area-inset-top, 0px); --sab: env(safe-area-inset-bottom, 0px); --sal: env(safe-area-inset-left, 0px); --sar: env(safe-area-inset-right, 0px); }
+body.light-theme { color-scheme: light; --bg-main:#eef0f2; --bg-panel:#fff; --bg-panel-alt:#f5f6f7; --bg-header:#e4e6e8; --bg-topbar:#fff; --bg-input:#e9ebed; --bg-menu:#fff; --border-color:#d5d8db; --border-soft:#ddd; --text-main:#1a1a1a; --text-muted:#555; --text-dim:#777; --row-bg:#fff; --row-alt:#f8f9fa; --accent-text:#b8651f; --ok:#2e7d32; }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html { -webkit-text-size-adjust: 100%; }
+body.xm { margin: 0; min-height: 100dvh; background: var(--bg-main); color: var(--text-main); font-family: 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif; font-size: 15px; line-height: 1.4; overscroll-behavior-y: none; }
+body.xm a { color: var(--accent-text); }
+.xm button { font-family: inherit; }
+/* barre du haut */
+.m-top { position: sticky; top: 0; z-index: 40; display: flex; align-items: center; gap: 8px; padding: calc(8px + var(--sat)) calc(10px + var(--sar)) 8px calc(10px + var(--sal)); background: var(--bg-topbar); border-bottom: 1px solid var(--border-soft); min-height: 56px; }
+.m-top .m-title { flex: 1; min-width: 0; line-height: 1.15; }
+.m-top .m-title b { display: block; font-size: 16px; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.m-top .m-title b i { font-style: normal; color: var(--accent-text); }
+.m-top .m-title small { display: block; font-size: 11.5px; color: var(--text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.m-ibtn { flex: 0 0 auto; width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center; font-size: 20px; border-radius: 12px; border: 1px solid var(--btn-border); background: var(--btn-bg); color: var(--text-main); cursor: pointer; text-decoration: none; padding: 0; }
+.m-ibtn:active { background: rgba(var(--accent), .35); }
+.m-ibtn.plain { border-color: transparent; background: transparent; }
+/* contenu */
+.m-main { padding: 12px calc(14px + var(--sar)) calc(128px + var(--sab)) calc(14px + var(--sal)); max-width: 760px; margin: 0 auto; }
+.m-main.no-tabs { padding-bottom: calc(28px + var(--sab)); }
+.m-sec { font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--text-dim); margin: 18px 4px 8px; }
+.m-card { background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 14px; padding: 14px; margin-bottom: 12px; }
+.m-card > h3 { margin: 0 0 10px; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+.m-card > h3 .grow { flex: 1; }
+.m-card.accent { border-color: rgba(var(--accent), .6); background: linear-gradient(180deg, rgba(var(--accent), .12), var(--bg-panel)); }
+.m-kv { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; font-size: 14px; }
+.m-kv dt { color: var(--text-dim); } .m-kv dd { margin: 0; text-align: right; font-weight: 600; word-break: break-word; }
+.m-row { display: flex; align-items: center; gap: 10px; padding: 11px 0; border-bottom: 1px solid var(--border-soft); } .m-row:last-child { border-bottom: 0; }
+.m-row .grow { flex: 1; min-width: 0; } .m-row small { display: block; color: var(--text-dim); font-size: 12.5px; }
+.m-list { background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 14px; overflow: hidden; margin-bottom: 12px; }
+.m-item { display: flex; align-items: center; gap: 12px; padding: 12px 14px; min-height: 56px; border-bottom: 1px solid var(--border-soft); color: inherit; text-decoration: none; cursor: pointer; background: transparent; width: 100%; text-align: left; border-left: 0; border-right: 0; border-top: 0; font-size: 15px; }
+.m-item:last-child { border-bottom: 0; } .m-item:active { background: rgba(var(--accent), .12); }
+.m-item .ico { font-size: 22px; flex: 0 0 auto; width: 30px; text-align: center; } .m-item .grow { flex: 1; min-width: 0; } .m-item b { display: block; font-weight: 600; } .m-item small { display: block; color: var(--text-dim); font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.m-item .go { color: var(--text-dim); font-size: 18px; }
+.m-chip { display: inline-flex; align-items: center; gap: 5px; padding: 5px 11px; border-radius: 99px; font-size: 13px; background: var(--btn-bg); border: 1px solid var(--btn-border); color: var(--text-main); white-space: nowrap; }
+.m-chips { display: flex; gap: 8px; overflow-x: auto; padding: 2px 0 8px; scrollbar-width: none; } .m-chips::-webkit-scrollbar { display: none; }
+.m-chip.on { background: rgba(var(--accent), .4); border-color: rgba(var(--accent), .95); font-weight: 600; }
+.m-pill { display: inline-block; padding: 2px 9px; border-radius: 99px; font-size: 12px; font-weight: 600; border: 1px solid var(--border-color); background: var(--bg-panel-alt); }
+.m-pill.ok { color: var(--ok); border-color: rgba(102,187,106,.5); } .m-pill.warn { color: var(--warn); border-color: rgba(255,167,38,.5); } .m-pill.danger { color: #ef5350; border-color: rgba(229,57,53,.5); }
+/* boutons */
+.m-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 46px; padding: 10px 18px; font-size: 15px; font-weight: 600; border-radius: 12px; border: 1px solid var(--btn-border); background: var(--btn-bg); color: var(--text-main); cursor: pointer; text-decoration: none; }
+.m-btn:active { background: rgba(var(--accent), .35); }
+.m-btn.primary { background: rgba(var(--accent), .3); border-color: rgba(var(--accent), .9); }
+.m-btn.danger { border-color: rgba(229,57,53,.55); background: rgba(229,57,53,.14); }
+.m-btn.block { display: flex; width: 100%; } .m-btn.sm { min-height: 36px; padding: 6px 12px; font-size: 13.5px; border-radius: 10px; }
+.m-btn:disabled { opacity: .45; }
+.m-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; } .m-actions > * { flex: 1 1 140px; }
+.m-fab { position: fixed; right: calc(16px + var(--sar)); bottom: calc(120px + var(--sab)); z-index: 35; width: 58px; height: 58px; border-radius: 50%; font-size: 26px; border: 1px solid rgba(var(--accent), .95); background: rgba(var(--accent), .92); color: #1a1a1a; box-shadow: 0 6px 18px rgba(0,0,0,.45); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.m-fab.no-tabs { bottom: calc(64px + var(--sab)); }
+/* champs */
+.m-field { display: block; margin-bottom: 12px; } .m-field > span { display: block; font-size: 11.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--text-dim); margin-bottom: 4px; }
+.xm input[type=text], .xm input[type=number], .xm input[type=date], .xm input[type=time], .xm input[type=tel], .xm input[type=email], .xm input[type=search], .xm input[type=url], .xm select, .xm textarea { width: 100%; min-height: 46px; padding: 10px 12px; font-size: 16px; font-family: inherit; border: 1px solid var(--border-color); border-radius: 10px; background: var(--bg-input); color: var(--text-main); appearance: none; -webkit-appearance: none; }
+.xm select { background-image: linear-gradient(45deg, transparent 50%, var(--text-dim) 50%), linear-gradient(135deg, var(--text-dim) 50%, transparent 50%); background-position: calc(100% - 18px) 20px, calc(100% - 13px) 20px; background-size: 5px 5px; background-repeat: no-repeat; padding-right: 32px; }
+.xm textarea { min-height: 90px; resize: vertical; line-height: 1.4; }
+.xm input:focus, .xm select:focus, .xm textarea:focus { outline: none; border-color: rgba(var(--accent), .9); box-shadow: 0 0 0 2px rgba(var(--accent), .25); }
+.xm input[type=checkbox], .xm input[type=radio] { width: 24px; height: 24px; accent-color: rgb(var(--accent)); flex: 0 0 auto; }
+.m-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; } .m-grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.m-seg { display: flex; border: 1px solid var(--btn-border); border-radius: 12px; overflow: hidden; margin-bottom: 12px; } .m-seg button { flex: 1; min-height: 44px; border: 0; border-right: 1px solid var(--btn-border); background: var(--btn-bg); color: var(--text-main); font-size: 14px; font-weight: 600; cursor: pointer; } .m-seg button:last-child { border-right: 0; } .m-seg button.on { background: rgba(var(--accent), .45); }
+.m-progress { height: 8px; border-radius: 99px; background: var(--bg-input); overflow: hidden; } .m-progress > i { display: block; height: 100%; background: rgb(var(--accent)); border-radius: 99px; transition: width .25s; }
+.m-empty { text-align: center; color: var(--text-dim); padding: 34px 18px; font-size: 14px; } .m-empty b { display: block; font-size: 38px; margin-bottom: 8px; }
+.m-hint { font-size: 12.5px; color: var(--text-dim); line-height: 1.45; }
+/* onglets du bas */
+.m-tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; display: flex; background: var(--bg-topbar); border-top: 1px solid var(--border-soft); padding: 4px calc(4px + var(--sar)) calc(48px + var(--sab)) calc(4px + var(--sal)); } /* au-dessus du badge Netlify */
+.m-tabs button { flex: 1; min-width: 0; min-height: 54px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; border: 0; background: transparent; color: var(--text-dim); font-size: 11px; font-weight: 600; cursor: pointer; border-radius: 10px; }
+.m-tabs button .ti { font-size: 21px; line-height: 1; } .m-tabs button.on { color: var(--accent-text); background: rgba(var(--accent), .12); }
+/* fenêtres du bas */
+.m-ov { position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,.62); display: flex; align-items: flex-end; justify-content: center; animation: mfade .15s; }
+.m-sheet { width: 100%; max-width: 640px; max-height: 92dvh; overflow-y: auto; background: var(--bg-menu); border: 1px solid var(--border-color); border-bottom: 0; border-radius: 18px 18px 0 0; padding: 8px 16px calc(18px + var(--sab)); animation: mup .2s; }
+.m-sheet .grab { width: 44px; height: 5px; border-radius: 3px; background: var(--border-color); margin: 4px auto 10px; }
+.m-sheet h2 { font-size: 17px; margin: 4px 0 12px; display: flex; align-items: center; gap: 8px; } .m-sheet h2 .grow { flex: 1; }
+@keyframes mup { from { transform: translateY(40px); opacity: .4; } } @keyframes mfade { from { opacity: 0; } }
+.m-toast { position: fixed; left: 50%; bottom: calc(86px + var(--sab)); transform: translate(-50%, 20px); z-index: 200; max-width: 90vw; padding: 11px 18px; border-radius: 12px; background: #111; color: #fff; border: 1px solid rgba(var(--accent), .6); font-size: 14px; opacity: 0; pointer-events: none; transition: .2s; text-align: center; }
+.m-toast.show { opacity: 1; transform: translate(-50%, 0); }
+.m-qr { background: #fff; border-radius: 12px; padding: 6px; width: min(86vw, 380px); margin: 6px auto; } .m-qr svg { display: block; width: 100%; height: auto; }
+.m-credit { text-align: center; color: var(--text-dim); font-size: 11.5px; margin: 22px 0 6px; }
+@media (min-width: 761px) { body.xm { max-width: 520px; margin: 0 auto; border-left: 1px solid var(--border-soft); border-right: 1px solid var(--border-soft); } .m-tabs { max-width: 520px; left: 50%; transform: translateX(-50%); } }
+@media print { .m-top, .m-tabs, .m-fab { display: none !important; } }
+
+/* REPERO XIII mobile */
+.mono { font-family: ui-monospace, Menlo, Consolas, monospace; }
+.m-pill.acc { color: var(--accent-text); border-color: rgba(var(--accent), .55); }
+.m-pill.ok { background: rgba(102,187,106,.12); } .m-pill.warn { background: rgba(255,167,38,.12); } .m-pill.danger { background: rgba(229,57,53,.14); }
+.m-btn small { display: block; font-size: 11px; font-weight: 400; opacity: .8; margin-top: 1px; }
+.m-btn.sm small { display: inline; margin-left: 4px; }
+.m-ibtn.sm { width: 38px; height: 38px; font-size: 16px; border-radius: 10px; }
+.rp-lnk { background: none; border: 0; color: var(--accent-text); padding: 4px 0; font: inherit; text-decoration: underline; text-align: right; cursor: pointer; min-height: 32px; }
+.rp-wrap { flex-wrap: wrap; overflow: visible; }
+.nw { white-space: nowrap; text-align: right; } .nw small { display: block; font-weight: 400; }
+/* liste */
+.rp-it { border-left: 4px solid var(--sc, transparent); align-items: flex-start; }
+.rp-it .grow b { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rp-n { display: inline-block; min-width: 20px; color: var(--text-dim); font-weight: 600; }
+.rp-bd { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
+.rp-bd .m-pill { font-size: 11.5px; padding: 1px 8px; }
+.rp-sd { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; }
+.rp-rt { color: #FFB300; font-size: 12px; letter-spacing: 1px; align-self: center; }
+.rp-steps { margin: 0 0 8px; padding-left: 20px; color: var(--text-muted); font-size: 14px; } .rp-steps li { margin: 6px 0; }
+/* fiche */
+.rp-h { display: flex; align-items: center; gap: 12px; } .rp-h .grow { flex: 1; min-width: 0; }
+.rp-ic { font-size: 30px; flex: 0 0 auto; } .rp-nm { display: block; font-size: 17px; overflow-wrap: anywhere; } .rp-h small { color: var(--text-dim); font-size: 12.5px; display: block; }
+.rp-stseg button { font-size: 12.5px; padding: 0 2px; border-bottom: 3px solid transparent; }
+.rp-stseg button.on { background: rgba(var(--accent), .35); border-bottom-color: var(--sc, rgb(var(--accent))); }
+.rp-stars { display: flex; gap: 2px; margin-bottom: 6px; } .rp-stars button { width: 52px; height: 48px; font-size: 32px; line-height: 1; background: none; border: 0; color: var(--border-color); cursor: pointer; padding: 0; } .rp-stars button.on { color: #FFB300; }
+.rp-score { display: flex; flex-direction: column; gap: 4px; margin-top: 6px; align-items: flex-start; } .rp-score small { color: var(--text-dim); font-size: 12.5px; }
+.al { padding: 9px 12px; margin: 7px 0; border-radius: 10px; font-size: 13.5px; border-left: 4px solid var(--warn); background: rgba(255,167,38,.11); overflow-wrap: anywhere; }
+.al.ko { border-left-color: var(--danger); background: rgba(229,57,53,.12); } .al.ok { border-left-color: var(--ok); background: rgba(102,187,106,.1); }
+.m-card > h3 { flex-wrap: wrap; }
+.rp-ac { padding: 0; overflow: hidden; }
+.rp-ac > summary { display: flex; align-items: center; gap: 8px; min-height: 54px; padding: 8px 14px; cursor: pointer; list-style: none; font-weight: 700; font-size: 14.5px; }
+.rp-ac > summary::-webkit-details-marker { display: none; }
+.rp-ac > summary .t { flex: 0 0 auto; } .rp-ac > summary .ps { flex: 1; display: flex; flex-wrap: wrap; gap: 4px; justify-content: flex-end; min-width: 0; } .rp-ac > summary .ps .m-pill { font-size: 11px; padding: 1px 7px; font-weight: 600; }
+.rp-ac > summary .x { color: var(--text-dim); transition: transform .15s; flex: 0 0 auto; } .rp-ac[open] > summary .x { transform: rotate(180deg); }
+.rp-ac > .b { padding: 0 14px 14px; border-top: 1px solid var(--border-soft); }
+.rp-sub { font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--text-dim); margin: 14px 0 4px; }
+.rp-day { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0 8px; align-items: center; } .rp-day input { flex: 1 1 150px; min-width: 0; width: auto; }
+.rp-sdg { text-align: center; margin-top: 12px; } .sdg { width: 100%; max-width: 280px; height: auto; } .stl { width: 100%; height: 40px; margin-top: 12px; border-radius: 6px; display: block; } .stl-l { font-size: 11px; color: var(--text-dim); margin-top: 4px; } .stl-l i { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin: 0 3px 0 8px; vertical-align: -1px; } .stl-l i:first-child { margin-left: 0; }
+.rp-call { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 12px 0 0; } .rp-call .m-btn { flex-direction: column; gap: 0; min-height: 58px; padding: 6px; }
+.rp-hosp { padding: 6px 0; font-size: 14px; } .rp-hosp small { color: var(--text-dim); }
+.rp-ul { margin: 8px 0; padding-left: 18px; font-size: 13.5px; } .rp-ul li { margin: 5px 0; }
+.rp-rli { padding: 8px 10px; margin: 6px 0; border-radius: 8px; background: var(--bg-panel-alt); border-left: 4px solid #F9A825; font-size: 13px; } .rp-rli.lv3 { border-left-color: #C62828; } .rp-rli.lv2 { border-left-color: #EF6C00; } .rp-rli small { color: var(--text-dim); } .rp-rli span { color: var(--text-muted); }
+.m-row .grow a { color: var(--accent-text); }
+.m-kv dd { overflow-wrap: anywhere; }
+/* contrôle */
+.rp-cs { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.ck { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; padding: 9px 0; border-bottom: 1px solid var(--border-soft); } .ck:last-child { border-bottom: 0; }
+.ck .cl { flex: 1 1 150px; min-width: 0; font-size: 14px; overflow-wrap: anywhere; } .ck .cb { display: flex; gap: 6px; flex: 0 0 auto; }
+.ck .cb button { width: 46px; height: 46px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-input); color: var(--text-main); font-size: 19px; cursor: pointer; padding: 0; }
+.ck .cb button.on.ok { background: rgba(102,187,106,.3); border-color: var(--ok); } .ck .cb button.on.q { background: rgba(255,167,38,.3); border-color: var(--warn); } .ck .cb button.on.ko { background: rgba(229,57,53,.3); border-color: var(--danger); }
+.ck .cn { flex: 1 1 100%; margin-top: 2px; }
+/* photos */
+.rp-ph { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; } .rp-ph figure { margin: 0; min-width: 0; } .rp-ph img { width: 100%; aspect-ratio: 4/3; object-fit: cover; border-radius: 10px; display: block; border: 1px solid var(--border-color); cursor: pointer; } .rp-ph input { margin-top: 5px; min-height: 40px; font-size: 14px; }
+.rp-sw { width: 46px; height: 26px; border-radius: 99px; background: var(--bg-input); border: 1px solid var(--border-color); position: relative; flex: 0 0 auto; transition: .15s; } .rp-sw::after { content: ''; position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; border-radius: 50%; background: var(--text-dim); transition: .15s; } .rp-sw.on { background: rgba(var(--accent), .45); border-color: rgba(var(--accent), .9); } .rp-sw.on::after { left: 22px; background: rgb(var(--accent)); }
+.rp-cnt { font-size: 10.5px; background: rgba(var(--accent), .8); color: #1a1a1a; border-radius: 99px; padding: 0 5px; margin-left: 2px; }
+.rp-padd { display: flex; flex-direction: column; gap: 2px; padding: 10px 14px; } .rp-padd small { color: var(--text-dim); font-size: 12.5px; }
+.m-chips.rp-wrap { padding-bottom: 12px; }
+/* carte */
+#mapwrap { position: fixed; left: 0; right: 0; top: var(--hh, 60px); bottom: var(--th, 58px); z-index: 20; background: var(--bg-main); }
+@media (min-width: 761px) { #mapwrap { max-width: 520px; margin: 0 auto; } }
+#map { position: absolute; inset: 0; z-index: 0; background: #d8d8d0; }
+#mp-top { position: absolute; top: 8px; left: 8px; right: 8px; z-index: 5; pointer-events: none; }
+.mp-ban { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; } .mp-ban > * { pointer-events: auto; }
+.mp-ban .mp-d { background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 12px; padding: 7px 12px; font-weight: 700; font-size: 14.5px; box-shadow: 0 2px 8px rgba(0,0,0,.35); max-width: 100%; } .mp-ban .mp-d small { font-weight: 400; color: var(--text-dim); }
+.mp-ban.mv { background: var(--bg-panel); border: 1px solid rgba(var(--accent), .9); border-radius: 12px; padding: 9px 12px; box-shadow: 0 2px 10px rgba(0,0,0,.4); font-size: 13px; } .mp-ban.mv b { font-size: 14.5px; }
+.mp-chip { background: var(--bg-panel); color: var(--text-main); border: 1px solid var(--btn-border); border-radius: 12px; min-height: 40px; padding: 6px 12px; font-size: 13px; font-weight: 600; box-shadow: 0 2px 8px rgba(0,0,0,.35); cursor: pointer; }
+.mp-off-chip { background: rgba(255,167,38,.95); color: #1a1a1a; border-radius: 99px; padding: 3px 10px; font-size: 12px; font-weight: 600; }
+#mp-side { position: absolute; right: 8px; top: 108px; z-index: 5; display: flex; flex-direction: column; gap: 8px; }
+.mp-rb { width: 46px; height: 46px; border-radius: 12px; border: 1px solid var(--btn-border); background: var(--bg-panel); color: var(--text-main); font-size: 21px; box-shadow: 0 2px 8px rgba(0,0,0,.4); cursor: pointer; padding: 0; }
+#mp-bot { position: absolute; left: 8px; right: 8px; bottom: 10px; z-index: 5; display: flex; gap: 8px; }
+.mp-ab { flex: 1; min-width: 0; min-height: 58px; border-radius: 14px; border: 1px solid var(--btn-border); background: var(--bg-panel); color: var(--text-main); font-size: 11.5px; font-weight: 600; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; box-shadow: 0 2px 10px rgba(0,0,0,.45); cursor: pointer; padding: 4px 2px; }
+.mp-ab span { font-size: 21px; line-height: 1; } .mp-ab.ok { background: rgba(var(--accent), .92); color: #1a1a1a; border-color: rgb(var(--accent)); } .mp-ab:disabled { opacity: .5; } .mp-ab:active { background: rgba(var(--accent), .4); }
+#mp-off { position: absolute; inset: 0; z-index: 4; overflow-y: auto; background: var(--bg-main); padding: 76px 12px 84px; }
+.leaflet-touch .leaflet-bar a { width: 44px; height: 44px; line-height: 44px; font-size: 22px; }
+.leaflet-bottom.leaflet-right { margin-bottom: 78px; }
+.leaflet-control-attribution { font-size: 10px; }
+.rp-dot { border: 2.5px solid #888; border-radius: 50%; background: #fff; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 4px rgba(0,0,0,.4); line-height: 1; }
+.rp-pin { width: 32px; height: 32px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); background: var(--pc); border: 2px solid #fff; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,.5); }
+.rp-pin.sel { width: 36px; height: 36px; margin: -2px 0 0 -2px; box-shadow: 0 0 0 4px rgba(240,179,120,.75), 0 2px 8px rgba(0,0,0,.5); }
+.rp-pin.mv { animation: rpmv 1s infinite alternate; } @keyframes rpmv { to { box-shadow: 0 0 0 9px rgba(240,179,120,.35), 0 2px 8px rgba(0,0,0,.5); } }
+.rp-pin .pe { transform: rotate(45deg); font-size: 16px; line-height: 1; }
+body.rp-map { overflow: hidden; }
+[hidden] { display: none !important; }
+.off #mp-top, .off #mp-side { display: none; } .off #mp-off { padding-top: 12px; }
+.rp-tv { border: 1px solid var(--border-color); border-left-width: 4px; border-radius: 10px; padding: 7px 10px; background: var(--bg-panel-alt); }
+.rp-tv.ok { border-left-color: #66bb6a; } .rp-tv.warn { border-left-color: #ffa726; } .rp-tv.ko { border-left-color: #ef5350; }
+
+#sar { position: fixed; inset: 0; z-index: 9000; background: #111; } #sar video, #sar canvas { position: absolute; inset: 0; width: 100%; height: 100%; } #sar video { object-fit: cover; }
+#sar .sar-hud { position: absolute; left: 10px; right: 10px; top: calc(10px + env(safe-area-inset-top)); color: #fff; font-size: 13px; text-shadow: 0 1px 3px #000; pointer-events: none; }
+#sar .sar-bar { position: absolute; left: 10px; right: 10px; bottom: calc(14px + env(safe-area-inset-bottom)); display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+
+</style>
+<link rel="icon" type="image/png" href="xiii-icon-192.png">
+</head>
+<body class="xm">
+<header class="m-top" id="top">
+  <button class="m-ibtn plain" id="btn-back" aria-label="Retour">‹</button>
+  <div class="m-title"><b id="ttl">REPERO <i>XIII</i></b><small id="sub">Repérage de lieux sur carte</small></div>
+  <button class="m-ibtn" id="btn-menu" aria-label="Menu">⋯</button>
+</header>
+<main class="m-main no-tabs" id="view"></main>
+<div id="mapwrap" hidden>
+  <div id="map"></div>
+  <div id="mp-top"></div>
+  <div id="mp-side"></div>
+  <div id="mp-bot"></div>
+  <div id="mp-off" hidden></div>
+</div>
+<nav class="m-tabs" id="tabs" hidden aria-label="Sections du lieu"></nav>
+<button class="m-fab no-tabs" id="fab" hidden aria-label="Ajouter un repérage ici">➕</button>
+
+<script>
+// =====================================================================
+//  XQR : générateur de QR code (mode octets, niveaux L/M/Q/H, versions 1 à 40) — sans dépendance
+//  XQR.make(texte, 'L') → { size, ver, get(x, y) } ou null si trop long ; XQR.svg(texte, opts) → chaîne SVG ou null
+// =====================================================================
+const XQR = (() => {
+    const ECC = [[-1, 7, 10, 15, 20, 26, 18, 20, 24, 30, 18, 20, 24, 26, 30, 22, 24, 28, 30, 28, 28, 28, 28, 30, 30, 26, 28, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30],
+        [-1, 10, 16, 26, 18, 24, 16, 18, 22, 22, 26, 30, 22, 22, 24, 24, 28, 28, 26, 26, 26, 26, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28],
+        [-1, 13, 22, 18, 26, 18, 24, 18, 22, 20, 24, 28, 26, 24, 20, 30, 24, 28, 28, 26, 30, 28, 30, 30, 30, 30, 28, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30],
+        [-1, 17, 28, 22, 16, 22, 28, 26, 26, 24, 28, 24, 28, 22, 24, 24, 30, 28, 28, 26, 28, 30, 24, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30]];
+    const BLK = [[-1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 4, 4, 4, 4, 4, 6, 6, 6, 6, 7, 8, 8, 9, 9, 10, 12, 12, 12, 13, 14, 15, 16, 17, 18, 19, 19, 20, 21, 22, 24, 25],
+        [-1, 1, 1, 1, 2, 2, 4, 4, 4, 5, 5, 5, 8, 9, 9, 10, 10, 11, 13, 14, 16, 17, 17, 18, 20, 21, 23, 25, 26, 28, 29, 31, 33, 35, 37, 38, 40, 43, 45, 47, 49],
+        [-1, 1, 1, 2, 2, 4, 4, 6, 6, 8, 8, 8, 10, 12, 16, 12, 17, 16, 18, 21, 20, 23, 23, 25, 27, 29, 34, 34, 35, 38, 40, 43, 45, 48, 51, 53, 56, 59, 62, 65, 68],
+        [-1, 1, 1, 2, 4, 4, 4, 5, 6, 8, 8, 11, 11, 16, 16, 18, 16, 19, 21, 25, 25, 25, 34, 30, 32, 35, 37, 40, 42, 45, 48, 51, 54, 57, 60, 63, 66, 70, 74, 77, 81]];
+    const ECL = { L: [0, 1], M: [1, 0], Q: [2, 3], H: [3, 2] };
+    const raw = v => { let r = (16 * v + 128) * v + 64; if (v >= 2) { const n = Math.floor(v / 7) + 2; r -= (25 * n - 10) * n - 55; if (v >= 7) r -= 36; } return r; };
+    const dataCw = (v, e) => Math.floor(raw(v) / 8) - ECC[e][v] * BLK[e][v];
+    const bit = (x, i) => ((x >>> i) & 1) !== 0;
+    const mul = (x, y) => { let z = 0; for (let i = 7; i >= 0; i--) { z = (z << 1) ^ ((z >>> 7) * 0x11D); z ^= ((y >>> i) & 1) * x; } return z; };
+    const rsDiv = d => { const r = new Array(d - 1).fill(0); r.push(1); let root = 1; for (let i = 0; i < d; i++) { for (let j = 0; j < r.length; j++) { r[j] = mul(r[j], root); if (j + 1 < r.length) r[j] ^= r[j + 1]; } root = mul(root, 2); } return r; };
+    const rsRem = (data, div) => { const r = div.map(() => 0); data.forEach(b => { const f = b ^ r.shift(); r.push(0); div.forEach((c, i) => { r[i] ^= mul(c, f); }); }); return r; };
+    function make(text, level) {
+        const e = (ECL[level || 'L'] || ECL.L)[0], bytes = Array.from(new TextEncoder().encode(String(text)));
+        let ver = 0; for (let v = 1; v <= 40; v++) { const cc = v <= 9 ? 8 : 16; if (4 + cc + 8 * bytes.length <= dataCw(v, e) * 8) { ver = v; break; } }
+        if (!ver) return null;
+        const bits = []; const put = (val, n) => { for (let i = n - 1; i >= 0; i--) bits.push((val >>> i) & 1); };
+        put(4, 4); put(bytes.length, ver <= 9 ? 8 : 16); bytes.forEach(b => put(b, 8));
+        const cap = dataCw(ver, e) * 8; put(0, Math.min(4, cap - bits.length)); put(0, (8 - bits.length % 8) % 8);
+        for (let p = 0xEC; bits.length < cap; p ^= 0xEC ^ 0x11) put(p, 8);
+        const data = []; for (let i = 0; i < bits.length; i += 8) { let b = 0; for (let j = 0; j < 8; j++) b = (b << 1) | bits[i + j]; data.push(b); }
+        // blocs + correction d'erreur
+        const nb = BLK[e][ver], el = ECC[e][ver], rc = Math.floor(raw(ver) / 8), ns = nb - rc % nb, sl = Math.floor(rc / nb), div = rsDiv(el), blocks = [];
+        for (let i = 0, k = 0; i < nb; i++) { const dl = sl - el + (i < ns ? 0 : 1), dat = data.slice(k, k + dl); k += dl; const ecc = rsRem(dat, div); if (i < ns) dat.push(0); blocks.push(dat.concat(ecc)); }
+        const all = []; for (let i = 0; i < blocks[0].length; i++) blocks.forEach((b, j) => { if (i !== sl - el || j >= ns) all.push(b[i]); });
+        const size = ver * 4 + 17, M = Array.from({ length: size }, () => new Array(size).fill(false)), F = Array.from({ length: size }, () => new Array(size).fill(false));
+        const setF = (x, y, d) => { M[y][x] = d; F[y][x] = true; };
+        for (let i = 0; i < size; i++) { setF(6, i, i % 2 === 0); setF(i, 6, i % 2 === 0); }
+        const finder = (x, y) => { for (let dy = -4; dy <= 4; dy++) for (let dx = -4; dx <= 4; dx++) { const d = Math.max(Math.abs(dx), Math.abs(dy)), xx = x + dx, yy = y + dy; if (xx >= 0 && xx < size && yy >= 0 && yy < size) setF(xx, yy, d !== 2 && d !== 4); } };
+        finder(3, 3); finder(size - 4, 3); finder(3, size - 4);
+        let ap = []; if (ver > 1) { const n = Math.floor(ver / 7) + 2, st = ver === 32 ? 26 : Math.ceil((ver * 4 + 4) / (n * 2 - 2)) * 2; ap = [6]; for (let p = size - 7; ap.length < n; p -= st) ap.splice(1, 0, p); }
+        ap.forEach((x, i) => ap.forEach((y, j) => { if ((i === 0 && j === 0) || (i === 0 && j === ap.length - 1) || (i === ap.length - 1 && j === 0)) return; for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++) setF(x + dx, y + dy, Math.max(Math.abs(dx), Math.abs(dy)) !== 1); }));
+        const fmt = mask => {
+            const d = (ECL[level || 'L'][1] << 3) | mask; let r = d; for (let i = 0; i < 10; i++) r = (r << 1) ^ ((r >>> 9) * 0x537); const b = ((d << 10) | r) ^ 0x5412;
+            for (let i = 0; i <= 5; i++) setF(8, i, bit(b, i)); setF(8, 7, bit(b, 6)); setF(8, 8, bit(b, 7)); setF(7, 8, bit(b, 8)); for (let i = 9; i < 15; i++) setF(14 - i, 8, bit(b, i));
+            for (let i = 0; i < 8; i++) setF(size - 1 - i, 8, bit(b, i)); for (let i = 8; i < 15; i++) setF(8, size - 15 + i, bit(b, i)); setF(8, size - 8, true);
+        };
+        fmt(0);
+        if (ver >= 7) { let r = ver; for (let i = 0; i < 12; i++) r = (r << 1) ^ ((r >>> 11) * 0x1F25); const b = (ver << 12) | r; for (let i = 0; i < 18; i++) { const c = bit(b, i), a = size - 11 + i % 3, d = Math.floor(i / 3); setF(a, d, c); setF(d, a, c); } }
+        for (let i = 0, right = size - 1; right >= 1; right -= 2) { if (right === 6) right = 5; for (let vert = 0; vert < size; vert++) for (let j = 0; j < 2; j++) { const x = right - j, up = ((right + 1) & 2) === 0, y = up ? size - 1 - vert : vert; if (!F[y][x] && i < all.length * 8) { M[y][x] = bit(all[i >>> 3], 7 - (i & 7)); i++; } } }
+        const inv = (m, x, y) => [(x + y) % 2 === 0, y % 2 === 0, x % 3 === 0, (x + y) % 3 === 0, (Math.floor(x / 3) + Math.floor(y / 2)) % 2 === 0, x * y % 2 + x * y % 3 === 0, (x * y % 2 + x * y % 3) % 2 === 0, ((x + y) % 2 + x * y % 3) % 2 === 0][m];
+        const apply = m => { for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) if (!F[y][x] && inv(m, x, y)) M[y][x] = !M[y][x]; };
+        const penalty = () => {
+            let p = 0, dark = 0;
+            for (let y = 0; y < size; y++) { let run = 1; for (let x = 1; x < size; x++) { if (M[y][x] === M[y][x - 1]) { run++; if (run === 5) p += 3; else if (run > 5) p++; } else run = 1; } }
+            for (let x = 0; x < size; x++) { let run = 1; for (let y = 1; y < size; y++) { if (M[y][x] === M[y - 1][x]) { run++; if (run === 5) p += 3; else if (run > 5) p++; } else run = 1; } }
+            for (let y = 0; y < size - 1; y++) for (let x = 0; x < size - 1; x++) { const c = M[y][x]; if (c === M[y][x + 1] && c === M[y + 1][x] && c === M[y + 1][x + 1]) p += 3; }
+            for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) if (M[y][x]) dark++;
+            p += Math.floor(Math.abs(dark * 20 - size * size * 10) / (size * size)) * 10; return p;
+        };
+        let best = 0, bp = Infinity; for (let m = 0; m < 8; m++) { apply(m); fmt(m); const p = penalty(); if (p < bp) { bp = p; best = m; } apply(m); }
+        apply(best); fmt(best);
+        return { size, ver, get: (x, y) => x >= 0 && y >= 0 && x < size && y < size && M[y][x] };
+    }
+    function svg(text, o) {
+        o = o || {}; const q = make(text, o.ecl || 'L'); if (!q) return null; const b = o.border == null ? 4 : o.border, n = q.size + 2 * b; let d = '';
+        for (let y = 0; y < q.size; y++) { let x = 0; while (x < q.size) { if (q.get(x, y)) { let w = 1; while (x + w < q.size && q.get(x + w, y)) w++; d += 'M' + (x + b) + ',' + (y + b) + 'h' + w + 'v1h-' + w + 'z'; x += w; } else x++; } }
+        return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + n + ' ' + n + '" shape-rendering="crispEdges" role="img" aria-label="QR code"><rect width="' + n + '" height="' + n + '" fill="' + (o.light || '#fff') + '"/><path d="' + d + '" fill="' + (o.dark || '#000') + '"/></svg>';
+    }
+    return { make, svg, capacity: (level) => { const e = (ECL[level || 'L'] || ECL.L)[0]; return dataCw(40, e) - 3; } };
+})();
+if (typeof module !== 'undefined') module.exports = XQR;
+
+// =====================================================================
+//  XM : socle mobile SUITE XIII (pages *-m.html) + panneau « 📱 Mobile » des outils bureau
+//  Enveloppe d'échange : { format:'xiii-mobile', v:1, app, kind:'project'|'return', name, ts, data }
+//  Transfert : lien (#mx=… compressé), QR code (si assez court) ou fichier .xiii-m.json
+// =====================================================================
+const XM = (() => {
+    const FORMAT = 'xiii-mobile', QR_MAX = 1800;
+    const $ = (s, r) => (r || document).querySelector(s), $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+    const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const uid = () => Math.random().toString(36).slice(2, 10);
+    const safe = s => String(s || 'projet').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^\w-]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 40) || 'projet';
+    const isPhone = () => { try { return matchMedia('(max-width:700px)').matches && matchMedia('(pointer:coarse)').matches; } catch (e) { return false; } };
+    // ---------- encodage ----------
+    const b64u = u8 => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
+    const unb64u = t => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
+    async function pipe(u8, Ctor, fmt) { const st = new Blob([u8]).stream().pipeThrough(new Ctor(fmt)); return new Uint8Array(await new Response(st).arrayBuffer()); }
+    async function pack(obj) {
+        const u8 = new TextEncoder().encode(JSON.stringify(obj));
+        if (typeof CompressionStream !== 'undefined') { try { return 'z' + b64u(await pipe(u8, CompressionStream, 'deflate-raw')); } catch (e) { } }
+        return 'r' + b64u(u8);
+    }
+    async function unpack(s) {
+        s = String(s || '').trim(); if (!s) throw new Error('Lien vide');
+        let u8 = unb64u(s.slice(1)); if (s[0] === 'z') u8 = await pipe(u8, DecompressionStream, 'deflate-raw'); else if (s[0] !== 'r') throw new Error('Lien non reconnu');
+        return JSON.parse(new TextDecoder().decode(u8));
+    }
+    const baseUrl = page => { const u = new URL(page || location.pathname.split('/').pop(), location.href); u.hash = ''; u.search = ''; return u.href; };
+    const envelope = (app, kind, name, data) => ({ format: FORMAT, v: 1, app, kind: kind || 'project', name: name || '', ts: Date.now(), data });
+    async function link(page, env) { return baseUrl(page) + '#mx=' + await pack(env); }
+    function checkEnv(env, app) {
+        if (!env || env.format !== FORMAT) throw new Error('Ce fichier n\'est pas un envoi SUITE XIII mobile');
+        if (app && env.app !== app) throw new Error('Cet envoi est destiné à « ' + env.app + ' », pas à « ' + app + ' »');
+        return env;
+    }
+    // ---------- stockage local (une enveloppe par application) ----------
+    const mem = {};
+    const load = app => { try { return JSON.parse(localStorage.getItem('xiii.m.' + app)); } catch (e) { return mem[app] || null; } };
+    const save = (app, obj) => { mem[app] = obj; try { localStorage.setItem('xiii.m.' + app, JSON.stringify(obj)); return true; } catch (e) { return false; } };
+    const drop = app => { delete mem[app]; try { localStorage.removeItem('xiii.m.' + app); } catch (e) { } };
+    // ---------- interface ----------
+    let toastT;
+    function toast(msg, ms) { let t = $('.m-toast'); if (!t) { t = document.createElement('div'); t.className = 'm-toast'; document.body.appendChild(t); } t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), ms || 2600); }
+    function sheet(html, o) {
+        o = o || {}; closeSheet(); const ov = document.createElement('div'); ov.className = 'm-ov'; ov.id = 'm-ov';
+        ov.innerHTML = '<div class="m-sheet" role="dialog"><div class="grab"></div>' + (o.title ? '<h2><span class="grow">' + o.title + '</span><button class="m-ibtn plain" data-x aria-label="Fermer">✕</button></h2>' : '') + html + '</div>';
+        ov.addEventListener('mousedown', e => { if (e.target === ov) closeSheet(); }); ov.addEventListener('touchstart', e => { if (e.target === ov) closeSheet(); }, { passive: true });
+        document.body.appendChild(ov); const x = $('[data-x]', ov); if (x) x.onclick = closeSheet; ov._onClose = o.onClose; return ov.querySelector('.m-sheet');
+    }
+    function closeSheet() { const ov = $('#m-ov'); if (ov) { ov.remove(); if (ov._onClose) try { ov._onClose(); } catch (e) { } } }
+    // choix : renvoie l'index du bouton (ou -1 si fermé)
+    function ask(title, text, buttons) {
+        return new Promise(res => {
+            const s = sheet('<p style="margin:0 0 14px;color:var(--text-muted)">' + text + '</p><div class="m-actions" style="margin-top:0">' + (buttons || ['OK']).map((b, i) => '<button class="m-btn ' + (i === 0 ? 'primary' : '') + (b.danger ? ' danger' : '') + '" data-i="' + i + '">' + esc(b.label || b) + '</button>').join('') + '</div>', { title: esc(title), onClose: () => res(-1) });
+            $$('[data-i]', s).forEach(b => b.onclick = () => { const ov = $('#m-ov'); if (ov) ov._onClose = null; closeSheet(); res(+b.dataset.i); });
+        });
+    }
+    function download(name, content, mime) { const b = content instanceof Blob ? content : new Blob([content], { type: mime || 'application/json' }), a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { a.remove(); URL.revokeObjectURL(a.href); }, 1500); }
+    async function copy(text) { try { await navigator.clipboard.writeText(text); return true; } catch (e) { const t = document.createElement('textarea'); t.value = text; t.style.cssText = 'position:fixed;opacity:0'; document.body.appendChild(t); t.select(); let ok = false; try { ok = document.execCommand('copy'); } catch (e2) { } t.remove(); return ok; } }
+    function pickFile(accept, cb) { const i = document.createElement('input'); i.type = 'file'; i.accept = accept || '.json,application/json'; i.style.display = 'none'; i.onchange = async () => { const f = i.files[0]; i.remove(); if (f) cb(f); }; document.body.appendChild(i); i.click(); }
+    async function readEnvFile(f, app) { return checkEnv(JSON.parse(await f.text()), app); }
+    // ---------- fenêtre d'envoi : QR + lien + fichier (bureau et mobile) ----------
+    //  cfg = { app, page, title, kind, name, make: () => data | null, note, empty }
+    async function send(cfg) {
+        const data = cfg.make(); if (data == null) { toast(cfg.empty || 'Rien à envoyer'); return; }
+        const env = envelope(cfg.app, cfg.kind || 'project', cfg.name ? (typeof cfg.name === 'function' ? cfg.name() : cfg.name) : '', data);
+        const url = await link(cfg.page, env), json = JSON.stringify(env), qr = url.length <= QR_MAX ? XQR.svg(url, { ecl: 'L', border: 2 }) : null, mob = document.body.classList.contains('xm');
+        const fname = cfg.file || ((cfg.title || cfg.app) + '_' + safe(env.name) + '.xiii-m.json').replace(/\s+/g, '_');
+        const body = (qr ? '<div class="m-qr">' + qr + '</div><p class="m-hint" style="text-align:center;margin:4px 0 12px">Scannez ce code avec l\'appareil photo' + (cfg.kind === 'return' ? ' de l\'ordinateur' : ' du téléphone') + '.' + (url.length > 1100 ? ' Code dense : affichez-le en grand.' : '') + '</p>'
+            : '<div class="m-card" style="margin-top:0"><b>Trop volumineux pour un QR code</b><p class="m-hint" style="margin:6px 0 0">' + (url.length < 8000 ? 'Utilisez le lien (message, mail, AirDrop…) ou le fichier ci-dessous.' : 'Utilisez le fichier ci-dessous (AirDrop, mail, cloud…) : le lien serait trop long.') + '</p></div>') +
+            '<div class="m-actions" style="margin-top:0">' + (url.length < 8000 ? '<button class="m-btn" id="xm-copy">🔗 Copier le lien</button>' : '') + ((navigator.share && mob) ? '<button class="m-btn" id="xm-share">📤 Partager…</button>' : '') + '<button class="m-btn primary" id="xm-file">⬇️ Fichier</button></div>' +
+            (cfg.note ? '<p class="m-hint" style="margin:12px 2px 0">' + cfg.note + '</p>' : '') + '<p class="m-hint" style="margin:8px 2px 0">' + (json.length / 1024 < 10 ? Math.max(1, Math.round(json.length / 102.4) / 10) : Math.round(json.length / 1024)) + ' Ko · le projet n\'est pas envoyé sur Internet : tout est dans le lien ou le fichier.</p>';
+        const s = host(body, '📱 ' + esc(cfg.heading || (cfg.kind === 'return' ? 'Renvoyer au bureau' : 'Envoyer vers le mobile')), mob);
+        const q = id => $(id, s.ov || s);
+        const c = q('#xm-copy'); if (c) c.onclick = async () => toast(await copy(url) ? '🔗 Lien copié' : '⚠️ Copie impossible : utilisez le fichier');
+        const sh = q('#xm-share'); if (sh) sh.onclick = async () => { try { await navigator.share({ title: cfg.title || cfg.app, text: cfg.title || cfg.app, url }); } catch (e) { } };
+        q('#xm-file').onclick = () => { download(fname, json, 'application/json'); toast('⬇️ Fichier enregistré'); };
+    }
+    // fenêtre : feuille du bas sur mobile, boîte centrée sur le bureau (styles en ligne : aucun CSS requis)
+    function host(html, title, mob) {
+        if (mob) { const s = sheet(html, { title }); s.ov = s.parentNode; return s; }
+        const old = document.getElementById('xm-d-ov'); if (old) old.remove();
+        const ov = document.createElement('div'); ov.id = 'xm-d-ov'; ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:10060;display:flex;align-items:center;justify-content:center;';
+        ov.innerHTML = '<div style="background:var(--bg-menu,#2d2d2d);color:var(--text-main,#fff);width:520px;max-width:94vw;max-height:90vh;overflow-y:auto;border-radius:10px;border:1px solid var(--border-color,#444);padding:20px;box-shadow:0 4px 18px rgba(0,0,0,.5);font-size:13.5px;font-family:inherit;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;border-bottom:1px solid var(--border-color,#444);padding-bottom:8px;"><b style="font-size:15px;">' + title + '</b><span data-x style="cursor:pointer;font-weight:bold;color:var(--text-muted,#aaa);padding:0 4px;">✕</span></div><div class="xm-d">' + html + '</div></div>';
+        ov.addEventListener('mousedown', e => { if (e.target === ov) ov.remove(); }); document.body.appendChild(ov); $('[data-x]', ov).onclick = () => ov.remove();
+        const s = $('.xm-d', ov); s.ov = ov; if (!document.getElementById('xm-d-css')) { const st = document.createElement('style'); st.id = 'xm-d-css'; st.textContent = '#xm-d-ov .m-qr{background:#fff;border-radius:10px;padding:6px;width:min(100%,340px);margin:6px auto}#xm-d-ov .m-qr svg{display:block;width:100%;height:auto}#xm-d-ov .m-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}#xm-d-ov .m-actions>*{flex:1 1 130px}#xm-d-ov .m-btn{padding:9px 12px;font-size:13.5px;border-radius:8px;border:1px solid var(--btn-border,rgba(240,179,120,.35));background:var(--btn-bg,rgba(240,179,120,.12));color:inherit;cursor:pointer;font-weight:600}#xm-d-ov .m-btn.primary{border-color:rgba(240,179,120,.85);background:rgba(240,179,120,.28)}#xm-d-ov .m-hint{font-size:12px;color:var(--text-dim,#888);line-height:1.45}#xm-d-ov .m-card{border:1px solid var(--border-color,#444);border-radius:8px;padding:10px 12px;background:var(--bg-panel-alt,#252525);margin:10px 0}#xm-d-ov .m-sec{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-dim,#888);margin:16px 2px 6px}'; document.head.appendChild(st); }
+        return s;
+    }
+    // ---------- réception : lien (#mx=…), fichier ou lien collé ----------
+    async function fromHash(app, onEnv) {
+        const m = /[#&]mx=([\w-]+)/.exec(location.hash || ''); if (!m) return false;
+        try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { }
+        try { const env = checkEnv(await unpack(m[1]), app); await onEnv(env, 'link'); } catch (e) { toast('⚠️ ' + (e.message || 'Lien illisible'), 4500); }
+        return true;
+    }
+    function importFile(app, onEnv) { pickFile('.json,application/json', async f => { try { await onEnv(await readEnvFile(f, app), 'file'); } catch (e) { toast('⚠️ ' + (e.message || 'Fichier illisible'), 4500); } }); }
+    async function importLink(app, onEnv) {
+        const mob = document.body.classList.contains('xm');
+        const s = host('<label class="m-field" style="display:block;margin-bottom:10px"><span class="m-hint">Collez le lien reçu</span><textarea id="xm-paste" rows="4" style="width:100%;box-sizing:border-box;font-size:16px;padding:10px;border-radius:8px;border:1px solid var(--border-color,#444);background:var(--bg-input,#3a3a3a);color:inherit"></textarea></label><div class="m-actions"><button class="m-btn primary" id="xm-pgo">Importer</button></div>', '🔗 Importer un lien', mob);
+        $('#xm-pgo', s.ov || s).onclick = async () => { const v = $('#xm-paste', s.ov || s).value, m = /mx=([\w-]+)/.exec(v) || [0, v.trim()]; try { const env = checkEnv(await unpack(m[1]), app); if (s.ov) s.ov.remove(); closeSheet(); await onEnv(env, 'link'); } catch (e) { toast('⚠️ ' + (e.message || 'Lien illisible'), 4500); } };
+    }
+    // ---------- panneau « 📱 Mobile » des outils bureau ----------
+    //  cfg = { app, page, title, name:()=>'', make:()=>data|null, apply:async(env)=>message, note }
+    function desktopPanel(cfg) {
+        const s = host('<p class="m-hint" style="margin:0 0 10px">Emportez ce projet sur le téléphone : ouvrez la <b>version mobile</b> de ' + esc(cfg.title) + ' en scannant un QR code, en ouvrant un lien ou en important un fichier.</p>' +
+            '<div class="m-actions" style="margin-top:0"><button class="m-btn primary" id="xm-go">📱 Envoyer vers le mobile</button><button class="m-btn" id="xm-open">↗ Ouvrir la version mobile ici</button></div>' +
+            (cfg.apply ? '<div class="m-sec">Récupérer ce qui a été fait sur le mobile</div><div class="m-actions" style="margin-top:0"><button class="m-btn" id="xm-ifile">📂 Importer un fichier</button><button class="m-btn" id="xm-ilink">🔗 Coller un lien</button></div><p class="m-hint" style="margin:8px 2px 0">' + (cfg.returnNote || 'Sur le mobile, « Renvoyer au bureau » produit le fichier ou le lien à importer ici.') + '</p>' : ''), '📱 Version mobile — ' + esc(cfg.title), false);
+        const q = id => $(id, s.ov);
+        q('#xm-go').onclick = () => { s.ov.remove(); send({ app: cfg.app, page: cfg.page, title: cfg.title, name: cfg.name, make: cfg.make, note: cfg.note, empty: cfg.empty }); };
+        q('#xm-open').onclick = async () => { const d = cfg.make(); if (d == null) { toast(cfg.empty || 'Rien à envoyer'); return; } s.ov.remove(); window.open(await link(cfg.page, envelope(cfg.app, 'project', typeof cfg.name === 'function' ? cfg.name() : cfg.name, d)), '_blank'); };
+        if (cfg.apply) { const ap = async env => { s.ov && s.ov.remove(); const m = await cfg.apply(env); if (m) toast(m, 5000); }; q('#xm-ifile').onclick = () => importFile(cfg.app, ap); q('#xm-ilink').onclick = () => { s.ov.remove(); importLink(cfg.app, async env => { const m = await cfg.apply(env); if (m) toast(m, 5000); }); }; }
+    }
+    // retour par lien sur le bureau (#mx=… de type return)
+    function desktopBoot(cfg) { return fromHash(cfg.app, async env => { if (env.kind === 'return' && cfg.apply) { const m = await cfg.apply(env); if (m) toast(m, 5000); } }); }
+    // ---------- thème, en-tête et menu des pages mobiles ----------
+    function initTheme() { let p = {}; try { p = JSON.parse(localStorage.getItem('hubXIII.prefs')) || {}; } catch (e) { } document.body.classList.add('xm'); document.body.classList.toggle('light-theme', p.theme === 'light'); const m = document.querySelector('meta[name=theme-color]'); if (m) m.content = p.theme === 'light' ? '#ffffff' : '#222222'; }
+    function toggleTheme() { let p = {}; try { p = JSON.parse(localStorage.getItem('hubXIII.prefs')) || {}; } catch (e) { } p.theme = p.theme === 'light' ? 'dark' : 'light'; try { localStorage.setItem('hubXIII.prefs', JSON.stringify(p)); } catch (e) { } initTheme(); }
+    //  menu standard ⋯ : cfg = { app, deskPage, items:[{icon,label,sub,run}] , onImport(env, via) , sendReturn() }
+    function menu(cfg) {
+        const items = (cfg.items || []).concat([
+            cfg.onImport ? { icon: '📂', label: 'Importer un fichier', sub: 'Envoi du bureau (.xiii-m.json)', run: () => importFile(cfg.app, cfg.onImport) } : null,
+            cfg.onImport ? { icon: '🔗', label: 'Coller un lien', sub: 'Lien ou QR reçu du bureau', run: () => importLink(cfg.app, cfg.onImport) } : null,
+            cfg.sendReturn ? { icon: '📤', label: 'Renvoyer au bureau', sub: 'QR code, lien ou fichier', run: cfg.sendReturn } : null,
+            { icon: '🌓', label: 'Thème clair / sombre', run: toggleTheme },
+            cfg.deskPage ? { icon: '🖥️', label: 'Version bureau', sub: 'Interface complète', run: () => { try { sessionStorage.setItem('xiiiDesk', '1'); } catch (e) { } location.href = cfg.deskPage + '?desktop=1'; } } : null,
+            { icon: '🏠', label: 'Accueil SUITE XIII', run: () => { location.href = 'index.html'; } }].filter(Boolean));
+        const s = sheet('<div class="m-list" style="margin:0">' + items.map((it, i) => '<button class="m-item" data-i="' + i + '"><span class="ico">' + it.icon + '</span><span class="grow"><b>' + esc(it.label) + '</b>' + (it.sub ? '<small>' + esc(it.sub) + '</small>' : '') + '</span></button>').join('') + '</div><p class="m-credit">Application développée par Matthieu Lamotte</p>', { title: 'Menu' });
+        $$('[data-i]', s).forEach(b => b.onclick = () => { closeSheet(); setTimeout(() => items[+b.dataset.i].run(), 60); });
+    }
+    return { FORMAT, $, $$, esc, uid, safe, isPhone, pack, unpack, link, envelope, checkEnv, load, save, drop, toast, sheet, closeSheet, ask, download, copy, pickFile, readEnvFile, send, host, fromHash, importFile, importLink, desktopPanel, desktopBoot, initTheme, toggleTheme, menu };
+})();
+// 🏠 retour à l'accueil SUITE XIII : même bouton en tête de chaque version mobile
+(function () {
+    const add = () => { const top = document.querySelector('.m-top'); if (!top || top.querySelector('.xm-home')) return; const a = document.createElement('a'); a.className = 'm-ibtn plain xm-home'; a.href = 'index.html'; a.title = 'Accueil SUITE XIII'; a.setAttribute('aria-label', 'Accueil'); a.textContent = '🏠'; a.style.cssText = 'text-decoration:none;font-size:17px;display:inline-flex;align-items:center;justify-content:center'; top.insertBefore(a, top.firstChild); };
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', add); else add();
+})();
+
+// 📱 XIII Équipe : une fois dans l'application, on y reste (l'accueil ramène à l'application, pas au site)
+(function () {
+    if (window.__xinapp) return; window.__xinapp = 1;
+    var page = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
+    try { if (page === 'equipe.html' && (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (window.matchMedia && matchMedia('(display-mode: standalone)').matches))) sessionStorage.setItem('xiii.inapp', '1'); } catch (e) { }
+    function inApp() { try { return sessionStorage.getItem('xiii.inapp') === '1'; } catch (e) { return false; } }
+    if (!inApp()) return;
+    if (page === 'index.html' || page === '') { location.replace('equipe.html'); return; }
+    document.addEventListener('click', function (e) {
+        var a = e.target.closest && e.target.closest('a[href]'); if (!a) return;
+        var u; try { u = new URL(a.getAttribute('href'), location.href); } catch (er) { return; }
+        if (u.origin !== location.origin) return;
+        var f = (u.pathname.split('/').pop() || 'index.html').toLowerCase();
+        if (f === 'index.html' || f === '') { e.preventDefault(); e.stopPropagation(); location.href = 'equipe.html'; return; }
+        if (a.target === '_blank') { a.removeAttribute('target'); }
+    }, true);
+})();
+
+</script>
+<script>
+// =====================================================================
+//  REPERO XIII — données statiques : couches, catégories OSM, règles, listes de contrôle, fréquences
+//  Tout ce qui est « indicatif » est signalé comme tel dans l'interface.
+// =====================================================================
+const LAYERS = [
+    { id: 'sun', icon: '☀️', name: 'Soleil', col: '#FFB300', hint: 'Lever, coucher, trajectoire et heures dorées' },
+    { id: 'noise', icon: '🔊', name: 'Bruit', col: '#EF6C00', hint: 'Zones de bruit estimées à partir des routes, voies ferrées, écoles, bars, chantiers…' },
+    { id: 'health', icon: '🏥', name: 'Santé & secours', col: '#E53935', hint: 'Hôpitaux, cliniques, pharmacies, pompiers, police, défibrillateurs' },
+    { id: 'shops', icon: '🛒', name: 'Commerces', col: '#43A047', hint: 'Supermarchés, supérettes, boulangeries, bricolage, carburant, bornes de recharge' },
+    { id: 'logi', icon: '🅿️', name: 'Logistique', col: '#42A5F5', hint: 'Parkings, toilettes, points d\'eau, hôtels, gares et métros, restauration' },
+    { id: 'air', icon: '✈️', name: 'Couloirs aériens', col: '#7E57C2', hint: 'Aérodromes, héliports et axes de piste (approche et décollage)' },
+    { id: 'drone', icon: '🚁', name: 'Drones', col: '#00ACC1', hint: 'Carte officielle des restrictions + zones de vigilance détectées' },
+    { id: 'radio', icon: '📻', name: 'Radio & antennes', col: '#8D6E63', hint: 'Relais mobiles, émetteurs radio et TV' },
+    { id: 'rights', icon: '⚖️', name: 'Droit à l\'image', col: '#D81B60', hint: 'Lieux sensibles : mineurs, santé, culte, sites protégés, monuments…' }
+];
+const BASES = [['osm', 'Plan OpenStreetMap'], ['ortho', 'Photo aérienne IGN'], ['topo', 'Relief (OpenTopoMap)']];
+
+// Catégories de points d'intérêt (service et logistique)
+const POI = {
+    hospital: { l: 'Hôpital / urgences', i: '🏥', c: '#E53935', ly: 'health' },
+    clinic: { l: 'Clinique / centre de santé', i: '⚕️', c: '#EF5350', ly: 'health' },
+    pharmacy: { l: 'Pharmacie', i: '💊', c: '#43A047', ly: 'health' },
+    fire: { l: 'Pompiers', i: '🚒', c: '#F4511E', ly: 'health' },
+    police: { l: 'Police / gendarmerie', i: '🚓', c: '#3949AB', ly: 'health' },
+    aed: { l: 'Défibrillateur', i: '⚡', c: '#2E7D32', ly: 'health' },
+    supermarket: { l: 'Supermarché', i: '🛒', c: '#43A047', ly: 'shops' },
+    convenience: { l: 'Supérette / épicerie', i: '🏪', c: '#66BB6A', ly: 'shops' },
+    bakery: { l: 'Boulangerie', i: '🥖', c: '#C68A3B', ly: 'shops' },
+    hardware: { l: 'Bricolage / quincaillerie', i: '🔧', c: '#78909C', ly: 'shops' },
+    fuel: { l: 'Station-service', i: '⛽', c: '#FB8C00', ly: 'shops' },
+    charging: { l: 'Borne de recharge', i: '🔌', c: '#00ACC1', ly: 'shops' },
+    atm: { l: 'Distributeur de billets', i: '🏧', c: '#8D6E63', ly: 'shops' },
+    parking: { l: 'Parking', i: '🅿️', c: '#42A5F5', ly: 'logi' },
+    toilets: { l: 'Toilettes publiques', i: '🚻', c: '#26A69A', ly: 'logi' },
+    water: { l: 'Point d\'eau potable', i: '🚰', c: '#29B6F6', ly: 'logi' },
+    hotel: { l: 'Hôtel / hébergement', i: '🏨', c: '#AB47BC', ly: 'logi' },
+    transit: { l: 'Gare / métro / tram', i: '🚉', c: '#5C6BC0', ly: 'logi' },
+    food: { l: 'Restaurant / café', i: '🍽️', c: '#EC407A', ly: 'logi' }
+};
+// Sources de bruit : L1 = niveau estimé à 10 m (dB(A)), type : 'line' (ligne, -3 dB par doublement) ou 'pt' (point, -6 dB)
+// per : jour / soir (d'après l'activité) ; night = correction nocturne appliquée au niveau (routes, rail…)
+const NOISE = {
+    motorway: { l: 'Autoroute', i: '🛣️', L1: 80, t: 'line', night: -6 },
+    trunk: { l: 'Voie rapide', i: '🛣️', L1: 77, t: 'line', night: -6 },
+    primary: { l: 'Route principale', i: '🚗', L1: 71, t: 'line', night: -8 },
+    secondary: { l: 'Route secondaire', i: '🚗', L1: 67, t: 'line', night: -9 },
+    tertiary: { l: 'Route de desserte', i: '🚗', L1: 61, t: 'line', night: -10 },
+    rail: { l: 'Voie ferrée', i: '🚆', L1: 73, t: 'line', night: -4 },
+    tram: { l: 'Tramway / métro aérien', i: '🚊', L1: 62, t: 'line', night: -8 },
+    nightclub: { l: 'Discothèque', i: '🪩', L1: 84, t: 'pt', day: -99, night: 0 },
+    bar: { l: 'Bar / pub', i: '🍺', L1: 68, t: 'pt', day: -10, night: 0 },
+    school: { l: 'École (récréations)', i: '🏫', L1: 76, t: 'pt', day: 0, night: -99 },
+    worship: { l: 'Lieu de culte (cloches)', i: '🔔', L1: 80, t: 'pt', day: 0, night: -12 },
+    stadium: { l: 'Stade / salle de sport', i: '🏟️', L1: 78, t: 'pt', day: -4, night: -6 },
+    industry: { l: 'Zone industrielle / carrière', i: '🏭', L1: 72, t: 'pt', day: 0, night: -8 },
+    works: { l: 'Chantier', i: '🏗️', L1: 80, t: 'pt', day: 0, night: -99 },
+    siren: { l: 'Caserne / hôpital (sirènes)', i: '🚨', L1: 74, t: 'pt', day: 0, night: -2 },
+    market: { l: 'Marché / gare routière', i: '🛍️', L1: 72, t: 'pt', day: 0, night: -99 },
+    station: { l: 'Gare', i: '🚉', L1: 72, t: 'pt', day: 0, night: -8 },
+    airport: { l: 'Aérodrome', i: '✈️', L1: 85, t: 'pt', day: 0, night: -6 }
+};
+// Règles « droit à l'image / autorisations » : level 3 = très encadré, 2 = autorisation nécessaire, 1 = vigilance
+const SENS = {
+    military: { lv: 3, i: '🪖', l: 'Site militaire / sensible', why: 'Filmer ou photographier est interdit ou soumis à l\'autorisation écrite de l\'autorité militaire.' },
+    prison: { lv: 3, i: '⛓️', l: 'Établissement pénitentiaire', why: 'Prises de vue interdites aux abords sans autorisation de l\'administration pénitentiaire.' },
+    court: { lv: 3, i: '⚖️', l: 'Tribunal / palais de justice', why: 'Captation d\'images et de sons interdite lors des audiences (loi du 29 juillet 1881) ; autorisation du chef de juridiction.' },
+    plant: { lv: 2, i: '⚛️', l: 'Site énergétique / industriel sensible', why: 'Opérateur d\'importance vitale : autorisation de l\'exploitant, tournage souvent refusé.' },
+    embassy: { lv: 2, i: '🏛️', l: 'Ambassade / consulat', why: 'Périmètre de sécurité : accord des autorités et information de la police.' },
+    police: { lv: 2, i: '🚓', l: 'Police / gendarmerie', why: 'Site sensible : autorisation de l\'administration ; interventions en cours à ne pas exploiter sans accord.' },
+    school: { lv: 2, i: '🏫', l: 'École / établissement scolaire', why: 'Mineurs : autorisations parentales écrites pour tout enfant identifiable, accord du chef d\'établissement, aucun tournage à la sortie des classes.' },
+    health: { lv: 2, i: '🏥', l: 'Hôpital / établissement de santé', why: 'Patients et soignants : secret médical, autorisation de la direction, personnes identifiables à flouter.' },
+    worship: { lv: 2, i: '⛪', l: 'Lieu de culte', why: 'Autorisation de l\'affectataire (clergé, association cultuelle) ; offices et fidèles à respecter.' },
+    museum: { lv: 2, i: '🖼️', l: 'Musée / site culturel', why: 'Œuvres protégées par le droit d\'auteur, règlement du gestionnaire : autorisation de tournage obligatoire.' },
+    heritage: { lv: 2, i: '🏰', l: 'Monument / patrimoine protégé', why: 'Autorisation du propriétaire ou gestionnaire (accès, occupation, parfois redevance) ; conditions spécifiques pour les monuments nationaux.' },
+    transport: { lv: 2, i: '🚉', l: 'Gare / métro / aéroport', why: 'Espace de l\'exploitant (SNCF, RATP, gestionnaire d\'aéroport) : autorisation et consignes de sûreté.' },
+    cemetery: { lv: 2, i: '🪦', l: 'Cimetière', why: 'Autorisation de la mairie ; respect du recueillement et des familles.' },
+    venue: { lv: 2, i: '🎭', l: 'Stade / salle de spectacle / cinéma', why: 'Espace privé, œuvres et marques : autorisation de l\'exploitant ; public identifiable.' },
+    protected: { lv: 2, i: '🌿', l: 'Aire protégée / réserve', why: 'Autorisation du gestionnaire ; arrêtés spécifiques (faune, drones, accès).' },
+    artwork: { lv: 2, i: '🗿', l: 'Œuvre d\'art visible', why: 'Fresque, sculpture, architecture : droits d\'auteur (pas d\'exception de panorama pour un usage commercial) → cadrage accessoire ou accord de l\'ayant droit.' },
+    government: { lv: 1, i: '🏢', l: 'Administration / mairie', why: 'Bâtiment public : accord du responsable pour tourner à l\'intérieur ; abords en général libres.' },
+    park: { lv: 1, i: '🌳', l: 'Parc / jardin public', why: 'Autorisation du gestionnaire (mairie) pour un tournage professionnel.' },
+    crowd: { lv: 1, i: '👥', l: 'Fréquentation piétonne (rue, place, commerces)', why: 'Passants identifiables : informer par affichage, flouter ou obtenir l\'accord si une personne est isolée à l\'image.' },
+    brand: { lv: 1, i: '🏷️', l: 'Devantures et enseignes', why: 'Marques visibles : à masquer ou à faire valider (clearance) selon l\'exploitation.' }
+};
+const LEVELS = { 3: ['Très encadré', 'ko'], 2: ['Autorisation nécessaire', 'warn'], 1: ['Vigilance', 'acc'] };
+
+// Liste de contrôle d'un repérage (état : ok / à vérifier / bloquant)
+const CHECK = [
+    ['Accès & logistique', '🚚', [
+        ['camion', 'Accès camion régie / groupe'], ['park', 'Stationnement équipe suffisant'], ['dist', 'Parking proche du décor (portage court)'],
+        ['asc', 'Ascenseur / monte-charge / escaliers'], ['haut', 'Hauteurs et largeurs de passage (portes, plafonds)'], ['pmr', 'Accessibilité PMR']]],
+    ['Technique', '⚡', [
+        ['elec', 'Alimentation électrique (prises, puissance)'], ['groupe', 'Emplacement possible pour groupe électrogène'], ['lum', 'Lumière naturelle et orientation des ouvertures'],
+        ['res', 'Réseau mobile / Wi-Fi'], ['masque', 'Masques solaires (bâtiments, relief) vérifiés à l\'heure voulue']]],
+    ['Son', '🎧', [
+        ['fond', 'Bruit de fond acceptable (circulation, voisinage)'], ['ponct', 'Sources sonores ponctuelles connues (cloches, récré, train)'],
+        ['coupe', 'Possibilité de couper ventilation, frigo, climatisation'], ['reverb', 'Acoustique du lieu (réverbération, échos)']]],
+    ['Confort de l\'équipe', '☕', [
+        ['wc', 'Toilettes'], ['eau', 'Point d\'eau'], ['cant', 'Espace repas / cantine'], ['hmc', 'Loges / espace HMC'], ['stock', 'Stockage du matériel et local de repli (pluie)']]],
+    ['Autorisations & droits', '📝', [
+        ['prop', 'Propriétaire ou gestionnaire identifié'], ['autor', 'Autorisation de tournage obtenue'], ['voirie', 'Arrêté de voirie / stationnement demandé'],
+        ['image', 'Droit à l\'image : passants, marques, œuvres traités'], ['drone', 'Vol de drone autorisé et déclaré'], ['horaires', 'Horaires et contraintes de voisinage validés'], ['assur', 'Assurance, caution, état des lieux']]],
+    ['Sécurité', '🦺', [
+        ['hosp', 'Hôpital / urgences repérés et temps d\'accès connu'], ['dae', 'Défibrillateur et trousse de secours localisés'], ['issues', 'Issues de secours et point de rassemblement'],
+        ['risque', 'Risques particuliers évalués (hauteur, eau, circulation)'], ['nuit', 'Éclairage et sécurité de nuit']]]
+];
+const CHECK_ALL = CHECK.reduce((a, c) => a.concat(c[2].map(x => ({ k: x[0], l: x[1], sec: c[0] }))), []);
+
+const CATS = [['decor', 'Décor', '🎬', '#E53935'], ['alt', 'Décor alternatif', '🔄', '#FF7043'], ['base', 'Base régie / QG', '🏠', '#FFA726'], ['parking', 'Parking / technique', '🚚', '#42A5F5'], ['autre', 'Autre', '📍', '#9E9E9E']];
+const STATUS = [['avoir', 'À voir', '#9E9E9E', '○'], ['vu', 'Vu', '#42A5F5', '◐'], ['retenu', 'Retenu', '#66BB6A', '✔'], ['ecarte', 'Écarté', '#E53935', '✖']];
+const ACCESS = [['prive', 'Lieu privé'], ['public', 'Voie / espace public'], ['mixte', 'Mixte / semi-public']];
+const catOf = k => CATS.find(c => c[0] === k) || CATS[CATS.length - 1];
+const statOf = k => STATUS.find(c => c[0] === k) || STATUS[0];
+
+// Bandes de fréquences utiles (France). Repères indicatifs : à confirmer auprès de l'ANFR / de l'ARCEP / du fabricant.
+const FREQS = [
+    ['87,5 – 108 MHz', 'Radio FM', 'listen', 'Émetteurs FM locaux : fréquences de la zone à consulter sur Cartoradio (ANFR). Peuvent perturber des liaisons voisines.'],
+    ['174 – 240 MHz', 'Radio numérique DAB+ (bande III)', 'listen', 'Multiplex DAB+ locaux.'],
+    ['108 – 137 MHz', 'Aviation (radionavigation et communications)', 'no', 'Ne pas émettre. Intéressant près d\'un aérodrome : trafic radio permanent.'],
+    ['156 – 162 MHz', 'VHF marine (canal 16 : 156,800 MHz, détresse)', 'no', 'Ne pas occuper, notamment près de l\'eau et des ports.'],
+    ['380 – 400 MHz', 'Réseaux de sécurité publique (secours, forces de l\'ordre)', 'no', 'Ne jamais utiliser.'],
+    ['136 – 174 MHz · 400 – 470 MHz', 'Talkies-walkies professionnels (hors 446 MHz)', 'auth', 'Fréquences attribuées sur autorisation ARCEP : en pratique, location auprès d\'un loueur qui gère les licences.'],
+    ['446,0 – 446,2 MHz', 'PMR446 : talkies-walkies sans licence (0,5 W)', 'free', '16 canaux analogiques ou numériques ; portée réduite, partagés avec tous les utilisateurs de la zone.'],
+    ['470 – 694 MHz', 'TNT (UHF) et micros HF', 'auth', 'Bande partagée avec la TNT : éviter les canaux TNT diffusés localement, usage soumis à autorisation selon la puissance. Scanner sur place.'],
+    ['694 – 790 MHz', 'Bande 700 MHz (4G / 5G)', 'no', 'Attribuée au mobile depuis 2019 : ne plus utiliser pour des micros HF.'],
+    ['863 – 865 MHz', 'Micros et audio sans fil faible puissance', 'free', 'Usage libre mais capacité limitée ; peu de canaux.'],
+    ['1 785 – 1 805 MHz', 'Micros / retours in-ear (bande 1,8 GHz)', 'auth', 'Régime à confirmer auprès de l\'ANFR et du fabricant (selon puissance et usage).'],
+    ['2,4 GHz', 'Wi-Fi, Bluetooth, intercoms, vidéo HF, drones', 'free', 'Libre mais très saturé en ville : prévoir un plan de canaux et couper les réseaux inutiles.'],
+    ['5 GHz', 'Wi-Fi 5 GHz, retours vidéo, drones', 'free', 'Libre avec des sous-bandes restreintes (intérieur, radars à éviter) selon la puissance.'],
+    ['700 / 800 / 900 / 1800 / 2100 / 2600 MHz · 3,5 GHz', 'Réseaux mobiles 4G / 5G', 'listen', 'Couverture à vérifier avec l\'ARCEP (« Mon réseau mobile ») pour les liaisons de production par réseau cellulaire.']
+];
+const FREQ_STATE = { free: ['Libre', 'ok'], auth: ['Sur autorisation', 'warn'], no: ['À ne pas utiliser', 'ko'], listen: ['À connaître', 'acc'] };
+
+// Codes météo (WMO)
+const WMO = { 0: ['☀️', 'Ciel dégagé'], 1: ['🌤️', 'Plutôt dégagé'], 2: ['⛅', 'Partiellement nuageux'], 3: ['☁️', 'Couvert'], 45: ['🌫️', 'Brouillard'], 48: ['🌫️', 'Brouillard givrant'], 51: ['🌦️', 'Bruine légère'], 53: ['🌦️', 'Bruine'], 55: ['🌧️', 'Bruine forte'], 56: ['🌧️', 'Bruine verglaçante'], 57: ['🌧️', 'Bruine verglaçante'], 61: ['🌧️', 'Pluie faible'], 63: ['🌧️', 'Pluie'], 65: ['🌧️', 'Pluie forte'], 66: ['🌧️', 'Pluie verglaçante'], 67: ['🌧️', 'Pluie verglaçante'], 71: ['🌨️', 'Neige faible'], 73: ['🌨️', 'Neige'], 75: ['❄️', 'Neige forte'], 77: ['🌨️', 'Grains de neige'], 80: ['🌦️', 'Averses'], 81: ['🌧️', 'Averses'], 82: ['⛈️', 'Averses violentes'], 85: ['🌨️', 'Averses de neige'], 86: ['❄️', 'Averses de neige'], 95: ['⛈️', 'Orage'], 96: ['⛈️', 'Orage et grêle'], 99: ['⛈️', 'Orage violent'] };
+
+const OVERPASS = ['https://overpass-api.de/api/interpreter', 'https://overpass.private.coffee/api/interpreter', 'https://maps.mail.ru/osm/tools/overpass/api/interpreter'];
+
+// Liens utiles (France)
+const LINKS = {
+    gmaps: (la, lo) => 'https://www.google.com/maps/search/?api=1&query=' + la + ',' + lo,
+    street: (la, lo) => 'https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=' + la + ',' + lo,
+    osm: (la, lo) => 'https://www.openstreetmap.org/?mlat=' + la + '&mlon=' + lo + '#map=18/' + la + '/' + lo,
+    waze: (la, lo) => 'https://waze.com/ul?ll=' + la + ',' + lo + '&navigate=yes',
+    geo: (la, lo) => 'https://www.geoportail.gouv.fr/carte?c=' + lo + ',' + la + '&z=17&permalink=yes',
+    cadastre: (la, lo) => 'https://www.geoportail.gouv.fr/carte?c=' + lo + ',' + la + '&z=18&l0=CADASTRALPARCELS.PARCELLAIRE_EXPRESS::GEOPORTAIL:OGC:WMTS(1)&permalink=yes',
+    drone: (la, lo) => 'https://www.geoportail.gouv.fr/carte?c=' + lo + ',' + la + '&z=14&l0=TRANSPORTS.DRONES.RESTRICTIONS::GEOPORTAIL:OGC:WMTS(1)&permalink=yes',
+    alpha: () => 'https://alphatango.aviation-civile.gouv.fr/',
+    sia: () => 'https://www.sia.aviation-civile.gouv.fr/',
+    fr24: (la, lo) => 'https://www.flightradar24.com/' + la + ',' + lo + '/13',
+    carto: (la, lo) => 'https://www.cartoradio.fr/#/cartographie/lonlat/' + lo + '/' + la,
+    tnt: () => 'https://www.recevoirlatnt.fr/',
+    arcep: () => 'https://monreseaumobile.arcep.fr/',
+    risk: () => 'https://www.georisques.gouv.fr/',
+    mairie: () => 'https://lannuaire.service-public.fr/navigation/mairie',
+    filmfr: () => 'https://www.filmfrance.net/'
+};
+
+// ---------- Fiche technique du lieu (électricité, accès camion, réseau) — partagée bureau / mobile ----------
+const TECH = [
+    ['elec', '⚡', 'Électricité', [
+        ['eType', 'Type de prise / départ', 'sel', [['', '—'], ['16m', '16 A mono (prise domestique)'], ['32m', '32 A mono'], ['16t', '16 A tri (P17)'], ['32t', '32 A tri (P17)'], ['63t', '63 A tri (P17)'], ['125t', '125 A tri'], ['none', 'Aucune alimentation']]],
+        ['eCirc', 'Circuits / départs indépendants', 'num', ''], ['eNb', 'Prises utilisables', 'num', ''],
+        ['eDist', 'Distance tableau → plateau', 'num', 'm'], ['eNeed', 'Puissance nécessaire au tournage', 'num', 'kW']]],
+    ['truck', '🚚', 'Accès camion', [
+        ['tH', 'Hauteur libre (porche, pont, barrière)', 'num', 'm'], ['tW', 'Largeur de passage', 'num', 'm'], ['tT', 'Tonnage autorisé', 'num', 't'],
+        ['tDist', 'Distance camion → décor', 'num', 'm'], ['tSol', 'Cheminement du matériel', 'sel', [['', '—'], ['plat', 'De plain-pied'], ['rampe', 'Rampe / quelques marches'], ['asc', 'Ascenseur / monte-charge'], ['esc', 'Escaliers (étages)'], ['terrain', 'Terrain meuble / herbe']]]]],
+    ['net', '📶', 'Réseau', [
+        ['nGen', 'Meilleur réseau mobile', 'sel', [['', '—'], ['5g', '5G'], ['4g', '4G'], ['3g', '3G / H+'], ['edge', '2G / Edge'], ['none', 'Aucun réseau']]],
+        ['nOp', 'Opérateur(s) testé(s)', 'txt', ''], ['nDown', 'Débit descendant mesuré', 'num', 'Mb/s'], ['nUp', 'Débit montant mesuré', 'num', 'Mb/s'],
+        ['nWifi', 'Wi-Fi / fibre sur place (réseau, code, contact)', 'txt', '']]]
+];
+const TECH_KW = { '16m': 3.7, '32m': 7.4, '16t': 11.1, '32t': 22.2, '63t': 43.6, '125t': 86.6, none: 0 };
+const TECH_TRUCKS = [['Utilitaire 12 m³ (3,5 t)', 2.8, 2.1, 3.5], ['Porteur 20 m³ (régie, 7,5 t)', 3.6, 2.5, 7.5], ['Porteur lumière 19 t', 3.9, 2.55, 19], ['Groupe électrogène tracté', 2.6, 2.2, 3.5]];
+function techFilled(t) { return !!t && Object.keys(t).some(k => t[k] !== '' && t[k] != null); }
+// verdicts : [niveau ok|warn|ko, texte]
+function techVerdict(t) {
+    t = t || {}; const out = [], n = v => v === '' || v == null ? null : +String(v).replace(',', '.');
+    const kw1 = TECH_KW[t.eType], circ = Math.max(1, n(t.eCirc) || 1), need = n(t.eNeed), dist = n(t.eDist);
+    if (t.eType === 'none') out.push(['ko', 'Aucune alimentation sur place : groupe électrogène obligatoire' + (need ? ' (≥ ' + Math.ceil(need * 1.25) + ' kVA conseillés pour ' + need + ' kW)' : '') + '.']);
+    else if (kw1 != null) {
+        const kw = kw1 * circ; if (need != null) out.push(need <= kw * .8 ? ['ok', 'Puissance disponible ≈ ' + String(kw.toFixed(1)).replace('.', ',') + ' kW pour ' + need + ' kW nécessaires (marge suffisante).'] : need <= kw ? ['warn', 'Puissance disponible ≈ ' + String(kw.toFixed(1)).replace('.', ',') + ' kW pour ' + need + ' kW : à la limite, répartissez les charges sur les ' + circ + ' circuit(s).'] : ['ko', 'Puissance disponible ≈ ' + String(kw.toFixed(1)).replace('.', ',') + ' kW pour ' + need + ' kW : insuffisant, prévoir un groupe électrogène ou un raccordement forain.']);
+        else out.push(['ok', 'Puissance disponible ≈ ' + String(kw.toFixed(1)).replace('.', ',') + ' kW (' + circ + ' circuit' + (circ > 1 ? 's' : '') + '). Indiquez la puissance nécessaire pour la comparer.']);
+    }
+    if (dist != null && dist > 25) out.push(['warn', dist + ' m de câble jusqu\'au tableau : chute de tension à surveiller, prévoir une section ' + (dist > 50 ? '≥ 6 mm²' : '≥ 2,5 mm²') + ' et des passages de câbles protégés.']);
+    const H = n(t.tH), W = n(t.tW), T = n(t.tT);
+    if (H != null || W != null || T != null) {
+        const ok = TECH_TRUCKS.filter(v => (H == null || H >= v[1] + .1) && (W == null || W >= v[2] + .2) && (T == null || T >= v[3])), ko = TECH_TRUCKS.filter(v => !ok.includes(v));
+        out.push([ok.length === TECH_TRUCKS.length ? 'ok' : ok.length ? 'warn' : 'ko', (ok.length ? 'Passent : ' + ok.map(v => v[0]).join(', ') + '.' : 'Aucun véhicule de tournage standard ne passe.') + (ko.length && ok.length ? ' Ne passent pas : ' + ko.map(v => v[0]).join(', ') + '.' : '')]);
+    }
+    const td = n(t.tDist); if (td != null && td > 50) out.push(['warn', td + ' m de portage camion → décor : prévoir chariots, renfort machino et temps d\'installation.']);
+    if (t.tSol === 'esc') out.push(['warn', 'Matériel à monter par les escaliers : allonger l\'installation, préférer du matériel léger.']);
+    if (t.tSol === 'terrain') out.push(['warn', 'Terrain meuble : plaques de roulage ou praticables pour les chariots et pieds.']);
+    const up = n(t.nUp), dn = n(t.nDown);
+    if (t.nGen === 'none') out.push(['ko', 'Aucun réseau mobile : prévoir liaison satellite ou fibre pour un direct, et un moyen de joindre les secours.']);
+    if (up != null) out.push(up >= 15 ? ['ok', 'Montant ' + up + ' Mb/s : direct 1080p possible (≈ 6–8 Mb/s par flux), voire plusieurs flux.'] : up >= 8 ? ['warn', 'Montant ' + up + ' Mb/s : un direct 1080p tient, sans marge ; agrégez plusieurs opérateurs (bonding) par sécurité.'] : up >= 3 ? ['warn', 'Montant ' + up + ' Mb/s : direct en 720p seulement, ou envoi différé des fichiers.'] : ['ko', 'Montant ' + up + ' Mb/s : direct impossible sans bonding ou liaison dédiée.']);
+    if (dn != null && up == null) out.push(['ok', 'Descendant ' + dn + ' Mb/s (mesurez aussi le montant pour un direct).']);
+    return out;
+}
+// lecture GPS + direction de prise de vue dans l'EXIF d'un JPEG
+function exifGps(buf) {
+    try {
+        const v = new DataView(buf); if (v.getUint16(0) !== 0xFFD8) return null; let p = 2;
+        while (p + 4 < v.byteLength) { const m = v.getUint16(p), l = v.getUint16(p + 2); if (m === 0xFFE1 && v.getUint32(p + 4) === 0x45786966) { p += 10; break; } if ((m & 0xFF00) !== 0xFF00) return null; p += 2 + l; if (m === 0xFFDA) return null; }
+        const le = v.getUint16(p) === 0x4949, g16 = o => v.getUint16(p + o, le), g32 = o => v.getUint32(p + o, le), rat = o => g32(o) / (g32(o + 4) || 1);
+        let gps = 0; const i0 = g32(4), n0 = g16(i0); for (let i = 0; i < n0; i++) { const e = i0 + 2 + i * 12; if (g16(e) === 0x8825) gps = g32(e + 8); } if (!gps) return null;
+        const r = {}, n1 = g16(gps); for (let i = 0; i < n1; i++) { const e = gps + 2 + i * 12, tag = g16(e), off = g32(e + 8); if (tag === 1 || tag === 3 || tag === 16) r[tag] = String.fromCharCode(v.getUint8(p + e + 8)); if (tag === 2 || tag === 4) r[tag] = rat(off) + rat(off + 8) / 60 + rat(off + 16) / 3600; if (tag === 17) r[17] = rat(off); }
+        if (r[2] == null || r[4] == null) return null; const lat = r[2] * (r[1] === 'S' ? -1 : 1), lon = r[4] * (r[3] === 'W' ? -1 : 1);
+        return isFinite(lat) && isFinite(lon) && (lat || lon) ? { lat: +lat.toFixed(6), lon: +lon.toFixed(6), hd: r[17] != null && isFinite(r[17]) ? Math.round(r[17]) : null } : null;
+    } catch (e) { return null; }
+}
+
+</script>
+<script>
+// REPERO XIII mobile — fonctions de calcul reprises à l'identique de repero/core.js (géométrie, soleil et lune hors ligne, coordonnées). NE PAS MODIFIER ICI : régénéré par mk_solar.sh
+const pad2 = n => String(n).padStart(2, '0');
+const todayISO = () => { const d = new Date(); return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()); };
+const MONTHS = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+const DAYS = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
+const longDate = iso => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || ''); if (!m) return String(iso || ''); const dt = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3])); return DAYS[dt.getUTCDay()] + ' ' + (+m[3] === 1 ? '1er' : +m[3]) + ' ' + MONTHS[+m[2] - 1] + ' ' + m[1]; };
+const shortDate = iso => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || ''); return m ? m[3] + '/' + m[2] + '/' + m[1] : ''; };
+const num = (v, d) => (v == null || !isFinite(v)) ? '—' : Number(v).toLocaleString('fr-FR', { maximumFractionDigits: d == null ? 0 : d, minimumFractionDigits: 0 });
+const fmtD = m => m == null ? '—' : m < 1000 ? Math.round(m / 10) * 10 + ' m' : (m / 1000).toLocaleString('fr-FR', { maximumFractionDigits: m < 10000 ? 1 : 0 }) + ' km';
+const fmtMin = s => s == null ? '—' : s < 3600 ? Math.max(1, Math.round(s / 60)) + ' min' : Math.floor(s / 3600) + ' h ' + pad2(Math.round((s % 3600) / 60));
+const located = s => s && s.lat != null && s.lon != null && isFinite(s.lat) && isFinite(s.lon);
+// ---------- Géométrie ----------
+const RAD = Math.PI / 180, ER = 6371000;
+function hav(a, b, c, d) { const x = Math.sin((c - a) * RAD / 2) ** 2 + Math.cos(a * RAD) * Math.cos(c * RAD) * Math.sin((d - b) * RAD / 2) ** 2; return 2 * ER * Math.asin(Math.min(1, Math.sqrt(x))); }
+function bearing(a, b, c, d) { const y = Math.sin((d - b) * RAD) * Math.cos(c * RAD), x = Math.cos(a * RAD) * Math.sin(c * RAD) - Math.sin(a * RAD) * Math.cos(c * RAD) * Math.cos((d - b) * RAD); return ((Math.atan2(y, x) / RAD) + 360) % 360; }
+function dest(lat, lon, brg, dist) { const dr = dist / ER, b = brg * RAD, p1 = lat * RAD, l1 = lon * RAD; const p2 = Math.asin(Math.sin(p1) * Math.cos(dr) + Math.cos(p1) * Math.sin(dr) * Math.cos(b)); const l2 = l1 + Math.atan2(Math.sin(b) * Math.sin(dr) * Math.cos(p1), Math.cos(dr) - Math.sin(p1) * Math.sin(p2)); return [p2 / RAD, ((l2 / RAD + 540) % 360) - 180]; }
+const WIND = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSO', 'SO', 'OSO', 'O', 'ONO', 'NO', 'NNO'];
+const compass = az => az == null ? '' : WIND[Math.round(((az % 360) + 360) % 360 / 22.5) % 16];
+function xy(lat, lon, lat0, lon0) { return [(lon - lon0) * Math.cos(lat0 * RAD) * 111320, (lat - lat0) * 110574]; }
+function segDist(px, py, ax, ay, bx, by) { const dx = bx - ax, dy = by - ay, l2 = dx * dx + dy * dy; let t = l2 ? ((px - ax) * dx + (py - ay) * dy) / l2 : 0; t = Math.max(0, Math.min(1, t)); const x = ax + t * dx - px, y = ay + t * dy - py; return Math.sqrt(x * x + y * y); }
+function distBox(lat, lon, b) { // b = [minlat, minlon, maxlat, maxlon] ; 0 si le point est dedans
+    const la = Math.max(b[0], Math.min(b[2], lat)), lo = Math.max(b[1], Math.min(b[3], lon)); return hav(lat, lon, la, lo);
+}
+const inBox = (lat, lon, b) => lat >= b[0] && lat <= b[2] && lon >= b[1] && lon <= b[3];
+// ---------- Soleil et lune (algorithmes astronomiques classiques, sans réseau) ----------
+const SUN = (() => {
+    const PI = Math.PI, rad = PI / 180, dayMs = 864e5, J1970 = 2440588, J2000 = 2451545, e = rad * 23.4397;
+    const toJ = d => d.valueOf() / dayMs - 0.5 + J1970, fromJ = j => new Date((j + 0.5 - J1970) * dayMs), toDays = d => toJ(d) - J2000;
+    const ra = (l, b) => Math.atan2(Math.sin(l) * Math.cos(e) - Math.tan(b) * Math.sin(e), Math.cos(l));
+    const dec = (l, b) => Math.asin(Math.sin(b) * Math.cos(e) + Math.cos(b) * Math.sin(e) * Math.sin(l));
+    const az = (H, phi, d) => Math.atan2(Math.sin(H), Math.cos(H) * Math.sin(phi) - Math.tan(d) * Math.cos(phi));
+    const alt = (H, phi, d) => Math.asin(Math.sin(phi) * Math.sin(d) + Math.cos(phi) * Math.cos(d) * Math.cos(H));
+    const sid = (d, lw) => rad * (280.16 + 360.9856235 * d) - lw;
+    const anom = d => rad * (357.5291 + 0.98560028 * d);
+    const eclLon = M => { const C = rad * (1.9148 * Math.sin(M) + 0.02 * Math.sin(2 * M) + 0.0003 * Math.sin(3 * M)), Pp = rad * 102.9372; return M + C + Pp + PI; };
+    const coords = d => { const M = anom(d), L = eclLon(M); return { dec: dec(L, 0), ra: ra(L, 0) }; };
+    function pos(date, lat, lon) { const lw = rad * -lon, phi = rad * lat, d = toDays(date), c = coords(d), H = sid(d, lw) - c.ra; return { az: (((az(H, phi, c.dec) / rad + 180) % 360) + 360) % 360, alt: alt(H, phi, c.dec) / rad }; }
+    const J0 = 0.0009, cyc = (d, lw) => Math.round(d - J0 - lw / (2 * PI)), apTr = (Ht, lw, n) => J0 + (Ht + lw) / (2 * PI) + n, trJ = (ds, M, L) => J2000 + ds + 0.0053 * Math.sin(M) - 0.0069 * Math.sin(2 * L);
+    const hAng = (h, phi, d) => Math.acos((Math.sin(h) - Math.sin(phi) * Math.sin(d)) / (Math.cos(phi) * Math.cos(d)));
+    const TIMES = [[-0.833, 'sunrise', 'sunset'], [6, 'goldenHourEnd', 'goldenHour'], [-4, 'blueEnd', 'blueStart'], [-6, 'dawn', 'dusk'], [-8, 'blueDawn', 'blueDusk'], [-12, 'nauticalDawn', 'nauticalDusk'], [-18, 'nightEnd', 'night']];
+    function times(date, lat, lon) {
+        const lw = rad * -lon, phi = rad * lat, d = toDays(date), n = cyc(d, lw), ds = apTr(0, lw, n), M = anom(ds), L = eclLon(M), dc = dec(L, 0), Jn = trJ(ds, M, L);
+        const out = { solarNoon: fromJ(Jn), nadir: fromJ(Jn - 0.5) };
+        TIMES.forEach(t => {
+            const h0 = t[0] * rad, w = hAng(h0, phi, dc);
+            if (!isFinite(w)) { out[t[1]] = null; out[t[2]] = null; return; }
+            const Js = trJ(apTr(w, lw, n), M, L), Jr = Jn - (Js - Jn); out[t[1]] = fromJ(Jr); out[t[2]] = fromJ(Js);
+        });
+        return out;
+    }
+    function moonCoords(d) { const L = rad * (218.316 + 13.176396 * d), M = rad * (134.963 + 13.064993 * d), F = rad * (93.272 + 13.229350 * d), l = L + rad * 6.289 * Math.sin(M), b = rad * 5.128 * Math.sin(F), dt = 385001 - 20905 * Math.cos(M); return { ra: ra(l, b), dec: dec(l, b), dist: dt }; }
+    function moon(date) {
+        const d = toDays(date), s = coords(d), m = moonCoords(d), sd = 149598000;
+        const phi = Math.acos(Math.sin(s.dec) * Math.sin(m.dec) + Math.cos(s.dec) * Math.cos(m.dec) * Math.cos(s.ra - m.ra)), inc = Math.atan2(sd * Math.sin(phi), m.dist - sd * Math.cos(phi));
+        const ang = Math.atan2(Math.cos(s.dec) * Math.sin(s.ra - m.ra), Math.sin(s.dec) * Math.cos(m.dec) - Math.cos(s.dec) * Math.sin(m.dec) * Math.cos(s.ra - m.ra));
+        return { fraction: (1 + Math.cos(inc)) / 2, phase: 0.5 + 0.5 * inc * (ang < 0 ? -1 : 1) / PI };
+    }
+    return { pos, times, moon };
+})();
+function guessTZ(lat, lon) {
+    if (lat >= 41 && lat <= 51.5 && lon >= -5.6 && lon <= 9.8) return 'Europe/Paris';
+    if (lat > -22 && lat < -20 && lon > 55 && lon < 56) return 'Indian/Reunion';
+    if (lat > 15.5 && lat < 17 && lon > -62 && lon < -60.5) return 'America/Guadeloupe';
+    if (lat > 14 && lat < 15 && lon > -61.5 && lon < -60.5) return 'America/Martinique';
+    if (lat > 2 && lat < 6 && lon > -55 && lon < -51) return 'America/Cayenne';
+    if (lat > -13.5 && lat < -12 && lon > 44.5 && lon < 46) return 'Indian/Mayotte';
+    if (lat > -23 && lat < -20 && lon > 163 && lon < 169) return 'Pacific/Noumea';
+    if (lat > -19 && lat < -16 && lon > -153 && lon < -148) return 'Pacific/Tahiti';
+    try { return Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'; } catch (e) { return 'UTC'; }
+}
+const tzOf = s => s.tz || (located(s) ? guessTZ(s.lat, s.lon) : 'Europe/Paris');
+function fmtT(d, tz, sec) {
+    if (!d || isNaN(d)) return '—';
+    const o = { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }; if (sec) o.second = '2-digit';
+    try { return new Intl.DateTimeFormat('fr-FR', Object.assign({ timeZone: tz }, o)).format(d).replace(/ | /g, ' '); } catch (e) { return new Intl.DateTimeFormat('fr-FR', o).format(d); }
+}
+function localHM(d, tz) { const t = fmtT(d, tz); return t; }
+function tzOffsetH(d, tz) { try { const f = new Intl.DateTimeFormat('en-US', { timeZone: tz, timeZoneName: 'shortOffset' }).formatToParts(d).find(p => p.type === 'timeZoneName'); const m = /GMT([+-]\d+)?(?::(\d+))?/.exec(f ? f.value : ''); return m && m[1] ? +m[1] + (m[2] ? Math.sign(+m[1]) * +m[2] / 60 : 0) : 0; } catch (e) { return 0; } }
+const moonName = p => ['Nouvelle lune', 'Premier croissant', 'Premier quartier', 'Lune gibbeuse croissante', 'Pleine lune', 'Lune gibbeuse décroissante', 'Dernier quartier', 'Dernier croissant'][Math.round(p * 8) % 8];
+const moonIcon = p => ['🌑', '🌒', '🌓', '🌔', '🌕', '🌖', '🌗', '🌘'][Math.round(p * 8) % 8];
+function sunDay(s, dateStr) {
+    if (!located(s)) return null;
+    const date = dateStr || s.date || todayISO(); const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(date); if (!m) return null;
+    const ref = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], 12) - s.lon / 15 * 3600e3), T = SUN.times(ref, s.lat, s.lon), tz = tzOf(s);
+    const A = d => d ? SUN.pos(d, s.lat, s.lon).az : null;
+    const noonPos = SUN.pos(T.solarNoon, s.lat, s.lon);
+    const r = { date, tz, T, ref, azRise: A(T.sunrise), azSet: A(T.sunset), azNoon: noonPos.az, altMax: noonPos.alt, azGoldAm: A(T.goldenHourEnd), azGoldPm: A(T.goldenHour), azBlueAm: A(T.blueEnd), azBluePm: A(T.blueStart) };
+    r.dayLen = T.sunrise && T.sunset ? (T.sunset - T.sunrise) / 60000 : (noonPos.alt > 0 ? 1440 : 0);
+    r.moon = SUN.moon(new Date(+m[1], +m[2] - 1, +m[3], 12));
+    const off = tzOffsetH(ref, tz);
+    r.shadow = [9, 12, 15, 18].map(h => { const t = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], h) - off * 3600e3), p = SUN.pos(t, s.lat, s.lon); return { h, alt: p.alt, az: p.az, len: shadowLen(p.alt) }; });
+    return r;
+}
+function sunPath(s, dateStr, stepMin) {
+    const day = sunDay(s, dateStr); if (!day) return [];
+    const out = [], t0 = day.T.solarNoon.getTime() - 12 * 3600e3, st = (stepMin || 10) * 60000;
+    for (let t = t0; t <= t0 + 24 * 3600e3; t += st) { const d = new Date(t), p = SUN.pos(d, s.lat, s.lon); out.push({ t: d, az: p.az, alt: p.alt }); }
+    return out;
+}
+const sunAt = (s, d) => SUN.pos(d, s.lat, s.lon);
+const shadowLen = alt => alt <= 1 ? null : 1.8 / Math.tan(alt * RAD);
+function parseCoords(text) {
+    const t = String(text || '').trim(); if (!t) return null;
+    const ok = (la, lo) => (isFinite(la) && isFinite(lo) && Math.abs(la) <= 90 && Math.abs(lo) <= 180) ? { lat: la, lon: lo } : null;
+    let m = /@(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/.exec(t) || /!3d(-?\d+(?:\.\d+)?)!4d(-?\d+(?:\.\d+)?)/.exec(t) || /[?&](?:q|ll|query|destination|mlat)=(-?\d+(?:\.\d+)?)(?:,|&mlon=)(-?\d+(?:\.\d+)?)/.exec(t);
+    if (m) return ok(+m[1], +m[2]);
+    const dms = /(\d{1,3})\s*°\s*(\d{1,2})?\s*['′]?\s*(\d{1,2}(?:[.,]\d+)?)?\s*(?:["″]|'')?\s*([NSns])[\s,;/]+(\d{1,3})\s*°\s*(\d{1,2})?\s*['′]?\s*(\d{1,2}(?:[.,]\d+)?)?\s*(?:["″]|'')?\s*([EWOewo])/.exec(t);
+    if (dms) { const f = (d, mi, se, h) => (+d + (+(mi || 0)) / 60 + (+String(se || 0).replace(',', '.')) / 3600) * (/[SsWwOo]/.test(h) ? -1 : 1); return ok(f(dms[1], dms[2], dms[3], dms[4]), f(dms[5], dms[6], dms[7], dms[8])); }
+    m = /^(-?\d+(?:[.,]\d+)?)\s*[;,\s]\s*(-?\d+(?:[.,]\d+)?)$/.exec(t.replace(/\s*;\s*/, ';'));
+    if (m) return ok(+m[1].replace(',', '.'), +m[2].replace(',', '.'));
+    m = /^(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)$/.exec(t); if (m) return ok(+m[1], +m[2]);
+    return null;
+}
+
+</script>
+<script>
+XM.initTheme();
+(function(){
+'use strict';
+// =====================================================================
+//  REPERO XIII mobile — état, stockage, position, photos, analyses (résumé reçu du bureau)
+// =====================================================================
+const E = XM.esc, Q = XM.$, QA = XM.$$;
+const APP = 'repero', PREFS = 'repero-prefs';
+const store = { get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { localStorage.setItem(k, v); return true; } catch (e) { return false; } } };
+const pf = Object.assign({ filter: '', sort: 'dist', layers: { sun: 1, sec: 1, park: 1, shop: 0, ring: 1, others: 1 }, base: 'osm', geoOn: 0, open: { sun: 1, health: 1 } }, XM.load(PREFS) || {});
+pf.layers = Object.assign({ sun: 1, sec: 1, park: 1, shop: 0, ring: 1, others: 1 }, pf.layers || {}); pf.open = pf.open || {};
+const savePf = () => XM.save(PREFS, pf);
+let ST = null, view = 'list', tab = 'map', curId = '', curDay = '';
+
+const mkSpot = o => Object.assign({ id: XM.uid(), name: '', address: '', city: '', cp: '', lat: null, lon: null, tz: '', cat: 'decor', status: 'avoir', date: '', access: 'public', owner: '', qualite: '', phone: '', email: '', notes: '', rating: 0, chk: {}, chkN: {}, photos: [], tech: {}, radius: 1500, hosp: '' }, o || {});
+const blankST = o => Object.assign({ v: 1, id: XM.uid(), name: '', author: '', info: {}, spots: [], an: {}, rx: {}, base: {}, newSpots: [], newPh: [], at: Date.now(), src: '' }, o || {});
+function normST(o) {
+    const s = blankST(o); s.info = s.info || {}; s.an = s.an || {}; s.rx = s.rx || {}; s.base = s.base || {}; s.newSpots = s.newSpots || []; s.newPh = s.newPh || [];
+    s.spots = (Array.isArray(s.spots) ? s.spots : []).filter(x => x && x.id).map(x => { const k = mkSpot(x); k.chk = k.chk || {}; k.chkN = k.chkN || {}; k.photos = Array.isArray(k.photos) ? k.photos : []; return k; });
+    return s;
+}
+const spotById = id => ST && ST.spots.find(s => s.id === id) || null;
+const cur = () => spotById(curId);
+const isNew = s => ST.newSpots.includes(s.id);
+let pT = null;
+function persist(now) {
+    clearTimeout(pT); const run = () => { if (ST && !XM.save(APP, ST)) { if (!persist.warned) { persist.warned = 1; XM.toast('⚠️ Stockage du téléphone plein : renvoyez vos modifications au bureau', 5000); } } };
+    if (now) run(); else pT = setTimeout(run, 250);
+}
+addEventListener('pagehide', () => persist(true)); document.addEventListener('visibilitychange', () => { if (document.hidden) persist(true); });
+// suivi des modifications faites sur le téléphone (pour le retour au bureau) : rx[id] = { champ: 1, chk: {clé: 1}, chkN: {clé: 1} }
+function touch(s, ...fields) { if (isNew(s)) { persist(); return; } const r = ST.rx[s.id] = ST.rx[s.id] || {}; fields.forEach(f => { r[f] = 1; }); persist(); }
+function touchChk(s, k, note) { if (isNew(s)) { persist(); return; } const r = ST.rx[s.id] = ST.rx[s.id] || {}, g = note ? 'chkN' : 'chk'; r[g] = r[g] || {}; r[g][k] = 1; persist(); }
+const hasLocal = () => !!ST && (ST.newSpots.length || ST.newPh.length || Object.keys(ST.rx).length);
+
+// ---------- formats ----------
+const pcls = c => c === 'ko' ? 'danger' : c === 'acc' ? 'acc' : (c || '');
+const pill = (t, c) => '<span class="m-pill ' + pcls(c) + '">' + t + '</span>';
+const nowHM = () => pad2(new Date().getHours()) + ':' + pad2(new Date().getMinutes());
+const catOf = k => CATS.find(c => c[0] === k) || CATS[CATS.length - 1];
+const statOf = k => STATUS.find(c => c[0] === k) || STATUS[0];
+const fmtN = (v, d) => num(v, d);
+const coordTxt = s => s.lat.toFixed(5) + ', ' + s.lon.toFixed(5);
+const telOf = p => 'tel:' + String(p || '').replace(/[^\d+]/g, '');
+const noiseClassOf = L => L < 45 ? ['Calme', 'ok'] : L < 55 ? ['Modéré', 'acc'] : L < 65 ? ['Bruyant', 'warn'] : ['Très bruyant', 'ko'];
+const scoreCls = v => v == null ? '' : v >= 80 ? 'ok' : v >= 60 ? 'acc' : v >= 40 ? 'warn' : 'ko';
+function chkCount(s) { let ok = 0, ko = 0, q = 0; CHECK_ALL.forEach(c => { const v = s.chk[c.k]; if (v === 'ok') ok++; else if (v === 'ko') ko++; else if (v === 'q') q++; }); return { ok, ko, q, n: CHECK_ALL.length }; }
+const poiO = p => p ? { lat: p[0], lon: p[1], d: p[2], n: p[3] || '', p: p[4] || '', o: p[5] || '' } : null; // POI compact [lat, lon, distance, nom, tél, horaires]
+const vlist = (a, k) => ((a && a.v && a.v[k]) || []).map(poiO);
+
+// ---------- score et alertes recalculés sur le téléphone (mêmes règles que le bureau ; la liste de contrôle se met à jour en direct) ----------
+function scoreNow(s) {
+    const a = ST.an[s.id]; if (!a || a.sv == null) return null; let v = a.sv; const why = (a.sw || []).slice(), c = chkCount(s), p1 = Math.min(30, c.ko * 6), p2 = Math.min(8, c.q);
+    if (p1) { v -= p1; why.push([-p1, 'points bloquants']); } if (p2) { v -= p2; why.push([-p2, 'points à vérifier']); }
+    return { v: Math.max(0, Math.round(v)), why };
+}
+function droneLabel(lv) { return lv >= 2 ? ['Restreinte', 'ko'] : lv === 1 ? ['À vérifier', 'warn'] : ['Aucune contrainte détectée', 'ok']; }
+function radioLevel(r) { return r.m1 >= 3 ? ['Chargé', 'warn'] : r.m3 >= 3 || r.m1 ? ['Modéré', 'acc'] : ['Léger', 'ok']; }
+function rightsLabel(top) { return top === 3 ? ['Très élevée', 'ko'] : top === 2 ? ['Élevée', 'warn'] : top === 1 ? ['Moyenne', 'acc'] : ['Faible', 'ok']; }
+function alertsNow(s) {
+    const a = ST.an[s.id], out = [];
+    if (a) {
+        if (a.nz) { const c = noiseClassOf(a.nz.d)[0]; if (c === 'Très bruyant') out.push(['ko', 'Environnement très bruyant (≈ ' + a.nz.d + ' dB(A)) : prise de son difficile']); else if (c === 'Bruyant') out.push(['warn', 'Environnement bruyant (≈ ' + a.nz.d + ' dB(A))']); }
+        if (a.hs && !a.h) out.push(['ko', 'Aucun hôpital trouvé à moins de 25 km : vérifier les secours']); else if (a.h && a.h.d > 12000) out.push(['warn', 'Hôpital éloigné (' + fmtD(a.h.d) + ')']);
+        if (a.ar && a.ar.inC) out.push(['ko', 'Dans l\'axe d\'une piste (' + (a.ar.inN || 'aérodrome') + ') : survols bas, son perturbé']);
+        if (a.dr && a.dr.lv >= 2) out.push(['ko', 'Drone : zone restreinte — ' + ((a.dr.r[0] || [])[1] || '')]); else if (a.dr && a.dr.lv === 1) out.push(['warn', 'Drone : à vérifier — ' + ((a.dr.r[0] || [])[1] || '')]);
+        if (a.ri) a.ri.it.map(x => ({ x, r: SENS[x[0]] })).filter(o => o.r && o.r.lv >= 2).slice(0, 3).forEach(o => out.push([o.r.lv === 3 ? 'ko' : 'warn', (o.r.i || '') + ' ' + (o.x[1] || o.r.l) + ' : ' + o.r.why]));
+        if (a.hs && !a.c.pk) out.push(['warn', 'Aucun parking repéré dans le rayon : stationnement des camions à anticiper']);
+    }
+    CHECK_ALL.forEach(c => { if (s.chk[c.k] === 'ko') out.push(['ko', c.l + (s.chkN[c.k] ? ' — ' + s.chkN[c.k] : '')]); });
+    return out;
+}
+const staleDist = s => { const a = ST.an[s.id]; return a && a.o && located(s) ? hav(a.o[0], a.o[1], s.lat, s.lon) : 0; };
+
+// ---------- position (géolocalisation) ----------
+const Geo = {
+    pos: null, err: '', w: null, ls: [],
+    on(f) { Geo.ls.push(f); }, fire() { Geo.ls.forEach(f => { try { f(); } catch (e) { } }); },
+    start() {
+        if (!navigator.geolocation) { Geo.err = 'Géolocalisation indisponible sur cet appareil'; Geo.fire(); return; }
+        if (Geo.w != null) return; Geo.err = '';
+        Geo.w = navigator.geolocation.watchPosition(p => { Geo.pos = { lat: p.coords.latitude, lon: p.coords.longitude, acc: p.coords.accuracy, ts: Date.now() }; Geo.err = ''; if (!pf.geoOn) { pf.geoOn = 1; savePf(); } Geo.fire(); },
+            e => { Geo.err = e && e.code === 1 ? 'Position refusée : autorisez la localisation pour ce site dans les réglages du navigateur' : 'Position indisponible pour l\'instant'; if (e && e.code === 1) { pf.geoOn = 0; savePf(); navigator.geolocation.clearWatch(Geo.w); Geo.w = null; } Geo.fire(); }, { enableHighAccuracy: true, maximumAge: 5000, timeout: 25000 });
+        Geo.fire();
+    },
+    once() { return new Promise(res => { if (Geo.pos && Date.now() - Geo.pos.ts < 20000) return res(Geo.pos); if (!navigator.geolocation) return res(null); navigator.geolocation.getCurrentPosition(p => { Geo.pos = { lat: p.coords.latitude, lon: p.coords.longitude, acc: p.coords.accuracy, ts: Date.now() }; Geo.err = ''; Geo.fire(); res(Geo.pos); }, () => res(null), { enableHighAccuracy: true, timeout: 15000 }); }); },
+    dist(s) { return Geo.pos && located(s) ? hav(Geo.pos.lat, Geo.pos.lon, s.lat, s.lon) : null; },
+    brg(s) { return Geo.pos && located(s) ? bearing(Geo.pos.lat, Geo.pos.lon, s.lat, s.lon) : null; }
+};
+const distTxt = s => { const d = Geo.dist(s); return d == null ? '' : fmtD(d) + ' · ' + compass(Geo.brg(s)); };
+
+// ---------- photos (IndexedDB locale, compressées ≤ 1400 px) ----------
+const IDB = (() => {
+    let dbp = null;
+    const open = () => dbp || (dbp = new Promise((res, rej) => { let r; try { r = indexedDB.open('xiiiM_repero', 1); } catch (e) { rej(e); return; } r.onupgradeneeded = () => { if (!r.result.objectStoreNames.contains('photos')) r.result.createObjectStore('photos'); }; r.onsuccess = () => res(r.result); r.onerror = () => { dbp = null; rej(r.error || new Error('IndexedDB')); }; r.onblocked = () => { dbp = null; rej(new Error('IndexedDB bloquée')); }; }));
+    const tx = async (mode, fn) => { const d = await open(); return new Promise((res, rej) => { const t = d.transaction('photos', mode); let out; const q = fn(t.objectStore('photos')); if (q) q.onsuccess = () => { out = q.result; }; t.oncomplete = () => res(out); t.onerror = () => rej(t.error); t.onabort = () => rej(t.error); }); };
+    return { put: (k, v) => tx('readwrite', o => o.put(v, k)), del: k => tx('readwrite', o => o.delete(k)), all: () => tx('readonly', o => o.getAll()), clear: () => tx('readwrite', o => o.clear()) };
+})();
+const PHC = {}; let idbOk = true;
+async function loadPhotos() { try { (await IDB.all()).forEach(p => { if (p && p.id) PHC[p.id] = p; }); } catch (e) { idbOk = false; } }
+function loadImg(file) { return new Promise((res, rej) => { const u = URL.createObjectURL(file), im = new Image(); im.onload = () => { URL.revokeObjectURL(u); res(im); }; im.onerror = () => { URL.revokeObjectURL(u); rej(new Error('Image illisible')); }; im.src = u; }); }
+function toJpeg(im, max, q) { const k = Math.min(1, max / Math.max(im.naturalWidth || im.width, im.naturalHeight || im.height)), c = document.createElement('canvas'); c.width = Math.max(1, Math.round((im.naturalWidth || im.width) * k)); c.height = Math.max(1, Math.round((im.naturalHeight || im.height) * k)); c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); return { data: c.toDataURL('image/jpeg', q), w: c.width, h: c.height }; }
+async function addPhotoFile(s, file, captured) {
+    let g = null; try { g = exifGps(await file.arrayBuffer()); } catch (e) { }
+    if (!g && captured && Geo.pos && Date.now() - Geo.pos.ts < 60000) g = { lat: +(+Geo.pos.lat).toFixed(6), lon: +(+Geo.pos.lon).toFixed(6), acc: Math.round(Geo.pos.acc || 0), hd: Compass.hd != null ? Math.round(Compass.hd) : null };
+    const im = await loadImg(file), big = toJpeg(im, 1400, .82), th = toJpeg(im, 260, .7), id = 'p' + XM.uid();
+    const rec = { id, spot: s.id, data: big.data, w: big.w, h: big.h, th: th.data, ts: Date.now() }; PHC[id] = rec; const meta = { id, cap: '' }; if (g) { meta.lat = g.lat; meta.lon = g.lon; if (g.hd != null) meta.hd = g.hd; if (g.acc) meta.acc = g.acc; } s.photos.push(meta); ST.newPh.push(id);
+    IDB.put(id, rec).catch(() => { idbOk = false; }); touch(s, 'photos'); return rec;
+}
+function delPhotoRec(s, id) { s.photos = s.photos.filter(p => p.id !== id); ST.newPh = ST.newPh.filter(x => x !== id); delete PHC[id]; IDB.del(id).catch(() => { }); persist(); }
+// version réduite pour le retour au bureau (≈ 900 px)
+async function smallPhoto(rec) { try { const im = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => rej(); i.src = rec.data; }); const r = toJpeg(im, 1000, .72); return { data: r.data, w: r.w, h: r.h }; } catch (e) { return { data: rec.data, w: rec.w, h: rec.h }; } }
+
+// ---------- adresse inversée (en ligne seulement, sans bloquer) ----------
+async function reverseGeo(lat, lon) {
+    try {
+        const ctl = typeof AbortController !== 'undefined' ? new AbortController() : null, t = setTimeout(() => ctl && ctl.abort(), 7000);
+        const r = await fetch('https://nominatim.openstreetmap.org/reverse?format=jsonv2&addressdetails=1&accept-language=fr&lat=' + lat + '&lon=' + lon, { signal: ctl ? ctl.signal : undefined }); clearTimeout(t);
+        const j = await r.json(), a = j.address || {}; return j && j.display_name ? { address: String(j.display_name).split(',').slice(0, 4).join(',').trim(), city: a.city || a.town || a.village || a.municipality || '', cp: a.postcode || '', name: j.name || a.amenity || a.building || a.road || '' } : null;
+    } catch (e) { return null; }
+}
+
+// ---------- boussole (direction de prise de vue des photos) ----------
+const Compass = { hd: null, on: false,
+    async start() {
+        if (Compass.on) return; Compass.on = true;
+        try { if (typeof DeviceOrientationEvent !== 'undefined' && DeviceOrientationEvent.requestPermission) { const r = await DeviceOrientationEvent.requestPermission(); if (r !== 'granted') return; } } catch (e) { return; }
+        const h = e => { let v = null; if (e.webkitCompassHeading != null) v = e.webkitCompassHeading; else if (e.absolute && e.alpha != null) v = 360 - e.alpha; if (v != null && isFinite(v)) { const sc = screen.orientation && screen.orientation.angle || 0; Compass.hd = (v + sc + 360) % 360; } };
+        window.addEventListener('deviceorientationabsolute', h); window.addEventListener('deviceorientation', h);
+    } };
+// ---------- mesure approximative du débit descendant ----------
+async function speedTest() {
+    const urls = ['syno.html', 'scripto.html', 'storyboardo.html']; let bytes = 0; const t0 = performance.now();
+    for (const u of urls) { const r = await fetch(u + '?dl=' + Date.now(), { cache: 'no-store' }); if (!r.ok) throw new Error('HTTP ' + r.status); bytes += (await r.arrayBuffer()).byteLength; if (performance.now() - t0 > 8000) break; }
+    const sec = (performance.now() - t0) / 1000; return Math.round(bytes * 8 / sec / 1e5) / 10;
+}
+
+// =====================================================================
+//  Vues : liste des lieux, fiche (Carte · Infos · Contrôle · Photos & notes)
+// =====================================================================
+let lq = '';
+const walkTxt = d => d < 90 ? '1 min à pied' : Math.round(d / 80) + ' min à pied';
+const navLink = (la, lo) => 'https://www.google.com/maps/dir/?api=1&destination=' + la + ',' + lo;
+const aExt = (u, t, cl) => '<a class="' + (cl || '') + '" href="' + E(u) + '" target="_blank" rel="noopener">' + t + '</a>';
+const kvr = (k, v) => '<dt>' + k + '</dt><dd>' + v + '</dd>';
+const noteH = t => '<p class="m-hint" style="margin:10px 0 0">' + t + '</p>';
+const subH = t => '<div class="rp-sub">' + t + '</div>';
+const stars = n => '★'.repeat(n) + '<span class="off">' + '★'.repeat(5 - n) + '</span>';
+
+function setTop() {
+    const t = Q('#ttl'), sub = Q('#sub');
+    if (view === 'list') { t.innerHTML = 'REPERO <i>XIII</i>'; sub.textContent = ST ? (ST.name || 'Repérage terrain') : 'Repérage de lieux sur carte'; }
+    else { const s = cur(); t.textContent = s ? (s.name || 'Lieu sans nom') : ''; sub.textContent = s ? catOf(s.cat)[2] + ' ' + catOf(s.cat)[1] + ' · ' + statOf(s.status)[3] + ' ' + statOf(s.status)[1] : ''; }
+}
+function render() {
+    const list = view === 'list', y = window.scrollY;
+    Q('#tabs').hidden = list; Q('#fab').hidden = !(list && ST); setTop();
+    if (list) { MapUI.hide(); Q('#view').hidden = false; Q('#view').className = 'm-main no-tabs'; renderList(); }
+    else {
+        const s = cur(); if (!s) { view = 'list'; render(); return; }
+        Q('#tabs').innerHTML = [['map', '🗺️', 'Carte'], ['info', 'ℹ️', 'Infos'], ['chk', '✅', 'Contrôle'], ['ph', '📷', 'Photos']].map(x => '<button class="' + (tab === x[0] ? 'on' : '') + '" data-act="tab" data-t="' + x[0] + '"><span class="ti">' + x[1] + '</span>' + x[2] + (x[0] === 'ph' && s.photos.length ? ' <b class="rp-cnt">' + s.photos.length + '</b>' : '') + '</button>').join('');
+        if (tab === 'map') { Q('#view').hidden = true; MapUI.show(s); }
+        else { MapUI.hide(); const v = Q('#view'); v.hidden = false; v.className = 'm-main'; v.innerHTML = tab === 'info' ? tabInfo(s) : tab === 'chk' ? tabChk(s) : tabPh(s); window.scrollTo(0, y); }
+    }
+    measure();
+}
+function measure() { const r = document.documentElement.style; r.setProperty('--hh', Q('#top').getBoundingClientRect().height + 'px'); r.setProperty('--th', (Q('#tabs').hidden ? 0 : Q('#tabs').getBoundingClientRect().height) + 'px'); }
+addEventListener('resize', () => { measure(); MapUI.resize(); });
+
+// ---------- liste ----------
+function sortedSpots() {
+    const q = fold(lq); let l = ST.spots.map((s, i) => ({ s, i })).filter(x => (!pf.filter || x.s.status === pf.filter) && (!q || fold([x.s.name, x.s.address, x.s.city, x.s.notes].join(' ')).includes(q)));
+    const key = pf.sort === 'dist' && Geo.pos ? 'dist' : pf.sort === 'score' ? 'score' : 'order';
+    if (key === 'dist') l.sort((a, b) => { const x = Geo.dist(a.s), y = Geo.dist(b.s); return (x == null ? 1e12 : x) - (y == null ? 1e12 : y) || a.i - b.i; });
+    else if (key === 'score') l.sort((a, b) => { const x = scoreNow(a.s), y = scoreNow(b.s); return (y ? y.v : -1) - (x ? x.v : -1) || a.i - b.i; });
+    return l;
+}
+const fold = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+function spotItem(s, i) {
+    const st = statOf(s.status), c = catOf(s.cat), sc = scoreNow(s), al = alertsNow(s), d = distTxt(s), cc = chkCount(s), nko = al.filter(x => x[0] === 'ko').length, nph = s.photos.length;
+    const bd = [pill('<span class="rp-sd" style="background:' + st[2] + '"></span>' + E(st[1])), d ? '<span class="m-pill acc">📍 ' + E(d) + '</span>' : '', sc ? pill('Score ' + sc.v, scoreCls(sc.v)) : '', al.length ? pill('⚠️ ' + al.length, nko ? 'ko' : 'warn') : '', s.rating ? '<span class="rp-rt">' + '★'.repeat(s.rating) + '</span>' : '', cc.ok + cc.q + cc.ko ? pill('✔ ' + cc.ok + '/' + cc.n) : '', nph ? pill('📷 ' + nph) : '', isNew(s) ? pill('nouveau', 'acc') : ''].filter(Boolean).join('');
+    return '<button class="m-item rp-it" data-act="open" data-id="' + s.id + '" style="--sc:' + st[2] + '"><span class="ico">' + c[2] + '</span><span class="grow"><b><span class="rp-n">' + (i + 1) + '</span> ' + E(s.name || 'Lieu sans nom') + '</b><small>' + E(s.address ? s.address : located(s) ? coordTxt(s) : 'non localisé') + '</small><span class="rp-bd">' + bd + '</span></span><span class="go">›</span></button>';
+}
+const geoRowHtml = () => Geo.pos ? '<span class="grow"><b>📍 Ma position</b><small>±' + Math.round(Geo.pos.acc || 0) + ' m · ' + (function () { const d = new Date(Geo.pos.ts); return pad2(d.getHours()) + ':' + pad2(d.getMinutes()); })() + '</small></span><button class="m-btn sm" data-act="geo">Actualiser</button>' : '<span class="grow"><b>📍 Ma position</b><small>' + E(Geo.err || 'Activez-la pour trier par distance') + '</small></span><button class="m-btn sm primary" data-act="geo">Activer</button>';
+function lstHtml() {
+    if (!ST || !ST.spots.length) return '<div class="m-empty"><b>📍</b>Aucun lieu pour le moment.<br>Touchez ➕ pour repérer un lieu à votre position.</div>';
+    const l = sortedSpots();
+    return (l.length ? '<div class="m-list">' + l.map(x => spotItem(x.s, x.i)).join('') + '</div>' : '<div class="m-empty"><b>🔍</b>Aucun lieu ne correspond.</div>') + (pf.sort === 'dist' && !Geo.pos ? '<p class="m-hint" style="text-align:center">Tri par distance dès que votre position est connue.</p>' : '');
+}
+function renderList() {
+    const v = Q('#view'), y = window.scrollY;
+    if (!ST) { v.innerHTML = emptyHome(); return; }
+    const n = ST.spots.length, cnt = k => ST.spots.filter(s => s.status === k).length, info = ST.info || {};
+    let h = '<div class="m-card"><div class="m-row" style="padding-top:0"><span class="grow"><b>' + E(ST.name || 'Repérage terrain') + '</b><small>' + [info.production, info.realisation && 'réal. ' + info.realisation, info.dates, ST.author && '👤 ' + ST.author].filter(Boolean).map(E).join(' · ') + '</small></span><span class="m-pill">' + n + ' lieu' + (n > 1 ? 'x' : '') + '</span></div>' +
+        '<div class="m-row" id="georow" style="padding-bottom:0">' + geoRowHtml() + '</div></div>';
+    if (n) {
+        h += '<div class="m-chips">' + [['', 'Tous', n]].concat(STATUS.map(x => [x[0], x[1], cnt(x[0])])).map(x => '<button class="m-chip ' + (pf.filter === x[0] ? 'on' : '') + '" data-act="filter" data-v="' + x[0] + '">' + E(x[1]) + ' <b>' + x[2] + '</b></button>').join('') + '</div>' +
+            '<div class="m-seg">' + [['dist', '📍 Distance'], ['order', '# Ordre'], ['score', '🎯 Score']].map(x => '<button class="' + (pf.sort === x[0] ? 'on' : '') + '" data-act="sort" data-v="' + x[0] + '">' + x[1] + '</button>').join('') + '</div>' +
+            (n > 5 ? '<input type="search" id="lq" placeholder="Rechercher un lieu…" value="' + E(lq) + '" style="margin-bottom:12px" data-in="lq">' : '');
+    }
+    h += '<div id="lst">' + lstHtml() + '</div><p class="m-credit">Application développée par Matthieu Lamotte</p>';
+    v.innerHTML = h; window.scrollTo(0, y);
+}
+function emptyHome() {
+    return '<div class="m-card accent"><h3>📥 Recevoir un projet du bureau</h3><ol class="rp-steps"><li>Sur l\'ordinateur, ouvrez <b>REPERO XIII</b> et touchez <b>📱 Mobile</b>.</li><li>Scannez le <b>QR code</b> avec l\'appareil photo du téléphone — ou copiez le lien, ou enregistrez le fichier.</li><li>Ici : <b>⋯ Menu</b> → <i>Importer un fichier</i> ou <i>Coller un lien</i>.</li></ol>' +
+        '<div class="m-actions"><button class="m-btn primary" data-act="impfile">📂 Importer un fichier</button><button class="m-btn" data-act="implink">🔗 Coller un lien</button></div></div>' +
+        '<div class="m-card"><h3>🧭 Repérer sans projet</h3><p class="m-hint" style="margin:0 0 4px">REPERO mobile sert aussi seul : créez des repères à votre position (nom, type, photos, liste de contrôle), puis renvoyez-les au bureau.</p><div class="m-actions"><button class="m-btn" data-act="newproj">➕ Nouveau repérage</button><button class="m-btn" data-act="demo">🧪 Essayer avec un exemple</button></div></div>' +
+        '<p class="m-credit">Application développée par Matthieu Lamotte</p>';
+}
+
+// ---------- fiche : Infos ----------
+function sunTl(s, day) {
+    const pts = sunPath(s, day.date, 10), off = tzOffsetH(day.ref, day.tz); let svg = '';
+    pts.forEach(p => { const mn = (((p.t.getTime() / 60000 + off * 60) % 1440) + 1440) % 1440, c = p.alt > 6 ? '#ffe9a8' : p.alt > -4 ? '#ffb300' : p.alt > -8 ? '#5c6bc0' : p.alt > -18 ? '#283593' : '#0d1442'; svg += '<rect x="' + (mn / 1440 * 600).toFixed(1) + '" y="4" width="4.2" height="22" fill="' + c + '"/>'; });
+    for (let h = 0; h <= 24; h += 3) svg += '<text x="' + (h / 24 * 600) + '" y="40" font-size="10" text-anchor="middle" fill="currentColor" opacity=".7">' + h + ' h</text>';
+    return '<svg viewBox="0 0 600 44" class="stl" preserveAspectRatio="none" role="img" aria-label="Frise du jour"><rect x="0" y="4" width="600" height="22" fill="#0d1442"/>' + svg + '</svg><div class="stl-l"><i style="background:#ffe9a8"></i>jour <i style="background:#ffb300"></i>heure dorée <i style="background:#5c6bc0"></i>heure bleue <i style="background:#0d1442"></i>nuit</div>';
+}
+function sunDg(s, dateStr, size) {
+    size = size || 260; const c = size / 2, R = c - 22, pr = (az, alt) => { const r = R * (1 - Math.max(alt, 0) / 90), a = az * RAD; return [c + r * Math.sin(a), c - r * Math.cos(a)]; };
+    const curve = (d, col, w, dash) => { const p = sunPath(s, d, 10).filter(x => x.alt >= 0); if (p.length < 2) return ''; let path = ''; p.forEach((x, i) => { const q = pr(x.az, x.alt); path += (i ? 'L' : 'M') + q[0].toFixed(1) + ' ' + q[1].toFixed(1); }); return '<path d="' + path + '" fill="none" stroke="' + col + '" stroke-width="' + w + '"' + (dash ? ' stroke-dasharray="' + dash + '"' : '') + '/>'; };
+    const y = +(dateStr || todayISO()).slice(0, 4); let svg = '<svg viewBox="0 0 ' + size + ' ' + size + '" class="sdg" xmlns="http://www.w3.org/2000/svg" font-family="Arial,sans-serif" role="img" aria-label="Trajectoire du soleil">';
+    [90, 60, 30, 0].forEach(a => { svg += '<circle cx="' + c + '" cy="' + c + '" r="' + (R * (1 - a / 90)).toFixed(1) + '" fill="none" stroke="#888" stroke-opacity=".35" stroke-width="1"/>'; if (a && a < 90) svg += '<text x="' + (c + 3) + '" y="' + (c - R * (1 - a / 90) - 2) + '" font-size="9" fill="#888">' + a + '°</text>'; });
+    svg += '<line x1="' + c + '" y1="' + (c - R) + '" x2="' + c + '" y2="' + (c + R) + '" stroke="#888" stroke-opacity=".35"/><line x1="' + (c - R) + '" y1="' + c + '" x2="' + (c + R) + '" y2="' + c + '" stroke="#888" stroke-opacity=".35"/>';
+    [['N', c, 11], ['E', size - 8, c + 4], ['S', c, size - 3], ['O', 8, c + 4]].forEach(l => { svg += '<text x="' + l[1] + '" y="' + l[2] + '" font-size="12" font-weight="bold" text-anchor="middle" fill="#888">' + l[0] + '</text>'; });
+    svg += curve(y + '-12-21', '#64B5F6', 1.5, '3 3') + curve(y + '-06-21', '#EF5350', 1.5, '3 3') + curve(dateStr || todayISO(), '#FFA000', 3);
+    sunPath(s, dateStr, 10).filter(p => p.alt >= 0).forEach(p => { const t = fmtT(p.t, tzOf(s)); if (t.endsWith(':00')) { const q = pr(p.az, p.alt); svg += '<circle cx="' + q[0].toFixed(1) + '" cy="' + q[1].toFixed(1) + '" r="3" fill="#FFE082" stroke="#FF8F00"/><text x="' + (q[0] + 4).toFixed(1) + '" y="' + (q[1] - 4).toFixed(1) + '" font-size="9" fill="#FF8F00" font-weight="bold">' + t.slice(0, 2) + '</text>'; } });
+    return svg + '</svg>';
+}
+const dayOf = s => curDay || s.date || todayISO();
+function acc(k, ico, title, pills, body, def) {
+    const open = pf.open[k] != null ? pf.open[k] : def;
+    return '<details class="m-card rp-ac" data-k="' + k + '"' + (open ? ' open' : '') + '><summary><span class="t">' + ico + ' ' + title + '</span><span class="ps">' + (pills || '') + '</span><span class="x">▾</span></summary><div class="b">' + body + '</div></details>';
+}
+function cardSun(s) {
+    if (!located(s)) return '';
+    const dd = dayOf(s), day = sunDay(s, dd); if (!day) return '';
+    const T = day.T, f = d => fmtT(d, day.tz), rng = (a, b) => (a && b) ? f(a) + ' → ' + f(b) : '—', az = a => a == null ? '' : ' · ' + Math.round(a) + '° ' + compass(a), dl = day.dayLen;
+    const pills = T.sunrise ? pill(f(T.sunrise) + ' → ' + f(T.sunset), 'acc') : '';
+    const body = '<div class="rp-day"><input type="date" id="dayin" value="' + E(dd) + '" data-in="day" aria-label="Jour choisi"><button class="m-btn sm" data-act="today">Aujourd\'hui</button>' + (s.date && s.date !== dd ? '<button class="m-btn sm" data-act="shootday">Jour de tournage</button>' : '') + '</div>' +
+        '<p class="m-hint" style="margin:0 0 8px">' + E(longDate(dd)) + (s.date === dd ? ' · jour de tournage' : s.date ? '' : ' · aucune date de tournage saisie') + ' · heure locale (' + E(day.tz) + ')</p>' +
+        '<button class="m-btn primary block" data-act="sunar" style="margin:0 0 10px">📷 Voir la course du soleil dans la caméra</button>' +
+        '<dl class="m-kv">' + kvr('🌅 Lever', f(T.sunrise) + az(day.azRise)) + kvr('🟧 Heure dorée (matin)', rng(T.sunrise, T.goldenHourEnd)) + kvr('☀️ Midi solaire', f(T.solarNoon) + ' · hauteur ' + Math.round(day.altMax) + '°') + kvr('🟧 Heure dorée (soir)', rng(T.goldenHour, T.sunset)) + kvr('🌇 Coucher', f(T.sunset) + az(day.azSet)) +
+        kvr('🌌 Heure bleue', rng(T.blueDawn, T.blueEnd) + '<br>' + rng(T.blueStart, T.blueDusk)) + kvr('🕑 Durée du jour', Math.floor(dl / 60) + ' h ' + pad2(Math.round(dl % 60)) + ' min') + kvr(moonIcon(day.moon.phase) + ' Lune', moonName(day.moon.phase) + ' · ' + Math.round(day.moon.fraction * 100) + ' %') +
+        kvr('👤 Ombre (1,80 m)', day.shadow.map(x => x.h + ' h : ' + (x.len ? num(x.len, 1) + ' m' : '—')).join('<br>')) + '</dl>' + sunTl(s, day) +
+        '<div class="rp-sdg">' + sunDg(s, dd, 260) + '<p class="m-hint" style="margin:6px 0 0">Vue du ciel, nord en haut : <b style="color:#FFA000">jour choisi</b>, <b style="color:#EF5350">21 juin</b>, <b style="color:#64B5F6">21 décembre</b>.</p></div>' +
+        noteH('Calcul astronomique hors ligne. Les masques (bâtiments, relief, arbres) ne sont pas pris en compte : vérifiez sur place à l\'heure voulue. Sur la carte : rayons de lever et de coucher.');
+    return acc('sun', '☀️', 'Soleil et ombres', pills, body, 1);
+}
+function poiRow(x, k, withWalk) {
+    const d = POI[k] || { l: '', i: '' };
+    return '<div class="m-row"><span class="grow">' + E(x.n || d.l) + (x.o ? '<small>🕑 ' + E(x.o) + '</small>' : '') + (x.p ? '<small><a href="' + telOf(x.p) + '">📞 ' + E(x.p) + '</a></small>' : '') + '</span><b class="nw">' + fmtD(x.d) + (withWalk ? '<small>' + walkTxt(x.d) + '</small>' : '') + '</b><a class="m-ibtn sm" href="' + navLink(x.lat, x.lon) + '" target="_blank" rel="noopener" aria-label="Itinéraire vers ' + E(x.n || d.l) + '">🧭</a></div>';
+}
+function poiBlock(a, k, title, n, withWalk) { const l = vlist(a, k).slice(0, n || 3); return l.length ? subH(POI[k].i + ' ' + title) + l.map(x => poiRow(x, k, withWalk)).join('') : ''; }
+function cardsAn(s) {
+    const a = ST.an[s.id]; let h = '';
+    if (!a) return '<div class="m-card"><h3>🔎 Analyse des alentours</h3><p class="m-hint" style="margin:0">' + (isNew(s) ? 'Lieu créé sur le téléphone : l\'analyse (bruit, secours, couloirs aériens, drones, radio, droit à l\'image) se lance depuis le bureau (🎯) après le retour.' : 'Ce lieu n\'a pas encore été analysé sur le bureau. Lancez 🎯 Analyser dans REPERO XIII puis renvoyez le projet vers le mobile (📱).') + '</p></div>';
+    const st = staleDist(s); if (st > 30) h += '<div class="al warn">Le repère a été déplacé de ' + fmtD(st) + ' : l\'analyse ci-dessous concerne l\'ancienne position. Relancez 🎯 sur le bureau.</div>';
+    if (a.er && a.er.length) h += '<div class="al warn">Sources qui n\'ont pas répondu lors de l\'analyse : ' + a.er.map(E).join(', ') + '. Relancez 🎯 sur le bureau.</div>';
+    if (a.nz) {
+        const d = a.nz, dc = noiseClassOf(d.d), nc = noiseClassOf(d.n);
+        h += acc('noise', '🔊', 'Bruit', pill('Jour ' + d.d + ' dB · ' + dc[0], dc[1]) + pill('Nuit ' + d.n + ' dB', nc[1]),
+            '<dl class="m-kv">' + kvr('Jour (8 h – 18 h)', '≈ ' + d.d + ' dB(A) · ' + dc[0]) + kvr('Soir / nuit', '≈ ' + d.n + ' dB(A) · ' + nc[0]) + (d.pk > d.d + 3 ? kvr('Pics possibles', '≈ ' + d.pk + ' dB(A)') : '') + '</dl>' +
+            (d.r && d.r.length ? subH('Principales sources') + d.r.map(r => { const df = NOISE[r[0]] || { i: '🔊', l: r[0] }; return '<div class="m-row"><span class="grow">' + df.i + ' ' + E(r[1] || df.l) + (r[1] ? '<small>' + E(df.l) + '</small>' : '') + '</span><b class="nw">' + fmtD(r[2]) + '<small>' + r[3] + ' dB · nuit ' + (r[4] == null ? '—' : r[4]) + '</small></b></div>'; }).join('') : '<p class="m-hint">Aucune source de bruit notable détectée dans les données OSM.</p>') +
+            noteH('<b>Estimation indicative</b> à partir d\'OpenStreetMap (routes, voies ferrées, écoles, bars, chantiers…) : elle ignore les bâtiments écrans et le trafic réel. Une prise de son d\'ambiance de 2 minutes sur place reste indispensable.'));
+    }
+    if (a.hs) {
+        const hh = a.h, r = hh && hh.t ? hh : null;
+        let b = '<div class="rp-call"><a class="m-btn danger" href="tel:15">📞 15<small>SAMU</small></a><a class="m-btn danger" href="tel:18">📞 18<small>Pompiers</small></a><a class="m-btn danger" href="tel:112">📞 112<small>Urgences</small></a></div>';
+        b += subH('Hôpital de référence');
+        b += hh ? '<div class="rp-hosp"><b>' + E(hh.n || 'Hôpital') + '</b> ' + (hh.em ? pill('urgences', 'ko') : '') + '<br>' + fmtD(hh.d) + ' à vol d\'oiseau' + (r ? ' · <b>' + fmtMin(hh.t) + '</b> en voiture (' + fmtD(hh.k) + ')' : '') + (hh.a ? '<br><small>' + E(hh.a) + '</small>' : '') + '<div class="m-actions">' + (hh.p ? '<a class="m-btn sm" href="' + telOf(hh.p) + '">📞 ' + E(hh.p) + '</a>' : '') + aExt('https://www.google.com/maps/dir/?api=1&origin=' + (located(s) ? s.lat + ',' + s.lon : '') + '&destination=' + hh.lat + ',' + hh.lon, '🧭 Itinéraire', 'm-btn sm') + '</div></div>' : '<p class="m-hint">Aucun hôpital trouvé à moins de 25 km dans OpenStreetMap. Appelez le 15 / 112.</p>';
+        if (a.hl && a.hl.length) b += subH('Autres hôpitaux') + a.hl.map(x => '<div class="m-row"><span class="grow">' + E(x[3] || 'Hôpital') + (x[4] ? '<small>urgences</small>' : '') + '</span><b class="nw">' + fmtD(x[2]) + '</b><a class="m-ibtn sm" href="' + navLink(x[0], x[1]) + '" target="_blank" rel="noopener" aria-label="Itinéraire">🧭</a></div>').join('');
+        b += poiBlock(a, 'pharmacy', 'Pharmacies', 2, true) + poiBlock(a, 'fire', 'Pompiers', 2) + poiBlock(a, 'police', 'Police / gendarmerie', 1) + poiBlock(a, 'aed', 'Défibrillateurs', 2, true) + poiBlock(a, 'clinic', 'Cliniques et centres de santé', 1);
+        b += noteH('Numéros utiles : <b>15</b> SAMU · <b>18</b> pompiers · <b>17</b> police · <b>112</b> urgences UE · <b>114</b> urgences par SMS. Les données OSM sont communautaires : confirmez par téléphone avant le tournage.');
+        h += acc('health', '🏥', 'Secours', hh ? pill('🏥 ' + fmtD(hh.d) + (r ? ' · ' + fmtMin(hh.t) : ''), hh.d < 5000 ? 'ok' : hh.d < 12000 ? 'acc' : 'warn') : pill('aucun hôpital', 'ko'), b, 1);
+        const m = vlist(a, 'supermarket')[0] || vlist(a, 'convenience')[0], k = a.c || {};
+        let sb = ['supermarket', 'convenience', 'bakery', 'hardware', 'fuel', 'charging', 'atm'].map(kk => poiBlock(a, kk, POI[kk].l, kk === 'supermarket' || kk === 'convenience' ? 2 : 1, true)).join('');
+        h += acc('shops', '🛒', 'Commerces', m ? pill('🛒 ' + fmtD(m.d), m.d < 800 ? 'ok' : m.d < 2000 ? 'acc' : 'warn') : pill('aucun commerce', 'warn'), sb || '<p class="m-hint">Aucun commerce détecté dans le rayon d\'analyse (' + fmtD(a.R || 1500) + ').</p>');
+        const lg = '<dl class="m-kv">' + kvr('🅿️ Parkings (rayon ' + fmtD(a.R || 1500) + ')', k.pk || 0) + kvr('🚻 Toilettes publiques', k.wc || 0) + kvr('🏨 Hébergements', k.ho || 0) + kvr('🍽️ Restaurants / cafés', k.fo || 0) + '</dl>' +
+            poiBlock(a, 'parking', 'Parkings', 5, true) + poiBlock(a, 'toilets', 'Toilettes', 2) + poiBlock(a, 'water', 'Points d\'eau', 1) + poiBlock(a, 'hotel', 'Hébergements', 2) + poiBlock(a, 'transit', 'Gares, métros, tramways', 2) + poiBlock(a, 'food', 'Restauration (repas équipe)', 2) +
+            noteH('Capacités et horaires de parking sont rarement renseignés dans OSM : vérifiez sur place le stationnement des camions et le portage jusqu\'au décor.');
+        h += acc('logi', '🅿️', 'Logistique', pill('🅿️ ' + (k.pk || 0), k.pk ? 'ok' : 'warn') + pill('🚻 ' + (k.wc || 0), k.wc ? 'ok' : 'warn'), lg);
+    }
+    if (a.ar) {
+        const r = a.ar;
+        h += acc('air', '✈️', 'Couloirs aériens', pill(r.inC ? 'dans l\'axe' : r.ae && r.ae.length ? fmtD(r.ae[0][1]) : 'aucun aérodrome', r.lv),
+            '<div class="al ' + (r.lv === 'ko' ? 'ko' : r.lv === 'ok' ? 'ok' : 'warn') + '">' + E(r.msg) + '</div>' + (r.ae && r.ae.length ? subH('Aérodromes et héliports') + r.ae.map(x => '<div class="m-row"><span class="grow">' + (x[2] === 'heliport' ? '🚁' : '✈️') + ' ' + E(x[0]) + (x[4] ? '<small>' + E(x[4]) + (x[5] ? ' · militaire' : '') + '</small>' : '') + '</span><b class="nw">' + fmtD(x[1]) + ' · ' + compass(x[3]) + '</b></div>').join('') : '') +
+            noteH('Les axes sont déduits des pistes OSM (cône de ±8°) : <b>indicatif</b>. ' + aExt(LINKS.fr24(s.lat, s.lon), 'Trafic en direct') + ' · ' + aExt(LINKS.sia(), 'SIA / DGAC')));
+    }
+    if (a.dr) {
+        const lb = droneLabel(a.dr.lv);
+        h += acc('drone', '🚁', 'Drones', pill(lb[0], lb[1]), '<div class="al ' + (a.dr.lv >= 2 ? 'ko' : a.dr.lv === 1 ? 'warn' : 'ok') + '"><b>' + lb[0] + '</b> — repérage préliminaire à partir d\'OSM</div>' + (a.dr.r.length ? '<ul class="rp-ul">' + a.dr.r.map(r => '<li>' + E(r[1]) + '</li>').join('') + '</ul>' : '') + '<p>' + aExt(LINKS.drone(s.lat, s.lon), '🗺️ Carte officielle des restrictions', 'm-btn sm') + ' ' + aExt(LINKS.alpha(), '✈️ AlphaTango', 'm-btn sm') + '</p>' + noteH('Catégorie « ouverte » : 120 m max au-dessus du sol, pas de survol de personnes non impliquées ; les tournages professionnels relèvent souvent de la catégorie « spécifique ». <b>Seule la carte officielle fait foi.</b>'));
+    }
+    if (a.ra) {
+        const r = a.ra, lv = radioLevel(r);
+        h += acc('radio', '📻', 'Radio et antennes', pill('HF ' + lv[0].toLowerCase(), lv[1]), '<dl class="m-kv">' + kvr('Relais mobiles à 1 km / 3 km', r.m1 + ' / ' + r.m3) + kvr('Émetteurs radio / TV (35 km)', r.nb) + '</dl>' + (r.bc && r.bc.length ? subH('Émetteurs les plus proches') + r.bc.map(x => '<div class="m-row"><span class="grow">' + (x[0] === 'tv' ? '📺' : '📻') + ' ' + E(x[1] || (x[0] === 'tv' ? 'Émetteur TV' : 'Émetteur radio')) + (x[3] ? '<small>' + E(x[3]) + '</small>' : '') + '</span><b class="nw">' + fmtD(x[2]) + '</b></div>').join('') : '') +
+            '<p>' + aExt(LINKS.carto(s.lat, s.lon), '📡 Cartoradio (ANFR)', 'm-btn sm') + ' ' + aExt(LINKS.arcep(), '📶 Couverture mobile', 'm-btn sm') + '</p>' + noteH('Fréquences exactes absentes d\'OSM : <b>scannez le spectre sur place</b> avant de fixer le plan de fréquences (micros HF, talkies, liaisons vidéo).'));
+    }
+    if (a.ri) {
+        const R = a.ri, lb = rightsLabel(R.top), items = R.it.map(x => ({ x, r: SENS[x[0]] })).filter(o => o.r), groups = [3, 2, 1].map(l => ({ l, it: items.filter(o => o.r.lv === l) })).filter(g => g.it.length), pub = s.access === 'public' || s.access === 'mixte';
+        h += acc('rights', '⚖️', 'Droit à l\'image', pill(lb[0], lb[1]), '<div class="al ' + (R.top === 3 ? 'ko' : R.top === 2 ? 'warn' : 'ok') + '">Complexité estimée : <b>' + lb[0] + '</b>' + (R.top === 0 ? ' — aucun lieu sensible détecté autour' : '') + '</div>' +
+            groups.map(g => subH(LEVELS[g.l][0]) + g.it.map(o => '<div class="rp-rli lv' + g.l + '"><b>' + o.r.i + ' ' + E(o.x[1] || o.r.l) + '</b> <small>' + (o.x[4] ? '' : o.x[3] ? 'sur place' : fmtD(o.x[2])) + '</small><br><span>' + E(o.r.why) + '</span></div>').join('')).join('') +
+            subH('À prévoir') + '<ul class="rp-ul">' + (pub ? '<li>Voie ou espace public : autorisation de la mairie (arrêté de voirie / stationnement si besoin), information de la police municipale.</li>' : '') + (s.access !== 'public' ? '<li>Lieu privé : convention d\'occupation signée (dates, horaires, remise en état, assurance) et autorisation d\'exploiter l\'image du lieu.</li>' : '') + '<li>Personnes reconnaissables : affichage de tournage, accord écrit pour toute personne isolée à l\'image ; mineurs : autorisation des parents.</li><li>Marques, œuvres et architectures protégées : masquer, cadrer de façon accessoire ou obtenir l\'accord.</li></ul>' +
+            noteH('Repérage <b>indicatif</b> (lieux sensibles d\'OSM) : il ne remplace ni l\'avis d\'un juriste ni l\'autorisation du propriétaire ou du gestionnaire.'));
+    }
+    if (a.wx) {
+        const w = a.wx, wm = WMO[w.code] || ['🌡️', '']; h += acc('wx', '🌦️', 'Météo et terrain', pill((WMO[w.code] ? WMO[w.code][0] + ' ' : '') + num(w.tmin, 0) + '–' + num(w.tmax, 0) + ' °C', 'acc'), '<p class="m-hint" style="margin:0 0 6px">' + (w.kind === 'forecast' ? 'Prévision pour le ' + E(longDate(w.date)) : 'Climat habituel à cette période (moyenne sur 5 ans)') + '</p><dl class="m-kv">' + (w.kind === 'forecast' ? kvr('Ciel', wm[0] + ' ' + wm[1]) : '') + kvr('Températures', num(w.tmin, 0) + ' → ' + num(w.tmax, 0) + ' °C') + kvr('Pluie', (w.rain != null ? num(w.rain, 1) + ' mm' : '—') + (w.pop != null ? ' · ' + w.pop + ' %' : '')) + kvr('Vent max', num(w.wind, 0) + ' km/h' + (w.gust ? ' · rafales ' + num(w.gust, 0) : '')) + (w.sun != null ? kvr('Ensoleillement', num(w.sun, 1) + ' h') : '') + (w.uv != null ? kvr('Indice UV', num(w.uv, 0)) : '') + (a.el != null ? kvr('⛰️ Altitude', a.el + ' m') : '') + '</dl>' + noteH('Météo de la date de tournage au moment de l\'analyse sur le bureau.'));
+    }
+    return h;
+}
+function cardContacts(s) {
+    const any = s.owner || s.phone || s.email;
+    return '<div class="m-card"><h3><span class="grow">🤝 Propriétaire / gestionnaire</span></h3>' + (any ? '<p style="margin:0 0 4px"><b>' + E(s.owner || '—') + '</b>' + (s.qualite ? ' <span class="m-hint">(' + E(s.qualite) + ')</span>' : '') + '</p><div class="m-actions">' + (s.phone ? '<a class="m-btn" href="' + telOf(s.phone) + '">📞 Appeler<small>' + E(s.phone) + '</small></a><a class="m-btn" href="sms:' + E(String(s.phone).replace(/[^\d+]/g, '')) + '">💬 SMS</a>' : '') + (s.email ? '<a class="m-btn" href="mailto:' + E(s.email) + '?subject=' + encodeURIComponent('Repérage : ' + (s.name || '')) + '">✉️ Écrire<small>' + E(s.email) + '</small></a>' : '') + '</div>' : '<p class="m-hint" style="margin:0">Aucun contact renseigné.</p><div class="m-actions"><button class="m-btn" data-act="edit">➕ Ajouter un contact</button></div>') + '</div>';
+}
+function tabInfo(s) {
+    const st = statOf(s.status), c = catOf(s.cat), sc = scoreNow(s), al = alertsNow(s), loc = located(s), a = ST.an[s.id], d = distTxt(s);
+    let h = '<div class="m-card accent"><div class="rp-h"><span class="rp-ic">' + c[2] + '</span><div class="grow"><b class="rp-nm">' + E(s.name || 'Lieu sans nom') + '</b><small>' + E(c[1]) + (isNew(s) ? ' · créé sur le téléphone' : '') + '</small></div><button class="m-ibtn" data-act="edit" aria-label="Modifier le lieu">✎</button></div>' +
+        '<dl class="m-kv" style="margin-top:10px">' + (s.address || s.city ? kvr('Adresse', E([s.address, s.city && !String(s.address).includes(s.city) ? ((s.cp ? s.cp + ' ' : '') + s.city) : ''].filter(Boolean).join(', '))) : '') + (loc ? kvr('GPS', '<button class="rp-lnk" data-act="copygps">' + coordTxt(s) + ' 📋</button>' + (a && a.el != null ? ' · ' + a.el + ' m' : '')) : kvr('GPS', '<span style="color:var(--warn)">non localisé</span>')) + (d ? kvr('Distance', E(d)) : '') + kvr('Tournage visé', s.date ? E(longDate(s.date)) : '—') + kvr('Nature', E((ACCESS.find(x => x[0] === s.access) || [])[1] || '')) + '</dl>' +
+        '<div class="m-actions"><button class="m-btn primary" data-act="tab" data-t="map">🗺️ Voir la carte</button>' + (loc ? '<button class="m-btn" data-act="nav">🧭 Itinéraire</button>' : '<button class="m-btn" data-act="place">📍 Placer à ma position</button>') + '</div></div>';
+    h += '<div class="m-card"><span class="m-sec" style="margin-top:0">Statut</span><div class="m-seg rp-stseg">' + STATUS.map(x => '<button class="' + (s.status === x[0] ? 'on' : '') + '" data-act="status" data-v="' + x[0] + '" style="--sc:' + x[2] + '">' + x[3] + ' ' + x[1] + '</button>').join('') + '</div>' +
+        '<span class="m-sec" style="margin-top:6px">Note</span><div class="rp-stars" role="group" aria-label="Note de 1 à 5">' + [1, 2, 3, 4, 5].map(n => '<button class="' + (n <= s.rating ? 'on' : '') + '" data-act="rate" data-v="' + n + '" aria-label="' + n + ' sur 5">★</button>').join('') + '</div>' +
+        (sc ? '<div class="rp-score"><span class="m-pill ' + scoreCls(sc.v) + '">Faisabilité ' + sc.v + '/100</span><small>' + (sc.why.length ? 'points faibles : ' + sc.why.slice(0, 4).map(w => E(w[1])).join(', ') : 'aucun point faible détecté') + '</small></div>' : '') + '</div>';
+    if (al.length) h += '<div class="m-card"><h3>⚠️ Points d\'attention <span class="m-pill ' + (al.some(x => x[0] === 'ko') ? 'danger' : 'warn') + '">' + al.length + '</span></h3>' + al.map(x => '<div class="al ' + x[0] + '">' + E(x[1]) + '</div>').join('') + '</div>';
+    h += cardSun(s) + cardsAn(s) + cardContacts(s);
+    if (isNew(s)) h += '<button class="m-btn danger block" data-act="delspot" style="margin-top:6px">🗑️ Supprimer ce lieu</button>';
+    return h + '<p class="m-credit">Application développée par Matthieu Lamotte</p>';
+}
+
+// ---------- fiche : Contrôle ----------
+function tabChk(s) {
+    const cc = chkCount(s), pct = Math.round(100 * (cc.ok + cc.q + cc.ko) / cc.n);
+    let h = '<div class="m-card"><div class="rp-cs">' + pill('✔ ' + cc.ok + ' OK', 'ok') + pill('? ' + cc.q + ' à vérifier', 'warn') + pill('✖ ' + cc.ko + ' bloquant' + (cc.ko > 1 ? 's' : ''), cc.ko ? 'ko' : '') + '<span class="m-hint">' + (cc.n - cc.ok - cc.q - cc.ko) + ' non évalué' + '</span></div><div class="m-progress" style="margin-top:10px"><i style="width:' + pct + '%"></i></div><div class="m-actions"><button class="m-btn sm" data-act="chkall">? Tout à vérifier</button></div></div>';
+    h += techCardM(s);
+    h += CHECK.map(([sec, ic, items], si) => {
+        const done = items.filter(i => s.chk[i[0]]).length, open = pf.open['c' + si] != null ? pf.open['c' + si] : (si < 2 || done ? 1 : 0);
+        return '<details class="m-card rp-ac" data-k="c' + si + '"' + (open ? ' open' : '') + '><summary><span class="t">' + ic + ' ' + E(sec) + '</span><span class="ps"><span class="m-pill">' + done + '/' + items.length + '</span></span><span class="x">▾</span></summary><div class="b">' + items.map(([k, l]) => {
+            const v = s.chk[k] || '';
+            return '<div class="ck ' + v + '"><div class="cl">' + E(l) + '</div><div class="cb">' + [['ok', '✔', 'OK'], ['q', '?', 'À vérifier'], ['ko', '✖', 'Bloquant']].map(b => '<button class="' + (v === b[0] ? 'on ' + b[0] : '') + '" data-act="chk" data-k="' + k + '" data-v="' + b[0] + '" aria-label="' + b[2] + '" aria-pressed="' + (v === b[0]) + '">' + b[1] + '</button>').join('') + '</div>' + (v === 'ko' || v === 'q' || s.chkN[k] ? '<input type="text" class="cn" data-in="chkn" data-k="' + k + '" placeholder="Précision…" value="' + E(s.chkN[k] || '') + '">' : '') + '</div>';
+        }).join('') + '</div></details>';
+    }).join('');
+    return h;
+}
+
+// ---------- fiche : Photos et notes ----------
+function tabPh(s) {
+    let h = '<div class="m-card"><h3>🗒️ Notes</h3><textarea id="notes" rows="6" data-in="notes" placeholder="Impressions, ambiance, contraintes, idées de cadres…">' + E(s.notes) + '</textarea></div>';
+    h += '<div class="m-card"><h3><span class="grow">📷 Photos <span class="m-pill">' + s.photos.length + '</span></span></h3><div class="m-actions" style="margin-top:0"><button class="m-btn primary" data-act="cam">📷 Prendre une photo</button><button class="m-btn" data-act="gal">🖼️ Galerie</button></div>';
+    const ph = s.photos.filter(p => PHC[p.id]);
+    h += ph.length ? '<div class="rp-ph">' + ph.map(p => '<figure><img src="' + PHC[p.id].th + '" alt="Photo" data-act="viewph" data-id="' + p.id + '"><input type="text" data-in="cap" data-id="' + p.id + '" value="' + E(p.cap) + '" placeholder="Légende (ex. vue vers le nord)"></figure>').join('') + '</div>' : '<p class="m-hint" style="margin:12px 0 0">Aucune photo. Les photos sont compressées (1 400 px max) et gardées sur ce téléphone ; elles repartent avec « Renvoyer au bureau » (fichier).</p>';
+    if (!idbOk) h += '<p class="m-hint" style="color:var(--warn)">⚠️ Stockage local indisponible : les photos seront perdues à la fermeture de la page. Renvoyez-les au bureau avant.</p>';
+    return h + '</div>';
+}
+
+// ---------- fiche technique (électricité, camion, réseau) ----------
+function techVHtml(s) { const vs = techVerdict(s.tech); return vs.length ? vs.map(v => '<div class="rp-tv ' + (v[0] === 'ko' ? 'ko' : v[0] === 'warn' ? 'warn' : 'ok') + '" style="margin-top:6px;font-size:13px">' + (v[0] === 'ko' ? '🔴 ' : v[0] === 'warn' ? '🟠 ' : '🟢 ') + E(v[1]) + '</div>').join('') : '<p class="m-hint" style="margin:6px 0 0">Relevez les valeurs sur place : puissance disponible, véhicules qui passent et faisabilité d\'un direct sont calculés.</p>'; }
+function techCardM(s) {
+    const t = s.tech || {}, open = pf.open.tech != null ? pf.open.tech : 1;
+    const fld = ([k, l, type, x]) => { const v = t[k] == null ? '' : t[k]; return '<label class="m-field"><span>' + E(l) + (type === 'num' && x ? ' (' + x + ')' : '') + '</span>' + (type === 'sel' ? '<select data-in="tech" data-k="' + k + '">' + x.map(o => '<option value="' + o[0] + '"' + (String(v) === o[0] ? ' selected' : '') + '>' + E(o[1]) + '</option>').join('') + '</select>' : '<input type="' + (type === 'num' ? 'number' : 'text') + '"' + (type === 'num' ? ' inputmode="decimal" step="any"' : '') + ' data-in="tech" data-k="' + k + '" value="' + E(v) + '" id="tf-' + k + '">') + '</label>'; };
+    return '<details class="m-card rp-ac" data-k="tech"' + (open ? ' open' : '') + '><summary><span class="t">🔧 Fiche technique</span><span class="x">▾</span></summary><div class="b">' +
+        TECH.map(g => '<div class="m-sec" style="margin-top:10px">' + g[1] + ' ' + E(g[2]) + '</div>' + g[3].map(fld).join('') + (g[0] === 'net' ? '<button class="m-btn block" data-act="speed" style="margin-bottom:10px">📶 Mesurer le débit descendant</button>' : '')).join('') +
+        '<div id="tv">' + techVHtml(s) + '</div></div></details>';
+}
+
+// =====================================================================
+//  Carte plein écran (Leaflet chargé à la demande depuis cdnjs ; hors ligne : coordonnées en liste)
+// =====================================================================
+const dotI = (emoji, color, size) => L.divIcon({ className: '', iconSize: [size, size], iconAnchor: [size / 2, size / 2], html: '<div class="rp-dot" style="width:' + size + 'px;height:' + size + 'px;border-color:' + color + '"><span style="font-size:' + Math.round(size * .55) + 'px">' + emoji + '</span></div>' });
+function pinI(s, sel, moving) {
+    const c = catOf(s.cat), col = s.status === 'ecarte' ? '#757575' : c[3];
+    return L.divIcon({ className: '', iconSize: [34, 42], iconAnchor: [17, 40], popupAnchor: [0, -38], html: '<div class="rp-pin' + (sel ? ' sel' : '') + (moving ? ' mv' : '') + '" style="--pc:' + col + '"><span class="pe">' + c[2] + '</span></div>' });
+}
+function arcPts(lat, lon, a1, a2, r, step) { let d = ((a2 - a1 + 540) % 360) - 180; const n = Math.max(2, Math.ceil(Math.abs(d) / (step || 3))), out = []; for (let i = 0; i <= n; i++) out.push(dest(lat, lon, a1 + d * i / n, r)); return out; }
+const wmtsU = (layer, fmt) => 'https://data.geopf.fr/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=' + layer + '&STYLE=normal&FORMAT=' + fmt + '&TILEMATRIXSET=PM&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}';
+
+const MapUI = (() => {
+    let MAP = null, LP = null, G = {}, baseL = null, moving = false, pend = null, mk = null, lastId = '', tileWarn = false, curS = null;
+    const wrap = Q('#mapwrap');
+    function ensureL() {
+        if (window.L && L.map) return Promise.resolve(true); if (LP) return LP;
+        if (navigator.onLine === false) return Promise.resolve(false);
+        LP = new Promise(res => {
+            let done = false, t; const fin = v => { if (done) return; done = true; clearTimeout(t); if (!v) LP = null; res(v); };
+            const css = document.createElement('link'); css.rel = 'stylesheet'; css.href = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css'; document.head.appendChild(css);
+            const sc = document.createElement('script'); sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js'; sc.onload = () => fin(!!(window.L && L.map)); sc.onerror = () => { sc.remove(); css.remove(); fin(false); };
+            document.head.appendChild(sc); t = setTimeout(() => fin(false), 9000);
+        });
+        return LP;
+    }
+    function baseLayer() {
+        const k = pf.base; let l;
+        if (k === 'ortho') l = L.tileLayer(wmtsU('ORTHOIMAGERY.ORTHOPHOTOS', 'image/jpeg'), { maxZoom: 19, attribution: '© IGN – Géoportail' });
+        else l = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' });
+        l.on('tileerror', () => { if (!tileWarn) { tileWarn = true; const b = Q('#mp-net'); if (b) b.hidden = false; } }); return l;
+    }
+    function setBase() { if (!MAP) return; if (baseL) MAP.removeLayer(baseL); baseL = baseLayer().addTo(MAP); if (baseL.bringToBack) baseL.bringToBack(); }
+    function build(s) {
+        if (!MAP) {
+            MAP = L.map(Q('#map'), { zoomControl: false, preferCanvas: true }).setView([s.lat, s.lon], 16);
+            baseL = baseLayer().addTo(MAP);
+            ['ring', 'others', 'sun', 'sec', 'park', 'shop', 'me', 'spot'].forEach(k => { G[k] = L.layerGroup().addTo(MAP); });
+            if (L.control && L.control.zoom) L.control.zoom({ position: 'bottomright' }).addTo(MAP);
+            MAP.on('click', e => { if (moving && e && e.latlng) { pend = [e.latlng.lat, e.latlng.lng]; if (mk) mk.setLatLng(pend); chrome(curS); } });
+        }
+        const fresh = lastId !== s.id; lastId = s.id; draw(s, fresh); setTimeout(() => { if (MAP) MAP.invalidateSize(); }, 40);
+    }
+    const pop = (x, label) => '<b>' + E(x.n || label) + '</b><br>' + E(label) + ' · ' + fmtD(x.d) + (x.p ? '<br>📞 ' + E(x.p) : '') + (x.o ? '<br>🕑 ' + E(x.o) : '') + '<br><a href="' + navLink(x.lat, x.lon) + '" target="_blank" rel="noopener">🧭 Itinéraire</a>';
+    function poiPins(g, a, kinds, lim) {
+        kinds.forEach(k => { const d = POI[k]; vlist(a, k).slice(0, lim || 6).forEach(x => { L.marker([x.lat, x.lon], { icon: dotI(d.i, d.c, 26) }).addTo(g).bindPopup(pop(x, d.l)); }); });
+    }
+    function drawSun(s, g) {
+        const day = sunDay(s, dayOf(s)); if (!day) return; const R = 450;
+        const ray = (az, col, lab, w, dash) => { if (az == null) return; L.polyline([[s.lat, s.lon], dest(s.lat, s.lon, az, R)], { color: col, weight: w || 4, dashArray: dash || '7 6', opacity: .95 }).addTo(g).bindTooltip(lab + ' · azimut ' + Math.round(az) + '° (' + compass(az) + ')', { sticky: true }); };
+        if (day.T.sunrise && day.T.goldenHourEnd) L.polygon([[s.lat, s.lon]].concat(arcPts(s.lat, s.lon, day.azRise, day.azGoldAm, 380)), { color: '#FFB300', weight: 0, fillColor: '#FFB300', fillOpacity: .24, interactive: false }).addTo(g);
+        if (day.T.sunset && day.T.goldenHour) L.polygon([[s.lat, s.lon]].concat(arcPts(s.lat, s.lon, day.azGoldPm, day.azSet, 380)), { color: '#FF7043', weight: 0, fillColor: '#FF7043', fillOpacity: .24, interactive: false }).addTo(g);
+        ray(day.azRise, '#FFB300', '🌅 Lever ' + fmtT(day.T.sunrise, day.tz)); ray(day.azSet, '#E64A19', '🌇 Coucher ' + fmtT(day.T.sunset, day.tz)); ray(day.azNoon, '#FFF176', '☀️ Midi solaire ' + fmtT(day.T.solarNoon, day.tz), 2, '2 6');
+        const path = sunPath(s, day.date, 15).filter(p => p.alt > 0); if (path.length > 1) L.polyline(path.map(p => dest(s.lat, s.lon, p.az, 300)), { color: '#FFD54F', weight: 2, opacity: .85, interactive: false }).addTo(g);
+    }
+    function drawMe(s) {
+        if (!MAP) return; G.me.clearLayers(); if (!Geo.pos) return; const p = Geo.pos;
+        if (p.acc && p.acc < 800) L.circle([p.lat, p.lon], { radius: p.acc, color: '#1E88E5', weight: 1, fillColor: '#1E88E5', fillOpacity: .12, interactive: false }).addTo(G.me);
+        if (located(s)) L.polyline([[p.lat, p.lon], [s.lat, s.lon]], { color: '#1E88E5', weight: 2, dashArray: '4 7', opacity: .8, interactive: false }).addTo(G.me);
+        L.circleMarker([p.lat, p.lon], { radius: 8, color: '#fff', weight: 3, fillColor: '#1E88E5', fillOpacity: 1 }).addTo(G.me).bindTooltip('Ma position · ±' + Math.round(p.acc || 0) + ' m');
+    }
+    function draw(s, fit) {
+        Object.keys(G).forEach(k => G[k].clearLayers()); const a = ST.an[s.id], pos = moving && pend ? pend : [s.lat, s.lon];
+        if (pf.layers.ring) L.circle([s.lat, s.lon], { radius: +s.radius || (a && a.R) || 1500, color: '#f0b378', weight: 2, dashArray: '4 6', fill: false, opacity: .75, interactive: false }).addTo(G.ring);
+        if (pf.layers.others) ST.spots.forEach((o, i) => { if (o.id === s.id || !located(o)) return; L.circleMarker([o.lat, o.lon], { radius: 7, color: '#fff', weight: 2, fillColor: statOf(o.status)[2], fillOpacity: 1 }).addTo(G.others).bindTooltip((i + 1) + '. ' + (o.name || 'Lieu')).on('click', () => XM.toast((i + 1) + '. ' + (o.name || 'Lieu') + ' · ' + statOf(o.status)[1])); });
+        if (pf.layers.sun) drawSun(s, G.sun);
+        if (a && a.hs) {
+            if (pf.layers.sec) {
+                const h = a.h; if (h) { L.polyline([[s.lat, s.lon], [h.lat, h.lon]], { color: '#E53935', weight: 2, dashArray: '2 7', opacity: .8, interactive: false }).addTo(G.sec); L.marker([h.lat, h.lon], { icon: dotI('🏥', '#E53935', 30) }).addTo(G.sec).bindPopup(pop({ n: h.n, d: h.d, p: h.p, lat: h.lat, lon: h.lon }, 'Hôpital' + (h.em ? ' · urgences' : '')) + (h.t ? '<br>🚗 ' + fmtMin(h.t) + ' en voiture' : '')); }
+                poiPins(G.sec, a, ['pharmacy', 'fire', 'aed', 'police'], 3);
+            }
+            if (pf.layers.park) poiPins(G.park, a, ['parking'], 12);
+            if (pf.layers.shop) poiPins(G.shop, a, ['supermarket', 'convenience', 'bakery', 'fuel'], 4);
+        }
+        drawMe(s);
+        mk = L.marker(pos, { icon: pinI(s, true, moving), draggable: moving, zIndexOffset: 1000 }).addTo(G.spot);
+        if (moving) mk.on('dragend', () => { const ll = mk.getLatLng(); pend = [ll.lat, ll.lng]; chrome(s); });
+        if (fit) fitView(s);
+    }
+    function fitView(s) {
+        if (!MAP) return; const d = Geo.dist(s);
+        if (Geo.pos && d != null && d < 3000 && d > 25) MAP.fitBounds([[s.lat, s.lon], [Geo.pos.lat, Geo.pos.lon]], { padding: [70, 70], maxZoom: 17 }); else MAP.setView([s.lat, s.lon], 16);
+    }
+    // ----- habillage (bandeau, boutons, actions) -----
+    function chrome(s) {
+        curS = s; const day = located(s) ? sunDay(s, dayOf(s)) : null, d = distTxt(s);
+        const dayChip = day && day.T.sunrise ? '<button class="mp-chip" data-act="dayopen" aria-label="Choisir le jour du soleil">☀️ ' + fmtT(day.T.sunrise, day.tz) + ' → ' + fmtT(day.T.sunset, day.tz) + ' · ' + E(longDate(day.date).split(' ').slice(0, 3).join(' ')) + '</button>' : '';
+        const loc = located(s);
+        Q('#mp-top').innerHTML = moving
+            ? '<div class="mp-ban mv"><b>✋ Déplacer le repère</b><span>Touchez la carte ou faites glisser le repère.' + (pend ? '<br><span class="mono">' + pend[0].toFixed(5) + ', ' + pend[1].toFixed(5) + ' · à ' + fmtD(hav(s.lat, s.lon, pend[0], pend[1])) + ' de l\'ancienne position</span>' : '') + '</span></div>'
+            : '<div class="mp-ban"><span class="mp-d" id="mp-dist">' + (d ? '📍 À ' + E(d) + (Geo.pos ? ' <small>±' + Math.round(Geo.pos.acc || 0) + ' m</small>' : '') : (loc ? '<button class="rp-lnk" data-act="geo">📍 Activer ma position pour voir la distance</button>' : '<b style="color:var(--warn)">Lieu non localisé</b>')) + '</span>' + dayChip + '<span id="mp-net" class="mp-off-chip" hidden>fond de carte hors ligne</span></div>';
+        Q('#mp-side').innerHTML = moving ? '' : (loc ? '<button class="mp-rb" data-act="mylocate" aria-label="Ma position">📍</button><button class="mp-rb" data-act="spotcenter" aria-label="Centrer sur le lieu">🎯</button><button class="mp-rb" data-act="layers" aria-label="Couches de la carte">🗂️</button>' : '');
+        Q('#mp-bot').innerHTML = moving
+            ? '<button class="mp-ab" data-act="movecancel"><span>✖</span>Annuler</button><button class="mp-ab ok" data-act="movevalid"' + (pend ? '' : ' disabled') + '><span>✔</span>Valider ici</button>'
+            : loc ? '<button class="mp-ab" data-act="nav"><span>🧭</span>Itinéraire</button><button class="mp-ab" data-act="streetview"><span>👁️</span>Street View</button><button class="mp-ab" data-act="copygps"><span>📋</span>Copier GPS</button><button class="mp-ab" data-act="movestart"><span>✋</span>Déplacer</button>'
+                : '<button class="mp-ab ok" data-act="place"><span>📍</span>Placer à ma position</button>';
+    }
+    function fallback(s, why) {
+        const off = Q('#mp-off'); off.hidden = false; wrap.classList.add('off'); Q('#map').style.visibility = 'hidden';
+        const a = ST.an[s.id], rows = []; if (located(s)) rows.push(['🎯 ' + (s.name || 'Lieu'), s.lat, s.lon]); if (Geo.pos) rows.push(['📍 Ma position', Geo.pos.lat, Geo.pos.lon]);
+        if (a && a.h) rows.push(['🏥 ' + (a.h.n || 'Hôpital') + ' · ' + fmtD(a.h.d), a.h.lat, a.h.lon]); vlist(a, 'parking').slice(0, 4).forEach(x => rows.push(['🅿️ ' + (x.n || 'Parking') + ' · ' + fmtD(x.d), x.lat, x.lon])); vlist(a, 'aed').slice(0, 2).forEach(x => rows.push(['⚡ ' + (x.n || 'Défibrillateur') + ' · ' + fmtD(x.d), x.lat, x.lon]));
+        off.innerHTML = '<div class="m-card"><h3>🗺️ Carte indisponible</h3><p class="m-hint" style="margin:0 0 6px">' + E(why || 'Pas de connexion : le fond de carte (OpenStreetMap) ne peut pas se charger.') + ' Les coordonnées restent utilisables dans toutes les applications de navigation.</p><div class="m-actions" style="margin-top:0"><button class="m-btn sm" data-act="retrymap">↻ Réessayer</button></div></div>' +
+            (rows.length ? '<div class="m-list">' + rows.map(r => '<button class="m-item" data-act="copy" data-t="' + (+r[1]).toFixed(6) + ', ' + (+r[2]).toFixed(6) + '"><span class="grow"><b>' + E(r[0]) + '</b><small>' + (+r[1]).toFixed(5) + ', ' + (+r[2]).toFixed(5) + '</small></span><span class="go">📋</span></button>').join('') + '</div>' : '');
+    }
+    function show(s) {
+        wrap.hidden = false; document.body.classList.add('rp-map'); curS = s; chrome(s);
+        const off = Q('#mp-off'); off.hidden = true; wrap.classList.remove('off'); Q('#map').style.visibility = '';
+        if (!located(s)) { fallback(s, 'Ce lieu n\'a pas de coordonnées.'); Q('#mp-off').innerHTML = '<div class="m-card"><h3>📍 Lieu non localisé</h3><p class="m-hint" style="margin:0">Placez-le à votre position, ou saisissez ses coordonnées dans la fiche (✎).</p></div>'; return; }
+        ensureL().then(ok => { if (view !== 'spot' || tab !== 'map' || curId !== s.id) return; if (ok) { build(s); } else fallback(s); });
+    }
+    function hide() { wrap.hidden = true; document.body.classList.remove('rp-map'); }
+    return {
+        show, hide, chrome: () => curS && chrome(curS), resize() { if (MAP && !wrap.hidden) MAP.invalidateSize(); },
+        redraw() { if (MAP && curS && !wrap.hidden && located(curS)) { draw(curS, false); chrome(curS); } },
+        live() { if (wrap.hidden || !curS) return; const el = Q('#mp-dist'); if (!moving) chrome(curS); if (MAP) drawMe(curS); },
+        center() { if (MAP && curS && located(curS)) MAP.setView([curS.lat, curS.lon], Math.max(MAP.getZoom(), 16)); },
+        toMe() { if (!MAP || !curS) return; if (!Geo.pos) { Geo.start(); XM.toast('📍 Recherche de votre position…'); return; } fitView(curS); },
+        startMove() { moving = true; pend = null; this.redraw(); },
+        cancelMove() { moving = false; pend = null; this.redraw(); },
+        pending: () => pend, isMoving: () => moving,
+        endMove() { moving = false; pend = null; },
+        setBase, retry() { LP = null; if (curS) show(curS); },
+        map: () => MAP
+    };
+})();
+
+// =====================================================================
+//  Actions, feuilles, import / retour bureau, exemple, démarrage
+// =====================================================================
+const goList = () => { if (history.state && history.state.v === 'spot') history.back(); else { view = 'list'; MapUI.endMove(); render(); } };
+function openSpot(id, t) {
+    if (!spotById(id)) return; curId = id; view = 'spot'; tab = t || 'map'; curDay = ''; MapUI.endMove();
+    try { history.pushState({ v: 'spot' }, ''); } catch (e) { } window.scrollTo(0, 0); render();
+}
+addEventListener('popstate', () => { if (view === 'spot') { view = 'list'; MapUI.endMove(); XM.closeSheet(); render(); } });
+function setTab(t) { if (t === tab) return; if (tab === 'map') MapUI.endMove(); tab = t; window.scrollTo(0, 0); render(); }
+const sheetOk = (html, o) => XM.sheet(html, o);
+async function copyTxt(t, msg) { toastIf(await XM.copy(t) ? (msg || '📋 Copié') : '⚠️ Copie impossible'); }
+const toastIf = m => XM.toast(m);
+
+// ---------- géolocalisation ----------
+function geoAct() { Geo.start(); if (Geo.pos) Geo.once().then(() => { }); XM.toast('📍 Recherche de votre position…', 2200); }
+let liveT = 0;
+Geo.on(() => {
+    const now = Date.now(); if (now - liveT < 1500 && Geo.pos) return; liveT = now;
+    if (view === 'list') renderLive(); else if (tab === 'map') MapUI.live();
+    const el = Q('#ad-p'); if (el) el.innerHTML = addPosHtml();
+});
+function renderLive() { const g = Q('#georow'); if (g) g.innerHTML = geoRowHtml(); const l = Q('#lst'); if (l) l.innerHTML = lstHtml(); }
+
+// ---------- modifications d'un lieu ----------
+function setStatus(v) { const s = cur(); if (!s || s.status === v) return; s.status = v; touch(s, 'status'); render(); }
+function setRate(n) { const s = cur(); if (!s) return; s.rating = s.rating === n ? 0 : n; touch(s, 'rating'); render(); }
+function setChk(k, v) { const s = cur(); if (!s) return; s.chk[k] = s.chk[k] === v ? '' : v; if (!s.chk[k]) delete s.chk[k]; touchChk(s, k); render(); }
+async function placeHere(s) {
+    XM.toast('📍 Recherche de votre position…', 2500); const p = await Geo.once(); if (!p) { XM.toast('⚠️ Position indisponible : autorisez la localisation', 4000); return; }
+    s.lat = +p.lat.toFixed(6); s.lon = +p.lon.toFixed(6); s.tz = ''; touch(s, 'lat', 'lon'); render(); fillAddress(s);
+}
+async function fillAddress(s) {
+    if (!located(s) || (s.address && s.city)) return; const r = await reverseGeo(s.lat, s.lon); if (!r) return; let ch = false;
+    if (!s.address && r.address) { s.address = r.address; touch(s, 'address'); ch = true; } if (!s.city && r.city) { s.city = r.city; s.cp = s.cp || r.cp; touch(s, 'city', 'cp'); ch = true; }
+    if (ch && ST && spotById(s.id)) render();
+}
+function moveSpot(s, lat, lon) { s.lat = +(+lat).toFixed(6); s.lon = +(+lon).toFixed(6); s.tz = ''; touch(s, 'lat', 'lon'); }
+
+// ---------- feuilles ----------
+function openNav(s) {
+    if (!located(s)) return; const la = s.lat, lo = s.lon, nm = encodeURIComponent(s.name || 'Lieu'), ios = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1), and = /Android/.test(navigator.userAgent);
+    let L0 = [['🧭', 'Google Maps', 'Itinéraire en voiture', navLink(la, lo) + '&travelmode=driving'], ['🚶', 'Google Maps · à pied', 'Itinéraire piéton', navLink(la, lo) + '&travelmode=walking'], ['🚙', 'Waze', 'Navigation', LINKS.waze(la, lo)], ['🍎', 'Plans (Apple)', 'iPhone, iPad, Mac', 'https://maps.apple.com/?daddr=' + la + ',' + lo + '&q=' + nm + '&dirflg=d'], ['📡', 'Application de cartes du téléphone', 'Lien geo: (Android et autres)', 'geo:' + la + ',' + lo + '?q=' + la + ',' + lo + '(' + nm + ')'], ['🌍', 'OpenStreetMap', 'Voir sur la carte', LINKS.osm(la, lo)]];
+    if (ios) L0 = [L0[3], L0[0], L0[2], L0[1], L0[5]]; else if (and) L0 = [L0[4], L0[0], L0[2], L0[1], L0[5]];
+    const sh = sheetOk('<p class="m-hint" style="margin:0 0 10px">Destination : <b>' + E(s.name || 'Lieu') + '</b>' + (s.address ? ' · ' + E(s.address) : '') + '</p><div class="m-list" style="margin:0">' + L0.map(x => '<a class="m-item" href="' + E(x[3]) + '"' + (x[3].startsWith('http') ? ' target="_blank" rel="noopener"' : '') + '><span class="ico">' + x[0] + '</span><span class="grow"><b>' + E(x[1]) + '</b><small>' + E(x[2]) + '</small></span><span class="go">↗</span></a>').join('') + '</div><div class="m-actions"><button class="m-btn" data-act="copygps">📋 Copier le GPS</button></div>', { title: '🧭 Itinéraire' });
+}
+function openEdit() {
+    const s = cur(); if (!s) return;
+    const sh = sheetOk('<label class="m-field"><span>Nom du lieu</span><input type="text" id="e-name" value="' + E(s.name) + '"></label>' +
+        '<label class="m-field"><span>Type</span><select id="e-cat">' + CATS.map(x => '<option value="' + x[0] + '"' + (s.cat === x[0] ? ' selected' : '') + '>' + x[2] + ' ' + x[1] + '</option>').join('') + '</select></label>' +
+        '<label class="m-field"><span>Adresse</span><input type="text" id="e-addr" value="' + E(s.address) + '"></label><div class="m-grid2"><label class="m-field"><span>Code postal</span><input type="text" id="e-cp" value="' + E(s.cp) + '" inputmode="numeric"></label><label class="m-field"><span>Commune</span><input type="text" id="e-city" value="' + E(s.city) + '"></label></div>' +
+        '<label class="m-field"><span>Coordonnées GPS (ou lien Maps)</span><input type="text" id="e-gps" value="' + (located(s) ? coordTxt(s) : '') + '" placeholder="48.8566, 2.3522"></label>' +
+        '<div class="m-grid2"><label class="m-field"><span>Jour de tournage visé</span><input type="date" id="e-date" value="' + E(s.date) + '"></label><label class="m-field"><span>Nature du lieu</span><select id="e-acc">' + ACCESS.map(x => '<option value="' + x[0] + '"' + (s.access === x[0] ? ' selected' : '') + '>' + x[1] + '</option>').join('') + '</select></label></div>' +
+        '<span class="m-sec" style="margin-top:4px">Propriétaire / gestionnaire</span><label class="m-field"><span>Nom</span><input type="text" id="e-own" value="' + E(s.owner) + '"></label><label class="m-field"><span>Qualité</span><input type="text" id="e-qual" value="' + E(s.qualite) + '" placeholder="propriétaire, gérant, mairie…"></label>' +
+        '<div class="m-grid2"><label class="m-field"><span>Téléphone</span><input type="tel" id="e-tel" value="' + E(s.phone) + '"></label><label class="m-field"><span>E-mail</span><input type="email" id="e-mail" value="' + E(s.email) + '"></label></div>' +
+        '<div class="m-actions"><button class="m-btn primary" id="e-ok">Enregistrer</button></div>', { title: '✎ Modifier le lieu' });
+    Q('#e-ok', sh).onclick = () => {
+        const v = id => Q(id, sh).value.trim(); let any = 0;
+        const set = (f, nv) => { if (s[f] !== nv) { s[f] = nv; touch(s, f); any = 1; } };
+        set('name', v('#e-name') || s.name); set('cat', v('#e-cat')); set('address', v('#e-addr')); set('cp', v('#e-cp')); set('city', v('#e-city')); set('date', v('#e-date')); set('access', v('#e-acc')); set('owner', v('#e-own')); set('qualite', v('#e-qual')); set('phone', v('#e-tel')); set('email', v('#e-mail'));
+        const g = v('#e-gps'); if (g) { const c = parseCoords(g); if (!c) { XM.toast('⚠️ Coordonnées non reconnues : « 48.8566, 2.3522 » ou lien Maps'); return; } if (!located(s) || Math.abs(c.lat - s.lat) > 1e-6 || Math.abs(c.lon - s.lon) > 1e-6) { moveSpot(s, c.lat, c.lon); any = 1; } }
+        XM.closeSheet(); render(); if (any) XM.toast('✔ Lieu mis à jour');
+    };
+}
+function openDay() {
+    const s = cur(); if (!s) return; const dd = dayOf(s);
+    const sh = sheetOk('<p class="m-hint" style="margin:0 0 10px">Le soleil (rayons de lever et de coucher, heures dorées, ombres) est calculé pour ce jour, hors ligne.</p><label class="m-field"><span>Jour</span><input type="date" id="dsh" value="' + E(dd) + '"></label><div class="m-actions" style="margin-top:0"><button class="m-btn" id="dsh-t">Aujourd\'hui</button>' + (s.date ? '<button class="m-btn" id="dsh-s">Jour de tournage</button>' : '') + '<button class="m-btn" id="dsh-w">⏱ +1 semaine</button></div><div class="m-actions"><button class="m-btn" id="dsh-r">💾 Définir comme jour de tournage</button><button class="m-btn primary" id="dsh-ok">Fermer</button></div>', { title: '☀️ Jour du soleil' });
+    const ap = v => { if (/^\d{4}-\d{2}-\d{2}$/.test(v)) { setDay(v); Q('#dsh', sh).value = v; } };
+    Q('#dsh', sh).onchange = e => ap(e.target.value); Q('#dsh-t', sh).onclick = () => ap(todayISO()); if (s.date) Q('#dsh-s', sh).onclick = () => ap(s.date);
+    Q('#dsh-w', sh).onclick = () => { const d = new Date(dayOf(s) + 'T12:00:00'); d.setDate(d.getDate() + 7); ap(d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate())); };
+    Q('#dsh-r', sh).onclick = () => { s.date = dayOf(s); touch(s, 'date'); XM.toast('✔ Jour de tournage : ' + longDate(s.date)); render(); };
+    Q('#dsh-ok', sh).onclick = () => XM.closeSheet();
+}
+function setDay(v) { curDay = v; if (view === 'spot') { if (tab === 'map') { MapUI.redraw(); } else render(); } }
+function openLayers() {
+    const rows = [['sun', '☀️', 'Soleil', 'Rayons de lever et de coucher, heures dorées'], ['sec', '🏥', 'Secours', 'Hôpital, pharmacies, pompiers, défibrillateurs'], ['park', '🅿️', 'Parkings', 'Stationnement autour du lieu'], ['shop', '🛒', 'Commerces', 'Supermarchés, supérettes, boulangeries'], ['ring', '⭕', 'Rayon d\'analyse', 'Cercle autour du lieu'], ['others', '📍', 'Autres lieux du projet', 'Points de couleur selon le statut']];
+    const sh = sheetOk('<div class="m-list" style="margin:0 0 12px">' + rows.map(r => '<button class="m-item" data-act="layer" data-k="' + r[0] + '"><span class="ico">' + r[1] + '</span><span class="grow"><b>' + r[2] + '</b><small>' + r[3] + '</small></span><span class="rp-sw' + (pf.layers[r[0]] ? ' on' : '') + '"></span></button>').join('') + '</div>' +
+        '<span class="m-sec" style="margin-top:0">Fond de carte</span><div class="m-seg">' + [['osm', 'Plan'], ['ortho', 'Photo aérienne']].map(b => '<button class="' + (pf.base === b[0] ? 'on' : '') + '" data-act="base" data-v="' + b[0] + '">' + b[1] + '</button>').join('') + '</div>' + (ST.an[curId] && !ST.an[curId].hs ? '<p class="m-hint">Secours, parkings et commerces apparaissent une fois le lieu analysé sur le bureau.</p>' : ''), { title: '🗂️ Couches de la carte' });
+}
+function viewPhoto(id) {
+    const s = cur(), p = PHC[id], ph = s && s.photos.find(x => x.id === id); if (!p) return;
+    const sh = sheetOk('<img src="' + p.data + '" style="width:100%;border-radius:10px;display:block" alt="Photo"><p class="m-hint" style="margin:8px 0 0">' + E(ph && ph.cap || '') + '</p><div class="m-actions"><button class="m-btn danger" id="ph-del">🗑️ Supprimer</button><button class="m-btn primary" id="ph-ok">Fermer</button></div>', { title: '📷 Photo' });
+    Q('#ph-ok', sh).onclick = () => XM.closeSheet();
+    Q('#ph-del', sh).onclick = async () => { XM.closeSheet(); if (await XM.ask('Supprimer cette photo ?', 'Elle sera retirée de ce téléphone.', [{ label: 'Supprimer', danger: true }, 'Annuler']) === 0) { delPhotoRec(s, id); render(); } };
+}
+function pickImages(capture) {
+    const s = cur(); if (!s) return; if (capture) { Compass.start(); try { Geo.start && Geo.start(); } catch (e) { } } const i = document.createElement('input'); i.type = 'file'; i.accept = 'image/*'; if (capture) i.setAttribute('capture', 'environment'); else i.multiple = true; i.style.display = 'none';
+    i.onchange = async () => { const fs = Array.from(i.files || []); i.remove(); if (!fs.length) return; XM.toast('🖼️ Ajout…'); let n = 0; for (const f of fs) { try { await addPhotoFile(s, f, capture); n++; } catch (e) { } } render(); XM.toast(n ? '📷 ' + n + ' photo' + (n > 1 ? 's' : '') + ' ajoutée' + (n > 1 ? 's' : '') : '⚠️ Image non reconnue'); };
+    document.body.appendChild(i); i.click();
+}
+
+// ---------- nouveau repérage « ici » ----------
+const addPosHtml = () => Geo.pos ? '<b>📍 Ma position</b><small>±' + Math.round(Geo.pos.acc || 0) + ' m · ' + (+Geo.pos.lat).toFixed(5) + ', ' + (+Geo.pos.lon).toFixed(5) + '</small>' : '<b>📍 Ma position</b><small>' + E(Geo.err || 'Recherche en cours… (autorisez la localisation)') + '</small>';
+let addCat = 'decor';
+function openAdd() {
+    if (!ST) { ST = blankST({ name: 'Repérage terrain ' + shortDate(todayISO()) }); persist(); render(); }
+    Geo.start(); addCat = 'decor'; const n = ST.spots.length + 1;
+    const sh = sheetOk('<label class="m-field"><span>Nom du lieu</span><input type="text" id="ad-n" value="Lieu ' + n + '" autocomplete="off"></label><span class="m-sec" style="margin-top:0">Type</span><div class="m-chips rp-wrap" id="ad-c">' + CATS.map(c => '<button class="m-chip' + (c[0] === addCat ? ' on' : '') + '" data-cat="' + c[0] + '">' + c[2] + ' ' + E(c[1]) + '</button>').join('') + '</div>' +
+        '<div class="m-card rp-padd" id="ad-p">' + addPosHtml() + '</div><label class="m-field"><span>Ou saisir des coordonnées / coller un lien Maps</span><input type="text" id="ad-g" placeholder="48.8566, 2.3522" autocomplete="off"></label><div class="m-actions"><button class="m-btn primary" id="ad-ok">➕ Ajouter ce repérage</button></div>', { title: '➕ Nouveau repérage' });
+    QA('[data-cat]', sh).forEach(b => b.onclick = () => { addCat = b.dataset.cat; QA('[data-cat]', sh).forEach(x => x.classList.toggle('on', x === b)); });
+    setTimeout(() => { try { Q('#ad-n', sh).select(); } catch (e) { } }, 50);
+    Q('#ad-ok', sh).onclick = async () => {
+        const g = Q('#ad-g', sh).value.trim(); let p = null; if (g) { p = parseCoords(g); if (!p) { XM.toast('⚠️ Coordonnées non reconnues'); return; } } else if (Geo.pos) p = { lat: Geo.pos.lat, lon: Geo.pos.lon }; else { XM.toast('⚠️ Position inconnue : attendez le point GPS ou saisissez des coordonnées', 4000); return; }
+        const s = mkSpot({ name: Q('#ad-n', sh).value.trim() || 'Lieu ' + n, cat: addCat, status: 'vu', lat: +(+p.lat).toFixed(6), lon: +(+p.lon).toFixed(6) });
+        ST.spots.push(s); ST.newSpots.push(s.id); persist(true); XM.closeSheet(); openSpot(s.id, 'map'); XM.toast('✔ Repérage ajouté');
+        const r = await reverseGeo(s.lat, s.lon); if (r && spotById(s.id)) { s.address = r.address || s.address; s.city = r.city; s.cp = r.cp; persist(); if (view === 'spot' && curId === s.id && tab === 'info') render(); }
+    };
+}
+
+// ---------- import / fusion d'un envoi du bureau ----------
+const SCAL = ['name', 'cat', 'status', 'rating', 'notes', 'address', 'city', 'cp', 'date', 'access', 'owner', 'qualite', 'phone', 'email', 'tech'];
+async function handleEnv(env, via) {
+    if (env.kind === 'return') { XM.toast('⚠️ Ce fichier est un retour du mobile : il s\'importe sur le bureau (bouton 📱)', 6000); return; }
+    const d = env.data || {}; if (!Array.isArray(d.spots)) { XM.toast('⚠️ Envoi non reconnu (aucun lieu)'); return; }
+    const inc = normST({ id: d.id || XM.uid(), name: d.name || env.name || '', author: d.author || '', info: d.info || {}, spots: d.spots, an: d.an || {}, at: Date.now(), src: via });
+    inc.spots.forEach(s => { inc.base[s.id] = { notes: s.notes || '' }; });
+    const nA = Object.keys(inc.an).length, msg = () => '📥 ' + inc.spots.length + ' lieu' + (inc.spots.length > 1 ? 'x' : '') + ' reçu' + (inc.spots.length > 1 ? 's' : '') + (nA ? ' · ' + nA + ' analysé' + (nA > 1 ? 's' : '') : '');
+    if (!ST || (!ST.spots.length && !hasLocal())) { ST = inc; await afterImport(msg()); return; }
+    if (ST.id === inc.id) {
+        if (!hasLocal()) { ST = inc; await afterImport('🔄 Projet mis à jour · ' + msg()); return; }
+        const i = await XM.ask('Projet déjà présent', 'Vous avez des modifications faites sur ce téléphone (' + localSummary() + ') qui n\'ont pas été renvoyées. Que faire ?', ['Fusionner (garder mes modifications)', { label: 'Remplacer par la nouvelle version', danger: true }, 'Annuler']);
+        if (i === 0) { ST = mergeIn(inc); await afterImport('🔀 Projet fusionné · ' + msg()); } else if (i === 1) { await wipePhotos(); ST = inc; await afterImport('🔄 Projet remplacé · ' + msg()); }
+        return;
+    }
+    const i = await XM.ask('Remplacer le projet ?', 'Le projet « ' + E(ST.name || 'Repérage terrain') + ' » (' + ST.spots.length + ' lieu' + (ST.spots.length > 1 ? 'x' : '') + ') sera remplacé par « ' + E(inc.name || 'projet reçu') + ' ».' + (hasLocal() ? ' <b>Attention : ' + localSummary() + ' non renvoyé(s) seront perdus.</b> Pensez à « Renvoyer au bureau » d\'abord.' : ''), [{ label: 'Remplacer', danger: true }, 'Annuler']);
+    if (i === 0) { await wipePhotos(); ST = inc; await afterImport(msg()); }
+}
+const localSummary = () => { const p = []; if (ST.newSpots.length) p.push(ST.newSpots.length + ' lieu(x) créé(s)'); const m = Object.keys(ST.rx).filter(id => Object.keys(ST.rx[id]).some(k => k !== 'photos')).length; if (m) p.push(m + ' lieu(x) modifié(s)'); if (ST.newPh.length) p.push(ST.newPh.length + ' photo(s)'); return p.join(', ') || 'rien'; };
+async function afterImport(m) { persist(true); view = 'list'; lq = ''; pf.filter = ''; savePf(); render(); XM.toast(m, 4500); if (!Geo.pos && pf.geoOn) Geo.start(); }
+async function wipePhotos() { Object.keys(PHC).forEach(k => delete PHC[k]); try { await IDB.clear(); } catch (e) { } }
+function mergeIn(inc) {
+    const old = ST, out = inc, keep = new Set();
+    Object.keys(old.rx).forEach(id => {
+        const so = old.spots.find(x => x.id === id), sn = out.spots.find(x => x.id === id), r = old.rx[id]; if (!so) return;
+        if (!sn) { if (Object.keys(r).some(k => k !== 'photos') || so.photos.length) { out.spots.push(so); out.newSpots.push(so.id); if (old.an[so.id]) out.an[so.id] = old.an[so.id]; } return; }
+        SCAL.forEach(f => { if (r[f]) { if (f === 'notes' && sn.notes && sn.notes !== (old.base[id] || {}).notes && sn.notes !== so.notes && !so.notes.includes(sn.notes)) sn.notes = so.notes + '\n\n— Notes du bureau —\n' + sn.notes; else sn[f] = so[f]; } });
+        if (r.lat) { sn.lat = so.lat; sn.lon = so.lon; sn.tz = so.tz; }
+        if (r.chk) Object.keys(r.chk).forEach(k => { if (so.chk[k]) sn.chk[k] = so.chk[k]; else delete sn.chk[k]; });
+        if (r.chkN) Object.keys(r.chkN).forEach(k => { if (so.chkN[k]) sn.chkN[k] = so.chkN[k]; else delete sn.chkN[k]; });
+        sn.photos = (so.photos || []).slice(); out.rx[id] = JSON.parse(JSON.stringify(r));
+    });
+    old.spots.forEach(so => {
+        if (!old.newSpots.includes(so.id)) { if (!old.rx[so.id] && so.photos.length) { const sn = out.spots.find(x => x.id === so.id); if (sn) sn.photos = so.photos.slice(); } return; }
+        if (!out.spots.find(x => x.id === so.id)) { out.spots.push(so); out.newSpots.push(so.id); if (old.an[so.id]) out.an[so.id] = old.an[so.id]; }
+    });
+    out.newPh = old.newPh.filter(pid => PHC[pid] && out.spots.some(s => s.photos.some(p => p.id === pid)));
+    return out;
+}
+
+// ---------- retour au bureau ----------
+const clean = o => { const r = {}; Object.keys(o).forEach(k => { const v = o[k]; if (v === '' || v == null || (Array.isArray(v) && !v.length) || (typeof v === 'object' && !Array.isArray(v) && !Object.keys(v).length)) return; r[k] = v; }); return r; };
+async function buildReturn(withPh) {
+    const created = ST.newSpots.map(spotById).filter(Boolean).map(s => { const o = clean(s); o.photos = s.photos.map(p => ({ id: p.id, cap: p.cap || '' })); if (!o.photos.length) delete o.photos; return o; });
+    const patch = {}; Object.keys(ST.rx).forEach(id => {
+        const s = spotById(id), r = ST.rx[id]; if (!s || isNew(s)) return; const p = {};
+        SCAL.forEach(f => { if (r[f]) p[f] = s[f]; }); if (r.notes) p.n0 = (ST.base[id] || {}).notes || ''; if (r.lat && located(s)) { p.lat = s.lat; p.lon = s.lon; }
+        if (r.chk) { p.chk = {}; Object.keys(r.chk).forEach(k => { p.chk[k] = s.chk[k] || ''; }); } if (r.chkN) { p.chkN = {}; Object.keys(r.chkN).forEach(k => { p.chkN[k] = s.chkN[k] || ''; }); }
+        if (Object.keys(p).length) patch[id] = p;
+    });
+    const ph = []; for (const id of ST.newPh) { const rec = PHC[id]; if (!rec) continue; const s = spotById(rec.spot), pr = s && s.photos.find(x => x.id === id); if (!s) continue; const o = { id, s: s.id, c: pr ? pr.cap || '' : '' }; if (pr && pr.lat != null) o.g = [pr.lat, pr.lon, pr.hd != null ? pr.hd : null, pr.acc || 0]; if (withPh) { const sm = await smallPhoto(rec); o.d = sm.data; o.w = sm.w; o.h = sm.h; } ph.push(o); }
+    return { v: 1, pid: ST.id, pname: ST.name, created, patch, ph, nph: ph.length, withPh: !!withPh };
+}
+async function sendBack() {
+    if (!ST) { XM.toast('Aucun projet à renvoyer'); return; }
+    let data = await buildReturn(false); const n = data.created.length + Object.keys(data.patch).length + data.ph.length;
+    if (!n) { XM.toast('Aucune modification à renvoyer : rien n\'a changé depuis la réception', 4000); return; }
+    let withPh = false;
+    if (data.ph.length) { const i = await XM.ask('📷 Photos prises sur place', data.ph.length + ' photo' + (data.ph.length > 1 ? 's' : '') + '. Les photos sont trop lourdes pour un QR code : elles voyagent dans un fichier.', ['Sans les photos (QR / lien léger)', 'Avec les photos (fichier)', 'Annuler']); if (i === -1 || i === 2) return; withPh = i === 1; }
+    if (withPh) { XM.toast('⏳ Préparation des photos…', 4000); data = await buildReturn(true); }
+    XM.send({ app: APP, page: 'repero.html', title: 'REPERO', kind: 'return', name: ST.name || 'Repérage terrain', make: () => data, file: 'REPERO_retour_' + XM.safe(ST.name || 'terrain') + '.xiii-m.json',
+        note: 'Sur le bureau : ouvrez REPERO XIII, touchez <b>📱 Mobile</b> puis <i>Importer un fichier</i> ou <i>Coller un lien</i> (ou scannez ce code avec l\'appareil photo de l\'ordinateur).<br>Contenu : ' + data.created.length + ' lieu(x) créé(s), ' + Object.keys(data.patch).length + ' lieu(x) modifié(s), ' + data.ph.length + ' photo(s)' + (withPh || !data.ph.length ? '' : ' <b>non incluses</b>') + '. Seules vos modifications repartent ; le bureau fusionne sans rien écraser d\'autre.' });
+}
+
+// ---------- exemple ----------
+function demoST() {
+    const now = Date.now(), A = (la, lo, o) => Object.assign({ at: now - 3600e3, R: 1500, o: [la, lo], hs: 1 }, o);
+    const sp = [
+        mkSpot({ id: 'demo0001', name: 'Café des Arts', address: '12 rue de Rivoli, 75004 Paris', city: 'Paris', cp: '75004', lat: 48.8566, lon: 2.3522, cat: 'decor', status: 'vu', rating: 4, date: '', access: 'prive', owner: 'Mme Dubois', qualite: 'gérante', phone: '+33 1 42 00 00 00', email: 'contact@cafedesarts.example', notes: 'Belle lumière le matin côté rue. Terrasse à privatiser.', chk: { camion: 'q', park: 'ok', elec: 'ok', fond: 'ko' }, chkN: { camion: 'Rue étroite, livraison avant 8 h', fond: 'Circulation rue de Rivoli' } }),
+        mkSpot({ id: 'demo0002', name: 'Parking Hôtel de Ville', address: 'Place de l\'Hôtel de Ville, 75004 Paris', city: 'Paris', cp: '75004', lat: 48.8575, lon: 2.3514, cat: 'parking', status: 'retenu', rating: 3, access: 'public', notes: 'Base régie possible : camions + loges.' }),
+        mkSpot({ id: 'demo0003', name: 'Cour d\'immeuble', address: 'Passage Saint-Paul, 75004 Paris', city: 'Paris', cp: '75004', lat: 48.8553, lon: 2.3605, cat: 'alt', status: 'avoir', access: 'mixte' })
+    ];
+    const an = {
+        demo0001: A(48.8566, 2.3522, { sv: 76, sw: [[-14, 'bruit bruyant'], [-2, 'drone'], [-8, 'droit à l\'image']], nz: { d: 62, n: 50, pk: 68, r: [['primary', 'Rue de Rivoli', 70, 66, 57], ['school', 'École Saint-Merri', 140, 58, null], ['bar', 'Le Bar', 90, 50, 60], ['worship', 'Cathédrale', 300, 54, 42]] },
+            h: { n: 'Hôtel-Dieu', d: 1420, em: 1, p: '+33 1 42 34 82 34', a: 'Parvis Notre-Dame, 75004 Paris', lat: 48.8546, lon: 2.3487, t: 420, k: 2100 }, hl: [[48.8827, 2.3569, 3650, 'Hôpital Lariboisière', 1]],
+            v: { pharmacy: [[48.8606, 2.3542, 450, 'Pharmacie du Centre', '+33 1 42 71 00 00', 'Mo-Sa 09:00-20:00']], fire: [[48.8626, 2.3562, 710, 'Caserne']], aed: [[48.8546, 2.3502, 260, 'DAE mairie']], supermarket: [[48.8536, 2.3532, 330, 'Monoprix']], convenience: [[48.8586, 2.3572, 290, 'Carrefour City']], parking: [[48.8576, 2.3572, 410, 'Parking Rivoli'], [48.8559, 2.3489, 280, 'Parking Hôtel de Ville']], toilets: [[48.8571, 2.3540, 180, 'Sanisette']], food: [[48.8569, 2.3530, 70, 'Brasserie du Coin']] },
+            c: { pk: 2, wc: 3, ho: 4, fo: 22 }, ar: { lv: 'ok', msg: 'Paris-Le Bourget à 15 km (NE)', ae: [['Paris-Le Bourget', 15000, 'aerodrome', 40, 'LFPB', 0]] }, dr: { lv: 1, r: [[1, 'Zone fréquentée : le survol de personnes non impliquées n\'est pas autorisé en catégorie ouverte'], [1, 'Monument à proximité : accord du gestionnaire']] },
+            ra: { m1: 2, m3: 6, nb: 2, bc: [['radio', 'Tour Eiffel', 4200, '95.0']] }, ri: { top: 2, it: [['worship', 'Cathédrale', 90, 0, 0], ['school', 'École Saint-Merri', 140, 0, 0], ['government', 'Mairie du 4e', 150, 0, 0], ['crowd', '', 0, 0, 1, 24]] },
+            wx: { kind: 'climate', date: todayISO(), tmax: 17, tmin: 10, rain: 1.2, pop: 35, wind: 18, sun: 4.2, n: 35 }, el: 35 }),
+        demo0002: A(48.8575, 2.3514, { sv: 90, sw: [[-4, 'bruit modéré'], [-6, 'droit à l\'image']], nz: { d: 52, n: 44, pk: 52, r: [['tertiary', 'Rue de Lobau', 60, 52, 42]] }, h: { n: 'Hôtel-Dieu', d: 1160, em: 1, lat: 48.8546, lon: 2.3487, t: 360, k: 1800 }, hl: [], v: { parking: [[48.8575, 2.3514, 0, 'Parking Hôtel de Ville']], aed: [[48.8573, 2.3519, 50, 'DAE Mairie']] }, c: { pk: 3, wc: 2, ho: 2, fo: 15 },
+            ar: { lv: 'ok', msg: 'Paris-Le Bourget à 15 km (NE)', ae: [] }, dr: { lv: 0, r: [] }, ra: { m1: 1, m3: 4, nb: 1, bc: [] }, ri: { top: 1, it: [['government', 'Hôtel de Ville', 40, 1, 0]] } })
+    };
+    const st = normST({ id: 'demo-repero', name: 'Court métrage « Les Heures Bleues » (exemple)', author: 'Équipe repérages', info: { production: 'Atelier XIII', realisation: 'M. Lamotte', dates: '12 → 14 nov.' }, spots: sp, an, src: 'demo' });
+    sp.forEach(s => { st.base[s.id] = { notes: s.notes }; }); return st;
+}
+async function loadDemo() {
+    if (ST && (ST.spots.length || hasLocal())) { const i = await XM.ask('Charger l\'exemple ?', 'Le projet actuel (' + ST.spots.length + ' lieu' + (ST.spots.length > 1 ? 'x' : '') + (hasLocal() ? ', ' + localSummary() + ' non renvoyé(s)' : '') + ') sera remplacé.', [{ label: 'Remplacer', danger: true }, 'Annuler']); if (i !== 0) return; }
+    await wipePhotos(); ST = demoST(); persist(true); view = 'list'; render(); XM.toast('🧪 Exemple chargé : touchez un lieu pour voir la carte et les infos', 4500);
+}
+async function wipeAll() {
+    const i = await XM.ask('Effacer le projet du téléphone ?', 'Le projet, vos modifications et vos photos seront supprimés de ce téléphone.' + (hasLocal() ? ' <b>' + localSummary() + ' non renvoyé(s).</b>' : ''), [{ label: 'Effacer', danger: true }, 'Annuler']); if (i !== 0) return;
+    await wipePhotos(); XM.drop(APP); ST = null; view = 'list'; render(); XM.toast('🗑️ Projet effacé');
+}
+function openMenu() {
+    XM.menu({ app: APP, deskPage: 'repero.html', onImport: handleEnv, sendReturn: sendBack, items: [
+        { icon: '➕', label: 'Nouveau repérage ici', sub: 'À ma position : nom, type, photos', run: openAdd },
+        { icon: '📍', label: 'Ma position', sub: Geo.pos ? 'Actualiser (±' + Math.round(Geo.pos.acc || 0) + ' m)' : 'Activer la localisation', run: geoAct },
+        { icon: '🧪', label: 'Charger l\'exemple', sub: 'Projet de démonstration', run: loadDemo },
+        ST ? { icon: '🗑️', label: 'Effacer le projet du téléphone', sub: 'Lieux, modifications et photos', run: wipeAll } : null].filter(Boolean) });
+}
+
+// ---------- événements ----------
+const ACT = {
+    sunar: () => { const s = cur(); if (s && located(s)) sunAR(s, dayOf(s)); else XM.toast('Localisez d\'abord le lieu'); },
+    speed: async (d, el) => { const s = cur(); if (!s) return; el.disabled = true; el.textContent = '📶 Mesure en cours…'; try { const v = await speedTest(); s.tech = s.tech || {}; s.tech.nDown = String(v).replace(',', '.'); touch(s, 'tech'); const i = Q('#tf-nDown'); if (i) i.value = s.tech.nDown; const b = Q('#tv'); if (b) b.innerHTML = techVHtml(s); XM.toast('📶 ≈ ' + String(v).replace('.', ',') + ' Mb/s en réception (mesure approximative)'); } catch (e) { XM.toast('⚠️ Mesure impossible (hors ligne ?)'); } el.disabled = false; el.textContent = '📶 Mesurer le débit descendant'; },
+    open: d => openSpot(d.id, 'map'), tab: d => setTab(d.t), filter: d => { pf.filter = d.v; savePf(); render(); }, sort: d => { pf.sort = d.v; savePf(); if (d.v === 'dist' && !Geo.pos) geoAct(); render(); },
+    geo: () => geoAct(), status: d => setStatus(d.v), rate: d => setRate(+d.v), chk: d => setChk(d.k, d.v),
+    chkall: () => { const s = cur(); if (!s) return; CHECK_ALL.forEach(c => { if (!s.chk[c.k]) { s.chk[c.k] = 'q'; touchChk(s, c.k); } }); render(); },
+    edit: () => openEdit(), nav: () => { XM.closeSheet(); const s = cur(); if (s) setTimeout(() => openNav(s), 30); },
+    streetview: () => { const s = cur(); if (s && located(s)) window.open(LINKS.street(s.lat, s.lon), '_blank', 'noopener'); },
+    copygps: () => { const s = cur(); if (s && located(s)) copyTxt(s.lat.toFixed(6) + ', ' + s.lon.toFixed(6), '📋 GPS copié : ' + coordTxt(s)); }, copy: d => copyTxt(d.t),
+    place: () => { const s = cur(); if (s) placeHere(s); },
+    today: () => setDay(todayISO()), shootday: () => { const s = cur(); if (s && s.date) setDay(s.date); }, dayopen: () => openDay(),
+    layers: () => openLayers(), layer: (d, el) => { pf.layers[d.k] = pf.layers[d.k] ? 0 : 1; savePf(); const sw = Q('.rp-sw', el); if (sw) sw.classList.toggle('on', !!pf.layers[d.k]); MapUI.redraw(); },
+    base: (d, el) => { pf.base = d.v; savePf(); QA('[data-act=base]', el.parentNode).forEach(b => b.classList.toggle('on', b === el)); MapUI.setBase(); },
+    mylocate: () => MapUI.toMe(), spotcenter: () => MapUI.center(), movestart: () => { MapUI.startMove(); XM.toast('✋ Touchez la carte pour placer le repère', 3000); }, movecancel: () => MapUI.cancelMove(),
+    movevalid: () => { const s = cur(), p = MapUI.pending(); if (!s || !p) return; const dm = hav(s.lat, s.lon, p[0], p[1]); moveSpot(s, p[0], p[1]); MapUI.endMove(); XM.toast('✔ Repère déplacé de ' + fmtD(dm) + (ST.an[s.id] ? ' · l\'analyse concerne l\'ancienne position' : '')); render(); fillAddress(s); },
+    retrymap: () => MapUI.retry(), cam: () => pickImages(true), gal: () => pickImages(false), viewph: d => viewPhoto(d.id),
+    delspot: async () => { const s = cur(); if (!s || !isNew(s)) return; if (await XM.ask('Supprimer ce lieu ?', 'Le repérage « ' + E(s.name || 'sans nom') + ' » et ses photos seront supprimés de ce téléphone.', [{ label: 'Supprimer', danger: true }, 'Annuler']) !== 0) return; s.photos.forEach(p => { delete PHC[p.id]; IDB.del(p.id).catch(() => { }); }); ST.newPh = ST.newPh.filter(id => !s.photos.some(p => p.id === id)); ST.newSpots = ST.newSpots.filter(id => id !== s.id); ST.spots = ST.spots.filter(x => x.id !== s.id); delete ST.an[s.id]; persist(); goList(); setTimeout(render, 30); },
+    impfile: () => XM.importFile(APP, handleEnv), implink: () => XM.importLink(APP, handleEnv), newproj: () => openAdd(), demo: () => loadDemo(), fab: () => openAdd()
+};
+document.addEventListener('click', e => { const t = e.target.closest('[data-act]'); if (!t) return; const f = ACT[t.dataset.act]; if (f) { e.preventDefault(); f(t.dataset, t); } });
+document.addEventListener('toggle', e => { const d = e.target; if (d && d.matches && d.matches('details[data-k]')) { pf.open[d.dataset.k] = d.open ? 1 : 0; savePf(); } }, true);
+let capT = null;
+document.addEventListener('input', e => {
+    const t = e.target, k = t.dataset && t.dataset.in; if (!k) return;
+    if (k === 'notes') { const s = cur(); if (s) { s.notes = t.value; touch(s, 'notes'); } } else if (k === 'lq') { lq = t.value; const l = Q('#lst'); if (l) l.innerHTML = lstHtml(); }
+});
+document.addEventListener('change', e => {
+    const t = e.target, k = t.dataset && t.dataset.in; if (!k) return; const s = cur();
+    if (k === 'cap' && s) { const p = s.photos.find(x => x.id === t.dataset.id); if (p) { p.cap = t.value; persist(); } }
+    else if (k === 'chkn' && s) { if (t.value.trim()) s.chkN[t.dataset.k] = t.value.trim(); else delete s.chkN[t.dataset.k]; touchChk(s, t.dataset.k, true); }
+    else if (k === 'tech' && s) { s.tech = s.tech || {}; const v = t.value.trim(); if (v === '') delete s.tech[t.dataset.k]; else s.tech[t.dataset.k] = v; touch(s, 'tech'); const b = Q('#tv'); if (b) b.innerHTML = techVHtml(s); }
+    else if (k === 'day') { if (/^\d{4}-\d{2}-\d{2}$/.test(t.value)) setDay(t.value); }
+});
+Q('#btn-back').onclick = () => { if (view === 'spot') goList(); else location.href = 'index.html'; };
+Q('#btn-menu').onclick = openMenu; Q('#fab').onclick = openAdd;
+
+// ---------- démarrage ----------
+(async function boot() {
+    const raw = XM.load(APP); if (raw && Array.isArray(raw.spots)) ST = normST(raw);
+    render(); await loadPhotos(); if (ST) render();
+    try { if (pf.geoOn && navigator.permissions && navigator.permissions.query) { const r = await navigator.permissions.query({ name: 'geolocation' }); if (r.state === 'granted') Geo.start(); } else if (pf.geoOn) Geo.start(); } catch (e) { if (pf.geoOn) Geo.start(); }
+    await XM.fromHash(APP, handleEnv);
+})();
+window.RM = { get ST() { return ST; }, get view() { return view; }, get tab() { return tab; }, Geo, MapUI, PHC, openSpot, setTab, render, scoreNow, alertsNow, buildReturn, handleEnv, demoST, sendBack };
+
+// ---------- ☀️ course du soleil en réalité augmentée (caméra + boussole + inclinaison) ----------
+async function sunAR(s, dd) {
+    const ov = document.createElement('div'); ov.id = 'sar'; ov.innerHTML = '<video playsinline muted autoplay></video><canvas></canvas><div class="sar-hud"></div><div class="sar-bar"><button class="m-btn sm" data-x="fov">📐 Champ ' + (+(localStorage.getItem('xiii.sar.fov') || 66)) + '°</button><button class="m-btn sm" data-x="off">−5°</button><button class="m-btn sm" data-x="on">+5°</button><button class="m-btn sm primary" data-x="close">✕ Fermer</button></div>';
+    document.body.appendChild(ov); const v = ov.querySelector('video'), cv = ov.querySelector('canvas'), hud = ov.querySelector('.sar-hud');
+    let stream = null, hd = null, pitch = 0, roll = 0, raf = 0, off = 0, fovL = +(localStorage.getItem('xiii.sar.fov') || 66), msg = '';
+    try { stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } }, audio: false }); v.srcObject = stream; } catch (e) { msg = 'Caméra indisponible : course affichée sur fond neutre.'; }
+    try { if (typeof DeviceOrientationEvent !== 'undefined' && DeviceOrientationEvent.requestPermission) await DeviceOrientationEvent.requestPermission(); } catch (e) { }
+    const onOr = e => { const a = ((((screen.orientation && screen.orientation.angle) ?? window.orientation) || 0) + 360) % 360; let h = null; if (e.webkitCompassHeading != null) h = e.webkitCompassHeading; else if (e.absolute && e.alpha != null) h = 360 - e.alpha; if (h != null) hd = (h + a) % 360; if (e.beta != null) { if (a === 0) { pitch = e.beta - 90; roll = e.gamma; } else if (a === 90) { pitch = -e.gamma - 90 + (e.gamma < 0 ? 0 : 180); roll = -e.beta; } else { pitch = e.gamma - 90 + (e.gamma > 0 ? 0 : 180); roll = e.beta; } } };
+    window.addEventListener('deviceorientationabsolute', onOr); window.addEventListener('deviceorientation', onOr);
+    const path = sunPath(s, dd, 10), day = sunDay(s, dd), tz = day.tz, now = new Date(), pNow = SUN.pos(now, s.lat, s.lon);
+    const isToday = dd === new Date().toISOString().slice(0, 10);
+    function draw() {
+        const W = cv.width = ov.clientWidth * devicePixelRatio, H = cv.height = ov.clientHeight * devicePixelRatio, x = cv.getContext('2d'), dpr = devicePixelRatio;
+        const long = Math.max(W, H), f = (long / 2) / Math.tan(fovL / 2 * Math.PI / 180), head = hd == null ? (day.azNoon || 180) : hd + off;
+        const P = (az, alt) => { let d = ((az - head + 540) % 360) - 180; if (Math.abs(d) > 85) return null; const X = Math.tan(d * Math.PI / 180) * f, Y = -Math.tan((alt - pitch) * Math.PI / 180) * f; const r = -roll * Math.PI / 180; return [W / 2 + X * Math.cos(r) - Y * Math.sin(r), H / 2 + X * Math.sin(r) + Y * Math.cos(r)]; };
+        x.clearRect(0, 0, W, H); x.lineWidth = 3 * dpr; x.font = (13 * dpr) + 'px system-ui';
+        // horizon
+        x.strokeStyle = 'rgba(255,255,255,.5)'; x.setLineDash([8 * dpr, 6 * dpr]); x.beginPath(); let st = false; for (let a = -80; a <= 80; a += 5) { const p = P(head + a, 0); if (!p) continue; st ? x.lineTo(p[0], p[1]) : x.moveTo(p[0], p[1]); st = true; } x.stroke(); x.setLineDash([]);
+        // course du jour
+        let prev = null; path.forEach(pt => { const p = pt.alt > -6 ? P(pt.az, pt.alt) : null; if (p && prev) { const gold = pt.alt < 6 && pt.alt > -4; x.strokeStyle = pt.alt < 0 ? 'rgba(100,140,255,.8)' : gold ? '#ffa000' : '#ffeb3b'; x.beginPath(); x.moveTo(prev[0], prev[1]); x.lineTo(p[0], p[1]); x.stroke(); } prev = p; });
+        path.forEach(pt => { const d = pt.t; if (d.getMinutes() > 9 || pt.alt < -2) return; const p = P(pt.az, pt.alt); if (!p) return; x.fillStyle = '#fff'; x.beginPath(); x.arc(p[0], p[1], 4 * dpr, 0, 7); x.fill(); x.fillStyle = '#fff'; x.shadowColor = '#000'; x.shadowBlur = 4; x.fillText(fmtT(d, tz).slice(0, 5), p[0] + 6 * dpr, p[1] - 6 * dpr); x.shadowBlur = 0; });
+        [[day.T.sunrise, '🌅 lever'], [day.T.sunset, '🌇 coucher']].forEach(([t, l]) => { if (!t) return; const q = SUN.pos(t, s.lat, s.lon), p = P(q.az, 0); if (!p) return; x.fillStyle = '#ffa000'; x.fillText(l + ' ' + fmtT(t, tz).slice(0, 5), p[0] - 30 * dpr, p[1] + 18 * dpr); });
+        if (isToday && pNow.alt > -6) { const p = P(pNow.az, pNow.alt); if (p) { x.fillStyle = 'rgba(255,235,59,.9)'; x.beginPath(); x.arc(p[0], p[1], 14 * dpr, 0, 7); x.fill(); } }
+        hud.innerHTML = '<b>☀️ ' + E(longDate(dd)) + '</b><br>' + (hd == null ? '⚠ Boussole indisponible : visez le sud et calez avec −5° / +5°' : 'Cap ' + Math.round((hd + off + 360) % 360) + '° ' + compass((hd + off + 360) % 360) + ' · inclinaison ' + Math.round(pitch) + '°') + (isToday ? '<br>Soleil maintenant : ' + Math.round(pNow.az) + '° · hauteur ' + Math.round(pNow.alt) + '°' : '') + (msg ? '<br>' + E(msg) : '');
+        raf = requestAnimationFrame(draw);
+    }
+    raf = requestAnimationFrame(draw);
+    ov.querySelector('.sar-bar').onclick = e => { const b = e.target.closest('[data-x]'); if (!b) return; const k = b.dataset.x;
+        if (k === 'close') { cancelAnimationFrame(raf); if (stream) stream.getTracks().forEach(t => t.stop()); window.removeEventListener('deviceorientationabsolute', onOr); window.removeEventListener('deviceorientation', onOr); ov.remove(); }
+        else if (k === 'off') off -= 5; else if (k === 'on') off += 5;
+        else if (k === 'fov') { fovL = fovL >= 80 ? 55 : fovL + 5; try { localStorage.setItem('xiii.sar.fov', fovL); } catch (er) { } b.textContent = '📐 Champ ' + fovL + '°'; } };
+}
+})();
+
+</script>
+</body>
+</html>

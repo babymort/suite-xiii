@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Écran kiosque — SUITE XIII</title>
+<style>
+html,body{margin:0;height:100%;background:#0d0c0b;color:#f2ede6;font:16px "Segoe UI",system-ui,sans-serif;overflow:hidden}
+iframe{position:fixed;inset:0;width:100%;height:100%;border:0;background:#0d0c0b;opacity:0;transition:opacity .8s}
+iframe.on{opacity:1}
+#bar{position:fixed;left:0;right:0;bottom:0;height:4px;background:rgba(255,255,255,.08);z-index:5}#bar i{display:block;height:100%;width:0;background:#f0b378}
+#ck{position:fixed;right:16px;bottom:12px;z-index:6;font:800 clamp(16px,2vw,24px) ui-monospace,Menlo,monospace;background:rgba(0,0,0,.55);padding:4px 12px;border-radius:10px;letter-spacing:.04em}
+#lb{position:fixed;left:16px;bottom:12px;z-index:6;font:700 13px "Segoe UI",sans-serif;letter-spacing:.12em;text-transform:uppercase;background:rgba(0,0,0,.55);padding:6px 12px;border-radius:10px;color:#f0b378}
+#go{position:fixed;inset:0;z-index:9;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;background:#0d0c0b;text-align:center;padding:20px}
+#go button{font:700 20px "Segoe UI",sans-serif;padding:16px 26px;border-radius:14px;border:0;background:#f0b378;color:#1d1b19;cursor:pointer}
+#go p{color:#a39b91;max-width:520px}
+#msg{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:8vw;font:800 clamp(30px,6vw,86px)/1.15 "Segoe UI",sans-serif;white-space:pre-wrap;background:radial-gradient(circle at 30% 20%,#2b2420,#0d0c0b);opacity:0;transition:opacity .8s;z-index:1}#msg.on{opacity:1}
+#pip{position:fixed;left:auto;top:auto;right:18px;bottom:62px;width:min(34vw,520px);height:min(34vh,330px);border:2px solid #f0b378;border-radius:12px;z-index:7;opacity:1;box-shadow:0 10px 30px rgba(0,0,0,.6);background:#0d0c0b}
+#tk{position:fixed;left:0;right:0;bottom:4px;height:44px;z-index:6;background:#b8651f;color:#fff;display:flex;align-items:center;overflow:hidden;font:700 20px "Segoe UI",sans-serif}#tk b{flex:0 0 auto;background:#1d1b19;color:#f0b378;height:100%;display:flex;align-items:center;padding:0 16px;letter-spacing:.08em;font-size:14px;z-index:1}#tk span{white-space:nowrap;padding-left:100%;display:inline-block;animation:tk linear infinite}@keyframes tk{from{transform:translateX(0)}to{transform:translateX(-100%)}}
+body.tk #ck,body.tk #lb{bottom:58px}body.tk iframe:not(#pip){height:calc(100% - 48px)}body.tk #msg{bottom:48px}body.tk #pip{bottom:108px}
+</style>
+<link rel="icon" type="image/png" href="xiii-icon-192.png">
+</head>
+<body>
+<div id="lb"></div><div id="ck"></div><div id="bar"><i></i></div>
+<div id="go"><h1 style="margin:0">📺 Écran kiosque</h1><p id="gp">Mode tournage, annonces et planning en boucle, mis à jour en direct. Touchez pour passer en plein écran.</p><button id="gb">▶ Démarrer</button></div>
+<script>
+// =====================================================================
+//  SUITE XIII — 📺 écran kiosque (régie, loges, base vie) : sans compte, rien à toucher
+//  Réglages du Master (👥 Équipe › 📲 Liens & QR › Écran kiosque), lus dans le ☁️ Drive et appliqués en direct :
+//  écrans en boucle (outils, synoptique, plan au sol, documents du dossier, message perso), un outil accroché
+//  en incrustation (picture in picture), bandeau défilant façon chaîne d'info.
+// =====================================================================
+const H = Object.fromEntries(location.hash.slice(1).split('&').filter(Boolean).map(x => { const i = x.indexOf('='); return [x.slice(0, i), decodeURIComponent(x.slice(i + 1))]; }));
+const PAGES = { jour: ['🎥 Mode tournage', 'jour.html?kiosk=1&embed=1'], planno: ['📊 Planning de production', 'calendrier.html?v=prod&embed=1'], calendrier: ['🗓️ Calendrier', 'calendrier.html?embed=1'], callsheeto: ['📋 Feuille de service', 'callsheeto.html?embed=1'], transporto: ['🚐 Transports', 'transporto.html?embed=1'], scripto: ['📝 Script', 'scripto.html?embed=1'], syno: ['🔀 Synoptique', 'syno.html?embed=1'], plano: ['📐 Plan au sol', 'plano.html?embed=1'], documents: ['📂 Documents du dossier', 'documents.html?embed=1'], conduco: ['🎬 Conducteur', 'conduco.html?embed=1'] };
+const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } };
+const c = J('xiii.drive', null); if (!c || !c.url) document.getElementById('gp').textContent = 'Écran non relié : ouvrez le lien ou le QR code fourni par la production.';
+let CFG = { p: String(H.p || 'jour,planno').split(',').filter(k => PAGES[k]).map(k => ({ k })), s: Math.max(10, +H.s || 30), pip: '', tk: [], name: '' }, SIG = '', started = false;
+const ck = () => document.getElementById('ck').textContent = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }); ck(); setInterval(ck, 5000);
+let F = [], L = [], i = -1, t0 = 0, wl = null;
+async function wake() { try { if ('wakeLock' in navigator) wl = await navigator.wakeLock.request('screen'); } catch (e) { } }
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') wake(); });
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, x => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[x]));
+async function load() { if (!c || !c.url) return; try { const r = await (await fetch(c.url, { method: 'POST', body: JSON.stringify({ a: 'get', app: 'kiosk_cfg', since: -1, tok: c.tok }), redirect: 'follow' })).json(); if (!r.ok || !r.data) return; const all = JSON.parse(r.data.cfg || '{}'), me = all[c.tok]; if (me) { CFG = Object.assign(CFG, me); CFG.p = (CFG.p || []).filter(x => x.k === 'msg' ? x.t : PAGES[x.k]); } } catch (e) { } }
+function build() {
+    document.querySelectorAll('iframe,#msg').forEach(x => x.remove()); F = []; L = CFG.p.slice(); if (!L.length) L = [{ k: 'jour' }];
+    F = L.map(x => { if (x.k === 'msg') { const d = document.createElement('div'); d.id = 'msg'; d.className = ''; d.textContent = x.t; d.dataset.k = 'msg'; document.body.appendChild(d); return d; } const f = document.createElement('iframe'); f.src = PAGES[x.k][1]; f.title = PAGES[x.k][0]; document.body.appendChild(f); return f; });
+    if (CFG.pip && PAGES[CFG.pip]) { const p = document.createElement('iframe'); p.id = 'pip'; p.src = PAGES[CFG.pip][1]; p.title = 'Incrustation : ' + PAGES[CFG.pip][0]; document.body.appendChild(p); setInterval(() => { try { p.contentWindow.location.reload(); } catch (e) { } }, 120000); }
+    const tk = (CFG.tk || []).map(x => String(x).trim()).filter(Boolean); document.querySelectorAll('#tk').forEach(x => x.remove()); document.body.classList.toggle('tk', !!tk.length);
+    if (tk.length) { const d = document.createElement('div'); d.id = 'tk'; d.innerHTML = '<b>INFO</b><span>' + tk.map(esc).join('   •   ') + '</span>'; document.body.appendChild(d); const sp = d.querySelector('span'); sp.style.animationDuration = Math.max(15, tk.join(' ').length / 6) + 's'; }
+    i = -1; next();
+}
+function next() {
+    if (!L.length) return; i = (i + 1) % L.length; const x = L[i];
+    F.forEach((f, j) => f.classList.toggle('on', j === i)); document.getElementById('lb').textContent = (x.k === 'msg' ? '💬 Message' : PAGES[x.k][0]) + ((c && c.proj) ? ' · ' + c.proj : '');
+    const nx = F[(i + 1) % L.length]; if (L.length > 1 && nx.tagName === 'IFRAME') setTimeout(() => { try { nx.contentWindow.location.reload(); } catch (e) { } }, 2000);
+    t0 = Date.now();
+}
+setInterval(() => { if (!t0) return; const p = (Date.now() - t0) / (CFG.s * 1000); document.querySelector('#bar i').style.width = Math.min(100, p * 100) + '%'; if (p >= 1) { if (L.length > 1) next(); else { t0 = Date.now(); if (F[0] && F[0].tagName === 'IFRAME' && Date.now() % 4 < 1) { } } } }, 250);
+setInterval(() => { if (F.length === 1 && F[0].tagName === 'IFRAME') try { F[0].contentWindow.location.reload(); } catch (e) { } }, 90000);
+async function start() {
+    document.getElementById('go').remove(); try { document.documentElement.requestFullscreen && document.documentElement.requestFullscreen().catch(() => { }); } catch (e) { } wake();
+    await load(); SIG = JSON.stringify(CFG); build(); started = true;
+    setInterval(async () => { await load(); const g = JSON.stringify(CFG); if (g !== SIG) { SIG = g; build(); } }, 60000); // réglages du Master appliqués en direct
+}
+document.getElementById('gb').onclick = start; if (H.auto === '1') setTimeout(start, 500);
+</script>
+<script>
+// 📱 XIII Équipe : une fois dans l'application, on y reste (l'accueil ramène à l'application, pas au site)
+(function () {
+    if (window.__xinapp) return; window.__xinapp = 1;
+    var page = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
+    try { if (page === 'equipe.html' && (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (window.matchMedia && matchMedia('(display-mode: standalone)').matches))) sessionStorage.setItem('xiii.inapp', '1'); } catch (e) { }
+    function inApp() { try { return sessionStorage.getItem('xiii.inapp') === '1'; } catch (e) { return false; } }
+    if (!inApp()) return;
+    if (page === 'index.html' || page === '') { location.replace('equipe.html'); return; }
+    document.addEventListener('click', function (e) {
+        var a = e.target.closest && e.target.closest('a[href]'); if (!a) return;
+        var u; try { u = new URL(a.getAttribute('href'), location.href); } catch (er) { return; }
+        if (u.origin !== location.origin) return;
+        var f = (u.pathname.split('/').pop() || 'index.html').toLowerCase();
+        if (f === 'index.html' || f === '') { e.preventDefault(); e.stopPropagation(); location.href = 'equipe.html'; return; }
+        if (a.target === '_blank') { a.removeAttribute('target'); }
+    }, true);
+})();
+</script>
+</body>
+</html>

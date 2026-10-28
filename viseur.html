@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<title>Viseur — CADRO XIII</title>
+<meta name="theme-color" content="#000">
+<style>
+*{box-sizing:border-box}html,body{margin:0;height:100%;background:#000;color:#f2ede6;font:14px/1.35 -apple-system,"Segoe UI",Roboto,sans-serif;overflow:hidden;touch-action:manipulation}
+#st{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
+#v{width:100%;height:100%;object-fit:cover;transform-origin:center;transition:transform .25s}
+#mask{position:fixed;inset:0;pointer-events:none}
+#fr{position:absolute;border:2px solid rgba(240,179,120,.95);box-shadow:0 0 0 2000px rgba(0,0,0,.55)}
+#fr i{position:absolute;left:33.33%;top:0;bottom:0;border-left:1px solid rgba(255,255,255,.25)}#fr i+i{left:66.66%}#fr b{position:absolute;top:33.33%;left:0;right:0;border-top:1px solid rgba(255,255,255,.25)}#fr b+b{top:66.66%}
+#info{position:fixed;left:12px;top:max(12px,env(safe-area-inset-top));font:700 13px ui-monospace,Menlo,monospace;background:rgba(0,0,0,.6);padding:6px 10px;border-radius:8px;line-height:1.5}
+#info small{display:block;font-weight:400;color:#bbb}
+#warn{position:fixed;left:50%;top:40%;transform:translateX(-50%);background:rgba(239,83,80,.9);padding:8px 12px;border-radius:10px;font-weight:700;display:none;text-align:center;max-width:80vw}
+#bk{position:fixed;right:12px;top:max(12px,env(safe-area-inset-top));color:#f0b378;text-decoration:none;font-weight:700;background:rgba(0,0,0,.6);padding:6px 10px;border-radius:8px}
+#ui{position:fixed;left:0;right:0;bottom:0;padding:8px 8px max(10px,env(safe-area-inset-bottom));background:linear-gradient(transparent,rgba(0,0,0,.85) 30%)}
+.fl{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:4px 2px}.fl::-webkit-scrollbar{display:none}
+.fl button{flex:0 0 auto;font:700 15px ui-monospace,Menlo,monospace;color:#fff;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);border-radius:99px;padding:9px 13px}
+.fl button.on{background:#f0b378;color:#111;border-color:#f0b378}
+.row{display:flex;gap:6px;margin-top:6px}.row select{flex:1;min-width:0;font:14px system-ui;color:#fff;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);border-radius:10px;padding:8px}
+#snap{width:64px;height:64px;border-radius:50%;border:4px solid #fff;background:rgba(255,255,255,.2);flex:0 0 auto}
+#go{position:fixed;inset:0;z-index:9;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:#111;text-align:center;padding:24px}
+#go button{font:700 18px system-ui;padding:16px 24px;border-radius:14px;border:0;background:#f0b378;color:#111}
+#go p{color:#aaa;max-width:420px}
+#sh{position:fixed;inset:0;z-index:8;background:rgba(0,0,0,.9);display:none;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:16px}#sh img{max-width:100%;max-height:70vh;border-radius:8px}#sh div{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}#sh button{font:600 14px system-ui;padding:10px 14px;border-radius:10px;border:1px solid #555;background:#222;color:#fff}
+</style>
+<link rel="icon" type="image/png" href="xiii-icon-192.png">
+</head>
+<body>
+<div id="st"><video id="v" playsinline muted autoplay></video></div>
+<div id="mask"><div id="fr"><i></i><i></i><b></b><b></b></div></div>
+<div id="info"></div><div id="warn"></div><a id="bk" href="equipe.html">← XIII</a>
+<div id="ui"><div class="fl" id="fl"></div><div class="row"><select id="cam"></select><select id="ar"></select><select id="ref" title="Focale équivalente de l'objectif du téléphone (calibrage)"></select><button id="snap" title="Photo du cadre"></button></div></div>
+<div id="go"><h1 style="margin:0">🎯 Viseur de focales</h1><p>Visez avec le téléphone : l'image est recadrée comme le verrait la caméra choisie avec chaque focale (capteur, format d'image).</p><button id="gb">📷 Ouvrir la caméra</button></div>
+<div id="sh"><img id="shi"><div><button id="sh-dl">⬇️ Enregistrer</button><button id="sh-sh">📤 Partager</button><button id="sh-mo">🎨 Envoyer à MOODO</button><button id="sh-x">Fermer</button></div></div>
+<script>
+// =====================================================================
+//  CADRO XIII — 🎯 viseur de focales sur téléphone (application équipe)
+//  Champ horizontal visé : 2·atan(largeur capteur / 2f). Le téléphone (≈ 26 mm équivalent 24×36) est recadré
+//  d'autant : zoom optique / numérique de la caméra si disponible, sinon agrandissement de l'image.
+//  Une focale plus large que l'objectif du téléphone est signalée (le cadre ne peut pas être plus large).
+// =====================================================================
+const $ = id => document.getElementById(id);
+const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } };
+const W = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { } };
+const CAMS = [['ff', 'Plein format 24×36', 36, 24], ['s35', 'Super 35 (FX6, C300, FS7)', 24.9, 14], ['alexa35', 'ARRI Alexa 35', 27.99, 19.22], ['minilf', 'ARRI Alexa Mini LF', 36.7, 25.54], ['komodo', 'RED Komodo 6K', 27.03, 14.26], ['bmpcc6k', 'BMPCC 6K (S35)', 23.1, 12.99], ['mft', 'Micro 4/3 (GH6, BMPCC 4K)', 17.3, 13], ['aps', 'APS-C (FX30, a6700)', 23.5, 15.6], ['s16', 'Super 16', 12.52, 7.41], ['b4', 'Broadcast 2/3"', 9.59, 5.39]];
+const ARS = [['1.78', '16:9'], ['2.39', '2.39 Scope'], ['1.85', '1.85'], ['1.33', '4:3'], ['1', '1:1'], ['0.5625', '9:16']];
+const FOC = [8, 10, 12, 14, 16, 18, 21, 24, 28, 32, 35, 40, 50, 65, 75, 85, 100, 135, 200];
+let S = Object.assign({ cam: 's35', ar: '1.78', f: 35, ref: 26 }, J('xiii.viseur', {})), track = null, cap = null;
+$('cam').innerHTML = CAMS.map(c => '<option value="' + c[0] + '">' + c[1] + '</option>').join(''); $('ar').innerHTML = ARS.map(a => '<option value="' + a[0] + '">' + a[1] + '</option>').join('');
+$('ref').innerHTML = [13, 16, 20, 23, 24, 26, 28].map(r => '<option value="' + r + '">Tél. ' + r + ' mm</option>').join('');
+$('fl').innerHTML = FOC.map(f => '<button data-f="' + f + '">' + f + '</button>').join('');
+const hfov = (w, f) => 2 * Math.atan(w / (2 * f));
+function apply() {
+    W('xiii.viseur', S); $('cam').value = S.cam; $('ar').value = S.ar; $('ref').value = S.ref; document.querySelectorAll('#fl button').forEach(b => b.classList.toggle('on', +b.dataset.f === S.f));
+    const c = CAMS.find(x => x[0] === S.cam) || CAMS[0], ar = +S.ar, sw = c[2], sh = Math.min(c[3], sw / ar) , fw = sw; // largeur utile du capteur
+    const want = hfov(fw, S.f), phone = hfov(36, S.ref), k = Math.tan(phone / 2) / Math.tan(want / 2); // grossissement à appliquer
+    const vw = innerWidth, vh = innerHeight, fh = Math.min(vh * .78, vw / ar), fwp = fh * ar; const fr = $('fr'); fr.style.width = fwp + 'px'; fr.style.height = fh + 'px'; fr.style.left = (vw - fwp) / 2 + 'px'; fr.style.top = (vh - fh) / 2 - 40 + 'px';
+    // le cadre (fwp px) doit montrer le champ « want » : l'image du téléphone couvre « phone » sur la largeur de l'écran (object-fit:cover)
+    const vid = $('v'), VW = vid.videoWidth || 1920, VH = vid.videoHeight || 1080, cs = Math.max(vw / VW, vh / VH), dW = VW * cs, dH = VH * cs, dLong = Math.max(dW, dH); // « 26 mm équiv. » = champ du grand côté de l'image
+    let scale = (fwp / dLong) * k; let hw = 1;
+    if (cap && cap.zoom && track) { const z = Math.min(cap.zoom.max, Math.max(cap.zoom.min, scale)); if (z > 1.01) { hw = z; track.applyConstraints({ advanced: [{ zoom: z }] }).catch(() => { hw = 1; }); } else track.applyConstraints({ advanced: [{ zoom: cap.zoom.min }] }).catch(() => { }); }
+    vid.style.transform = 'scale(' + Math.max(scale / hw, 0.2) + ')'; vid.style.transformOrigin = '50% ' + (((vh - fh) / 2 - 40 + fh / 2) / vh * 100) + '%';
+    const hdeg = want * 180 / Math.PI, vdeg = 2 * Math.atan(sh / (2 * S.f)) * 180 / Math.PI, eq = Math.round(S.f * 43.27 / Math.hypot(sw, sh));
+    $('info').innerHTML = S.f + ' mm · ' + c[1].split(' (')[0] + '<small>Champ ' + hdeg.toFixed(1) + '° × ' + vdeg.toFixed(1) + '° · équiv. 24×36 : ' + eq + ' mm</small>';
+    const w = $('warn'); if (dW * scale < fwp - 2 || dH * scale < fh - 2) { w.style.display = 'block'; w.textContent = 'Plus large que ce que voit le téléphone : tournez-le à l\'horizontale, ou passez sur l\'ultra grand-angle et réglez « Tél. 13 mm »'; } else w.style.display = 'none';
+}
+document.querySelectorAll('#fl button').forEach(b => b.onclick = () => { S.f = +b.dataset.f; apply(); });
+['cam', 'ar', 'ref'].forEach(k => $(k).onchange = () => { S[k] = k === 'ref' ? +$(k).value : $(k).value; apply(); });
+addEventListener('resize', apply);
+$('gb').onclick = async () => {
+    try { const st = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment', width: { ideal: 3840 }, height: { ideal: 2160 } }, audio: false }); $('v').srcObject = st; track = st.getVideoTracks()[0]; try { cap = track.getCapabilities ? track.getCapabilities() : null; } catch (e) { cap = null; } await $('v').play().catch(() => { }); $('go').remove(); $('v').onloadedmetadata = apply; setTimeout(apply, 400); }
+    catch (e) { $('go').querySelector('p').textContent = 'Caméra refusée ou indisponible : autorisez la caméra pour ce site dans le navigateur.'; }
+};
+let SHOT = null;
+$('snap').onclick = () => {
+    const vid = $('v'), fr = $('fr').getBoundingClientRect(), vr = vid.getBoundingClientRect(), sx = vid.videoWidth / vr.width, sy = vid.videoHeight / vr.height;
+    const x = (fr.left - vr.left) * sx, y = (fr.top - vr.top) * sy, w = fr.width * sx, h = fr.height * sy, cv = document.createElement('canvas'), out = 1600; cv.width = out; cv.height = Math.round(out * fr.height / fr.width);
+    const g = cv.getContext('2d'); g.drawImage(vid, x, y, w, h, 0, 0, cv.width, cv.height); g.fillStyle = 'rgba(0,0,0,.55)'; g.fillRect(0, cv.height - 54, cv.width, 54); g.fillStyle = '#f0b378'; g.font = 'bold 30px sans-serif'; g.fillText($('info').firstChild.textContent + '  ·  ' + $('ar').selectedOptions[0].textContent, 18, cv.height - 18);
+    SHOT = cv.toDataURL('image/jpeg', .85); $('shi').src = SHOT; $('sh').style.display = 'flex';
+};
+$('sh-x').onclick = () => { $('sh').style.display = 'none'; };
+$('sh-dl').onclick = () => { const a = document.createElement('a'); a.href = SHOT; a.download = 'cadre-' + S.f + 'mm.jpg'; a.click(); };
+$('sh-sh').onclick = async () => { try { const b = await (await fetch(SHOT)).blob(); await navigator.share({ files: [new File([b], 'cadre-' + S.f + 'mm.jpg', { type: 'image/jpeg' })], title: 'Cadre ' + S.f + ' mm' }); } catch (e) { } };
+$('sh-mo').onclick = async () => { const d = J('xiii.drive', null); if (!d || !d.url) { alert('Application non reliée au projet'); return; } const b = $('sh-mo'); b.disabled = true; b.textContent = 'Envoi…';
+    try { const r = await (await fetch(d.url, { method: 'POST', body: JSON.stringify(Object.assign({ a: 'ph_add', app: 'moodo', cap: 'Test cadre ' + S.f + ' mm · ' + (CAMS.find(x => x[0] === S.cam) || [0, ''])[1] + ' · ' + $('ar').selectedOptions[0].textContent, b64: SHOT.split(',')[1], mime: 'image/jpeg' }, d.tok && !d.code ? { tok: d.tok } : { code: d.code, by: (d.me && d.me.name) || 'Master' })), redirect: 'follow' })).json(); b.textContent = r.ok ? '✓ Envoyé à MOODO' : '⚠️ ' + r.err; } catch (e) { b.textContent = '⚠️ Pas de réseau'; } b.disabled = false; };
+apply();
+</script>
+<script>
+// 📱 XIII Équipe : une fois dans l'application, on y reste (l'accueil ramène à l'application, pas au site)
+(function () {
+    if (window.__xinapp) return; window.__xinapp = 1;
+    var page = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
+    try { if (page === 'equipe.html' && (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (window.matchMedia && matchMedia('(display-mode: standalone)').matches))) sessionStorage.setItem('xiii.inapp', '1'); } catch (e) { }
+    function inApp() { try { return sessionStorage.getItem('xiii.inapp') === '1'; } catch (e) { return false; } }
+    if (!inApp()) return;
+    if (page === 'index.html' || page === '') { location.replace('equipe.html'); return; }
+    document.addEventListener('click', function (e) {
+        var a = e.target.closest && e.target.closest('a[href]'); if (!a) return;
+        var u; try { u = new URL(a.getAttribute('href'), location.href); } catch (er) { return; }
+        if (u.origin !== location.origin) return;
+        var f = (u.pathname.split('/').pop() || 'index.html').toLowerCase();
+        if (f === 'index.html' || f === '') { e.preventDefault(); e.stopPropagation(); location.href = 'equipe.html'; return; }
+        if (a.target === '_blank') { a.removeAttribute('target'); }
+    }, true);
+})();
+</script>
+</body>
+</html>

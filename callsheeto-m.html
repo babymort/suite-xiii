@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#222222">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>CALL SHEETO XIII · Mobile</title>
+<style>
+/* SUITE XIII — socle mobile (partagé par toutes les pages *-m.html) */
+:root { color-scheme: dark; --bg-main:#1e1e1e; --bg-panel:#2d2d2d; --bg-panel-alt:#252525; --bg-header:#1a1a1a; --bg-topbar:#222; --bg-input:#3a3a3a; --bg-menu:#2d2d2d; --border-color:#444; --border-soft:#333; --text-main:#fff; --text-muted:#aaa; --text-dim:#888; --row-bg:#262626; --row-alt:#2a2a2a;
+  --accent:240,179,120; --accent-text:rgb(240,179,120); --btn-bg:rgba(var(--accent),.12); --btn-border:rgba(var(--accent),.35); --blue:#007acc; --danger:#e53935; --warn:#ffa726; --ok:#66bb6a;
+  --sat: env(safe-area-inset-top, 0px); --sab: env(safe-area-inset-bottom, 0px); --sal: env(safe-area-inset-left, 0px); --sar: env(safe-area-inset-right, 0px); }
+body.light-theme { color-scheme: light; --bg-main:#eef0f2; --bg-panel:#fff; --bg-panel-alt:#f5f6f7; --bg-header:#e4e6e8; --bg-topbar:#fff; --bg-input:#e9ebed; --bg-menu:#fff; --border-color:#d5d8db; --border-soft:#ddd; --text-main:#1a1a1a; --text-muted:#555; --text-dim:#777; --row-bg:#fff; --row-alt:#f8f9fa; --accent-text:#b8651f; --ok:#2e7d32; }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html { -webkit-text-size-adjust: 100%; }
+body.xm { margin: 0; min-height: 100dvh; background: var(--bg-main); color: var(--text-main); font-family: 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif; font-size: 15px; line-height: 1.4; overscroll-behavior-y: none; }
+body.xm a { color: var(--accent-text); }
+.xm button { font-family: inherit; }
+/* barre du haut */
+.m-top { position: sticky; top: 0; z-index: 40; display: flex; align-items: center; gap: 8px; padding: calc(8px + var(--sat)) calc(10px + var(--sar)) 8px calc(10px + var(--sal)); background: var(--bg-topbar); border-bottom: 1px solid var(--border-soft); min-height: 56px; }
+.m-top .m-title { flex: 1; min-width: 0; line-height: 1.15; }
+.m-top .m-title b { display: block; font-size: 16px; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.m-top .m-title b i { font-style: normal; color: var(--accent-text); }
+.m-top .m-title small { display: block; font-size: 11.5px; color: var(--text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.m-ibtn { flex: 0 0 auto; width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center; font-size: 20px; border-radius: 12px; border: 1px solid var(--btn-border); background: var(--btn-bg); color: var(--text-main); cursor: pointer; text-decoration: none; padding: 0; }
+.m-ibtn:active { background: rgba(var(--accent), .35); }
+.m-ibtn.plain { border-color: transparent; background: transparent; }
+/* contenu */
+.m-main { padding: 12px calc(14px + var(--sar)) calc(128px + var(--sab)) calc(14px + var(--sal)); max-width: 760px; margin: 0 auto; }
+.m-main.no-tabs { padding-bottom: calc(28px + var(--sab)); }
+.m-sec { font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--text-dim); margin: 18px 4px 8px; }
+.m-card { background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 14px; padding: 14px; margin-bottom: 12px; }
+.m-card > h3 { margin: 0 0 10px; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+.m-card > h3 .grow { flex: 1; }
+.m-card.accent { border-color: rgba(var(--accent), .6); background: linear-gradient(180deg, rgba(var(--accent), .12), var(--bg-panel)); }
+.m-kv { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; font-size: 14px; }
+.m-kv dt { color: var(--text-dim); } .m-kv dd { margin: 0; text-align: right; font-weight: 600; word-break: break-word; }
+.m-row { display: flex; align-items: center; gap: 10px; padding: 11px 0; border-bottom: 1px solid var(--border-soft); } .m-row:last-child { border-bottom: 0; }
+.m-row .grow { flex: 1; min-width: 0; } .m-row small { display: block; color: var(--text-dim); font-size: 12.5px; }
+.m-list { background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 14px; overflow: hidden; margin-bottom: 12px; }
+.m-item { display: flex; align-items: center; gap: 12px; padding: 12px 14px; min-height: 56px; border-bottom: 1px solid var(--border-soft); color: inherit; text-decoration: none; cursor: pointer; background: transparent; width: 100%; text-align: left; border-left: 0; border-right: 0; border-top: 0; font-size: 15px; }
+.m-item:last-child { border-bottom: 0; } .m-item:active { background: rgba(var(--accent), .12); }
+.m-item .ico { font-size: 22px; flex: 0 0 auto; width: 30px; text-align: center; } .m-item .grow { flex: 1; min-width: 0; } .m-item b { display: block; font-weight: 600; } .m-item small { display: block; color: var(--text-dim); font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.m-item .go { color: var(--text-dim); font-size: 18px; }
+.m-chip { display: inline-flex; align-items: center; gap: 5px; padding: 5px 11px; border-radius: 99px; font-size: 13px; background: var(--btn-bg); border: 1px solid var(--btn-border); color: var(--text-main); white-space: nowrap; }
+.m-chips { display: flex; gap: 8px; overflow-x: auto; padding: 2px 0 8px; scrollbar-width: none; } .m-chips::-webkit-scrollbar { display: none; }
+.m-chip.on { background: rgba(var(--accent), .4); border-color: rgba(var(--accent), .95); font-weight: 600; }
+.m-pill { display: inline-block; padding: 2px 9px; border-radius: 99px; font-size: 12px; font-weight: 600; border: 1px solid var(--border-color); background: var(--bg-panel-alt); }
+.m-pill.ok { color: var(--ok); border-color: rgba(102,187,106,.5); } .m-pill.warn { color: var(--warn); border-color: rgba(255,167,38,.5); } .m-pill.danger { color: #ef5350; border-color: rgba(229,57,53,.5); }
+/* boutons */
+.m-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 46px; padding: 10px 18px; font-size: 15px; font-weight: 600; border-radius: 12px; border: 1px solid var(--btn-border); background: var(--btn-bg); color: var(--text-main); cursor: pointer; text-decoration: none; }
+.m-btn:active { background: rgba(var(--accent), .35); }
+.m-btn.primary { background: rgba(var(--accent), .3); border-color: rgba(var(--accent), .9); }
+.m-btn.danger { border-color: rgba(229,57,53,.55); background: rgba(229,57,53,.14); }
+.m-btn.block { display: flex; width: 100%; } .m-btn.sm { min-height: 36px; padding: 6px 12px; font-size: 13.5px; border-radius: 10px; }
+.m-btn:disabled { opacity: .45; }
+.m-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; } .m-actions > * { flex: 1 1 140px; }
+.m-fab { position: fixed; right: calc(16px + var(--sar)); bottom: calc(120px + var(--sab)); z-index: 35; width: 58px; height: 58px; border-radius: 50%; font-size: 26px; border: 1px solid rgba(var(--accent), .95); background: rgba(var(--accent), .92); color: #1a1a1a; box-shadow: 0 6px 18px rgba(0,0,0,.45); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.m-fab.no-tabs { bottom: calc(64px + var(--sab)); }
+/* champs */
+.m-field { display: block; margin-bottom: 12px; } .m-field > span { display: block; font-size: 11.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--text-dim); margin-bottom: 4px; }
+.xm input[type=text], .xm input[type=number], .xm input[type=date], .xm input[type=time], .xm input[type=tel], .xm input[type=email], .xm input[type=search], .xm input[type=url], .xm select, .xm textarea { width: 100%; min-height: 46px; padding: 10px 12px; font-size: 16px; font-family: inherit; border: 1px solid var(--border-color); border-radius: 10px; background: var(--bg-input); color: var(--text-main); appearance: none; -webkit-appearance: none; }
+.xm select { background-image: linear-gradient(45deg, transparent 50%, var(--text-dim) 50%), linear-gradient(135deg, var(--text-dim) 50%, transparent 50%); background-position: calc(100% - 18px) 20px, calc(100% - 13px) 20px; background-size: 5px 5px; background-repeat: no-repeat; padding-right: 32px; }
+.xm textarea { min-height: 90px; resize: vertical; line-height: 1.4; }
+.xm input:focus, .xm select:focus, .xm textarea:focus { outline: none; border-color: rgba(var(--accent), .9); box-shadow: 0 0 0 2px rgba(var(--accent), .25); }
+.xm input[type=checkbox], .xm input[type=radio] { width: 24px; height: 24px; accent-color: rgb(var(--accent)); flex: 0 0 auto; }
+.m-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; } .m-grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.m-seg { display: flex; border: 1px solid var(--btn-border); border-radius: 12px; overflow: hidden; margin-bottom: 12px; } .m-seg button { flex: 1; min-height: 44px; border: 0; border-right: 1px solid var(--btn-border); background: var(--btn-bg); color: var(--text-main); font-size: 14px; font-weight: 600; cursor: pointer; } .m-seg button:last-child { border-right: 0; } .m-seg button.on { background: rgba(var(--accent), .45); }
+.m-progress { height: 8px; border-radius: 99px; background: var(--bg-input); overflow: hidden; } .m-progress > i { display: block; height: 100%; background: rgb(var(--accent)); border-radius: 99px; transition: width .25s; }
+.m-empty { text-align: center; color: var(--text-dim); padding: 34px 18px; font-size: 14px; } .m-empty b { display: block; font-size: 38px; margin-bottom: 8px; }
+.m-hint { font-size: 12.5px; color: var(--text-dim); line-height: 1.45; }
+/* onglets du bas */
+.m-tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; display: flex; background: var(--bg-topbar); border-top: 1px solid var(--border-soft); padding: 4px calc(4px + var(--sar)) calc(48px + var(--sab)) calc(4px + var(--sal)); } /* au-dessus du badge Netlify */
+.m-tabs button { flex: 1; min-width: 0; min-height: 54px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; border: 0; background: transparent; color: var(--text-dim); font-size: 11px; font-weight: 600; cursor: pointer; border-radius: 10px; }
+.m-tabs button .ti { font-size: 21px; line-height: 1; } .m-tabs button.on { color: var(--accent-text); background: rgba(var(--accent), .12); }
+/* fenêtres du bas */
+.m-ov { position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,.62); display: flex; align-items: flex-end; justify-content: center; animation: mfade .15s; }
+.m-sheet { width: 100%; max-width: 640px; max-height: 92dvh; overflow-y: auto; background: var(--bg-menu); border: 1px solid var(--border-color); border-bottom: 0; border-radius: 18px 18px 0 0; padding: 8px 16px calc(18px + var(--sab)); animation: mup .2s; }
+.m-sheet .grab { width: 44px; height: 5px; border-radius: 3px; background: var(--border-color); margin: 4px auto 10px; }
+.m-sheet h2 { font-size: 17px; margin: 4px 0 12px; display: flex; align-items: center; gap: 8px; } .m-sheet h2 .grow { flex: 1; }
+@keyframes mup { from { transform: translateY(40px); opacity: .4; } } @keyframes mfade { from { opacity: 0; } }
+.m-toast { position: fixed; left: 50%; bottom: calc(86px + var(--sab)); transform: translate(-50%, 20px); z-index: 200; max-width: 90vw; padding: 11px 18px; border-radius: 12px; background: #111; color: #fff; border: 1px solid rgba(var(--accent), .6); font-size: 14px; opacity: 0; pointer-events: none; transition: .2s; text-align: center; }
+.m-toast.show { opacity: 1; transform: translate(-50%, 0); }
+.m-qr { background: #fff; border-radius: 12px; padding: 6px; width: min(86vw, 380px); margin: 6px auto; } .m-qr svg { display: block; width: 100%; height: auto; }
+.m-credit { text-align: center; color: var(--text-dim); font-size: 11.5px; margin: 22px 0 6px; }
+@media (min-width: 761px) { body.xm { max-width: 520px; margin: 0 auto; border-left: 1px solid var(--border-soft); border-right: 1px solid var(--border-soft); } .m-tabs { max-width: 520px; left: 50%; transform: translateX(-50%); } }
+@media print { .m-top, .m-tabs, .m-fab { display: none !important; } }
+
+/* CALL SHEETO XIII — mobile */
+.cs-days { position: sticky; top: calc(61px + var(--sat)); z-index: 30; display: flex; gap: 8px; overflow-x: auto; padding: 8px calc(12px + var(--sar)) 6px calc(12px + var(--sal)); background: var(--bg-main); border-bottom: 1px solid var(--border-soft); scrollbar-width: none; }
+.cs-days::-webkit-scrollbar { display: none; }
+.cs-days[hidden], #cs-ret[hidden], #cs-fab[hidden], #cs-tabs[hidden] { display: none !important; }
+.cs-day { flex: 0 0 auto; min-height: 44px; padding: 4px 14px; border-radius: 12px; border: 1px solid var(--btn-border); background: var(--btn-bg); color: var(--text-main); font-size: 15px; font-weight: 700; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.15; cursor: pointer; }
+.cs-day small { font-size: 11px; font-weight: 500; color: var(--text-muted); }
+.cs-day.on { background: rgba(var(--accent), .4); border-color: rgba(var(--accent), .95); }
+.cs-hero h2 { margin: 0 0 2px; font-size: 19px; line-height: 1.2; }
+.cs-hero .sub { color: var(--text-muted); font-size: 14px; }
+.cs-hero .meta { color: var(--text-dim); font-size: 12.5px; margin-top: 6px; }
+.cs-edit { position: absolute; top: 8px; right: 8px; }
+.cs-rel { position: relative; }
+.cs-keys { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-bottom: 12px; }
+.cs-key { min-width: 0; overflow: hidden; background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 14px; padding: 8px 10px 6px; display: block; }
+.cs-key span { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: .07em; color: var(--text-dim); }
+.xm .cs-key input[type=time] { background: transparent; border: 0; padding: 0; min-height: 44px; font-size: clamp(20px, 6vw, 26px); font-weight: 700; color: var(--accent-text); width: 100%; min-width: 0; box-shadow: none; letter-spacing: .02em; }
+.xm .cs-key input[type=time]:focus { box-shadow: none; }
+.cs-key.main { border-color: rgba(var(--accent), .6); background: linear-gradient(180deg, rgba(var(--accent), .14), var(--bg-panel)); }
+.cs-wx { display: flex; align-items: center; gap: 14px; }
+.cs-wx .ico { font-size: 44px; line-height: 1; }
+.cs-wx .t { font-size: 28px; font-weight: 700; } .cs-wx .t small { font-size: 16px; color: var(--text-dim); font-weight: 500; }
+.cs-wx .l { color: var(--text-muted); font-size: 13.5px; }
+.cs-chips { display: flex; flex-wrap: wrap; gap: 6px 8px; margin-top: 10px; }
+.cs-sun { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 12px; }
+.cs-sun div { background: var(--bg-panel-alt); border: 1px solid var(--border-soft); border-radius: 10px; padding: 7px 10px; }
+.cs-sun span { display: block; font-size: 11.5px; color: var(--text-dim); } .cs-sun b { font-size: 18px; } .cs-sun small { display: block; font-size: 11px; color: var(--text-dim); }
+.cs-bar { position: relative; margin: 30px 6px 28px; }
+.cs-bar .b { height: 14px; border-radius: 7px; }
+.cs-bar .mk { position: absolute; top: -4px; bottom: -4px; width: 2px; background: #fff; box-shadow: 0 0 0 1px rgba(0,0,0,.5); }
+.cs-bar .mk span { position: absolute; bottom: calc(100% + 2px); left: 50%; transform: translateX(-50%); font-size: 10.5px; white-space: nowrap; color: var(--text-muted); font-weight: 600; }
+.cs-bar .mk.lo span { bottom: auto; top: calc(100% + 2px); }
+.cs-bar .ax { display: flex; justify-content: space-between; font-size: 10px; color: var(--text-dim); margin-top: 20px; }
+.cs-alert { padding: 9px 12px; border-radius: 10px; margin-bottom: 8px; font-size: 13.5px; background: rgba(255,167,38,.12); border: 1px solid rgba(255,167,38,.45); }
+.cs-alert.red { background: rgba(229,57,53,.13); border-color: rgba(229,57,53,.5); } .cs-alert.ok { background: rgba(102,187,106,.12); border-color: rgba(102,187,106,.45); }
+.cs-pre { white-space: pre-wrap; word-break: break-word; font-size: 14.5px; line-height: 1.5; }
+.cs-pre:empty::before { content: attr(data-empty); color: var(--text-dim); }
+/* programme */
+.cs-sch { display: flex; gap: 10px; align-items: stretch; padding: 8px 10px 8px 8px; border-bottom: 1px solid var(--border-soft); background: transparent; }
+.cs-sch:last-child { border-bottom: 0; }
+.xm .cs-sch input[type=time] { width: 112px; flex: 0 0 112px; min-height: 46px; padding: 6px 4px; font-size: 17px; font-weight: 700; color: var(--accent-text); text-align: center; }
+.cs-sch .body { flex: 1; min-width: 0; text-align: left; background: transparent; border: 0; color: inherit; font-size: 15px; padding: 2px 0; cursor: pointer; }
+.cs-sch .body b { display: block; } .cs-sch .body small { display: block; color: var(--text-dim); font-size: 12.5px; }
+.cs-sch.ev { background: rgba(var(--accent), .08); } .cs-sch.ev .body b { font-weight: 600; color: var(--accent-text); }
+.cs-seq { display: inline-block; min-width: 28px; text-align: center; padding: 1px 7px; border-radius: 8px; background: rgba(var(--accent), .22); font-weight: 700; margin-right: 6px; font-size: 13px; }
+.cs-ie { display: inline-block; font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 99px; border: 1px solid var(--border-color); color: var(--text-muted); margin-right: 6px; }
+/* équipe */
+.cs-band { display: flex; align-items: center; gap: 8px; margin: 16px 4px 6px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--text-muted); }
+.cs-band i { width: 12px; height: 12px; border-radius: 4px; display: inline-block; }
+.cs-p { display: flex; align-items: center; gap: 8px; padding: 8px 8px 8px 12px; border-bottom: 1px solid var(--border-soft); }
+.cs-p:last-child { border-bottom: 0; }
+.cs-p .body { flex: 1; min-width: 0; text-align: left; background: transparent; border: 0; color: inherit; padding: 2px 0; font-size: 15px; cursor: pointer; }
+.cs-p .body b { display: block; } .cs-p .body small { display: block; color: var(--text-dim); font-size: 12.5px; }
+.cs-p .tm { display: inline-block; font-size: 12px; font-weight: 700; padding: 1px 8px; border-radius: 99px; background: rgba(var(--accent), .2); margin: 3px 4px 0 0; }
+.cs-p .tm.hmc { background: rgba(236,64,122,.2); } .cs-p .tm.dim { background: var(--bg-input); color: var(--text-muted); font-weight: 600; }
+.cs-p .ibtns { display: flex; gap: 6px; flex: 0 0 auto; }
+.cs-p .m-ibtn { width: 44px; height: 44px; font-size: 18px; }
+.cs-p .m-ibtn.off { opacity: .25; pointer-events: none; }
+.cs-search { margin-bottom: 4px; }
+/* lieux */
+.cs-loc { border-left: 5px solid var(--lc, #999); }
+.cs-loc .lt { font-size: 12px; color: var(--text-dim); text-transform: uppercase; letter-spacing: .06em; }
+.cs-loc h3 { margin: 2px 0 6px; font-size: 17px; }
+.cs-loc .ad { color: var(--text-muted); margin-bottom: 6px; }
+.cs-loc .acc { margin: 8px 0 0; padding: 8px 10px; background: var(--bg-panel-alt); border-radius: 10px; font-size: 14px; white-space: pre-wrap; }
+.cs-loc .m-actions > * { flex: 1 1 100px; }
+/* sécurité */
+.cs-sos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 12px; }
+.cs-sos a { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 70px; border-radius: 14px; background: rgba(229,57,53,.15); border: 1px solid rgba(229,57,53,.6); color: var(--text-main); text-decoration: none; text-align: center; padding: 6px; }
+.cs-sos a b { font-size: 26px; line-height: 1.1; color: #ef5350; } .cs-sos a span { font-size: 11.5px; color: var(--text-muted); line-height: 1.15; }
+.cs-sos a.sm { grid-column: span 1; }
+.cs-who { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border-soft); } .cs-who:last-child { border-bottom: 0; }
+.cs-who .grow { flex: 1; min-width: 0; } .cs-who small { display: block; color: var(--text-dim); font-size: 12.5px; }
+.cs-risk { padding: 8px 0; border-bottom: 1px solid var(--border-soft); font-size: 14px; } .cs-risk:last-child { border-bottom: 0; } .cs-risk b { display: block; }
+.cs-rk { display: flex; align-items: flex-start; gap: 12px; padding: 10px 2px; border-bottom: 1px solid var(--border-soft); } .cs-rk:last-child { border-bottom: 0; } .cs-rk small { display: block; color: var(--text-dim); font-size: 12.5px; }
+.cs-nav { display: grid; grid-template-columns: 1fr; gap: 8px; }
+.cs-home p { color: var(--text-muted); }
+.cs-steps { counter-reset: s; list-style: none; margin: 0 0 6px; padding: 0; } .cs-steps li { counter-increment: s; position: relative; padding: 6px 0 6px 34px; font-size: 14.5px; } .cs-steps li::before { content: counter(s); position: absolute; left: 0; top: 5px; width: 24px; height: 24px; border-radius: 50%; background: rgba(var(--accent), .3); text-align: center; line-height: 24px; font-weight: 700; font-size: 13px; }
+
+.cs-key input[type=time]::-webkit-calendar-picker-indicator { display: none; }
+.cs-sch input[type=time]::-webkit-calendar-picker-indicator { display: none; }
+.xm a.m-btn { color: var(--text-main); }
+.cs-loc .m-actions .m-btn { white-space: nowrap; padding: 10px 8px; }
+
+</style>
+<link rel="icon" type="image/png" href="xiii-icon-192.png">
+</head>
+<body class="xm">
+<header class="m-top">
+  <a class="m-ibtn plain" href="index.html" aria-label="Accueil SUITE XIII">‹</a>
+  <div class="m-title"><b>CALL SHEETO <i>XIII</i></b><small id="cs-sub">Feuille de service</small></div>
+  <button class="m-btn sm primary" id="cs-ret" hidden aria-label="Renvoyer au bureau">📤 <span id="cs-retn">0</span></button>
+  <button class="m-ibtn" id="cs-menu" aria-label="Menu">⋯</button>
+</header>
+<nav class="cs-days" id="cs-days" hidden aria-label="Journées de tournage"></nav>
+<main class="m-main" id="cs-main"></main>
+<button class="m-fab" id="cs-fab" hidden aria-label="Ajouter">＋</button>
+<nav class="m-tabs" id="cs-tabs" hidden>
+  <button data-tab="day"><span class="ti">📋</span>Journée</button>
+  <button data-tab="prog"><span class="ti">🎬</span>Programme</button>
+  <button data-tab="crew"><span class="ti">👥</span>Équipe</button>
+  <button data-tab="loc"><span class="ti">📍</span>Lieux</button>
+  <button data-tab="safe"><span class="ti">⚠️</span>Sécurité</button>
+</nav>
+
+<script>
+// =====================================================================
+//  XQR : générateur de QR code (mode octets, niveaux L/M/Q/H, versions 1 à 40) — sans dépendance
+//  XQR.make(texte, 'L') → { size, ver, get(x, y) } ou null si trop long ; XQR.svg(texte, opts) → chaîne SVG ou null
+// =====================================================================
+const XQR = (() => {
+    const ECC = [[-1, 7, 10, 15, 20, 26, 18, 20, 24, 30, 18, 20, 24, 26, 30, 22, 24, 28, 30, 28, 28, 28, 28, 30, 30, 26, 28, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30],
+        [-1, 10, 16, 26, 18, 24, 16, 18, 22, 22, 26, 30, 22, 22, 24, 24, 28, 28, 26, 26, 26, 26, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28],
+        [-1, 13, 22, 18, 26, 18, 24, 18, 22, 20, 24, 28, 26, 24, 20, 30, 24, 28, 28, 26, 30, 28, 30, 30, 30, 30, 28, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30],
+        [-1, 17, 28, 22, 16, 22, 28, 26, 26, 24, 28, 24, 28, 22, 24, 24, 30, 28, 28, 26, 28, 30, 24, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30]];
+    const BLK = [[-1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 4, 4, 4, 4, 4, 6, 6, 6, 6, 7, 8, 8, 9, 9, 10, 12, 12, 12, 13, 14, 15, 16, 17, 18, 19, 19, 20, 21, 22, 24, 25],
+        [-1, 1, 1, 1, 2, 2, 4, 4, 4, 5, 5, 5, 8, 9, 9, 10, 10, 11, 13, 14, 16, 17, 17, 18, 20, 21, 23, 25, 26, 28, 29, 31, 33, 35, 37, 38, 40, 43, 45, 47, 49],
+        [-1, 1, 1, 2, 2, 4, 4, 6, 6, 8, 8, 8, 10, 12, 16, 12, 17, 16, 18, 21, 20, 23, 23, 25, 27, 29, 34, 34, 35, 38, 40, 43, 45, 48, 51, 53, 56, 59, 62, 65, 68],
+        [-1, 1, 1, 2, 4, 4, 4, 5, 6, 8, 8, 11, 11, 16, 16, 18, 16, 19, 21, 25, 25, 25, 34, 30, 32, 35, 37, 40, 42, 45, 48, 51, 54, 57, 60, 63, 66, 70, 74, 77, 81]];
+    const ECL = { L: [0, 1], M: [1, 0], Q: [2, 3], H: [3, 2] };
+    const raw = v => { let r = (16 * v + 128) * v + 64; if (v >= 2) { const n = Math.floor(v / 7) + 2; r -= (25 * n - 10) * n - 55; if (v >= 7) r -= 36; } return r; };
+    const dataCw = (v, e) => Math.floor(raw(v) / 8) - ECC[e][v] * BLK[e][v];
+    const bit = (x, i) => ((x >>> i) & 1) !== 0;
+    const mul = (x, y) => { let z = 0; for (let i = 7; i >= 0; i--) { z = (z << 1) ^ ((z >>> 7) * 0x11D); z ^= ((y >>> i) & 1) * x; } return z; };
+    const rsDiv = d => { const r = new Array(d - 1).fill(0); r.push(1); let root = 1; for (let i = 0; i < d; i++) { for (let j = 0; j < r.length; j++) { r[j] = mul(r[j], root); if (j + 1 < r.length) r[j] ^= r[j + 1]; } root = mul(root, 2); } return r; };
+    const rsRem = (data, div) => { const r = div.map(() => 0); data.forEach(b => { const f = b ^ r.shift(); r.push(0); div.forEach((c, i) => { r[i] ^= mul(c, f); }); }); return r; };
+    function make(text, level) {
+        const e = (ECL[level || 'L'] || ECL.L)[0], bytes = Array.from(new TextEncoder().encode(String(text)));
+        let ver = 0; for (let v = 1; v <= 40; v++) { const cc = v <= 9 ? 8 : 16; if (4 + cc + 8 * bytes.length <= dataCw(v, e) * 8) { ver = v; break; } }
+        if (!ver) return null;
+        const bits = []; const put = (val, n) => { for (let i = n - 1; i >= 0; i--) bits.push((val >>> i) & 1); };
+        put(4, 4); put(bytes.length, ver <= 9 ? 8 : 16); bytes.forEach(b => put(b, 8));
+        const cap = dataCw(ver, e) * 8; put(0, Math.min(4, cap - bits.length)); put(0, (8 - bits.length % 8) % 8);
+        for (let p = 0xEC; bits.length < cap; p ^= 0xEC ^ 0x11) put(p, 8);
+        const data = []; for (let i = 0; i < bits.length; i += 8) { let b = 0; for (let j = 0; j < 8; j++) b = (b << 1) | bits[i + j]; data.push(b); }
+        // blocs + correction d'erreur
+        const nb = BLK[e][ver], el = ECC[e][ver], rc = Math.floor(raw(ver) / 8), ns = nb - rc % nb, sl = Math.floor(rc / nb), div = rsDiv(el), blocks = [];
+        for (let i = 0, k = 0; i < nb; i++) { const dl = sl - el + (i < ns ? 0 : 1), dat = data.slice(k, k + dl); k += dl; const ecc = rsRem(dat, div); if (i < ns) dat.push(0); blocks.push(dat.concat(ecc)); }
+        const all = []; for (let i = 0; i < blocks[0].length; i++) blocks.forEach((b, j) => { if (i !== sl - el || j >= ns) all.push(b[i]); });
+        const size = ver * 4 + 17, M = Array.from({ length: size }, () => new Array(size).fill(false)), F = Array.from({ length: size }, () => new Array(size).fill(false));
+        const setF = (x, y, d) => { M[y][x] = d; F[y][x] = true; };
+        for (let i = 0; i < size; i++) { setF(6, i, i % 2 === 0); setF(i, 6, i % 2 === 0); }
+        const finder = (x, y) => { for (let dy = -4; dy <= 4; dy++) for (let dx = -4; dx <= 4; dx++) { const d = Math.max(Math.abs(dx), Math.abs(dy)), xx = x + dx, yy = y + dy; if (xx >= 0 && xx < size && yy >= 0 && yy < size) setF(xx, yy, d !== 2 && d !== 4); } };
+        finder(3, 3); finder(size - 4, 3); finder(3, size - 4);
+        let ap = []; if (ver > 1) { const n = Math.floor(ver / 7) + 2, st = ver === 32 ? 26 : Math.ceil((ver * 4 + 4) / (n * 2 - 2)) * 2; ap = [6]; for (let p = size - 7; ap.length < n; p -= st) ap.splice(1, 0, p); }
+        ap.forEach((x, i) => ap.forEach((y, j) => { if ((i === 0 && j === 0) || (i === 0 && j === ap.length - 1) || (i === ap.length - 1 && j === 0)) return; for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++) setF(x + dx, y + dy, Math.max(Math.abs(dx), Math.abs(dy)) !== 1); }));
+        const fmt = mask => {
+            const d = (ECL[level || 'L'][1] << 3) | mask; let r = d; for (let i = 0; i < 10; i++) r = (r << 1) ^ ((r >>> 9) * 0x537); const b = ((d << 10) | r) ^ 0x5412;
+            for (let i = 0; i <= 5; i++) setF(8, i, bit(b, i)); setF(8, 7, bit(b, 6)); setF(8, 8, bit(b, 7)); setF(7, 8, bit(b, 8)); for (let i = 9; i < 15; i++) setF(14 - i, 8, bit(b, i));
+            for (let i = 0; i < 8; i++) setF(size - 1 - i, 8, bit(b, i)); for (let i = 8; i < 15; i++) setF(8, size - 15 + i, bit(b, i)); setF(8, size - 8, true);
+        };
+        fmt(0);
+        if (ver >= 7) { let r = ver; for (let i = 0; i < 12; i++) r = (r << 1) ^ ((r >>> 11) * 0x1F25); const b = (ver << 12) | r; for (let i = 0; i < 18; i++) { const c = bit(b, i), a = size - 11 + i % 3, d = Math.floor(i / 3); setF(a, d, c); setF(d, a, c); } }
+        for (let i = 0, right = size - 1; right >= 1; right -= 2) { if (right === 6) right = 5; for (let vert = 0; vert < size; vert++) for (let j = 0; j < 2; j++) { const x = right - j, up = ((right + 1) & 2) === 0, y = up ? size - 1 - vert : vert; if (!F[y][x] && i < all.length * 8) { M[y][x] = bit(all[i >>> 3], 7 - (i & 7)); i++; } } }
+        const inv = (m, x, y) => [(x + y) % 2 === 0, y % 2 === 0, x % 3 === 0, (x + y) % 3 === 0, (Math.floor(x / 3) + Math.floor(y / 2)) % 2 === 0, x * y % 2 + x * y % 3 === 0, (x * y % 2 + x * y % 3) % 2 === 0, ((x + y) % 2 + x * y % 3) % 2 === 0][m];
+        const apply = m => { for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) if (!F[y][x] && inv(m, x, y)) M[y][x] = !M[y][x]; };
+        const penalty = () => {
+            let p = 0, dark = 0;
+            for (let y = 0; y < size; y++) { let run = 1; for (let x = 1; x < size; x++) { if (M[y][x] === M[y][x - 1]) { run++; if (run === 5) p += 3; else if (run > 5) p++; } else run = 1; } }
+            for (let x = 0; x < size; x++) { let run = 1; for (let y = 1; y < size; y++) { if (M[y][x] === M[y - 1][x]) { run++; if (run === 5) p += 3; else if (run > 5) p++; } else run = 1; } }
+            for (let y = 0; y < size - 1; y++) for (let x = 0; x < size - 1; x++) { const c = M[y][x]; if (c === M[y][x + 1] && c === M[y + 1][x] && c === M[y + 1][x + 1]) p += 3; }
+            for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) if (M[y][x]) dark++;
+            p += Math.floor(Math.abs(dark * 20 - size * size * 10) / (size * size)) * 10; return p;
+        };
+        let best = 0, bp = Infinity; for (let m = 0; m < 8; m++) { apply(m); fmt(m); const p = penalty(); if (p < bp) { bp = p; best = m; } apply(m); }
+        apply(best); fmt(best);
+        return { size, ver, get: (x, y) => x >= 0 && y >= 0 && x < size && y < size && M[y][x] };
+    }
+    function svg(text, o) {
+        o = o || {}; const q = make(text, o.ecl || 'L'); if (!q) return null; const b = o.border == null ? 4 : o.border, n = q.size + 2 * b; let d = '';
+        for (let y = 0; y < q.size; y++) { let x = 0; while (x < q.size) { if (q.get(x, y)) { let w = 1; while (x + w < q.size && q.get(x + w, y)) w++; d += 'M' + (x + b) + ',' + (y + b) + 'h' + w + 'v1h-' + w + 'z'; x += w; } else x++; } }
+        return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + n + ' ' + n + '" shape-rendering="crispEdges" role="img" aria-label="QR code"><rect width="' + n + '" height="' + n + '" fill="' + (o.light || '#fff') + '"/><path d="' + d + '" fill="' + (o.dark || '#000') + '"/></svg>';
+    }
+    return { make, svg, capacity: (level) => { const e = (ECL[level || 'L'] || ECL.L)[0]; return dataCw(40, e) - 3; } };
+})();
+if (typeof module !== 'undefined') module.exports = XQR;
+
+// =====================================================================
+//  XM : socle mobile SUITE XIII (pages *-m.html) + panneau « 📱 Mobile » des outils bureau
+//  Enveloppe d'échange : { format:'xiii-mobile', v:1, app, kind:'project'|'return', name, ts, data }
+//  Transfert : lien (#mx=… compressé), QR code (si assez court) ou fichier .xiii-m.json
+// =====================================================================
+const XM = (() => {
+    const FORMAT = 'xiii-mobile', QR_MAX = 1800;
+    const $ = (s, r) => (r || document).querySelector(s), $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+    const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const uid = () => Math.random().toString(36).slice(2, 10);
+    const safe = s => String(s || 'projet').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^\w-]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 40) || 'projet';
+    const isPhone = () => { try { return matchMedia('(max-width:700px)').matches && matchMedia('(pointer:coarse)').matches; } catch (e) { return false; } };
+    // ---------- encodage ----------
+    const b64u = u8 => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
+    const unb64u = t => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
+    async function pipe(u8, Ctor, fmt) { const st = new Blob([u8]).stream().pipeThrough(new Ctor(fmt)); return new Uint8Array(await new Response(st).arrayBuffer()); }
+    async function pack(obj) {
+        const u8 = new TextEncoder().encode(JSON.stringify(obj));
+        if (typeof CompressionStream !== 'undefined') { try { return 'z' + b64u(await pipe(u8, CompressionStream, 'deflate-raw')); } catch (e) { } }
+        return 'r' + b64u(u8);
+    }
+    async function unpack(s) {
+        s = String(s || '').trim(); if (!s) throw new Error('Lien vide');
+        let u8 = unb64u(s.slice(1)); if (s[0] === 'z') u8 = await pipe(u8, DecompressionStream, 'deflate-raw'); else if (s[0] !== 'r') throw new Error('Lien non reconnu');
+        return JSON.parse(new TextDecoder().decode(u8));
+    }
+    const baseUrl = page => { const u = new URL(page || location.pathname.split('/').pop(), location.href); u.hash = ''; u.search = ''; return u.href; };
+    const envelope = (app, kind, name, data) => ({ format: FORMAT, v: 1, app, kind: kind || 'project', name: name || '', ts: Date.now(), data });
+    async function link(page, env) { return baseUrl(page) + '#mx=' + await pack(env); }
+    function checkEnv(env, app) {
+        if (!env || env.format !== FORMAT) throw new Error('Ce fichier n\'est pas un envoi SUITE XIII mobile');
+        if (app && env.app !== app) throw new Error('Cet envoi est destiné à « ' + env.app + ' », pas à « ' + app + ' »');
+        return env;
+    }
+    // ---------- stockage local (une enveloppe par application) ----------
+    const mem = {};
+    const load = app => { try { return JSON.parse(localStorage.getItem('xiii.m.' + app)); } catch (e) { return mem[app] || null; } };
+    const save = (app, obj) => { mem[app] = obj; try { localStorage.setItem('xiii.m.' + app, JSON.stringify(obj)); return true; } catch (e) { return false; } };
+    const drop = app => { delete mem[app]; try { localStorage.removeItem('xiii.m.' + app); } catch (e) { } };
+    // ---------- interface ----------
+    let toastT;
+    function toast(msg, ms) { let t = $('.m-toast'); if (!t) { t = document.createElement('div'); t.className = 'm-toast'; document.body.appendChild(t); } t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), ms || 2600); }
+    function sheet(html, o) {
+        o = o || {}; closeSheet(); const ov = document.createElement('div'); ov.className = 'm-ov'; ov.id = 'm-ov';
+        ov.innerHTML = '<div class="m-sheet" role="dialog"><div class="grab"></div>' + (o.title ? '<h2><span class="grow">' + o.title + '</span><button class="m-ibtn plain" data-x aria-label="Fermer">✕</button></h2>' : '') + html + '</div>';
+        ov.addEventListener('mousedown', e => { if (e.target === ov) closeSheet(); }); ov.addEventListener('touchstart', e => { if (e.target === ov) closeSheet(); }, { passive: true });
+        document.body.appendChild(ov); const x = $('[data-x]', ov); if (x) x.onclick = closeSheet; ov._onClose = o.onClose; return ov.querySelector('.m-sheet');
+    }
+    function closeSheet() { const ov = $('#m-ov'); if (ov) { ov.remove(); if (ov._onClose) try { ov._onClose(); } catch (e) { } } }
+    // choix : renvoie l'index du bouton (ou -1 si fermé)
+    function ask(title, text, buttons) {
+        return new Promise(res => {
+            const s = sheet('<p style="margin:0 0 14px;color:var(--text-muted)">' + text + '</p><div class="m-actions" style="margin-top:0">' + (buttons || ['OK']).map((b, i) => '<button class="m-btn ' + (i === 0 ? 'primary' : '') + (b.danger ? ' danger' : '') + '" data-i="' + i + '">' + esc(b.label || b) + '</button>').join('') + '</div>', { title: esc(title), onClose: () => res(-1) });
+            $$('[data-i]', s).forEach(b => b.onclick = () => { const ov = $('#m-ov'); if (ov) ov._onClose = null; closeSheet(); res(+b.dataset.i); });
+        });
+    }
+    function download(name, content, mime) { const b = content instanceof Blob ? content : new Blob([content], { type: mime || 'application/json' }), a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { a.remove(); URL.revokeObjectURL(a.href); }, 1500); }
+    async function copy(text) { try { await navigator.clipboard.writeText(text); return true; } catch (e) { const t = document.createElement('textarea'); t.value = text; t.style.cssText = 'position:fixed;opacity:0'; document.body.appendChild(t); t.select(); let ok = false; try { ok = document.execCommand('copy'); } catch (e2) { } t.remove(); return ok; } }
+    function pickFile(accept, cb) { const i = document.createElement('input'); i.type = 'file'; i.accept = accept || '.json,application/json'; i.style.display = 'none'; i.onchange = async () => { const f = i.files[0]; i.remove(); if (f) cb(f); }; document.body.appendChild(i); i.click(); }
+    async function readEnvFile(f, app) { return checkEnv(JSON.parse(await f.text()), app); }
+    // ---------- fenêtre d'envoi : QR + lien + fichier (bureau et mobile) ----------
+    //  cfg = { app, page, title, kind, name, make: () => data | null, note, empty }
+    async function send(cfg) {
+        const data = cfg.make(); if (data == null) { toast(cfg.empty || 'Rien à envoyer'); return; }
+        const env = envelope(cfg.app, cfg.kind || 'project', cfg.name ? (typeof cfg.name === 'function' ? cfg.name() : cfg.name) : '', data);
+        const url = await link(cfg.page, env), json = JSON.stringify(env), qr = url.length <= QR_MAX ? XQR.svg(url, { ecl: 'L', border: 2 }) : null, mob = document.body.classList.contains('xm');
+        const fname = cfg.file || ((cfg.title || cfg.app) + '_' + safe(env.name) + '.xiii-m.json').replace(/\s+/g, '_');
+        const body = (qr ? '<div class="m-qr">' + qr + '</div><p class="m-hint" style="text-align:center;margin:4px 0 12px">Scannez ce code avec l\'appareil photo' + (cfg.kind === 'return' ? ' de l\'ordinateur' : ' du téléphone') + '.' + (url.length > 1100 ? ' Code dense : affichez-le en grand.' : '') + '</p>'
+            : '<div class="m-card" style="margin-top:0"><b>Trop volumineux pour un QR code</b><p class="m-hint" style="margin:6px 0 0">' + (url.length < 8000 ? 'Utilisez le lien (message, mail, AirDrop…) ou le fichier ci-dessous.' : 'Utilisez le fichier ci-dessous (AirDrop, mail, cloud…) : le lien serait trop long.') + '</p></div>') +
+            '<div class="m-actions" style="margin-top:0">' + (url.length < 8000 ? '<button class="m-btn" id="xm-copy">🔗 Copier le lien</button>' : '') + ((navigator.share && mob) ? '<button class="m-btn" id="xm-share">📤 Partager…</button>' : '') + '<button class="m-btn primary" id="xm-file">⬇️ Fichier</button></div>' +
+            (cfg.note ? '<p class="m-hint" style="margin:12px 2px 0">' + cfg.note + '</p>' : '') + '<p class="m-hint" style="margin:8px 2px 0">' + (json.length / 1024 < 10 ? Math.max(1, Math.round(json.length / 102.4) / 10) : Math.round(json.length / 1024)) + ' Ko · le projet n\'est pas envoyé sur Internet : tout est dans le lien ou le fichier.</p>';
+        const s = host(body, '📱 ' + esc(cfg.heading || (cfg.kind === 'return' ? 'Renvoyer au bureau' : 'Envoyer vers le mobile')), mob);
+        const q = id => $(id, s.ov || s);
+        const c = q('#xm-copy'); if (c) c.onclick = async () => toast(await copy(url) ? '🔗 Lien copié' : '⚠️ Copie impossible : utilisez le fichier');
+        const sh = q('#xm-share'); if (sh) sh.onclick = async () => { try { await navigator.share({ title: cfg.title || cfg.app, text: cfg.title || cfg.app, url }); } catch (e) { } };
+        q('#xm-file').onclick = () => { download(fname, json, 'application/json'); toast('⬇️ Fichier enregistré'); };
+    }
+    // fenêtre : feuille du bas sur mobile, boîte centrée sur le bureau (styles en ligne : aucun CSS requis)
+    function host(html, title, mob) {
+        if (mob) { const s = sheet(html, { title }); s.ov = s.parentNode; return s; }
+        const old = document.getElementById('xm-d-ov'); if (old) old.remove();
+        const ov = document.createElement('div'); ov.id = 'xm-d-ov'; ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:10060;display:flex;align-items:center;justify-content:center;';
+        ov.innerHTML = '<div style="background:var(--bg-menu,#2d2d2d);color:var(--text-main,#fff);width:520px;max-width:94vw;max-height:90vh;overflow-y:auto;border-radius:10px;border:1px solid var(--border-color,#444);padding:20px;box-shadow:0 4px 18px rgba(0,0,0,.5);font-size:13.5px;font-family:inherit;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;border-bottom:1px solid var(--border-color,#444);padding-bottom:8px;"><b style="font-size:15px;">' + title + '</b><span data-x style="cursor:pointer;font-weight:bold;color:var(--text-muted,#aaa);padding:0 4px;">✕</span></div><div class="xm-d">' + html + '</div></div>';
+        ov.addEventListener('mousedown', e => { if (e.target === ov) ov.remove(); }); document.body.appendChild(ov); $('[data-x]', ov).onclick = () => ov.remove();
+        const s = $('.xm-d', ov); s.ov = ov; if (!document.getElementById('xm-d-css')) { const st = document.createElement('style'); st.id = 'xm-d-css'; st.textContent = '#xm-d-ov .m-qr{background:#fff;border-radius:10px;padding:6px;width:min(100%,340px);margin:6px auto}#xm-d-ov .m-qr svg{display:block;width:100%;height:auto}#xm-d-ov .m-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}#xm-d-ov .m-actions>*{flex:1 1 130px}#xm-d-ov .m-btn{padding:9px 12px;font-size:13.5px;border-radius:8px;border:1px solid var(--btn-border,rgba(240,179,120,.35));background:var(--btn-bg,rgba(240,179,120,.12));color:inherit;cursor:pointer;font-weight:600}#xm-d-ov .m-btn.primary{border-color:rgba(240,179,120,.85);background:rgba(240,179,120,.28)}#xm-d-ov .m-hint{font-size:12px;color:var(--text-dim,#888);line-height:1.45}#xm-d-ov .m-card{border:1px solid var(--border-color,#444);border-radius:8px;padding:10px 12px;background:var(--bg-panel-alt,#252525);margin:10px 0}#xm-d-ov .m-sec{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-dim,#888);margin:16px 2px 6px}'; document.head.appendChild(st); }
+        return s;
+    }
+    // ---------- réception : lien (#mx=…), fichier ou lien collé ----------
+    async function fromHash(app, onEnv) {
+        const m = /[#&]mx=([\w-]+)/.exec(location.hash || ''); if (!m) return false;
+        try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { }
+        try { const env = checkEnv(await unpack(m[1]), app); await onEnv(env, 'link'); } catch (e) { toast('⚠️ ' + (e.message || 'Lien illisible'), 4500); }
+        return true;
+    }
+    function importFile(app, onEnv) { pickFile('.json,application/json', async f => { try { await onEnv(await readEnvFile(f, app), 'file'); } catch (e) { toast('⚠️ ' + (e.message || 'Fichier illisible'), 4500); } }); }
+    async function importLink(app, onEnv) {
+        const mob = document.body.classList.contains('xm');
+        const s = host('<label class="m-field" style="display:block;margin-bottom:10px"><span class="m-hint">Collez le lien reçu</span><textarea id="xm-paste" rows="4" style="width:100%;box-sizing:border-box;font-size:16px;padding:10px;border-radius:8px;border:1px solid var(--border-color,#444);background:var(--bg-input,#3a3a3a);color:inherit"></textarea></label><div class="m-actions"><button class="m-btn primary" id="xm-pgo">Importer</button></div>', '🔗 Importer un lien', mob);
+        $('#xm-pgo', s.ov || s).onclick = async () => { const v = $('#xm-paste', s.ov || s).value, m = /mx=([\w-]+)/.exec(v) || [0, v.trim()]; try { const env = checkEnv(await unpack(m[1]), app); if (s.ov) s.ov.remove(); closeSheet(); await onEnv(env, 'link'); } catch (e) { toast('⚠️ ' + (e.message || 'Lien illisible'), 4500); } };
+    }
+    // ---------- panneau « 📱 Mobile » des outils bureau ----------
+    //  cfg = { app, page, title, name:()=>'', make:()=>data|null, apply:async(env)=>message, note }
+    function desktopPanel(cfg) {
+        const s = host('<p class="m-hint" style="margin:0 0 10px">Emportez ce projet sur le téléphone : ouvrez la <b>version mobile</b> de ' + esc(cfg.title) + ' en scannant un QR code, en ouvrant un lien ou en important un fichier.</p>' +
+            '<div class="m-actions" style="margin-top:0"><button class="m-btn primary" id="xm-go">📱 Envoyer vers le mobile</button><button class="m-btn" id="xm-open">↗ Ouvrir la version mobile ici</button></div>' +
+            (cfg.apply ? '<div class="m-sec">Récupérer ce qui a été fait sur le mobile</div><div class="m-actions" style="margin-top:0"><button class="m-btn" id="xm-ifile">📂 Importer un fichier</button><button class="m-btn" id="xm-ilink">🔗 Coller un lien</button></div><p class="m-hint" style="margin:8px 2px 0">' + (cfg.returnNote || 'Sur le mobile, « Renvoyer au bureau » produit le fichier ou le lien à importer ici.') + '</p>' : ''), '📱 Version mobile — ' + esc(cfg.title), false);
+        const q = id => $(id, s.ov);
+        q('#xm-go').onclick = () => { s.ov.remove(); send({ app: cfg.app, page: cfg.page, title: cfg.title, name: cfg.name, make: cfg.make, note: cfg.note, empty: cfg.empty }); };
+        q('#xm-open').onclick = async () => { const d = cfg.make(); if (d == null) { toast(cfg.empty || 'Rien à envoyer'); return; } s.ov.remove(); window.open(await link(cfg.page, envelope(cfg.app, 'project', typeof cfg.name === 'function' ? cfg.name() : cfg.name, d)), '_blank'); };
+        if (cfg.apply) { const ap = async env => { s.ov && s.ov.remove(); const m = await cfg.apply(env); if (m) toast(m, 5000); }; q('#xm-ifile').onclick = () => importFile(cfg.app, ap); q('#xm-ilink').onclick = () => { s.ov.remove(); importLink(cfg.app, async env => { const m = await cfg.apply(env); if (m) toast(m, 5000); }); }; }
+    }
+    // retour par lien sur le bureau (#mx=… de type return)
+    function desktopBoot(cfg) { return fromHash(cfg.app, async env => { if (env.kind === 'return' && cfg.apply) { const m = await cfg.apply(env); if (m) toast(m, 5000); } }); }
+    // ---------- thème, en-tête et menu des pages mobiles ----------
+    function initTheme() { let p = {}; try { p = JSON.parse(localStorage.getItem('hubXIII.prefs')) || {}; } catch (e) { } document.body.classList.add('xm'); document.body.classList.toggle('light-theme', p.theme === 'light'); const m = document.querySelector('meta[name=theme-color]'); if (m) m.content = p.theme === 'light' ? '#ffffff' : '#222222'; }
+    function toggleTheme() { let p = {}; try { p = JSON.parse(localStorage.getItem('hubXIII.prefs')) || {}; } catch (e) { } p.theme = p.theme === 'light' ? 'dark' : 'light'; try { localStorage.setItem('hubXIII.prefs', JSON.stringify(p)); } catch (e) { } initTheme(); }
+    //  menu standard ⋯ : cfg = { app, deskPage, items:[{icon,label,sub,run}] , onImport(env, via) , sendReturn() }
+    function menu(cfg) {
+        const items = (cfg.items || []).concat([
+            cfg.onImport ? { icon: '📂', label: 'Importer un fichier', sub: 'Envoi du bureau (.xiii-m.json)', run: () => importFile(cfg.app, cfg.onImport) } : null,
+            cfg.onImport ? { icon: '🔗', label: 'Coller un lien', sub: 'Lien ou QR reçu du bureau', run: () => importLink(cfg.app, cfg.onImport) } : null,
+            cfg.sendReturn ? { icon: '📤', label: 'Renvoyer au bureau', sub: 'QR code, lien ou fichier', run: cfg.sendReturn } : null,
+            { icon: '🌓', label: 'Thème clair / sombre', run: toggleTheme },
+            cfg.deskPage ? { icon: '🖥️', label: 'Version bureau', sub: 'Interface complète', run: () => { try { sessionStorage.setItem('xiiiDesk', '1'); } catch (e) { } location.href = cfg.deskPage + '?desktop=1'; } } : null,
+            { icon: '🏠', label: 'Accueil SUITE XIII', run: () => { location.href = 'index.html'; } }].filter(Boolean));
+        const s = sheet('<div class="m-list" style="margin:0">' + items.map((it, i) => '<button class="m-item" data-i="' + i + '"><span class="ico">' + it.icon + '</span><span class="grow"><b>' + esc(it.label) + '</b>' + (it.sub ? '<small>' + esc(it.sub) + '</small>' : '') + '</span></button>').join('') + '</div><p class="m-credit">Application développée par Matthieu Lamotte</p>', { title: 'Menu' });
+        $$('[data-i]', s).forEach(b => b.onclick = () => { closeSheet(); setTimeout(() => items[+b.dataset.i].run(), 60); });
+    }
+    return { FORMAT, $, $$, esc, uid, safe, isPhone, pack, unpack, link, envelope, checkEnv, load, save, drop, toast, sheet, closeSheet, ask, download, copy, pickFile, readEnvFile, send, host, fromHash, importFile, importLink, desktopPanel, desktopBoot, initTheme, toggleTheme, menu };
+})();
+// 🏠 retour à l'accueil SUITE XIII : même bouton en tête de chaque version mobile
+(function () {
+    const add = () => { const top = document.querySelector('.m-top'); if (!top || top.querySelector('.xm-home')) return; const a = document.createElement('a'); a.className = 'm-ibtn plain xm-home'; a.href = 'index.html'; a.title = 'Accueil SUITE XIII'; a.setAttribute('aria-label', 'Accueil'); a.textContent = '🏠'; a.style.cssText = 'text-decoration:none;font-size:17px;display:inline-flex;align-items:center;justify-content:center'; top.insertBefore(a, top.firstChild); };
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', add); else add();
+})();
+
+// 📱 XIII Équipe : une fois dans l'application, on y reste (l'accueil ramène à l'application, pas au site)
+(function () {
+    if (window.__xinapp) return; window.__xinapp = 1;
+    var page = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
+    try { if (page === 'equipe.html' && (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (window.matchMedia && matchMedia('(display-mode: standalone)').matches))) sessionStorage.setItem('xiii.inapp', '1'); } catch (e) { }
+    function inApp() { try { return sessionStorage.getItem('xiii.inapp') === '1'; } catch (e) { return false; } }
+    if (!inApp()) return;
+    if (page === 'index.html' || page === '') { location.replace('equipe.html'); return; }
+    document.addEventListener('click', function (e) {
+        var a = e.target.closest && e.target.closest('a[href]'); if (!a) return;
+        var u; try { u = new URL(a.getAttribute('href'), location.href); } catch (er) { return; }
+        if (u.origin !== location.origin) return;
+        var f = (u.pathname.split('/').pop() || 'index.html').toLowerCase();
+        if (f === 'index.html' || f === '') { e.preventDefault(); e.stopPropagation(); location.href = 'equipe.html'; return; }
+        if (a.target === '_blank') { a.removeAttribute('target'); }
+    }, true);
+})();
+
+</script>
+<script>
+XM.initTheme();
+// =====================================================================
+//  CALL SHEETO XIII — version mobile : voir la feuille de service et la modifier vite
+//  Reçoit un projet allégé du bureau (QR / lien / fichier), renvoie un PATCH par identifiants.
+// =====================================================================
+(function () {
+'use strict';
+const $ = XM.$, $$ = XM.$$, esc = XM.esc, uid = XM.uid, APP = 'callsheeto';
+
+// ---------- Référentiels (identiques à l'outil bureau) ----------
+const DEPTS = [
+    ['prod', 'Production', '#EF5350'], ['real', 'Réalisation', '#AB47BC'], ['image', 'Image', '#42A5F5'],
+    ['elec', 'Électro', '#FFCA28'], ['machino', 'Machinerie', '#8D6E63'], ['son', 'Son', '#26A69A'],
+    ['deco', 'Décoration', '#66BB6A'], ['cost', 'Costumes', '#EC407A'], ['hmc', 'Maquillage / Coiffure', '#F48FB1'],
+    ['regie', 'Régie', '#FFA726'], ['cast', 'Comédiens / Talents', '#7E57C2'], ['fig', 'Figuration', '#9E9E9E'],
+    ['secu', 'Sécurité / Secours', '#E53935'], ['transport', 'Transport', '#78909C'], ['cantine', 'Cantine / Catering', '#C0CA33'],
+    ['post', 'DIT / Post-prod', '#26C6DA'], ['autre', 'Autre', '#BDBDBD']
+];
+const dept = k => DEPTS.find(d => d[0] === k) || DEPTS[DEPTS.length - 1];
+const LOC_TYPES = [
+    ['decor', 'Décor', '🎬', '#E53935'], ['base', 'Base régie / QG', '🏠', '#FFA726'], ['park_tech', 'Parking technique', '🚚', '#78909C'],
+    ['park', 'Parking équipe', '🅿️', '#42A5F5'], ['cantine', 'Cantine', '🍽️', '#66BB6A'], ['loges', 'Loges / HMC', '💄', '#EC407A'],
+    ['rdv', 'Point de RDV', '📌', '#AB47BC'], ['rassemblement', 'Point de rassemblement', '🚩', '#43A047'], ['autre', 'Autre', '📍', '#9E9E9E']
+];
+const ltype = k => LOC_TYPES.find(t => t[0] === k) || LOC_TYPES[LOC_TYPES.length - 1];
+const RISKS = [
+    ['hauteur', 'Travail en hauteur', 'Harnais et ligne de vie obligatoires, nacelles et échafaudages vérifiés, zone balisée au sol.'],
+    ['voie', 'Tournage sur la voie publique', 'Gilets haute visibilité, signaleurs aux accès, autorisation de tournage disponible à la régie.'],
+    ['elec', 'Groupe électrogène / fortes puissances', 'Seul le chef électro intervient sur la distribution ; câbles protégés et balisés ; aucun liquide près des armoires.'],
+    ['eau', "Proximité de l'eau", 'Gilets de sauvetage à disposition, sauveteur désigné, pas de matériel électrique sans protection.'],
+    ['nuit', 'Tournage de nuit', 'Circulations éclairées, lampe frontale conseillée, vigilance fatigue sur la route du retour.'],
+    ['chaleur', 'Fortes chaleurs', "Eau à disposition en continu, zones d'ombre, pauses régulières, protection solaire."],
+    ['froid', 'Froid / intempéries', 'Vêtements chauds, boissons chaudes, abri chauffé, attention aux sols glissants.'],
+    ['drone', 'Vol de drone', "Télépilote certifié, vol déclaré, zone d'évolution interdite au public, briefing avant chaque vol."],
+    ['pyro', 'Pyrotechnie / effets spéciaux', 'Artificier certifié seul habilité, extincteurs en place, périmètre de sécurité respecté.'],
+    ['cascade', 'Cascades / armes factices', 'Coordinateur cascades présent, répétitions obligatoires, armes neutralisées et déclarées.'],
+    ['vehicule', 'Véhicules en mouvement / voiture travelling', "Routes sécurisées, briefing conducteurs, personne dans l'axe des véhicules."],
+    ['levage', 'Charges lourdes / levage', "Chaussures de sécurité et gants, levage à deux, zone d'exclusion sous grue ou bras."],
+    ['fumee', 'Fumée / brouillard artificiel', 'Aération des lieux, détection incendie gérée avec le lieu, fiches produits disponibles.'],
+    ['enfants', 'Enfants sur le plateau', 'Horaires légaux respectés, accompagnant présent, loge dédiée.'],
+    ['animaux', 'Animaux', 'Dresseur présent, silence et distances respectés, zone de repos.'],
+    ['public', 'Public / figuration nombreuse', 'Issues de secours dégagées, jauge respectée, agents de sécurité aux accès.']
+];
+const SOS = [['112', 'Urgences (UE)'], ['15', 'SAMU'], ['18', 'Pompiers'], ['17', 'Police'], ['114', 'Urgences SMS']];
+const IE_OPTS = ['', 'INT / JOUR', 'EXT / JOUR', 'INT / NUIT', 'EXT / NUIT', 'INT / EXT'];
+const WMO = {
+    0: ['Ciel dégagé', '☀️'], 1: ['Plutôt dégagé', '🌤️'], 2: ['Partiellement nuageux', '⛅'], 3: ['Couvert', '☁️'],
+    45: ['Brouillard', '🌫️'], 48: ['Brouillard givrant', '🌫️'], 51: ['Bruine légère', '🌦️'], 53: ['Bruine', '🌦️'], 55: ['Bruine dense', '🌧️'],
+    56: ['Bruine verglaçante', '🌧️'], 57: ['Bruine verglaçante', '🌧️'], 61: ['Pluie faible', '🌧️'], 63: ['Pluie modérée', '🌧️'], 65: ['Pluie forte', '🌧️'],
+    66: ['Pluie verglaçante', '🌧️'], 67: ['Pluie verglaçante forte', '🌧️'], 71: ['Neige faible', '🌨️'], 73: ['Neige', '🌨️'], 75: ['Neige forte', '❄️'],
+    77: ['Grains de neige', '🌨️'], 80: ['Averses', '🌦️'], 81: ['Averses modérées', '🌧️'], 82: ['Averses violentes', '⛈️'],
+    85: ['Averses de neige', '🌨️'], 86: ['Fortes averses de neige', '❄️'], 95: ['Orage', '⛈️'], 96: ['Orage avec grêle', '⛈️'], 99: ['Orage violent avec grêle', '⛈️']
+};
+const wmo = c => WMO[c] || ['—', '🌡️'];
+// champs d'une liste, tels que le bureau les connaît
+const LIST_KEYS = {
+    schedule: ['ev', 'time', 'seq', 'ie', 'loc', 'desc', 'roles', 'pages'],
+    crew: ['dept', 'role', 'name', 'phone', 'email', 'call', 'hmc', 'note'],
+    locations: ['type', 'name', 'address', 'lat', 'lon', 'tz', 'access', 'contact', 'phone', 'code']
+};
+const DAY_KEYS = ['name', 'date', 'title', 'dayNum', 'dayTotal', 'practical', 'notes', 'wxLocId'];
+const SAFE_KEYS = ['referent', 'referentPhone', 'firstAid', 'firstAidPhone', 'assembly', 'notes', 'risks', 'hospital', 'aed', 'extra'];
+
+// ---------- Dates / heures ----------
+const pad2 = n => String(n).padStart(2, '0');
+const isoOf = d => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+const todayISO = () => isoOf(new Date());
+function addDays(iso, n) { const [y, m, d] = iso.split('-').map(Number); return isoOf(new Date(y, m - 1, d + n)); }
+function daysBetween(a, b) { const p = s => { const [y, m, d] = s.split('-').map(Number); return Date.UTC(y, m - 1, d); }; return Math.round((p(b) - p(a)) / 864e5); }
+function fmtDateLong(iso) { if (!iso) return 'Date à définir'; const [y, m, d] = iso.split('-').map(Number); const s = new Date(y, m - 1, d).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }); return s.charAt(0).toUpperCase() + s.slice(1); }
+function fmtDateShort(iso) { if (!iso) return ''; const [y, m, d] = iso.split('-').map(Number); return new Date(y, m - 1, d).toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' }); }
+const tmin = t => { if (!t) return null; const [h, m] = String(t).split(':').map(Number); return isNaN(h) ? null : h * 60 + (m || 0); };
+const browserTZ = () => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone; } catch (e) { return undefined; } };
+function fmtT(date, tz) { if (!date || isNaN(date)) return '--:--'; try { return new Intl.DateTimeFormat('fr-FR', { hour: '2-digit', minute: '2-digit', timeZone: tz || undefined }).format(date); } catch (e) { return new Intl.DateTimeFormat('fr-FR', { hour: '2-digit', minute: '2-digit' }).format(date); } }
+function localH(date, tz) { const s = fmtT(date, tz); const [h, m] = s.split(':').map(Number); return h + m / 60; }
+const fmtDur = ms => { const m = Math.round(ms / 60000); return `${Math.floor(m / 60)} h ${pad2(m % 60)}`; };
+const telHref = p => 'tel:' + String(p).replace(/[^\d+]/g, '');
+const smsHref = p => 'sms:' + String(p).replace(/[^\d+]/g, '');
+
+// ---------- Soleil : calcul astronomique local, identique au bureau (hors ligne) ----------
+const SUN = (() => {
+    const PI = Math.PI, sin = Math.sin, cos = Math.cos, tan = Math.tan, asin = Math.asin, atan = Math.atan2, acos = Math.acos, rad = PI / 180;
+    const dayMs = 864e5, J1970 = 2440588, J2000 = 2451545, e = rad * 23.4397, J0 = 0.0009;
+    const toJulian = d => d.valueOf() / dayMs - 0.5 + J1970, fromJulian = j => new Date((j + 0.5 - J1970) * dayMs), toDays = d => toJulian(d) - J2000;
+    const decl = (l, b) => asin(sin(b) * cos(e) + cos(b) * sin(e) * sin(l));
+    const ra = (l, b) => atan(sin(l) * cos(e) - tan(b) * sin(e), cos(l));
+    const M = d => rad * (357.5291 + 0.98560028 * d);
+    const L = m => { const C = rad * (1.9148 * sin(m) + 0.02 * sin(2 * m) + 0.0003 * sin(3 * m)); return m + C + rad * 102.9372 + PI; };
+    const cycle = (d, lw) => Math.round(d - J0 - lw / (2 * PI));
+    const approx = (Ht, lw, n) => J0 + (Ht + lw) / (2 * PI) + n;
+    const transit = (ds, m, l) => J2000 + ds + 0.0053 * sin(m) - 0.0069 * sin(2 * l);
+    const hourAngle = (h, phi, d) => acos((sin(h) - sin(phi) * sin(d)) / (cos(phi) * cos(d)));
+    function times(date, lat, lng, angles) {
+        const lw = rad * -lng, phi = rad * lat, d = toDays(date), n = cycle(d, lw), ds = approx(0, lw, n), m = M(ds), l = L(m), dec = decl(l, 0), Jnoon = transit(ds, m, l);
+        const res = { noon: fromJulian(Jnoon), dec };
+        angles.forEach(a => {
+            const w = hourAngle(a * rad, phi, dec);
+            if (isNaN(w)) { res['r' + a] = null; res['s' + a] = null; return; }
+            const Jset = transit(approx(w, lw, n), m, l), Jrise = Jnoon - (Jset - Jnoon);
+            res['r' + a] = fromJulian(Jrise); res['s' + a] = fromJulian(Jset);
+        });
+        return res;
+    }
+    function position(date, lat, lng) {
+        const lw = rad * -lng, phi = rad * lat, d = toDays(date), m = M(d), l = L(m), dc = decl(l, 0), r = ra(l, 0);
+        const H = rad * (280.16 + 360.9856235 * d) - lw - r;
+        const az = atan(sin(H), cos(H) * sin(phi) - tan(dc) * cos(phi)), alt = asin(sin(phi) * sin(dc) + cos(phi) * cos(dc) * cos(H));
+        return { az: ((az / rad) + 180 + 360) % 360, alt: alt / rad };
+    }
+    return { times, position };
+})();
+const COMPASS = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSO', 'SO', 'OSO', 'O', 'ONO', 'NO', 'NNO'];
+const compass = a => COMPASS[Math.round(a / 22.5) % 16];
+function wxLoc(d) { const L = d.locations.filter(l => l.lat != null); return L.find(l => l.id === d.wxLocId) || L.find(l => l.type === 'decor') || L[0] || null; }
+function sunInfo(d) {
+    const loc = wxLoc(d); if (!loc || loc.lat == null || !d.date) return null;
+    const tz = loc.tz || (d.weather && d.weather.tz) || browserTZ();
+    const [y, m, dd] = d.date.split('-').map(Number);
+    const mid = new Date(Date.UTC(y, m - 1, dd, 12) - loc.lon / 15 * 3600e3);
+    const t = SUN.times(mid, loc.lat, loc.lon, [-0.833, -4, -6, 6]);
+    const pr = t['r-0.833'] ? SUN.position(t['r-0.833'], loc.lat, loc.lon) : null, ps = t['s-0.833'] ? SUN.position(t['s-0.833'], loc.lat, loc.lon) : null;
+    const pn = SUN.position(t.noon, loc.lat, loc.lon);
+    return {
+        tz, loc, rise: t['r-0.833'], set: t['s-0.833'], dawn: t['r-6'], dusk: t['s-6'], b4m: t['r-4'], b4e: t['s-4'], g6m: t['r6'], g6e: t['s6'],
+        noon: t.noon, maxEl: pn.alt, azRise: pr && pr.az, azSet: ps && ps.az, len: t['r-0.833'] && t['s-0.833'] ? t['s-0.833'] - t['r-0.833'] : null
+    };
+}
+
+// ---------- Modèle ----------
+const clone = o => JSON.parse(JSON.stringify(o));
+const blankSafety = () => ({ risks: [], referent: '', referentPhone: '', firstAid: '', firstAidPhone: '', assembly: '', hospital: null, aed: null, extra: [], notes: '' });
+function normDay(d) {
+    d = d || {};
+    const o = Object.assign({ id: uid(), name: 'J1', date: '', title: '', dayNum: '', dayTotal: '', practical: '', notes: '', wxLocId: '', weather: null }, d);
+    o.times = Object.assign({ general: '', pat: '', lunch: '', wrap: '' }, d.times || {});
+    o.safety = Object.assign(blankSafety(), d.safety || {});
+    if (!Array.isArray(o.safety.risks)) o.safety.risks = [];
+    if (!Array.isArray(o.safety.extra)) o.safety.extra = [];
+    o.safety.extra = o.safety.extra.map(x => ({ label: x.label || '', phone: x.phone || '' }));
+    o.locations = (d.locations || []).map(l => Object.assign({ id: uid(), type: 'autre', name: '', address: '', lat: null, lon: null, tz: '', access: '', contact: '', phone: '', code: '' }, l));
+    o.schedule = (d.schedule || []).map(r => Object.assign({ id: uid(), ev: false, time: '', seq: '', ie: '', loc: '', desc: '', roles: '', pages: '' }, r, { ev: !!r.ev }));
+    o.crew = (d.crew || []).map(c => Object.assign({ id: uid(), dept: 'autre', role: '', name: '', phone: '', email: '', call: '', hmc: '', note: '' }, c));
+    return o;
+}
+let S = null;              // { name, ts, example, meta, days, base, cur }
+const UI = { tab: 'day', q: '', wx: {} };
+const D = () => S.days[S.cur];
+const byId = (arr, id) => arr.find(x => x.id === id);
+function persist() { if (S && !XM.save(APP, S) && !UI.warnedFull) { UI.warnedFull = 1; XM.toast('⚠️ Stockage du téléphone plein : renvoyez vos modifications au bureau', 5000); } badge(); }
+function adopt(data, name, example) {
+    const days = (data.days || []).map(normDay);
+    S = { name: name || (data.meta && data.meta.name) || '', ts: Date.now(), example: !!example, meta: Object.assign({ name: '', company: '', director: '', producer: '', author: '', settings: {} }, data.meta || {}), days, cur: Math.max(0, Math.min(data.cur || 0, days.length - 1)), base: clone(days.map(d => { const c = clone(d); c.weather = null; return c; })) };
+    UI.tab = 'day'; UI.q = ''; persist();
+}
+
+// ---------- Différences par rapport à l'envoi du bureau (= le patch de retour) ----------
+const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+function diffList(list, b, c) {
+    const keys = LIST_KEYS[list], bm = new Map(b.map(x => [x.id, x])), cm = new Map(c.map(x => [x.id, x]));
+    const out = { mod: {}, add: [], del: [] };
+    c.forEach(it => {
+        const o = bm.get(it.id);
+        if (!o) { out.add.push(clone(it)); return; }
+        const ch = {}; keys.forEach(k => { if (!same(o[k], it[k])) ch[k] = it[k]; });
+        if (Object.keys(ch).length) out.mod[it.id] = ch;
+    });
+    b.forEach(o => { if (!cm.has(o.id)) out.del.push(o.id); });
+    const ids = c.map(x => x.id), expect = b.filter(o => cm.has(o.id)).map(o => o.id).concat(out.add.map(x => x.id));
+    if (!same(ids, expect)) out.order = ids;
+    if (!Object.keys(out.mod).length && !out.add.length && !out.del.length && !out.order) return null;
+    return out;
+}
+function diffDay(b, c) {
+    const out = {}; let n = 0;
+    const set = {}; DAY_KEYS.forEach(k => { if (!same(b[k], c[k])) { set[k] = c[k]; n++; } });
+    const times = {}; Object.keys(c.times).forEach(k => { if (!same(b.times[k], c.times[k])) { times[k] = c.times[k]; n++; } });
+    const safety = {}; SAFE_KEYS.forEach(k => { if (!same(b.safety[k], c.safety[k])) { safety[k] = c.safety[k]; n++; } });
+    const lists = {};
+    Object.keys(LIST_KEYS).forEach(l => { const r = diffList(l, b[l], c[l]); if (r) { lists[l] = r; n += Object.keys(r.mod).length + r.add.length + r.del.length + (r.order ? 1 : 0); } });
+    if (Object.keys(set).length) out.set = set; if (Object.keys(times).length) out.times = times; if (Object.keys(safety).length) out.safety = safety; if (Object.keys(lists).length) out.lists = lists;
+    return n ? { patch: out, n } : null;
+}
+function buildPatch() {
+    if (!S) return null; const days = {}; let n = 0;
+    S.days.forEach(c => { const b = byId(S.base, c.id); if (!b) return; const r = diffDay(b, c); if (r) { days[c.id] = r.patch; n += r.n; } });
+    return n ? { v: 1, project: S.meta.name || S.name, sent: S.ts, count: n, days } : null;
+}
+function countChanges() { const p = buildPatch(); return p ? p.count : 0; }
+function badge() {
+    const n = S ? countChanges() : 0, b = $('#cs-ret'); b.hidden = !n; $('#cs-retn').textContent = n;
+    b.title = n + ' modification(s) à renvoyer au bureau';
+}
+
+// ---------- Météo (Open-Meteo, facultative : nécessite du réseau) ----------
+async function refreshWx() {
+    const d = D(), l = wxLoc(d); if (!l) return; if (!d.date) { XM.toast('Définissez la date de la journée'); return; }
+    const diff = daysBetween(todayISO(), d.date);
+    if (diff > 15) { UI.wx = { msg: 'Prévision disponible à partir du ' + fmtDateShort(addDays(d.date, -15)) }; render(); return; }
+    const archive = diff < -60;
+    UI.wx = { busy: true }; render();
+    try {
+        const dv = archive ? 'weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max,wind_gusts_10m_max' : 'weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,wind_gusts_10m_max,uv_index_max';
+        const url = `https://${archive ? 'archive-api' : 'api'}.open-meteo.com/v1/${archive ? 'archive' : 'forecast'}?latitude=${l.lat}&longitude=${l.lon}&timezone=auto&start_date=${d.date}&end_date=${d.date}&daily=${dv}&wind_speed_unit=kmh`;
+        const ctl = new AbortController(), to = setTimeout(() => ctl.abort(), 12000);
+        const r = await fetch(url, { signal: ctl.signal }); clearTimeout(to); const j = await r.json(); if (j.error) throw new Error(j.reason);
+        const Dy = j.daily || {}, g = k => Dy[k] ? Dy[k][0] : null;
+        if (g('temperature_2m_max') == null) throw new Error('Réponse vide');
+        d.weather = { date: d.date, tz: j.timezone || '', fetchedAt: Date.now(), src: archive ? 'archive' : 'forecast', daily: { code: g('weather_code'), tmax: g('temperature_2m_max'), tmin: g('temperature_2m_min'), psum: g('precipitation_sum'), pp: g('precipitation_probability_max'), wind: g('wind_speed_10m_max'), gust: g('wind_gusts_10m_max'), uv: g('uv_index_max') } };
+        UI.wx = {}; persist(); XM.toast('🌦️ Météo actualisée');
+    } catch (e) { UI.wx = { msg: 'Météo indisponible (pas de connexion ?)' }; }
+    render();
+}
+function computeAlerts(d) {
+    const out = [], w = d.weather && d.weather.date === d.date ? d.weather.daily : null, s = sunInfo(d), R = d.safety.risks, e = tmin(d.times.wrap);
+    if (w) {
+        if (w.pp != null && w.pp >= 60) out.push(['red', `🌧️ Pluie probable (${w.pp} %) : bâches, parapluies, housses matériel, plan de repli intérieur.`]);
+        else if (w.pp != null && w.pp >= 35) out.push(['', `🌦️ Risque d'averses (${w.pp} %) : protections pluie à portée de main.`]);
+        else if (w.pp == null && w.psum >= 0.5) out.push(['', `🌧️ Précipitations relevées (${w.psum} mm).`]);
+        if (w.gust >= 60) out.push(['red', `💨 Rafales jusqu'à ${Math.round(w.gust)} km/h : lester pieds et cadres, pas de nacelle, drone interdit.`]);
+        else if (w.gust >= 40) out.push(['', `💨 Vent soutenu (rafales ${Math.round(w.gust)} km/h) : lester pieds et cadres${R.includes('drone') ? ', vol drone à valider' : ''}.`]);
+        else if (w.gust >= 30 && R.includes('drone')) out.push(['', `🚁 Rafales ${Math.round(w.gust)} km/h : vol drone à valider par le télépilote.`]);
+        if (w.code >= 95) out.push(['red', "⛈️ Orage prévu : arrêt des travaux en hauteur et en extérieur, mise à l'abri, matériel électrique protégé."]);
+        if (w.tmax >= 30) out.push(['red', `🌡️ Forte chaleur (${Math.round(w.tmax)}°) : eau en continu, ombre, pauses, protection solaire.`]);
+        if (w.tmin <= 3) out.push(['', `🥶 Froid (${Math.round(w.tmin)}°${w.tmin <= 0 ? ', risque de verglas' : ''}) : vêtements chauds, boissons chaudes, abri chauffé.`]);
+        if (w.uv != null && w.uv >= 6) out.push(['', `🕶️ Indice UV élevé (${Math.round(w.uv)}) : crème solaire, casquettes, ombre.`]);
+        if (w.code === 45 || w.code === 48) out.push(['', '🌫️ Brouillard : prudence sur la route.']);
+    }
+    if (s && s.set && e != null) { const setM = Math.round(localH(s.set, s.tz) * 60); if (e > setM + 20) out.push(['', `🌙 Fin prévue après le coucher du soleil (${fmtT(s.set, s.tz)}) : éclairer circulations et parking.`]); }
+    return out;
+}
+
+// ---------- Rendu ----------
+const main = $('#cs-main');
+const iconBtn = (act, ico, label, extra) => `<button class="m-ibtn plain" data-act="${act}" aria-label="${esc(label)}"${extra || ''}>${ico}</button>`;
+function render() {
+    const y = window.scrollY, has = !!S;
+    $('#cs-days').hidden = !has; $('#cs-tabs').hidden = !has; main.classList.toggle('no-tabs', !has);
+    $('#cs-fab').hidden = !(has && ['prog', 'crew', 'loc'].includes(UI.tab));
+    if (!has) { $('#cs-sub').textContent = 'Feuille de service'; main.innerHTML = vHome(); badge(); return; }
+    $('#cs-days').innerHTML = S.days.map((d, i) => `<button class="cs-day ${i === S.cur ? 'on' : ''}" data-day="${i}">${esc(d.name || 'Journée')}<small>${esc(fmtDateShort(d.date))}</small></button>`).join('');
+    $$('#cs-tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === UI.tab));
+    const d = D(); $('#cs-sub').textContent = [S.meta.name || S.name, d.name].filter(Boolean).join(' · ') || 'Feuille de service';
+    main.innerHTML = ({ day: vDay, prog: vProg, crew: vCrew, loc: vLoc, safe: vSafe }[UI.tab] || vDay)(d);
+    window.scrollTo(0, y); badge();
+}
+function vHome() {
+    return `<div class="m-card cs-home"><h3>📋 Aucune feuille de service sur ce téléphone</h3>
+      <p style="margin-top:0">Recevez la feuille depuis l'ordinateur :</p>
+      <ol class="cs-steps"><li>Dans CALL SHEETO XIII (bureau), touchez le bouton <b>📱</b> de la barre d'outils.</li>
+      <li><b>Scannez le QR code</b> avec l'appareil photo du téléphone, ou envoyez-vous le lien / le fichier.</li>
+      <li>Consultez, modifiez, puis <b>« Renvoyer au bureau »</b> pour fusionner vos changements.</li></ol></div>
+      <div class="m-actions"><button class="m-btn primary" data-act="homeLink">🔗 Coller un lien</button><button class="m-btn" data-act="homeFile">📂 Importer un fichier</button></div>
+      <div class="m-actions"><button class="m-btn block" data-act="example">📐 Essayer avec un exemple</button></div>
+      <p class="m-hint" style="text-align:center;margin-top:18px">Tout reste dans le téléphone : rien n'est envoyé sur Internet.<br>Fonctionne hors ligne (sauf météo et cartes).</p><p class="m-credit">Application développée par Matthieu Lamotte</p>`;
+}
+function keyTile(d, k, label, cls) { return `<label class="cs-key ${cls || ''}"><span>${label}</span><input type="time" data-set="times.${k}" value="${esc(d.times[k])}" aria-label="${esc(label)}"></label>`; }
+function vDay(d) {
+    const m = S.meta, s = sunInfo(d), alerts = computeAlerts(d);
+    let h = `<div class="m-card cs-hero cs-rel accent"><button class="m-ibtn plain cs-edit" data-act="editInfo" aria-label="Modifier la journée">✏️</button>
+      <h2 style="padding-right:40px">${esc(d.title || d.name)}</h2><div class="sub">${esc(fmtDateLong(d.date))}${d.dayNum ? ` · Jour ${esc(d.dayNum)}${d.dayTotal ? '/' + esc(d.dayTotal) : ''}` : ''}</div>
+      <div class="meta">${[m.name, m.company, m.director ? 'Réal. ' + m.director : '', m.producer ? 'Dir. prod. ' + m.producer : ''].filter(Boolean).map(esc).join(' · ')}</div></div>`;
+    h += `<div class="cs-keys">${keyTile(d, 'general', 'Convocation', 'main')}${keyTile(d, 'pat', 'PAT')}${keyTile(d, 'lunch', 'Repas')}${keyTile(d, 'wrap', 'Fin prévue')}</div>`;
+    h += wxCard(d, s);
+    if (s) h += sunCard(d, s);
+    if (alerts.length) h += `<div class="m-card"><h3>⚠️ Alertes</h3>${alerts.map(a => `<div class="cs-alert ${a[0]}">${a[1]}</div>`).join('')}</div>`;
+    h += `<div class="m-card"><h3><span class="grow">ℹ️ Infos pratiques</span>${iconBtn('editText', '✏️', 'Modifier les infos pratiques', ' data-k="practical"')}</h3><div class="cs-pre" data-empty="Aucune info pratique">${esc(d.practical)}</div></div>`;
+    h += `<div class="m-card"><h3><span class="grow">📝 Notes</span>${iconBtn('editText', '✏️', 'Modifier les notes', ' data-k="notes"')}</h3><div class="cs-pre" data-empty="Aucune note">${esc(d.notes)}</div></div>`;
+    h += `<p class="m-hint" style="text-align:center">Touchez une heure pour la modifier directement.</p>`;
+    return h;
+}
+function wxCard(d, s) {
+    const l = wxLoc(d), w = d.weather && d.weather.date === d.date ? d.weather : null, st = UI.wx || {};
+    let b;
+    if (!l) b = `<p class="m-hint" style="margin:0">Aucun lieu localisé : localisez le décor dans la version bureau pour obtenir la météo et le soleil.</p>`;
+    else {
+        if (w) {
+            const dy = w.daily, [lbl, ico] = wmo(dy.code);
+            b = `<div class="cs-wx"><div class="ico">${ico}</div><div><div class="t">${Math.round(dy.tmax)}°<small> / ${Math.round(dy.tmin)}°</small></div><div class="l">${esc(lbl)}</div></div></div>
+              <div class="cs-chips"><span class="m-chip">💧 ${dy.pp != null ? dy.pp + ' %' : '—'} · ${dy.psum != null ? String(Math.round(dy.psum * 10) / 10).replace('.', ',') : 0} mm</span><span class="m-chip">💨 ${Math.round(dy.wind)} km/h · raf. ${Math.round(dy.gust)}</span>${dy.uv != null ? `<span class="m-chip">🕶️ UV ${Math.round(dy.uv)}</span>` : ''}</div>
+              <p class="m-hint" style="margin:8px 0 0">📍 ${esc(l.name || l.address || 'Lieu')} · ${w.src === 'archive' ? 'relevé archivé' : 'prévision'} du ${new Date(w.fetchedAt).toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}</p>`;
+        } else b = `<p class="m-hint" style="margin:0">📍 ${esc(l.name || l.address || 'Lieu')} · météo non enregistrée pour cette date. Touchez ↻ avec une connexion Internet.</p>`;
+        if (st.msg) b += `<p class="m-hint" style="margin:8px 0 0;color:var(--warn)">${esc(st.msg)}</p>`;
+    }
+    return `<div class="m-card"><h3><span class="grow">🌦️ Météo</span>${l ? `<button class="m-btn sm" data-act="wx" ${st.busy ? 'disabled' : ''}>${st.busy ? '⏳ …' : '↻ Actualiser'}</button>` : ''}</h3>${b}</div>`;
+}
+function sunCard(d, s) {
+    const F = x => fmtT(x, s.tz), c = (lab, t, sub) => `<div><span>${lab}</span><b>${t}</b>${sub ? `<small>${sub}</small>` : ''}</div>`;
+    return `<div class="m-card"><h3><span class="grow">☀️ Soleil &amp; lumière</span><span class="m-pill">hors ligne</span></h3><div class="cs-sun">
+      ${c('🌅 Lever', F(s.rise), s.azRise != null ? `azimut ${Math.round(s.azRise)}° ${compass(s.azRise)}` : '')}
+      ${c('🌇 Coucher', F(s.set), s.azSet != null ? `azimut ${Math.round(s.azSet)}° ${compass(s.azSet)}` : '')}
+      ${c('✨ Dorée matin', F(s.b4m), 'jusqu’à ' + F(s.g6m))}${c('✨ Dorée soir', F(s.g6e), 'jusqu’à ' + F(s.b4e))}
+      ${c('🔵 Bleue matin', F(s.dawn), 'jusqu’à ' + F(s.b4m))}${c('🔵 Bleue soir', F(s.b4e), 'jusqu’à ' + F(s.dusk))}
+      ${c('☀️ Midi solaire', F(s.noon), `hauteur ${Math.round(s.maxEl)}°`)}${c('⏳ Durée du jour', s.len ? fmtDur(s.len) : '—', s.tz && s.tz !== browserTZ() ? 'heure locale ' + esc(s.tz) : '')}</div>${sunBar(d, s)}</div>`;
+}
+function sunBar(d, s) {
+    if (!s.rise || !s.set) return '';
+    const pc = x => (x ? Math.max(0, Math.min(100, localH(x, s.tz) / 24 * 100)) : null);
+    const N = '#0d1b2a', B = '#2c4a9a', G = '#f0b378', Dd = '#8cc8f5';
+    const st = [[0, N], [pc(s.dawn), B], [pc(s.b4m), G], [pc(s.g6m), Dd], [pc(s.g6e), G], [pc(s.b4e), B], [pc(s.dusk), N]].filter(x => x[0] != null);
+    const grad = []; st.forEach((x, k) => { const nx = st[k + 1] ? st[k + 1][0] : 100; grad.push(`${x[1]} ${x[0]}%`, `${x[1]} ${nx}%`); });
+    const mk = [['Convoc.', d.times.general], ['PAT', d.times.pat], ['Repas', d.times.lunch], ['Fin', d.times.wrap]].filter(x => tmin(x[1]) != null);
+    return `<div class="cs-bar"><div class="b" style="background:linear-gradient(90deg,${grad.join(',')})"></div>${mk.map((x, k) => `<div class="mk ${k % 2 ? 'lo' : ''}" style="left:${tmin(x[1]) / 1440 * 100}%"><span>${x[0]} ${esc(x[1])}</span></div>`).join('')}<div class="ax"><span>0h</span><span>6h</span><span>12h</span><span>18h</span><span>24h</span></div></div>`;
+}
+function locName(d, id) { const l = byId(d.locations, id); return l ? (l.name || ltype(l.type)[1]) : ''; }
+function vProg(d) {
+    let h = `<div class="m-actions" style="margin:0 0 10px"><button class="m-btn sm" data-act="sortSched">⇅ Trier par heure</button><button class="m-btn sm" data-act="addSched" data-ev="1">⏱ + Événement</button></div>`;
+    if (!d.schedule.length) return h + `<div class="m-empty"><b>🎬</b>Aucune ligne au programme.<br>Touchez ＋ pour ajouter une séquence ou un événement.</div>`;
+    h += `<div class="m-list">` + d.schedule.map(r => {
+        const body = r.ev ? `<b>${esc(r.desc || 'Événement')}</b>`
+            : `<b>${r.seq ? `<span class="cs-seq">${esc(r.seq)}</span>` : ''}${r.ie ? `<span class="cs-ie">${esc(r.ie)}</span>` : ''}${esc(r.desc || 'Séquence')}</b>` +
+              (locName(d, r.loc) || r.roles || r.pages ? `<small>${[locName(d, r.loc) ? '📍 ' + esc(locName(d, r.loc)) : '', r.roles ? '🎭 ' + esc(r.roles) : '', r.pages ? 'p. ' + esc(r.pages) : ''].filter(Boolean).join(' · ')}</small>` : '');
+        return `<div class="cs-sch ${r.ev ? 'ev' : ''}"><input type="time" data-li="schedule" data-id="${r.id}" data-k="time" value="${esc(r.time)}" aria-label="Heure"><button class="body" data-act="schEdit" data-id="${r.id}">${body}</button></div>`;
+    }).join('') + `</div><p class="m-hint" style="text-align:center">Heure : modifiable directement · touchez le texte pour tout éditer, déplacer ou supprimer.</p>`;
+    return h;
+}
+function crewList(d) {
+    const fold = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+    const qq = fold(UI.q).trim();
+    const list = d.crew.filter(c => !qq || fold([c.name, c.role, c.phone, c.note, dept(c.dept)[1]].join(' ')).includes(qq));
+    if (!d.crew.length) return `<div class="m-empty"><b>👥</b>Aucun membre dans l'équipe.<br>Touchez ＋ pour ajouter une personne.</div>`;
+    if (!list.length) return `<div class="m-empty">Aucun résultat pour « ${esc(UI.q)} ».</div>`;
+    let h = '';
+    DEPTS.forEach(dp => {
+        const L = list.filter(c => (dept(c.dept)[0]) === dp[0]); if (!L.length) return;
+        h += `<div class="cs-band"><i style="background:${dp[2]}"></i>${esc(dp[1])} <span style="font-weight:400">· ${L.length}</span></div><div class="m-list">` + L.map(c => {
+            const call = c.call || d.times.general;
+            return `<div class="cs-p"><button class="body" data-act="crewEdit" data-id="${c.id}"><b>${esc(c.name || '(sans nom)')}</b><small>${esc(c.role)}${c.note ? ' · ' + esc(c.note) : ''}</small>
+              <span class="tm ${c.call ? '' : 'dim'}">Convoc. ${esc(call || '--:--')}</span>${c.hmc ? `<span class="tm hmc">HMC ${esc(c.hmc)}</span>` : ''}</button>
+              <div class="ibtns">${c.phone ? `<a class="m-ibtn" href="${telHref(c.phone)}" aria-label="Appeler ${esc(c.name)}">📞</a><a class="m-ibtn" href="${smsHref(c.phone)}" aria-label="SMS à ${esc(c.name)}">💬</a>` : ''}${c.email ? `<a class="m-ibtn" href="mailto:${esc(c.email)}" aria-label="E-mail à ${esc(c.name)}">✉️</a>` : (c.phone ? '<span class="m-ibtn" style="visibility:hidden" aria-hidden="true"></span>' : '')}</div></div>`;
+        }).join('') + `</div>`;
+    });
+    return h;
+}
+function vCrew(d) {
+    return `<div class="cs-search"><input type="search" id="cs-q" placeholder="Rechercher un nom, un poste…" value="${esc(UI.q)}" aria-label="Rechercher dans l'équipe"></div><div id="cs-crewlist">${crewList(d)}</div>`;
+}
+function navUrls(p) {
+    const has = p.lat != null && p.lon != null, ll = has ? p.lat + ',' + p.lon : '', q = has ? ll : encodeURIComponent(p.address || p.name || '');
+    return {
+        geo: has ? `geo:${ll}?q=${ll}(${encodeURIComponent(p.name || 'Lieu')})` : `geo:0,0?q=${q}`,
+        gmaps: `https://www.google.com/maps/dir/?api=1&destination=${q}`,
+        waze: has ? `https://waze.com/ul?ll=${ll}&navigate=yes` : `https://waze.com/ul?q=${q}&navigate=yes`,
+        apple: `https://maps.apple.com/?daddr=${q}`
+    };
+}
+function navSheet(p) {
+    if (p.lat == null && !p.address && !p.name) { XM.toast('Aucune adresse renseignée'); return; }
+    const u = navUrls(p), s = XM.sheet(`<p class="m-hint" style="margin:0 0 10px">${esc([p.name, p.address].filter(Boolean).join(' — '))}</p><div class="cs-nav">
+      <a class="m-btn primary block" href="${u.geo}">🧭 Application de cartes (geo:)</a>
+      <a class="m-btn block" href="${u.gmaps}" target="_blank" rel="noopener">🗺️ Google Maps</a>
+      <a class="m-btn block" href="${u.waze}" target="_blank" rel="noopener">🚗 Waze</a>
+      <a class="m-btn block" href="${u.apple}" target="_blank" rel="noopener">🍎 Plans (Apple)</a>
+      <button class="m-btn block" id="cs-cpa">📋 Copier l'adresse</button></div>${p.lat == null ? '<p class="m-hint" style="margin:10px 0 0">Lieu non localisé : la recherche se fait sur l\'adresse saisie.</p>' : ''}`, { title: '🧭 Itinéraire' });
+    $('#cs-cpa', s).onclick = async () => XM.toast(await XM.copy([p.name, p.address].filter(Boolean).join(', ')) ? '📋 Adresse copiée' : '⚠️ Copie impossible');
+}
+function vLoc(d) {
+    if (!d.locations.length) return `<div class="m-empty"><b>📍</b>Aucun lieu pour cette journée.<br>Touchez ＋ pour en ajouter un (la localisation se fait sur le bureau).</div>`;
+    const wl = wxLoc(d);
+    return d.locations.map((l, i) => {
+        const t = ltype(l.type);
+        return `<div class="m-card cs-loc" style="--lc:${t[3]}"><div class="lt">${i + 1}. ${t[2]} ${esc(t[1])}${wl && wl.id === l.id ? ' · ☀️ lieu météo' : ''}</div><h3>${esc(l.name || t[1])}</h3>
+          ${l.address ? `<div class="ad">${esc(l.address)}</div>` : '<div class="ad m-hint">Adresse non renseignée</div>'}
+          ${l.code ? `<div>🔑 <b>${esc(l.code)}</b></div>` : ''}${l.contact || l.phone ? `<div>👤 ${esc(l.contact)}${l.phone ? ` · ${esc(l.phone)}` : ''}</div>` : ''}${l.access ? `<div class="acc">${esc(l.access)}</div>` : ''}
+          <div class="m-actions"><button class="m-btn primary" data-act="nav" data-id="${l.id}">🧭 Itinéraire</button>${l.phone ? `<a class="m-btn" href="${telHref(l.phone)}">📞 Appeler</a>` : ''}<button class="m-btn" data-act="locEdit" data-id="${l.id}">✏️ Modifier</button></div></div>`;
+    }).join('');
+}
+function whoRow(label, name, phone) {
+    if (!name && !phone) return '';
+    return `<div class="cs-who"><div class="grow"><small>${esc(label)}</small><b>${esc(name || '—')}</b>${phone ? `<small>${esc(phone)}</small>` : ''}</div>${phone ? `<a class="m-ibtn" href="${telHref(phone)}" aria-label="Appeler ${esc(name || label)}">📞</a>` : ''}</div>`;
+}
+function poiCard(key, label, p) {
+    if (!p || !(p.name || p.address || p.phone)) return `<div class="m-card"><h3><span class="grow">${label}</span></h3><p class="m-hint" style="margin:0 0 8px">Non renseigné.</p><button class="m-btn sm" data-act="poiEdit" data-k="${key}">＋ Renseigner</button></div>`;
+    return `<div class="m-card"><h3><span class="grow">${label}${p.dist != null ? ` <small style="color:var(--text-dim);font-weight:400">· à ${p.dist < 1000 ? Math.round(p.dist) + ' m' : (p.dist / 1000).toFixed(1).replace('.', ',') + ' km'}</small>` : ''}</span>${iconBtn('poiEdit', '✏️', 'Modifier', ` data-k="${key}"`)}</h3>
+      <b>${esc(p.name)}</b>${p.address ? `<div class="m-hint" style="font-size:14px">${esc(p.address)}</div>` : ''}
+      <div class="m-actions">${p.phone ? `<a class="m-btn" href="${telHref(p.phone)}">📞 ${esc(p.phone)}</a>` : ''}<button class="m-btn" data-act="navPoi" data-k="${key}">🧭 Itinéraire</button></div></div>`;
+}
+function vSafe(d) {
+    const s = d.safety, risks = RISKS.filter(r => s.risks.includes(r[0])), alerts = computeAlerts(d);
+    let h = `<div class="m-sec" style="margin-top:4px">Urgences · un seul geste</div><div class="cs-sos">${SOS.map(x => `<a href="tel:${x[0]}" aria-label="Appeler le ${x[0]} : ${esc(x[1])}"><b>${x[0]}</b><span>${esc(x[1])}</span></a>`).join('')}</div>`;
+    h += `<div class="m-card"><h3><span class="grow">🦺 Référents sur le tournage</span>${iconBtn('editPeople', '✏️', 'Modifier')}</h3>${whoRow('Référent sécurité', s.referent, s.referentPhone) + whoRow('Secouriste (SST)', s.firstAid, s.firstAidPhone) || '<p class="m-hint" style="margin:0">Aucun référent renseigné.</p>'}
+      <div class="cs-who" style="border-bottom:0"><div class="grow"><small>Rassemblement / trousse de secours</small>${s.assembly ? esc(s.assembly) : '<span class="m-hint">Non renseigné</span>'}</div></div></div>`;
+    h += poiCard('hospital', '🏥 Hôpital (urgences) le plus proche', s.hospital) + poiCard('aed', '⚡ Défibrillateur (DAE)', s.aed);
+    h += `<div class="m-card"><h3><span class="grow">📞 Autres contacts utiles</span>${iconBtn('extraEdit', '＋', 'Ajouter un contact', ' data-i="-1"')}</h3>${s.extra.length ? s.extra.map((x, i) => `<div class="cs-who"><div class="grow"><b>${esc(x.label || 'Contact')}</b>${x.phone ? `<small>${esc(x.phone)}</small>` : ''}</div>${x.phone ? `<a class="m-ibtn" href="${telHref(x.phone)}" aria-label="Appeler ${esc(x.label)}">📞</a>` : ''}${iconBtn('extraEdit', '✏️', 'Modifier', ` data-i="${i}"`)}</div>`).join('') : '<p class="m-hint" style="margin:0">Aucun.</p>'}</div>`;
+    h += `<div class="m-card"><h3><span class="grow">⚠️ Risques identifiés</span>${iconBtn('editRisks', '✏️', 'Cocher les risques')}</h3>${risks.length ? risks.map(r => `<div class="cs-risk"><b>${esc(r[1])}</b>${esc(r[2])}</div>`).join('') : '<p class="m-hint" style="margin:0">Aucun risque coché. Touchez ✏️ pour en cocher.</p>'}</div>`;
+    if (alerts.length) h += `<div class="m-card"><h3>🌦️ Alertes météo</h3>${alerts.map(a => `<div class="cs-alert ${a[0]}">${a[1]}</div>`).join('')}</div>`;
+    h += `<div class="m-card"><h3><span class="grow">📝 Consignes complémentaires</span>${iconBtn('editText', '✏️', 'Modifier', ' data-k="safety.notes"')}</h3><div class="cs-pre" data-empty="Aucune consigne complémentaire">${esc(s.notes)}</div></div>`;
+    return h;
+}
+
+// ---------- Éditeurs (feuilles du bas) ----------
+function fieldHTML(f, v) {
+    const id = 'f-' + f.k.replace(/\W/g, '_'), ph = f.ph ? ` placeholder="${esc(f.ph)}"` : '';
+    let inp;
+    if (f.t === 'select') inp = `<select id="${id}">${f.opts.map(o => `<option value="${esc(o[0])}"${String(o[0]) === String(v == null ? '' : v) ? ' selected' : ''}>${esc(o[1])}</option>`).join('')}</select>`;
+    else if (f.t === 'textarea') inp = `<textarea id="${id}" rows="${f.rows || 4}"${ph}>${esc(v)}</textarea>`;
+    else inp = `<input id="${id}" type="${f.t || 'text'}"${f.t === 'tel' ? ' inputmode="tel"' : ''}${f.t === 'number' ? ' inputmode="numeric"' : ''}${ph} value="${esc(v)}" autocomplete="off">`;
+    return `<label class="m-field"><span>${esc(f.label)}</span>${inp}</label>`;
+}
+function formHTML(fields, get) {
+    return fields.map(f => Array.isArray(f) ? `<div class="m-grid2">${f.map(x => fieldHTML(x, get(x.k))).join('')}</div>` : fieldHTML(f, get(f.k))).join('');
+}
+function readForm(sh, fields) {
+    const o = {}; fields.flat().forEach(f => { const el = $('#f-' + f.k.replace(/\W/g, '_'), sh); if (!el) return; let v = el.value; if (f.t === 'number') v = v === '' ? '' : Number(v); else if (f.t !== 'textarea') v = v.trim(); o[f.k] = v; });
+    return o;
+}
+// ouvre une feuille d'édition ; extra : [{label, cls, run(sh)}]
+function editor(o) {
+    const sh = XM.sheet(formHTML(o.fields, k => o.get(k)) + `<div class="m-actions"><button class="m-btn primary" id="ed-ok">✓ Enregistrer</button></div>` + ((o.extra || []).length ? `<div class="m-actions">${o.extra.map((x, i) => `<button class="m-btn ${x.cls || ''}" data-x="${i}">${x.label}</button>`).join('')}</div>` : ''), { title: esc(o.title) });
+    $('#ed-ok', sh).onclick = () => { const v = readForm(sh, o.fields); if (o.save(v) !== false) { XM.closeSheet(); persist(); render(); } };
+    (o.extra || []).forEach((x, i) => { const b = $(`[data-x="${i}"]`, sh); if (b) b.onclick = () => x.run(sh, () => readForm(sh, o.fields)); });
+    if (o.focus) { const el = $('#f-' + o.focus, sh); if (el) setTimeout(() => el.focus(), 80); }
+    return sh;
+}
+async function confirmDel(title, text) { return (await XM.ask(title, text, [{ label: 'Supprimer', danger: true }, 'Annuler'])) === 0; }
+function moveIn(list, id, dir) {
+    const a = D()[list], i = a.findIndex(x => x.id === id), j = i + dir; if (i < 0 || j < 0 || j >= a.length) { XM.toast(dir < 0 ? 'Déjà en premier' : 'Déjà en dernier'); return; }
+    [a[i], a[j]] = [a[j], a[i]]; persist(); render(); XM.toast(dir < 0 ? '↑ Monté' : '↓ Descendu', 1200);
+}
+function editInfo() {
+    const d = D();
+    const fields = [{ k: 'title', label: 'Titre de la journée', ph: 'ex. Canal Saint-Martin — ext. jour' }, [{ k: 'name', label: 'Nom (onglet)' }, { k: 'date', label: 'Date de tournage', t: 'date' }], [{ k: 'dayNum', label: 'Jour n°', t: 'number' }, { k: 'dayTotal', label: 'Sur (total)', t: 'number' }]];
+    editor({ title: '✏️ Journée', fields, get: k => d[k], save: v => { if (!v.name) v.name = d.name; Object.assign(d, v); } });
+}
+function editText(k) {
+    const d = D(), isS = k.startsWith('safety.'), key = k.replace('safety.', ''), titles = { practical: 'ℹ️ Infos pratiques', notes: '📝 Notes', notes_s: '📝 Consignes de sécurité' };
+    editor({ title: titles[isS ? 'notes_s' : key], fields: [{ k: 'v', label: isS ? 'Consignes complémentaires' : key === 'practical' ? 'Accès, parking, cantine, tenue…' : 'Notes générales', t: 'textarea', rows: 9 }], get: () => (isS ? d.safety : d)[key], save: v => { (isS ? d.safety : d)[key] = v.v; } });
+}
+function schEdit(id, isNew, ev) {
+    const d = D(); let r = id ? byId(d.schedule, id) : null;
+    if (isNew) { const last = d.schedule[d.schedule.length - 1]; r = ev ? { id: uid(), ev: true, time: last && last.time || d.times.lunch, desc: 'REPAS' } : { id: uid(), ev: false, time: last && last.time || d.times.pat, seq: '', ie: '', loc: (wxLoc(d) || {}).id || '', desc: '', roles: '', pages: '' }; }
+    if (!r) return;
+    const locOpts = [['', '—']].concat(d.locations.map(l => [l.id, l.name || ltype(l.type)[1]]));
+    const fields = r.ev ? [{ k: 'time', label: 'Heure', t: 'time' }, { k: 'desc', label: 'Événement', ph: 'ex. REPAS, déplacement vers décor 2…', t: 'textarea', rows: 3 }]
+        : [[{ k: 'time', label: 'Heure', t: 'time' }, { k: 'seq', label: 'Séquence' }], [{ k: 'ie', label: 'Effet', t: 'select', opts: IE_OPTS.map(o => [o, o || '—']) }, { k: 'loc', label: 'Lieu', t: 'select', opts: locOpts }], { k: 'desc', label: 'Description', t: 'textarea', rows: 3 }, [{ k: 'roles', label: 'Rôles / intervenants' }, { k: 'pages', label: 'Pages' }]];
+    const extra = isNew ? [] : [
+        { label: '↑ Monter', run: (sh, rd) => { Object.assign(r, rd()); moveIn('schedule', r.id, -1); } },
+        { label: '↓ Descendre', run: (sh, rd) => { Object.assign(r, rd()); moveIn('schedule', r.id, 1); } },
+        { label: '🗑 Supprimer', cls: 'danger', run: async () => { XM.closeSheet(); if (await confirmDel('Supprimer cette ligne ?', esc(r.desc || r.time || 'Ligne du programme'))) { d.schedule = d.schedule.filter(x => x.id !== r.id); persist(); render(); XM.toast('🗑 Ligne supprimée'); } } }];
+    editor({ title: isNew ? (r.ev ? '➕ Événement' : '➕ Séquence') : (r.ev ? '✏️ Événement' : '✏️ Séquence'), fields, get: k => r[k], extra, focus: isNew ? 'desc' : '', save: v => { Object.assign(r, v); if (isNew) d.schedule.push(r); } });
+}
+function crewEdit(id, isNew) {
+    const d = D(); let c = id ? byId(d.crew, id) : null;
+    if (isNew) c = { id: uid(), dept: 'prod', role: '', name: '', phone: '', email: '', call: '', hmc: '', note: '' };
+    if (!c) return;
+    const fields = [{ k: 'name', label: 'Nom', ph: 'Prénom Nom' }, { k: 'role', label: 'Poste / rôle' }, { k: 'dept', label: 'Département', t: 'select', opts: DEPTS.map(x => [x[0], x[1]]) },
+        [{ k: 'call', label: 'Convocation', t: 'time' }, { k: 'hmc', label: 'HMC / Prêt', t: 'time' }], { k: 'phone', label: 'Téléphone', t: 'tel' }, { k: 'email', label: 'E-mail', t: 'email' }, { k: 'note', label: 'Note' }];
+    const extra = isNew ? [] : [
+        { label: '⏱ Convoc. = générale', run: (sh) => { $('#f-call', sh).value = ''; XM.toast('Convocation vide = convocation générale (' + (d.times.general || '--:--') + ')'); } },
+        { label: '🗑 Supprimer', cls: 'danger', run: async () => { XM.closeSheet(); if (await confirmDel('Retirer cette personne ?', esc(c.name || c.role || 'Membre de l\'équipe'))) { d.crew = d.crew.filter(x => x.id !== c.id); persist(); render(); XM.toast('🗑 Personne retirée'); } } }];
+    editor({ title: isNew ? '➕ Nouvelle personne' : '✏️ ' + (c.name || 'Équipe'), fields, get: k => c[k], extra, focus: isNew ? 'name' : '',
+        save: v => { if (isNew && !v.name && !v.role) { XM.toast('Renseignez au moins le nom ou le poste'); return false; } Object.assign(c, v); if (isNew) d.crew.push(c); } });
+}
+function locEdit(id, isNew) {
+    const d = D(); let l = id ? byId(d.locations, id) : null;
+    if (isNew) l = { id: uid(), type: d.locations.some(x => x.type === 'decor') ? 'autre' : 'decor', name: '', address: '', lat: null, lon: null, tz: '', access: '', contact: '', phone: '', code: '' };
+    if (!l) return;
+    const fields = [{ k: 'type', label: 'Type', t: 'select', opts: LOC_TYPES.map(t => [t[0], t[2] + ' ' + t[1]]) }, { k: 'name', label: 'Nom du lieu', ph: 'ex. Appartement Marie' }, { k: 'address', label: 'Adresse', ph: 'Adresse complète' },
+        { k: 'code', label: 'Étage / code', ph: 'ex. 3e — digicode 4512B' }, [{ k: 'contact', label: 'Contact sur place' }, { k: 'phone', label: 'Téléphone', t: 'tel' }], { k: 'access', label: 'Accès', t: 'textarea', rows: 4, ph: 'Itinéraire, portail, transports, stationnement…' }];
+    const extra = isNew ? [] : [
+        { label: '↑ Monter', run: (sh, rd) => { Object.assign(l, rd()); moveIn('locations', l.id, -1); } }, { label: '↓ Descendre', run: (sh, rd) => { Object.assign(l, rd()); moveIn('locations', l.id, 1); } },
+        { label: '🗑 Supprimer', cls: 'danger', run: async () => { XM.closeSheet(); if (await confirmDel('Supprimer ce lieu ?', esc(l.name || l.address || 'Lieu') + (d.schedule.some(r => r.loc === l.id) ? '<br>Il est utilisé dans le programme.' : ''))) { d.locations = d.locations.filter(x => x.id !== l.id); if (d.wxLocId === l.id) d.wxLocId = ''; persist(); render(); XM.toast('🗑 Lieu supprimé'); } } }];
+    editor({ title: isNew ? '➕ Nouveau lieu' : '✏️ ' + (l.name || ltype(l.type)[1]), fields, get: k => l[k], extra, focus: isNew ? 'name' : '', save: v => { Object.assign(l, v); if (isNew) d.locations.push(l); } });
+    if (isNew) { const hint = document.createElement('p'); hint.className = 'm-hint'; hint.textContent = 'Le lieu sera ajouté sans coordonnées : localisez-le ensuite sur le bureau (🔍) pour la météo et le soleil.'; $('.m-sheet').appendChild(hint); }
+}
+function editPeople() {
+    const s = D().safety, fields = [[{ k: 'referent', label: 'Référent sécurité' }, { k: 'referentPhone', label: 'Tél. référent', t: 'tel' }], [{ k: 'firstAid', label: 'Secouriste (SST)' }, { k: 'firstAidPhone', label: 'Tél. secouriste', t: 'tel' }], { k: 'assembly', label: 'Point de rassemblement / trousse de secours', t: 'textarea', rows: 3 }];
+    editor({ title: '🦺 Référents sécurité', fields, get: k => s[k], save: v => Object.assign(s, v) });
+}
+function poiEdit(key) {
+    const d = D(), p = d.safety[key] || { name: '', address: '', phone: '' }, fields = [{ k: 'name', label: 'Nom' }, { k: 'address', label: 'Adresse' }, { k: 'phone', label: 'Téléphone', t: 'tel' }];
+    editor({ title: key === 'aed' ? '⚡ Défibrillateur (DAE)' : '🏥 Hôpital (urgences)', fields, get: k => p[k] || '', focus: d.safety[key] ? '' : 'name',
+        extra: d.safety[key] ? [{ label: '🗑 Retirer', cls: 'danger', run: () => { d.safety[key] = null; XM.closeSheet(); persist(); render(); } }] : [],
+        save: v => { d.safety[key] = Object.assign({}, d.safety[key] || {}, v); } });
+}
+function extraEdit(i) {
+    const d = D(), isNew = i < 0, x = isNew ? { label: '', phone: '' } : d.safety.extra[i];
+    editor({ title: isNew ? '➕ Contact utile' : '✏️ Contact utile', fields: [{ k: 'label', label: 'Libellé', ph: 'ex. Mairie, gendarmerie locale, centre antipoison…' }, { k: 'phone', label: 'Téléphone', t: 'tel' }], get: k => x[k], focus: isNew ? 'label' : '',
+        extra: isNew ? [] : [{ label: '🗑 Supprimer', cls: 'danger', run: () => { d.safety.extra.splice(i, 1); XM.closeSheet(); persist(); render(); } }],
+        save: v => { if (isNew && !v.label && !v.phone) return false; Object.assign(x, v); if (isNew) d.safety.extra.push(x); } });
+}
+function editRisks() {
+    const d = D(), r = d.safety.risks;
+    const sh = XM.sheet(`<p class="m-hint" style="margin:0 0 6px">Cochez les risques du jour : la consigne s'affiche sur la feuille.</p>` + RISKS.map(k => `<label class="cs-rk"><input type="checkbox" data-r="${k[0]}" ${r.includes(k[0]) ? 'checked' : ''}><span><b>${esc(k[1])}</b><small>${esc(k[2])}</small></span></label>`).join('') + `<div class="m-actions"><button class="m-btn primary" id="rk-ok">OK</button></div>`, { title: '⚠️ Risques identifiés', onClose: () => { render(); } });
+    $$('[data-r]', sh).forEach(cb => cb.onchange = () => { const k = cb.dataset.r, i = r.indexOf(k); if (cb.checked && i < 0) r.push(k); if (!cb.checked && i >= 0) r.splice(i, 1); persist(); });
+    $('#rk-ok', sh).onclick = () => XM.closeSheet();
+}
+
+// ---------- Résumé texte ----------
+function sheetText() {
+    const d = D(), m = S.meta, t = d.times;
+    let x = `📋 ${m.name || S.name || 'Tournage'} — Feuille de service ${d.name}\n${fmtDateLong(d.date)}${d.title ? '\n' + d.title : ''}\n\n⏰ Convocation ${t.general || '--:--'} · PAT ${t.pat || '--:--'} · Repas ${t.lunch || '--:--'} · Fin ${t.wrap || '--:--'}\n`;
+    const l = d.locations.find(z => z.type === 'decor') || d.locations[0]; if (l) x += `📍 ${l.name || ''}${l.address ? ' — ' + l.address : ''}${l.code ? ' (' + l.code + ')' : ''}\n`;
+    const s = sunInfo(d); if (s) x += `🌅 ${fmtT(s.rise, s.tz)} · 🌇 ${fmtT(s.set, s.tz)}\n`;
+    if (d.schedule.length) x += '\n🎬 Programme\n' + d.schedule.map(r => `  ${r.time || '--:--'}  ${r.ev ? r.desc : [r.seq ? 'Séq. ' + r.seq : '', r.ie, r.desc].filter(Boolean).join(' · ')}`).join('\n') + '\n';
+    if (d.safety.referent || d.safety.referentPhone) x += `\n⚠️ Sécurité : ${d.safety.referent} ${d.safety.referentPhone}\n`;
+    return x;
+}
+
+// ---------- Envoi / réception ----------
+async function onEnv(env, via) {
+    if (env.kind !== 'project') { XM.toast('⚠️ Cet envoi est un retour de modifications, pas une feuille de service'); return; }
+    const d = env.data;
+    if (!d || !Array.isArray(d.days) || !d.days.length) throw new Error('Envoi vide : aucune journée');
+    if (S && !S.example) { const n = countChanges(); if (n) { const i = await XM.ask('Remplacer la feuille ?', `Le téléphone contient <b>${n} modification(s)</b> non renvoyée(s). La nouvelle feuille les remplacera.`, [{ label: 'Remplacer', danger: true }, 'Annuler']); if (i !== 0) return; } }
+    adopt(d, env.name, false); render(); XM.toast('✓ Feuille reçue : ' + (S.meta.name || S.name || 'projet') + ' (' + S.days.length + ' journée' + (S.days.length > 1 ? 's' : '') + ')', 3500);
+}
+function sendReturn() {
+    if (!S) { XM.toast('Aucune feuille chargée'); return; }
+    XM.send({ app: APP, page: 'callsheeto.html', title: 'CALL SHEETO', kind: 'return', name: S.meta.name || S.name, make: () => buildPatch(), empty: 'Aucune modification à renvoyer',
+        note: 'Sur l\'ordinateur : ouvrez CALL SHEETO XIII, touchez 📱 puis « Importer un fichier » ou « Coller un lien » (ou scannez le QR avec l\'ordinateur). Seules vos modifications sont envoyées ; le reste de la feuille n\'est pas touché.' });
+}
+function openMenu() {
+    const items = [];
+    if (S) { items.push({ icon: '📋', label: 'Copier la feuille en texte', sub: 'Convocations et programme, pour un SMS ou un mail', run: async () => XM.toast(await XM.copy(sheetText()) ? '📋 Texte copié' : '⚠️ Copie impossible') });
+        items.push({ icon: '🗑️', label: 'Effacer la feuille du téléphone', sub: countChanges() ? countChanges() + ' modification(s) non renvoyée(s)' : '', run: async () => { if ((await XM.ask('Effacer la feuille ?', 'Elle sera supprimée de ce téléphone' + (countChanges() ? ', <b>avec ses modifications non renvoyées</b>' : '') + '.', [{ label: 'Effacer', danger: true }, 'Annuler'])) === 0) { XM.drop(APP); S = null; render(); } } }); }
+    XM.menu({ app: APP, deskPage: 'callsheeto.html', items, onImport: onEnv, sendReturn: S ? sendReturn : null });
+}
+
+// ---------- Exemple ----------
+function exampleData() {
+    const d = normDay({ name: 'J3', date: addDays(todayISO(), 2), title: 'Canal Saint-Martin — ext. jour', dayNum: 3, dayTotal: 12, times: { general: '07:30', pat: '08:45', lunch: '13:00', wrap: '19:30' } });
+    const L1 = { id: uid(), type: 'decor', name: 'Quai de Valmy — passerelle', address: 'Quai de Valmy, 75010 Paris', lat: 48.8721, lon: 2.3637, tz: 'Europe/Paris', access: 'Métro Jacques Bonsergent (L5). Accès piéton uniquement côté quai.', contact: 'Régisseur adjoint', phone: '06 00 00 00 02', code: '' };
+    const L2 = { id: uid(), type: 'base', name: 'Base régie', address: 'Rue de Lancry, 75010 Paris', lat: 48.8703, lon: 2.3610, tz: 'Europe/Paris', access: 'Local au rez-de-chaussée, code porte 4512B.', contact: '', phone: '', code: 'RDC — 4512B' };
+    const L3 = { id: uid(), type: 'park_tech', name: 'Parking camions', address: 'Boulevard de Magenta, 75010 Paris', lat: 48.8738, lon: 2.3590, tz: 'Europe/Paris', access: 'Emplacements réservés par arrêté, côté pair.', contact: '', phone: '', code: '' };
+    d.locations = [L1, L2, L3]; d.wxLocId = L1.id;
+    d.schedule = [
+        { id: uid(), ev: true, time: '07:30', desc: 'Convocation — petit-déjeuner à la cantine' },
+        { id: uid(), ev: false, time: '08:45', seq: '12', ie: 'EXT / JOUR', loc: L1.id, desc: 'Léa attend Hugo sur la passerelle, il ne vient pas.', roles: 'Léa', pages: '1 2/8' },
+        { id: uid(), ev: false, time: '10:30', seq: '13', ie: 'EXT / JOUR', loc: L1.id, desc: 'Hugo court le long du quai.', roles: 'Hugo', pages: '4/8' },
+        { id: uid(), ev: true, time: '13:00', desc: 'REPAS' },
+        { id: uid(), ev: false, time: '14:00', seq: '27', ie: 'EXT / JOUR', loc: L1.id, desc: 'Retrouvailles sur l’écluse.', roles: 'Léa, Hugo', pages: '2' },
+        { id: uid(), ev: false, time: '17:30', seq: '28', ie: 'EXT / JOUR', loc: L1.id, desc: 'Plan drone du canal, lumière de fin de journée.', roles: '—', pages: '1/8' }];
+    d.crew = [['prod', 'Directrice de production', 'Camille Martin', '06 00 00 00 01', 'camille@exemple.fr'], ['regie', 'Régisseur général', 'Julien Petit', '06 00 00 00 02', 'julien@exemple.fr'], ['real', 'Réalisatrice', 'Sarah Leroy', '06 00 00 00 03', ''], ['real', '1er assistant réal.', 'Nicolas Roux', '06 00 00 00 04', 'nicolas@exemple.fr'],
+        ['image', 'Chef opérateur', 'Thomas Moreau', '06 00 00 00 05', ''], ['image', '1er assistant caméra', 'Inès Garnier', '06 00 00 00 06', ''], ['elec', 'Chef électricien', 'Karim Benali', '06 00 00 00 07', ''], ['son', 'Chef opérateur son', 'Lucie Faure', '06 00 00 00 08', ''],
+        ['cast', 'Léa', 'Emma Dubois', '06 00 00 00 09', '', '08:00', '07:15'], ['cast', 'Hugo', 'Paul Bernard', '06 00 00 00 10', '', '10:00', '09:15'], ['secu', 'Télépilote drone', 'Marc Vidal', '06 00 00 00 11', '']
+    ].map(r => ({ id: uid(), dept: r[0], role: r[1], name: r[2], phone: r[3], email: r[4], call: r[5] || '', hmc: r[6] || '', note: '' }));
+    d.safety = Object.assign(blankSafety(), { risks: ['voie', 'eau', 'drone'], referent: 'Julien Petit', referentPhone: '06 00 00 00 02', firstAid: 'Nicolas Roux (SST)', firstAidPhone: '06 00 00 00 04', assembly: 'Trousse de secours et extincteur à la base régie — rassemblement square Villemin', hospital: { name: 'Hôpital Lariboisière (urgences)', address: '2 Rue Ambroise Paré, 75010 Paris', phone: '01 49 95 65 65', lat: 48.8829, lon: 2.3527 } });
+    d.practical = 'Parking équipe impossible sur place : venir en transports.\nTenue : chaussures fermées, vêtements chauds pour la fin de journée.';
+    d.notes = 'Autorisation de tournage n° 2026-XXXX disponible à la régie.';
+    d.weather = { date: d.date, tz: 'Europe/Paris', fetchedAt: Date.now(), src: 'forecast', daily: { code: 2, tmax: 19, tmin: 11, psum: 0.2, pp: 20, wind: 18, gust: 35, uv: 3 } };
+    const d2 = clone(d); d2.id = uid(); d2.name = 'J4'; d2.dayNum = 4; d2.date = addDays(d.date, 1); d2.title = 'Studio — int. jour'; d2.weather = null;
+    d2.locations.forEach(l => { const o = l.id; l.id = uid(); if (d2.wxLocId === o) d2.wxLocId = l.id; }); d2.crew.forEach(c => c.id = uid()); d2.schedule.forEach(r => { r.id = uid(); r.loc = d2.locations[0].id; });
+    return { meta: { name: 'Les Quais (exemple)', company: 'Productions XIII', director: 'Sarah Leroy', producer: 'Camille Martin', settings: { showEmails: true } }, days: [d, d2], cur: 0 };
+}
+
+// ---------- Événements ----------
+document.addEventListener('click', e => {
+    const dayBtn = e.target.closest('[data-day]'); if (dayBtn && S) { S.cur = +dayBtn.dataset.day; UI.wx = {}; persist(); render(); window.scrollTo(0, 0); return; }
+    const tab = e.target.closest('#cs-tabs [data-tab]'); if (tab) { UI.tab = tab.dataset.tab; render(); window.scrollTo(0, 0); return; }
+    const a = e.target.closest('[data-act]'); if (!a) return;
+    const act = a.dataset.act, id = a.dataset.id;
+    if (act === 'homeLink') XM.importLink(APP, onEnv); else if (act === 'homeFile') XM.importFile(APP, onEnv);
+    else if (act === 'example') { const x = exampleData(); adopt(x, x.meta.name, true); render(); XM.toast('📐 Exemple chargé : explorez les onglets du bas'); }
+    else if (!S) return;
+    else if (act === 'editInfo') editInfo(); else if (act === 'editText') editText(a.dataset.k);
+    else if (act === 'wx') refreshWx(); else if (act === 'sortSched') { D().schedule.sort((p, q) => (tmin(p.time) ?? 9999) - (tmin(q.time) ?? 9999)); persist(); render(); XM.toast('⇅ Programme trié par heure'); }
+    else if (act === 'addSched') schEdit(null, true, !!a.dataset.ev); else if (act === 'schEdit') schEdit(id);
+    else if (act === 'crewEdit') crewEdit(id); else if (act === 'locEdit') locEdit(id);
+    else if (act === 'nav') navSheet(byId(D().locations, id)); else if (act === 'navPoi') navSheet(D().safety[a.dataset.k] || {});
+    else if (act === 'editPeople') editPeople(); else if (act === 'poiEdit') poiEdit(a.dataset.k); else if (act === 'extraEdit') extraEdit(+a.dataset.i); else if (act === 'editRisks') editRisks();
+});
+document.addEventListener('change', e => {
+    const t = e.target; if (!S) return;
+    if (t.dataset.set) { const p = t.dataset.set.split('.'); D()[p[0]][p[1]] = t.value; persist(); render(); }
+    else if (t.dataset.li) { const it = byId(D()[t.dataset.li], t.dataset.id); if (it) { it[t.dataset.k] = t.value; persist(); render(); } }
+});
+document.addEventListener('input', e => { if (e.target.id === 'cs-q') { UI.q = e.target.value; $('#cs-crewlist').innerHTML = crewList(D()); } });
+$('#cs-fab').onclick = () => {
+    if (!S) return;
+    if (UI.tab === 'crew') crewEdit(null, true); else if (UI.tab === 'loc') locEdit(null, true);
+    else if (UI.tab === 'prog') { const sh = XM.sheet(`<div class="m-actions" style="margin-top:0"><button class="m-btn primary block" id="a-seq">🎬 Séquence</button><button class="m-btn block" id="a-ev">⏱ Événement (repas, déplacement…)</button></div>`, { title: '➕ Ajouter au programme' }); $('#a-seq', sh).onclick = () => { XM.closeSheet(); schEdit(null, true, false); }; $('#a-ev', sh).onclick = () => { XM.closeSheet(); schEdit(null, true, true); }; }
+};
+$('#cs-ret').onclick = sendReturn;
+$('#cs-menu').onclick = openMenu;
+
+// ---------- Démarrage ----------
+(async function start() {
+    const saved = XM.load(APP); if (saved && Array.isArray(saved.days) && saved.days.length) { S = saved; S.days = S.days.map(normDay); S.cur = Math.min(S.cur || 0, S.days.length - 1); }
+    const got = await XM.fromHash(APP, onEnv); void got;
+    render();
+})();
+window.CSM = { get S() { return S; }, buildPatch, normDay, adopt, render, UI };
+})();
+
+</script>
+</body>
+</html>

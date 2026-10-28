@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>Retours sur la version — POSTO XIII</title>
+<style>
+:root{--bg:#f3f1ee;--panel:#fff;--fg:#1d1b19;--dim:#6d675f;--line:#ddd7cf;--acc:#b8651f;--in:#fbfaf8;--ok:#2e7d32}
+@media (prefers-color-scheme:dark){:root{--bg:#161618;--panel:#1f1f23;--fg:#f1ece6;--dim:#a39b91;--line:#34343b;--acc:#f0b378;--in:#17171a;--ok:#81c784}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.5 -apple-system,"Segoe UI",Roboto,sans-serif}
+header{padding:14px 16px;border-bottom:1px solid var(--line);background:var(--panel)}
+header small{display:block;color:var(--dim);font-size:12px;letter-spacing:.08em;text-transform:uppercase}header h1{margin:2px 0 0;font-size:20px}
+main{max-width:960px;margin:0 auto;padding:16px;display:grid;gap:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px}
+.hint{color:var(--dim);font-size:13px;margin:0}
+button,a.btn{font:inherit;font-size:14px;color:var(--fg);background:transparent;border:1px solid var(--line);border-radius:8px;padding:8px 13px;cursor:pointer;text-decoration:none;display:inline-flex;gap:6px;align-items:center}
+.main{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:700}
+input,select,textarea{font:inherit;color:var(--fg);background:var(--in);border:1px solid var(--line);border-radius:7px;padding:8px 10px;min-width:0}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.player{position:relative;background:#000;border-radius:8px;overflow:hidden}.player video{width:100%;display:block;max-height:56vh}
+.tco{position:absolute;right:8px;top:8px;background:rgba(0,0,0,.65);color:#fff;font:700 14px ui-monospace,Menlo,monospace;padding:3px 8px;border-radius:5px}
+.add{display:grid;grid-template-columns:130px minmax(0,1fr) 170px 90px;gap:8px}
+.add .tc,.c .t{font-family:ui-monospace,Menlo,monospace}
+.who{color:var(--dim);font-size:13px;align-self:center;text-align:center;border:1px dashed var(--line);border-radius:7px;padding:8px 6px}
+.c{display:grid;grid-template-columns:110px minmax(0,1fr) auto;gap:10px;padding:9px 4px;border-top:1px solid var(--line);align-items:start}
+.c .t{font-weight:700;color:var(--acc);cursor:pointer}.cat{font-size:11px;border-radius:99px;padding:1px 8px;margin-right:6px;color:#111;font-weight:700}
+.c .x{outline:none}.c .x:focus{background:var(--in)}
+.foot{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+.big{font-size:16px;padding:11px 18px}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#333;color:#fff;padding:9px 16px;border-radius:8px;opacity:0;transition:opacity .2s;pointer-events:none}#toast.show{opacity:1}
+.err{text-align:center;margin:15vh auto;color:var(--dim);max-width:460px}
+@media(max-width:700px){.add{grid-template-columns:1fr 1fr}.add #c-text{grid-column:1/-1;order:-1}.c{grid-template-columns:90px 1fr}.c>span:last-child{grid-column:2}}
+</style>
+<link rel="icon" type="image/png" href="xiii-icon-192.png">
+</head>
+<body>
+<header><small id="h-sub">POSTO XIII · Retours client</small><h1 id="h-t">Chargement…</h1></header>
+<main id="m"></main>
+<div id="toast"></div>
+<script>
+(async function () {
+    const $ = id => document.getElementById(id), m = $('m');
+    const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const toast = t => { const e = $('toast'); e.textContent = t; e.classList.add('show'); clearTimeout(toast.t); toast.t = setTimeout(() => e.classList.remove('show'), 3200); };
+    const CATS = [['montage', 'Montage', '#90caf9'], ['son', 'Son / mixage', '#ce93d8'], ['etalo', 'Étalonnage', '#ffcc80'], ['gfx', 'Graphisme / VFX', '#80cbc4'], ['st', 'Sous-titres', '#e6ee9c'], ['autre', 'Autre', '#cfd8dc']];
+    const cat = k => CATS.find(c => c[0] === k) || CATS[5];
+    const u8 = s => { s = s.replace(/-/g, '+').replace(/_/g, '/'); while (s.length % 4) s += '='; return Uint8Array.from(atob(s), c => c.charCodeAt(0)); };
+    let D;
+    try { const code = decodeURIComponent((location.hash || '').slice(1)), data = u8(code.slice(2)); const txt = code.slice(0, 2) === 'z.' ? await new Response(new Blob([data]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).text() : new TextDecoder().decode(data); D = JSON.parse(txt); }
+    catch (e) { $('h-t').textContent = 'Lien incomplet'; m.innerHTML = '<p class="err">🔗 Ce lien est incomplet (il a peut-être été coupé par la messagerie). Demandez à la production de vous le renvoyer.</p>'; return; }
+    const fps = +D.f || 25, pad = n => String(n).padStart(2, '0');
+    const tcStr = sec => { let f = Math.round((sec || 0) * fps); const ff = f % fps; f = (f - ff) / fps; return pad(Math.floor(f / 3600)) + ':' + pad(Math.floor(f / 60) % 60) + ':' + pad(f % 60) + ':' + pad(ff); };
+    const parseTc = s => { const p = String(s || '').trim().split(/[:;.]/).map(Number); if (!p.length || p.some(isNaN)) return null; let h = 0, mi = 0, se = 0, fr = 0; if (p.length === 4) [h, mi, se, fr] = p; else if (p.length === 3) [h, mi, se] = p; else if (p.length === 2) [mi, se] = p; else se = p[0]; return h * 3600 + mi * 60 + se + fr / fps; };
+    const KEY = 'postoClient.' + (D.id || 'x'); let L = []; try { L = JSON.parse(localStorage.getItem(KEY)) || []; } catch (e) { }
+    const save = () => { try { localStorage.setItem(KEY, JSON.stringify(L)); } catch (e) { } };
+    document.title = 'Retours ' + (D.v || '') + (D.p ? ' — ' + D.p : '');
+    $('h-sub').textContent = 'Retours client' + (D.n ? ' · envoyé par ' + D.n : '');
+    $('h-t').textContent = (D.p ? D.p + ' — ' : '') + (D.v || 'Version');
+    const direct = /\.(mp4|m4v|mov|webm|ogg)(\?|#|$)/i.test(D.u || '');
+    m.innerHTML = '<div class="card"><p class="hint">Regardez la version, puis notez chaque remarque avec son <b>timecode</b>. Quand vous avez fini, cliquez sur <b>✉️ Envoyer les retours</b> : un e-mail tout prêt s\'ouvre. Vos retours restent enregistrés sur cet appareil en attendant.' + (D.m ? '</p><p class="hint" style="margin-top:8px;white-space:pre-wrap">💬 ' + esc(D.m) : '') + '</p></div>' +
+        '<div class="card" id="vz">' + (direct ? '' : (D.u ? '<div class="row"><a class="btn main" href="' + esc(D.u) + '" target="_blank" rel="noopener">▶ Regarder la vidéo</a><span class="hint">La vidéo s\'ouvre dans un nouvel onglet : relevez le timecode affiché par le lecteur.</span></div>' : '<p class="hint">Aucun lien vidéo n\'a été joint.</p>') + '<p class="hint" style="margin-top:10px">Vous avez reçu le fichier ? <button id="pick">🎞️ Le lire ici</button> le timecode se remplira tout seul.</p><input type="file" id="file" accept="video/*" hidden>') + '<div id="pz"></div></div>' +
+        '<div class="card"><div class="add"><input class="tc" id="c-tc" value="' + tcStr(0) + '" title="Timecode (HH:MM:SS:II ou MM:SS)" placeholder="00:01:23"><input id="c-text" placeholder="Votre retour… (Entrée pour ajouter)"><select id="c-cat">' + CATS.map(c => '<option value="' + c[0] + '">' + c[1] + '</option>').join('') + '</select><span class="who" title="Rempli automatiquement">Client</span></div><div class="row" style="margin-top:8px"><button class="main" id="add">＋ Ajouter ce retour</button><span class="hint" id="cnt"></span></div><div id="list" style="margin-top:8px"></div></div>' +
+        '<div class="card foot"><span class="hint">Les retours partent par e-mail' + (D.to ? ' à <b>' + esc(D.to) + '</b>' : '') + '.</span><span class="row"><button id="copy">📋 Copier les retours</button><button class="main big" id="send">✉️ Envoyer les retours</button></span></div>';
+    function player(src) { $('pz').innerHTML = '<div class="player" style="margin-top:10px"><video id="vid" src="' + esc(src) + '" controls playsinline preload="metadata"></video><span class="tco" id="tco">' + tcStr(0) + '</span></div>'; const v = $('vid'); v.ontimeupdate = v.onseeked = () => { const t = tcStr(v.currentTime); $('tco').textContent = t; if (document.activeElement !== $('c-tc')) $('c-tc').value = t; }; }
+    if (direct) player(D.u);
+    if ($('pick')) { $('pick').onclick = () => $('file').click(); $('file').onchange = e => { const f = e.target.files[0]; if (f) player(URL.createObjectURL(f)); }; }
+    function list() {
+        L.sort((a, b) => a.tc - b.tc); $('cnt').textContent = L.length ? L.length + ' retour' + (L.length > 1 ? 's' : '') : '';
+        $('list').innerHTML = L.length ? L.map((c, i) => '<div class="c" data-i="' + i + '"><span class="t" title="Aller à ce timecode">' + tcStr(c.tc) + '</span><span><span class="cat" style="background:' + cat(c.cat)[2] + '">' + cat(c.cat)[1] + '</span><span class="x" contenteditable="true">' + esc(c.text) + '</span></span><span><button data-del title="Supprimer">✕</button></span></div>').join('') : '<p class="hint">Aucun retour pour l\'instant.</p>';
+        $('list').querySelectorAll('.c').forEach(r => { const c = L[+r.dataset.i]; r.querySelector('.t').onclick = () => { const v = $('vid'); if (v) { v.currentTime = c.tc; v.pause(); } $('c-tc').value = tcStr(c.tc); }; const x = r.querySelector('.x'); x.oninput = () => { c.text = x.textContent; save(); }; x.onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); x.blur(); } }; r.querySelector('[data-del]').onclick = () => { L.splice(+r.dataset.i, 1); save(); list(); }; });
+    }
+    function add() { const t = $('c-text').value.trim(); if (!t) { $('c-text').focus(); return; } const tc = parseTc($('c-tc').value); if (tc == null) { toast('Timecode non reconnu (ex. 00:01:23)'); $('c-tc').focus(); return; } L.push({ tc, text: t, cat: $('c-cat').value }); save(); $('c-text').value = ''; list(); $('c-text').focus(); }
+    $('add').onclick = add; $('c-text').onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); add(); } };
+    const label = k => cat(k)[1];
+    function text() { return 'POSTO · Version : ' + (D.v || '') + (D.p ? ' · Projet : ' + D.p : '') + '\nDe : Client\n' + L.slice().sort((a, b) => a.tc - b.tc).map(c => '[' + tcStr(c.tc) + '] ' + label(c.cat) + ' — ' + c.text.replace(/\s+/g, ' ').trim()).join('\n') + '\n(' + L.length + ' retour' + (L.length > 1 ? 's' : '') + ')'; }
+    async function copy() { try { await navigator.clipboard.writeText(text()); return true; } catch (e) { const t = document.createElement('textarea'); t.value = text(); document.body.appendChild(t); t.select(); const ok = document.execCommand('copy'); t.remove(); return ok; } }
+    $('copy').onclick = async () => { if (!L.length) { toast('Aucun retour à copier'); return; } toast((await copy()) ? '📋 Retours copiés : collez-les dans votre e-mail' : 'Copie impossible'); };
+    $('send').onclick = async () => {
+        if (!L.length) { toast('Ajoutez au moins un retour'); return; }
+        const body = 'Bonjour,\n\nVoici mes retours sur ' + (D.v || 'la version') + (D.p ? ' — ' + D.p : '') + '.\n\n' + text() + '\n\nMerci !';
+        let url = 'mailto:' + encodeURIComponent(D.to || '') + '?subject=' + encodeURIComponent('Retours ' + (D.v || '') + (D.p ? ' — ' + D.p : '')) + '&body=' + encodeURIComponent(body).replace(/%0A/g, '%0D%0A');
+        if (url.length > 1900) { await copy(); url = url.split('&body=')[0] + '&body=' + encodeURIComponent('Bonjour,\n\nVoici mes retours sur ' + (D.v || 'la version') + ' (collez-les ici avec Ctrl+V / Cmd+V) :\n\n').replace(/%0A/g, '%0D%0A'); toast('📋 Beaucoup de retours : ils sont copiés, collez-les dans l\'e-mail'); }
+        (window.openMail || (u => { location.href = u; }))(url);
+    };
+    list();
+})();
+</script>
+<script>
+// 📱 XIII Équipe : une fois dans l'application, on y reste (l'accueil ramène à l'application, pas au site)
+(function () {
+    if (window.__xinapp) return; window.__xinapp = 1;
+    var page = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
+    try { if (page === 'equipe.html' && (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (window.matchMedia && matchMedia('(display-mode: standalone)').matches))) sessionStorage.setItem('xiii.inapp', '1'); } catch (e) { }
+    function inApp() { try { return sessionStorage.getItem('xiii.inapp') === '1'; } catch (e) { return false; } }
+    if (!inApp()) return;
+    if (page === 'index.html' || page === '') { location.replace('equipe.html'); return; }
+    document.addEventListener('click', function (e) {
+        var a = e.target.closest && e.target.closest('a[href]'); if (!a) return;
+        var u; try { u = new URL(a.getAttribute('href'), location.href); } catch (er) { return; }
+        if (u.origin !== location.origin) return;
+        var f = (u.pathname.split('/').pop() || 'index.html').toLowerCase();
+        if (f === 'index.html' || f === '') { e.preventDefault(); e.stopPropagation(); location.href = 'equipe.html'; return; }
+        if (a.target === '_blank') { a.removeAttribute('target'); }
+    }, true);
+})();
+</script>
+</body>
+</html>

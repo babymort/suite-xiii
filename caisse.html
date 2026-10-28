@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Caisse — PACKINGO XIII</title>
+<meta name="theme-color" content="#1d1b19">
+<style>
+:root{--bg:#141312;--panel:#1f1d1b;--panel2:#292624;--line:#3a3632;--fg:#f2ede6;--dim:#a39b91;--acc:#f0b378;--ok:#66bb6a;--bad:#ef5350;--cc:#f0b378;color-scheme:dark}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.4 -apple-system,"Segoe UI",Roboto,sans-serif;padding-bottom:max(30px,env(safe-area-inset-bottom))}
+header{position:sticky;top:0;z-index:3;background:var(--bg);border-bottom:4px solid var(--cc);padding:max(12px,env(safe-area-inset-top)) 16px 10px}
+.code{font:800 30px/1 ui-monospace,Menlo,monospace;letter-spacing:.04em}.nm{font-size:17px;font-weight:600;margin-top:4px}.pj{color:var(--dim);font-size:13px}
+.cps{display:flex;gap:6px;overflow-x:auto;margin-top:10px;scrollbar-width:none}.cps button{white-space:nowrap}
+button{font:inherit;color:var(--fg);background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:8px 12px;cursor:pointer}
+button.on{background:var(--acc);color:#1d1b19;border-color:var(--acc);font-weight:700}
+.bar{height:8px;background:var(--panel2);border-radius:99px;overflow:hidden;margin:10px 0 2px}.bar i{display:block;height:100%;background:var(--ok);transition:width .2s}
+.st{display:flex;justify-content:space-between;color:var(--dim);font-size:13px}
+main{padding:10px 12px}.it{display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px}
+.it .q{font:700 18px ui-monospace,Menlo,monospace;color:var(--acc);min-width:38px}.it .n{flex:1;min-width:0}.it .n small{display:block;color:var(--dim);font-size:12px}
+.it .b{display:flex;gap:6px}.it .b button{width:48px;height:48px;padding:0;font-size:20px;border-radius:12px}
+.it.ok{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 12%,var(--panel))}.it.ok .bo{background:var(--ok);border-color:var(--ok);color:#fff}
+.it.miss{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 12%,var(--panel))}.it.miss .bm{background:var(--bad);border-color:var(--bad);color:#fff}
+.it .w{font-size:11px;color:var(--dim);display:block}
+.foot{display:flex;gap:8px;flex-wrap:wrap;padding:6px 12px}.foot button{flex:1}
+.empty{padding:40px 20px;text-align:center;color:var(--dim)}.note{color:var(--dim);font-size:12.5px;padding:4px 14px}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#333;color:#fff;padding:9px 14px;border-radius:10px;opacity:0;transition:opacity .2s;pointer-events:none}#toast.on{opacity:1}
+</style>
+<link rel="icon" type="image/png" href="xiii-icon-192.png">
+</head>
+<body>
+<header id="h"><a id="bk" href="equipe.html" style="display:none;float:right;color:var(--acc);text-decoration:none;font-weight:600">← XIII</a><div class="pj" id="pj">PACKINGO XIII</div><div class="code" id="code">…</div><div class="nm" id="nm"></div><div class="cps" id="cps"></div><div class="bar"><i id="bar" style="width:0"></i></div><div class="st" id="st"></div></header>
+<main id="m"><div class="empty">Chargement…</div></main>
+<div class="foot" id="foot"></div>
+<p class="note" id="note"></p>
+<div id="toast"></div>
+<script>
+// =====================================================================
+//  PACKINGO XIII — page d'une caisse, ouverte par le QR code de son étiquette
+//  En ligne (Drive du projet) : liste à pointer, reliée à l'onglet ✅ Vérification de PACKINGO (point de contrôle au choix).
+//  Hors ligne : la liste de la caisse, contenue dans le QR code lui-même.
+// =====================================================================
+const $ = id => document.getElementById(id), esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const toast = t => { const e = $('toast'); e.textContent = t; e.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(() => e.classList.remove('on'), 2200); };
+const ub = s => { s = String(s || '').replace(/-/g, '+').replace(/_/g, '/'); while (s.length % 4) s += '='; return new TextDecoder().decode(Uint8Array.from(atob(s), c => c.charCodeAt(0))); };
+const Q = new URLSearchParams(location.hash.slice(1));
+let D = null, CP = '', busy = false;
+const me = () => { try { return localStorage.getItem('xiii.case.me') || ''; } catch (e) { return ''; } };
+function head(c, pj) { document.documentElement.style.setProperty('--cc', c.color || '#f0b378'); $('code').textContent = c.code || '—'; $('nm').textContent = (c.name || '') + (c.fragile ? ' · 🍷 FRAGILE' : ''); $('pj').textContent = (pj ? pj + ' · ' : '') + 'PACKINGO XIII'; document.title = (c.code || 'Caisse') + ' — PACKINGO XIII'; }
+// ---------- hors ligne : liste contenue dans le QR ----------
+function offline() {
+    let o; try { o = JSON.parse(ub(Q.get('d'))); } catch (e) { $('m').innerHTML = '<div class="empty">QR code illisible.</div>'; return; }
+    head({ code: o.c, name: o.n, color: o.k, fragile: o.f }, o.p);
+    $('st').innerHTML = '<span>' + o.i.length + ' ligne(s)</span><span>liste seule (hors ligne)</span>'; $('bar').parentNode.style.display = 'none';
+    $('m').innerHTML = o.i.map(x => '<div class="it"><span class="q">' + esc(x[0]) + '×</span><span class="n">' + esc(x[1]) + (x[2] ? '<small>' + esc(x[2]) + '</small>' : '') + '</span></div>').join('') || '<div class="empty">Caisse vide.</div>';
+    $('note').textContent = 'Liste imprimée le ' + (o.t || '') + '. Pour pointer depuis ce QR, reliez PACKINGO au ☁️ Drive du projet et réimprimez les étiquettes.';
+}
+// ---------- en ligne : Drive du projet ----------
+async function call(a, x) { const r = await fetch(Q.get('u'), { method: 'POST', body: JSON.stringify(Object.assign({ a, k: Q.get('k'), c: Q.get('c') }, x || {})), redirect: 'follow' }); return r.json(); }
+async function load() {
+    let r; try { r = await call('case_get'); } catch (e) { r = { ok: false, err: 'net' }; }
+    if (!r.ok) { $('m').innerHTML = '<div class="empty">' + ({ code: '🔒 Ce QR code n\'est plus valable (nouveaux QR imprimés).', nocase: 'Cette caisse n\'existe plus dans PACKINGO.', net: '📴 Pas de réseau : réessayez dans un instant.', nodata: 'PACKINGO n\'est pas encore dans le Drive du projet.' }[r.err] || '⚠️ ' + esc(r.err)) + '</div><div class="foot"><button onclick="load()">↻ Réessayer</button></div>'; return; }
+    D = r; if (!CP || !D.cps.some(c => c.id === CP)) CP = D.cur || (D.cps[0] || {}).id; draw();
+}
+function draw() {
+    const c = D.case; head(c, D.proj);
+    $('cps').innerHTML = D.cps.map(x => '<button data-cp="' + x.id + '" class="' + (x.id === CP ? 'on' : '') + '">' + esc((x.icon ? x.icon + ' ' : '') + x.name) + '</button>').join('');
+    $('cps').querySelectorAll('[data-cp]').forEach(b => b.onclick = () => { CP = b.dataset.cp; draw(); });
+    const m = D.checks[CP] || {}, ok = c.items.filter(i => m[i.id] && m[i.id].s === 'ok').length, miss = c.items.filter(i => m[i.id] && m[i.id].s === 'miss').length, seal = m['c:' + c.id];
+    $('bar').style.width = (c.items.length ? ok / c.items.length * 100 : 0) + '%';
+    $('st').innerHTML = '<span>' + ok + ' / ' + c.items.length + ' pointé(s)' + (miss ? ' · <b style="color:var(--bad)">' + miss + ' manquant(s)</b>' : '') + '</span><span>' + (seal ? '🔒 caisse fermée ' + esc(seal.t || '') : '') + '</span>';
+    $('m').innerHTML = c.items.map(i => { const s = m[i.id]; return '<div class="it ' + (s ? s.s : '') + '"><span class="q">' + esc(i.qty) + '×</span><span class="n">' + esc(i.name) + (i.sn ? '<small>' + esc(i.sn) + '</small>' : '') + (s ? '<span class="w">' + (s.s === 'ok' ? '✓' : '✗') + ' ' + esc(s.t || '') + (s.by ? ' · ' + esc(s.by) : '') + '</span>' : '') + '</span><span class="b"><button class="bm" data-i="' + i.id + '" data-s="miss" aria-label="Manquant">✗</button><button class="bo" data-i="' + i.id + '" data-s="ok" aria-label="Rangé">✓</button></span></div>'; }).join('') || '<div class="empty">Caisse vide.</div>';
+    $('m').querySelectorAll('[data-i]').forEach(b => b.onclick = () => { const cur = (D.checks[CP] || {})[b.dataset.i]; set(b.dataset.i, cur && cur.s === b.dataset.s ? '' : b.dataset.s); });
+    $('foot').innerHTML = '<button id="all">✓ Tout pointer</button><button id="seal">' + (seal ? '🔓 Rouvrir la caisse' : '🔒 Fermer la caisse') + '</button><button id="who">👤 ' + esc(me() || 'Votre nom') + '</button>';
+    $('all').onclick = async () => { for (const i of c.items) if (!((D.checks[CP] || {})[i.id] || {}).s) await set(i.id, 'ok', true); draw(); };
+    $('seal').onclick = () => { if (!seal && ok < c.items.length && !confirm((c.items.length - ok) + ' article(s) non pointé(s). Fermer quand même ?')) return; set('c:' + c.id, seal ? '' : 'seal'); };
+    $('who').onclick = () => { const n = prompt('Votre nom (apparaît dans PACKINGO) :', me()); if (n != null) { try { localStorage.setItem('xiii.case.me', n.trim()); } catch (e) { } draw(); } };
+    $('note').textContent = 'Relié à l\'onglet ✅ Vérification de PACKINGO par le ☁️ Drive du projet.';
+}
+async function set(id, s, quiet) {
+    if (!me()) { const n = prompt('Votre nom (apparaît dans PACKINGO) :', ''); if (!n) return; try { localStorage.setItem('xiii.case.me', n.trim()); } catch (e) { } }
+    const prev = JSON.stringify(D.checks[CP] || {}), m = D.checks[CP] = D.checks[CP] || {};
+    if (!s) delete m[id]; else m[id] = id.indexOf('c:') === 0 ? { sealed: true, t: '…' } : { s, t: '…', by: me() };
+    if (!quiet) draw(); if (navigator.vibrate) navigator.vibrate(20);
+    let r; try { r = await call('case_check', { cp: CP, i: id, s: s === 'seal' ? 'seal' : s, by: me() }); } catch (e) { r = { ok: false, err: 'net' }; }
+    if (r.ok) { D = r; if (!quiet) draw(); } else { D.checks[CP] = JSON.parse(prev); draw(); toast('⚠️ Non enregistré (' + (r.err === 'net' ? 'pas de réseau' : r.err) + ')'); }
+}
+if (Q.get('d')) offline(); else if (Q.get('u') && Q.get('k') && Q.get('c')) { load(); setInterval(() => { if (!busy && document.visibilityState === 'visible') call('case_get').then(r => { if (r.ok && D && r.rev !== D.rev) { D = r; draw(); } }).catch(() => { }); }, 15000); }
+else $('m').innerHTML = '<div class="empty">Scannez le QR code d\'une étiquette de caisse PACKINGO.</div>';
+</script>
+<script>try { if (localStorage.getItem('xiii.app.me')) document.getElementById('bk').style.display = ''; } catch (e) { }</script>
+<script>
+// 📱 XIII Équipe : une fois dans l'application, on y reste (l'accueil ramène à l'application, pas au site)
+(function () {
+    if (window.__xinapp) return; window.__xinapp = 1;
+    var page = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
+    try { if (page === 'equipe.html' && (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (window.matchMedia && matchMedia('(display-mode: standalone)').matches))) sessionStorage.setItem('xiii.inapp', '1'); } catch (e) { }
+    function inApp() { try { return sessionStorage.getItem('xiii.inapp') === '1'; } catch (e) { return false; } }
+    if (!inApp()) return;
+    if (page === 'index.html' || page === '') { location.replace('equipe.html'); return; }
+    document.addEventListener('click', function (e) {
+        var a = e.target.closest && e.target.closest('a[href]'); if (!a) return;
+        var u; try { u = new URL(a.getAttribute('href'), location.href); } catch (er) { return; }
+        if (u.origin !== location.origin) return;
+        var f = (u.pathname.split('/').pop() || 'index.html').toLowerCase();
+        if (f === 'index.html' || f === '') { e.preventDefault(); e.stopPropagation(); location.href = 'equipe.html'; return; }
+        if (a.target === '_blank') { a.removeAttribute('target'); }
+    }, true);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Direct — CONDUCO XIII</title>
+<meta name="theme-color" content="#0d0c0b">
+<style>
+:root{--bg:#0d0c0b;--panel:#191715;--line:#2c2926;--fg:#f2ede6;--dim:#9b9389;--acc:#f0b378;--red:#e53935;--ok:#66bb6a;--warn:#ffb300;color-scheme:dark}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.4 "Segoe UI",system-ui,sans-serif;padding-bottom:env(safe-area-inset-bottom)}
+header{position:sticky;top:0;z-index:3;background:var(--bg);border-bottom:1px solid var(--line);padding:max(10px,env(safe-area-inset-top)) 14px 10px;display:flex;align-items:center;gap:10px}
+header .pj{flex:1;min-width:0}header .pj b{display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}header .pj small{color:var(--dim)}
+#oa{font:900 12px "Segoe UI",sans-serif;letter-spacing:.15em;padding:5px 10px;border-radius:6px;border:2px solid #444;color:#888;white-space:nowrap}#oa.on{background:var(--red);border-color:var(--red);color:#fff;animation:pl 1.4s infinite}#oa.pa{border-color:var(--warn);color:var(--warn)}@keyframes pl{50%{opacity:.75}}
+#hr{font:800 18px ui-monospace,Menlo,monospace}
+main{max-width:900px;margin:0 auto;padding:12px}
+.cur{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:10px}
+.cur small{color:var(--dim);letter-spacing:.12em;text-transform:uppercase;font-size:11px}
+.cur .t{font:800 clamp(20px,5vw,30px)/1.15 "Segoe UI",sans-serif;margin:6px 0 10px}
+.cur .rm{font:900 clamp(44px,13vw,86px)/1 ui-monospace,Menlo,monospace;letter-spacing:.02em}
+.cur.warn .rm{color:var(--warn)}.cur.over .rm{color:#ff5252}
+.bar{height:6px;background:#2c2926;border-radius:9px;overflow:hidden;margin-top:12px}.bar i{display:block;height:100%;background:var(--acc)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px}.box small{color:var(--dim);font-size:11px;letter-spacing:.1em;text-transform:uppercase;display:block}.box b{font-size:17px;display:block;margin-top:3px}
+.ou-p{color:#ff5252}.ou-m{color:#69f0ae}
+h2{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);margin:18px 0 6px}
+.rd{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.it{display:grid;grid-template-columns:44px 1fr auto;gap:8px;padding:9px 12px;border-top:1px solid var(--line);align-items:center}.it:first-child{border-top:0}
+.it .n{font:700 12px ui-monospace,Menlo,monospace;color:var(--dim)}.it .d{font:600 13px ui-monospace,Menlo,monospace;color:var(--dim)}
+.it.done{opacity:.4}.it.done .x{text-decoration:line-through}.it.now{background:color-mix(in srgb,var(--red) 22%,var(--panel))}.it.now .n{color:#fff}.it.nx{background:color-mix(in srgb,var(--acc) 10%,var(--panel))}
+.wait{color:var(--dim);text-align:center;padding:60px 20px}
+#rc{position:fixed;left:0;right:0;bottom:0;display:flex;gap:10px;justify-content:center;padding:10px;background:#111;border-top:1px solid #333;z-index:9}#rc button{background:#262626;color:#eee;border:1px solid #444;border-radius:10px;padding:10px 18px;font:600 15px system-ui;cursor:pointer}#rc button.go{background:#b71c1c;border-color:#e53935}#rc kbd{font-size:10px;opacity:.6;margin-left:6px}body:has(#rc){padding-bottom:70px}
+</style>
+<link rel="icon" type="image/png" href="xiii-icon-192.png">
+</head>
+<body>
+<header><div class="pj"><b id="pj">CONDUCO XIII</b><small id="tb">Direct</small></div><span id="hr">--:--</span><span id="oa">CONNEXION…</span></header>
+<main id="m"><div class="wait">Connexion au direct…</div></main>
+<script>
+// =====================================================================
+//  CONDUCO XIII — 📡 direct à suivre (lien / QR donné par la scripte depuis le mode Direct)
+//  Lecture seule, sans compte : élément en cours et temps restant, suivant, horloge d'émission, avance / retard,
+//  déroulé complet. Mis à jour toutes les 2 secondes depuis le ☁️ Drive du projet.
+// =====================================================================
+const $ = id => document.getElementById(id), E = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const H = Object.fromEntries(location.hash.slice(1).split('&').filter(Boolean).map(x => { const i = x.indexOf('='); return [x.slice(0, i), decodeURIComponent(x.slice(i + 1))]; }));
+const p2 = n => String(n).padStart(2, '0'), dur = s => { s = Math.max(0, Math.round(+s || 0)); const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60); return (h ? h + ':' + p2(m) : m) + ':' + p2(s % 60); };
+const clk = s => { s = ((Math.round(s) % 86400) + 86400) % 86400; return p2(Math.floor(s / 3600)) + ':' + p2(Math.floor(s % 3600 / 60)); };
+let S = null, rx = 0, sig = '', err = '';
+const BC = H.bc && typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel('xiii.conduco.live') : null;
+if (BC) { BC.onmessage = e => { const m = e.data || {}; if (m.t === 'st') { S = m; rx = Date.now(); err = ''; } }; setInterval(() => BC.postMessage({ t: 'hello', rec: 1 }), 1500); BC.postMessage({ t: 'hello', rec: 1 });
+    document.addEventListener('DOMContentLoaded', () => { }); setTimeout(() => { const b = document.createElement('div'); b.id = 'rc'; b.innerHTML = '<button data-c="prev">⏮ Précédent</button><button data-c="go" class="go">▶ TOP / Suivant <kbd>Espace</kbd></button><button data-c="pause">⏸ Pause <kbd>P</kbd></button>'; document.body.appendChild(b); b.onclick = e => { const x = e.target.closest('[data-c]'); if (x) BC.postMessage({ t: 'cmd', c: x.dataset.c, rec: 1 }); }; }, 0);
+    document.addEventListener('keydown', e => { if (e.target.closest('input,textarea')) return; if (e.code === 'Space') { e.preventDefault(); BC.postMessage({ t: 'cmd', c: 'go', rec: 1 }); } else if (e.key === 'p' || e.key === 'P') BC.postMessage({ t: 'cmd', c: 'pause', rec: 1 }); else if (e.key === 'ArrowLeft') BC.postMessage({ t: 'cmd', c: 'prev', rec: 1 }); });
+    document.addEventListener('dblclick', e => { const it = e.target.closest('.it[id^="i-"]'); if (it) BC.postMessage({ t: 'cmd', c: 'jump', id: it.id.slice(2), rec: 1 }); }); }
+let AGE = null; // âge de l'état côté serveur (horloge Google), indépendant de l'heure du téléphone
+async function poll() { if (BC) { if (S && Date.now() - rx > 4000) err = 'Fenêtre CONDUCO fermée ou direct arrêté'; return; } if (!H.u || !H.k) { err = 'Lien incomplet'; return; } try { const r = await (await fetch(H.u, { method: 'POST', body: JSON.stringify({ a: 'cdl_get', k: H.k }), redirect: 'follow' })).json(); if (r.ok) { S = r.st; rx = Date.now(); err = ''; AGE = r.now && S && S._srv ? Math.max(0, r.now - S._srv) : null; } else err = r.err === 'nolive' ? 'Le direct n\'est pas diffusé pour le moment.' : (r.err === 'action' ? 'Le script Google du Drive est à mettre à jour (page Drive XIII) pour diffuser le direct.' : 'Erreur : ' + r.err); } catch (e) { err = 'Pas de réseau…'; } }
+function draw() {
+    const d = new Date(); $('hr').textContent = p2(d.getHours()) + ':' + p2(d.getMinutes()) + ':' + p2(d.getSeconds());
+    const oa = $('oa'); if (!S) { oa.className = ''; oa.textContent = err ? 'HORS LIGNE' : 'CONNEXION…'; $('m').innerHTML = '<div class="wait">' + E(err || 'Connexion au direct…') + '</div>'; return; }
+    const stale = Date.now() - rx > 20000, lag = !S.on ? 0 : BC ? (Date.now() - (S.at || rx)) / 1000 : ((Date.now() - rx) + (AGE != null ? AGE : Math.min(5000, Math.max(0, rx - (S.at || rx))))) / 1000;
+    oa.className = stale ? '' : S.ended ? '' : S.on ? 'on' : S.paused ? 'pa' : ''; oa.textContent = stale ? 'DÉCONNECTÉ' : S.ended ? 'FIN' : S.on ? 'À L\'ANTENNE' : S.paused ? 'PAUSE' : 'STAND-BY';
+    $('pj').textContent = S.proj || 'CONDUCO XIII'; $('tb').textContent = S.tab || 'Direct'; document.title = (S.on ? '🔴 ' : '') + (S.tab || 'Direct') + ' — CONDUCO';
+    const it = S.item, el = it ? it.el + lag : 0, r = it ? it.dur - el : 0, warn = S.warn || 10;
+    let h = '<div class="cur ' + (it && S.started && r < 0 ? 'over' : it && S.started && r <= warn ? 'warn' : '') + '"><small>' + (S.started ? 'En cours' : 'Prochain élément') + '</small><div class="t">' + (it ? (it.num ? E(it.num) + ' · ' : '') + E(it.title || '—') : '—') + '</div><div class="rm">' + (it ? (S.started ? (r >= 0 ? dur(Math.ceil(r)) : '+' + dur(Math.floor(-r))) : dur(it.dur)) : '--:--') + '</div>' + (it && it.dur ? '<div class="bar"><i style="width:' + Math.min(100, Math.max(0, el / it.dur * 100)) + '%"></i></div>' : '') + '</div>';
+    const ou = S.ou || 0;
+    h += '<div class="row2"><div class="box"><small>Suivant</small><b>' + (S.next ? E(S.next.title) + ' <span style="color:var(--dim);font-weight:400">' + dur(S.next.dur) + '</span>' : '—') + '</b></div><div class="box"><small>Émission · avance / retard</small><b>' + dur((S.show || 0) + lag) + ' <span class="' + (ou > 1 ? 'ou-p' : ou < -1 ? 'ou-m' : '') + '">' + (Math.abs(ou) < 1 ? '· à l\'heure' : (ou > 0 ? '+' : '−') + dur(Math.abs(ou))) + '</span></b>' + (S.end ? '<span style="color:var(--dim);font-size:12px">Fin estimée ' + clk(S.end) + '</span>' : '') + '</div></div>';
+    const nxId = (() => { if (!S.rd || !it) return ''; const i = S.rd.findIndex(x => x.id === it.id); return i > -1 && S.rd[i + 1] ? S.rd[i + 1].id : ''; })();
+    const rs = JSON.stringify([S.rd, it && it.id]);
+    if (rs !== sig || !$('rd')) { h += '<h2>Déroulé</h2><div class="rd" id="rd">' + (S.rd || []).map(x => '<div class="it ' + (it && x.id === it.id ? 'now' : x.done ? 'done' : x.id === nxId ? 'nx' : '') + '" id="i-' + E(x.id) + '"><span class="n">' + E(x.n) + '</span><span class="x">' + E(x.t || '—') + (x.h ? ' <small style="color:var(--acc)">⏰ ' + E(x.h) + '</small>' : '') + '</span><span class="d">' + dur(x.d) + '</span></div>').join('') + '</div>'; $('m').innerHTML = h; sig = rs; const n = document.querySelector('.it.now'); if (n) n.scrollIntoView({ block: 'center', behavior: 'smooth' }); }
+    else { const rd = $('rd'); $('m').innerHTML = h; $('m').appendChild(Object.assign(document.createElement('h2'), { textContent: 'Déroulé' })); $('m').appendChild(rd); }
+}
+poll(); setInterval(poll, 2000); setInterval(draw, 250);
+let wl = null; (async () => { try { if ('wakeLock' in navigator) wl = await navigator.wakeLock.request('screen'); } catch (e) { } })();
+</script>
+<script>
+// 📱 XIII Équipe : une fois dans l'application, on y reste (l'accueil ramène à l'application, pas au site)
+(function () {
+    if (window.__xinapp) return; window.__xinapp = 1;
+    var page = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
+    try { if (page === 'equipe.html' && (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (window.matchMedia && matchMedia('(display-mode: standalone)').matches))) sessionStorage.setItem('xiii.inapp', '1'); } catch (e) { }
+    function inApp() { try { return sessionStorage.getItem('xiii.inapp') === '1'; } catch (e) { return false; } }
+    if (!inApp()) return;
+    if (page === 'index.html' || page === '') { location.replace('equipe.html'); return; }
+    document.addEventListener('click', function (e) {
+        var a = e.target.closest && e.target.closest('a[href]'); if (!a) return;
+        var u; try { u = new URL(a.getAttribute('href'), location.href); } catch (er) { return; }
+        if (u.origin !== location.origin) return;
+        var f = (u.pathname.split('/').pop() || 'index.html').toLowerCase();
+        if (f === 'index.html' || f === '') { e.preventDefault(); e.stopPropagation(); location.href = 'equipe.html'; return; }
+        if (a.target === '_blank') { a.removeAttribute('target'); }
+    }, true);
+})();
+</script>
+</body>
+</html>

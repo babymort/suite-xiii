@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<meta name="robots" content="noindex">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#000000">
+<title>Prompteur — CONDUCO XIII</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;height:100%;background:#000;color:#fff;font-family:"Segoe UI",system-ui,-apple-system,sans-serif;overflow:hidden;-webkit-user-select:none;user-select:none}
+#sc{position:fixed;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}#sc::-webkit-scrollbar{display:none}
+#tx{padding:45vh 9vw 80vh;font-size:44px;line-height:1.45;font-weight:600}
+body.mir #tx{transform:scaleX(-1)}body.flip #tx{transform:scaleY(-1)}body.mir.flip #tx{transform:scale(-1,-1)}
+.h{font-size:.4em;letter-spacing:.12em;text-transform:uppercase;color:#f0b378;margin:1.4em 0 .35em;font-weight:800}.h.cur{color:#ff5252}
+.b{white-space:pre-wrap;margin-bottom:1.2em}
+#gd{position:fixed;left:0;right:0;top:38%;height:0;border-top:2px dashed rgba(229,57,53,.55);pointer-events:none;z-index:3}#gd::before{content:'▶';position:absolute;left:8px;top:-22px;color:#e53935;font-size:30px}
+#bar{position:fixed;left:0;right:0;bottom:0;z-index:5;display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center;padding:10px 12px calc(10px + env(safe-area-inset-bottom));background:linear-gradient(transparent,rgba(0,0,0,.92) 35%);transition:opacity .3s}
+body.hide #bar{opacity:0;pointer-events:none}
+#bar button{font:inherit;font-size:16px;color:#fff;background:#1d1d21;border:1px solid #444;border-radius:10px;padding:10px 14px;min-width:48px;touch-action:manipulation}
+#bar button.on{background:#e53935;border-color:#e53935}#bar .v{font:700 15px ui-monospace,monospace;color:#ccc;min-width:64px;text-align:center}
+#top{position:fixed;left:0;right:0;top:0;z-index:5;display:flex;justify-content:space-between;padding:8px 14px;font-size:13px;color:#999;background:linear-gradient(rgba(0,0,0,.85),transparent);transition:opacity .3s;pointer-events:none}body.hide #top{opacity:0}
+#lv{color:#777}#lv.on{color:#ff5252;font-weight:700}
+.err{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;color:#999;padding:30px}
+</style>
+<link rel="icon" type="image/png" href="xiii-icon-192.png">
+</head>
+<body>
+<div id="sc"><div id="tx"></div></div>
+<div id="gd"></div>
+<div id="top"><span id="ti">Prompteur</span><span id="lv"></span></div>
+<div id="bar">
+    <button id="pl" title="Lecture / pause (Espace)">▶</button>
+    <button id="sm" title="Moins vite (↓)">−</button><span class="v" id="sv">45</span><button id="sp" title="Plus vite (↑)">＋</button>
+    <button id="pv" title="Texte précédent (Page précédente)">⏮</button><button id="nx" title="Texte suivant (Page suivante)">⏭</button>
+    <button id="am" title="Texte plus petit">A−</button><button id="ap" title="Texte plus grand">A＋</button>
+    <button id="mi" title="Miroir (prompteur à vitre)">⇋</button><button id="fl" title="Suivre le direct de CONDUCO (même ordinateur)">🔴 Suivre</button><button id="fs" title="Plein écran">⛶</button>
+</div>
+<script>
+(async function () {
+    const $ = id => document.getElementById(id), sc = $('sc'), tx = $('tx');
+    const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const u8 = s => { s = s.replace(/-/g, '+').replace(/_/g, '/'); while (s.length % 4) s += '='; return Uint8Array.from(atob(s), c => c.charCodeAt(0)); };
+    let D = null;
+    try { const code = decodeURIComponent((location.hash || '').slice(1)), data = u8(code.slice(2)); D = JSON.parse(code.slice(0, 2) === 'z.' ? await new Response(new Blob([data]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).text() : new TextDecoder().decode(data)); } catch (e) { }
+    if (!D || !Array.isArray(D.it)) { document.body.insertAdjacentHTML('beforeend', '<div class="err">📜<br>Lien de prompteur incomplet.<br>Recréez-le depuis CONDUCO (📜 Prompteur › 📱 Tablette / 2e écran).</div>'); $('bar').style.display = 'none'; return; }
+    const KP = 'xiii.prompteur.prefs', o = Object.assign({ size: 44, speed: 45, mirror: false }, D.o || {}); try { Object.assign(o, JSON.parse(localStorage.getItem(KP)) || {}); } catch (e) { }
+    const save = () => { try { localStorage.setItem(KP, JSON.stringify({ size: o.size, speed: o.speed, mirror: o.mirror, follow: o.follow })); } catch (e) { } };
+    function draw(keepPos) { const y = sc.scrollTop; tx.innerHTML = D.it.map(x => '<div class="h" data-id="' + esc(x.id) + '">' + esc(x.h) + '</div><div class="b">' + esc(x.s) + '</div>').join('') + '<div class="h">— Fin —</div>'; if (keepPos) sc.scrollTop = y; }
+    $('ti').textContent = (D.p || 'Prompteur') + (D.tab ? ' — ' + D.tab : ''); document.title = 'Prompteur — ' + (D.p || '');
+    const apply = () => { tx.style.fontSize = o.size + 'px'; $('sv').textContent = o.speed; document.body.classList.toggle('mir', !!o.mirror); $('mi').classList.toggle('on', !!o.mirror); $('fl').classList.toggle('on', !!o.follow); };
+    draw(); apply();
+    // défilement
+    let run = false, last = 0, acc = 0, wake = null;
+    function step(t) { if (!run) return; if (last) { acc += o.speed * (t - last) / 1000 * (o.size / 44); const d = Math.floor(acc); if (d) { sc.scrollTop += d; acc -= d; } } last = t; requestAnimationFrame(step); }
+    function toggle(v) { if (v == null && typeof held !== 'undefined') held = false; run = v == null ? !run : v; $('pl').textContent = run ? '⏸' : '▶'; $('pl').classList.toggle('on', run); if (run) { last = 0; acc = 0; requestAnimationFrame(step); try { navigator.wakeLock && navigator.wakeLock.request('screen').then(w => wake = w).catch(() => { }); } catch (e) { } hideSoon(); } else { try { wake && wake.release(); } catch (e) { } show(); } }
+    const heads = () => [...tx.querySelectorAll('.h')], guide = () => sc.clientHeight * 0.38;
+    function jump(d) { const g = sc.scrollTop + guide() + 4, H = heads(); let i = H.findIndex(h => h.offsetTop > g); if (i < 0) i = H.length; const tgt = d > 0 ? H[i] : H[Math.max(0, i - 2)]; if (tgt) sc.scrollTo({ top: tgt.offsetTop - guide() + 2, behavior: 'smooth' }); }
+    // 🔴 suivi du REC : le changement de séquence en régie PRIME sur le défilement automatique.
+    // Séquence sans texte → le défilement se met en attente (rien ne défile dans le vide) et reprend tout seul à la prochaine séquence avec texte.
+    let held = false;
+    function goId(id) { const h = tx.querySelector('.h[data-id="' + CSS.escape(id) + '"]'); tx.querySelectorAll('.h.cur').forEach(x => x.classList.remove('cur'));
+        if (h) { h.classList.add('cur'); const top = h.offsetTop - guide() + 2; if (run || held) { sc.scrollTop = top; acc = 0; last = 0; } else sc.scrollTo({ top, behavior: 'smooth' }); if (held) { held = false; toggle(true); } $('lv').dataset.w = ''; }
+        else if (run) { held = true; toggle(false); $('lv').dataset.w = '1'; } }
+    const sp = d => { o.speed = Math.max(5, Math.min(300, o.speed + d)); apply(); save(); }, sz = d => { o.size = Math.max(18, Math.min(120, o.size + d)); apply(); save(); };
+    $('pl').onclick = e => { e.stopPropagation(); toggle(); }; $('sm').onclick = () => sp(-5); $('sp').onclick = () => sp(5); $('pv').onclick = () => jump(-1); $('nx').onclick = () => jump(1);
+    $('am').onclick = () => sz(-4); $('ap').onclick = () => sz(4); $('mi').onclick = () => { o.mirror = !o.mirror; apply(); save(); };
+    $('fl').onclick = () => { o.follow = !o.follow; apply(); save(); };
+    $('fs').onclick = () => { const d = document.documentElement; if (document.fullscreenElement) document.exitFullscreen(); else if (d.requestFullscreen) d.requestFullscreen().catch(() => { }); else if (d.webkitRequestFullscreen) d.webkitRequestFullscreen(); };
+    // toucher = lecture / pause (sans gêner le glisser)
+    let sx = 0, sy = 0, moved = false;
+    sc.addEventListener('pointerdown', e => { sx = e.clientX; sy = e.clientY; moved = false; acc = 0; });
+    sc.addEventListener('pointermove', e => { if (Math.abs(e.clientY - sy) > 8 || Math.abs(e.clientX - sx) > 8) moved = true; });
+    sc.addEventListener('click', () => { if (!moved) toggle(); show(); if (run) hideSoon(); });
+    sc.addEventListener('wheel', () => { acc = 0; show(); if (run) hideSoon(); }, { passive: true });
+    let hT = 0; const show = () => { document.body.classList.remove('hide'); clearTimeout(hT); }, hideSoon = () => { clearTimeout(hT); hT = setTimeout(() => { if (run) document.body.classList.add('hide'); }, 2500); };
+    document.addEventListener('keydown', e => { const k = e.key; if (k === ' ' || k === 'Enter' || k === 'k' || k === 'b' || k === 'B') { e.preventDefault(); toggle(); } else if (k === 'ArrowUp') { e.preventDefault(); sp(5); } else if (k === 'ArrowDown') { e.preventDefault(); sp(-5); } else if (k === 'PageDown' || k === 'ArrowRight') { e.preventDefault(); jump(1); } else if (k === 'PageUp' || k === 'ArrowLeft') { e.preventDefault(); jump(-1); } else if (k === '+' || k === '=') sz(4); else if (k === '-') sz(-4); else if (k === 'm' || k === 'M') $('mi').click(); else if (k === 'Home') sc.scrollTop = 0; });
+    // même ordinateur : suit l'élément à l'antenne de CONDUCO et reçoit les textes à jour
+    try {
+        const ch = new BroadcastChannel('xiii.conduco.live'); let curId = null, seen = 0;
+        ch.onmessage = e => { const m = e.data || {}; if (m.t === 'texts' && Array.isArray(m.it) && m.it.length) { D.it = m.it; draw(true); if (curId) tx.querySelectorAll('.h[data-id="' + CSS.escape(curId) + '"]').forEach(h => h.classList.add('cur')); }
+            else if (m.t === 'st') { seen = Date.now(); $('lv').textContent = m.ended ? 'CONDUCO : fin' : m.on ? '● À L\'ANTENNE' + (m.item ? ' — ' + m.item.title : '') : m.paused ? 'CONDUCO : pause' : 'CONDUCO connecté'; $('lv').className = m.on ? 'on' : ''; if (held) $('lv').textContent += ' · ⏸ séquence sans texte : reprise auto'; const id = m.item && m.item.id; if (id && id !== curId) { curId = id; if (o.follow && m.started) goId(id); } } };
+        // 🌐 autre ordinateur : suit le direct diffusé par le ☁️ Drive (📡 Partager le direct actif côté régie)
+        if (D.lv && D.lv.u && D.lv.k) setInterval(async () => { if (seen && Date.now() - seen < 3000 && !ch.__drv) return; try { const r = await (await fetch(D.lv.u, { method: 'POST', body: JSON.stringify({ a: 'cdl_get', k: D.lv.k }), redirect: 'follow' })).json(); if (r.ok && r.st) { ch.__drv = 1; ch.onmessage({ data: Object.assign({}, r.st, { t: 'st' }) }); } } catch (e) { } }, 2000);
+        ch.postMessage({ t: 'gettexts' }); ch.postMessage({ t: 'hello' }); setInterval(() => { if (seen && Date.now() - seen > 4000) { $('lv').textContent = ''; } }, 2000);
+    } catch (e) { }
+})();
+</script>
+</body>
+</html>

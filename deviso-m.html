@@ -1,0 +1,1671 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#222222">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>DEVISO XIII · Mobile</title>
+<style>
+/* SUITE XIII — socle mobile (partagé par toutes les pages *-m.html) */
+:root { color-scheme: dark; --bg-main:#1e1e1e; --bg-panel:#2d2d2d; --bg-panel-alt:#252525; --bg-header:#1a1a1a; --bg-topbar:#222; --bg-input:#3a3a3a; --bg-menu:#2d2d2d; --border-color:#444; --border-soft:#333; --text-main:#fff; --text-muted:#aaa; --text-dim:#888; --row-bg:#262626; --row-alt:#2a2a2a;
+  --accent:240,179,120; --accent-text:rgb(240,179,120); --btn-bg:rgba(var(--accent),.12); --btn-border:rgba(var(--accent),.35); --blue:#007acc; --danger:#e53935; --warn:#ffa726; --ok:#66bb6a;
+  --sat: env(safe-area-inset-top, 0px); --sab: env(safe-area-inset-bottom, 0px); --sal: env(safe-area-inset-left, 0px); --sar: env(safe-area-inset-right, 0px); }
+body.light-theme { color-scheme: light; --bg-main:#eef0f2; --bg-panel:#fff; --bg-panel-alt:#f5f6f7; --bg-header:#e4e6e8; --bg-topbar:#fff; --bg-input:#e9ebed; --bg-menu:#fff; --border-color:#d5d8db; --border-soft:#ddd; --text-main:#1a1a1a; --text-muted:#555; --text-dim:#777; --row-bg:#fff; --row-alt:#f8f9fa; --accent-text:#b8651f; --ok:#2e7d32; }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html { -webkit-text-size-adjust: 100%; }
+body.xm { margin: 0; min-height: 100dvh; background: var(--bg-main); color: var(--text-main); font-family: 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif; font-size: 15px; line-height: 1.4; overscroll-behavior-y: none; }
+body.xm a { color: var(--accent-text); }
+.xm button { font-family: inherit; }
+/* barre du haut */
+.m-top { position: sticky; top: 0; z-index: 40; display: flex; align-items: center; gap: 8px; padding: calc(8px + var(--sat)) calc(10px + var(--sar)) 8px calc(10px + var(--sal)); background: var(--bg-topbar); border-bottom: 1px solid var(--border-soft); min-height: 56px; }
+.m-top .m-title { flex: 1; min-width: 0; line-height: 1.15; }
+.m-top .m-title b { display: block; font-size: 16px; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.m-top .m-title b i { font-style: normal; color: var(--accent-text); }
+.m-top .m-title small { display: block; font-size: 11.5px; color: var(--text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.m-ibtn { flex: 0 0 auto; width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center; font-size: 20px; border-radius: 12px; border: 1px solid var(--btn-border); background: var(--btn-bg); color: var(--text-main); cursor: pointer; text-decoration: none; padding: 0; }
+.m-ibtn:active { background: rgba(var(--accent), .35); }
+.m-ibtn.plain { border-color: transparent; background: transparent; }
+/* contenu */
+.m-main { padding: 12px calc(14px + var(--sar)) calc(128px + var(--sab)) calc(14px + var(--sal)); max-width: 760px; margin: 0 auto; }
+.m-main.no-tabs { padding-bottom: calc(28px + var(--sab)); }
+.m-sec { font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--text-dim); margin: 18px 4px 8px; }
+.m-card { background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 14px; padding: 14px; margin-bottom: 12px; }
+.m-card > h3 { margin: 0 0 10px; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+.m-card > h3 .grow { flex: 1; }
+.m-card.accent { border-color: rgba(var(--accent), .6); background: linear-gradient(180deg, rgba(var(--accent), .12), var(--bg-panel)); }
+.m-kv { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; font-size: 14px; }
+.m-kv dt { color: var(--text-dim); } .m-kv dd { margin: 0; text-align: right; font-weight: 600; word-break: break-word; }
+.m-row { display: flex; align-items: center; gap: 10px; padding: 11px 0; border-bottom: 1px solid var(--border-soft); } .m-row:last-child { border-bottom: 0; }
+.m-row .grow { flex: 1; min-width: 0; } .m-row small { display: block; color: var(--text-dim); font-size: 12.5px; }
+.m-list { background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 14px; overflow: hidden; margin-bottom: 12px; }
+.m-item { display: flex; align-items: center; gap: 12px; padding: 12px 14px; min-height: 56px; border-bottom: 1px solid var(--border-soft); color: inherit; text-decoration: none; cursor: pointer; background: transparent; width: 100%; text-align: left; border-left: 0; border-right: 0; border-top: 0; font-size: 15px; }
+.m-item:last-child { border-bottom: 0; } .m-item:active { background: rgba(var(--accent), .12); }
+.m-item .ico { font-size: 22px; flex: 0 0 auto; width: 30px; text-align: center; } .m-item .grow { flex: 1; min-width: 0; } .m-item b { display: block; font-weight: 600; } .m-item small { display: block; color: var(--text-dim); font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.m-item .go { color: var(--text-dim); font-size: 18px; }
+.m-chip { display: inline-flex; align-items: center; gap: 5px; padding: 5px 11px; border-radius: 99px; font-size: 13px; background: var(--btn-bg); border: 1px solid var(--btn-border); color: var(--text-main); white-space: nowrap; }
+.m-chips { display: flex; gap: 8px; overflow-x: auto; padding: 2px 0 8px; scrollbar-width: none; } .m-chips::-webkit-scrollbar { display: none; }
+.m-chip.on { background: rgba(var(--accent), .4); border-color: rgba(var(--accent), .95); font-weight: 600; }
+.m-pill { display: inline-block; padding: 2px 9px; border-radius: 99px; font-size: 12px; font-weight: 600; border: 1px solid var(--border-color); background: var(--bg-panel-alt); }
+.m-pill.ok { color: var(--ok); border-color: rgba(102,187,106,.5); } .m-pill.warn { color: var(--warn); border-color: rgba(255,167,38,.5); } .m-pill.danger { color: #ef5350; border-color: rgba(229,57,53,.5); }
+/* boutons */
+.m-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 46px; padding: 10px 18px; font-size: 15px; font-weight: 600; border-radius: 12px; border: 1px solid var(--btn-border); background: var(--btn-bg); color: var(--text-main); cursor: pointer; text-decoration: none; }
+.m-btn:active { background: rgba(var(--accent), .35); }
+.m-btn.primary { background: rgba(var(--accent), .3); border-color: rgba(var(--accent), .9); }
+.m-btn.danger { border-color: rgba(229,57,53,.55); background: rgba(229,57,53,.14); }
+.m-btn.block { display: flex; width: 100%; } .m-btn.sm { min-height: 36px; padding: 6px 12px; font-size: 13.5px; border-radius: 10px; }
+.m-btn:disabled { opacity: .45; }
+.m-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; } .m-actions > * { flex: 1 1 140px; }
+.m-fab { position: fixed; right: calc(16px + var(--sar)); bottom: calc(120px + var(--sab)); z-index: 35; width: 58px; height: 58px; border-radius: 50%; font-size: 26px; border: 1px solid rgba(var(--accent), .95); background: rgba(var(--accent), .92); color: #1a1a1a; box-shadow: 0 6px 18px rgba(0,0,0,.45); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.m-fab.no-tabs { bottom: calc(64px + var(--sab)); }
+/* champs */
+.m-field { display: block; margin-bottom: 12px; } .m-field > span { display: block; font-size: 11.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--text-dim); margin-bottom: 4px; }
+.xm input[type=text], .xm input[type=number], .xm input[type=date], .xm input[type=time], .xm input[type=tel], .xm input[type=email], .xm input[type=search], .xm input[type=url], .xm select, .xm textarea { width: 100%; min-height: 46px; padding: 10px 12px; font-size: 16px; font-family: inherit; border: 1px solid var(--border-color); border-radius: 10px; background: var(--bg-input); color: var(--text-main); appearance: none; -webkit-appearance: none; }
+.xm select { background-image: linear-gradient(45deg, transparent 50%, var(--text-dim) 50%), linear-gradient(135deg, var(--text-dim) 50%, transparent 50%); background-position: calc(100% - 18px) 20px, calc(100% - 13px) 20px; background-size: 5px 5px; background-repeat: no-repeat; padding-right: 32px; }
+.xm textarea { min-height: 90px; resize: vertical; line-height: 1.4; }
+.xm input:focus, .xm select:focus, .xm textarea:focus { outline: none; border-color: rgba(var(--accent), .9); box-shadow: 0 0 0 2px rgba(var(--accent), .25); }
+.xm input[type=checkbox], .xm input[type=radio] { width: 24px; height: 24px; accent-color: rgb(var(--accent)); flex: 0 0 auto; }
+.m-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; } .m-grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.m-seg { display: flex; border: 1px solid var(--btn-border); border-radius: 12px; overflow: hidden; margin-bottom: 12px; } .m-seg button { flex: 1; min-height: 44px; border: 0; border-right: 1px solid var(--btn-border); background: var(--btn-bg); color: var(--text-main); font-size: 14px; font-weight: 600; cursor: pointer; } .m-seg button:last-child { border-right: 0; } .m-seg button.on { background: rgba(var(--accent), .45); }
+.m-progress { height: 8px; border-radius: 99px; background: var(--bg-input); overflow: hidden; } .m-progress > i { display: block; height: 100%; background: rgb(var(--accent)); border-radius: 99px; transition: width .25s; }
+.m-empty { text-align: center; color: var(--text-dim); padding: 34px 18px; font-size: 14px; } .m-empty b { display: block; font-size: 38px; margin-bottom: 8px; }
+.m-hint { font-size: 12.5px; color: var(--text-dim); line-height: 1.45; }
+/* onglets du bas */
+.m-tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; display: flex; background: var(--bg-topbar); border-top: 1px solid var(--border-soft); padding: 4px calc(4px + var(--sar)) calc(48px + var(--sab)) calc(4px + var(--sal)); } /* au-dessus du badge Netlify */
+.m-tabs button { flex: 1; min-width: 0; min-height: 54px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; border: 0; background: transparent; color: var(--text-dim); font-size: 11px; font-weight: 600; cursor: pointer; border-radius: 10px; }
+.m-tabs button .ti { font-size: 21px; line-height: 1; } .m-tabs button.on { color: var(--accent-text); background: rgba(var(--accent), .12); }
+/* fenêtres du bas */
+.m-ov { position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,.62); display: flex; align-items: flex-end; justify-content: center; animation: mfade .15s; }
+.m-sheet { width: 100%; max-width: 640px; max-height: 92dvh; overflow-y: auto; background: var(--bg-menu); border: 1px solid var(--border-color); border-bottom: 0; border-radius: 18px 18px 0 0; padding: 8px 16px calc(18px + var(--sab)); animation: mup .2s; }
+.m-sheet .grab { width: 44px; height: 5px; border-radius: 3px; background: var(--border-color); margin: 4px auto 10px; }
+.m-sheet h2 { font-size: 17px; margin: 4px 0 12px; display: flex; align-items: center; gap: 8px; } .m-sheet h2 .grow { flex: 1; }
+@keyframes mup { from { transform: translateY(40px); opacity: .4; } } @keyframes mfade { from { opacity: 0; } }
+.m-toast { position: fixed; left: 50%; bottom: calc(86px + var(--sab)); transform: translate(-50%, 20px); z-index: 200; max-width: 90vw; padding: 11px 18px; border-radius: 12px; background: #111; color: #fff; border: 1px solid rgba(var(--accent), .6); font-size: 14px; opacity: 0; pointer-events: none; transition: .2s; text-align: center; }
+.m-toast.show { opacity: 1; transform: translate(-50%, 0); }
+.m-qr { background: #fff; border-radius: 12px; padding: 6px; width: min(86vw, 380px); margin: 6px auto; } .m-qr svg { display: block; width: 100%; height: auto; }
+.m-credit { text-align: center; color: var(--text-dim); font-size: 11.5px; margin: 22px 0 6px; }
+@media (min-width: 761px) { body.xm { max-width: 520px; margin: 0 auto; border-left: 1px solid var(--border-soft); border-right: 1px solid var(--border-soft); } .m-tabs { max-width: 520px; left: 50%; transform: translateX(-50%); } }
+@media print { .m-top, .m-tabs, .m-fab { display: none !important; } }
+
+.d-stick { position: sticky; top: 0; z-index: 30; }
+.d-sum { display: flex; width: 100%; align-items: center; gap: 10px; border: 0; border-bottom: 1px solid var(--border-soft); background: var(--bg-panel-alt); color: var(--text-main); padding: 8px calc(14px + var(--sar)) 8px calc(14px + var(--sal)); text-align: left; cursor: pointer; font-size: 13px; }
+.d-sum[hidden] { display: none; }
+.d-sum .t { font-size: 20px; font-weight: 800; color: var(--accent-text); white-space: nowrap; }
+.d-sum .r { flex: 1; min-width: 0; color: var(--text-dim); font-size: 12px; line-height: 1.3; }
+.d-sum .r b { color: var(--text-main); font-weight: 600; }
+.d-step { display: flex; align-items: center; gap: 0; border: 1px solid var(--btn-border); border-radius: 12px; overflow: hidden; flex: 0 0 auto; }
+.d-step button { width: 44px; height: 44px; border: 0; background: var(--btn-bg); color: var(--text-main); font-size: 20px; cursor: pointer; }
+.d-step button:active { background: rgba(var(--accent), .35); }
+.d-step span { min-width: 38px; text-align: center; font-weight: 700; font-size: 16px; }
+.d-step.sm button { width: 36px; height: 36px; font-size: 17px; } .d-step.sm span { min-width: 28px; font-size: 14.5px; }
+.d-line { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border-soft); }
+.d-line:last-child { border-bottom: 0; }
+.d-line .grow { flex: 1; min-width: 0; cursor: pointer; }
+.d-line .grow b { display: block; font-weight: 600; font-size: 14.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.d-line .grow small { display: block; color: var(--text-dim); font-size: 12px; line-height: 1.35; }
+.d-line .amt { text-align: right; font-weight: 700; font-size: 14px; white-space: nowrap; cursor: pointer; }
+.d-line .amt small { display: block; font-weight: 400; color: var(--text-dim); font-size: 11px; }
+.d-line.off { opacity: .45; }
+.d-cat { display: flex; align-items: center; gap: 8px; margin: 16px 4px 4px; font-size: 12px; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: .06em; }
+.d-cat .grow { flex: 1; } .d-cat i { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+.d-big { text-align: center; padding: 6px 0 2px; }
+.d-big .v { font-size: 38px; font-weight: 800; color: var(--accent-text); line-height: 1.1; }
+.d-big .l { color: var(--text-dim); font-size: 13px; margin-top: 4px; }
+.d-bar { height: 10px; border-radius: 6px; overflow: hidden; display: flex; background: var(--bg-panel-alt); margin: 12px 0 4px; }
+.d-bar i { display: block; height: 100%; }
+.d-legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12px; color: var(--text-dim); }
+.d-legend span::before { content: ''; display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--c); margin-right: 5px; vertical-align: -1px; }
+.d-res { border-bottom: 1px solid var(--border-soft); }
+.d-res:last-child { border-bottom: 0; }
+.d-res button { width: 100%; display: flex; gap: 10px; align-items: center; text-align: left; background: transparent; border: 0; color: inherit; padding: 11px 2px; min-height: 52px; cursor: pointer; font-size: 14.5px; }
+.d-res button .grow { flex: 1; min-width: 0; } .d-res button small { display: block; color: var(--text-dim); font-size: 12px; }
+.d-res button .add { font-size: 22px; color: var(--accent-text); }
+.d-kits { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.d-kits button { min-height: 64px; border-radius: 12px; border: 1px solid var(--btn-border); background: var(--btn-bg); color: var(--text-main); font-size: 13.5px; font-weight: 600; cursor: pointer; padding: 8px; text-align: left; }
+.d-kits button span { display: block; font-size: 20px; margin-bottom: 2px; }
+.d-tot { display: grid; grid-template-columns: 1fr auto; gap: 7px 12px; font-size: 14px; }
+.d-tot dt { color: var(--text-muted); } .d-tot dd { margin: 0; text-align: right; font-weight: 600; white-space: nowrap; }
+.d-tot dd small { display: block; font-weight: 400; color: var(--text-dim); font-size: 11.5px; }
+.d-tot .sep { grid-column: 1 / -1; border-top: 1px solid var(--border-soft); margin: 3px 0; }
+.d-tot .big { font-size: 16px; color: var(--accent-text); font-weight: 800; }
+.d-vers { display: flex; gap: 8px; overflow-x: auto; padding: 2px 0 10px; scrollbar-width: none; } .d-vers::-webkit-scrollbar { display: none; }
+.d-num { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 0 10px; } .d-num > * { min-width: 0; } .d-num input { min-width: 0; width: 100%; box-sizing: border-box; }
+.d-sw { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border-soft); }
+.d-sw:last-child { border-bottom: 0; } .d-sw .grow { flex: 1; min-width: 0; } .d-sw small { display: block; color: var(--text-dim); font-size: 12px; }
+.d-sw input[type=checkbox] { width: 26px; height: 26px; flex: 0 0 auto; }
+.d-warn { color: var(--warn); }
+.d-home h2 { margin: 6px 0 4px; font-size: 22px; } .d-home p { color: var(--text-muted); margin: 0 0 14px; line-height: 1.5; }
+#d-tabs[hidden], #d-fab[hidden] { display: none !important; }
+
+</style>
+<link rel="icon" type="image/png" href="xiii-icon-192.png">
+</head>
+<body class="xm">
+<div class="d-stick">
+<header class="m-top">
+    <a class="m-ibtn plain" href="index.html" aria-label="Accueil SUITE XIII">‹</a>
+    <div class="m-title"><b>DEVISO <i>XIII</i></b><small id="d-sub">Estimatif rapide</small></div>
+    <button class="m-ibtn" id="d-list" aria-label="Mes estimatifs" title="Mes estimatifs">📋</button>
+    <button class="m-ibtn" id="d-menu" aria-label="Menu">⋯</button>
+</header>
+<button class="d-sum" id="d-sum" hidden aria-label="Voir le total"></button>
+</div>
+<main class="m-main" id="d-main"></main>
+<button class="m-fab" id="d-fab" hidden aria-label="Ajouter">＋</button>
+<nav class="m-tabs" id="d-tabs" hidden>
+  <button data-tab="proj"><span class="ti">🎬</span>Projet</button>
+  <button data-tab="eq"><span class="ti">🎥</span>Matériel</button>
+  <button data-tab="crew"><span class="ti">👥</span>Équipe</button>
+  <button data-tab="tot"><span class="ti">💶</span>Total</button>
+</nav>
+
+<script>
+// =====================================================================
+//  XQR : générateur de QR code (mode octets, niveaux L/M/Q/H, versions 1 à 40) — sans dépendance
+//  XQR.make(texte, 'L') → { size, ver, get(x, y) } ou null si trop long ; XQR.svg(texte, opts) → chaîne SVG ou null
+// =====================================================================
+const XQR = (() => {
+    const ECC = [[-1, 7, 10, 15, 20, 26, 18, 20, 24, 30, 18, 20, 24, 26, 30, 22, 24, 28, 30, 28, 28, 28, 28, 30, 30, 26, 28, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30],
+        [-1, 10, 16, 26, 18, 24, 16, 18, 22, 22, 26, 30, 22, 22, 24, 24, 28, 28, 26, 26, 26, 26, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28],
+        [-1, 13, 22, 18, 26, 18, 24, 18, 22, 20, 24, 28, 26, 24, 20, 30, 24, 28, 28, 26, 30, 28, 30, 30, 30, 30, 28, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30],
+        [-1, 17, 28, 22, 16, 22, 28, 26, 26, 24, 28, 24, 28, 22, 24, 24, 30, 28, 28, 26, 28, 30, 24, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30]];
+    const BLK = [[-1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 4, 4, 4, 4, 4, 6, 6, 6, 6, 7, 8, 8, 9, 9, 10, 12, 12, 12, 13, 14, 15, 16, 17, 18, 19, 19, 20, 21, 22, 24, 25],
+        [-1, 1, 1, 1, 2, 2, 4, 4, 4, 5, 5, 5, 8, 9, 9, 10, 10, 11, 13, 14, 16, 17, 17, 18, 20, 21, 23, 25, 26, 28, 29, 31, 33, 35, 37, 38, 40, 43, 45, 47, 49],
+        [-1, 1, 1, 2, 2, 4, 4, 6, 6, 8, 8, 8, 10, 12, 16, 12, 17, 16, 18, 21, 20, 23, 23, 25, 27, 29, 34, 34, 35, 38, 40, 43, 45, 48, 51, 53, 56, 59, 62, 65, 68],
+        [-1, 1, 1, 2, 4, 4, 4, 5, 6, 8, 8, 11, 11, 16, 16, 18, 16, 19, 21, 25, 25, 25, 34, 30, 32, 35, 37, 40, 42, 45, 48, 51, 54, 57, 60, 63, 66, 70, 74, 77, 81]];
+    const ECL = { L: [0, 1], M: [1, 0], Q: [2, 3], H: [3, 2] };
+    const raw = v => { let r = (16 * v + 128) * v + 64; if (v >= 2) { const n = Math.floor(v / 7) + 2; r -= (25 * n - 10) * n - 55; if (v >= 7) r -= 36; } return r; };
+    const dataCw = (v, e) => Math.floor(raw(v) / 8) - ECC[e][v] * BLK[e][v];
+    const bit = (x, i) => ((x >>> i) & 1) !== 0;
+    const mul = (x, y) => { let z = 0; for (let i = 7; i >= 0; i--) { z = (z << 1) ^ ((z >>> 7) * 0x11D); z ^= ((y >>> i) & 1) * x; } return z; };
+    const rsDiv = d => { const r = new Array(d - 1).fill(0); r.push(1); let root = 1; for (let i = 0; i < d; i++) { for (let j = 0; j < r.length; j++) { r[j] = mul(r[j], root); if (j + 1 < r.length) r[j] ^= r[j + 1]; } root = mul(root, 2); } return r; };
+    const rsRem = (data, div) => { const r = div.map(() => 0); data.forEach(b => { const f = b ^ r.shift(); r.push(0); div.forEach((c, i) => { r[i] ^= mul(c, f); }); }); return r; };
+    function make(text, level) {
+        const e = (ECL[level || 'L'] || ECL.L)[0], bytes = Array.from(new TextEncoder().encode(String(text)));
+        let ver = 0; for (let v = 1; v <= 40; v++) { const cc = v <= 9 ? 8 : 16; if (4 + cc + 8 * bytes.length <= dataCw(v, e) * 8) { ver = v; break; } }
+        if (!ver) return null;
+        const bits = []; const put = (val, n) => { for (let i = n - 1; i >= 0; i--) bits.push((val >>> i) & 1); };
+        put(4, 4); put(bytes.length, ver <= 9 ? 8 : 16); bytes.forEach(b => put(b, 8));
+        const cap = dataCw(ver, e) * 8; put(0, Math.min(4, cap - bits.length)); put(0, (8 - bits.length % 8) % 8);
+        for (let p = 0xEC; bits.length < cap; p ^= 0xEC ^ 0x11) put(p, 8);
+        const data = []; for (let i = 0; i < bits.length; i += 8) { let b = 0; for (let j = 0; j < 8; j++) b = (b << 1) | bits[i + j]; data.push(b); }
+        // blocs + correction d'erreur
+        const nb = BLK[e][ver], el = ECC[e][ver], rc = Math.floor(raw(ver) / 8), ns = nb - rc % nb, sl = Math.floor(rc / nb), div = rsDiv(el), blocks = [];
+        for (let i = 0, k = 0; i < nb; i++) { const dl = sl - el + (i < ns ? 0 : 1), dat = data.slice(k, k + dl); k += dl; const ecc = rsRem(dat, div); if (i < ns) dat.push(0); blocks.push(dat.concat(ecc)); }
+        const all = []; for (let i = 0; i < blocks[0].length; i++) blocks.forEach((b, j) => { if (i !== sl - el || j >= ns) all.push(b[i]); });
+        const size = ver * 4 + 17, M = Array.from({ length: size }, () => new Array(size).fill(false)), F = Array.from({ length: size }, () => new Array(size).fill(false));
+        const setF = (x, y, d) => { M[y][x] = d; F[y][x] = true; };
+        for (let i = 0; i < size; i++) { setF(6, i, i % 2 === 0); setF(i, 6, i % 2 === 0); }
+        const finder = (x, y) => { for (let dy = -4; dy <= 4; dy++) for (let dx = -4; dx <= 4; dx++) { const d = Math.max(Math.abs(dx), Math.abs(dy)), xx = x + dx, yy = y + dy; if (xx >= 0 && xx < size && yy >= 0 && yy < size) setF(xx, yy, d !== 2 && d !== 4); } };
+        finder(3, 3); finder(size - 4, 3); finder(3, size - 4);
+        let ap = []; if (ver > 1) { const n = Math.floor(ver / 7) + 2, st = ver === 32 ? 26 : Math.ceil((ver * 4 + 4) / (n * 2 - 2)) * 2; ap = [6]; for (let p = size - 7; ap.length < n; p -= st) ap.splice(1, 0, p); }
+        ap.forEach((x, i) => ap.forEach((y, j) => { if ((i === 0 && j === 0) || (i === 0 && j === ap.length - 1) || (i === ap.length - 1 && j === 0)) return; for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++) setF(x + dx, y + dy, Math.max(Math.abs(dx), Math.abs(dy)) !== 1); }));
+        const fmt = mask => {
+            const d = (ECL[level || 'L'][1] << 3) | mask; let r = d; for (let i = 0; i < 10; i++) r = (r << 1) ^ ((r >>> 9) * 0x537); const b = ((d << 10) | r) ^ 0x5412;
+            for (let i = 0; i <= 5; i++) setF(8, i, bit(b, i)); setF(8, 7, bit(b, 6)); setF(8, 8, bit(b, 7)); setF(7, 8, bit(b, 8)); for (let i = 9; i < 15; i++) setF(14 - i, 8, bit(b, i));
+            for (let i = 0; i < 8; i++) setF(size - 1 - i, 8, bit(b, i)); for (let i = 8; i < 15; i++) setF(8, size - 15 + i, bit(b, i)); setF(8, size - 8, true);
+        };
+        fmt(0);
+        if (ver >= 7) { let r = ver; for (let i = 0; i < 12; i++) r = (r << 1) ^ ((r >>> 11) * 0x1F25); const b = (ver << 12) | r; for (let i = 0; i < 18; i++) { const c = bit(b, i), a = size - 11 + i % 3, d = Math.floor(i / 3); setF(a, d, c); setF(d, a, c); } }
+        for (let i = 0, right = size - 1; right >= 1; right -= 2) { if (right === 6) right = 5; for (let vert = 0; vert < size; vert++) for (let j = 0; j < 2; j++) { const x = right - j, up = ((right + 1) & 2) === 0, y = up ? size - 1 - vert : vert; if (!F[y][x] && i < all.length * 8) { M[y][x] = bit(all[i >>> 3], 7 - (i & 7)); i++; } } }
+        const inv = (m, x, y) => [(x + y) % 2 === 0, y % 2 === 0, x % 3 === 0, (x + y) % 3 === 0, (Math.floor(x / 3) + Math.floor(y / 2)) % 2 === 0, x * y % 2 + x * y % 3 === 0, (x * y % 2 + x * y % 3) % 2 === 0, ((x + y) % 2 + x * y % 3) % 2 === 0][m];
+        const apply = m => { for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) if (!F[y][x] && inv(m, x, y)) M[y][x] = !M[y][x]; };
+        const penalty = () => {
+            let p = 0, dark = 0;
+            for (let y = 0; y < size; y++) { let run = 1; for (let x = 1; x < size; x++) { if (M[y][x] === M[y][x - 1]) { run++; if (run === 5) p += 3; else if (run > 5) p++; } else run = 1; } }
+            for (let x = 0; x < size; x++) { let run = 1; for (let y = 1; y < size; y++) { if (M[y][x] === M[y - 1][x]) { run++; if (run === 5) p += 3; else if (run > 5) p++; } else run = 1; } }
+            for (let y = 0; y < size - 1; y++) for (let x = 0; x < size - 1; x++) { const c = M[y][x]; if (c === M[y][x + 1] && c === M[y + 1][x] && c === M[y + 1][x + 1]) p += 3; }
+            for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) if (M[y][x]) dark++;
+            p += Math.floor(Math.abs(dark * 20 - size * size * 10) / (size * size)) * 10; return p;
+        };
+        let best = 0, bp = Infinity; for (let m = 0; m < 8; m++) { apply(m); fmt(m); const p = penalty(); if (p < bp) { bp = p; best = m; } apply(m); }
+        apply(best); fmt(best);
+        return { size, ver, get: (x, y) => x >= 0 && y >= 0 && x < size && y < size && M[y][x] };
+    }
+    function svg(text, o) {
+        o = o || {}; const q = make(text, o.ecl || 'L'); if (!q) return null; const b = o.border == null ? 4 : o.border, n = q.size + 2 * b; let d = '';
+        for (let y = 0; y < q.size; y++) { let x = 0; while (x < q.size) { if (q.get(x, y)) { let w = 1; while (x + w < q.size && q.get(x + w, y)) w++; d += 'M' + (x + b) + ',' + (y + b) + 'h' + w + 'v1h-' + w + 'z'; x += w; } else x++; } }
+        return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + n + ' ' + n + '" shape-rendering="crispEdges" role="img" aria-label="QR code"><rect width="' + n + '" height="' + n + '" fill="' + (o.light || '#fff') + '"/><path d="' + d + '" fill="' + (o.dark || '#000') + '"/></svg>';
+    }
+    return { make, svg, capacity: (level) => { const e = (ECL[level || 'L'] || ECL.L)[0]; return dataCw(40, e) - 3; } };
+})();
+if (typeof module !== 'undefined') module.exports = XQR;
+
+// =====================================================================
+//  XM : socle mobile SUITE XIII (pages *-m.html) + panneau « 📱 Mobile » des outils bureau
+//  Enveloppe d'échange : { format:'xiii-mobile', v:1, app, kind:'project'|'return', name, ts, data }
+//  Transfert : lien (#mx=… compressé), QR code (si assez court) ou fichier .xiii-m.json
+// =====================================================================
+const XM = (() => {
+    const FORMAT = 'xiii-mobile', QR_MAX = 1800;
+    const $ = (s, r) => (r || document).querySelector(s), $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+    const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const uid = () => Math.random().toString(36).slice(2, 10);
+    const safe = s => String(s || 'projet').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^\w-]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 40) || 'projet';
+    const isPhone = () => { try { return matchMedia('(max-width:700px)').matches && matchMedia('(pointer:coarse)').matches; } catch (e) { return false; } };
+    // ---------- encodage ----------
+    const b64u = u8 => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
+    const unb64u = t => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
+    async function pipe(u8, Ctor, fmt) { const st = new Blob([u8]).stream().pipeThrough(new Ctor(fmt)); return new Uint8Array(await new Response(st).arrayBuffer()); }
+    async function pack(obj) {
+        const u8 = new TextEncoder().encode(JSON.stringify(obj));
+        if (typeof CompressionStream !== 'undefined') { try { return 'z' + b64u(await pipe(u8, CompressionStream, 'deflate-raw')); } catch (e) { } }
+        return 'r' + b64u(u8);
+    }
+    async function unpack(s) {
+        s = String(s || '').trim(); if (!s) throw new Error('Lien vide');
+        let u8 = unb64u(s.slice(1)); if (s[0] === 'z') u8 = await pipe(u8, DecompressionStream, 'deflate-raw'); else if (s[0] !== 'r') throw new Error('Lien non reconnu');
+        return JSON.parse(new TextDecoder().decode(u8));
+    }
+    const baseUrl = page => { const u = new URL(page || location.pathname.split('/').pop(), location.href); u.hash = ''; u.search = ''; return u.href; };
+    const envelope = (app, kind, name, data) => ({ format: FORMAT, v: 1, app, kind: kind || 'project', name: name || '', ts: Date.now(), data });
+    async function link(page, env) { return baseUrl(page) + '#mx=' + await pack(env); }
+    function checkEnv(env, app) {
+        if (!env || env.format !== FORMAT) throw new Error('Ce fichier n\'est pas un envoi SUITE XIII mobile');
+        if (app && env.app !== app) throw new Error('Cet envoi est destiné à « ' + env.app + ' », pas à « ' + app + ' »');
+        return env;
+    }
+    // ---------- stockage local (une enveloppe par application) ----------
+    const mem = {};
+    const load = app => { try { return JSON.parse(localStorage.getItem('xiii.m.' + app)); } catch (e) { return mem[app] || null; } };
+    const save = (app, obj) => { mem[app] = obj; try { localStorage.setItem('xiii.m.' + app, JSON.stringify(obj)); return true; } catch (e) { return false; } };
+    const drop = app => { delete mem[app]; try { localStorage.removeItem('xiii.m.' + app); } catch (e) { } };
+    // ---------- interface ----------
+    let toastT;
+    function toast(msg, ms) { let t = $('.m-toast'); if (!t) { t = document.createElement('div'); t.className = 'm-toast'; document.body.appendChild(t); } t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), ms || 2600); }
+    function sheet(html, o) {
+        o = o || {}; closeSheet(); const ov = document.createElement('div'); ov.className = 'm-ov'; ov.id = 'm-ov';
+        ov.innerHTML = '<div class="m-sheet" role="dialog"><div class="grab"></div>' + (o.title ? '<h2><span class="grow">' + o.title + '</span><button class="m-ibtn plain" data-x aria-label="Fermer">✕</button></h2>' : '') + html + '</div>';
+        ov.addEventListener('mousedown', e => { if (e.target === ov) closeSheet(); }); ov.addEventListener('touchstart', e => { if (e.target === ov) closeSheet(); }, { passive: true });
+        document.body.appendChild(ov); const x = $('[data-x]', ov); if (x) x.onclick = closeSheet; ov._onClose = o.onClose; return ov.querySelector('.m-sheet');
+    }
+    function closeSheet() { const ov = $('#m-ov'); if (ov) { ov.remove(); if (ov._onClose) try { ov._onClose(); } catch (e) { } } }
+    // choix : renvoie l'index du bouton (ou -1 si fermé)
+    function ask(title, text, buttons) {
+        return new Promise(res => {
+            const s = sheet('<p style="margin:0 0 14px;color:var(--text-muted)">' + text + '</p><div class="m-actions" style="margin-top:0">' + (buttons || ['OK']).map((b, i) => '<button class="m-btn ' + (i === 0 ? 'primary' : '') + (b.danger ? ' danger' : '') + '" data-i="' + i + '">' + esc(b.label || b) + '</button>').join('') + '</div>', { title: esc(title), onClose: () => res(-1) });
+            $$('[data-i]', s).forEach(b => b.onclick = () => { const ov = $('#m-ov'); if (ov) ov._onClose = null; closeSheet(); res(+b.dataset.i); });
+        });
+    }
+    function download(name, content, mime) { const b = content instanceof Blob ? content : new Blob([content], { type: mime || 'application/json' }), a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { a.remove(); URL.revokeObjectURL(a.href); }, 1500); }
+    async function copy(text) { try { await navigator.clipboard.writeText(text); return true; } catch (e) { const t = document.createElement('textarea'); t.value = text; t.style.cssText = 'position:fixed;opacity:0'; document.body.appendChild(t); t.select(); let ok = false; try { ok = document.execCommand('copy'); } catch (e2) { } t.remove(); return ok; } }
+    function pickFile(accept, cb) { const i = document.createElement('input'); i.type = 'file'; i.accept = accept || '.json,application/json'; i.style.display = 'none'; i.onchange = async () => { const f = i.files[0]; i.remove(); if (f) cb(f); }; document.body.appendChild(i); i.click(); }
+    async function readEnvFile(f, app) { return checkEnv(JSON.parse(await f.text()), app); }
+    // ---------- fenêtre d'envoi : QR + lien + fichier (bureau et mobile) ----------
+    //  cfg = { app, page, title, kind, name, make: () => data | null, note, empty }
+    async function send(cfg) {
+        const data = cfg.make(); if (data == null) { toast(cfg.empty || 'Rien à envoyer'); return; }
+        const env = envelope(cfg.app, cfg.kind || 'project', cfg.name ? (typeof cfg.name === 'function' ? cfg.name() : cfg.name) : '', data);
+        const url = await link(cfg.page, env), json = JSON.stringify(env), qr = url.length <= QR_MAX ? XQR.svg(url, { ecl: 'L', border: 2 }) : null, mob = document.body.classList.contains('xm');
+        const fname = cfg.file || ((cfg.title || cfg.app) + '_' + safe(env.name) + '.xiii-m.json').replace(/\s+/g, '_');
+        const body = (qr ? '<div class="m-qr">' + qr + '</div><p class="m-hint" style="text-align:center;margin:4px 0 12px">Scannez ce code avec l\'appareil photo' + (cfg.kind === 'return' ? ' de l\'ordinateur' : ' du téléphone') + '.' + (url.length > 1100 ? ' Code dense : affichez-le en grand.' : '') + '</p>'
+            : '<div class="m-card" style="margin-top:0"><b>Trop volumineux pour un QR code</b><p class="m-hint" style="margin:6px 0 0">' + (url.length < 8000 ? 'Utilisez le lien (message, mail, AirDrop…) ou le fichier ci-dessous.' : 'Utilisez le fichier ci-dessous (AirDrop, mail, cloud…) : le lien serait trop long.') + '</p></div>') +
+            '<div class="m-actions" style="margin-top:0">' + (url.length < 8000 ? '<button class="m-btn" id="xm-copy">🔗 Copier le lien</button>' : '') + ((navigator.share && mob) ? '<button class="m-btn" id="xm-share">📤 Partager…</button>' : '') + '<button class="m-btn primary" id="xm-file">⬇️ Fichier</button></div>' +
+            (cfg.note ? '<p class="m-hint" style="margin:12px 2px 0">' + cfg.note + '</p>' : '') + '<p class="m-hint" style="margin:8px 2px 0">' + (json.length / 1024 < 10 ? Math.max(1, Math.round(json.length / 102.4) / 10) : Math.round(json.length / 1024)) + ' Ko · le projet n\'est pas envoyé sur Internet : tout est dans le lien ou le fichier.</p>';
+        const s = host(body, '📱 ' + esc(cfg.heading || (cfg.kind === 'return' ? 'Renvoyer au bureau' : 'Envoyer vers le mobile')), mob);
+        const q = id => $(id, s.ov || s);
+        const c = q('#xm-copy'); if (c) c.onclick = async () => toast(await copy(url) ? '🔗 Lien copié' : '⚠️ Copie impossible : utilisez le fichier');
+        const sh = q('#xm-share'); if (sh) sh.onclick = async () => { try { await navigator.share({ title: cfg.title || cfg.app, text: cfg.title || cfg.app, url }); } catch (e) { } };
+        q('#xm-file').onclick = () => { download(fname, json, 'application/json'); toast('⬇️ Fichier enregistré'); };
+    }
+    // fenêtre : feuille du bas sur mobile, boîte centrée sur le bureau (styles en ligne : aucun CSS requis)
+    function host(html, title, mob) {
+        if (mob) { const s = sheet(html, { title }); s.ov = s.parentNode; return s; }
+        const old = document.getElementById('xm-d-ov'); if (old) old.remove();
+        const ov = document.createElement('div'); ov.id = 'xm-d-ov'; ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:10060;display:flex;align-items:center;justify-content:center;';
+        ov.innerHTML = '<div style="background:var(--bg-menu,#2d2d2d);color:var(--text-main,#fff);width:520px;max-width:94vw;max-height:90vh;overflow-y:auto;border-radius:10px;border:1px solid var(--border-color,#444);padding:20px;box-shadow:0 4px 18px rgba(0,0,0,.5);font-size:13.5px;font-family:inherit;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;border-bottom:1px solid var(--border-color,#444);padding-bottom:8px;"><b style="font-size:15px;">' + title + '</b><span data-x style="cursor:pointer;font-weight:bold;color:var(--text-muted,#aaa);padding:0 4px;">✕</span></div><div class="xm-d">' + html + '</div></div>';
+        ov.addEventListener('mousedown', e => { if (e.target === ov) ov.remove(); }); document.body.appendChild(ov); $('[data-x]', ov).onclick = () => ov.remove();
+        const s = $('.xm-d', ov); s.ov = ov; if (!document.getElementById('xm-d-css')) { const st = document.createElement('style'); st.id = 'xm-d-css'; st.textContent = '#xm-d-ov .m-qr{background:#fff;border-radius:10px;padding:6px;width:min(100%,340px);margin:6px auto}#xm-d-ov .m-qr svg{display:block;width:100%;height:auto}#xm-d-ov .m-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}#xm-d-ov .m-actions>*{flex:1 1 130px}#xm-d-ov .m-btn{padding:9px 12px;font-size:13.5px;border-radius:8px;border:1px solid var(--btn-border,rgba(240,179,120,.35));background:var(--btn-bg,rgba(240,179,120,.12));color:inherit;cursor:pointer;font-weight:600}#xm-d-ov .m-btn.primary{border-color:rgba(240,179,120,.85);background:rgba(240,179,120,.28)}#xm-d-ov .m-hint{font-size:12px;color:var(--text-dim,#888);line-height:1.45}#xm-d-ov .m-card{border:1px solid var(--border-color,#444);border-radius:8px;padding:10px 12px;background:var(--bg-panel-alt,#252525);margin:10px 0}#xm-d-ov .m-sec{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-dim,#888);margin:16px 2px 6px}'; document.head.appendChild(st); }
+        return s;
+    }
+    // ---------- réception : lien (#mx=…), fichier ou lien collé ----------
+    async function fromHash(app, onEnv) {
+        const m = /[#&]mx=([\w-]+)/.exec(location.hash || ''); if (!m) return false;
+        try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { }
+        try { const env = checkEnv(await unpack(m[1]), app); await onEnv(env, 'link'); } catch (e) { toast('⚠️ ' + (e.message || 'Lien illisible'), 4500); }
+        return true;
+    }
+    function importFile(app, onEnv) { pickFile('.json,application/json', async f => { try { await onEnv(await readEnvFile(f, app), 'file'); } catch (e) { toast('⚠️ ' + (e.message || 'Fichier illisible'), 4500); } }); }
+    async function importLink(app, onEnv) {
+        const mob = document.body.classList.contains('xm');
+        const s = host('<label class="m-field" style="display:block;margin-bottom:10px"><span class="m-hint">Collez le lien reçu</span><textarea id="xm-paste" rows="4" style="width:100%;box-sizing:border-box;font-size:16px;padding:10px;border-radius:8px;border:1px solid var(--border-color,#444);background:var(--bg-input,#3a3a3a);color:inherit"></textarea></label><div class="m-actions"><button class="m-btn primary" id="xm-pgo">Importer</button></div>', '🔗 Importer un lien', mob);
+        $('#xm-pgo', s.ov || s).onclick = async () => { const v = $('#xm-paste', s.ov || s).value, m = /mx=([\w-]+)/.exec(v) || [0, v.trim()]; try { const env = checkEnv(await unpack(m[1]), app); if (s.ov) s.ov.remove(); closeSheet(); await onEnv(env, 'link'); } catch (e) { toast('⚠️ ' + (e.message || 'Lien illisible'), 4500); } };
+    }
+    // ---------- panneau « 📱 Mobile » des outils bureau ----------
+    //  cfg = { app, page, title, name:()=>'', make:()=>data|null, apply:async(env)=>message, note }
+    function desktopPanel(cfg) {
+        const s = host('<p class="m-hint" style="margin:0 0 10px">Emportez ce projet sur le téléphone : ouvrez la <b>version mobile</b> de ' + esc(cfg.title) + ' en scannant un QR code, en ouvrant un lien ou en important un fichier.</p>' +
+            '<div class="m-actions" style="margin-top:0"><button class="m-btn primary" id="xm-go">📱 Envoyer vers le mobile</button><button class="m-btn" id="xm-open">↗ Ouvrir la version mobile ici</button></div>' +
+            (cfg.apply ? '<div class="m-sec">Récupérer ce qui a été fait sur le mobile</div><div class="m-actions" style="margin-top:0"><button class="m-btn" id="xm-ifile">📂 Importer un fichier</button><button class="m-btn" id="xm-ilink">🔗 Coller un lien</button></div><p class="m-hint" style="margin:8px 2px 0">' + (cfg.returnNote || 'Sur le mobile, « Renvoyer au bureau » produit le fichier ou le lien à importer ici.') + '</p>' : ''), '📱 Version mobile — ' + esc(cfg.title), false);
+        const q = id => $(id, s.ov);
+        q('#xm-go').onclick = () => { s.ov.remove(); send({ app: cfg.app, page: cfg.page, title: cfg.title, name: cfg.name, make: cfg.make, note: cfg.note, empty: cfg.empty }); };
+        q('#xm-open').onclick = async () => { const d = cfg.make(); if (d == null) { toast(cfg.empty || 'Rien à envoyer'); return; } s.ov.remove(); window.open(await link(cfg.page, envelope(cfg.app, 'project', typeof cfg.name === 'function' ? cfg.name() : cfg.name, d)), '_blank'); };
+        if (cfg.apply) { const ap = async env => { s.ov && s.ov.remove(); const m = await cfg.apply(env); if (m) toast(m, 5000); }; q('#xm-ifile').onclick = () => importFile(cfg.app, ap); q('#xm-ilink').onclick = () => { s.ov.remove(); importLink(cfg.app, async env => { const m = await cfg.apply(env); if (m) toast(m, 5000); }); }; }
+    }
+    // retour par lien sur le bureau (#mx=… de type return)
+    function desktopBoot(cfg) { return fromHash(cfg.app, async env => { if (env.kind === 'return' && cfg.apply) { const m = await cfg.apply(env); if (m) toast(m, 5000); } }); }
+    // ---------- thème, en-tête et menu des pages mobiles ----------
+    function initTheme() { let p = {}; try { p = JSON.parse(localStorage.getItem('hubXIII.prefs')) || {}; } catch (e) { } document.body.classList.add('xm'); document.body.classList.toggle('light-theme', p.theme === 'light'); const m = document.querySelector('meta[name=theme-color]'); if (m) m.content = p.theme === 'light' ? '#ffffff' : '#222222'; }
+    function toggleTheme() { let p = {}; try { p = JSON.parse(localStorage.getItem('hubXIII.prefs')) || {}; } catch (e) { } p.theme = p.theme === 'light' ? 'dark' : 'light'; try { localStorage.setItem('hubXIII.prefs', JSON.stringify(p)); } catch (e) { } initTheme(); }
+    //  menu standard ⋯ : cfg = { app, deskPage, items:[{icon,label,sub,run}] , onImport(env, via) , sendReturn() }
+    function menu(cfg) {
+        const items = (cfg.items || []).concat([
+            cfg.onImport ? { icon: '📂', label: 'Importer un fichier', sub: 'Envoi du bureau (.xiii-m.json)', run: () => importFile(cfg.app, cfg.onImport) } : null,
+            cfg.onImport ? { icon: '🔗', label: 'Coller un lien', sub: 'Lien ou QR reçu du bureau', run: () => importLink(cfg.app, cfg.onImport) } : null,
+            cfg.sendReturn ? { icon: '📤', label: 'Renvoyer au bureau', sub: 'QR code, lien ou fichier', run: cfg.sendReturn } : null,
+            { icon: '🌓', label: 'Thème clair / sombre', run: toggleTheme },
+            cfg.deskPage ? { icon: '🖥️', label: 'Version bureau', sub: 'Interface complète', run: () => { try { sessionStorage.setItem('xiiiDesk', '1'); } catch (e) { } location.href = cfg.deskPage + '?desktop=1'; } } : null,
+            { icon: '🏠', label: 'Accueil SUITE XIII', run: () => { location.href = 'index.html'; } }].filter(Boolean));
+        const s = sheet('<div class="m-list" style="margin:0">' + items.map((it, i) => '<button class="m-item" data-i="' + i + '"><span class="ico">' + it.icon + '</span><span class="grow"><b>' + esc(it.label) + '</b>' + (it.sub ? '<small>' + esc(it.sub) + '</small>' : '') + '</span></button>').join('') + '</div><p class="m-credit">Application développée par Matthieu Lamotte</p>', { title: 'Menu' });
+        $$('[data-i]', s).forEach(b => b.onclick = () => { closeSheet(); setTimeout(() => items[+b.dataset.i].run(), 60); });
+    }
+    return { FORMAT, $, $$, esc, uid, safe, isPhone, pack, unpack, link, envelope, checkEnv, load, save, drop, toast, sheet, closeSheet, ask, download, copy, pickFile, readEnvFile, send, host, fromHash, importFile, importLink, desktopPanel, desktopBoot, initTheme, toggleTheme, menu };
+})();
+// 🏠 retour à l'accueil SUITE XIII : même bouton en tête de chaque version mobile
+(function () {
+    const add = () => { const top = document.querySelector('.m-top'); if (!top || top.querySelector('.xm-home')) return; const a = document.createElement('a'); a.className = 'm-ibtn plain xm-home'; a.href = 'index.html'; a.title = 'Accueil SUITE XIII'; a.setAttribute('aria-label', 'Accueil'); a.textContent = '🏠'; a.style.cssText = 'text-decoration:none;font-size:17px;display:inline-flex;align-items:center;justify-content:center'; top.insertBefore(a, top.firstChild); };
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', add); else add();
+})();
+
+// 📱 XIII Équipe : une fois dans l'application, on y reste (l'accueil ramène à l'application, pas au site)
+(function () {
+    if (window.__xinapp) return; window.__xinapp = 1;
+    var page = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
+    try { if (page === 'equipe.html' && (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (window.matchMedia && matchMedia('(display-mode: standalone)').matches))) sessionStorage.setItem('xiii.inapp', '1'); } catch (e) { }
+    function inApp() { try { return sessionStorage.getItem('xiii.inapp') === '1'; } catch (e) { return false; } }
+    if (!inApp()) return;
+    if (page === 'index.html' || page === '') { location.replace('equipe.html'); return; }
+    document.addEventListener('click', function (e) {
+        var a = e.target.closest && e.target.closest('a[href]'); if (!a) return;
+        var u; try { u = new URL(a.getAttribute('href'), location.href); } catch (er) { return; }
+        if (u.origin !== location.origin) return;
+        var f = (u.pathname.split('/').pop() || 'index.html').toLowerCase();
+        if (f === 'index.html' || f === '') { e.preventDefault(); e.stopPropagation(); location.href = 'equipe.html'; return; }
+        if (a.target === '_blank') { a.removeAttribute('target'); }
+    }, true);
+})();
+
+</script>
+<script>
+
+// =====================================================================
+//  DEVISO XIII — RÉFÉRENTIELS
+//  • Loueurs : tarifs publics relevés sur leurs sites (HT / jour, octobre 2026), références (AFCS…)
+//    et loueurs « sur devis » (tarifs non publiés : complétés en important leur devis).
+//  • Base tarifaire : modèles précis (prix par loueur) et types génériques (estimation d'après plusieurs références).
+//  • Grilles de salaires : minima conventionnels (journée 8 h, brut) et usage constaté.
+// =====================================================================
+const TARIFS_DATE = 'octobre 2026';
+// [id, nom, ville, spécialité, type ('pub' tarif public · 'ref' référence · 'devis' sur devis), précision sur les prix, site]
+const LOUEURS0 = [
+    ['amp', 'AMP Visual TV', 'Île-de-France', 'Cars régie, studios, HF', 'devis', 'Sur devis (tarifs non publiés)', 'ampvisualtv.tv'],
+    ['vi', 'Impact Visuel', 'Paris', 'Caméra, optiques, lumière, son, régie', 'devis', 'Sur devis (« prix sur demande »)', ''],
+    ['mxl', 'Maximaloc', 'Paris 11e', 'Vidéo, caméra, optiques, régie', 'devis', 'Tarifs non consultables en ligne', 'maximaloc.com'],
+    ['lmx', 'Lumex', 'Châtenay-Malabry', 'Lumière cinéma / TV, groupes, nacelles', 'devis', 'Sur devis (catalogue sans prix)', 'lumex.tv'],
+    ['tr', 'Transpa (Transpalux / Transpacam)', 'Gennevilliers', 'Lumière, énergie, caméra, machinerie', 'devis', 'Sur devis (boutique en ligne fermée)', 'transpalux.com'],
+    ['bf', 'Buffaloc', 'Saint-Denis', 'Caméra, optiques, lumière, HF vidéo', 'pub', 'Prix publics HT / jour', 'buffaloc.fr'],
+    ['li', 'Loca Images', 'Paris', 'Caméra, transmission, HF', 'pub', 'Prix publics HT / jour (dégressif selon durée)', 'rent.loca-images.com'],
+    ['cl', 'Cine Loc', 'Paris', 'Caméra, LED, HMI, son', 'pub', 'Prix publics HT / jour', 'cine-loc.com'],
+    ['tm', 'Turtle Max Location', 'Saint-Ouen', 'Caméra cinéma, HMI, LED, tungstène', 'pub', 'Prix publics HT / jour, hors assurance', 'turtlemaxlocation.com'],
+    ['ck', 'Cosmik Vidéo', 'Aubervilliers', 'Caméra, lumière, machinerie', 'pub', 'Prix publics HT / jour (tarifs 2025), week-end = 1 jour', 'cosmikvideo.net'],
+    ['fl', 'Filme', 'Montreuil', 'Caméra, PTZ, lumière, son, régie, streaming', 'pub', 'Prix « à partir de » HT / jour, −50 % dès le 2e jour', 'filme.fr'],
+    ['jm', 'Jamaya', 'Boulogne-Billancourt', 'Caméras', 'pub', 'Prix publics HT / jour', 'jamaya.fr'],
+    ['pi', 'Pleine Image Loc', 'Saint-Denis', 'Caméra, lumière, machinerie', 'pub', 'Prix publics HT / jour, assurance 8 %', 'pleineimage-loc.com'],
+    ['v13', 'Vidéo 13', 'Paris 13e', 'Caméra, lumière', 'pub', 'Prix public HT / jour', 'video-13.com'],
+    ['lbm', 'La Baleine Mécanique', 'Nantes', 'Vidéo', 'pub', 'Prix public HT / jour', 'labaleinemecanique.fr'],
+    ['tp', 'Time Prod', 'Belfort', 'Vidéo, événementiel', 'pub', 'Prix publics HT / jour, week-end = 1 jour', 'timeprod-location.fr'],
+    ['mx', 'MX Événement', 'Chalifert (77)', 'Son, lumière, murs LED', 'pub', 'Prix publics HT / jour', 'location.mxevenement.com'],
+    ['p2g', 'P2G Rent', 'Saint-Prix (95)', 'Son, lumière, vidéo, intercom, LED', 'pub', 'Prix publics HT / jour, coefficients dégressifs', 'p2grent.com'],
+    ['gl', 'GL events', 'National', 'Audiovisuel événementiel', 'pub', 'Prix « à partir de » HT pour 1 jour', 'store.gl-events.com'],
+    ['h7', 'Helium 7', 'Paris 17e', 'Lumière, son, vidéo, structures', 'pub', 'Tarif HT / jour (édition déc. 2025)', 'helium7.com'],
+    ['ls', 'Locasono', 'Paris 11e', 'Son, lumière, vidéo, murs LED', 'pub', 'Prix publiés TTC, convertis en HT (÷ 1,2)', 'locasono.fr'],
+    ['rt', 'RT Events', 'Montélimar', 'Audiovisuel événementiel', 'pub', 'Prix public HT / jour', 'rt-events.fr'],
+    ['lx', 'Loxam', 'National', 'Groupes électrogènes (BTP)', 'pub', 'Prix TTC 1 jour, converti en HT (÷ 1,2)', 'loxam.fr'],
+    ['il', 'Interlocation', 'Chartres', 'Groupes électrogènes (BTP)', 'pub', 'Prix « à partir de » HT / jour (1 à 2 jours)', 'interlocation.fr'],
+    ['afcs', 'AFCS (tarif recommandé)', '—', 'Association française des cadreurs Steadicam', 'ref', 'Tarif recommandé de location du Steadicam (programmes TV)', 'afcs.fr']
+];
+// Familles de matériel : [id, libellé, couleur, icône]
+const ECATS = [
+    ['cam', 'Caméras', '#E53935', '🎥'], ['opt', 'Optiques', '#8E24AA', '🔭'], ['mach', 'Machinerie & stabilisation', '#8D6E63', '🎞️'],
+    ['hfv', 'Transmission & HF vidéo', '#5C6BC0', '📡'], ['mon', 'Moniteurs, écrans & projection', '#00ACC1', '🖥️'], ['led', 'Murs LED', '#26A69A', '🟦'],
+    ['lum', 'Lumière', '#F9A825', '💡'], ['son', 'Son', '#EC407A', '🎚️'], ['com', 'Intercom', '#7E57C2', '🎧'],
+    ['vid', 'Régie vidéo & streaming', '#1E88E5', '🎛️'], ['nrj', 'Énergie', '#FB8C00', '⚡'], ['cab', 'Câblage', '#43A047', '🔌'],
+    ['veh', 'Transport & véhicules', '#78909C', '🚚'], ['div', 'Divers', '#90A4AE', '📦']
+];
+// ---------- Base tarifaire ----------
+// R(id, famille, désignation, alias (séparés par |), { loueur: prix HT / jour }, options)
+// options : u unité ('j' jour, 'm2' m² / jour, 'f' forfait) · g [réf.] type générique estimé d'après ces références ·
+//           est [bas, haut] estimation DEVISO (aucun tarif public) · sd sur devis · inc inclus (prix 0) · note
+const R = (id, c, n, k, p, o) => Object.assign({ id, c, n, k: k || '', p: p || {} }, o || {});
+const CATALOG = [
+    // ---- Caméras cinéma & documentaire ----
+    R('arri-alexa35', 'cam', 'ARRI Alexa 35', 'alexa 35', { bf: 900, li: 840, tm: 1200, ck: 1140, jm: 950 }),
+    R('arri-minilf', 'cam', 'ARRI Alexa Mini LF', 'alexa mini lf|mini lf', { bf: 750, tm: 900, ck: 900 }),
+    R('arri-mini', 'cam', 'ARRI Alexa Mini', 'alexa mini', { bf: 540, li: 375, cl: 550, tm: 700, jm: 380 }),
+    R('arri-amira', 'cam', 'ARRI Amira', 'amira', { jm: 320 }),
+    R('sony-venice', 'cam', 'Sony Venice', 'venice cinealta', { bf: 700, li: 600, ck: 600 }),
+    R('sony-venice2', 'cam', 'Sony Venice 2', 'venice 2|venice2 8k', { tm: 900 }),
+    R('sony-burano', 'cam', 'Sony Burano', 'burano', { li: 350, cl: 385, ck: 550 }),
+    R('sony-fx9', 'cam', 'Sony FX9', 'pxw-fx9|fx9v|fx 9', { bf: 260, li: 170, cl: 200, tm: 290, ck: 200, jm: 210 }),
+    R('sony-fx6', 'cam', 'Sony FX6', 'ilme-fx6|fx 6', { bf: 175, fl: 139, li: 150, cl: 130, tm: 220, ck: 150, jm: 160, lbm: 150 }),
+    R('sony-fx3', 'cam', 'Sony FX3', 'fx 3|ilme-fx3', { fl: 99, li: 125, cl: 90, ck: 120, jm: 140 }),
+    R('sony-f55', 'cam', 'Sony PMW-F55', 'f55', { li: 300 }),
+    R('sony-pmw500', 'cam', 'Sony PMW-500 (épaule)', 'pmw500|pmw 500', { li: 250 }),
+    R('sony-pmw400', 'cam', 'Sony PMW-400 (épaule)', 'pmw400|pmw 400', { li: 180 }),
+    R('sony-z200', 'cam', 'Sony PXW-Z200', 'z200|pxw z200', { li: 110, cl: 130 }),
+    R('red-raptor', 'cam', 'RED V-Raptor', 'v-raptor|raptor 8k', { bf: 450, cl: 530, tm: 550 }),
+    R('red-komodo', 'cam', 'RED Komodo 6K', 'komodo', { bf: 250, fl: 155, cl: 135 }),
+    R('red-komodox', 'cam', 'RED Komodo-X', 'komodo x', { fl: 199, tm: 320 }),
+    R('red-helium', 'cam', 'RED Helium 8K', 'helium 8k', { li: 240 }),
+    R('canon-c300', 'cam', 'Canon C300 Mark III', 'c300 mk3|c300 mkiii|eos c300', { li: 170, cl: 230 }),
+    R('canon-c70', 'cam', 'Canon C70', 'eos c70', { fl: 119, cl: 100 }),
+    R('canon-c80', 'cam', 'Canon C80', 'eos c80', { fl: 139, li: 145 }),
+    R('canon-c400', 'cam', 'Canon C400', 'eos c400', { fl: 189, li: 250 }),
+    R('canon-c700', 'cam', 'Canon C700', 'eos c700', { cl: 360 }),
+    R('canon-c50', 'cam', 'Canon C50', 'eos c50', { cl: 120 }),
+    R('canon-r5c', 'cam', 'Canon R5 C', 'r5c|eos r5 c', { fl: 99 }),
+    R('canon-xf705', 'cam', 'Canon XF705', 'xf705', { li: 150 }),
+    R('bm-pyxis6', 'cam', 'Blackmagic Pyxis 6K', 'pyxis 6k', { fl: 138.5 }),
+    R('bm-pyxis12', 'cam', 'Blackmagic Pyxis 12K', 'pyxis 12k', { fl: 227.5 }),
+    R('bm-ursa46', 'cam', 'Blackmagic URSA Mini Pro 4.6K G2', 'ursa mini pro|ursa 4.6k', { cl: 130 }),
+    R('pana-varicam', 'cam', 'Panasonic VariCam', 'varicam', { bf: 190 }),
+    R('dji-ronin4d', 'cam', 'DJI Ronin 4D 6K', 'ronin 4d', { fl: 161 }),
+    R('phantom-veo', 'cam', 'Phantom VEO 4K (haute vitesse)', 'phantom veo|veo 4k', { tm: 2200 }),
+    // ---- Caméras PTZ ----
+    R('sony-brcam7', 'cam', 'Sony BRC-AM7 (PTZ)', 'brc am7|brc-am7', { fl: 279 }),
+    R('sony-fr7', 'cam', 'Sony FR7 (PTZ cinéma)', 'ilme-fr7|fr 7', { fl: 239, li: 290 }),
+    R('pana-ue150', 'cam', 'Panasonic AW-UE150 (PTZ)', 'aw-ue150|ue150|ue 150', { cl: 390, tp: 320 }),
+    R('pana-he145', 'cam', 'Panasonic AW-HE145 (PTZ)', 'aw-he145|he145', { tp: 290 }),
+    R('pana-he130', 'cam', 'Panasonic AW-HE130 (PTZ)', 'aw-he130|he130', { gl: 360 }),
+    R('pana-he40', 'cam', 'Panasonic AW-HE40 (PTZ)', 'aw-he40|he40', { jm: 140 }),
+    R('dv-ptz300', 'cam', 'Datavideo PTZ-300', 'ptz-300|ptz 300', { h7: 240 }),
+    R('sony-rmip500', 'cam', 'Pupitre PTZ Sony RM-IP500', 'rm-ip500|rm ip500|pupitre ptz sony', { fl: 80 }),
+    R('pana-rp50', 'cam', 'Pupitre PTZ Panasonic AW-RP50', 'aw-rp50|rp50|pupitre ptz panasonic', { jm: 50 }),
+    // ---- Caméras : types génériques ----
+    R('g-cam', 'cam', 'Caméra (modèle à préciser)', 'camera|camescope|cam', {}, { g: ['sony-fx6', 'sony-fx9', 'canon-c300', 'canon-c70', 'sony-z200', 'sony-pmw500'] }),
+    R('g-cam-studio', 'cam', 'Caméra de plateau broadcast (chaîne : tête, optique, CCU, RCP)', 'camera de plateau|camera plateau|camera studio|camera broadcast|hdc|ldx', {}, { est: [400, 900], note: 'Aucun tarif public : chaînes broadcast louées sur devis (cars régie, prestataires)' }),
+    R('g-cam-cine', 'cam', 'Caméra cinéma (corps)', 'camera cinema', {}, { g: ['arri-mini', 'sony-venice', 'sony-burano', 'red-raptor', 'red-komodo'] }),
+    R('g-cam-eng', 'cam', 'Caméra épaule (ENG) + optique', 'camera epaule|eng|camescope epaule', {}, { g: ['sony-pmw500', 'sony-pmw400', 'canon-xf705', 'sony-z200'] }),
+    R('g-cam-light', 'cam', 'Caméra légère (hybride) + optique', 'camera legere|hybride|appareil photo', {}, { g: ['sony-fx3', 'canon-r5c'] }),
+    R('g-ptz', 'cam', 'Caméra PTZ (modèle à préciser)', 'ptz|tourelle|camera ip|camera robotisee', {}, { g: ['sony-brcam7', 'sony-fr7', 'pana-ue150', 'pana-he145', 'pana-he130', 'pana-he40', 'dv-ptz300'] }),
+    R('g-actioncam', 'cam', 'Caméra embarquée (action cam)', 'gopro|action cam|camera embarquee|osmo', {}, { est: [15, 40] }),
+    R('g-drone', 'cam', 'Drone (avec télépilote)', 'drone|mavic|inspire', {}, { sd: 1, note: 'Prestation drone : sur devis (télépilote déclaré)' }),
+    // ---- Optiques ----
+    R('ang-dp', 'opt', 'Angénieux Optimo DP 30-80 / 16-42', 'optimo dp|angenieux dp', { bf: 215 }),
+    R('canon-cn17', 'opt', 'Canon CN 17-120 (CN7x17)', 'cn7x17|cn 17-120|cn17', { bf: 245 }),
+    R('ang-ez', 'opt', 'Angénieux EZ-1 / EZ-2', 'angenieux ez|ez-1|ez-2', { bf: 280 }),
+    R('zeiss-sp', 'opt', 'Série Zeiss Supreme Prime', 'supreme prime', { bf: 595 }),
+    R('zeiss-cp2', 'opt', 'Série Zeiss CP2', 'cp2|cp.2', { bf: 185 }),
+    R('arri-sig', 'opt', 'Série ARRI Signature Prime', 'signature prime', { ck: 1250 }),
+    R('sony-2470', 'opt', 'Sony FE 24-70 GM', '24-70 gm|fe 24-70', { bf: 40 }),
+    R('g-zoom', 'opt', 'Zoom (modèle à préciser)', 'zoom broadcast|zoom|objectif zoom', {}, { g: ['ang-dp', 'canon-cn17', 'ang-ez'] }),
+    R('g-optc', 'opt', 'Optique cinéma (unité)', 'optique cinema|optique fixe|objectif', {}, { est: [40, 150] }),
+    // ---- Machinerie & stabilisation ----
+    R('oconnor-2575', 'mach', 'Tête O\'Connor 2575D', 'oconnor|2575', { bf: 180 }),
+    R('sachtler-99', 'mach', 'Tête Sachtler Studio 9+9', 'studio 9+9|studio 9x9', { bf: 70 }),
+    R('cartoni-maxima', 'mach', 'Tête Cartoni Maxima', 'cartoni maxima', { bf: 120 }),
+    R('sachtler-s20', 'mach', 'Trépied Sachtler S20 (S1)', 'sachtler s20|s20 s1', { bf: 45, li: 45 }),
+    R('sachtler-s18', 'mach', 'Trépied Sachtler S18', 'sachtler s18', { bf: 40, li: 40 }),
+    R('sachtler-fsb8', 'mach', 'Trépied Sachtler FSB 8', 'fsb8|fsb 8', { ck: 35 }),
+    R('dji-ronin2', 'mach', 'DJI Ronin 2', 'ronin 2', { bf: 200, ck: 190 }),
+    R('dji-rs3', 'mach', 'DJI RS3 Pro', 'rs3 pro|rs 3', { ck: 60 }),
+    R('easyrig', 'mach', 'Easyrig Vario 5', 'easyrig', { bf: 75 }),
+    R('dana-dolly', 'mach', 'Dana Dolly (kit)', 'dana dolly', { bf: 75 }),
+    R('gfm-jib', 'mach', 'GFM Tele Jib', 'tele jib|gfm jib', { bf: 160 }),
+    R('arri-wcu4', 'mach', 'ARRI WCU-4 + 3 moteurs (point sans fil)', 'wcu-4|wcu4|follow focus sans fil|moteur de point', { ck: 320 }),
+    R('steadicam', 'mach', 'Steadicam (location du système)', 'steadicam', { afcs: 650 }, { note: 'Tarif recommandé AFCS pour les programmes TV (500 € clip / doc, 600 € série). L\'opérateur se chiffre dans l\'équipe.' }),
+    R('g-tripod', 'mach', 'Trépied + tête fluide', 'trepied|tripod|tete fluide|trepied photo', {}, { g: ['sachtler-s18', 'sachtler-s20', 'sachtler-fsb8'] }),
+    R('g-tripod-bc', 'mach', 'Trépied broadcast lourd / piédestal', 'trepied broadcast|piedestal|vinten', {}, { g: ['sachtler-99', 'cartoni-maxima', 'oconnor-2575'] }),
+    R('g-gimbal', 'mach', 'Stabilisateur (gimbal)', 'gimbal|stabilisateur|ronin', {}, { g: ['dji-rs3', 'dji-ronin2'] }),
+    R('g-dolly', 'mach', 'Dolly', 'dolly', {}, { est: [75, 300] }),
+    R('g-rail', 'mach', 'Rail de travelling (2 m)', 'rail|travelling', {}, { est: [10, 25] }),
+    R('g-jib', 'mach', 'Grue / jib (kit)', 'grue|jib', {}, { est: [160, 400] }),
+    R('g-techno', 'mach', 'Grue télescopique (Technocrane)', 'technocrane|grue telescopique', {}, { sd: 1, note: 'Sur devis (avec équipe)' }),
+    R('g-remotehead', 'mach', 'Tête télécommandée', 'tete telecommandee|tete motorisee', {}, { est: [150, 350] }),
+    R('g-slider', 'mach', 'Slider', 'slider', {}, { est: [25, 60] }),
+    R('g-cstand', 'mach', 'Pied C-stand', 'c-stand|cstand|pied c stand', {}, { est: [5, 10] }),
+    R('g-standl', 'mach', 'Pied lumière léger', 'pied lumiere leger|pied de projecteur|pied leger', {}, { est: [3, 8] }),
+    R('g-standh', 'mach', 'Pied lumière lourd (wind-up)', 'wind-up|pied lumiere lourd|pied lourd', {}, { est: [15, 30] }),
+    R('g-standm', 'mach', 'Pied de moniteur / de perche', 'pied de moniteur|pied de perche', {}, { est: [5, 12] }),
+    R('g-prompteur', 'mach', 'Prompteur (kit)', 'prompteur|teleprompter|autocue', {}, { est: [80, 200] }),
+    // ---- Transmission & HF vidéo ----
+    R('teradek-750', 'hfv', 'Teradek Bolt 4K LT 750 (émetteur + récepteur)', 'bolt 750|bolt 4k lt 750|teradek 750', { bf: 140, li: 120 }, { note: 'Loca Images : 60 € l\'émetteur ou le récepteur' }),
+    R('teradek-1500', 'hfv', 'Teradek Bolt 4K LT 1500 (kit)', 'bolt 1500|teradek 1500', { bf: 150 }),
+    R('teradek-pro300', 'hfv', 'Teradek Bolt Pro 300 (kit)', 'bolt pro 300|teradek 300', { bf: 95 }),
+    R('teradek-bolt6', 'hfv', 'Teradek Bolt 6 LT (kit)', 'bolt 6', { li: 120 }),
+    R('dji-transmission', 'hfv', 'DJI Transmission (kit)', 'dji transmission', { li: 100 }),
+    R('liveu-800', 'hfv', 'LiveU LU800', 'lu800|liveu 800', { li: 800 }),
+    R('liveu-300', 'hfv', 'LiveU LU300S', 'lu300|liveu 300', { li: 600 }),
+    R('tvu-one', 'hfv', 'TVU One', 'tvu', { li: 700 }),
+    R('haivision-360', 'hfv', 'Haivision Pro 360', 'haivision', { li: 600 }),
+    R('starlink', 'hfv', 'Starlink (liaison satellite)', 'starlink|satellite', { li: 220 }),
+    R('g-hfvideo', 'hfv', 'Liaison vidéo HF (kit)', 'emetteur video|hf video|liaison hf|teradek', {}, { g: ['teradek-750', 'teradek-1500', 'teradek-pro300', 'dji-transmission'] }),
+    R('g-backpack', 'hfv', 'Sac de transmission 4G / 5G', 'sac de transmission|liveu|4g|5g|bonding', {}, { g: ['liveu-300', 'liveu-800', 'tvu-one', 'haivision-360'] }),
+    // ---- Moniteurs, écrans & projection ----
+    R('smallhd-24', 'mon', 'SmallHD Cine 24" 4K', 'smallhd 24|cine 24', { bf: 150 }),
+    R('smallhd-703', 'mon', 'SmallHD 703 UltraBright', 'smallhd 703|703', { bf: 75 }),
+    R('sony-pvm170', 'mon', 'Sony PVM-A170 17" OLED', 'pvm-a170|pvm a170|pvm 17', { bf: 105 }),
+    R('tvlogic-24', 'mon', 'TVLogic LQM-241W 24"', 'tvlogic|lqm-241', { bf: 100 }),
+    R('tv-55', 'mon', 'Écran 55"', 'ecran 55|tv 55|55 pouces', { h7: 230 }),
+    R('tv-65', 'mon', 'Écran 65"', 'ecran 65|tv 65|65 pouces', { h7: 320 }),
+    R('tv-75', 'mon', 'Écran 75"', 'ecran 75|tv 75|75 pouces', { h7: 390, ls: 408.33 }),
+    R('tv-85', 'mon', 'Écran 85"', 'ecran 85|tv 85|85 pouces', { h7: 780 }),
+    R('tv-98', 'mon', 'Écran 98"', 'ecran 98|tv 98|98 pouces', { ls: 825 }),
+    R('vp-7k', 'mon', 'Vidéoprojecteur ~7 000 lumens', 'videoprojecteur 7000', { ls: 374.17 }),
+    R('vp-rz670', 'mon', 'Vidéoprojecteur Panasonic PT-RZ670', 'pt-rz670|rz670', { gl: 1030 }),
+    R('vp-epson1505', 'mon', 'Vidéoprojecteur Epson EB-L1505UH', 'eb-l1505|l1505', { h7: 1200 }),
+    R('vp-tz12000', 'mon', 'Vidéoprojecteur Panasonic PT-TZ12000', 'tz12000|pd-tz', { gl: 2350 }),
+    R('vp-barco20', 'mon', 'Vidéoprojecteur Barco HDX-20 Flex', 'barco hdx|hdx-20', { p2g: 3600 }),
+    R('vp-40k', 'mon', 'Vidéoprojecteur 40 000 lumens 4K', 'videoprojecteur 40000|40k lumens', { ls: 5800 }),
+    R('g-monitor', 'mon', 'Moniteur de contrôle', 'moniteur|monitor|moniteur de controle|moniteur de retour|multivue|multiview', {}, { g: ['smallhd-703', 'sony-pvm170', 'tvlogic-24', 'smallhd-24'] }),
+    R('g-tv', 'mon', 'Écran / TV (taille à préciser)', 'ecran|television|televiseur|tv|ecran de salle', {}, { g: ['tv-55', 'tv-65', 'tv-75'] }),
+    R('g-vp', 'mon', 'Vidéoprojecteur (puissance à préciser)', 'videoprojecteur|projecteur video|beamer', {}, { g: ['vp-7k', 'vp-rz670', 'vp-epson1505'] }),
+    R('g-screen', 'mon', 'Écran de projection (toile)', 'ecran de projection|toile de projection', {}, { est: [40, 150] }),
+    // ---- Murs LED (prix au m² déduits des packs publiés) ----
+    R('led-wall', 'led', 'Mur LED intérieur (pitch 2,9 à 3,9 mm)', 'mur led|mur d images|ecran led|dalles led|led wall', { mx: 331, p2g: 278, ls: 333 }, { u: 'm2', note: 'Prix au m² déduits des packs publiés (4,5 à 36 m²), processeur compris selon les loueurs' }),
+    R('led-proc', 'led', 'Processeur LED Novastar VX6S', 'novastar|vx6s|processeur led', { mx: 75 }),
+    // ---- Lumière : LED ----
+    R('ap-1200d', 'lum', 'Aputure LS 1200D Pro', 'ls 1200d|1200d', { bf: 125, li: 125, tm: 140 }),
+    R('ap-storm1200', 'lum', 'Aputure Storm 1200x', 'storm 1200', { li: 130 }),
+    R('ap-600d', 'lum', 'Aputure LS 600D Pro', 'ls 600d|600d|aputure 600', { bf: 90, fl: 66, li: 70, tm: 100 }),
+    R('ap-600c', 'lum', 'Aputure LS 600C Pro', 'ls 600c|600c', { bf: 120 }),
+    R('ap-600x', 'lum', 'Aputure LS 600X Pro', 'ls 600x|600x', { fl: 70 }),
+    R('ap-300d', 'lum', 'Aputure LS 300D II', 'ls 300d|300d|300x', { bf: 50, fl: 38.5 }),
+    R('ap-storm400', 'lum', 'Aputure Storm 400x', 'storm 400', { fl: 55 }),
+    R('amaran-200d', 'lum', 'Amaran 200D', 'amaran 200', { fl: 23 }),
+    R('nanlux-2400', 'lum', 'Nanlux Evoke 2400B', 'evoke 2400', { bf: 200 }),
+    R('nanlux-1200', 'lum', 'Nanlux Evoke 1200', 'evoke 1200', { tm: 135 }),
+    R('nanlux-900c', 'lum', 'Nanlux Evoke 900C', 'evoke 900', { bf: 120 }),
+    R('arri-s60', 'lum', 'ARRI SkyPanel S60-C', 'skypanel s60|s60-c|s60c|skypanel', { cl: 90, tm: 190, ck: 150, v13: 129 }),
+    R('arri-s30', 'lum', 'ARRI SkyPanel S30-C', 'skypanel s30|s30-c', { cl: 70 }),
+    R('arri-s120', 'lum', 'ARRI SkyPanel S120-C', 'skypanel s120|s120-c', { tm: 190 }),
+    R('arri-s360', 'lum', 'ARRI SkyPanel S360-C', 'skypanel s360|s360-c', { tm: 500 }),
+    R('astera-titan', 'lum', 'Astera Titan Tube (kit de 8)', 'titan tube|astera titan|astera fp1', { bf: 190, tm: 250 }),
+    R('astera-helios', 'lum', 'Astera Helios (kit de 8)', 'helios', { bf: 150, tm: 210 }),
+    R('astera-ax1', 'lum', 'Astera AX1 (kit de 4)', 'ax1', { cl: 65 }),
+    R('creamsource-v8', 'lum', 'Creamsource Vortex 8', 'vortex 8|creamsource', { bf: 145 }),
+    R('lp-gemini', 'lum', 'Litepanels Gemini', 'gemini', { bf: 115 }),
+    R('kino-4x4', 'lum', 'Kino Flo 4 tubes 1,20 m', 'kino flo|kino 4 tubes|kino', { bf: 60, cl: 55 }),
+    R('sl1-mix', 'lum', 'SL1 Mix', 'sl1', { tm: 190 }),
+    R('litemat-4', 'lum', 'LiteMat Plus 4', 'litemat', { tm: 125 }),
+    // ---- Lumière : HMI ----
+    R('arri-m18', 'lum', 'ARRI M18 (HMI 1,8 kW)', 'm18|hmi 1800|hmi 1,8|hmi 1.8', { bf: 160, tm: 150, pi: 150 }),
+    R('arri-m40', 'lum', 'ARRI M40 (HMI 4 kW)', 'm40|hmi 4k|hmi 4 kw', { bf: 240, tm: 240 }),
+    R('arri-m90', 'lum', 'ARRI M90 (HMI 9 kW)', 'm90|hmi 9', { tm: 450 }),
+    R('arri-m8', 'lum', 'ARRI M8 (HMI 800 W)', 'arri m8', { pi: 140 }),
+    R('joker-200', 'lum', 'K5600 Joker Bug 200', 'joker 200|joker bug 200', { cl: 40 }),
+    R('joker-400', 'lum', 'K5600 Joker 400', 'joker 400|joker bug 400', { li: 70, cl: 60, pi: 70 }),
+    R('joker-800', 'lum', 'K5600 Joker 800', 'joker 800|joker bug 800', { li: 100, cl: 80, pi: 100 }),
+    R('joker-1600', 'lum', 'K5600 Joker 1600', 'joker 1600|joker bug 1600', { li: 145, tm: 170 }),
+    R('k5600-alpha4', 'lum', 'K5600 Alpha 4K', 'alpha 4k|alpha 2.5', { bf: 160, tm: 180 }),
+    R('k5600-alpha9', 'lum', 'K5600 Alpha 9K', 'alpha 9k', { tm: 450 }),
+    R('ltm-18k', 'lum', 'LTM Luxarc 12/18 kW', 'luxarc|hmi 18|18 kw|18k', { tm: 370 }),
+    R('par-hmi1200', 'lum', 'PAR HMI 1200 W', 'par hmi|par 1200', { tm: 120 }),
+    R('powerbeam', 'lum', 'Filmgear Power Beam 4 / 2,5 kW', 'power beam', { tm: 305 }),
+    R('briese-77', 'lum', 'Briese Focus 77', 'briese', { tm: 650 }),
+    // ---- Lumière : tungstène ----
+    R('fresnel-650', 'lum', 'Fresnel 650 W', 'fresnel 650', { bf: 15, tm: 10 }),
+    R('fresnel-1k', 'lum', 'Fresnel 1 kW', 'fresnel 1 kw|fresnel 1kw|fresnel 1000', { tm: 12 }),
+    R('fresnel-2k', 'lum', 'Fresnel 2 kW', 'fresnel 2 kw|fresnel 2kw|fresnel 2000', { bf: 20, tm: 16 }),
+    R('fresnel-5k', 'lum', 'Fresnel 5 kW', 'fresnel 5 kw|fresnel 5kw|fresnel 5000', { tm: 20 }),
+    R('blonde-2k', 'lum', 'Blonde 2 kW', 'blonde', { bf: 20, tm: 16 }),
+    R('mandarine', 'lum', 'Mandarine 800 W', 'mandarine', { tm: 12 }),
+    // ---- Lumière : spectacle & événementiel ----
+    R('robe-bmfl', 'lum', 'Robe BMFL Blade', 'bmfl', { mx: 230 }),
+    R('mac-viper', 'lum', 'Martin MAC Viper Profile', 'viper', { mx: 220 }),
+    R('robe-megapointe', 'lum', 'Robe MegaPointe', 'megapointe', { mx: 210 }),
+    R('mac-aura', 'lum', 'Martin MAC Aura', 'mac aura|aura', { mx: 110 }),
+    R('robe-robin600', 'lum', 'Robe Robin 600 LED Wash', 'robin 600', { gl: 80 }),
+    R('poursuite-1200', 'lum', 'Poursuite HMI 1200 W', 'poursuite|follow spot', { h7: 180 }),
+    R('grandma3', 'lum', 'Console grandMA3 (on PC)', 'grandma3|grand ma 3|grandma 3', { h7: 350 }),
+    R('grandma', 'lum', 'Console grandMA', 'grandma|grand ma', { ls: 215.83 }),
+    R('jands-vista', 'lum', 'Console Jands Vista T2', 'vista t2|jands', { gl: 310 }),
+    // ---- Lumière : types génériques ----
+    R('g-led', 'lum', 'Projecteur LED (modèle à préciser)', 'projecteur led|panneau led|led cob|cob|softbox|bol beaute|beauty dish', {}, { g: ['ap-300d', 'ap-600d', 'arri-s60', 'ap-1200d'] }),
+    R('g-hmi', 'lum', 'Projecteur HMI (puissance à préciser)', 'hmi', {}, { g: ['joker-800', 'arri-m18', 'joker-1600', 'arri-m40'] }),
+    R('g-fresnel', 'lum', 'Fresnel tungstène (puissance à préciser)', 'fresnel|tungstene|halogene|par 64|decoupe|profile|cycliode|ballon', {}, { g: ['fresnel-650', 'fresnel-1k', 'fresnel-2k', 'fresnel-5k'] }),
+    R('g-tubes', 'lum', 'Tubes LED (kit)', 'tube led|tubes led|astera', {}, { g: ['astera-ax1', 'astera-helios', 'astera-titan'] }),
+    R('g-spot', 'lum', 'Lyre spot / profile (asservi)', 'lyre spot|asservi|lyre profile|spot motorise', {}, { g: ['robe-megapointe', 'mac-viper', 'robe-bmfl'] }),
+    R('g-wash', 'lum', 'Lyre wash LED', 'lyre wash|wash led|lyre', {}, { g: ['robe-robin600', 'mac-aura'] }),
+    R('g-parled', 'lum', 'PAR LED RGBW', 'par led|barre led|batten|stroboscope|strobe', {}, { est: [10, 25] }),
+    R('g-lumconsole', 'lum', 'Console lumière', 'console lumiere|console dmx|pupitre lumiere', {}, { g: ['grandma', 'jands-vista', 'grandma3'] }),
+    R('g-dimmer', 'lum', 'Gradateur DMX', 'gradateur|dimmer|bloc de puissance', {}, { est: [15, 40] }),
+    R('g-flags', 'lum', 'Accessoires lumière (drapeaux, réflecteurs, cadres)', 'drapeau|flag|reflecteur|bounce|polystyrene|cadre butterfly|butterfly|toile|floppy', {}, { est: [5, 25] }),
+    R('g-collier', 'lum', 'Collier + élingue de sécurité', 'collier|elingue', {}, { est: [1, 3] }),
+    R('inc-ballast', 'lum', 'Ballast (inclus avec le projecteur)', 'ballast', {}, { inc: 1 }),
+    // ---- Son ----
+    R('senn-ew500', 'son', 'Sennheiser EW 500 G4 (micro main HF)', 'ew 500|ew500|ew 500 g4|g4 965', { fl: 38, li: 25, h7: 60 }, { note: 'Helium 7 : « micro UHF main Sennheiser »' }),
+    R('senn-ew500-lav', 'son', 'Sennheiser EW 500 G4 + micro cravate', 'mke 40|mke-40|cravate|lavalier|micro cravate', { fl: 50, h7: 70 }),
+    R('senn-dp835', 'son', 'Sennheiser EW-DP 835', 'ew-dp|dp 835', { li: 25 }),
+    R('senn-g3', 'son', 'Micro HF Sennheiser G3', 'sennheiser g3|g3', { cl: 26, bf: 30 }),
+    R('dji-mic3', 'son', 'DJI Mic 3', 'dji mic', { cl: 15 }),
+    R('shure-ur4d', 'son', 'Shure UR4D + 2 émetteurs UR2 (2 canaux)', 'ur4d|ur 4d', { mx: 194.4 }),
+    R('shure-ulxd4d', 'son', 'Shure ULXD4D + 2 émetteurs ULXD2', 'ulxd|ulx-d', { mx: 210 }),
+    R('shure-ad4d', 'son', 'Shure Axient AD4D (récepteur 2 canaux)', 'ad4d', { p2g: 120 }),
+    R('shure-ad4q', 'son', 'Shure Axient AD4Q (récepteur 4 canaux)', 'ad4q', { p2g: 240 }),
+    R('shure-ad2', 'son', 'Shure Axient AD2 (émetteur main)', 'ad2', { p2g: 55 }),
+    R('shure-qlxd', 'son', 'Shure QLX-D (liaison complète)', 'qlx-d|qlxd', { p2g: 50 }),
+    R('senn-iem', 'son', 'Sennheiser IEM G4 (ear monitor)', 'iem|ear monitor|in-ear', { fl: 45 }),
+    R('rode-ntg2', 'son', 'Micro canon Rode NTG-2', 'ntg-2|ntg2', { bf: 25 }),
+    R('zoom-h6', 'son', 'Enregistreur Zoom H6', 'zoom h6', { bf: 35 }),
+    R('yam-cl5', 'son', 'Console Yamaha CL5', 'cl5', { mx: 350 }),
+    R('yam-ql5', 'son', 'Console Yamaha QL5', 'ql5', { mx: 325, rt: 300 }),
+    R('yam-ql1', 'son', 'Console Yamaha QL1', 'ql1', { mx: 250, ls: 241.67 }),
+    R('yam-dm7', 'son', 'Console Yamaha DM7', 'dm7', { mx: 500 }),
+    R('yam-m7cl', 'son', 'Console Yamaha M7CL-48', 'm7cl', { mx: 300 }),
+    R('beh-x32', 'son', 'Console Behringer X32', 'x32', { mx: 203, h7: 150 }, { note: 'MX Événement : X32 Rack' }),
+    R('midas-m32', 'son', 'Console Midas M32R + stagebox DL32', 'm32r|m32|dl32', { ls: 190.83 }),
+    R('ah-sq5', 'son', 'Console Allen & Heath SQ-5', 'sq-5|sq5', { fl: 90, ls: 249.17 }),
+    R('ah-qu16', 'son', 'Console Allen & Heath Qu-16', 'qu-16|qu16', { fl: 80 }),
+    R('rodecaster', 'son', 'Rodecaster Pro II', 'rodecaster', { fl: 33 }),
+    R('yam-rio', 'son', 'Stagebox Yamaha Rio3224', 'rio3224|rio 3224|stagebox', { mx: 160 }),
+    R('lac-k2', 'son', 'Enceinte L-Acoustics K2 (par élément)', 'k2|l-acoustics', { gl: 100 }),
+    R('g-hf', 'son', 'Micro HF (liaison complète)', 'micro hf|kit hf|hf main|micro main hf|emetteur hf|systeme hf', {}, { g: ['senn-ew500', 'shure-qlxd', 'senn-g3', 'senn-dp835'] }),
+    R('g-hf2', 'son', 'Récepteurs HF (rack, 2 canaux)', 'recepteur hf|recepteurs hf|rack hf', {}, { g: ['shure-ad4d', 'shure-ur4d', 'shure-ulxd4d'] }),
+    R('g-mixer', 'son', 'Console son numérique', 'console son|console de mixage|table de mixage|console audio|mixette', {}, { g: ['beh-x32', 'midas-m32', 'yam-ql1', 'ah-sq5', 'yam-ql5'] }),
+    R('g-mic', 'son', 'Micro filaire (sur pied / de table)', 'micro sur pied|micro de table|micro filaire|micro|sm58|micro plafond', {}, { est: [8, 20] }),
+    R('g-boom', 'son', 'Micro canon + perche', 'micro canon|perche|canon', {}, { est: [25, 60] }),
+    R('g-recorder', 'son', 'Enregistreur audio', 'enregistreur audio|enregistreur son|sound devices|mixette', {}, { est: [35, 120] }),
+    R('g-speaker', 'son', 'Enceinte (unité)', 'enceinte|retour|wedge|caisson|sub|line array|ampli|amplificateur', {}, { est: [25, 100] }),
+    R('g-dsp', 'son', 'Processeur audio / DSP', 'dsp|processeur audio', {}, { est: [40, 100] }),
+    // ---- Intercom ----
+    R('cc-fs2-kit', 'com', 'Clear-Com FreeSpeak II (kit 10 beltpacks)', 'freespeak kit|freespeak ii kit', { p2g: 1800 }),
+    R('cc-fs2-bp', 'com', 'Beltpack Clear-Com FreeSpeak II', 'freespeak|fs2', { p2g: 100 }),
+    R('cc-dx410', 'com', 'Clear-Com DX-410 (kit 4 postes)', 'dx-410|dx410', { p2g: 350 }),
+    R('cc-ms702', 'com', 'Station Clear-Com MS-702', 'ms-702|ms702', { p2g: 115 }),
+    R('cc-ms704', 'com', 'Station Clear-Com MS-704', 'ms-704|ms704', { gl: 70 }),
+    R('cc-rs601', 'com', 'Beltpack filaire Clear-Com RS601', 'rs601|rs-601', { gl: 15 }),
+    R('cc-wbs680', 'com', 'Clear-Com WBS-680 (sans fil)', 'wbs-680|wbs680', { gl: 465 }),
+    R('riedel-bolero4', 'com', 'Riedel Bolero (4 postes DECT)', 'bolero|riedel', { gl: 550 }),
+    R('h7-base', 'com', 'Base intercom 2 canaux', 'base intercom', { h7: 140 }),
+    R('h7-bphf', 'com', 'Beltpack intercom HF', 'beltpack hf', { h7: 60 }),
+    R('g-intercom', 'com', 'Intercom (kit 4 postes)', 'intercom|interphonie|ordre', {}, { g: ['cc-dx410', 'riedel-bolero4'] }),
+    R('g-beltpack', 'com', 'Beltpack intercom', 'beltpack|poste intercom', {}, { g: ['cc-rs601', 'h7-bphf', 'cc-fs2-bp'] }),
+    R('g-commstation', 'com', 'Station intercom', 'station intercom|station', {}, { g: ['cc-ms704', 'cc-ms702', 'h7-base'] }),
+    R('g-talkie', 'com', 'Talkie-walkie', 'talkie|talky|walkie', {}, { est: [5, 15] }),
+    // ---- Régie vidéo & streaming ----
+    R('atem-minipro', 'vid', 'Blackmagic ATEM Mini Pro ISO', 'atem mini pro', { fl: 32, li: 80, ls: 40.83 }),
+    R('atem-miniext', 'vid', 'Blackmagic ATEM Mini Extreme ISO', 'atem mini extreme', { fl: 66 }),
+    R('atem-sdiext', 'vid', 'Blackmagic ATEM SDI Extreme ISO', 'atem sdi extreme', { fl: 90, li: 120 }),
+    R('atem-sdipro', 'vid', 'Blackmagic ATEM SDI Pro ISO', 'atem sdi pro', { h7: 160 }),
+    R('atem-tvs4k', 'vid', 'Blackmagic ATEM Television Studio Pro 4K', 'television studio|atem tvs', { h7: 380 }),
+    R('atem-2me', 'vid', 'Blackmagic ATEM 2 M/E 4K', 'atem 2 m/e|atem 2me|2 m/e|constellation', { p2g: 250 }),
+    R('pana-hs410', 'vid', 'Panasonic AV-HS410', 'hs410|av-hs410', { li: 250 }),
+    R('hyperdeck-pro', 'vid', 'Blackmagic HyperDeck Studio Pro', 'hyperdeck studio pro', { p2g: 150 }),
+    R('hyperdeck-mini', 'vid', 'Blackmagic HyperDeck Studio Mini', 'hyperdeck studio mini|hyperdeck mini', { h7: 90 }),
+    R('shogun7', 'vid', 'Atomos Shogun 7', 'shogun', { h7: 130 }),
+    R('regie-atem2me', 'vid', 'Régie ATEM 2 M/E (package complet)', 'regie atem', { fl: 281.45 }),
+    R('regie-hd-sony', 'vid', 'Régie HD-SDI multicaméra 2/3" Sony (package)', 'regie hd sony|regie multicamera', { gl: 3985 }),
+    R('regie-hd-jvc', 'vid', 'Régie HD-SDI multicaméra 1/3" JVC (package)', 'regie jvc', { gl: 2695 }),
+    R('vidiu-go', 'vid', 'Encodeur Teradek Vidiu Go', 'vidiu', { fl: 60 }),
+    R('stream-mbp', 'vid', 'MacBook Pro + OBS (streaming)', 'obs|macbook', { fl: 40 }),
+    R('pack-5g', 'vid', 'Pack internet sécurisé 5G 100 Mb/s', 'internet 5g|routeur 5g|pack 5g|connexion internet', { fl: 131 }),
+    R('g-switcher', 'vid', 'Mélangeur vidéo (modèle à préciser)', 'melangeur|melangeur video|switcher|atem|mixeur video|regie video', {}, { g: ['atem-sdiext', 'atem-sdipro', 'atem-2me', 'pana-hs410', 'atem-tvs4k'] }),
+    R('g-vrec', 'vid', 'Enregistreur vidéo', 'enregistreur|hyperdeck|recorder|ki pro|magneto|nvr', {}, { g: ['hyperdeck-mini', 'shogun7', 'hyperdeck-pro'] }),
+    R('g-encoder', 'vid', 'Encodeur / PC de streaming', 'encodeur|streaming|pc streaming|codec|visioconference|web presenter', {}, { g: ['stream-mbp', 'vidiu-go'] }),
+    R('g-conv', 'vid', 'Convertisseur / distributeur vidéo', 'convertisseur|converter|decimator|distributeur|splitter|scaler', {}, { est: [5, 25] }),
+    R('g-router', 'vid', 'Grille vidéo / routeur', 'grille|routeur video|matrice|router', {}, { est: [50, 150] }),
+    R('g-multiviewer', 'vid', 'Multiviewer', 'multiviewer', {}, { est: [30, 80] }),
+    R('g-laptop', 'vid', 'Ordinateur portable', 'ordinateur|laptop|pc portable|macbook|pc\\b', {}, { est: [30, 60] }),
+    R('g-network', 'vid', 'Réseau (switch, borne Wi-Fi)', 'switch|switch poe|reseau|wifi|wi-fi|borne|point d acces|routeur', {}, { est: [10, 40] }),
+    R('g-rack', 'vid', 'Rack régie complet (baie équipée)', 'rack regie|baie|rack 19|rack', {}, { est: [150, 400] }),
+    R('g-ccu', 'vid', 'Voie de commande caméra (CCU / RCP)', 'ccu|rcp|voie de commande', {}, { est: [80, 200] }),
+    R('g-regiepack', 'vid', 'Régie multicaméra complète (package)', 'regie complete|car regie|ob van|regie mobile|car-regie', {}, { g: ['regie-atem2me', 'regie-hd-jvc', 'regie-hd-sony'] }),
+    // ---- Énergie ----
+    R('ge-100kva', 'nrj', 'Groupe électrogène 100 kVA (chantier, non insonorisé)', 'groupe 100 kva|100 kva', { lx: 393.48, il: 160 }),
+    R('ge-60kva', 'nrj', 'Groupe électrogène 60 kVA (chantier)', 'groupe 60 kva|60 kva', { il: 79 }),
+    R('ge-150kva', 'nrj', 'Groupe électrogène 150 kVA (chantier)', 'groupe 150 kva|150 kva', { il: 153 }),
+    R('g-groupe', 'nrj', 'Groupe électrogène (puissance à préciser)', 'groupe electrogene|generateur|groupe', {}, { g: ['ge-60kva', 'ge-100kva', 'ge-150kva'], note: 'Groupes de chantier : les groupes insonorisés tournage se louent chez Lumex ou Transpalux (sur devis)' }),
+    R('g-distrib', 'nrj', 'Distribution électrique (armoire, boîte P17)', 'armoire electrique|boite de distribution|distribution|p17|armoire', {}, { est: [20, 60] }),
+    R('g-rallonge', 'nrj', 'Rallonges / multiprises / enrouleurs', 'rallonge|multiprise|enrouleur|prolongateur|passe-cable|passe cable', {}, { est: [2, 8] }),
+    R('g-ups', 'nrj', 'Onduleur', 'onduleur|ups', {}, { est: [15, 40] }),
+    // ---- Câblage (par câble et par jour) ----
+    R('cab-sdi', 'cab', 'Câble SDI / BNC', 'cable sdi|sdi|bnc|coax', {}, { est: [2, 5] }),
+    R('cab-hdmi', 'cab', 'Câble HDMI', 'cable hdmi|hdmi', {}, { est: [2, 5] }),
+    R('cab-xlr', 'cab', 'Câble XLR / modulation', 'cable xlr|xlr|modulation|jack', {}, { est: [1, 3] }),
+    R('cab-dmx', 'cab', 'Câble DMX', 'cable dmx|dmx', {}, { est: [1, 3] }),
+    R('cab-rj45', 'cab', 'Câble RJ45 / réseau', 'cable rj45|rj45|ethernet|cat6', {}, { est: [1, 4] }),
+    R('cab-pw', 'cab', 'Câble d\'alimentation', 'cable d alimentation|alimentation|secteur|iec|powercon', {}, { est: [2, 6] }),
+    R('cab-fibre', 'cab', 'Touret fibre / SMPTE', 'fibre|smpte|touret|optique', {}, { est: [20, 60] }),
+    R('cab-multi', 'cab', 'Multipaire', 'multipaire', {}, { est: [15, 40] }),
+    R('g-cable', 'cab', 'Câble (type à préciser)', 'cable|cordon|jarretiere', {}, { est: [1, 5] }),
+    // ---- Transport & véhicules ----
+    R('h7-livraison', 'veh', 'Livraison / reprise camion 10 m³ (Paris)', 'livraison|reprise|enlevement', { h7: 135 }, { u: 'f', note: 'Helium 7 : 135 € HT + 1,50 € / km' }),
+    R('g-van', 'veh', 'Utilitaire 12 à 20 m³ (location)', 'utilitaire|fourgon|camion|porteur|trafic|master|vehicule|van', {}, { est: [90, 160] }),
+    R('g-vl', 'veh', 'Véhicule léger / break', 'voiture|break|vl|ludospace', {}, { est: [50, 90] }),
+    // ---- Divers ----
+    R('g-truss', 'div', 'Structure (truss, totem)', 'truss|totem|pied de levage|structure|portique', {}, { est: [8, 30] }),
+    R('g-prat', 'div', 'Praticable', 'praticable|estrade|scene', {}, { est: [10, 25] }),
+    R('g-fondvert', 'div', 'Fond vert / cyclo (toile + structure)', 'fond vert|cyclo|fond|toile de fond', {}, { est: [40, 150] }),
+    R('g-flight', 'div', 'Flight cases / malles', 'flight|malle|valise', {}, { inc: 1, note: 'Contenants fournis avec le matériel loué' }),
+    R('g-secu', 'div', 'Sécurité (extincteur, trousse de secours)', 'extincteur|trousse de secours|secours', {}, { est: [5, 15] }),
+    R('g-conso', 'div', 'Consommables (gaffer, piles, gélatines…)', 'gaffer|piles|gelatine|consommable|scotch', {}, { u: 'f', est: [50, 200] })
+];
+// Règles d'attribution d'un type générique quand le nom ne correspond à aucun modèle (ordre important)
+const GEN_RULES = [
+    ['inc-ballast', /\bballast/], ['g-flight', /\b(flight|malle)\b/],
+    ['g-cam-studio', /(camera|cam)\b.*\b(plateau|studio|broadcast|piedestal|viseur)|\b(hdc|ldx)\b/], ['g-ptz', /\bptz\b|tourelle|camera ip|robotis/],
+    ['g-cam-cine', /camera cinema|cine\b.*corps/], ['g-cam-eng', /\beng\b|epaule/], ['g-cam-light', /hybride|appareil photo/], ['g-actioncam', /gopro|action ?cam|embarquee/], ['g-drone', /\bdrone\b/],
+    ['g-zoom', /\bzoom\b(?! h)/], ['g-optc', /optique|objectif/],
+    ['g-tripod-bc', /trepied broadcast|piedestal|vinten/], ['g-tripod', /trepied|tripod|tete fluide/], ['steadicam', /steadicam/], ['g-gimbal', /gimbal|stabilisateur|ronin/],
+    ['g-remotehead', /tete telecommandee|tete motorisee/], ['g-techno', /technocrane|grue telescopique/], ['g-jib', /\b(grue|jib)\b/], ['g-dolly', /\bdolly\b/], ['g-rail', /\brails?\b|travelling/], ['g-slider', /slider/],
+    ['g-prompteur', /prompteur|teleprompt|autocue/], ['g-cstand', /c-?stand/], ['g-standh', /wind-?up|pied (lumiere )?lourd/], ['g-standl', /pied (lumiere|de projecteur|leger)/], ['g-standm', /pied de (moniteur|perche)/],
+    ['g-backpack', /liveu|tvu|4g|5g|bonding|sac de transmission/], ['g-hfvideo', /teradek|hf video|emetteur video|liaison (hf|video)/],
+    ['led-wall', /mur (led|d.images)|led wall|dalles? led|ecran led/], ['g-vp', /video ?projecteur|beamer/], ['g-screen', /ecran de projection|toile de projection/],
+    ['g-monitor', /moniteur|monitor|multivue/], ['g-tv', /\becran\b|\btv\b|televiseur|television/],
+    ['g-hmi', /\bhmi\b|\bm18\b|\bm40\b|joker/], ['g-tubes', /tubes? led|astera/], ['g-spot', /lyre spot|asservi|lyre profile/], ['g-wash', /lyre|wash/], ['g-parled', /par led|barre led|batten|strobo/],
+    ['g-lumconsole', /console (lumiere|dmx)|grand ?ma|pupitre lumiere/], ['g-dimmer', /gradateur|dimmer/], ['g-collier', /collier|elingue/], ['g-flags', /drapeau|flag|reflecteur|bounce|polystyrene|butterfly|floppy/],
+    ['g-fresnel', /fresnel|tungstene|halogene|par 64|decoupe|cycliode|ballon|blonde|mandarine/], ['g-led', /\bled\b|\bcob\b|softbox|octa|bol beaute|beauty|skypanel|kino|projecteur|panneau/],
+    ['g-hf2', /recepteurs? hf|rack hf/], ['g-hf', /\bhf\b|sans fil|cravate|lavalier/], ['g-mixer', /console (son|audio|de mixage)|table de mix|mixette|mixage/], ['g-recorder', /enregistreur (audio|son)|sound devices/],
+    ['g-boom', /perche|micro canon|\bcanon\b/], ['g-mic', /\bmicro/], ['g-dsp', /\bdsp\b|processeur audio/], ['g-speaker', /enceinte|retour|wedge|caisson|\bsub\b|line array|ampli/],
+    ['g-intercom', /intercom|interphon/], ['g-beltpack', /beltpack/], ['g-talkie', /talkie|walkie|talky/],
+    ['g-regiepack', /car regie|ob van|regie (mobile|complete)/], ['g-switcher', /melangeur|switcher|\batem\b|mixeur video|tricaster|vmix/], ['g-vrec', /enregistreur|hyperdeck|recorder|ki pro|magneto|\bnvr\b/],
+    ['g-encoder', /encodeur|streaming|codec|visio|web presenter/], ['g-conv', /convertisseur|converter|decimator|distributeur|splitter|scaler/], ['g-router', /grille|matrice|routeur video/],
+    ['g-ccu', /\b(ccu|rcp)\b/], ['g-rack', /\b(rack|baie)\b/], ['g-laptop', /ordinateur|laptop|macbook|\bpc\b/], ['g-network', /switch|reseau|wi-?fi|borne|point d.acces|routeur|modem/],
+    ['g-groupe', /groupe electrogene|generateur|\bgroupe\b/], ['g-distrib', /armoire electrique|distribution|\bp17\b|armoire/], ['g-ups', /onduleur|\bups\b/], ['g-rallonge', /rallonge|multiprise|enrouleur|passe-?cable/],
+    ['cab-fibre', /fibre|smpte|touret/], ['cab-multi', /multipaire/], ['cab-sdi', /\bsdi\b|\bbnc\b/], ['cab-hdmi', /hdmi/], ['cab-xlr', /\bxlr\b|modulation|\bjack\b/], ['cab-dmx', /\bdmx\b/], ['cab-rj45', /rj ?45|ethernet|cat ?6/], ['cab-pw', /alimentation|secteur|\biec\b|powercon/], ['g-cable', /cable|cordon|jarretiere/],
+    ['g-van', /utilitaire|fourgon|camion|porteur|trafic|master|\bvan\b|vehicule/], ['g-vl', /voiture|\bbreak\b|ludospace/],
+    ['g-truss', /truss|totem|levage|portique|structure/], ['g-prat', /praticable|estrade|\bscene\b/], ['g-fondvert', /fond vert|cyclo|toile de fond/], ['g-secu', /extincteur|secours/], ['g-conso', /gaffer|piles|gelatine|consommable/]
+];
+// Coefficients dégressifs de location (nombre de jours facturés pour N jours) — tables publiées par des loueurs
+const DEGR = {
+    none: { n: 'Aucun : jours × tarif jour', t: null },
+    event: { n: 'Événementiel (P2G Rent : 2 j = 1,5 · 3 j = 1,7 · 7 j = 3,2 · 30 j = 7,8)', t: { 1: 1, 2: 1.5, 3: 1.7, 4: 2.1, 5: 2.5, 6: 2.85, 7: 3.2, 8: 3.55, 9: 3.9, 10: 4.2, 14: 5, 20: 6.2, 30: 7.8 } },
+    av: { n: 'Vidéo & son (Helium 7 : 2 j = 1,5 · 3 j = 2 · 5 j = 2,6 · 7 j = 3,2)', t: { 1: 1, 2: 1.5, 3: 2, 5: 2.6, 7: 3.2, 10: 4, 30: 8 } },
+    cine: { n: 'Cinéma (2 j = 1,7 · 3 j = 2,5 · 5 j = 3,5 · 7 j = 4,5)', t: { 1: 1, 2: 1.7, 3: 2.5, 4: 3, 5: 3.5, 6: 4, 7: 4.5, 14: 8 } },
+    week4: { n: 'Semaine = 4 jours facturés (5 à 7 jours)', t: 'week4' },
+    half: { n: '−50 % dès le 2e jour (type Filme)', t: 'half' }
+};
+// ---------- Grilles de salaires ----------
+// Minima conventionnels bruts pour une journée de 8 h. Sources :
+//  flux / fiction : convention de la production audiovisuelle (IDCC 2642), grille du 1er juillet 2025 toujours en vigueur en 2026
+//  cinema : convention de la production cinématographique (IDCC 3097), accord du 1er mars 2024 (journée = horaire × 1,25 × 8 h)
+//  event : entreprises au service de la création et de l'événement (IDCC 3252), filière audiovisuelle, juin 2024 (horaire × 8 h)
+const CONVS = {
+    flux: { n: 'Audiovisuel — flux (émissions, jeux, live)', s: 'IDCC 2642 · grille flux au 1er juillet 2025' },
+    fiction: { n: 'Audiovisuel — fiction TV (téléfilms, séries)', s: 'IDCC 2642 · grille fiction « spécialisée » au 1er juillet 2025' },
+    cinema: { n: 'Cinéma (longs et courts métrages)', s: 'IDCC 3097 · accord du 1er mars 2024' },
+    event: { n: 'Prestataires techniques / événementiel', s: 'IDCC 3252 · filière audiovisuelle, juin 2024' }
+};
+const CONV_FALLBACK = { flux: ['flux', 'fiction', 'event', 'cinema'], fiction: ['fiction', 'flux', 'cinema', 'event'], cinema: ['cinema', 'fiction', 'flux', 'event'], event: ['event', 'flux', 'fiction', 'cinema'] };
+// Poste : [id, libellé, département (annuaire XIII), motif reconnu dans la fonction, { minima 8 h }, [usage bas, usage haut] (brut / jour), mode par défaut, note]
+// usage : fourchette constatée quand une source existe, sinon estimée (minimum +0 à +40 %). Mode : cddu (salarié intermittent) · facture (prestataire HT) · cachet (artiste)
+const POSTES0 = [
+    ['dirprod', 'Directeur·rice de production', 'prod', /direct\w* (de )?(la )?prod|dir\.? ?prod/, { flux: 387.22, fiction: 569.27, cinema: 680.4 }, [390, 600]],
+    ['dop', 'Directeur·rice de la photographie', 'image', /directeu\w* (de )?(la )?photo|\bdop\b|\bd\.?o\.?p\b|chef op\w* (image|lumiere)/, { flux: 445.29, fiction: 576.75, cinema: 689.5 }, [450, 650]],
+    ['ingeson', 'Chef opérateur·rice du son / ingénieur·e du son', 'son', /(ing\w*|chef op\w*) (du )?son|ingeson|ingenieur son|mixeu\w* (plateau|live|direct|facade)/, { flux: 306.49, fiction: 400.79, cinema: 482.5, event: 238.4 }, [306, 450]],
+    ['chefop', 'Chef opérateur·rice prise de vues', 'image', /chef op/, { flux: 319.52, event: 379.68 }, [320, 490], '', 'Usage : 1 500 à 2 200 € / semaine selon l\'expérience (metier.org)'],
+    ['steadi', 'Opérateur·rice Steadicam', 'image', /steadi/, { flux: 298.28 }, [500, 650], '', 'AFCS : 650 € / jour pour les programmes TV, 500 € clip / doc, 700 € série'],
+    ['ac2', '2e assistant·e opérateur·rice', 'image', /(2e|2eme|2nd|second)\w* assistant\w* (op|cam|image)|clap|loader/, { flux: 180.55, fiction: 234.27, cinema: 267.6 }, [181, 260]],
+    ['ac1', '1er·e assistant·e opérateur·rice / pointeur', 'image', /assistant\w* (op|cam|image)|pointeu|focus/, { flux: 244.75, fiction: 288.11, cinema: 341.1 }, [245, 350], '', 'Usage : 300 à 350 € / jour (metier.org)'],
+    ['ar2', '2e assistant·e réalisateur·rice', 'real', /(2e|2eme|2nd|second)\w* assistant\w* real/, { fiction: 234.27 }, [234, 300]],
+    ['ar1', '1er·e assistant·e réalisateur·rice', 'real', /assistant\w* (a la )?real/, { flux: 243.27, fiction: 305.05, cinema: 369.9 }, [245, 380]],
+    ['scripte', 'Scripte', 'real', /script/, { flux: 243.27, fiction: 283.09, cinema: 327.7 }, [245, 350]],
+    ['real', 'Réalisateur·rice', 'real', /realisat|director\b/, { flux: 379.68, fiction: 300.07 }, [380, 600], '', 'Flux : pas de minimum conventionnel, référence SNTPCT 379,68 € / jour. Fiction : forfait journée 9 h. Usage freelance (Malt 2026) : 286 à 544 € HT / jour'],
+    ['chargeprod', 'Chargé·e de production', 'prod', /charge\w* (de )?prod|coordinat\w* (de )?prod|production manager/, { flux: 243.27 }, [245, 350]],
+    ['adminprod', 'Administrateur·rice de production', 'prod', /administrat/, { flux: 221.78, fiction: 289.17, cinema: 341.1 }, [222, 320]],
+    ['assprod', 'Assistant·e de production', 'prod', /assistant\w* (de )?prod|runner/, { flux: 180.55, fiction: 209.23 }, [181, 240]],
+    ['regiegen', 'Régisseur·se général·e', 'regie', /regisseu\w* gen/, { flux: 243.27, fiction: 305.05, cinema: 369.9 }, [245, 400], '', 'Usage régisseur : 180 à 400 € / jour (Youschool 2026)'],
+    ['regadj', 'Régisseur·se adjoint·e', 'regie', /regisseu\w* adjoint/, { fiction: 234.27, cinema: 267.6 }, [234, 300]],
+    ['chefplateau', 'Chef de plateau / régisseur·se plateau', 'regie', /chef de plateau|floor manager|regisseu\w* (de )?plateau|stage manager/, { flux: 180.55 }, [200, 330]],
+    ['regisseur', 'Régisseur·se', 'regie', /regisseu|\bregie\b/, { flux: 209.99, fiction: 283.74, event: 168.8 }, [210, 320]],
+    ['visionadj', 'Ingénieur·e de la vision adjoint·e', 'image', /vision adjoint/, { flux: 223.82 }, [224, 320]],
+    ['vision', 'Ingénieur·e de la vision', 'image', /\bvision\b|video engineer|\bshader/,{ flux: 316.35, event: 253.36 }, [316, 450]],
+    ['truquiste', 'Truquiste', 'image', /truqu|synthe|graphic operator/, { flux: 247.69, fiction: 254.36, event: 263.2 }, [250, 350]],
+    ['lsm', 'Opérateur·rice ralenti / VTR (LSM)', 'image', /\blsm\b|ralenti|magneto|\bvtr\b|replay|\bevs\b/, { flux: 171.62, event: 170.48 }, [200, 350]],
+    ['dit', 'DIT / data manager', 'post', /\bdit\b|data ?manag|transfert|backup|derush/, { fiction: 185.4, event: 198.4 }, [200, 350]],
+    ['techvid', 'Technicien·ne vidéo', 'image', /tech\w* (video|vision|image)|video\b|ingenieur video/, { flux: 207.91, fiction: 213.51 }, [208, 300]],
+    ['perch', 'Perchiste / 1er·e assistant·e son', 'son', /perch|boom|1er\w* assistant\w* son/, { flux: 222.95, fiction: 277.65, cinema: 319.6 }, [223, 320]],
+    ['assson', 'Assistant·e son', 'son', /assistant\w* son|\bhf\b/, { flux: 180.55, fiction: 185.4 }, [181, 250]],
+    ['mixeur', 'Mixeur·se (post-production)', 'post', /mixeu|mixage/, { flux: 340.76, fiction: 345.88, cinema: 527.6 }, [341, 450]],
+    ['opson', 'Opérateur·rice / technicien·ne son', 'son', /(operat|tech|regisseu)\w* (du )?son|sonoris|\bson\b|audio/, { event: 190.32 }, [190, 350], '', 'Usage : 170 à 350 € / jour (Youschool 2026), 200 à 400 € en événementiel (Sonomedoc 2026)'],
+    ['chefelec', 'Chef électricien·ne', 'elec', /chef elec|gaffer|chef eclair/, { flux: 250.15, fiction: 256.88, cinema: 303, event: 173.84 }, [250, 350]],
+    ['pupitreur', 'Pupitreur·se lumière', 'elec', /pupitr|console lum|(operat|tech|regisseu)\w* lum|eclairag/, { flux: 180.55, fiction: 241.93 }, [200, 350], '', 'Usage événementiel : 200 à 400 € / jour (Sonomedoc 2026)'],
+    ['elec', 'Électricien·ne', 'elec', /electric|\belec\b|lumiere/, { flux: 205.23, fiction: 210.76, cinema: 252.3, event: 144.4 }, [205, 280]],
+    ['chefmachino', 'Chef machiniste', 'machino', /chef machin|key grip/, { flux: 250.15, fiction: 256.88, cinema: 303, event: 173.84 }, [250, 350]],
+    ['grutier', 'Grutier·ère / opérateur·rice de grue', 'machino', /grut|grue|\bjib\b|techno/, { flux: 203.2, fiction: 210.76, cinema: 252.3 }, null, '', 'Pas de fonction dédiée : minimum machiniste'],
+    ['machino', 'Machiniste', 'machino', /machin|\bgrip\b|rigger|cintrier/, { flux: 203.2, fiction: 210.76, cinema: 252.3, event: 144.4 }, [203, 280]],
+    ['chefdeco', 'Chef décorateur·rice', 'deco', /chef deco|production designer/, { flux: 420.64, fiction: 569.27, cinema: 680.4 }, [421, 600]],
+    ['accessoiriste', 'Accessoiriste', 'deco', /accessoir/, { fiction: 280.7 }, [280, 350]],
+    ['deco', 'Décorateur·rice / ensemblier·ère', 'deco', /decor|ensemblier|scenograph/, { flux: 270.37, fiction: 296.13 }, [270, 380]],
+    ['chefcost', 'Chef costumier·ère', 'cost', /chef costum/, { flux: 226.06, fiction: 285.56, cinema: 482.5 }, [226, 330]],
+    ['habilleur', 'Habilleur·se', 'cost', /habill/, { flux: 162.7, fiction: 181.74, cinema: 228.2 }, [163, 230]],
+    ['costumier', 'Costumier·ère / styliste', 'cost', /costum|styl/, { flux: 180.55, fiction: 232.75 }, [181, 260]],
+    ['chefmaq', 'Chef maquilleur·se', 'hmc', /chef maquill/, { flux: 223.54, fiction: 284.85, cinema: 330.3 }, [280, 450], '', 'Usage : 280 à 350 € / jour en éditorial, 480 à 650 € en publicité (book.fr 2025)'],
+    ['coiffeur', 'Coiffeur·se', 'hmc', /coiff|hair/, { flux: 180.55, fiction: 232.75 }, [200, 350]],
+    ['maquilleur', 'Maquilleur·se', 'hmc', /maquill|make ?up|\bmua\b|\bhmc\b/, { flux: 180.55, fiction: 232.75, cinema: 265.9 }, [200, 350]],
+    ['chefmonteur', 'Chef monteur·se', 'post', /chef mont/, { flux: 284.94, fiction: 320.29, cinema: 458.3, event: 243.52 }, [285, 400]],
+    ['etalon', 'Étalonneur·se', 'post', /etalon|colori/, { flux: 243.9, fiction: 250.46, cinema: 527.6, event: 248.16 }, [244, 400]],
+    ['monteur', 'Monteur·se', 'post', /monteu|montage|editor/, { flux: 237.95, event: 182.08 }, [238, 300], '', 'Usage : 160 à 300 € / jour (Youschool 2026)'],
+    ['cadreur', 'Cadreur·se / OPV', 'image', /cadr|\bopv\b|operat\w* (de )?prise|camera ?(wo)?man|\bcam(era)?\b|image/, { flux: 284.36, fiction: 362.27, cinema: 437, event: 214.4 }, [285, 380], '', 'Usage : 180 à 350 € / jour (Youschool 2026)'],
+    ['drone', 'Télépilote de drone', 'image', /drone|telepilote/, {}, null, 'facture', 'Prestation sur devis'],
+    ['chauffeur', 'Chauffeur·se', 'transport', /chauffeu|driver|convoyeu/, {}, null, '', 'Pas de grille dédiée : tarif à saisir'],
+    ['securite', 'Agent de sécurité / SSIAP', 'secu', /secur|ssiap|vigile|surete/, {}, null, 'facture', 'Prestation : tarif à saisir'],
+    ['secours', 'Secouriste / poste de secours', 'secu', /secour|infirm|pompier|medecin/, {}, null, 'facture', 'Prestation : tarif à saisir'],
+    ['catering', 'Catering / cantine', 'cantine', /cantin|catering|traiteu|cuisin/, {}, null, 'facture', 'Prestation : tarif à saisir (les repas se chiffrent aussi dans 🍽️ Frais)'],
+    ['animateur', 'Animateur·rice / présentateur·rice', 'cast', /animat|presentat|\bhost\b|journalist|chroniqu/, {}, null, 'cachet', 'Cachet ou salaire à saisir'],
+    ['comedien', 'Comédien·ne', 'cast', /comedien|acteu|actrice|role/, {}, null, 'cachet', 'Cachet à saisir'],
+    ['musicien', 'Artiste / musicien·ne', 'cast', /musicien|chanteu|artiste|danseu|groupe|\bdj\b/, {}, null, 'cachet', 'Cachet à saisir'],
+    ['invite', 'Invité·e', 'cast', /invite|guest|intervenant/, {}, null, 'cachet', 'Défraiement ou cachet à saisir'],
+    ['figurant', 'Figurant·e', 'fig', /figur|silhouette/, {}, null, 'cachet', 'Cachet à saisir'],
+    ['autre', 'Autre fonction', 'autre', /^$/, {}, null, '', 'Tarif à saisir']
+];
+// Poste proposé d'après le département de l'annuaire quand la fonction n'est pas reconnue
+const DEPT_POSTE = { prod: 'chargeprod', real: 'real', image: 'cadreur', elec: 'elec', machino: 'machino', son: 'opson', deco: 'deco', cost: 'costumier', hmc: 'maquilleur', regie: 'regisseur', cast: 'comedien', fig: 'figurant', secu: 'securite', transport: 'chauffeur', cantine: 'catering', post: 'monteur', autre: 'autre' };
+const DEPTS_D = [
+    ['prod', 'Production', '#EF5350'], ['real', 'Réalisation', '#AB47BC'], ['image', 'Image & vidéo', '#42A5F5'], ['son', 'Son', '#26A69A'], ['elec', 'Électro / lumière', '#FFCA28'], ['machino', 'Machinerie', '#8D6E63'],
+    ['deco', 'Décoration', '#66BB6A'], ['cost', 'Costumes', '#EC407A'], ['hmc', 'Maquillage / coiffure', '#F48FB1'], ['regie', 'Régie', '#FFA726'], ['post', 'DIT / post-production', '#26C6DA'],
+    ['cast', 'Artistes & talents', '#7E57C2'], ['fig', 'Figuration', '#9E9E9E'], ['secu', 'Sécurité / secours', '#E53935'], ['transport', 'Transport', '#78909C'], ['cantine', 'Cantine / catering', '#C0CA33'], ['autre', 'Autre', '#BDBDBD']
+];
+const MODES = { cddu: ['Salarié (CDDU)', 'Salaire brut + charges patronales'], facture: ['Prestataire (HT)', 'Facture HT, sans charges sociales'], cachet: ['Artiste (cachet)', 'Cachet brut + charges artistes'] };
+// Frais : défraiements conventionnels et barèmes URSSAF 2026
+const FEES0 = {
+    repas: { n: 'Repas équipe (indemnité ou catering)', u: 'repas', p: 21.4, lo: 12.2, hi: 21.4, s: 'IDCC 2642 : indemnité repas 21,40 € hors lieu habituel, titre-restaurant minimum 12,20 €' },
+    hotel: { n: 'Hébergement (chambre + petit-déjeuner)', u: 'nuitée', p: 56.8, lo: 56.8, hi: 76.6, s: 'Barème URSSAF 2026 grand déplacement : 56,80 € en région, 76,60 € à Paris et petite couronne' },
+    km: { n: 'Indemnités kilométriques', u: 'km', p: 0.348, lo: 0.348, hi: 0.348, s: 'IDCC 2642 : ½ barème fiscal 7 CV, soit 0,348 € / km en 2026' },
+    assu: { n: 'Assurance du matériel loué', u: '%', p: 8, lo: 5, hi: 10, s: 'Assurance loueur : 5 à 10 % du montant de location (8 % chez Pleine Image, 10 % chez Cosmik)' }
+};
+
+</script>
+<script>
+
+// =====================================================================
+//  DEVISO XIII — état, sauvegarde et calculs
+// =====================================================================
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const uid = () => Math.random().toString(36).slice(2, 10);
+const store = {
+    get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+    set(k, v) { try { localStorage.setItem(k, v); return true; } catch (e) { return false; } }
+};
+const KEY_PROJECT = 'devisoXIII.project', KEY_PREFS = 'devisoXIII.prefs', KEY_BASE = 'devisoXIII.base';
+const pad2 = n => String(n).padStart(2, '0');
+const todayISO = () => { const d = new Date(); return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()); };
+const addDays = (iso, n) => { const d = new Date((iso || todayISO()) + 'T12:00:00'); d.setDate(d.getDate() + n); return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()); };
+const nowHM = () => { const d = new Date(); return pad2(d.getHours()) + ':' + pad2(d.getMinutes()); };
+const frDate = iso => { if (!iso) return ''; const [y, m, d] = iso.split('-'); return d + '/' + m + '/' + y; };
+const daysBetween = (a, b) => { if (!a || !b) return 0; const x = new Date(a + 'T12:00:00'), y = new Date(b + 'T12:00:00'); return Math.round((y - x) / 864e5) + 1; };
+const fold = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+const num = v => { const n = parseFloat(String(v).replace(/\s/g, '').replace(',', '.')); return isFinite(n) ? n : 0; };
+const numOrNull = v => { if (v == null || String(v).trim() === '') return null; const n = parseFloat(String(v).replace(/\s/g, '').replace(',', '.')); return isFinite(n) ? n : null; };
+const nf = (n, d = 0) => (isFinite(n) ? n : 0).toLocaleString('fr-FR', { minimumFractionDigits: d, maximumFractionDigits: d });
+const eur = (n, d) => { n = +n || 0; if (d == null) d = Math.abs(n) < 100 && Math.round(n * 100) % 100 ? 2 : 0; return nf(n, d) + ' €'; };
+const eur0 = n => nf(Math.round(+n || 0)) + ' €';
+const keur = n => { n = +n || 0; return Math.abs(n) >= 10000 ? nf(n / 1000, Math.abs(n) >= 100000 ? 0 : 1) + ' k€' : eur0(n); };
+const rng = (lo, hi) => Math.round(lo) === Math.round(hi) ? eur0(lo) : eur0(lo) + ' – ' + eur0(hi);
+const median = a => { if (!a.length) return null; const s = a.slice().sort((x, y) => x - y), m = s.length >> 1; return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; };
+const plural = (n, w, ws) => n + ' ' + (n > 1 ? (ws || w + 's') : w);
+const ecat = id => ECATS.find(c => c[0] === id) || ECATS[ECATS.length - 1];
+const deptD = id => DEPTS_D.find(d => d[0] === id) || DEPTS_D[DEPTS_D.length - 1];
+
+// =====================================================================
+//  BASE TARIFAIRE (référentiel + vos ajouts, enregistrés dans ce navigateur)
+// =====================================================================
+let BASE = { loueurs: [], prices: {}, hidden: {}, custom: [], grid: {}, pref: {} };
+function saveBase() { store.set(KEY_BASE, JSON.stringify(BASE)); }
+function loueurs() {
+    const edit = BASE.ledit || {};
+    return LOUEURS0.map(([id, n, city, spec, kind, note, url]) => Object.assign({ id, n, city, spec, kind, note, url, builtin: true }, edit[id] || {}))
+        .concat((BASE.loueurs || []).map(l => Object.assign({ kind: 'user', city: '', spec: '', note: 'Vos tarifs', url: '' }, l)));
+}
+const loueurOf = id => loueurs().find(l => l.id === id) || { id, n: id, kind: 'user', note: '' };
+const refs = () => CATALOG.concat(BASE.custom || []);
+let REFMAP = null;
+const refOf = id => { if (!REFMAP) { REFMAP = new Map(); refs().forEach(r => REFMAP.set(r.id, r)); } return id ? REFMAP.get(id) || null : null; };
+function refsChanged() { REFMAP = null; MATCH_CACHE.clear(); }
+// Prix d'une référence : tarifs publics + vos prix (devis importés, saisies), triés du moins cher au plus cher
+function pricesOf(ref) {
+    if (!ref) return [];
+    const out = new Map(), hid = (BASE.hidden || {})[ref.id] || {};
+    Object.entries(ref.p || {}).forEach(([l, p]) => { if (!hid[l]) out.set(l, { l, p: +p, user: false }); });
+    Object.entries((BASE.prices || {})[ref.id] || {}).forEach(([l, o]) => { if (o && isFinite(+o.p)) out.set(l, { l, p: +o.p, user: true, src: o.src || '', ts: o.ts || 0 }); });
+    return [...out.values()].sort((a, b) => a.p - b.p);
+}
+// Fourchette d'une référence : { kind, lo, hi, med, list }
+function refRange(ref) {
+    if (!ref) return { kind: 'none', lo: null, hi: null, med: null, list: [] };
+    if (ref.inc) return { kind: 'inc', lo: 0, hi: 0, med: 0, list: [] };
+    const list = pricesOf(ref);
+    if (list.length) { const v = list.map(x => x.p); return { kind: 'model', lo: Math.min(...v), hi: Math.max(...v), med: median(v), list }; }
+    if (ref.g) {
+        const v = []; ref.g.forEach(id => pricesOf(refOf(id)).forEach(x => v.push(x.p)));
+        if (v.length) return { kind: 'generic', lo: Math.min(...v), hi: Math.max(...v), med: median(v), list: [], n: ref.g.length };
+    }
+    if (ref.est) return { kind: 'est', lo: ref.est[0], hi: ref.est[1], med: (ref.est[0] + ref.est[1]) / 2, list: [] };
+    return { kind: ref.sd ? 'sd' : 'none', lo: null, hi: null, med: null, list: [] };
+}
+
+// =====================================================================
+//  RECONNAISSANCE DES NOMS DE MATÉRIEL
+// =====================================================================
+const XSTOP = new Set(['de', 'du', 'des', 'la', 'le', 'les', 'et', 'avec', 'pour', 'lot', 'sur', 'en', 'un', 'une', 'x', 'the', 'with', 'kit', 'pack', 'set', 'pro', 'complet', 'complete', 'serie', 'modele', 'preciser', 'unite', 'type', 'ou']);
+// « FX 6 », « C 300 », « M 18 » → « fx6 », « c300 », « m18 » ; 1,8 → 1.8
+const normTxt = s => fold(s).replace(/(\d),(\d)/g, '$1.$2').replace(/\b([a-z]{1,3})[\s\-]+(\d)/g, '$1$2').replace(/[^a-z0-9.+]+/g, ' ').trim();
+const toks = s => normTxt(s).split(' ').map(t => t.replace(/^\.+|\.+$/g, '')).filter(t => t.length >= 2 && !XSTOP.has(t));
+const MATCH_CACHE = new Map();
+let REFTOK = null;
+function refTokens() {
+    if (REFTOK && REFTOK.n === refs().length) return REFTOK.list;
+    const list = refs().filter(r => !/^(g-|inc-|cab-)/.test(r.id)).map(r => ({ r, sets: [r.n].concat(String(r.k || '').split('|').filter(Boolean)).map(toks).filter(a => a.length) }));
+    REFTOK = { n: refs().length, list }; return list;
+}
+// Renvoie { ref, how: 'exact' | 'model' | 'generic', score } ou null
+function matchRef(name, hint) {
+    const key = fold(name) + '|' + fold(hint || '');
+    if (MATCH_CACHE.has(key)) return MATCH_CACHE.get(key);
+    const res = matchRef0(name, hint); MATCH_CACHE.set(key, res); return res;
+}
+function matchRef0(name, hint) {
+    const n = normTxt(name); if (!n) return null;
+    for (const r of refs()) { if (normTxt(r.n) === n || String(r.k || '').split('|').some(a => a && normTxt(a) === n && !/^(g-|cab-)/.test(r.id))) return { ref: r, how: 'exact', score: 99 }; }
+    const st = new Set(toks(name)), w = t => /\d/.test(t) ? 3 : 1;
+    let sw = 0; st.forEach(t => sw += w(t));
+    let best = null, bestScore = 0;
+    if (sw) refTokens().forEach(({ r, sets }) => sets.forEach(lt => {
+        let shared = 0, lw = 0; lt.forEach(t => { lw += w(t); if (st.has(t)) shared += w(t); });
+        const covL = shared / lw, covS = shared / sw;
+        // un numéro de modèle présent des deux côtés doit être identique (FX6 ≠ FX9)
+        const dq = [...st].filter(t => /\d/.test(t) && /[a-z]/.test(t)), dl = lt.filter(t => /\d/.test(t) && /[a-z]/.test(t));
+        if (dq.length && dl.length && !dl.some(t => st.has(t))) return;
+        if (!((shared >= 3 && covL >= 0.6) || (shared >= 2 && (covS >= 0.99 || covL >= 0.99)))) return;
+        const score = shared + covL + covS * 0.5; if (score > bestScore) { bestScore = score; best = r; }
+    }));
+    if (best) return { ref: best, how: 'model', score: bestScore };
+    const f = ' ' + fold(name).replace(/[^a-z0-9+\-]+/g, ' ') + ' ';
+    for (const [id, re] of GEN_RULES) if (re.test(f)) return { ref: refOf(id), how: 'generic', score: 1 };
+    const h = fold(hint || '');
+    if (h) for (const [id, re] of GEN_RULES) if (re.test(' ' + h + ' ')) return { ref: refOf(id), how: 'generic', score: 0.5 };
+    return null;
+}
+// Suggestions pour la fenêtre de correspondance
+function suggestRefs(q, cat, limit) {
+    const st = new Set(toks(q)), fq = fold(q).trim();
+    return refs().map(r => {
+        const all = fold(r.n + ' ' + r.k);
+        let s = 0; st.forEach(t => { if (all.includes(t)) s += /\d/.test(t) ? 3 : 1; });
+        if (fq && all.includes(fq)) s += 2;
+        if (cat && r.c === cat) s += 0.5;
+        return { r, s };
+    }).filter(x => x.s > 0.5 || !q).sort((a, b) => b.s - a.s || (a.r.n.localeCompare(b.r.n))).slice(0, limit || 30).map(x => x.r);
+}
+
+// =====================================================================
+//  GRILLES DE SALAIRES
+// =====================================================================
+const postes = () => POSTES0.map(([id, n, dept, re, min, mkt, mode, note]) => {
+    const e = (BASE.grid || {})[id] || {};
+    return { id, n, dept, re, min: Object.assign({}, min, e.min || {}), mkt: e.mkt || mkt || null, mode: mode || 'cddu', note: note || '', edited: !!(e.min || e.mkt) };
+});
+let POSTMAP = null;
+const posteOf = id => { if (!POSTMAP) POSTMAP = new Map(postes().map(p => [p.id, p])); return POSTMAP.get(id) || POSTMAP.get('autre'); };
+function gridChanged() { POSTMAP = null; }
+function posteFromRole(role, dept) {
+    const r = ' ' + fold(role).replace(/[^a-z0-9.]+/g, ' ').trim() + ' ';
+    if (r.trim()) for (const p of postes()) if (p.id !== 'autre' && p.re.test(r)) return p.id;
+    return DEPT_POSTE[dept] || 'autre';
+}
+// Minimum conventionnel (journée de 8 h) : { v, conv } ou null
+function gridMin(p, conv) {
+    for (const c of CONV_FALLBACK[conv] || CONV_FALLBACK.flux) if (p.min && p.min[c] > 0) return { v: p.min[c], conv: c };
+    return null;
+}
+// Majoration de l'amplitude : heures 9 à 11 à +25 %, au-delà à +50 % (convention de la production audiovisuelle)
+function ampMult(h) {
+    h = +h || 8; if (h <= 8) return h / 8;
+    const extra = Math.min(h - 8, 3) * 1.25 + Math.max(0, h - 11) * 1.5;
+    return (8 + extra) / 8;
+}
+
+// =====================================================================
+//  PROJET
+// =====================================================================
+let P = null, prefs = { theme: 'dark', libHidden: false, view: 'eq', libCat: 'cam', repMode: 'detail' };
+const DEFAULT_SET = { tournage: 1, install: 0, demontage: 0, degr: 'event', remise: 0, strat: 'med', conv: 'flux', convAuto: true, amp: 10, chT: 60, chA: 50, chLo: 55, chHi: 65, chALo: 45, chAHi: 56, level: 'mid', nights: 0, fg: 7, imp: 5, marge: 0, tva: 20, region: 'prov' };
+function blankVersion(name) {
+    return { id: uid(), name: name || 'Devis', eq: [], crew: [], fees: [{ id: uid(), key: 'repas', on: true }, { id: uid(), key: 'hotel', on: false }, { id: uid(), key: 'km', on: false, qty: 0 }, { id: uid(), key: 'assu', on: true }] };
+}
+function blankProject() {
+    const v = blankVersion('Devis A');
+    return { v: 1, id: uid(), name: '', client: '', ref: 'DEV-' + todayISO().replace(/-/g, '').slice(2) + '-01', author: '', lieu: '', debut: '', fin: '', validite: 30, notes: '', set: Object.assign({}, DEFAULT_SET), versions: [v], cur: v.id, created: Date.now() };
+}
+function normalize(p) {
+    const b = blankProject();
+    p = Object.assign({}, b, p || {});
+    p.set = Object.assign({}, DEFAULT_SET, p.set || {});
+    if (!Array.isArray(p.versions) || !p.versions.length) p.versions = b.versions;
+    p.versions.forEach(v => { ['eq', 'crew', 'fees'].forEach(k => { if (!Array.isArray(v[k])) v[k] = []; }); if (!v.fees.length) v.fees = blankVersion().fees; });
+    if (!p.versions.find(v => v.id === p.cur)) p.cur = p.versions[0].id;
+    return p;
+}
+const V = () => P.versions.find(v => v.id === P.cur) || P.versions[0];
+const totalDays = () => Math.max(0, (+P.set.tournage || 0) + (+P.set.install || 0) + (+P.set.demontage || 0)) || 1;
+
+// ---------- Dégressif de location ----------
+function degrCoef(d, mode) {
+    d = Math.max(0, +d || 0); if (!d) return 0;
+    const D = DEGR[mode || P.set.degr] || DEGR.none, t = D.t;
+    if (!t) return d;
+    if (t === 'week4') return Math.floor(d / 7) * 4 + Math.min(d % 7, 4);
+    if (t === 'half') return 1 + (d - 1) * 0.5;
+    if (t[d] != null) return t[d];
+    const ks = Object.keys(t).map(Number).sort((a, b) => a - b);
+    const max = ks[ks.length - 1];
+    if (d > max) { const k0 = ks[ks.length - 2]; const slope = (t[max] - t[k0]) / (max - k0); return t[max] + (d - max) * slope; }
+    let a = ks[0], b = max; ks.forEach(k => { if (k <= d) a = k; if (k >= d && k < b) b = k; });
+    return t[a] + (t[b] - t[a]) * (d - a) / ((b - a) || 1);
+}
+
+// ---------- Lignes de matériel ----------
+// e = { id, on, name, cat, qty, days, ref, refLock, loueur, price, unit, note, src }
+function eqRef(e) {
+    if (e.ref) { const r = refOf(e.ref); if (r) return { ref: r, how: e.refLock ? 'manual' : 'saved' }; }
+    const m = matchRef(e.name, e.hint || ecat(e.cat || 'div')[1]);
+    return m;
+}
+function eqCalc(e) {
+    const m = eqRef(e), ref = m ? m.ref : null, R0 = refRange(ref);
+    const unit = e.unit || (ref && ref.u) || 'j';
+    const days = e.days != null && e.days !== '' ? +e.days : totalDays();
+    const coef = unit === 'f' ? 1 : degrCoef(days);
+    const qty = +e.qty || 0, rem = 1 - (+P.set.remise || 0) / 100;
+    let p = null, lo = null, hi = null, src = '', who = '';
+    if (e.price != null && e.price !== '') { p = +e.price; lo = R0.lo != null ? Math.min(p, R0.lo) : p; hi = R0.hi != null ? Math.max(p, R0.hi) : p; src = 'manual'; }
+    else if (R0.kind === 'model') {
+        const list = R0.list;
+        let pick = null;
+        if (e.loueur) pick = list.find(x => x.l === e.loueur);
+        if (!pick && P.set.strat === 'pref') { const pl = (BASE.pref || {})[ref.c]; if (pl) pick = list.find(x => x.l === pl); }
+        if (!pick && P.set.strat === 'min') pick = list[0];
+        if (pick) { p = pick.p; who = pick.l; src = e.loueur ? 'loueur' : 'auto'; }
+        else { p = R0.med; src = 'med'; who = list.length === 1 ? list[0].l : ''; }
+        lo = R0.lo; hi = R0.hi;
+        if (list.length === 1) { lo = p * 0.9; hi = p * 1.1; }
+    } else if (R0.kind === 'generic' || R0.kind === 'est') { p = R0.med; lo = R0.lo; hi = R0.hi; src = R0.kind; }
+    else if (R0.kind === 'inc') { p = 0; lo = 0; hi = 0; src = 'inc'; }
+    const k = qty * coef * rem;
+    return {
+        m, ref, R: R0, unit, days, coef, qty, p, who, src, missing: p == null,
+        tot: p != null ? p * k : 0, lo: lo != null ? lo * k : 0, hi: hi != null ? hi * k : 0
+    };
+}
+
+// ---------- Lignes d'équipe ----------
+// c = { id, on, name, role, poste, dept, mode, days, level, rate, note, src, cid }
+function crewCalc(c) {
+    const p = posteOf(c.poste), conv = P.set.conv, mode = c.mode || p.mode || 'cddu';
+    const gm = gridMin(p, conv), amp = ampMult(P.set.amp);
+    const floor = gm ? gm.v * amp : null;
+    let mkt = p.mkt ? p.mkt.slice() : (gm ? [gm.v, gm.v * 1.4] : null);
+    if (mkt && floor != null) mkt = [Math.max(mkt[0], floor), Math.max(mkt[1], floor)];
+    const level = c.level || P.set.level || 'mid';
+    let rate = null, src = '';
+    if (c.rate != null && c.rate !== '') { rate = +c.rate; src = 'manual'; }
+    else if (mkt) { rate = level === 'min' ? (floor != null ? floor : mkt[0]) : level === 'max' ? mkt[1] : (mkt[0] + mkt[1]) / 2; src = level; }
+    const days = c.days != null && c.days !== '' ? +c.days : totalDays();
+    const isArt = mode === 'cachet';
+    const ch = mode === 'facture' ? 0 : (isArt ? +P.set.chA : +P.set.chT) / 100;
+    const chLo = mode === 'facture' ? 0 : (isArt ? +P.set.chALo : +P.set.chLo) / 100, chHi = mode === 'facture' ? 0 : (isArt ? +P.set.chAHi : +P.set.chHi) / 100;
+    const gross = rate != null ? rate * days : 0;
+    const loRate = src === 'manual' ? rate : (floor != null ? floor : (mkt ? mkt[0] : null));
+    const hiRate = src === 'manual' ? rate : (mkt ? mkt[1] : null);
+    return {
+        p, gm, amp, floor, mkt, rate, src, level, days, mode, ch, missing: rate == null,
+        gross, charges: gross * ch, tot: gross * (1 + ch),
+        lo: loRate != null ? loRate * days * (1 + chLo) : 0, hi: hiRate != null ? hiRate * days * (1 + chHi) : 0
+    };
+}
+
+// ---------- Frais ----------
+function persons(v) { return (v || V()).crew.filter(c => c.on !== false).length; }
+function personDays(v) { return (v || V()).crew.filter(c => c.on !== false).reduce((s, c) => s + (c.days != null && c.days !== '' ? +c.days : totalDays()), 0); }
+function feeCalc(f, eqT) {
+    const D = FEES0[f.key];
+    if (D) {
+        if (f.key === 'assu') {
+            const pct = f.price != null && f.price !== '' ? +f.price : D.p;
+            return { n: D.n, u: '%', auto: true, qty: null, base: eqT.tot, p: pct, tot: eqT.tot * pct / 100, lo: eqT.lo * D.lo / 100, hi: eqT.hi * D.hi / 100, hint: pct + ' % de ' + eur0(eqT.tot) + ' de location' };
+        }
+        let qty = f.qty, hint = '';
+        if (qty == null || qty === '') {
+            if (f.key === 'repas') { qty = personDays(); hint = 'Σ jours × personnes de l\'équipe'; }
+            else if (f.key === 'hotel') { qty = persons() * (+P.set.nights || 0); hint = persons() + ' pers. × ' + (+P.set.nights || 0) + ' nuit(s)'; }
+            else qty = 0;
+        }
+        const pDef = f.key === 'hotel' && P.set.region === 'paris' ? D.hi : D.p;
+        const p = f.price != null && f.price !== '' ? +f.price : pDef;
+        const lo = f.price != null && f.price !== '' ? p : D.lo, hi = f.price != null && f.price !== '' ? p : D.hi;
+        return { n: D.n, u: D.u, auto: true, qty: +qty || 0, p, tot: (+qty || 0) * p, lo: (+qty || 0) * lo, hi: (+qty || 0) * hi, hint };
+    }
+    const p = +f.price || 0, q = +f.qty || 0;
+    const lo = f.lo != null && f.lo !== '' ? +f.lo : p, hi = f.hi != null && f.hi !== '' ? +f.hi : p;
+    return { n: f.name || 'Frais', u: f.unit || 'forfait', auto: false, qty: q, p, tot: q * p, lo: q * lo, hi: q * hi, hint: '' };
+}
+
+// ---------- Totaux ----------
+// TVA : désactivable (micro-entreprise, export…) — le taux saisi est conservé
+const tvaR = () => P && P.set && !P.set.noTva ? (+P.set.tva || 0) : 0;
+function totals(v) {
+    v = v || V();
+    const T = { eq: { tot: 0, lo: 0, hi: 0, n: 0, miss: 0, byCat: {} }, crew: { tot: 0, lo: 0, hi: 0, gross: 0, charges: 0, n: 0, miss: 0, byDept: {} }, fees: { tot: 0, lo: 0, hi: 0, n: 0 } };
+    v.eq.forEach(e => {
+        if (e.on === false || e.opt) return; const c = eqCalc(e), k = e.cat || (c.ref ? c.ref.c : 'div');
+        T.eq.tot += c.tot; T.eq.lo += c.lo; T.eq.hi += c.hi; T.eq.n++; if (c.missing) T.eq.miss++;
+        const b = T.eq.byCat[k] || (T.eq.byCat[k] = { tot: 0, lo: 0, hi: 0, n: 0 }); b.tot += c.tot; b.lo += c.lo; b.hi += c.hi; b.n++;
+    });
+    v.crew.forEach(x => {
+        if (x.on === false || x.opt) return; const c = crewCalc(x), k = x.dept || c.p.dept;
+        T.crew.tot += c.tot; T.crew.lo += c.lo; T.crew.hi += c.hi; T.crew.gross += c.gross; T.crew.charges += c.charges; T.crew.n++; if (c.missing) T.crew.miss++;
+        const b = T.crew.byDept[k] || (T.crew.byDept[k] = { tot: 0, lo: 0, hi: 0, n: 0, gross: 0, charges: 0 }); b.tot += c.tot; b.lo += c.lo; b.hi += c.hi; b.n++; b.gross += c.gross; b.charges += c.charges;
+    });
+    v.fees.forEach(f => { if (f.on === false || f.opt) return; const c = feeCalc(f, T.eq); T.fees.tot += c.tot; T.fees.lo += c.lo; T.fees.hi += c.hi; T.fees.n++; });
+    const s = P.set, sub = ['tot', 'lo', 'hi'].reduce((o, k) => (o[k] = T.eq[k] + T.crew[k] + T.fees[k], o), {});
+    const fin = k => { const st = sub[k], fg = st * (+s.fg || 0) / 100, imp = st * (+s.imp || 0) / 100, mg = (st + fg + imp) * (+s.marge || 0) / 100, ht = st + fg + imp + mg, tva = ht * tvaR() / 100; return { st, fg, imp, mg, ht, tva, ttc: ht + tva }; };
+    T.sub = sub; T.R = fin('tot'); T.L = fin('lo'); T.H = fin('hi');
+    // lignes « en option » : chiffrées à part (mêmes frais généraux, imprévus et marge), présentées à la fin du devis
+    const kf = (1 + ((+s.fg || 0) + (+s.imp || 0)) / 100) * (1 + (+s.marge || 0) / 100), O = [];
+    v.eq.forEach(e => { if (e.on === false || !e.opt) return; const c = eqCalc(e); O.push({ l: 'eq', it: e, n: e.name || 'Matériel', d: (c.qty ? nf(c.qty, c.qty % 1 ? 1 : 0) + ' × ' : '') + (c.unit === 'f' ? 'forfait' : c.days + ' j'), ht: c.tot * kf, miss: c.missing }); });
+    v.crew.forEach(x => { if (x.on === false || !x.opt) return; const c = crewCalc(x); O.push({ l: 'crew', it: x, n: (c.p.n || 'Poste') + (x.name ? ' — ' + x.name : ''), d: nf(c.days, c.days % 1 ? 1 : 0) + ' j', ht: c.tot * kf, miss: c.missing }); });
+    v.fees.forEach(f => { if (f.on === false || !f.opt) return; const c = feeCalc(f, T.eq); O.push({ l: 'fees', it: f, n: c.n || f.name || 'Frais', d: c.u === '%' ? '' : nf(c.qty, c.qty % 1 ? 1 : 0) + ' ' + (c.u || ''), ht: c.tot * kf }); });
+    const oht = O.reduce((a, o) => a + o.ht, 0), otva = oht * tvaR() / 100;
+    T.opt = { list: O, ht: oht, tva: otva, ttc: oht + otva };
+    return T;
+}
+
+// =====================================================================
+//  SAUVEGARDE
+// =====================================================================
+let saveT = null, toastT = null;
+function dirty() {
+    $('save-state').textContent = 'Modifications…';
+    clearTimeout(saveT); saveT = setTimeout(() => saveProject(false), 600);
+}
+function saveProject(explicit) {
+    clearTimeout(saveT);
+    P.updated = Date.now();
+    const ok = store.set(KEY_PROJECT, JSON.stringify(P));
+    try { const T = totals(); store.set('devisoXIII.summary', JSON.stringify({ name: P.name || '', version: (V() || {}).name || '', ht: Math.round(T.R.ht), ttc: Math.round(T.R.ttc), crew: Math.round(T.crew.tot), eq: Math.round(T.eq.tot), fees: Math.round(T.fees.tot), at: Date.now() })); } catch (e) { }
+    $('save-state').textContent = ok ? 'Enregistré · ' + nowHM() : '⚠️ Non enregistré (stockage indisponible) — exportez le fichier';
+    if (explicit) toast(ok ? '💾 Devis enregistré dans ce navigateur' : '⚠️ Enregistrement impossible : utilisez « Exporter Fichier »');
+}
+function savePrefs() { store.set(KEY_PREFS, JSON.stringify(prefs)); }
+function download(content, name, type) {
+    const blob = content instanceof Blob ? content : new Blob([content], { type: type || 'text/plain' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
+    document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+}
+function toast(msg, ms) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), ms || 2800); }
+const safeName = s => String(s || 'devis').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^\w\- ]+/g, ' ').trim().replace(/\s+/g, '_').slice(0, 70) || 'devis';
+
+</script>
+<script>
+XM.initTheme();
+// =====================================================================
+//  DEVISO XIII · mobile — estimatif rapide
+//  Référentiels et calculs : deviso/data.js + deviso/core.js du bureau, chargés tels quels
+//  (eqCalc, crewCalc, feeCalc, totals, matchRef, posteOf…) : mêmes montants qu'au bureau.
+//  Données : même modèle de projet que le bureau (P = { name, client, set, versions:[{eq, crew, fees}] }).
+// =====================================================================
+const APPN = 'deviso', Q = XM.$, QQ = XM.$$;
+const AMPS_M = [8, 9, 10, 11, 12];
+const LEVELS_M = [['min', 'Minimum'], ['mid', 'Médian'], ['max', 'Haut']];
+const STRATS_M = [['med', 'Prix médian des loueurs'], ['min', 'Loueur le moins cher'], ['pref', 'Loueur préféré par famille']];
+// core.js du bureau écrit dans des éléments de la page bureau : on redirige vers le mobile
+function dirty() { persist(); }
+function saveProject() { persist(); }
+function toast(m, ms) { XM.toast(m, ms); }
+
+// ---------- état ----------
+let ST = { list: [], cur: '' }, TAB = 'eq', DESK_BASE = null;
+try { DESK_BASE = JSON.parse(store.get(KEY_BASE) || 'null'); } catch (e) { DESK_BASE = null; }
+function resetBase(extra) {
+    const b = DESK_BASE || {};
+    BASE = { loueurs: (b.loueurs || []).slice(), prices: Object.assign({}, b.prices || {}), hidden: Object.assign({}, b.hidden || {}), custom: (b.custom || []).slice(), grid: Object.assign({}, b.grid || {}), pref: Object.assign({}, b.pref || {}), ledit: Object.assign({}, b.ledit || {}) };
+    if (extra) {
+        (extra.custom || []).forEach(r => { if (!BASE.custom.find(x => x.id === r.id)) BASE.custom.push(r); });
+        (extra.loueurs || []).forEach(l => { if (!BASE.loueurs.find(x => x.id === l.id)) BASE.loueurs.push(l); });
+        Object.entries(extra.prices || {}).forEach(([id, o]) => { BASE.prices[id] = Object.assign({}, o, BASE.prices[id] || {}); });
+        Object.entries(extra.hidden || {}).forEach(([id, o]) => { BASE.hidden[id] = Object.assign({}, o, BASE.hidden[id] || {}); });
+        Object.entries(extra.grid || {}).forEach(([id, o]) => { if (!BASE.grid[id]) BASE.grid[id] = o; });
+        Object.entries(extra.pref || {}).forEach(([k, l]) => { if (!BASE.pref[k]) BASE.pref[k] = l; });
+    }
+    refsChanged(); gridChanged();
+}
+function loadState() {
+    const s = XM.load(APPN);
+    if (s && Array.isArray(s.list)) ST = s;
+    ST.list = ST.list.filter(x => x && x.P).map(x => Object.assign(x, { P: normalize(x.P) }));
+    if (!ST.list.find(x => x.P.id === ST.cur)) ST.cur = '';
+    selectItem(ST.cur, true);
+}
+const ITEM = () => ST.list.find(x => x.P.id === ST.cur) || null;
+function selectItem(id, quiet) {
+    ST.cur = id || ''; const it = ITEM();
+    P = it ? it.P : null; resetBase(it && it.base);
+    if (!quiet) persist();
+}
+let persistT = null;
+function persist() {
+    const it = ITEM(); if (it) { it.P.updated = Date.now(); it.changed = true; }
+    clearTimeout(persistT); persistT = setTimeout(() => { if (!XM.save(APPN, ST)) XM.toast('⚠️ Stockage plein : renvoyez ou exportez vos estimatifs', 4000); }, 250);
+}
+function addItem(p, o) {
+    p = normalize(p); const ex = ST.list.find(x => x.P.id === p.id);
+    const it = Object.assign({ P: p, origin: 'mobile', changed: false, recv: 0 }, o || {});
+    if (ex) Object.assign(ex, it); else ST.list.unshift(it);
+    selectItem(p.id); return it;
+}
+
+// ---------- utilitaires ----------
+const H = esc;
+const stepper = (act, id, val, sm) => '<div class="d-step' + (sm ? ' sm' : '') + '"><button data-act="' + act + '" data-id="' + id + '" data-d="-1" aria-label="Moins">−</button><span>' + H(val) + '</span><button data-act="' + act + '" data-id="' + id + '" data-d="1" aria-label="Plus">+</button></div>';
+const seg = (k, opts, cur) => '<div class="m-seg">' + opts.map(o => '<button data-seg="' + k + '" data-v="' + o[0] + '" class="' + (String(cur) === String(o[0]) ? 'on' : '') + '">' + H(o[1]) + '</button>').join('') + '</div>';
+const field = (label, html) => '<label class="m-field"><span>' + label + '</span>' + html + '</label>';
+const inp = (k, v, type, ph, extra) => '<input type="' + (type || 'text') + '" data-f="' + k + '" value="' + H(v == null ? '' : v) + '"' + (ph ? ' placeholder="' + H(ph) + '"' : '') + (type === 'number' ? ' inputmode="decimal"' : '') + (extra || '') + '>';
+const sel = (k, opts, cur) => '<select data-f="' + k + '">' + opts.map(o => '<option value="' + H(o[0]) + '"' + (String(cur) === String(o[0]) ? ' selected' : '') + '>' + H(o[1]) + '</option>').join('') + '</select>';
+const fmtDays = d => nf(d, d % 1 ? 1 : 0) + ' j';
+function setPath(obj, path, v) { const ks = path.split('.'); let o = obj; ks.slice(0, -1).forEach(k => { o = o[k]; }); o[ks[ks.length - 1]] = v; }
+function getPath(obj, path) { return path.split('.').reduce((o, k) => o == null ? o : o[k], obj); }
+
+// =====================================================================
+//  RENDU
+// =====================================================================
+function render() {
+    const has = !!P;
+    Q('#d-tabs').hidden = !has; Q('#d-sum').hidden = !has; Q('#d-main').classList.toggle('no-tabs', !has);
+    Q('#d-sub').textContent = has ? (P.name || 'Estimatif sans nom') + (P.versions.length > 1 ? ' · ' + V().name : '') : 'Estimatif rapide';
+    QQ('#d-tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === TAB));
+    const fab = Q('#d-fab'); fab.hidden = !has || !(TAB === 'eq' || TAB === 'crew');
+    if (!has) { renderHome(); return; }
+    renderSum();
+    const m = Q('#d-main');
+    m.innerHTML = TAB === 'proj' ? viewProj() : TAB === 'eq' ? viewEq() : TAB === 'crew' ? viewCrew() : viewTot();
+}
+function renderSum() {
+    const T = totals(), b = Q('#d-sum');
+    b.innerHTML = '<span class="t">' + keur(T.R.ht) + '</span><span class="r">HT · fourchette <b>' + rng(T.L.ht, T.H.ht) + '</b><br>' + plural(T.eq.n, 'ligne') + ' de matériel · ' + plural(T.crew.n, 'personne') + ' · ' + fmtDays(totalDays()) + '</span><span class="go">›</span>';
+}
+
+// ---------- accueil ----------
+function renderHome() {
+    const ago = ts => { if (!ts) return ''; const m = Math.round((Date.now() - ts) / 60000); return m < 1 ? 'à l\'instant' : m < 60 ? 'il y a ' + m + ' min' : m < 1440 ? 'il y a ' + Math.round(m / 60) + ' h' : 'le ' + new Date(ts).toLocaleDateString('fr-FR'); };
+    Q('#d-main').innerHTML = '<div class="d-home"><h2>💶 Estimatif rapide</h2><p>Chiffrez un tournage depuis le téléphone : matériel aux tarifs des loueurs, équipe d\'après les grilles de salaires, frais et total HT/TTC avec sa fourchette. Mêmes calculs que DEVISO sur ordinateur.</p></div>' +
+        '<div class="m-actions" style="margin-top:0"><button class="m-btn primary block" data-act="new">🗒️ Nouvel estimatif</button></div>' +
+        '<div class="m-sec">Partir d\'un modèle</div><div class="d-kits">' + KITS.map((k, i) => '<button data-act="newkit" data-i="' + i + '"><span>' + k.ico + '</span>' + H(k.label) + '</button>').join('') + '</div>' +
+        '<div class="m-actions"><button class="m-btn" data-act="example">📐 Essayer avec un exemple</button></div>' +
+        (ST.list.length ? '<div class="m-sec">Mes estimatifs</div><div class="m-card" style="padding:0"><div class="m-list" style="margin:0">' + ST.list.map(x => { const T = (() => { const p0 = P; P = x.P; resetBase(x.base); const t = totals(); P = p0; return t; })(); return '<button class="m-item" data-act="open" data-id="' + x.P.id + '"><span class="ico">' + (x.origin === 'desk' ? '🖥️' : '📱') + '</span><span class="grow"><b>' + H(x.P.name || 'Sans nom') + '</b><small>' + H(eur0(T.R.ht) + ' HT · ' + (x.origin === 'desk' ? 'reçu du bureau ' : 'créé ') + ago(x.recv || x.P.created)) + '</small></span><span class="go">›</span></button>'; }).join('') + '</div></div>' : '') +
+        '<div class="m-sec">Recevoir un devis du bureau</div><div class="m-card"><p class="m-hint" style="margin:0 0 10px">Dans DEVISO sur l\'ordinateur, bouton <b>📱</b> : scannez le QR code avec l\'appareil photo du téléphone, ou ouvrez le lien / le fichier reçu.</p><div class="m-actions" style="margin-top:0"><button class="m-btn" data-act="ifile">📂 Fichier</button><button class="m-btn" data-act="ilink">🔗 Coller un lien</button></div></div>';
+    resetBase(ITEM() && ITEM().base);
+}
+
+// ---------- projet ----------
+function viewProj() {
+    const s = P.set;
+    return versionsBar() +
+        '<div class="m-card">' + field('Projet / production', inp('name', P.name, 'text', 'ex. Captation concert')) + field('Client', inp('client', P.client, 'text', 'Société, diffuseur…')) + field('Lieu', inp('lieu', P.lieu, 'text', 'Ville, salle…')) +
+        '<div class="d-num">' + field('Début', inp('debut', P.debut, 'date')) + field('Fin', inp('fin', P.fin, 'date')) + '</div></div>' +
+        '<div class="m-sec">Durée</div><div class="m-card">' +
+        [['tournage', 'Jours de tournage', 'captation, émission, live'], ['install', 'Jours d\'installation', 'montage, répétitions'], ['demontage', 'Jours de démontage', ''], ['nights', 'Nuits d\'hôtel', 'par personne de l\'équipe']].map(([k, l, sub]) => '<div class="d-sw"><span class="grow"><b>' + l + '</b>' + (sub ? '<small>' + sub + '</small>' : '') + '</span>' + stepper('set', k, +s[k] || 0) + '</div>').join('') +
+        '<p class="m-hint" style="margin:8px 0 0">Durée facturée par défaut : <b>' + fmtDays(totalDays()) + '</b> (location et équipe ; chaque ligne peut avoir sa propre durée).</p></div>' +
+        '<div class="m-sec">Équipe</div><div class="m-card">' + field('Convention collective', sel('set.conv', Object.entries(CONVS).map(([k, c]) => [k, c.n]), s.conv)) +
+        '<span class="m-hint" style="display:block;margin:-6px 0 10px">' + H(CONVS[s.conv].s) + '</span>' +
+        '<div class="m-field"><span>Niveau des tarifs</span>' + seg('set.level', LEVELS_M, s.level) + '</div>' +
+        field('Amplitude des journées', sel('set.amp', AMPS_M.map(a => [a, a + ' h' + (a > 8 ? ' (×' + nf(ampMult(a), 3) + ')' : '')]), s.amp)) +
+        '<div class="m-field"><span>Hébergement</span>' + seg('set.region', [['prov', 'En région'], ['paris', 'Paris / IDF']], s.region) + '</div></div>' +
+        '<div class="m-sec">Location</div><div class="m-card">' + field('Choix du prix', sel('set.strat', STRATS_M, s.strat)) + field('Dégressif de location', sel('set.degr', Object.entries(DEGR).map(([k, d]) => [k, d.n]), s.degr)) +
+        field('Remise loueur (%)', inp('set.remise', s.remise, 'number', '0')) + '</div>' +
+        '<div class="m-sec">Notes</div><div class="m-card">' + field('Notes et hypothèses', '<textarea data-f="notes" rows="3" placeholder="Hors droits, repas fournis…">' + H(P.notes) + '</textarea>') + '</div>';
+}
+function versionsBar() {
+    return '<div class="d-vers">' + P.versions.map(v => '<button class="m-chip' + (v.id === P.cur ? ' on' : '') + '" data-act="ver" data-id="' + v.id + '">' + H(v.name) + '</button>').join('') + '<button class="m-chip" data-act="vermenu">＋ Version…</button></div>';
+}
+
+// ---------- matériel ----------
+function eqSub(e, c) {
+    const parts = [];
+    if (c.p != null) parts.push(eur(c.p) + (c.unit === 'f' ? ' forfait' : c.unit === 'm2' ? ' / m² / j' : ' / j'));
+    if (c.unit !== 'f') parts.push(fmtDays(c.days) + (Math.abs(c.coef - c.days) > 1e-9 ? ' → ' + nf(c.coef, 2) + ' facturé' + (c.coef > 1 ? 's' : '') : ''));
+    if (c.who) parts.push(loueurOf(c.who).n);
+    else if (c.src === 'med') parts.push('médiane ' + c.R.list.length + ' loueurs');
+    else if (c.src === 'generic' || c.src === 'est') parts.push('estimation');
+    else if (c.src === 'manual') parts.push('prix saisi');
+    else if (c.src === 'inc') parts.push('inclus');
+    return parts.join(' · ');
+}
+function viewEq() {
+    const v = V(), T = totals();
+    let h = versionsBar();
+    if (!v.eq.length) h += '<div class="m-empty" style="padding:18px 6px 6px"><b>Aucun matériel</b><br>Ajoutez un kit complet ou cherchez un équipement avec ＋.</div>';
+    h += '<div class="m-sec">Kits rapides</div><div class="d-kits">' + KITS.map((k, i) => '<button data-act="kit" data-i="' + i + '"><span>' + k.ico + '</span>' + H(k.label) + '</button>').join('') + '</div>';
+    if (v.eq.length) {
+        const cats = ECATS.map(c => c[0]).filter(k => v.eq.some(e => (e.cat || 'div') === k));
+        h += cats.map(k => {
+            const c = ecat(k), b = T.eq.byCat[k] || { tot: 0 };
+            return '<div class="d-cat"><i style="background:' + c[2] + '"></i><span class="grow">' + c[3] + ' ' + H(c[1]) + '</span><span>' + eur0(b.tot) + '</span></div><div class="m-card" style="padding:4px 12px">' +
+                v.eq.filter(e => (e.cat || 'div') === k).map(e => { const x = eqCalc(e); return '<div class="d-line' + (e.on === false ? ' off' : '') + '">' + stepper('eqq', e.id, +e.qty || 0, true) + '<div class="grow" data-act="eq" data-id="' + e.id + '"><b>' + H(e.name || (x.ref && x.ref.n) || 'Matériel') + '</b><small' + (x.missing ? ' class="d-warn"' : '') + '>' + (x.missing ? '⚠️ prix à saisir' : H(eqSub(e, x))) + '</small></div><div class="amt" data-act="eq" data-id="' + e.id + '">' + eur0(x.tot) + (x.missing ? '' : '<small>' + rng(x.lo, x.hi) + '</small>') + '</div></div>'; }).join('') + '</div>';
+        }).join('');
+        h += '<p class="m-hint">' + (T.eq.miss ? '⚠️ ' + plural(T.eq.miss, 'ligne') + ' sans prix public : touchez-la pour saisir un tarif. ' : '') + 'Dégressif : ' + H(DEGR[P.set.degr].n.split(' (')[0].toLowerCase()) + (P.set.remise ? ' · remise ' + P.set.remise + ' %' : '') + '. Tarifs publics relevés en ' + TARIFS_DATE + '.</p>';
+    }
+    return h;
+}
+function eqSheet(id) {
+    const v = V(), e = v.eq.find(x => x.id === id); if (!e) return;
+    const x = eqCalc(e), list = x.R.list || [];
+    const s = XM.sheet('<div class="m-row" style="padding-top:0"><span class="grow"><b>Quantité</b></span>' + stepper('sq', 'qty', +e.qty || 0) + '</div>' +
+        field('Désignation', inp('name', e.name)) +
+        '<p class="m-hint" style="margin:-6px 0 12px">' + (x.ref ? 'Tarif : <b>' + H(x.ref.n) + '</b>' + (x.m && x.m.how === 'generic' ? ' (type générique)' : '') : 'Aucune correspondance dans la base : saisissez un prix.') + '</p>' +
+        '<div class="d-num">' + field('Jours', inp('days', e.days, 'number', String(totalDays()))) + field('Prix HT ' + (x.unit === 'f' ? 'forfait' : '/ jour'), inp('price', e.price, 'number', x.p != null && x.src !== 'manual' ? nf(x.p, 0) : '—')) + '</div>' +
+        (list.length ? field('Loueur', '<select data-f="loueur"><option value="">' + (P.set.strat === 'min' ? 'Le moins cher' : P.set.strat === 'pref' ? 'Préféré / médiane' : 'Médiane des loueurs') + ' (auto)</option>' + list.map(o => '<option value="' + H(o.l) + '"' + (e.loueur === o.l ? ' selected' : '') + '>' + H(loueurOf(o.l).n + ' — ' + eur(o.p) + (o.user ? ' (vos prix)' : '')) + '</option>').join('') + '</select>') : '') +
+        '<div class="m-card" style="margin:4px 0 0"><dl class="m-kv"><dt>Total ligne</dt><dd>' + eur0(x.tot) + '</dd>' + (x.missing ? '' : '<dt>Fourchette</dt><dd>' + rng(x.lo, x.hi) + '</dd>') + (x.unit !== 'f' ? '<dt>Jours facturés</dt><dd>' + nf(x.coef, 2) + ' pour ' + fmtDays(x.days) + '</dd>' : '') + '</dl></div>' +
+        '<div class="m-actions"><button class="m-btn" data-sa="toggle">' + (e.on === false ? '✅ Réactiver' : '⏸️ Désactiver') + '</button><button class="m-btn danger" data-sa="del">🗑️ Supprimer</button></div>', { title: '🎥 ' + H(e.name || 'Matériel'), onClose: render });
+    bindSheet(s, e, k => {
+        if (k === 'name') { e.ref = null; e.refLock = false; const m = matchRef(e.name, ecat(e.cat || 'div')[1]); if (m && m.ref) e.cat = m.ref.c; }
+        if (k === 'loueur' && !e.loueur) delete e.loueur;
+    }, a => {
+        if (a === 'toggle') { e.on = e.on === false; persist(); XM.closeSheet(); }
+        if (a === 'del') { v.eq.splice(v.eq.indexOf(e), 1); persist(); XM.closeSheet(); XM.toast('🗑️ Ligne supprimée'); }
+    }, () => eqSheet(id));
+}
+// recherche dans la base tarifaire
+function eqSearch() {
+    let cat = '', q = '';
+    const s = XM.sheet('<input type="search" id="d-q" placeholder="FX6, trépied, micro HF, LED…" autocomplete="off"><div class="m-chips" id="d-qc" style="margin-top:10px"></div><div id="d-qr"></div>', { title: '➕ Ajouter du matériel', onClose: render });
+    const draw = () => {
+        Q('#d-qc', s).innerHTML = '<button class="m-chip' + (!cat ? ' on' : '') + '" data-c="">Tout</button>' + ECATS.map(c => '<button class="m-chip' + (cat === c[0] ? ' on' : '') + '" data-c="' + c[0] + '">' + c[3] + ' ' + H(c[1].split(' ')[0]) + '</button>').join('');
+        const res = (q ? suggestRefs(q, cat, 40) : refs().filter(r => !cat || r.c === cat).slice(0, cat ? 80 : 30)).filter(r => !cat || r.c === cat || q);
+        const have = new Map(V().eq.map(e => [e.ref, e]));
+        Q('#d-qr', s).innerHTML = (res.length ? res.map(r => { const g = refRange(r), ex = have.get(r.id); return '<div class="d-res"><button data-add="' + r.id + '"><span class="grow">' + H(r.n) + '<small>' + ecat(r.c)[3] + ' ' + (g.kind === 'inc' ? 'inclus' : g.lo != null ? (Math.round(g.lo) === Math.round(g.hi) ? eur0(g.lo) : eur0(g.lo) + ' – ' + eur0(g.hi)) + (r.u === 'f' ? ' forfait' : r.u === 'm2' ? ' / m² / j' : ' / j') : 'sur devis') + (ex ? ' · déjà ×' + ex.qty : '') + '</small></span><span class="add">＋</span></button></div>'; }).join('') : '<p class="m-hint">Aucun résultat.</p>') +
+            (q ? '<div class="d-res"><button data-free="1"><span class="grow">Ajouter « ' + H(q) + ' » tel quel<small>Le prix sera reconnu automatiquement si possible, sinon à saisir</small></span><span class="add">＋</span></button></div>' : '');
+        QQ('[data-c]', s).forEach(b => b.onclick = () => { cat = b.dataset.c; draw(); });
+        QQ('[data-add]', s).forEach(b => b.onclick = () => { addRef(b.dataset.add, 1); draw(); });
+        const fr = Q('[data-free]', s); if (fr) fr.onclick = () => { const m = matchRef(q); V().eq.push({ id: uid(), on: true, name: q, qty: 1, cat: m && m.ref ? m.ref.c : (cat || 'div') }); persist(); XM.toast('＋ ' + q); XM.closeSheet(); };
+    };
+    const qi = Q('#d-q', s); qi.oninput = () => { q = qi.value.trim(); draw(); }; draw();
+}
+function addRef(id, n) {
+    const r = refOf(id); if (!r) return null; const v = V();
+    const ex = v.eq.find(e => e.ref === id && e.on !== false && (e.price == null || e.price === ''));
+    if (ex) { ex.qty = (+ex.qty || 0) + n; persist(); XM.toast('＋' + n + ' ' + r.n + ' (×' + ex.qty + ')'); return ex; }
+    const e = { id: uid(), on: true, name: r.n, ref: r.id, refLock: true, cat: r.c, qty: r.u === 'm2' ? 10 * n : n };
+    v.eq.push(e); persist(); XM.toast('＋ ' + r.n); return e;
+}
+
+// ---------- équipe ----------
+function crewName(c) { return c.name || c.role || posteOf(c.poste).n; }
+function crewSub(c, k) {
+    const parts = [];
+    if (c.name) parts.push(c.role || k.p.n);
+    if (k.rate != null) parts.push(eur0(k.rate) + ' / j' + (k.mode === 'facture' ? ' HT' : ' brut'));
+    parts.push(fmtDays(k.days));
+    parts.push(k.mode === 'facture' ? 'prestataire' : k.mode === 'cachet' ? 'cachet' : 'CDDU');
+    return parts.join(' · ');
+}
+function viewCrew() {
+    const v = V(), T = totals();
+    let h = versionsBar();
+    if (!v.crew.length) h += '<div class="m-empty" style="padding:18px 6px 6px"><b>Aucune personne</b><br>Ajoutez des postes avec ＋ : le tarif journalier vient des grilles de salaires (' + H(CONVS[P.set.conv].n) + ').</div>';
+    const depts = DEPTS_D.map(d => d[0]).filter(k => v.crew.some(c => (c.dept || posteOf(c.poste).dept) === k));
+    h += depts.map(k => {
+        const d = deptD(k), b = T.crew.byDept[k] || { tot: 0 };
+        return '<div class="d-cat"><i style="background:' + d[2] + '"></i><span class="grow">' + H(d[1]) + '</span><span>' + eur0(b.tot) + '</span></div><div class="m-card" style="padding:4px 12px">' +
+            v.crew.filter(c => (c.dept || posteOf(c.poste).dept) === k).map(c => { const x = crewCalc(c); return '<div class="d-line' + (c.on === false ? ' off' : '') + '">' + stepper('crd', c.id, fmtDays(x.days).replace(' j', ''), true) + '<div class="grow" data-act="crew" data-id="' + c.id + '"><b>' + H(crewName(c)) + '</b><small' + (x.missing ? ' class="d-warn"' : '') + '>' + (x.missing ? '⚠️ tarif à saisir · ' + H(MODES[x.mode][0]) : H(crewSub(c, x))) + '</small></div><div class="amt" data-act="crew" data-id="' + c.id + '">' + eur0(x.tot) + (x.missing ? '' : '<small>' + rng(x.lo, x.hi) + '</small>') + '</div></div>'; }).join('') + '</div>';
+    }).join('');
+    if (v.crew.length) h += '<p class="m-hint">Le compteur règle le nombre de jours de chaque personne. Coût employeur = brut + charges (' + P.set.chT + ' % techniciens, ' + P.set.chA + ' % artistes) ; amplitude ' + P.set.amp + ' h. ' + (T.crew.miss ? '⚠️ ' + plural(T.crew.miss, 'poste') + ' sans tarif.' : '') + '</p>';
+    return h;
+}
+function posteOptions(cur) {
+    return DEPTS_D.map(d => { const ps = postes().filter(p => p.dept === d[0]); return ps.length ? '<optgroup label="' + H(d[1]) + '">' + ps.map(p => '<option value="' + p.id + '"' + (p.id === cur ? ' selected' : '') + '>' + H(p.n) + '</option>').join('') + '</optgroup>' : ''; }).join('');
+}
+function crewSheet(id) {
+    const v = V(), c = v.crew.find(x => x.id === id); if (!c) return;
+    const k = crewCalc(c), gm = k.gm;
+    const info = gm ? 'Minimum ' + ({ flux: 'flux', fiction: 'fiction', cinema: 'cinéma', event: 'prestataires' }[gm.conv]) + ' ' + eur(gm.v, 2) + ' (8 h)' + (Math.abs(k.amp - 1) > 1e-9 ? ' → ' + eur(k.floor, 2) + ' (' + P.set.amp + ' h)' : '') + (k.mkt ? ' · usage ' + eur0(k.mkt[0]) + '–' + eur0(k.mkt[1]) : '') : (k.p.note || 'Pas de grille : tarif à saisir');
+    const s = XM.sheet(field('Nom (facultatif)', inp('name', c.name, 'text', 'Prénom Nom')) +
+        field('Poste', '<select data-f="poste">' + posteOptions(c.poste) + '</select>') +
+        '<p class="m-hint" style="margin:-6px 0 12px">' + H(info) + '</p>' +
+        '<div class="m-field"><span>Statut</span>' + seg('mode', Object.entries(MODES).map(([m, l]) => [m, l[0].split(' (')[0]]), k.mode) + '</div>' +
+        '<div class="m-field"><span>Niveau</span>' + seg('level', LEVELS_M, c.level || P.set.level || 'mid') + '</div>' +
+        '<div class="d-num">' + field('Jours', inp('days', c.days, 'number', String(totalDays()))) + field('Tarif / jour ' + (k.mode === 'facture' ? 'HT' : 'brut'), inp('rate', c.rate, 'number', k.rate != null && k.src !== 'manual' ? nf(k.rate, 0) : '—')) + '</div>' +
+        '<div class="m-card" style="margin:4px 0 0"><dl class="m-kv"><dt>Brut</dt><dd>' + eur0(k.gross) + '</dd><dt>Charges</dt><dd>' + eur0(k.charges) + ' (' + Math.round(k.ch * 100) + ' %)</dd><dt>Coût total</dt><dd>' + eur0(k.tot) + '</dd>' + (k.missing ? '' : '<dt>Fourchette</dt><dd>' + rng(k.lo, k.hi) + '</dd>') + '</dl></div>' +
+        '<div class="m-actions"><button class="m-btn" data-sa="dup">⧉ Dupliquer</button><button class="m-btn" data-sa="toggle">' + (c.on === false ? '✅ Réactiver' : '⏸️ Désactiver') + '</button><button class="m-btn danger" data-sa="del">🗑️</button></div>', { title: '👥 ' + H(crewName(c)), onClose: render });
+    bindSheet(s, c, f => {
+        if (f === 'poste') { const p = posteOf(c.poste); c.dept = p.dept; c.mode = p.mode; c.role = p.n; }
+    }, a => {
+        if (a === 'toggle') { c.on = c.on === false; persist(); XM.closeSheet(); }
+        if (a === 'dup') { const n = JSON.parse(JSON.stringify(c)); n.id = uid(); n.name = ''; delete n.cid; delete n.src; v.crew.splice(v.crew.indexOf(c) + 1, 0, n); persist(); XM.closeSheet(); XM.toast('⧉ Poste dupliqué'); }
+        if (a === 'del') { v.crew.splice(v.crew.indexOf(c), 1); persist(); XM.closeSheet(); XM.toast('🗑️ Poste supprimé'); }
+    }, () => crewSheet(id));
+}
+function crewAdd() {
+    let dept = '', q = '';
+    const s = XM.sheet('<input type="search" id="d-q" placeholder="cadreur, ingé son, régisseur…" autocomplete="off"><div class="m-chips" id="d-qc" style="margin-top:10px"></div><div id="d-qr"></div>', { title: '➕ Ajouter un poste', onClose: render });
+    const draw = () => {
+        Q('#d-qc', s).innerHTML = '<button class="m-chip' + (!dept ? ' on' : '') + '" data-c="">Tout</button>' + DEPTS_D.filter(d => postes().some(p => p.dept === d[0])).map(d => '<button class="m-chip' + (dept === d[0] ? ' on' : '') + '" data-c="' + d[0] + '">' + H(d[1]) + '</button>').join('');
+        const fq = fold(q), list = postes().filter(p => (!dept || p.dept === dept) && (!fq || fold(p.n).includes(fq) || p.re.test(' ' + fq + ' ')));
+        const cnt = {}; V().crew.forEach(c => { cnt[c.poste] = (cnt[c.poste] || 0) + 1; });
+        Q('#d-qr', s).innerHTML = list.length ? list.map(p => { const k = crewCalc({ poste: p.id }); return '<div class="d-res"><button data-add="' + p.id + '"><span class="grow">' + H(p.n) + '<small>' + (k.rate != null ? eur0(k.rate) + ' / j' + (k.mode === 'facture' ? ' HT' : ' brut') : 'tarif à saisir') + ' · ' + H(deptD(p.dept)[1]) + (cnt[p.id] ? ' · déjà ×' + cnt[p.id] : '') + '</small></span><span class="add">＋</span></button></div>'; }).join('') : '<p class="m-hint">Aucun poste trouvé.</p>';
+        QQ('[data-c]', s).forEach(b => b.onclick = () => { dept = b.dataset.c; draw(); });
+        QQ('[data-add]', s).forEach(b => b.onclick = () => { addPoste(b.dataset.add); XM.toast('＋ ' + posteOf(b.dataset.add).n); draw(); });
+    };
+    const qi = Q('#d-q', s); qi.oninput = () => { q = qi.value.trim(); draw(); }; draw();
+}
+function addPoste(pid, name) { const p = posteOf(pid); const c = { id: uid(), on: true, name: name || '', role: p.n, poste: p.id, dept: p.dept, mode: p.mode }; V().crew.push(c); persist(); return c; }
+
+// ---------- total ----------
+function viewTot() {
+    const T = totals(), s = P.set, v = V(), R0 = T.R;
+    const parts = [['Matériel', T.eq.tot, '#42A5F5'], ['Équipe', T.crew.tot, '#66BB6A'], ['Frais', T.fees.tot, '#FFCA28'], ['Frais généraux, imprévus, marge', R0.fg + R0.imp + R0.mg, '#AB47BC']], sum = parts.reduce((a, p) => a + p[1], 0) || 1;
+    let h = versionsBar() + '<div class="m-card accent"><div class="d-big"><div class="v">' + eur0(R0.ht) + '</div><div class="l">Total HT retenu · TTC ' + eur0(R0.ttc) + '</div><div class="l">Fourchette <b>' + rng(T.L.ht, T.H.ht) + '</b> HT</div></div>' +
+        '<div class="d-bar">' + parts.map(p => '<i style="width:' + (p[1] / sum * 100).toFixed(2) + '%;background:' + p[2] + '"></i>').join('') + '</div><div class="d-legend">' + parts.map(p => '<span style="--c:' + p[2] + '">' + H(p[0]) + ' ' + Math.round(p[1] / sum * 100) + ' %</span>').join('') + '</div></div>';
+    h += '<div class="m-card"><dl class="d-tot">' +
+        '<dt>🎥 Matériel <small>(' + plural(T.eq.n, 'ligne') + ')</small></dt><dd>' + eur0(T.eq.tot) + '<small>' + rng(T.eq.lo, T.eq.hi) + '</small></dd>' +
+        '<dt>👥 Équipe <small>(' + plural(T.crew.n, 'personne') + ')</small></dt><dd>' + eur0(T.crew.tot) + '<small>brut ' + eur0(T.crew.gross) + ' + charges</small></dd>' +
+        '<dt>🍽️ Frais</dt><dd>' + eur0(T.fees.tot) + '<small>' + rng(T.fees.lo, T.fees.hi) + '</small></dd><div class="sep"></div>' +
+        '<dt>Sous-total</dt><dd>' + eur0(R0.st) + '</dd><dt>Frais généraux ' + s.fg + ' %</dt><dd>' + eur0(R0.fg) + '</dd><dt>Imprévus ' + s.imp + ' %</dt><dd>' + eur0(R0.imp) + '</dd>' + (+s.marge ? '<dt>Marge ' + s.marge + ' %</dt><dd>' + eur0(R0.mg) + '</dd>' : '') +
+        '<div class="sep"></div><dt class="big">Total HT</dt><dd class="big">' + eur0(R0.ht) + '</dd><dt>TVA ' + s.tva + ' %</dt><dd>' + eur0(R0.tva) + '</dd><dt><b>Total TTC</b></dt><dd><b>' + eur0(R0.ttc) + '</b></dd></dl></div>';
+    if (T.eq.miss || T.crew.miss) h += '<p class="m-hint d-warn">⚠️ ' + [T.eq.miss ? plural(T.eq.miss, 'ligne') + ' de matériel' : '', T.crew.miss ? plural(T.crew.miss, 'poste') : ''].filter(Boolean).join(' et ') + ' sans tarif : non comptés dans le total.</p>';
+    h += '<div class="m-sec">Frais & défraiements</div><div class="m-card" style="padding:4px 14px">' + v.fees.map(f => { const c = feeCalc(f, T.eq); return '<div class="d-sw"><input type="checkbox" data-fee="' + f.id + '"' + (f.on !== false ? ' checked' : '') + '><span class="grow" data-act="fee" data-id="' + f.id + '"><b>' + H(c.n) + '</b><small>' + H(c.auto && f.key === 'assu' ? c.hint : (nf(c.qty, c.qty % 1 ? 1 : 0) + ' ' + c.u + ' × ' + eur(c.p) + (c.hint ? ' · ' + c.hint : ''))) + '</small></span><b style="white-space:nowrap">' + eur0(c.tot) + '</b></div>'; }).join('') + '<div class="m-actions" style="margin:6px 0 8px"><button class="m-btn sm" data-act="feeadd">＋ Autre frais</button></div></div>';
+    h += '<div class="m-sec">Taux</div><div class="m-card"><div class="d-num">' + field('Frais généraux %', inp('set.fg', s.fg, 'number')) + field('Imprévus %', inp('set.imp', s.imp, 'number')) + field('Marge %', inp('set.marge', s.marge, 'number')) + field('TVA %', inp('set.tva', s.tva, 'number')) + '</div></div>';
+    h += '<div class="m-actions"><button class="m-btn primary" data-act="share">📤 Partager le résumé</button><button class="m-btn" data-act="copy">📋 Copier</button><button class="m-btn" data-act="print">🖨️ PDF</button><button class="m-btn" data-act="ret">🖥️ Renvoyer au bureau</button></div>' +
+        '<p class="m-hint" style="margin-top:12px">Estimation non contractuelle : tarifs publics des loueurs relevés en ' + TARIFS_DATE + ', ' + H(CONVS[s.conv].s) + '. Le devis détaillé (PDF, Excel, envoi vers DOSSIER) se fait dans DEVISO sur ordinateur.</p>';
+    return h;
+}
+function feeSheet(id) {
+    const v = V(), f = v.fees.find(x => x.id === id); if (!f) return;
+    const T = totals(), c = feeCalc(f, T.eq), D = FEES0[f.key];
+    const s = XM.sheet((D ? '<p class="m-hint" style="margin:0 0 12px">' + H(D.s) + '</p>' : field('Libellé', inp('name', f.name))) +
+        '<div class="d-num">' + (f.key === 'assu' ? field('Taux %', inp('price', f.price, 'number', String(D.p))) : field('Quantité (' + H(c.u) + ')', inp('qty', f.qty, 'number', D ? String(c.qty) : '1')) + field('Prix unitaire', inp('price', f.price, 'number', D ? String(c.p) : '0'))) + '</div>' +
+        (!D ? '<div class="d-num">' + field('Prix bas', inp('lo', f.lo, 'number')) + field('Prix haut', inp('hi', f.hi, 'number')) + '</div>' : '') +
+        '<p class="m-hint">Total : <b>' + eur0(c.tot) + '</b>' + (c.hint ? ' · ' + H(c.hint) : '') + '</p>' +
+        (D ? '' : '<div class="m-actions"><button class="m-btn danger" data-sa="del">🗑️ Supprimer</button></div>'), { title: '🍽️ ' + H(c.n), onClose: render });
+    bindSheet(s, f, null, a => { if (a === 'del') { v.fees.splice(v.fees.indexOf(f), 1); persist(); XM.closeSheet(); } }, () => feeSheet(id));
+}
+
+// ---------- feuilles : liaison des champs ----------
+const NUMF = new Set(['qty', 'days', 'price', 'rate', 'lo', 'hi']);
+function bindSheet(s, obj, after, onAct, redraw) {
+    QQ('[data-f]', s).forEach(el => el.onchange = () => {
+        const k = el.dataset.f; let val = el.value;
+        if (NUMF.has(k)) { const n = numOrNull(val); if (n == null) delete obj[k]; else obj[k] = n; } else obj[k] = val;
+        if (after) after(k); persist(); const ov = Q('#m-ov'); if (ov) ov._onClose = null; XM.closeSheet(); redraw();
+    });
+    QQ('[data-seg]', s).forEach(b => b.onclick = () => { obj[b.dataset.seg] = b.dataset.v; if (after) after(b.dataset.seg); persist(); const ov = Q('#m-ov'); if (ov) ov._onClose = null; XM.closeSheet(); redraw(); });
+    QQ('[data-act=sq]', s).forEach(b => b.onclick = () => { obj.qty = Math.max(0, (+obj.qty || 0) + +b.dataset.d); persist(); b.parentNode.querySelector('span').textContent = obj.qty; });
+    QQ('[data-sa]', s).forEach(b => b.onclick = () => onAct && onAct(b.dataset.sa));
+}
+
+// =====================================================================
+//  KITS (types génériques de la base : prix estimés d'après plusieurs loueurs)
+// =====================================================================
+const KITS = [
+    { ico: '🎤', label: 'Interview 1 caméra', name: 'Interview', set: { tournage: 1 }, eq: [['g-cam-eng', 1], ['g-tripod', 1], ['g-hf', 2], ['g-boom', 1], ['g-led', 2], ['g-cstand', 2], ['g-monitor', 1]], crew: ['real', 'cadreur', 'opson'] },
+    { ico: '🎥', label: 'Plateau 3 caméras', name: 'Plateau multicam', set: { tournage: 1, install: 1, conv: 'flux' }, eq: [['g-cam-eng', 3], ['g-tripod', 3], ['g-switcher', 1], ['g-vrec', 1], ['g-monitor', 3], ['g-intercom', 1], ['g-hf', 4], ['g-mixer', 1], ['g-led', 6], ['cab-sdi', 10]], crew: ['real', 'cadreur', 'cadreur', 'cadreur', 'vision', 'ingeson', 'chefelec', 'chefplateau'] },
+    { ico: '🎸', label: 'Concert 4 caméras', name: 'Captation concert', set: { tournage: 1, install: 1, conv: 'flux' }, eq: [['g-cam-eng', 4], ['g-zoom', 2], ['g-tripod-bc', 2], ['g-tripod', 1], ['g-gimbal', 1], ['g-switcher', 1], ['g-vrec', 2], ['g-monitor', 2], ['g-intercom', 1], ['cab-sdi', 12], ['g-van', 1]], crew: ['real', 'cadreur', 'cadreur', 'cadreur', 'cadreur', 'vision', 'ingeson', 'regisseur'] },
+    { ico: '📡', label: 'Live streaming', name: 'Live streaming', set: { tournage: 1, conv: 'event' }, eq: [['g-cam-eng', 2], ['g-ptz', 2], ['g-tripod', 2], ['g-switcher', 1], ['g-encoder', 1], ['g-network', 1], ['g-mixer', 1], ['g-hf', 2], ['g-intercom', 1], ['cab-sdi', 8]], crew: ['real', 'cadreur', 'cadreur', 'techvid', 'opson'] },
+    { ico: '🎬', label: 'Fiction légère', name: 'Tournage fiction', set: { tournage: 5, conv: 'fiction', degr: 'cine' }, eq: [['g-cam-cine', 1], ['g-optc', 4], ['g-gimbal', 1], ['g-monitor', 1], ['g-hfvideo', 1], ['g-boom', 1], ['g-hf', 2], ['g-recorder', 1], ['g-led', 4], ['g-hmi', 1], ['g-cstand', 6], ['g-flags', 1], ['g-van', 1]], crew: ['real', 'dop', 'ac1', 'ingeson', 'perch', 'chefelec', 'elec', 'chefmachino', 'regisseur', 'scripte', 'maquilleur'] },
+    { ico: '🚁', label: 'Magazine + drone', name: 'Reportage magazine', set: { tournage: 2, conv: 'flux' }, eq: [['g-cam-eng', 1], ['g-cam-light', 1], ['g-drone', 1], ['g-gimbal', 1], ['g-hf', 2], ['g-led', 2]], crew: ['real', 'cadreur', 'opson'] }
+];
+function applyKit(k, fresh) {
+    if (fresh) Object.assign(P.set, k.set || {});
+    let n = 0; k.eq.forEach(([id, q]) => { if (refOf(id)) { addRef(id, q); n++; } });
+    k.crew.forEach(pid => addPoste(pid));
+    if (fresh && !P.name) P.name = k.name;
+    persist(); XM.toast(k.ico + ' ' + k.label + ' : ' + plural(n, 'ligne') + ' de matériel, ' + plural(k.crew.length, 'poste'), 3500);
+}
+function newEstimate(kit) {
+    const p = blankProject(); p.author = '';
+    addItem(p, { origin: 'mobile' }); TAB = kit ? 'eq' : 'proj';
+    if (kit) applyKit(kit, true);
+    render();
+}
+function loadExampleM() {
+    const p = blankProject(); addItem(p, { origin: 'mobile' });
+    const d = todayISO(), v = V();
+    Object.assign(P, { name: 'Concert Live — Captation 4 caméras', client: 'Prod XIII', lieu: 'Le Transbordeur, Villeurbanne', debut: addDays(d, 30), fin: addDays(d, 30), notes: 'Hors droits musicaux et diffusion.' });
+    Object.assign(P.set, { tournage: 1, install: 1, demontage: 0, conv: 'flux', convAuto: false, amp: 10 });
+    const E = (name, qty, o) => { const m = matchRef(name); v.eq.push(Object.assign({ id: uid(), on: true, name, qty, cat: m && m.ref ? m.ref.c : 'div' }, o || {})); };
+    E('Sony FX9', 2); E('Sony FX6', 1); E('Caméra PTZ', 1); E('Canon CN 17-120 (CN7x17)', 2); E('Trépied Sachtler S20 (S1)', 3); E('DJI Ronin 2', 1);
+    E('Teradek Bolt 4K LT 750 (émetteur + récepteur)', 1); E('Blackmagic ATEM SDI Extreme ISO', 1); E('Blackmagic HyperDeck Studio Mini', 2); E('TVLogic LQM-241W 24"', 2);
+    E('Clear-Com DX-410 (kit 4 postes)', 1); E('Sennheiser EW 500 G4 + micro cravate', 4); E('Console Yamaha QL1', 1);
+    E('Aputure LS 600D Pro', 4); E('ARRI SkyPanel S60-C', 2); E('Astera Titan Tube (kit de 8)', 1); E('Pied C-stand', 6);
+    E('Câble SDI 10 m', 12, { cat: 'cab' }); E('Utilitaire 12 m³', 1);
+    const C = (name, role) => { const pp = posteOf(posteFromRole(role)); v.crew.push({ id: uid(), on: true, name, role, poste: pp.id, dept: pp.dept, mode: pp.mode }); };
+    C('Camille Martin', 'Réalisatrice'); C('Hugo Bernard', 'Cadreur'); C('Léa Petit', 'Cadreuse'); C('Nora Haddad', 'Cadreuse'); C('Yanis Morel', 'Ingénieur de la vision');
+    C('Sami Roux', 'Ingénieur du son'); C('Inès Faure', 'Assistante son'); C('Paul Girard', 'Chef électricien'); C('Lucas Blanc', 'Électricien');
+    C('Chloé Garnier', 'Régisseuse'); C('Tom Lefèvre', 'Chargé de production'); C('Emma Rousseau', 'Maquilleuse');
+    v.fees.push({ id: uid(), on: true, name: 'Régie (consommables, petit matériel)', qty: 1, unit: 'forfait', price: 150, lo: 100, hi: 250 });
+    persist(); TAB = 'tot'; render(); XM.toast('📐 Exemple chargé : captation live 4 caméras');
+}
+
+// ---------- versions ----------
+function versionMenu() {
+    const v = V();
+    const s = XM.sheet('<div class="m-list" style="margin:0">' + [['dup', '⧉', 'Dupliquer « ' + v.name + ' »', 'Pour comparer une option (ex. 3 caméras au lieu de 4)'], ['new', '➕', 'Nouvelle version vide', ''], ['ren', '✏️', 'Renommer « ' + v.name + ' »', '']].concat(P.versions.length > 1 ? [['del', '🗑️', 'Supprimer « ' + v.name + ' »', '']] : []).map(x => '<button class="m-item" data-v="' + x[0] + '"><span class="ico">' + x[1] + '</span><span class="grow"><b>' + H(x[2]) + '</b>' + (x[3] ? '<small>' + H(x[3]) + '</small>' : '') + '</span></button>').join('') + '</div>' +
+        (P.versions.length > 1 ? '<div class="m-sec">Comparer</div><div class="m-card" style="padding:4px 12px">' + P.versions.map(x => { const T = totals(x); return '<div class="m-row"><span class="grow"><b>' + H(x.name) + '</b><small>' + plural(T.eq.n, 'ligne') + ' · ' + plural(T.crew.n, 'personne') + '</small></span><b>' + eur0(T.R.ht) + '</b></div>'; }).join('') + '</div>' : ''), { title: '📑 Versions du devis', onClose: render });
+    const used = new Set(P.versions.map(x => x.name)), next = () => { for (let i = 0; i < 26; i++) { const n = 'Devis ' + String.fromCharCode(65 + i); if (!used.has(n)) return n; } return 'Devis ' + (P.versions.length + 1); };
+    QQ('[data-v]', s).forEach(b => b.onclick = async () => {
+        const a = b.dataset.v;
+        if (a === 'dup') { const n = JSON.parse(JSON.stringify(v)); n.id = uid(); n.name = next(); ['eq', 'crew', 'fees'].forEach(k => n[k].forEach(x => { x.id = uid(); })); P.versions.push(n); P.cur = n.id; }
+        if (a === 'new') { const n = blankVersion(next()); P.versions.push(n); P.cur = n.id; }
+        if (a === 'ren') { const nn = prompt('Nom de la version', v.name); if (nn && nn.trim()) v.name = nn.trim().slice(0, 40); }
+        if (a === 'del') { XM.closeSheet(); if (await XM.ask('Supprimer la version ?', '« ' + H(v.name) + ' » sera supprimée de cet estimatif.', [{ label: 'Supprimer', danger: true }, 'Annuler']) !== 0) return; P.versions = P.versions.filter(x => x !== v); P.cur = P.versions[0].id; }
+        persist(); XM.closeSheet(); render();
+    });
+}
+
+// ---------- résumé, impression ----------
+function summaryText() {
+    const v = V(), T = totals(v), R0 = T.R;
+    return '💶 DEVIS ESTIMATIF — ' + (P.name || 'Projet') + (P.versions.length > 1 ? ' (' + v.name + ')' : '') + '\n' + (P.client ? 'Client : ' + P.client + '\n' : '') + (P.debut ? '🗓 ' + frDate(P.debut) + (P.fin && P.fin !== P.debut ? ' → ' + frDate(P.fin) : '') + '\n' : '') +
+        '\nTotal HT retenu : ' + eur0(R0.ht) + '  (fourchette ' + rng(T.L.ht, T.H.ht) + ')\nTotal TTC : ' + eur0(R0.ttc) + '\n' +
+        '\n🎥 Matériel & location : ' + eur0(T.eq.tot) + ' (' + rng(T.eq.lo, T.eq.hi) + ')' + ECATS.filter(c => T.eq.byCat[c[0]]).map(c => '\n   · ' + c[1] + ' : ' + eur0(T.eq.byCat[c[0]].tot)).join('') +
+        '\n👥 Équipe : ' + eur0(T.crew.tot) + ' (' + rng(T.crew.lo, T.crew.hi) + ') — ' + plural(T.crew.n, 'personne') + ', brut ' + eur0(T.crew.gross) + ' + charges ' + eur0(T.crew.charges) +
+        '\n🍽️ Frais : ' + eur0(T.fees.tot) +
+        '\nFrais généraux ' + P.set.fg + ' % · imprévus ' + P.set.imp + ' %' + (+P.set.marge ? ' · marge ' + P.set.marge + ' %' : '') +
+        '\n\nEstimation non contractuelle — DEVISO XIII (tarifs publics des loueurs relevés en ' + TARIFS_DATE + ', ' + CONVS[P.set.conv].s + ').\n';
+}
+function printRecap() {
+    const v = V(), T = totals(v), R0 = T.R; let el = Q('#d-print'); if (!el) { el = document.createElement('div'); el.id = 'd-print'; document.body.appendChild(el); }
+    const row = (a, b, c) => '<tr><td>' + a + '</td><td style="text-align:right">' + b + '</td><td style="text-align:right;color:#666">' + (c || '') + '</td></tr>';
+    el.innerHTML = '<style>#d-print{display:none}@media print{body.xm>*:not(#d-print){display:none!important}#d-print{display:block!important;color:#111;background:#fff;font:12px/1.45 Arial,sans-serif;padding:0}#d-print table{width:100%;border-collapse:collapse;margin:8px 0 14px}#d-print td,#d-print th{border-bottom:1px solid #ddd;padding:5px 6px;text-align:left}#d-print h1{font-size:20px;margin:0 0 4px}#d-print h2{font-size:13px;margin:14px 0 4px;text-transform:uppercase;letter-spacing:.08em;color:#a8662a}@page{size:A4;margin:16mm}}</style>' +
+        '<h1>Devis estimatif — ' + H(P.name || 'Projet') + (P.versions.length > 1 ? ' (' + H(v.name) + ')' : '') + '</h1><div>' + H([P.client && 'Client : ' + P.client, P.lieu, P.debut && frDate(P.debut) + (P.fin && P.fin !== P.debut ? ' → ' + frDate(P.fin) : ''), 'Établi le ' + frDate(todayISO())].filter(Boolean).join(' · ')) + '</div>' +
+        '<h2>Matériel & location</h2><table>' + v.eq.filter(e => e.on !== false).map(e => { const x = eqCalc(e); return row(H((+e.qty || 0) + ' × ' + (e.name || (x.ref && x.ref.n) || '')), x.missing ? 'à chiffrer' : eur0(x.tot), x.missing ? '' : rng(x.lo, x.hi)); }).join('') + row('<b>Total matériel</b>', '<b>' + eur0(T.eq.tot) + '</b>', rng(T.eq.lo, T.eq.hi)) + '</table>' +
+        '<h2>Équipe</h2><table>' + v.crew.filter(c => c.on !== false).map(c => { const k = crewCalc(c); return row(H(crewName(c) + (c.name ? ' — ' + (c.role || k.p.n) : '') + ' · ' + fmtDays(k.days)), k.missing ? 'à chiffrer' : eur0(k.tot), k.missing ? '' : rng(k.lo, k.hi)); }).join('') + row('<b>Total équipe</b>', '<b>' + eur0(T.crew.tot) + '</b>', rng(T.crew.lo, T.crew.hi)) + '</table>' +
+        '<h2>Frais</h2><table>' + v.fees.filter(f => f.on !== false).map(f => { const c = feeCalc(f, T.eq); return row(H(c.n), eur0(c.tot), ''); }).join('') + '</table>' +
+        '<h2>Total</h2><table>' + row('Sous-total', eur0(R0.st)) + row('Frais généraux ' + P.set.fg + ' %', eur0(R0.fg)) + row('Imprévus ' + P.set.imp + ' %', eur0(R0.imp)) + (+P.set.marge ? row('Marge ' + P.set.marge + ' %', eur0(R0.mg)) : '') + row('<b>Total HT</b>', '<b>' + eur0(R0.ht) + '</b>', 'fourchette ' + rng(T.L.ht, T.H.ht)) + row('TVA ' + P.set.tva + ' %', eur0(R0.tva)) + row('<b>Total TTC</b>', '<b>' + eur0(R0.ttc) + '</b>') + '</table>' +
+        (P.notes ? '<p>' + H(P.notes) + '</p>' : '') + '<p style="color:#666;font-size:10.5px">Estimation non contractuelle — DEVISO XIII (tarifs publics des loueurs relevés en ' + TARIFS_DATE + ', ' + H(CONVS[P.set.conv].s) + ').</p>';
+    setTimeout(() => { try { window.print(); } catch (e) { } }, 150);
+}
+
+// =====================================================================
+//  ÉCHANGES AVEC LE BUREAU
+// =====================================================================
+async function onEnv(env, via) {
+    const d = env.data || {};
+    if (env.kind !== 'project' || !d.project) { XM.toast('⚠️ Cet envoi n\'est pas un devis du bureau', 4000); return; }
+    const p = normalize(d.project), ex = ST.list.find(x => x.P.id === p.id);
+    if (ex && ex.changed) {
+        const r = await XM.ask('Remplacer l\'estimatif ?', '« ' + H(ex.P.name || 'Sans nom') + ' » a été modifié sur ce téléphone. Le remplacer par la version reçue du bureau ?', [{ label: 'Remplacer', danger: true }, 'Garder les deux', 'Annuler']);
+        if (r === 2 || r < 0) return;
+        if (r === 1) { p.id = uid(); p.name = (p.name || 'Devis') + ' (bureau)'; }
+    }
+    addItem(p, { origin: 'desk', base: d.base || null, recv: Date.now(), changed: false });
+    TAB = 'tot'; render(); XM.toast('📥 « ' + (p.name || 'Devis') + ' » reçu' + (via === 'link' ? ' par lien' : ''), 3500);
+}
+function sendReturn() {
+    if (!P) { XM.toast('Ouvrez d\'abord un estimatif'); return; }
+    XM.send({ app: APPN, page: 'deviso.html', title: 'DEVISO', kind: 'return', name: P.name || 'Estimatif mobile',
+        make: () => { const it = ITEM(); return { project: JSON.parse(JSON.stringify(P)), origin: it ? it.origin : 'mobile' }; },
+        note: 'Sur l\'ordinateur, ouvrez ce lien ou importez le fichier dans DEVISO (bouton 📱 → Récupérer) : vous choisirez d\'ajouter les versions au devis ouvert ou de remplacer celui-ci.' });
+    const it = ITEM(); if (it) { it.changed = false; it.sent = Date.now(); XM.save(APPN, ST); }
+}
+function openList() {
+    const s = XM.sheet('<div class="m-list" style="margin:0">' + ST.list.map(x => '<button class="m-item" data-id="' + x.P.id + '"><span class="ico">' + (x.P.id === ST.cur ? '✅' : x.origin === 'desk' ? '🖥️' : '📱') + '</span><span class="grow"><b>' + H(x.P.name || 'Sans nom') + '</b><small>' + plural(x.P.versions.length, 'version') + (x.origin === 'desk' ? ' · reçu du bureau' : '') + '</small></span><span class="go">›</span></button>').join('') + '</div>' +
+        '<div class="m-actions"><button class="m-btn primary" data-n="1">🗒️ Nouvel estimatif</button>' + (P ? '<button class="m-btn danger" data-del="1">🗑️ Supprimer celui-ci</button>' : '') + '</div>', { title: '📋 Mes estimatifs' });
+    QQ('[data-id]', s).forEach(b => b.onclick = () => { selectItem(b.dataset.id); TAB = 'tot'; XM.closeSheet(); render(); });
+    Q('[data-n]', s).onclick = () => { XM.closeSheet(); selectItem(''); render(); };
+    const del = Q('[data-del]', s); if (del) del.onclick = async () => { XM.closeSheet(); if (await XM.ask('Supprimer cet estimatif ?', '« ' + H(P.name || 'Sans nom') + ' » sera effacé de ce téléphone.', [{ label: 'Supprimer', danger: true }, 'Annuler']) !== 0) return; ST.list = ST.list.filter(x => x.P.id !== ST.cur); selectItem(''); render(); };
+}
+
+// =====================================================================
+//  ÉVÉNEMENTS
+// =====================================================================
+Q('#d-tabs').addEventListener('click', e => { const b = e.target.closest('button[data-tab]'); if (!b) return; TAB = b.dataset.tab; render(); window.scrollTo(0, 0); });
+Q('#d-sum').onclick = () => { TAB = 'tot'; render(); window.scrollTo(0, 0); };
+Q('#d-fab').onclick = () => { if (TAB === 'eq') eqSearch(); else if (TAB === 'crew') crewAdd(); };
+Q('#d-list').onclick = openList;
+Q('#d-menu').onclick = () => XM.menu({ app: APPN, deskPage: 'deviso.html', items: [
+    { icon: '🗒️', label: 'Nouvel estimatif', run: () => { selectItem(''); render(); } },
+    { icon: '📐', label: 'Charger l\'exemple', sub: 'Captation live 4 caméras', run: loadExampleM },
+    P ? { icon: '📋', label: 'Copier le résumé', run: async () => XM.toast(await XM.copy(summaryText()) ? '📋 Résumé copié' : '⚠️ Copie impossible') } : null,
+    P ? { icon: '⬇️', label: 'Exporter le devis (.json)', sub: 'S\'ouvre aussi dans DEVISO sur ordinateur (📂 Ouvrir)', run: () => XM.download('DEVISO_XIII_' + safeName(P.name || 'devis') + '_' + todayISO() + '.json', JSON.stringify(P, null, 1)) } : null
+].filter(Boolean), onImport: onEnv, sendReturn: P ? sendReturn : null });
+const main = Q('#d-main');
+main.addEventListener('click', async e => {
+    const t = e.target.closest('[data-act],[data-seg],[data-fee]'); if (!t) return;
+    if (t.dataset.fee) return;
+    if (t.dataset.seg) { setPath(P, t.dataset.seg, t.dataset.v); if (t.dataset.seg === 'set.conv') P.set.convAuto = false; persist(); render(); return; }
+    const a = t.dataset.act, id = t.dataset.id, d = +t.dataset.d;
+    if (a === 'new') newEstimate(null);
+    else if (a === 'newkit') newEstimate(KITS[+t.dataset.i]);
+    else if (a === 'example') loadExampleM();
+    else if (a === 'open') { selectItem(id); TAB = 'tot'; render(); }
+    else if (a === 'ifile') XM.importFile(APPN, onEnv);
+    else if (a === 'ilink') XM.importLink(APPN, onEnv);
+    else if (a === 'kit') { applyKit(KITS[+t.dataset.i], !V().eq.length && !V().crew.length); render(); }
+    else if (a === 'ver') { P.cur = id; persist(); render(); }
+    else if (a === 'vermenu') versionMenu();
+    else if (a === 'set') { P.set[id] = Math.max(0, (+P.set[id] || 0) + d); persist(); render(); }
+    else if (a === 'eqq') { const x = V().eq.find(y => y.id === id); if (!x) return; x.qty = Math.max(0, (+x.qty || 0) + d); if (!x.qty) { if (await XM.ask('Retirer la ligne ?', '« ' + H(x.name) + ' » passe à 0.', ['Retirer', 'Garder à 0']) === 0) V().eq.splice(V().eq.indexOf(x), 1); } persist(); render(); }
+    else if (a === 'crd') { const x = V().crew.find(y => y.id === id); if (!x) return; const cur = x.days != null && x.days !== '' ? +x.days : totalDays(); x.days = Math.max(0.5, cur + d * (cur < 1 || (cur === 1 && d < 0) ? 0.5 : 1)); persist(); render(); }
+    else if (a === 'eq') eqSheet(id);
+    else if (a === 'crew') crewSheet(id);
+    else if (a === 'fee') feeSheet(id);
+    else if (a === 'feeadd') { const f = { id: uid(), on: true, name: 'Frais', qty: 1, unit: 'forfait', price: 0 }; V().fees.push(f); persist(); feeSheet(f.id); }
+    else if (a === 'share') { const txt = summaryText(); if (navigator.share) { try { await navigator.share({ title: 'Devis estimatif — ' + (P.name || ''), text: txt }); } catch (err) { } } else XM.toast(await XM.copy(txt) ? '📋 Résumé copié (partage indisponible)' : '⚠️ Copie impossible'); }
+    else if (a === 'copy') XM.toast(await XM.copy(summaryText()) ? '📋 Résumé copié : collez-le dans un message' : '⚠️ Copie impossible');
+    else if (a === 'print') printRecap();
+    else if (a === 'ret') sendReturn();
+});
+main.addEventListener('change', e => {
+    const t = e.target;
+    if (t.dataset.fee) { const f = V().fees.find(x => x.id === t.dataset.fee); if (f) { f.on = t.checked; persist(); render(); } return; }
+    if (!t.dataset.f || !P) return;
+    const k = t.dataset.f, num = /^set\.(fg|imp|marge|tva|remise|amp)$/.test(k);
+    let v = t.value; if (num) v = numOrNull(v) == null ? 0 : numOrNull(v);
+    setPath(P, k, v); if (k === 'set.conv') P.set.convAuto = false;
+    if (k === 'debut' && (!P.fin || P.fin < P.debut)) P.fin = P.debut;
+    persist(); render();
+});
+
+// ---------- démarrage ----------
+loadState();
+if (P) TAB = 'tot';
+render();
+XM.fromHash(APPN, onEnv);
+
+</script>
+</body>
+</html>

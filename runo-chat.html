@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>Chat à l'écran — RUNO XIII</title>
+<style>
+html,body{margin:0;height:100%;background:transparent;overflow:hidden;font-family:"Segoe UI",system-ui,sans-serif;color:#fff}
+#w{position:absolute;left:0;right:0;bottom:0;padding:10px;display:flex;flex-direction:column;gap:6px}
+.m{background:rgba(10,10,14,.72);border-radius:10px;padding:.35em .6em;line-height:1.3;text-shadow:0 1px 2px rgba(0,0,0,.6);animation:in .35s ease-out;word-wrap:break-word}
+.m b{margin-right:.4em}.m.out{transition:opacity .8s;opacity:0}
+.pin{background:linear-gradient(90deg,rgba(145,70,255,.92),rgba(240,140,60,.9));font-weight:600}
+.al{background:rgba(145,70,255,.92);font-weight:700;text-align:center;padding:.6em}
+.goal{background:rgba(10,10,14,.78);border-radius:10px;padding:.4em .6em;font-weight:700}.goal .b{height:.55em;background:rgba(255,255,255,.2);border-radius:99px;overflow:hidden;margin-top:.3em}.goal .b i{display:block;height:100%;background:linear-gradient(90deg,#9146ff,#f0b378);transition:width .6s}
+#help{position:fixed;top:10px;left:10px;right:10px;background:rgba(0,0,0,.8);border-radius:8px;padding:10px;font-size:14px}
+@keyframes in{from{transform:translateY(12px);opacity:0}to{transform:none;opacity:1}}
+</style>
+<link rel="icon" type="image/png" href="xiii-icon-192.png">
+</head>
+<body>
+<div id="w"></div>
+<script>
+(function () {
+    const q = new URLSearchParams((location.hash || '').slice(1)), ch = (q.get('c') || '').toLowerCase().replace(/^#/, ''), size = +q.get('s') || 22, max = +q.get('n') || 12, fade = +q.get('f') || 0, showAl = q.get('a') !== '0', showGoal = q.get('g') === '1';
+    const w = document.getElementById('w'), esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    document.body.style.fontSize = size + 'px';
+    // sources URL superposées (Streamlabs, StreamElements…)
+    try { const x = q.get('x'); if (x) { let b = x.replace(/-/g, '+').replace(/_/g, '/'); while (b.length % 4) b += '='; const L = JSON.parse(decodeURIComponent(escape(atob(b)))); const POS = { full: 'inset:0', top: 'left:0;right:0;top:0;height:Z%', bottom: 'left:0;right:0;bottom:0;height:Z%', left: 'left:0;top:0;bottom:0;width:Z%', right: 'right:0;top:0;bottom:0;width:Z%', tl: 'left:0;top:0;width:Z%;height:Z%', tr: 'right:0;top:0;width:Z%;height:Z%', bl: 'left:0;bottom:0;width:Z%;height:Z%', br: 'right:0;bottom:0;width:Z%;height:Z%', center: 'left:50%;top:50%;width:Z%;height:Z%;transform:translate(-50%,-50%)' };
+        L.forEach(s => { if (!/^https?:\/\//.test(s.u || '')) return; const f = document.createElement('iframe'); f.src = s.u; f.setAttribute('allow', 'autoplay'); f.setAttribute('referrerpolicy', 'no-referrer'); f.style.cssText = 'position:fixed;border:0;background:transparent;' + (POS[s.p] || POS.full).replace(/Z/g, Math.max(10, Math.min(100, +s.z || 40))); document.body.insertBefore(f, document.body.firstChild); }); } } catch (e) { }
+    if (q.get('h') === '1') w.style.display = 'none';
+    if (!ch && !q.get('x')) document.body.insertAdjacentHTML('beforeend', '<div id="help">Ajoutez le nom de la chaîne à l\'adresse : runo-chat.html#c=machaine (ou créez l\'adresse depuis RUNO › 💬 Chat à l\'écran).</div>');
+    let goalEl = null, pinEl = null;
+    function add(html, cls, keep) { const d = document.createElement('div'); d.className = 'm ' + (cls || ''); d.innerHTML = html; if (pinEl && !keep) w.insertBefore(d, pinEl); else w.appendChild(d); const L = [...w.querySelectorAll('.m:not(.pin):not(.goal)')]; while (L.length > max) L.shift().remove(); if (fade && !keep) setTimeout(() => { d.classList.add('out'); setTimeout(() => d.remove(), 900); }, fade * 1000); return d; }
+    const msg = (who, color, text) => add('<b style="color:' + esc(color || '#c9a7ff') + '">' + esc(who) + '</b>' + esc(text));
+    // Twitch, lecture anonyme
+    const tags = s => { const o = {}; s.split(';').forEach(kv => { const i = kv.indexOf('='); o[kv.slice(0, i)] = (kv.slice(i + 1) || '').replace(/\\s/g, ' '); }); return o; };
+    function connect() {
+        if (!ch) return; const ws = new WebSocket('wss://irc-ws.chat.twitch.tv:443');
+        ws.onopen = () => { ws.send('CAP REQ :twitch.tv/tags twitch.tv/commands'); ws.send('PASS SCHMOOPIIE'); ws.send('NICK justinfan' + (10000 + Math.floor(Math.random() * 80000))); ws.send('JOIN #' + ch); };
+        ws.onmessage = e => String(e.data).split('\r\n').forEach(l => {
+            if (!l) return; if (l.startsWith('PING')) { ws.send('PONG' + l.slice(4)); return; }
+            let t = {}; if (l[0] === '@') { const i = l.indexOf(' '); t = tags(l.slice(1, i)); l = l.slice(i + 1); }
+            const m = /^(?::(\S+) )?(\S+)(?: (#\S+))?(?: :(.*))?$/.exec(l); if (!m) return; const who = t['display-name'] || (m[1] || '').split('!')[0];
+            if (m[2] === 'PRIVMSG') msg(who, t.color, m[4] || '');
+            else if (m[2] === 'USERNOTICE' && showAl) { const id = t['msg-id']; if (id === 'sub' || id === 'resub') al('⭐ ' + who + ' s\'abonne' + ((+t['msg-param-cumulative-months'] || 1) > 1 ? ' — ' + t['msg-param-cumulative-months'] + ' mois !' : ' !')); else if (id === 'submysterygift') al('🎁 ' + who + ' offre ' + (t['msg-param-mass-gift-count'] || 1) + ' abonnements !'); else if (id === 'raid') al('🚀 Raid de ' + (t['msg-param-displayName'] || who) + ' avec ' + (t['msg-param-viewerCount'] || '?') + ' viewers !'); }
+            else if (m[2] === 'CLEARCHAT' && !m[4]) w.querySelectorAll('.m:not(.pin):not(.goal):not(.al)').forEach(x => x.remove());
+        });
+        ws.onclose = () => setTimeout(connect, 3000);
+    }
+    const al = text => { const d = add(esc(text), 'al'); setTimeout(() => { d.classList.add('out'); setTimeout(() => d.remove(), 900); }, 7000); };
+    connect();
+    // même navigateur que RUNO : message épinglé, alertes manuelles (dons…), objectif
+    try {
+        const bc = new BroadcastChannel('xiii.runo');
+        bc.onmessage = e => { const d = e.data || {};
+            if (d.t === 'pin') { if (pinEl) pinEl.remove(); pinEl = null; if (d.m) { pinEl = add('📌 <b>' + esc(d.m.who) + '</b>' + esc(d.m.text), 'pin', true); } }
+            else if (d.t === 'alert' && showAl && d.a && d.a.src !== 'twitch') { const a = d.a, n = a.who || 'Quelqu\'un'; al(a.k === 'don' || a.k === 'superchat' ? '💶 Merci ' + n + ' pour ' + a.amount + ' € !' : a.k === 'follow' ? '❤️ ' + n + ' suit la chaîne' : a.k === 'member' ? '🎟 ' + n + ' devient membre !' : a.k === 'sub' ? '⭐ ' + n + ' s\'abonne !' : a.k === 'bits' ? '💎 ' + n + ' — ' + a.amount + ' bits' : '🎉 ' + n); }
+            else if (d.t === 'goal' && showGoal && d.g) { if (!goalEl) { goalEl = document.createElement('div'); goalEl.className = 'goal'; w.insertBefore(goalEl, w.firstChild); } const p = Math.min(100, d.g.cur / (d.g.target || 1) * 100); goalEl.innerHTML = esc(d.g.name) + ' — ' + d.g.cur.toLocaleString('fr-FR') + ' / ' + d.g.target.toLocaleString('fr-FR') + '<div class="b"><i style="width:' + p + '%"></i></div>'; } };
+    } catch (e) { }
+})();
+</script>
+<script>
+// 📱 XIII Équipe : une fois dans l'application, on y reste (l'accueil ramène à l'application, pas au site)
+(function () {
+    if (window.__xinapp) return; window.__xinapp = 1;
+    var page = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
+    try { if (page === 'equipe.html' && (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (window.matchMedia && matchMedia('(display-mode: standalone)').matches))) sessionStorage.setItem('xiii.inapp', '1'); } catch (e) { }
+    function inApp() { try { return sessionStorage.getItem('xiii.inapp') === '1'; } catch (e) { return false; } }
+    if (!inApp()) return;
+    if (page === 'index.html' || page === '') { location.replace('equipe.html'); return; }
+    document.addEventListener('click', function (e) {
+        var a = e.target.closest && e.target.closest('a[href]'); if (!a) return;
+        var u; try { u = new URL(a.getAttribute('href'), location.href); } catch (er) { return; }
+        if (u.origin !== location.origin) return;
+        var f = (u.pathname.split('/').pop() || 'index.html').toLowerCase();
+        if (f === 'index.html' || f === '') { e.preventDefault(); e.stopPropagation(); location.href = 'equipe.html'; return; }
+        if (a.target === '_blank') { a.removeAttribute('target'); }
+    }, true);
+})();
+</script>
+</body>
+</html>

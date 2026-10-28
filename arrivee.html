@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Arrivée sur le plateau — SUITE XIII</title>
+<meta name="theme-color" content="#1d1b19">
+<style>
+:root{--bg:#141312;--panel:#1f1d1b;--line:#3a3632;--fg:#f2ede6;--dim:#a39b91;--acc:#f0b378;--ok:#66bb6a;--bad:#ef5350;color-scheme:dark}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:17px/1.45 -apple-system,"Segoe UI",Roboto,sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:max(24px,env(safe-area-inset-top)) 20px 30px}
+main{width:min(420px,100%);text-align:center}
+.pj{color:var(--dim);font-size:14px;letter-spacing:.06em;text-transform:uppercase}
+h1{font-size:26px;margin:6px 0 22px}
+input{width:100%;font:inherit;font-size:19px;padding:14px 16px;border-radius:14px;border:1px solid var(--line);background:var(--panel);color:var(--fg);text-align:center}
+button{width:100%;margin-top:14px;font:700 20px inherit;font-family:inherit;padding:18px;border-radius:16px;border:0;background:var(--acc);color:#1d1b19;cursor:pointer}
+button:disabled{opacity:.5}
+.ok{margin-top:10px;padding:26px 16px;border-radius:18px;background:color-mix(in srgb,var(--ok) 15%,var(--panel));border:1px solid var(--ok)}
+.ok .t{font:800 46px/1 ui-monospace,Menlo,monospace;color:var(--ok);margin:10px 0 4px}
+.err{color:var(--bad);margin-top:14px}.dim{color:var(--dim);font-size:13.5px;margin-top:16px}
+a{color:var(--acc)}
+</style>
+<link rel="icon" type="image/png" href="xiii-icon-192.png">
+</head>
+<body>
+<main id="m"><div class="dim">Chargement…</div></main>
+<script>
+// =====================================================================
+//  SUITE XIII — 📲 page d'arrivée sur le plateau (QR code affiché par le MODE TOURNAGE)
+//  La personne indique son nom une fois (gardé sur le téléphone) et touche « Je suis arrivé·e » :
+//  l'heure remonte dans le ☁️ Drive du projet → MODE TOURNAGE (équipe) et CALL SHEETO.
+// =====================================================================
+const $ = id => document.getElementById(id), esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const H = Object.fromEntries(location.hash.slice(1).split('&').filter(Boolean).map(x => { const i = x.indexOf('='); return [x.slice(0, i), decodeURIComponent(x.slice(i + 1))]; }));
+const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } };
+const ME = () => J('xiii.ci.me', '') || ((J('xiii.drive', null) || {}).me || {}).name || (J('xiii.deleg.me', {}) || {}).name || '';
+async function api(a, p) { try { const r = await fetch(H.u, { method: 'POST', body: JSON.stringify(Object.assign({ a, k: H.k }, p || {})), redirect: 'follow' }); return await r.json(); } catch (e) { return { ok: false, err: 'net' }; } }
+const hm = ts => new Date(ts).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+function done(ts, deja, nom) {
+    const k = 'xiii.ci.done.' + new Date().toISOString().slice(0, 10); localStorage.setItem(k, JSON.stringify({ ts, nom }));
+    $('m').innerHTML = '<div class="pj" id="pj">' + esc(H.p || 'SUITE XIII') + '</div><div class="ok"><div>✅ ' + (deja ? 'Arrivée déjà enregistrée' : 'Bienvenue sur le plateau') + '</div><div class="t">' + hm(ts) + '</div><div>' + esc(nom) + '</div></div><p class="dim">La production voit votre heure d\'arrivée dans le mode tournage et la feuille de service.<br><a href="#" id="chg">Ce n\'est pas moi</a></p>';
+    $('chg').onclick = e => { e.preventDefault(); localStorage.removeItem(k); localStorage.removeItem('xiii.ci.me'); form(); };
+}
+function form(msg) {
+    $('m').innerHTML = '<div class="pj">' + esc(H.p || 'SUITE XIII') + '</div><h1>📲 Arrivée sur le plateau</h1><input id="n" placeholder="Prénom Nom" autocomplete="name" value="' + esc(ME()) + '"><button id="go">✅ Je suis arrivé·e</button>' + (msg ? '<div class="err">' + esc(msg) + '</div>' : '') + '<p class="dim">Votre nom tel qu\'il figure sur la feuille de service.</p>';
+    $('n').onkeydown = e => { if (e.key === 'Enter') $('go').click(); };
+    $('go').onclick = async () => { const n = $('n').value.trim(); if (!n) { $('n').focus(); return; } $('go').disabled = true; $('go').textContent = 'Envoi…';
+        const r = await api('ci_add', { n }); if (r.ok) { localStorage.setItem('xiii.ci.me', JSON.stringify(n)); done(r.ts, r.deja, n); } else form(r.err === 'net' ? 'Pas de réseau : réessayez dans un instant.' : r.err === 'code' ? 'Ce QR code n\'est plus valable : demandez le nouveau à la production.' : 'Erreur : ' + r.err); };
+}
+(async () => {
+    if (!H.u || !H.k) { $('m').innerHTML = '<h1>📲 Arrivée</h1><p class="err">QR code incomplet.</p>'; return; }
+    const d = J('xiii.ci.done.' + new Date().toISOString().slice(0, 10), null); if (d && d.ts) { done(d.ts, true, d.nom); return; }
+    form(); const r = await api('ci_get'); if (r.ok && !H.p && r.name) { H.p = r.name; const p = document.querySelector('.pj'); if (p) p.textContent = r.name; } if (!r.ok && r.err === 'code') form('Ce QR code n\'est plus valable : demandez le nouveau à la production.');
+})();
+</script>
+<script>
+// 📱 XIII Équipe : une fois dans l'application, on y reste (l'accueil ramène à l'application, pas au site)
+(function () {
+    if (window.__xinapp) return; window.__xinapp = 1;
+    var page = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
+    try { if (page === 'equipe.html' && (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (window.matchMedia && matchMedia('(display-mode: standalone)').matches))) sessionStorage.setItem('xiii.inapp', '1'); } catch (e) { }
+    function inApp() { try { return sessionStorage.getItem('xiii.inapp') === '1'; } catch (e) { return false; } }
+    if (!inApp()) return;
+    if (page === 'index.html' || page === '') { location.replace('equipe.html'); return; }
+    document.addEventListener('click', function (e) {
+        var a = e.target.closest && e.target.closest('a[href]'); if (!a) return;
+        var u; try { u = new URL(a.getAttribute('href'), location.href); } catch (er) { return; }
+        if (u.origin !== location.origin) return;
+        var f = (u.pathname.split('/').pop() || 'index.html').toLowerCase();
+        if (f === 'index.html' || f === '') { e.preventDefault(); e.stopPropagation(); location.href = 'equipe.html'; return; }
+        if (a.target === '_blank') { a.removeAttribute('target'); }
+    }, true);
+})();
+</script>
+</body>
+</html>

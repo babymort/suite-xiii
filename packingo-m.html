@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#222222">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>PACKINGO XIII · Mobile</title>
+<style>
+/* SUITE XIII — socle mobile (partagé par toutes les pages *-m.html) */
+:root { color-scheme: dark; --bg-main:#1e1e1e; --bg-panel:#2d2d2d; --bg-panel-alt:#252525; --bg-header:#1a1a1a; --bg-topbar:#222; --bg-input:#3a3a3a; --bg-menu:#2d2d2d; --border-color:#444; --border-soft:#333; --text-main:#fff; --text-muted:#aaa; --text-dim:#888; --row-bg:#262626; --row-alt:#2a2a2a;
+  --accent:240,179,120; --accent-text:rgb(240,179,120); --btn-bg:rgba(var(--accent),.12); --btn-border:rgba(var(--accent),.35); --blue:#007acc; --danger:#e53935; --warn:#ffa726; --ok:#66bb6a;
+  --sat: env(safe-area-inset-top, 0px); --sab: env(safe-area-inset-bottom, 0px); --sal: env(safe-area-inset-left, 0px); --sar: env(safe-area-inset-right, 0px); }
+body.light-theme { color-scheme: light; --bg-main:#eef0f2; --bg-panel:#fff; --bg-panel-alt:#f5f6f7; --bg-header:#e4e6e8; --bg-topbar:#fff; --bg-input:#e9ebed; --bg-menu:#fff; --border-color:#d5d8db; --border-soft:#ddd; --text-main:#1a1a1a; --text-muted:#555; --text-dim:#777; --row-bg:#fff; --row-alt:#f8f9fa; --accent-text:#b8651f; --ok:#2e7d32; }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html { -webkit-text-size-adjust: 100%; }
+body.xm { margin: 0; min-height: 100dvh; background: var(--bg-main); color: var(--text-main); font-family: 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif; font-size: 15px; line-height: 1.4; overscroll-behavior-y: none; }
+body.xm a { color: var(--accent-text); }
+.xm button { font-family: inherit; }
+/* barre du haut */
+.m-top { position: sticky; top: 0; z-index: 40; display: flex; align-items: center; gap: 8px; padding: calc(8px + var(--sat)) calc(10px + var(--sar)) 8px calc(10px + var(--sal)); background: var(--bg-topbar); border-bottom: 1px solid var(--border-soft); min-height: 56px; }
+.m-top .m-title { flex: 1; min-width: 0; line-height: 1.15; }
+.m-top .m-title b { display: block; font-size: 16px; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.m-top .m-title b i { font-style: normal; color: var(--accent-text); }
+.m-top .m-title small { display: block; font-size: 11.5px; color: var(--text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.m-ibtn { flex: 0 0 auto; width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center; font-size: 20px; border-radius: 12px; border: 1px solid var(--btn-border); background: var(--btn-bg); color: var(--text-main); cursor: pointer; text-decoration: none; padding: 0; }
+.m-ibtn:active { background: rgba(var(--accent), .35); }
+.m-ibtn.plain { border-color: transparent; background: transparent; }
+/* contenu */
+.m-main { padding: 12px calc(14px + var(--sar)) calc(128px + var(--sab)) calc(14px + var(--sal)); max-width: 760px; margin: 0 auto; }
+.m-main.no-tabs { padding-bottom: calc(28px + var(--sab)); }
+.m-sec { font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--text-dim); margin: 18px 4px 8px; }
+.m-card { background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 14px; padding: 14px; margin-bottom: 12px; }
+.m-card > h3 { margin: 0 0 10px; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+.m-card > h3 .grow { flex: 1; }
+.m-card.accent { border-color: rgba(var(--accent), .6); background: linear-gradient(180deg, rgba(var(--accent), .12), var(--bg-panel)); }
+.m-kv { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; font-size: 14px; }
+.m-kv dt { color: var(--text-dim); } .m-kv dd { margin: 0; text-align: right; font-weight: 600; word-break: break-word; }
+.m-row { display: flex; align-items: center; gap: 10px; padding: 11px 0; border-bottom: 1px solid var(--border-soft); } .m-row:last-child { border-bottom: 0; }
+.m-row .grow { flex: 1; min-width: 0; } .m-row small { display: block; color: var(--text-dim); font-size: 12.5px; }
+.m-list { background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 14px; overflow: hidden; margin-bottom: 12px; }
+.m-item { display: flex; align-items: center; gap: 12px; padding: 12px 14px; min-height: 56px; border-bottom: 1px solid var(--border-soft); color: inherit; text-decoration: none; cursor: pointer; background: transparent; width: 100%; text-align: left; border-left: 0; border-right: 0; border-top: 0; font-size: 15px; }
+.m-item:last-child { border-bottom: 0; } .m-item:active { background: rgba(var(--accent), .12); }
+.m-item .ico { font-size: 22px; flex: 0 0 auto; width: 30px; text-align: center; } .m-item .grow { flex: 1; min-width: 0; } .m-item b { display: block; font-weight: 600; } .m-item small { display: block; color: var(--text-dim); font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.m-item .go { color: var(--text-dim); font-size: 18px; }
+.m-chip { display: inline-flex; align-items: center; gap: 5px; padding: 5px 11px; border-radius: 99px; font-size: 13px; background: var(--btn-bg); border: 1px solid var(--btn-border); color: var(--text-main); white-space: nowrap; }
+.m-chips { display: flex; gap: 8px; overflow-x: auto; padding: 2px 0 8px; scrollbar-width: none; } .m-chips::-webkit-scrollbar { display: none; }
+.m-chip.on { background: rgba(var(--accent), .4); border-color: rgba(var(--accent), .95); font-weight: 600; }
+.m-pill { display: inline-block; padding: 2px 9px; border-radius: 99px; font-size: 12px; font-weight: 600; border: 1px solid var(--border-color); background: var(--bg-panel-alt); }
+.m-pill.ok { color: var(--ok); border-color: rgba(102,187,106,.5); } .m-pill.warn { color: var(--warn); border-color: rgba(255,167,38,.5); } .m-pill.danger { color: #ef5350; border-color: rgba(229,57,53,.5); }
+/* boutons */
+.m-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 46px; padding: 10px 18px; font-size: 15px; font-weight: 600; border-radius: 12px; border: 1px solid var(--btn-border); background: var(--btn-bg); color: var(--text-main); cursor: pointer; text-decoration: none; }
+.m-btn:active { background: rgba(var(--accent), .35); }
+.m-btn.primary { background: rgba(var(--accent), .3); border-color: rgba(var(--accent), .9); }
+.m-btn.danger { border-color: rgba(229,57,53,.55); background: rgba(229,57,53,.14); }
+.m-btn.block { display: flex; width: 100%; } .m-btn.sm { min-height: 36px; padding: 6px 12px; font-size: 13.5px; border-radius: 10px; }
+.m-btn:disabled { opacity: .45; }
+.m-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; } .m-actions > * { flex: 1 1 140px; }
+.m-fab { position: fixed; right: calc(16px + var(--sar)); bottom: calc(120px + var(--sab)); z-index: 35; width: 58px; height: 58px; border-radius: 50%; font-size: 26px; border: 1px solid rgba(var(--accent), .95); background: rgba(var(--accent), .92); color: #1a1a1a; box-shadow: 0 6px 18px rgba(0,0,0,.45); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.m-fab.no-tabs { bottom: calc(64px + var(--sab)); }
+/* champs */
+.m-field { display: block; margin-bottom: 12px; } .m-field > span { display: block; font-size: 11.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--text-dim); margin-bottom: 4px; }
+.xm input[type=text], .xm input[type=number], .xm input[type=date], .xm input[type=time], .xm input[type=tel], .xm input[type=email], .xm input[type=search], .xm input[type=url], .xm select, .xm textarea { width: 100%; min-height: 46px; padding: 10px 12px; font-size: 16px; font-family: inherit; border: 1px solid var(--border-color); border-radius: 10px; background: var(--bg-input); color: var(--text-main); appearance: none; -webkit-appearance: none; }
+.xm select { background-image: linear-gradient(45deg, transparent 50%, var(--text-dim) 50%), linear-gradient(135deg, var(--text-dim) 50%, transparent 50%); background-position: calc(100% - 18px) 20px, calc(100% - 13px) 20px; background-size: 5px 5px; background-repeat: no-repeat; padding-right: 32px; }
+.xm textarea { min-height: 90px; resize: vertical; line-height: 1.4; }
+.xm input:focus, .xm select:focus, .xm textarea:focus { outline: none; border-color: rgba(var(--accent), .9); box-shadow: 0 0 0 2px rgba(var(--accent), .25); }
+.xm input[type=checkbox], .xm input[type=radio] { width: 24px; height: 24px; accent-color: rgb(var(--accent)); flex: 0 0 auto; }
+.m-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; } .m-grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.m-seg { display: flex; border: 1px solid var(--btn-border); border-radius: 12px; overflow: hidden; margin-bottom: 12px; } .m-seg button { flex: 1; min-height: 44px; border: 0; border-right: 1px solid var(--btn-border); background: var(--btn-bg); color: var(--text-main); font-size: 14px; font-weight: 600; cursor: pointer; } .m-seg button:last-child { border-right: 0; } .m-seg button.on { background: rgba(var(--accent), .45); }
+.m-progress { height: 8px; border-radius: 99px; background: var(--bg-input); overflow: hidden; } .m-progress > i { display: block; height: 100%; background: rgb(var(--accent)); border-radius: 99px; transition: width .25s; }
+.m-empty { text-align: center; color: var(--text-dim); padding: 34px 18px; font-size: 14px; } .m-empty b { display: block; font-size: 38px; margin-bottom: 8px; }
+.m-hint { font-size: 12.5px; color: var(--text-dim); line-height: 1.45; }
+/* onglets du bas */
+.m-tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; display: flex; background: var(--bg-topbar); border-top: 1px solid var(--border-soft); padding: 4px calc(4px + var(--sar)) calc(48px + var(--sab)) calc(4px + var(--sal)); } /* au-dessus du badge Netlify */
+.m-tabs button { flex: 1; min-width: 0; min-height: 54px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; border: 0; background: transparent; color: var(--text-dim); font-size: 11px; font-weight: 600; cursor: pointer; border-radius: 10px; }
+.m-tabs button .ti { font-size: 21px; line-height: 1; } .m-tabs button.on { color: var(--accent-text); background: rgba(var(--accent), .12); }
+/* fenêtres du bas */
+.m-ov { position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,.62); display: flex; align-items: flex-end; justify-content: center; animation: mfade .15s; }
+.m-sheet { width: 100%; max-width: 640px; max-height: 92dvh; overflow-y: auto; background: var(--bg-menu); border: 1px solid var(--border-color); border-bottom: 0; border-radius: 18px 18px 0 0; padding: 8px 16px calc(18px + var(--sab)); animation: mup .2s; }
+.m-sheet .grab { width: 44px; height: 5px; border-radius: 3px; background: var(--border-color); margin: 4px auto 10px; }
+.m-sheet h2 { font-size: 17px; margin: 4px 0 12px; display: flex; align-items: center; gap: 8px; } .m-sheet h2 .grow { flex: 1; }
+@keyframes mup { from { transform: translateY(40px); opacity: .4; } } @keyframes mfade { from { opacity: 0; } }
+.m-toast { position: fixed; left: 50%; bottom: calc(86px + var(--sab)); transform: translate(-50%, 20px); z-index: 200; max-width: 90vw; padding: 11px 18px; border-radius: 12px; background: #111; color: #fff; border: 1px solid rgba(var(--accent), .6); font-size: 14px; opacity: 0; pointer-events: none; transition: .2s; text-align: center; }
+.m-toast.show { opacity: 1; transform: translate(-50%, 0); }
+.m-qr { background: #fff; border-radius: 12px; padding: 6px; width: min(86vw, 380px); margin: 6px auto; } .m-qr svg { display: block; width: 100%; height: auto; }
+.m-credit { text-align: center; color: var(--text-dim); font-size: 11.5px; margin: 22px 0 6px; }
+@media (min-width: 761px) { body.xm { max-width: 520px; margin: 0 auto; border-left: 1px solid var(--border-soft); border-right: 1px solid var(--border-soft); } .m-tabs { max-width: 520px; left: 50%; transform: translateX(-50%); } }
+@media print { .m-top, .m-tabs, .m-fab { display: none !important; } }
+
+/* PACKINGO XIII — mobile */
+#pk-ret[hidden], #pk-fab[hidden], #pk-tabs[hidden] { display: none !important; }
+.xm a.m-btn { color: var(--text-main); }
+.pk-modes { position: sticky; top: calc(61px + var(--sat)); z-index: 30; background: var(--bg-main); margin: -12px calc(-14px - var(--sar)) 8px calc(-14px - var(--sal)); padding: 8px calc(14px + var(--sar)) 6px calc(14px + var(--sal)); border-bottom: 1px solid var(--border-soft); }
+.pk-modes .m-seg { margin-bottom: 6px; } .pk-modes .m-seg button { min-height: 48px; font-size: 15px; }
+.pk-cps { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; } .pk-cps::-webkit-scrollbar { display: none; }
+.pk-sum { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.pk-big { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 8px; } .pk-big b { font-size: 30px; line-height: 1; } .pk-big span { color: var(--text-dim); font-size: 13px; }
+.m-progress.pk-p { height: 12px; display: flex; } .m-progress.pk-p > i { border-radius: 0; transition: width .2s; } .pk-p .ok { background: var(--ok); } .pk-p .dmg { background: var(--warn); } .pk-p .miss { background: var(--danger); }
+.pk-filters { display: flex; gap: 8px; margin: 10px 0 8px; } .pk-filters .m-chip { flex: 1; justify-content: center; min-height: 40px; font-weight: 600; cursor: pointer; font-size: 14px; }
+.pk-case { padding: 0; overflow: hidden; border-left: 6px solid var(--cc, #888); }
+.pk-case.done { border-color: rgba(102,187,106,.6); border-left-color: var(--ok); } .pk-case.bad { border-color: rgba(229,57,53,.5); border-left-color: var(--danger); }
+.pk-ch { display: flex; align-items: center; gap: 8px; padding: 6px 8px 6px 12px; min-height: 58px; }
+.pk-ch .tog { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; text-align: left; background: transparent; border: 0; color: inherit; font-size: 15px; padding: 4px 0; min-height: 46px; cursor: pointer; }
+.pk-ch .nm { min-width: 0; } .pk-ch .nm b { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .pk-ch .nm small { color: var(--text-dim); font-size: 12.5px; display: block; }
+.pk-code { display: inline-block; padding: 3px 8px; border-radius: 8px; font-weight: 800; font-size: 13px; letter-spacing: .03em; white-space: nowrap; }
+.pk-ch .m-btn.sm { min-height: 44px; padding: 6px 10px; }
+.pk-row { display: flex; align-items: stretch; border-top: 1px solid var(--border-soft); min-height: 60px; }
+.pk-box { flex: 0 0 62px; border: 0; border-right: 1px solid var(--border-soft); background: transparent; display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; }
+.pk-box i { width: 38px; height: 38px; border-radius: 10px; border: 2px solid var(--text-dim); display: flex; align-items: center; justify-content: center; font-style: normal; font-size: 24px; font-weight: 800; color: transparent; transition: .12s; }
+.pk-row.s-ok .pk-box i { background: var(--ok); border-color: var(--ok); color: #fff; } .pk-row.s-miss .pk-box i { background: var(--danger); border-color: var(--danger); color: #fff; } .pk-row.s-dmg .pk-box i { background: var(--warn); border-color: var(--warn); color: #111; }
+.pk-row.s-ok { background: rgba(102,187,106,.07); } .pk-row.s-miss { background: rgba(229,57,53,.09); } .pk-row.s-dmg { background: rgba(255,167,38,.09); }
+.pk-rb { flex: 1; min-width: 0; text-align: left; background: transparent; border: 0; color: inherit; padding: 8px 10px; font-size: 15px; cursor: pointer; }
+.pk-rb b { font-weight: 600; } .pk-rb .q { color: var(--accent-text); font-weight: 800; margin-right: 4px; }
+.pk-rb small { display: block; color: var(--text-dim); font-size: 12.5px; word-break: break-word; }
+.pk-rb .nt { color: var(--text-muted); font-style: italic; }
+.pk-more { flex: 0 0 44px; align-self: center; width: 44px; height: 44px; margin-right: 4px; border: 0; background: transparent; color: var(--text-dim); font-size: 20px; cursor: pointer; border-radius: 10px; }
+.pk-st { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
+.pk-st button { min-height: 60px; border-radius: 12px; border: 2px solid var(--border-color); background: var(--bg-panel-alt); color: var(--text-main); font-size: 14px; font-weight: 700; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; cursor: pointer; }
+.pk-st button span { font-size: 22px; line-height: 1; }
+.pk-st button.on[data-s=ok] { border-color: var(--ok); background: rgba(102,187,106,.22); } .pk-st button.on[data-s=miss] { border-color: var(--danger); background: rgba(229,57,53,.22); } .pk-st button.on[data-s=dmg] { border-color: var(--warn); background: rgba(255,167,38,.22); }
+.pk-ph { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; } .pk-ph img { width: 84px; height: 84px; object-fit: cover; border-radius: 10px; border: 1px solid var(--border-color); }
+.pk-vh { display: flex; align-items: center; gap: 8px; font-weight: 700; margin: 0 0 8px; } .pk-vh i { width: 12px; height: 12px; border-radius: 4px; display: inline-block; }
+.pk-gauge { margin: 6px 0 10px; font-size: 13px; color: var(--text-muted); } .pk-gauge .m-progress { margin-top: 4px; height: 10px; } .pk-gauge .warn > i { background: var(--warn); } .pk-gauge .red > i { background: var(--danger); }
+.pk-list .m-row b { font-weight: 600; }
+.pk-pre { white-space: pre-wrap; word-break: break-word; font-size: 13.5px; line-height: 1.5; background: var(--bg-panel-alt); border: 1px solid var(--border-soft); border-radius: 10px; padding: 10px 12px; max-height: 260px; overflow: auto; }
+.pk-steps { counter-reset: s; list-style: none; margin: 0 0 6px; padding: 0; } .pk-steps li { counter-increment: s; position: relative; padding: 6px 0 6px 34px; font-size: 14.5px; } .pk-steps li::before { content: counter(s); position: absolute; left: 0; top: 5px; width: 24px; height: 24px; border-radius: 50%; background: rgba(var(--accent), .3); text-align: center; line-height: 24px; font-weight: 700; font-size: 13px; }
+.pk-flash { animation: pkf .5s; } @keyframes pkf { from { background: rgba(var(--accent), .45); } }
+
+</style>
+<link rel="icon" type="image/png" href="xiii-icon-192.png">
+</head>
+<body class="xm">
+<header class="m-top">
+  <a class="m-ibtn plain" href="index.html" aria-label="Accueil SUITE XIII">‹</a>
+  <div class="m-title"><b>PACKINGO <i>XIII</i></b><small id="pk-sub">Check-out / check-in du matériel</small></div>
+  <button class="m-btn sm primary" id="pk-ret" hidden aria-label="Renvoyer au bureau">📤 <span id="pk-retn">0</span></button>
+  <button class="m-ibtn" id="pk-menu" aria-label="Menu">⋯</button>
+</header>
+<main class="m-main" id="pk-main"></main>
+<button class="m-fab" id="pk-fab" hidden aria-label="Ajouter">＋</button>
+<nav class="m-tabs" id="pk-tabs" hidden>
+  <button data-tab="chk"><span class="ti">✅</span>Contrôle</button>
+  <button data-tab="veh"><span class="ti">🚚</span>Véhicules</button>
+  <button data-tab="sum"><span class="ti">📋</span>Résumé</button>
+</nav>
+<input type="file" id="pk-photo" accept="image/*" capture="environment" hidden>
+
+<script>
+// =====================================================================
+//  XQR : générateur de QR code (mode octets, niveaux L/M/Q/H, versions 1 à 40) — sans dépendance
+//  XQR.make(texte, 'L') → { size, ver, get(x, y) } ou null si trop long ; XQR.svg(texte, opts) → chaîne SVG ou null
+// =====================================================================
+const XQR = (() => {
+    const ECC = [[-1, 7, 10, 15, 20, 26, 18, 20, 24, 30, 18, 20, 24, 26, 30, 22, 24, 28, 30, 28, 28, 28, 28, 30, 30, 26, 28, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30],
+        [-1, 10, 16, 26, 18, 24, 16, 18, 22, 22, 26, 30, 22, 22, 24, 24, 28, 28, 26, 26, 26, 26, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28],
+        [-1, 13, 22, 18, 26, 18, 24, 18, 22, 20, 24, 28, 26, 24, 20, 30, 24, 28, 28, 26, 30, 28, 30, 30, 30, 30, 28, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30],
+        [-1, 17, 28, 22, 16, 22, 28, 26, 26, 24, 28, 24, 28, 22, 24, 24, 30, 28, 28, 26, 28, 30, 24, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30]];
+    const BLK = [[-1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 4, 4, 4, 4, 4, 6, 6, 6, 6, 7, 8, 8, 9, 9, 10, 12, 12, 12, 13, 14, 15, 16, 17, 18, 19, 19, 20, 21, 22, 24, 25],
+        [-1, 1, 1, 1, 2, 2, 4, 4, 4, 5, 5, 5, 8, 9, 9, 10, 10, 11, 13, 14, 16, 17, 17, 18, 20, 21, 23, 25, 26, 28, 29, 31, 33, 35, 37, 38, 40, 43, 45, 47, 49],
+        [-1, 1, 1, 2, 2, 4, 4, 6, 6, 8, 8, 8, 10, 12, 16, 12, 17, 16, 18, 21, 20, 23, 23, 25, 27, 29, 34, 34, 35, 38, 40, 43, 45, 48, 51, 53, 56, 59, 62, 65, 68],
+        [-1, 1, 1, 2, 4, 4, 4, 5, 6, 8, 8, 11, 11, 16, 16, 18, 16, 19, 21, 25, 25, 25, 34, 30, 32, 35, 37, 40, 42, 45, 48, 51, 54, 57, 60, 63, 66, 70, 74, 77, 81]];
+    const ECL = { L: [0, 1], M: [1, 0], Q: [2, 3], H: [3, 2] };
+    const raw = v => { let r = (16 * v + 128) * v + 64; if (v >= 2) { const n = Math.floor(v / 7) + 2; r -= (25 * n - 10) * n - 55; if (v >= 7) r -= 36; } return r; };
+    const dataCw = (v, e) => Math.floor(raw(v) / 8) - ECC[e][v] * BLK[e][v];
+    const bit = (x, i) => ((x >>> i) & 1) !== 0;
+    const mul = (x, y) => { let z = 0; for (let i = 7; i >= 0; i--) { z = (z << 1) ^ ((z >>> 7) * 0x11D); z ^= ((y >>> i) & 1) * x; } return z; };
+    const rsDiv = d => { const r = new Array(d - 1).fill(0); r.push(1); let root = 1; for (let i = 0; i < d; i++) { for (let j = 0; j < r.length; j++) { r[j] = mul(r[j], root); if (j + 1 < r.length) r[j] ^= r[j + 1]; } root = mul(root, 2); } return r; };
+    const rsRem = (data, div) => { const r = div.map(() => 0); data.forEach(b => { const f = b ^ r.shift(); r.push(0); div.forEach((c, i) => { r[i] ^= mul(c, f); }); }); return r; };
+    function make(text, level) {
+        const e = (ECL[level || 'L'] || ECL.L)[0], bytes = Array.from(new TextEncoder().encode(String(text)));
+        let ver = 0; for (let v = 1; v <= 40; v++) { const cc = v <= 9 ? 8 : 16; if (4 + cc + 8 * bytes.length <= dataCw(v, e) * 8) { ver = v; break; } }
+        if (!ver) return null;
+        const bits = []; const put = (val, n) => { for (let i = n - 1; i >= 0; i--) bits.push((val >>> i) & 1); };
+        put(4, 4); put(bytes.length, ver <= 9 ? 8 : 16); bytes.forEach(b => put(b, 8));
+        const cap = dataCw(ver, e) * 8; put(0, Math.min(4, cap - bits.length)); put(0, (8 - bits.length % 8) % 8);
+        for (let p = 0xEC; bits.length < cap; p ^= 0xEC ^ 0x11) put(p, 8);
+        const data = []; for (let i = 0; i < bits.length; i += 8) { let b = 0; for (let j = 0; j < 8; j++) b = (b << 1) | bits[i + j]; data.push(b); }
+        // blocs + correction d'erreur
+        const nb = BLK[e][ver], el = ECC[e][ver], rc = Math.floor(raw(ver) / 8), ns = nb - rc % nb, sl = Math.floor(rc / nb), div = rsDiv(el), blocks = [];
+        for (let i = 0, k = 0; i < nb; i++) { const dl = sl - el + (i < ns ? 0 : 1), dat = data.slice(k, k + dl); k += dl; const ecc = rsRem(dat, div); if (i < ns) dat.push(0); blocks.push(dat.concat(ecc)); }
+        const all = []; for (let i = 0; i < blocks[0].length; i++) blocks.forEach((b, j) => { if (i !== sl - el || j >= ns) all.push(b[i]); });
+        const size = ver * 4 + 17, M = Array.from({ length: size }, () => new Array(size).fill(false)), F = Array.from({ length: size }, () => new Array(size).fill(false));
+        const setF = (x, y, d) => { M[y][x] = d; F[y][x] = true; };
+        for (let i = 0; i < size; i++) { setF(6, i, i % 2 === 0); setF(i, 6, i % 2 === 0); }
+        const finder = (x, y) => { for (let dy = -4; dy <= 4; dy++) for (let dx = -4; dx <= 4; dx++) { const d = Math.max(Math.abs(dx), Math.abs(dy)), xx = x + dx, yy = y + dy; if (xx >= 0 && xx < size && yy >= 0 && yy < size) setF(xx, yy, d !== 2 && d !== 4); } };
+        finder(3, 3); finder(size - 4, 3); finder(3, size - 4);
+        let ap = []; if (ver > 1) { const n = Math.floor(ver / 7) + 2, st = ver === 32 ? 26 : Math.ceil((ver * 4 + 4) / (n * 2 - 2)) * 2; ap = [6]; for (let p = size - 7; ap.length < n; p -= st) ap.splice(1, 0, p); }
+        ap.forEach((x, i) => ap.forEach((y, j) => { if ((i === 0 && j === 0) || (i === 0 && j === ap.length - 1) || (i === ap.length - 1 && j === 0)) return; for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++) setF(x + dx, y + dy, Math.max(Math.abs(dx), Math.abs(dy)) !== 1); }));
+        const fmt = mask => {
+            const d = (ECL[level || 'L'][1] << 3) | mask; let r = d; for (let i = 0; i < 10; i++) r = (r << 1) ^ ((r >>> 9) * 0x537); const b = ((d << 10) | r) ^ 0x5412;
+            for (let i = 0; i <= 5; i++) setF(8, i, bit(b, i)); setF(8, 7, bit(b, 6)); setF(8, 8, bit(b, 7)); setF(7, 8, bit(b, 8)); for (let i = 9; i < 15; i++) setF(14 - i, 8, bit(b, i));
+            for (let i = 0; i < 8; i++) setF(size - 1 - i, 8, bit(b, i)); for (let i = 8; i < 15; i++) setF(8, size - 15 + i, bit(b, i)); setF(8, size - 8, true);
+        };
+        fmt(0);
+        if (ver >= 7) { let r = ver; for (let i = 0; i < 12; i++) r = (r << 1) ^ ((r >>> 11) * 0x1F25); const b = (ver << 12) | r; for (let i = 0; i < 18; i++) { const c = bit(b, i), a = size - 11 + i % 3, d = Math.floor(i / 3); setF(a, d, c); setF(d, a, c); } }
+        for (let i = 0, right = size - 1; right >= 1; right -= 2) { if (right === 6) right = 5; for (let vert = 0; vert < size; vert++) for (let j = 0; j < 2; j++) { const x = right - j, up = ((right + 1) & 2) === 0, y = up ? size - 1 - vert : vert; if (!F[y][x] && i < all.length * 8) { M[y][x] = bit(all[i >>> 3], 7 - (i & 7)); i++; } } }
+        const inv = (m, x, y) => [(x + y) % 2 === 0, y % 2 === 0, x % 3 === 0, (x + y) % 3 === 0, (Math.floor(x / 3) + Math.floor(y / 2)) % 2 === 0, x * y % 2 + x * y % 3 === 0, (x * y % 2 + x * y % 3) % 2 === 0, ((x + y) % 2 + x * y % 3) % 2 === 0][m];
+        const apply = m => { for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) if (!F[y][x] && inv(m, x, y)) M[y][x] = !M[y][x]; };
+        const penalty = () => {
+            let p = 0, dark = 0;
+            for (let y = 0; y < size; y++) { let run = 1; for (let x = 1; x < size; x++) { if (M[y][x] === M[y][x - 1]) { run++; if (run === 5) p += 3; else if (run > 5) p++; } else run = 1; } }
+            for (let x = 0; x < size; x++) { let run = 1; for (let y = 1; y < size; y++) { if (M[y][x] === M[y - 1][x]) { run++; if (run === 5) p += 3; else if (run > 5) p++; } else run = 1; } }
+            for (let y = 0; y < size - 1; y++) for (let x = 0; x < size - 1; x++) { const c = M[y][x]; if (c === M[y][x + 1] && c === M[y + 1][x] && c === M[y + 1][x + 1]) p += 3; }
+            for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) if (M[y][x]) dark++;
+            p += Math.floor(Math.abs(dark * 20 - size * size * 10) / (size * size)) * 10; return p;
+        };
+        let best = 0, bp = Infinity; for (let m = 0; m < 8; m++) { apply(m); fmt(m); const p = penalty(); if (p < bp) { bp = p; best = m; } apply(m); }
+        apply(best); fmt(best);
+        return { size, ver, get: (x, y) => x >= 0 && y >= 0 && x < size && y < size && M[y][x] };
+    }
+    function svg(text, o) {
+        o = o || {}; const q = make(text, o.ecl || 'L'); if (!q) return null; const b = o.border == null ? 4 : o.border, n = q.size + 2 * b; let d = '';
+        for (let y = 0; y < q.size; y++) { let x = 0; while (x < q.size) { if (q.get(x, y)) { let w = 1; while (x + w < q.size && q.get(x + w, y)) w++; d += 'M' + (x + b) + ',' + (y + b) + 'h' + w + 'v1h-' + w + 'z'; x += w; } else x++; } }
+        return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + n + ' ' + n + '" shape-rendering="crispEdges" role="img" aria-label="QR code"><rect width="' + n + '" height="' + n + '" fill="' + (o.light || '#fff') + '"/><path d="' + d + '" fill="' + (o.dark || '#000') + '"/></svg>';
+    }
+    return { make, svg, capacity: (level) => { const e = (ECL[level || 'L'] || ECL.L)[0]; return dataCw(40, e) - 3; } };
+})();
+if (typeof module !== 'undefined') module.exports = XQR;
+
+// =====================================================================
+//  XM : socle mobile SUITE XIII (pages *-m.html) + panneau « 📱 Mobile » des outils bureau
+//  Enveloppe d'échange : { format:'xiii-mobile', v:1, app, kind:'project'|'return', name, ts, data }
+//  Transfert : lien (#mx=… compressé), QR code (si assez court) ou fichier .xiii-m.json
+// =====================================================================
+const XM = (() => {
+    const FORMAT = 'xiii-mobile', QR_MAX = 1800;
+    const $ = (s, r) => (r || document).querySelector(s), $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+    const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const uid = () => Math.random().toString(36).slice(2, 10);
+    const safe = s => String(s || 'projet').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^\w-]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 40) || 'projet';
+    const isPhone = () => { try { return matchMedia('(max-width:700px)').matches && matchMedia('(pointer:coarse)').matches; } catch (e) { return false; } };
+    // ---------- encodage ----------
+    const b64u = u8 => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
+    const unb64u = t => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
+    async function pipe(u8, Ctor, fmt) { const st = new Blob([u8]).stream().pipeThrough(new Ctor(fmt)); return new Uint8Array(await new Response(st).arrayBuffer()); }
+    async function pack(obj) {
+        const u8 = new TextEncoder().encode(JSON.stringify(obj));
+        if (typeof CompressionStream !== 'undefined') { try { return 'z' + b64u(await pipe(u8, CompressionStream, 'deflate-raw')); } catch (e) { } }
+        return 'r' + b64u(u8);
+    }
+    async function unpack(s) {
+        s = String(s || '').trim(); if (!s) throw new Error('Lien vide');
+        let u8 = unb64u(s.slice(1)); if (s[0] === 'z') u8 = await pipe(u8, DecompressionStream, 'deflate-raw'); else if (s[0] !== 'r') throw new Error('Lien non reconnu');
+        return JSON.parse(new TextDecoder().decode(u8));
+    }
+    const baseUrl = page => { const u = new URL(page || location.pathname.split('/').pop(), location.href); u.hash = ''; u.search = ''; return u.href; };
+    const envelope = (app, kind, name, data) => ({ format: FORMAT, v: 1, app, kind: kind || 'project', name: name || '', ts: Date.now(), data });
+    async function link(page, env) { return baseUrl(page) + '#mx=' + await pack(env); }
+    function checkEnv(env, app) {
+        if (!env || env.format !== FORMAT) throw new Error('Ce fichier n\'est pas un envoi SUITE XIII mobile');
+        if (app && env.app !== app) throw new Error('Cet envoi est destiné à « ' + env.app + ' », pas à « ' + app + ' »');
+        return env;
+    }
+    // ---------- stockage local (une enveloppe par application) ----------
+    const mem = {};
+    const load = app => { try { return JSON.parse(localStorage.getItem('xiii.m.' + app)); } catch (e) { return mem[app] || null; } };
+    const save = (app, obj) => { mem[app] = obj; try { localStorage.setItem('xiii.m.' + app, JSON.stringify(obj)); return true; } catch (e) { return false; } };
+    const drop = app => { delete mem[app]; try { localStorage.removeItem('xiii.m.' + app); } catch (e) { } };
+    // ---------- interface ----------
+    let toastT;
+    function toast(msg, ms) { let t = $('.m-toast'); if (!t) { t = document.createElement('div'); t.className = 'm-toast'; document.body.appendChild(t); } t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), ms || 2600); }
+    function sheet(html, o) {
+        o = o || {}; closeSheet(); const ov = document.createElement('div'); ov.className = 'm-ov'; ov.id = 'm-ov';
+        ov.innerHTML = '<div class="m-sheet" role="dialog"><div class="grab"></div>' + (o.title ? '<h2><span class="grow">' + o.title + '</span><button class="m-ibtn plain" data-x aria-label="Fermer">✕</button></h2>' : '') + html + '</div>';
+        ov.addEventListener('mousedown', e => { if (e.target === ov) closeSheet(); }); ov.addEventListener('touchstart', e => { if (e.target === ov) closeSheet(); }, { passive: true });
+        document.body.appendChild(ov); const x = $('[data-x]', ov); if (x) x.onclick = closeSheet; ov._onClose = o.onClose; return ov.querySelector('.m-sheet');
+    }
+    function closeSheet() { const ov = $('#m-ov'); if (ov) { ov.remove(); if (ov._onClose) try { ov._onClose(); } catch (e) { } } }
+    // choix : renvoie l'index du bouton (ou -1 si fermé)
+    function ask(title, text, buttons) {
+        return new Promise(res => {
+            const s = sheet('<p style="margin:0 0 14px;color:var(--text-muted)">' + text + '</p><div class="m-actions" style="margin-top:0">' + (buttons || ['OK']).map((b, i) => '<button class="m-btn ' + (i === 0 ? 'primary' : '') + (b.danger ? ' danger' : '') + '" data-i="' + i + '">' + esc(b.label || b) + '</button>').join('') + '</div>', { title: esc(title), onClose: () => res(-1) });
+            $$('[data-i]', s).forEach(b => b.onclick = () => { const ov = $('#m-ov'); if (ov) ov._onClose = null; closeSheet(); res(+b.dataset.i); });
+        });
+    }
+    function download(name, content, mime) { const b = content instanceof Blob ? content : new Blob([content], { type: mime || 'application/json' }), a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { a.remove(); URL.revokeObjectURL(a.href); }, 1500); }
+    async function copy(text) { try { await navigator.clipboard.writeText(text); return true; } catch (e) { const t = document.createElement('textarea'); t.value = text; t.style.cssText = 'position:fixed;opacity:0'; document.body.appendChild(t); t.select(); let ok = false; try { ok = document.execCommand('copy'); } catch (e2) { } t.remove(); return ok; } }
+    function pickFile(accept, cb) { const i = document.createElement('input'); i.type = 'file'; i.accept = accept || '.json,application/json'; i.style.display = 'none'; i.onchange = async () => { const f = i.files[0]; i.remove(); if (f) cb(f); }; document.body.appendChild(i); i.click(); }
+    async function readEnvFile(f, app) { return checkEnv(JSON.parse(await f.text()), app); }
+    // ---------- fenêtre d'envoi : QR + lien + fichier (bureau et mobile) ----------
+    //  cfg = { app, page, title, kind, name, make: () => data | null, note, empty }
+    async function send(cfg) {
+        const data = cfg.make(); if (data == null) { toast(cfg.empty || 'Rien à envoyer'); return; }
+        const env = envelope(cfg.app, cfg.kind || 'project', cfg.name ? (typeof cfg.name === 'function' ? cfg.name() : cfg.name) : '', data);
+        const url = await link(cfg.page, env), json = JSON.stringify(env), qr = url.length <= QR_MAX ? XQR.svg(url, { ecl: 'L', border: 2 }) : null, mob = document.body.classList.contains('xm');
+        const fname = cfg.file || ((cfg.title || cfg.app) + '_' + safe(env.name) + '.xiii-m.json').replace(/\s+/g, '_');
+        const body = (qr ? '<div class="m-qr">' + qr + '</div><p class="m-hint" style="text-align:center;margin:4px 0 12px">Scannez ce code avec l\'appareil photo' + (cfg.kind === 'return' ? ' de l\'ordinateur' : ' du téléphone') + '.' + (url.length > 1100 ? ' Code dense : affichez-le en grand.' : '') + '</p>'
+            : '<div class="m-card" style="margin-top:0"><b>Trop volumineux pour un QR code</b><p class="m-hint" style="margin:6px 0 0">' + (url.length < 8000 ? 'Utilisez le lien (message, mail, AirDrop…) ou le fichier ci-dessous.' : 'Utilisez le fichier ci-dessous (AirDrop, mail, cloud…) : le lien serait trop long.') + '</p></div>') +
+            '<div class="m-actions" style="margin-top:0">' + (url.length < 8000 ? '<button class="m-btn" id="xm-copy">🔗 Copier le lien</button>' : '') + ((navigator.share && mob) ? '<button class="m-btn" id="xm-share">📤 Partager…</button>' : '') + '<button class="m-btn primary" id="xm-file">⬇️ Fichier</button></div>' +
+            (cfg.note ? '<p class="m-hint" style="margin:12px 2px 0">' + cfg.note + '</p>' : '') + '<p class="m-hint" style="margin:8px 2px 0">' + (json.length / 1024 < 10 ? Math.max(1, Math.round(json.length / 102.4) / 10) : Math.round(json.length / 1024)) + ' Ko · le projet n\'est pas envoyé sur Internet : tout est dans le lien ou le fichier.</p>';
+        const s = host(body, '📱 ' + esc(cfg.heading || (cfg.kind === 'return' ? 'Renvoyer au bureau' : 'Envoyer vers le mobile')), mob);
+        const q = id => $(id, s.ov || s);
+        const c = q('#xm-copy'); if (c) c.onclick = async () => toast(await copy(url) ? '🔗 Lien copié' : '⚠️ Copie impossible : utilisez le fichier');
+        const sh = q('#xm-share'); if (sh) sh.onclick = async () => { try { await navigator.share({ title: cfg.title || cfg.app, text: cfg.title || cfg.app, url }); } catch (e) { } };
+        q('#xm-file').onclick = () => { download(fname, json, 'application/json'); toast('⬇️ Fichier enregistré'); };
+    }
+    // fenêtre : feuille du bas sur mobile, boîte centrée sur le bureau (styles en ligne : aucun CSS requis)
+    function host(html, title, mob) {
+        if (mob) { const s = sheet(html, { title }); s.ov = s.parentNode; return s; }
+        const old = document.getElementById('xm-d-ov'); if (old) old.remove();
+        const ov = document.createElement('div'); ov.id = 'xm-d-ov'; ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:10060;display:flex;align-items:center;justify-content:center;';
+        ov.innerHTML = '<div style="background:var(--bg-menu,#2d2d2d);color:var(--text-main,#fff);width:520px;max-width:94vw;max-height:90vh;overflow-y:auto;border-radius:10px;border:1px solid var(--border-color,#444);padding:20px;box-shadow:0 4px 18px rgba(0,0,0,.5);font-size:13.5px;font-family:inherit;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;border-bottom:1px solid var(--border-color,#444);padding-bottom:8px;"><b style="font-size:15px;">' + title + '</b><span data-x style="cursor:pointer;font-weight:bold;color:var(--text-muted,#aaa);padding:0 4px;">✕</span></div><div class="xm-d">' + html + '</div></div>';
+        ov.addEventListener('mousedown', e => { if (e.target === ov) ov.remove(); }); document.body.appendChild(ov); $('[data-x]', ov).onclick = () => ov.remove();
+        const s = $('.xm-d', ov); s.ov = ov; if (!document.getElementById('xm-d-css')) { const st = document.createElement('style'); st.id = 'xm-d-css'; st.textContent = '#xm-d-ov .m-qr{background:#fff;border-radius:10px;padding:6px;width:min(100%,340px);margin:6px auto}#xm-d-ov .m-qr svg{display:block;width:100%;height:auto}#xm-d-ov .m-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}#xm-d-ov .m-actions>*{flex:1 1 130px}#xm-d-ov .m-btn{padding:9px 12px;font-size:13.5px;border-radius:8px;border:1px solid var(--btn-border,rgba(240,179,120,.35));background:var(--btn-bg,rgba(240,179,120,.12));color:inherit;cursor:pointer;font-weight:600}#xm-d-ov .m-btn.primary{border-color:rgba(240,179,120,.85);background:rgba(240,179,120,.28)}#xm-d-ov .m-hint{font-size:12px;color:var(--text-dim,#888);line-height:1.45}#xm-d-ov .m-card{border:1px solid var(--border-color,#444);border-radius:8px;padding:10px 12px;background:var(--bg-panel-alt,#252525);margin:10px 0}#xm-d-ov .m-sec{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-dim,#888);margin:16px 2px 6px}'; document.head.appendChild(st); }
+        return s;
+    }
+    // ---------- réception : lien (#mx=…), fichier ou lien collé ----------
+    async function fromHash(app, onEnv) {
+        const m = /[#&]mx=([\w-]+)/.exec(location.hash || ''); if (!m) return false;
+        try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { }
+        try { const env = checkEnv(await unpack(m[1]), app); await onEnv(env, 'link'); } catch (e) { toast('⚠️ ' + (e.message || 'Lien illisible'), 4500); }
+        return true;
+    }
+    function importFile(app, onEnv) { pickFile('.json,application/json', async f => { try { await onEnv(await readEnvFile(f, app), 'file'); } catch (e) { toast('⚠️ ' + (e.message || 'Fichier illisible'), 4500); } }); }
+    async function importLink(app, onEnv) {
+        const mob = document.body.classList.contains('xm');
+        const s = host('<label class="m-field" style="display:block;margin-bottom:10px"><span class="m-hint">Collez le lien reçu</span><textarea id="xm-paste" rows="4" style="width:100%;box-sizing:border-box;font-size:16px;padding:10px;border-radius:8px;border:1px solid var(--border-color,#444);background:var(--bg-input,#3a3a3a);color:inherit"></textarea></label><div class="m-actions"><button class="m-btn primary" id="xm-pgo">Importer</button></div>', '🔗 Importer un lien', mob);
+        $('#xm-pgo', s.ov || s).onclick = async () => { const v = $('#xm-paste', s.ov || s).value, m = /mx=([\w-]+)/.exec(v) || [0, v.trim()]; try { const env = checkEnv(await unpack(m[1]), app); if (s.ov) s.ov.remove(); closeSheet(); await onEnv(env, 'link'); } catch (e) { toast('⚠️ ' + (e.message || 'Lien illisible'), 4500); } };
+    }
+    // ---------- panneau « 📱 Mobile » des outils bureau ----------
+    //  cfg = { app, page, title, name:()=>'', make:()=>data|null, apply:async(env)=>message, note }
+    function desktopPanel(cfg) {
+        const s = host('<p class="m-hint" style="margin:0 0 10px">Emportez ce projet sur le téléphone : ouvrez la <b>version mobile</b> de ' + esc(cfg.title) + ' en scannant un QR code, en ouvrant un lien ou en important un fichier.</p>' +
+            '<div class="m-actions" style="margin-top:0"><button class="m-btn primary" id="xm-go">📱 Envoyer vers le mobile</button><button class="m-btn" id="xm-open">↗ Ouvrir la version mobile ici</button></div>' +
+            (cfg.apply ? '<div class="m-sec">Récupérer ce qui a été fait sur le mobile</div><div class="m-actions" style="margin-top:0"><button class="m-btn" id="xm-ifile">📂 Importer un fichier</button><button class="m-btn" id="xm-ilink">🔗 Coller un lien</button></div><p class="m-hint" style="margin:8px 2px 0">' + (cfg.returnNote || 'Sur le mobile, « Renvoyer au bureau » produit le fichier ou le lien à importer ici.') + '</p>' : ''), '📱 Version mobile — ' + esc(cfg.title), false);
+        const q = id => $(id, s.ov);
+        q('#xm-go').onclick = () => { s.ov.remove(); send({ app: cfg.app, page: cfg.page, title: cfg.title, name: cfg.name, make: cfg.make, note: cfg.note, empty: cfg.empty }); };
+        q('#xm-open').onclick = async () => { const d = cfg.make(); if (d == null) { toast(cfg.empty || 'Rien à envoyer'); return; } s.ov.remove(); window.open(await link(cfg.page, envelope(cfg.app, 'project', typeof cfg.name === 'function' ? cfg.name() : cfg.name, d)), '_blank'); };
+        if (cfg.apply) { const ap = async env => { s.ov && s.ov.remove(); const m = await cfg.apply(env); if (m) toast(m, 5000); }; q('#xm-ifile').onclick = () => importFile(cfg.app, ap); q('#xm-ilink').onclick = () => { s.ov.remove(); importLink(cfg.app, async env => { const m = await cfg.apply(env); if (m) toast(m, 5000); }); }; }
+    }
+    // retour par lien sur le bureau (#mx=… de type return)
+    function desktopBoot(cfg) { return fromHash(cfg.app, async env => { if (env.kind === 'return' && cfg.apply) { const m = await cfg.apply(env); if (m) toast(m, 5000); } }); }
+    // ---------- thème, en-tête et menu des pages mobiles ----------
+    function initTheme() { let p = {}; try { p = JSON.parse(localStorage.getItem('hubXIII.prefs')) || {}; } catch (e) { } document.body.classList.add('xm'); document.body.classList.toggle('light-theme', p.theme === 'light'); const m = document.querySelector('meta[name=theme-color]'); if (m) m.content = p.theme === 'light' ? '#ffffff' : '#222222'; }
+    function toggleTheme() { let p = {}; try { p = JSON.parse(localStorage.getItem('hubXIII.prefs')) || {}; } catch (e) { } p.theme = p.theme === 'light' ? 'dark' : 'light'; try { localStorage.setItem('hubXIII.prefs', JSON.stringify(p)); } catch (e) { } initTheme(); }
+    //  menu standard ⋯ : cfg = { app, deskPage, items:[{icon,label,sub,run}] , onImport(env, via) , sendReturn() }
+    function menu(cfg) {
+        const items = (cfg.items || []).concat([
+            cfg.onImport ? { icon: '📂', label: 'Importer un fichier', sub: 'Envoi du bureau (.xiii-m.json)', run: () => importFile(cfg.app, cfg.onImport) } : null,
+            cfg.onImport ? { icon: '🔗', label: 'Coller un lien', sub: 'Lien ou QR reçu du bureau', run: () => importLink(cfg.app, cfg.onImport) } : null,
+            cfg.sendReturn ? { icon: '📤', label: 'Renvoyer au bureau', sub: 'QR code, lien ou fichier', run: cfg.sendReturn } : null,
+            { icon: '🌓', label: 'Thème clair / sombre', run: toggleTheme },
+            cfg.deskPage ? { icon: '🖥️', label: 'Version bureau', sub: 'Interface complète', run: () => { try { sessionStorage.setItem('xiiiDesk', '1'); } catch (e) { } location.href = cfg.deskPage + '?desktop=1'; } } : null,
+            { icon: '🏠', label: 'Accueil SUITE XIII', run: () => { location.href = 'index.html'; } }].filter(Boolean));
+        const s = sheet('<div class="m-list" style="margin:0">' + items.map((it, i) => '<button class="m-item" data-i="' + i + '"><span class="ico">' + it.icon + '</span><span class="grow"><b>' + esc(it.label) + '</b>' + (it.sub ? '<small>' + esc(it.sub) + '</small>' : '') + '</span></button>').join('') + '</div><p class="m-credit">Application développée par Matthieu Lamotte</p>', { title: 'Menu' });
+        $$('[data-i]', s).forEach(b => b.onclick = () => { closeSheet(); setTimeout(() => items[+b.dataset.i].run(), 60); });
+    }
+    return { FORMAT, $, $$, esc, uid, safe, isPhone, pack, unpack, link, envelope, checkEnv, load, save, drop, toast, sheet, closeSheet, ask, download, copy, pickFile, readEnvFile, send, host, fromHash, importFile, importLink, desktopPanel, desktopBoot, initTheme, toggleTheme, menu };
+})();
+// 🏠 retour à l'accueil SUITE XIII : même bouton en tête de chaque version mobile
+(function () {
+    const add = () => { const top = document.querySelector('.m-top'); if (!top || top.querySelector('.xm-home')) return; const a = document.createElement('a'); a.className = 'm-ibtn plain xm-home'; a.href = 'index.html'; a.title = 'Accueil SUITE XIII'; a.setAttribute('aria-label', 'Accueil'); a.textContent = '🏠'; a.style.cssText = 'text-decoration:none;font-size:17px;display:inline-flex;align-items:center;justify-content:center'; top.insertBefore(a, top.firstChild); };
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', add); else add();
+})();
+
+// 📱 XIII Équipe : une fois dans l'application, on y reste (l'accueil ramène à l'application, pas au site)
+(function () {
+    if (window.__xinapp) return; window.__xinapp = 1;
+    var page = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
+    try { if (page === 'equipe.html' && (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (window.matchMedia && matchMedia('(display-mode: standalone)').matches))) sessionStorage.setItem('xiii.inapp', '1'); } catch (e) { }
+    function inApp() { try { return sessionStorage.getItem('xiii.inapp') === '1'; } catch (e) { return false; } }
+    if (!inApp()) return;
+    if (page === 'index.html' || page === '') { location.replace('equipe.html'); return; }
+    document.addEventListener('click', function (e) {
+        var a = e.target.closest && e.target.closest('a[href]'); if (!a) return;
+        var u; try { u = new URL(a.getAttribute('href'), location.href); } catch (er) { return; }
+        if (u.origin !== location.origin) return;
+        var f = (u.pathname.split('/').pop() || 'index.html').toLowerCase();
+        if (f === 'index.html' || f === '') { e.preventDefault(); e.stopPropagation(); location.href = 'equipe.html'; return; }
+        if (a.target === '_blank') { a.removeAttribute('target'); }
+    }, true);
+})();
+
+</script>
+<script>
+XM.initTheme();
+// =====================================================================
+//  PACKINGO XIII — version mobile : check-out (sortie / chargement) et check-in (retour) du matériel
+//  Reçoit une structure légère du bureau (cases, éléments, état des contrôles), renvoie un PATCH par identifiants.
+// =====================================================================
+(function () {
+'use strict';
+const $ = XM.$, $$ = XM.$$, esc = XM.esc, uid = XM.uid, APP = 'packingo';
+const ST = { ok: ['✓', 'Présent'], miss: ['✗', 'Manquant'], dmg: ['⚠', 'Abîmé'] };
+const COLORS = ['#E53935', '#1E88E5', '#43A047', '#FB8C00', '#8E24AA', '#00ACC1', '#FDD835', '#6D4C41', '#D81B60', '#3949AB', '#7CB342', '#F4511E', '#546E7A', '#C0CA33', '#5E35B1', '#00897B'];
+const nf = (n, d = 0) => (isFinite(n) ? n : 0).toLocaleString('fr-FR', { minimumFractionDigits: d, maximumFractionDigits: d });
+const pad2 = n => String(n).padStart(2, '0');
+const nowHM = () => { const d = new Date(); return pad2(d.getHours()) + ':' + pad2(d.getMinutes()); };
+const todayISO = () => { const d = new Date(); return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()); };
+const addDays = (iso, n) => { const d = new Date(iso + 'T12:00:00'); d.setDate(d.getDate() + n); return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()); };
+const frDate = iso => { if (!iso) return ''; const [y, m, d] = iso.split('-'); return d + '/' + m + '/' + y; };
+const fold = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+const num = v => { const n = parseFloat(String(v).replace(',', '.')); return isFinite(n) ? n : 0; };
+const fmtKg = kg => { kg = +kg || 0; return kg >= 1000 ? nf(kg / 1000, 2) + ' t' : nf(kg, kg < 100 ? 1 : 0) + ' kg'; };
+function ink(hex) { const m = /^#?([0-9a-f]{6})$/i.exec(hex || ''); if (!m) return '#fff'; const n = parseInt(m[1], 16), r = n >> 16, g = (n >> 8) & 255, b = n & 255; return (0.299 * r + 0.587 * g + 0.114 * b) > 170 ? '#111' : '#fff'; }
+const chipSt = col => 'background:' + esc(col) + ';color:' + ink(col);
+const clone = o => JSON.parse(JSON.stringify(o));
+const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+const vib = ms => { try { if (navigator.vibrate) navigator.vibrate(ms || 12); } catch (e) { } };
+
+// ---------- Photos : IndexedDB (hors du stockage principal) ----------
+const PH = new Map(); let idb = null;
+const idbOpen = () => new Promise(res => { try { const r = indexedDB.open('xiii-m-packingo', 1); r.onupgradeneeded = () => r.result.createObjectStore('ph'); r.onsuccess = () => res(r.result); r.onerror = () => res(null); } catch (e) { res(null); } });
+async function phLoad() { idb = await idbOpen(); if (!idb) return; await new Promise(res => { try { const rq = idb.transaction('ph').objectStore('ph').openCursor(); rq.onsuccess = () => { const c = rq.result; if (c) { PH.set(c.key, c.value); c.continue(); } else res(); }; rq.onerror = () => res(); } catch (e) { res(); } }); }
+function phSet(k, v) { if (v) PH.set(k, v); else PH.delete(k); if (!idb) return; try { const st = idb.transaction('ph', 'readwrite').objectStore('ph'); if (v) st.put(v, k); else st.delete(k); } catch (e) { } }
+function phClear(prefix) { Array.from(PH.keys()).filter(k => !prefix || k.startsWith(prefix)).forEach(k => phSet(k, null)); }
+function compress(file) {
+    return new Promise((res, rej) => {
+        const url = URL.createObjectURL(file), img = new Image();
+        img.onload = () => { const s = Math.min(1, 800 / Math.max(img.width, img.height)), c = document.createElement('canvas'); c.width = Math.max(1, Math.round(img.width * s)); c.height = Math.max(1, Math.round(img.height * s)); c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); URL.revokeObjectURL(url); res(c.toDataURL('image/jpeg', 0.6)); };
+        img.onerror = () => { URL.revokeObjectURL(url); rej(new Error('Image illisible')); }; img.src = url;
+    });
+}
+
+// ---------- Modèle ----------
+let S = null;   // { name, ts, example, standalone, prod, cps, curCp, vehicles, cases, checks, base }
+const UI = { tab: 'chk', f: 'all', q: '', col: {} };
+const curCp = () => S.cps.find(c => c.id === S.curCp) || S.cps[0];
+const caseOf = id => S.cases.find(c => c.id === id);
+const vehOf = id => S.vehicles.find(v => v.id === id);
+const vehCases = v => S.cases.filter(c => c.veh === (v ? v.id : null)).sort((a, b) => (a.ord || 0) - (b.ord || 0));
+const cpMap = cp => S.checks[cp] || (S.checks[cp] = {});
+const recOf = (cp, iid) => (S.checks[cp] || {})[iid] || null;
+const stOf = (cp, iid) => (recOf(cp, iid) || {}).s || '';
+const itemKg = i => (+i.kg || 0) * (+i.qty || 0), caseKg = c => (+c.tare || 0) + c.items.reduce((s, i) => s + itemKg(i), 0);
+function cpStats(cp) { const s = { total: 0, ok: 0, miss: 0, dmg: 0, pend: 0 }; S.cases.forEach(c => c.items.forEach(i => { s.total++; const st = stOf(cp, i.id); if (st) s[st]++; else s.pend++; })); return s; }
+function caseStats(cp, c) { const s = { total: c.items.length, ok: 0, miss: 0, dmg: 0, pend: 0 }; c.items.forEach(i => { const st = stOf(cp, i.id); if (st) s[st]++; else s.pend++; }); return s; }
+function caseLoaded(cp, c) { const pr = c.items.filter(i => ['ok', 'dmg'].includes(stOf(cp, i.id))); return pr.length ? (+c.tare || 0) + pr.reduce((s, i) => s + itemKg(i), 0) : 0; }
+function weights(cp) { let exp = 0, load = 0; S.cases.forEach(c => { exp += caseKg(c); load += caseLoaded(cp, c); }); return { exp, load }; }
+function normalize(d, name, flags) {
+    const prod = Object.assign({ name: '', client: '', lieu: '', depart: '', retour: '', resp: '', paxKg: 75 }, d.prod || {});
+    const cps = (d.cps && d.cps.length ? d.cps : [{ id: uid(), name: 'Sortie', icon: '🚚', date: todayISO() }, { id: uid(), name: 'Retour', icon: '🏁', date: addDays(todayISO(), 2) }]).map(c => ({ id: c.id, name: c.name || 'Contrôle', icon: c.icon || '📍', date: c.date || '' }));
+    const vehicles = (d.vehicles || []).map(v => Object.assign({ name: '', plate: '', driver: '', payload: 0, pax: 0, color: '#42A5F5' }, v));
+    const cases = (d.cases || []).map((c, k) => ({ id: c.id, code: c.code || 'FC-' + (k + 1), name: c.name || '', color: c.color || COLORS[k % COLORS.length], veh: c.veh && vehicles.some(v => v.id === c.veh) ? c.veh : null, ord: c.ord || 0, fragile: !!c.fragile, tare: +c.tare || 0, mob: c.mob ? 1 : 0,
+        items: (c.items || []).map(i => Array.isArray(i) ? { id: i[0], name: i[1] || '', qty: +i[2] || 1, kg: +i[3] || 0, sn: i[4] || '' } : { id: i.id, name: i.name || '', qty: +i.qty || 1, kg: +i.kg || 0, sn: i.sn || '', mob: i.mob ? 1 : 0 }) }));
+    const checks = {}; Object.keys(d.checks || {}).forEach(cp => { checks[cp] = {}; Object.keys(d.checks[cp]).forEach(k => { const r = d.checks[cp][k]; if (r && (r.s || r.sealed)) checks[cp][k] = clone(r); }); });
+    const curCp = cps.some(c => c.id === d.curCp) ? d.curCp : cps[0].id;
+    return Object.assign({ name: name || prod.name || '', ts: Date.now(), example: false, standalone: false, prod, cps, curCp, vehicles, cases, checks, base: clone(checks) }, flags || {});
+}
+function persist() { if (S && !XM.save(APP, S) && !UI.full) { UI.full = 1; XM.toast('⚠️ Stockage du téléphone plein : renvoyez vos pointages au bureau', 5000); } badge(); }
+
+// ---------- Patch de retour (différences par rapport à l'envoi du bureau) ----------
+function buildPatch(withPh) {
+    if (!S) return null; let n = 0; const cps = {};
+    S.cps.forEach(cp => {
+        const cur = S.checks[cp.id] || {}, base = S.base[cp.id] || {}, set = {}, del = [];
+        new Set(Object.keys(cur).concat(Object.keys(base))).forEach(k => {
+            const a = base[k], b = cur[k]; if (same(a, b)) return;
+            if (!b) { del.push(k); return; }
+            const r = clone(b); if (r.ph) { const data = PH.get(cp.id + '|' + k); r.ph = withPh && data ? data : 'keep'; } set[k] = r;
+        });
+        if (Object.keys(set).length || del.length) { cps[cp.id] = { set, del }; n += Object.keys(set).length + del.length; }
+    });
+    const arr = i => [i.id, i.name, i.qty, i.kg, i.sn || ''];
+    const newCases = S.cases.filter(c => c.mob).map(c => ({ id: c.id, code: c.code, name: c.name, color: c.color, veh: c.veh, fragile: c.fragile, tare: c.tare, items: c.items.filter(i => !i.ed).map(arr) }));
+    const newItems = []; S.cases.filter(c => !c.mob).forEach(c => c.items.filter(i => i.mob).forEach(i => newItems.push({ case: c.id, id: i.id, name: i.name, qty: i.qty, kg: i.kg, sn: i.sn || '' })));
+    const edits = []; S.cases.forEach(c => c.items.filter(i => i.ed && !i.mob).forEach(i => edits.push({ id: i.id, qty: i.qty, case: c.id })));
+    n += newCases.length + newItems.length + edits.length;
+    if (!n) return null;
+    const out = { v: 1, project: S.prod.name || S.name, sent: S.ts, count: n, cps, newCases, newItems, edits, photos: !!withPh };
+    if (S.standalone) { out.standalone = true; out.prod = S.prod; out.newCps = S.cps; }
+    return out;
+}
+function badge() { let n = 0; try { const p = S ? buildPatch(false) : null; n = p ? p.count : 0; } catch (e) { } const b = $('#pk-ret'); b.hidden = !n; $('#pk-retn').textContent = n; b.title = n + ' changement(s) à renvoyer au bureau'; }
+
+// ---------- Actions de pointage ----------
+function setRec(cpId, iid, rec) {
+    const m = cpMap(cpId); if (rec) m[iid] = rec; else delete m[iid];
+    persist();
+}
+function tick(iid) {
+    const cp = curCp().id, r = recOf(cp, iid); vib(r && r.s === 'ok' ? 8 : 14);
+    if (r && r.s === 'ok') { setRec(cp, iid, null); phSet(cp + '|' + iid, null); }
+    else { const n = { s: 'ok', t: nowHM(), by: S.prod.resp || '' }; if (r && r.n) n.n = r.n; if (r && r.ph) n.ph = 1; setRec(cp, iid, n); }
+    render(iid);
+}
+function checkCase(cid) {
+    const cp = curCp().id, c = caseOf(cid), all = c.items.every(i => stOf(cp, i.id) === 'ok'); vib(25);
+    c.items.forEach(i => { if (all) { delete cpMap(cp)[i.id]; phSet(cp + '|' + i.id, null); } else if (!recOf(cp, i.id)) cpMap(cp)[i.id] = { s: 'ok', t: nowHM(), by: S.prod.resp || '' }; });
+    persist(); UI.col[cid] = false; render();
+    XM.toast(all ? 'Pointage du case effacé' : '✓ ' + c.code + ' : tout pointé présent', 1800);
+}
+function toggleSeal(cid) {
+    const cp = curCp().id, m = cpMap(cp), k = 'c:' + cid; vib(14);
+    if (m[k]) delete m[k]; else { const s = caseStats(cp, caseOf(cid)); if (s.pend) XM.toast('🔒 Case fermé alors que ' + s.pend + ' élément(s) ne sont pas pointés', 3200); m[k] = { sealed: 1, t: nowHM() }; }
+    persist(); render();
+}
+function detail(iid) {
+    const cp = curCp(), c = S.cases.find(x => x.items.some(i => i.id === iid)), it = c.items.find(i => i.id === iid), r0 = recOf(cp.id, iid) || {};
+    let s = r0.s || '', photo = r0.ph ? (PH.get(cp.id + '|' + iid) || 'remote') : '', note = r0.n || '', phChanged = false;
+    const sh = XM.sheet(`<p class="m-hint" style="margin:-4px 0 10px"><span class="pk-code" style="${chipSt(c.color)}">${esc(c.code)}</span> ${esc(c.name)} · ${esc(cp.icon)} ${esc(cp.name)}${it.sn ? ' · n° ' + esc(it.sn) : ''}</p>
+      <div class="pk-st">${Object.keys(ST).map(k => `<button data-s="${k}" class="${s === k ? 'on' : ''}"><span>${ST[k][0]}</span>${ST[k][1]}</button>`).join('')}</div>
+      <div class="m-grid2"><label class="m-field"><span>Quantité</span><input type="number" id="d-qty" min="1" inputmode="numeric" value="${+it.qty || 1}"></label><label class="m-field"><span>Flight case</span><select id="d-case">${S.cases.map(x => `<option value="${x.id}" ${x.id === c.id ? 'selected' : ''}>${esc(x.code + ' — ' + x.name)}</option>`).join('')}</select></label></div>
+      <label class="m-field"><span>Note (facultatif)</span><textarea id="d-note" rows="3" placeholder="ex. objectif rayé, batterie à 40 %, remplacé par…">${esc(note)}</textarea></label>
+      <div class="pk-ph" id="d-ph"></div>
+      <div class="m-actions" style="margin-top:0"><button class="m-btn" id="d-photo">📷 Photo</button><button class="m-btn primary" id="d-ok">✓ Enregistrer</button></div>`, { title: esc((+it.qty > 1 ? it.qty + '× ' : '') + it.name) });
+    const drawPh = () => { $('#d-ph', sh).innerHTML = photo ? `<img src="${photo === 'remote' ? '' : photo}" alt="Photo" ${photo === 'remote' ? 'hidden' : ''}>${photo === 'remote' ? '<span class="m-hint">📷 Photo enregistrée sur le bureau</span>' : ''}<button class="m-btn sm danger" id="d-rmph">Retirer</button>` : ''; const rm = $('#d-rmph', sh); if (rm) rm.onclick = () => { photo = ''; phChanged = true; drawPh(); }; };
+    drawPh();
+    $$('.pk-st button', sh).forEach(b => b.onclick = () => { s = s === b.dataset.s ? '' : b.dataset.s; $$('.pk-st button', sh).forEach(x => x.classList.toggle('on', x.dataset.s === s)); vib(10); });
+    $('#d-photo', sh).onclick = () => { const inp = $('#pk-photo'); inp.value = ''; inp.onchange = async () => { const f = inp.files[0]; if (!f) return; try { photo = await compress(f); phChanged = true; drawPh(); } catch (e) { XM.toast('⚠️ ' + e.message); } }; inp.click(); };
+    $('#d-ok', sh).onclick = () => {
+        note = $('#d-note', sh).value.trim();
+        const nq = Math.max(1, Math.round(num($('#d-qty', sh).value) || 1)), nc = $('#d-case', sh).value;
+        if (nq !== (+it.qty || 1) || nc !== c.id) { if (!it.mob && !it.ed) it.ed = { q0: +it.qty || 1, c0: c.id }; it.qty = nq; if (nc !== c.id) { const to = caseOf(nc); if (to) { c.items.splice(c.items.indexOf(it), 1); to.items.push(it); UI.col[to.id] = false; } } if (it.ed && it.ed.q0 === it.qty && it.ed.c0 === nc) delete it.ed; persist(); XM.toast('✏️ ' + it.name + ' : ' + it.qty + '× → ' + (caseOf(nc) || c).code); }
+        if (!s && (note || photo)) { XM.toast('Choisissez d\'abord un état (présent, manquant, abîmé) pour joindre une note ou une photo', 3500); return; }
+        if (!s) { setRec(cp.id, iid, null); phSet(cp.id + '|' + iid, null); }
+        else { const n = { s, t: r0.s === s && r0.t ? r0.t : nowHM(), by: S.prod.resp || '' }; if (note) n.n = note; if (photo) n.ph = 1; setRec(cp.id, iid, n); if (phChanged) phSet(cp.id + '|' + iid, photo && photo !== 'remote' ? photo : null); if (!photo && r0.ph) phSet(cp.id + '|' + iid, null); }
+        XM.closeSheet(); render(iid);
+    };
+}
+
+// ---------- Rendu ----------
+const main = $('#pk-main');
+function render(flash) {
+    const y = window.scrollY, has = !!S;
+    $('#pk-tabs').hidden = !has; $('#pk-fab').hidden = !(has && UI.tab === 'chk'); main.classList.toggle('no-tabs', !has);
+    if (!has) { $('#pk-sub').textContent = 'Check-out / check-in du matériel'; main.innerHTML = vHome(); badge(); return; }
+    $$('#pk-tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === UI.tab));
+    const cp = curCp(); $('#pk-sub').textContent = [S.prod.name || S.name, cp.icon + ' ' + cp.name].filter(Boolean).join(' · ');
+    main.innerHTML = ({ chk: vChk, veh: vVeh, sum: vSum }[UI.tab] || vChk)();
+    window.scrollTo(0, y); badge();
+    if (flash) { const el = $('#row-' + flash); if (el) el.classList.add('pk-flash'); }
+}
+function vHome() {
+    return `<div class="m-card"><h3>📦 Aucune liste de colisage sur ce téléphone</h3><p style="margin:0 0 6px;color:var(--text-muted)">Emportez-la depuis l'ordinateur :</p>
+      <ol class="pk-steps"><li>Dans PACKINGO XIII (bureau), touchez le bouton <b>📱</b> de la barre d'outils.</li><li><b>Scannez le QR code</b> avec l'appareil photo du téléphone, ou envoyez-vous le lien / le fichier.</li>
+      <li>Pointez le matériel à la <b>sortie</b> et au <b>retour</b>, puis « Renvoyer au bureau ».</li></ol></div>
+      <div class="m-actions"><button class="m-btn primary" data-act="homeLink">🔗 Coller un lien</button><button class="m-btn" data-act="homeFile">📂 Importer un fichier</button></div>
+      <div class="m-actions"><button class="m-btn" data-act="example">📐 Essayer avec un exemple</button><button class="m-btn" data-act="newProj">✨ Nouveau</button></div>
+      <p class="m-hint" style="text-align:center;margin-top:18px">Tout reste dans le téléphone : rien n'est envoyé sur Internet.<br>Fonctionne hors ligne.</p><p class="m-credit">Application développée par Matthieu Lamotte</p>`;
+}
+function modeBar(cp) {
+    const first = S.cps[0], last = S.cps[S.cps.length - 1];
+    let h = '<div class="pk-modes">';
+    if (S.cps.length >= 2) h += `<div class="m-seg"><button data-cp="${first.id}" class="${cp.id === first.id ? 'on' : ''}">🚚 SORTIE</button><button data-cp="${last.id}" class="${cp.id === last.id ? 'on' : ''}">🏁 RETOUR</button></div>`;
+    if (S.cps.length > 2 || S.cps.length === 1) h += `<div class="pk-cps">${S.cps.map(c => `<button class="m-chip ${c.id === cp.id ? 'on' : ''}" data-cp="${c.id}">${esc(c.icon)} ${esc(c.name)}${c.date ? ' · ' + esc(frDate(c.date).slice(0, 5)) : ''}</button>`).join('')}</div>`;
+    return h + '</div>';
+}
+function vChk() {
+    const cp = curCp(), s = cpStats(cp.id), f = UI.f, q = fold(UI.q).trim(), w = weights(cp.id), pct = x => s.total ? x / s.total * 100 : 0;
+    if (!S.cases.length) return modeBar(cp) + `<div class="m-empty"><b>📦</b>Aucun case.<br>Touchez ＋ pour ajouter un case et son matériel.</div>`;
+    let h = modeBar(cp) + `<div class="m-card"><div class="pk-big"><b>${s.ok + s.dmg}/${s.total}</b><span>pointés · ${nf(s.total ? (s.ok + s.dmg) / s.total * 100 : 0)} %</span></div>
+      <div class="m-progress pk-p"><i class="ok" style="width:${pct(s.ok)}%"></i><i class="dmg" style="width:${pct(s.dmg)}%"></i><i class="miss" style="width:${pct(s.miss)}%"></i></div>
+      <div class="pk-sum"><span class="m-pill ok">✓ ${s.ok}</span><span class="m-pill danger">✗ ${s.miss} manquant${s.miss > 1 ? 's' : ''}</span><span class="m-pill warn">⚠ ${s.dmg} abîmé${s.dmg > 1 ? 's' : ''}</span><span class="m-pill">☐ ${s.pend} restant${s.pend > 1 ? 's' : ''}</span><span class="m-pill">⚖️ ${fmtKg(w.load)} / ${fmtKg(w.exp)}</span></div></div>
+      <input type="search" id="pk-q" placeholder="Rechercher un élément, un n° de série, un case…" value="${esc(UI.q)}" aria-label="Rechercher">
+      <div class="pk-filters">${[['all', 'Tout'], ['pend', 'Restant à traiter'], ['pb', 'Problèmes']].map(x => `<button class="m-chip ${f === x[0] ? 'on' : ''}" data-f="${x[0]}">${x[1]}</button>`).join('')}</div><div id="pk-list">${caseList()}</div>`;
+    return h;
+}
+function caseList() {
+    const cp = curCp(), f = UI.f, q = fold(UI.q).trim(); let h = '', shown = 0;
+    const groups = S.vehicles.map(v => [v, vehCases(v)]).concat([[null, vehCases(null)]]).filter(g => g[1].length);
+    groups.forEach(([v, cs]) => {
+        let gh = '';
+        cs.forEach(c => {
+            const st = caseStats(cp.id, c), sealed = !!recOf(cp.id, 'c:' + c.id), caseHit = q && fold(c.code + ' ' + c.name).includes(q);
+            const rows = c.items.filter(i => { const x = stOf(cp.id, i.id); if (f === 'pend' && x) return false; if (f === 'pb' && x !== 'miss' && x !== 'dmg') return false; return !q || caseHit || fold(i.name + ' ' + i.sn).includes(q); });
+            if ((f !== 'all' || q) && !rows.length) return;
+            shown++;
+            const done = st.total && !st.pend, open = (f !== 'all' || q) ? true : (UI.col[c.id] === undefined ? !done : !UI.col[c.id]);
+            gh += `<div class="m-card pk-case ${st.miss ? 'bad' : done ? 'done' : ''}" style="--cc:${esc(c.color)}" id="case-${c.id}"><div class="pk-ch"><button class="tog" data-act="col" data-id="${c.id}" aria-expanded="${open}"><span class="pk-code" style="${chipSt(c.color)}">${esc(c.code)}</span><span class="nm"><b>${esc(c.name || 'Case')}${c.fragile ? ' 🥚' : ''}</b><small>${st.total - st.pend}/${st.total} · ${fmtKg(caseKg(c))} ${open ? '▾' : '▸'}</small></span></button>
+              <button class="m-btn sm" data-act="all" data-id="${c.id}" aria-label="Tout cocher dans ${esc(c.code)}">✓ Tout</button><button class="m-btn sm ${sealed ? 'primary' : ''}" data-act="seal" data-id="${c.id}" aria-label="${sealed ? 'Rouvrir' : 'Fermer'} ${esc(c.code)}">${sealed ? '🔒' : '🔓'}</button></div>`;
+            if (open) gh += (rows.length ? rows.map(i => {
+                const r = recOf(cp.id, i.id) || {}, x = r.s || '';
+                return `<div class="pk-row s-${x || 'none'}" id="row-${i.id}"><button class="pk-box" data-act="tick" data-id="${i.id}" aria-label="Pointer ${esc(i.name)}"><i>${x ? ST[x][0] : '✓'}</i></button>
+                  <button class="pk-rb" data-act="detail" data-id="${i.id}"><b>${i.qty > 1 ? `<span class="q">${i.qty}×</span>` : ''}${esc(i.name)}</b><small>${[i.sn ? 'n° ' + esc(i.sn) : '', x === 'miss' || x === 'dmg' ? '<b style="color:' + (x === 'miss' ? '#ef5350' : 'var(--warn)') + '">' + ST[x][1] + '</b>' : '', r.ph ? '📷' : '', r.t && x ? esc(r.t) : ''].filter(Boolean).join(' · ')}</small>${r.n ? `<small class="nt">📝 ${esc(r.n)}</small>` : ''}</button></div>`;
+            }).join('') : '<div class="m-empty" style="padding:12px">Case vide</div>');
+            gh += '</div>';
+        });
+        if (gh) h += `<div class="pk-vh"><i style="background:${v ? esc(v.color) : 'var(--text-dim)'}"></i>${v ? '🚚 ' + esc(v.name) + (v.plate ? ' · ' + esc(v.plate) : '') : '📦 Non chargés'}</div>` + gh;
+    });
+    if (!shown) h = `<div class="m-empty"><b>${f === 'pb' ? '✔' : q ? '🔍' : '✔'}</b>${q ? 'Aucun résultat pour « ' + esc(UI.q) + ' ».' : f === 'pend' ? 'Plus rien à pointer.' : 'Aucun problème signalé.'}</div>`;
+    return h;
+}
+function gauge(label, val, max, fmt) {
+    const r = max ? val / max : 0;
+    return `<div class="pk-gauge">${label} <b>${fmt(val)}</b>${max ? ' / ' + fmt(max) + ' · ' + nf(r * 100) + ' %' : ''}<div class="m-progress ${r > 1 ? 'red' : r > 0.85 ? 'warn' : ''}"><i style="width:${Math.min(100, r * 100)}%"></i></div></div>`;
+}
+function vVeh() {
+    const cp = curCp(); let h = modeBar(cp);
+    const T = weights(cp.id);
+    h += `<div class="m-card"><div class="pk-big"><b>${fmtKg(T.load)}</b><span>pointés sur ${fmtKg(T.exp)} prévus</span></div></div>`;
+    const groups = S.vehicles.map(v => [v, vehCases(v)]).concat([[null, vehCases(null)]]).filter(g => g[1].length || g[0]);
+    if (!S.cases.length) return h + `<div class="m-empty"><b>🚚</b>Aucun case.</div>`;
+    groups.forEach(([v, cs]) => {
+        const exp = cs.reduce((s, c) => s + caseKg(c), 0), load = cs.reduce((s, c) => s + caseLoaded(cp.id, c), 0), pax = v ? (+v.pax || 0) * (+S.prod.paxKg || 0) : 0;
+        h += `<div class="m-card"><div class="pk-vh"><i style="background:${v ? esc(v.color) : 'var(--text-dim)'}"></i>${v ? '🚚 ' + esc(v.name) : '📦 Non chargés'}${v && (v.plate || v.driver) ? `<span class="m-hint" style="font-weight:400">· ${esc([v.plate, v.driver].filter(Boolean).join(' · '))}</span>` : ''}</div>
+          ${gauge('Prévu', exp + pax, v && v.payload, fmtKg)}${gauge('Pointé', load, exp || 0, fmtKg)}
+          ${v && v.pax ? `<p class="m-hint" style="margin:0 0 6px">👤 ${v.pax} × ${fmtKg(S.prod.paxKg)} comptés dans la charge utile</p>` : ''}
+          <div class="pk-list">${cs.map((c, k) => { const st = caseStats(cp.id, c); return `<div class="m-row"><span class="pk-code" style="${chipSt(c.color)}">${esc(c.code)}</span><div class="grow"><b>${v ? '<span class="m-hint">#' + (k + 1) + '</span> ' : ''}${esc(c.name)}${c.fragile ? ' 🥚' : ''}</b><small>${st.total - st.pend}/${st.total} pointés · ${fmtKg(caseKg(c))}</small></div>${recOf(cp.id, 'c:' + c.id) ? '<span class="m-pill ok">🔒</span>' : st.total && !st.pend ? '<span class="m-pill ok">✓</span>' : ''}</div>`; }).join('') || '<p class="m-hint" style="margin:0">Aucun case.</p>'}</div>
+          ${v && cs.length ? '<p class="m-hint" style="margin:8px 0 0">1 = chargé en premier (fond du véhicule) · déchargement dans l\'ordre inverse.</p>' : ''}</div>`;
+    });
+    return h;
+}
+function problems(cp, kind) { const out = []; S.cases.forEach(c => c.items.forEach(i => { if (stOf(cp, i.id) === kind) out.push([c, i, recOf(cp, i.id)]); })); return out; }
+function summaryText() {
+    const cp = curCp(), s = cpStats(cp.id), w = weights(cp.id), p = S.prod;
+    let t = `📦 PACKINGO XIII — ${p.name || S.name || 'Tournage'}\n${cp.icon} ${cp.name}${cp.date ? ' · ' + frDate(cp.date) : ''}${p.lieu ? ' · ' + p.lieu : ''}\n\n✅ ${s.ok + s.dmg}/${s.total} pointés · ✗ ${s.miss} manquant${s.miss > 1 ? 's' : ''} · ⚠ ${s.dmg} abîmé${s.dmg > 1 ? 's' : ''} · ${s.pend} restant${s.pend > 1 ? 's' : ''}\n⚖️ Poids chargé : ${fmtKg(w.load)} / ${fmtKg(w.exp)} prévus\n`;
+    S.vehicles.forEach(v => { const cs = vehCases(v); t += `🚚 ${v.name}${v.plate ? ' (' + v.plate + ')' : ''} : ${fmtKg(cs.reduce((a, c) => a + caseLoaded(cp.id, c), 0))} pointés / ${fmtKg(cs.reduce((a, c) => a + caseKg(c), 0))} prévus${v.payload ? ' (CU ' + fmtKg(v.payload) + ')' : ''}\n`; });
+    const line = ([c, i, r]) => `  • ${i.qty}× ${i.name}${i.sn ? ' [' + i.sn + ']' : ''} (${c.code})${r && r.n ? ' — ' + r.n : ''}${r && r.ph ? ' 📷' : ''}`;
+    const miss = problems(cp.id, 'miss'), dmg = problems(cp.id, 'dmg');
+    if (miss.length) t += '\n✗ MANQUANTS\n' + miss.map(line).join('\n') + '\n';
+    if (dmg.length) t += '\n⚠ ABÎMÉS\n' + dmg.map(line).join('\n') + '\n';
+    const rest = S.cases.map(c => [c, caseStats(cp.id, c).pend]).filter(x => x[1]);
+    if (rest.length) t += '\n☐ RESTE À POINTER : ' + rest.map(x => x[0].code + ' (' + x[1] + ')').join(', ') + '\n';
+    else if (s.total && !miss.length && !dmg.length) t += '\n✅ Tout est pointé présent.\n';
+    return t;
+}
+function vSum() {
+    const cp = curCp(), s = cpStats(cp.id), w = weights(cp.id), miss = problems(cp.id, 'miss'), dmg = problems(cp.id, 'dmg');
+    const list = (title, arr, cls) => arr.length ? `<div class="m-card"><h3><span class="grow">${title}</span><span class="m-pill ${cls}">${arr.length}</span></h3>${arr.map(([c, i, r]) => `<div class="m-row"><span class="pk-code" style="${chipSt(c.color)}">${esc(c.code)}</span><div class="grow"><b>${i.qty}× ${esc(i.name)}</b>${i.sn ? `<small>n° ${esc(i.sn)}</small>` : ''}${r && r.n ? `<small>📝 ${esc(r.n)}</small>` : ''}</div>${r && r.ph ? '📷' : ''}<button class="m-btn sm" data-act="detail" data-id="${i.id}">✏️</button></div>`).join('')}</div>` : '';
+    return modeBar(cp) + `<div class="m-card accent"><div class="pk-big"><b>${s.ok + s.dmg}/${s.total}</b><span>pointés</span></div><div class="pk-sum"><span class="m-pill ok">✓ ${s.ok}</span><span class="m-pill danger">✗ ${s.miss}</span><span class="m-pill warn">⚠ ${s.dmg}</span><span class="m-pill">☐ ${s.pend} restant${s.pend > 1 ? 's' : ''}</span></div>
+      <dl class="m-kv" style="margin:12px 0 0"><dt>Poids chargé</dt><dd>${fmtKg(w.load)}</dd><dt>Poids prévu</dt><dd>${fmtKg(w.exp)}</dd><dt>Cases</dt><dd>${S.cases.length}</dd></dl></div>
+      ${list('✗ Manquants', miss, 'danger')}${list('⚠ Abîmés', dmg, 'warn')}${!miss.length && !dmg.length && s.total ? `<div class="m-card"><p style="margin:0">${s.pend ? 'Aucun problème signalé pour l\'instant.' : '✅ Tout est pointé présent.'}</p></div>` : ''}
+      <div class="m-sec">Résumé à partager</div><div class="pk-pre">${esc(summaryText())}</div>
+      <div class="m-actions"><button class="m-btn primary" data-act="copy">📋 Copier</button><button class="m-btn" data-act="share">📤 Partager</button></div>
+      <div class="m-actions"><button class="m-btn" data-act="ret">🖥️ Renvoyer au bureau</button><button class="m-btn danger" data-act="reset">↺ Remise à zéro</button></div>`;
+}
+
+// ---------- Ajouts sur le terrain ----------
+function addItemSheet(preCase) {
+    if (!S.cases.length) { addCaseSheet(); return; }
+    const sh = XM.sheet(`<label class="m-field"><span>Case</span><select id="a-case">${S.cases.map(c => `<option value="${c.id}" ${c.id === preCase ? 'selected' : ''}>${esc(c.code + ' — ' + c.name)}</option>`).join('')}</select></label>
+      <label class="m-field"><span>Élément</span><input type="text" id="a-name" placeholder="ex. Batterie V-mount 150 Wh" autocomplete="off"></label>
+      <div class="m-grid2"><label class="m-field"><span>Quantité</span><input type="number" id="a-qty" value="1" min="1" inputmode="numeric"></label><label class="m-field"><span>Poids unitaire (kg)</span><input type="text" id="a-kg" inputmode="decimal" placeholder="facultatif"></label></div>
+      <div class="m-actions"><button class="m-btn primary" id="a-ok">✓ Ajouter</button></div><p class="m-hint">L'élément sera ajouté au case sur le bureau lors du renvoi.</p>`, { title: '➕ Ajouter un élément' });
+    setTimeout(() => $('#a-name', sh).focus(), 80);
+    $('#a-ok', sh).onclick = () => { const name = $('#a-name', sh).value.trim(); if (!name) { XM.toast('Saisissez le nom de l\'élément'); return; }
+        const c = caseOf($('#a-case', sh).value); const it = { id: uid(), name, qty: Math.max(1, Math.round(num($('#a-qty', sh).value) || 1)), kg: num($('#a-kg', sh).value), sn: '', mob: 1 }; c.items.push(it); UI.col[c.id] = false; persist(); XM.closeSheet(); render(it.id); XM.toast('➕ ' + name + ' → ' + c.code); };
+}
+function addCaseSheet() {
+    const n = S.cases.length + 1;
+    const sh = XM.sheet(`<div class="m-grid2"><label class="m-field"><span>Code</span><input type="text" id="n-code" value="FC-${pad2(n)}"></label><label class="m-field"><span>Nom</span><input type="text" id="n-name" placeholder="ex. Câbles"></label></div>
+      ${S.vehicles.length ? `<label class="m-field"><span>Véhicule</span><select id="n-veh"><option value="">Non chargé</option>${S.vehicles.map(v => `<option value="${v.id}">${esc(v.name)}</option>`).join('')}</select></label>` : ''}
+      <div class="m-actions"><button class="m-btn primary" id="n-ok">✓ Créer le case</button></div>`, { title: '📦 Nouveau case' });
+    $('#n-ok', sh).onclick = () => { const veh = $('#n-veh', sh) ? $('#n-veh', sh).value || null : null; const c = { id: uid(), code: $('#n-code', sh).value.trim() || 'FC-' + pad2(n), name: $('#n-name', sh).value.trim(), color: COLORS[S.cases.length % COLORS.length], veh, ord: 99 + n, fragile: false, tare: 0, items: [], mob: 1 }; S.cases.push(c); persist(); XM.closeSheet(); render(); XM.toast('📦 ' + c.code + ' créé : touchez ＋ pour y ajouter du matériel'); setTimeout(() => addItemSheet(c.id), 200); };
+}
+
+// ---------- Envoi / réception ----------
+async function onEnv(env, via) {
+    if (env.kind !== 'project') { XM.toast('⚠️ Cet envoi est un retour de pointages, pas une liste de colisage'); return; }
+    const d = env.data; if (!d || !Array.isArray(d.cases)) throw new Error('Envoi vide : aucune liste de colisage');
+    if (S && !S.example) { let n = 0; try { n = (buildPatch(false) || {}).count || 0; } catch (e) { } if (n) { const i = await XM.ask('Remplacer la liste ?', `Le téléphone contient <b>${n} changement(s)</b> non renvoyé(s). La nouvelle liste les remplacera.`, [{ label: 'Remplacer', danger: true }, 'Annuler']); if (i !== 0) return; } }
+    phClear(); S = normalize(d, env.name); UI.tab = 'chk'; UI.f = 'all'; UI.q = ''; UI.col = {}; persist(); render();
+    XM.toast('✓ Liste reçue : ' + (S.prod.name || S.name || 'projet') + ' · ' + S.cases.length + ' cases', 3500);
+}
+async function sendReturn() {
+    if (!S) { XM.toast('Aucune liste chargée'); return; }
+    let withPh = false; const nph = Object.keys(S.checks).reduce((a, cp) => a + Object.keys(S.checks[cp]).filter(k => S.checks[cp][k].ph && PH.get(cp + '|' + k)).length, 0);
+    if (nph) { const i = await XM.ask('Photos', `<b>${nph} photo(s)</b> sont jointes à vos pointages. Les envoyer au bureau ? (par fichier : trop lourd pour un QR code)`, ['Avec les photos', 'Sans les photos (léger)']); if (i < 0) return; withPh = i === 0; }
+    XM.send({ app: APP, page: 'packingo.html', title: 'PACKINGO', kind: 'return', name: S.prod.name || S.name, make: () => buildPatch(withPh), empty: 'Aucun changement à renvoyer',
+        note: 'Sur l\'ordinateur : ouvrez PACKINGO XIII, touchez 📱 puis « Importer un fichier » ou « Coller un lien ». Seuls vos pointages (états, notes' + (withPh ? ', photos' : '') + ') et ajouts sont fusionnés ; le reste du projet n\'est pas touché.' });
+}
+function openMenu() {
+    const items = [];
+    if (S) { items.push({ icon: '📋', label: 'Copier le résumé', sub: 'Manquants, abîmés, poids chargé', run: async () => XM.toast(await XM.copy(summaryText()) ? '📋 Résumé copié' : '⚠️ Copie impossible') });
+        items.push({ icon: '↺', label: 'Remise à zéro du contrôle', sub: curCp().icon + ' ' + curCp().name, run: resetCp });
+        items.push({ icon: '🗑️', label: 'Effacer la liste du téléphone', run: async () => { if ((await XM.ask('Effacer la liste ?', 'Elle sera supprimée de ce téléphone, <b>avec ses pointages et photos non renvoyés</b>.', [{ label: 'Effacer', danger: true }, 'Annuler'])) === 0) { XM.drop(APP); phClear(); S = null; render(); } } }); }
+    XM.menu({ app: APP, deskPage: 'packingo.html', items, onImport: onEnv, sendReturn: S ? sendReturn : null });
+}
+async function resetCp() {
+    const cp = curCp(), n = Object.keys(S.checks[cp.id] || {}).length;
+    if (!n) { XM.toast('Rien à remettre à zéro'); return; }
+    if ((await XM.ask('Remise à zéro ?', `Les <b>${n} pointage(s)</b> de « ${esc(cp.name)} » seront effacés (notes et photos comprises).`, [{ label: 'Remettre à zéro', danger: true }, 'Annuler'])) !== 0) return;
+    delete S.checks[cp.id]; phClear(cp.id + '|'); persist(); render(); XM.toast('↺ Contrôle remis à zéro');
+}
+
+// ---------- Exemple / nouveau ----------
+function exampleData() {
+    const d = todayISO(), cps = [{ id: uid(), name: 'Départ dépôt', icon: '🚚', date: d }, { id: uid(), name: 'Retour dépôt', icon: '🏁', date: addDays(d, 2) }];
+    const v1 = { id: uid(), name: 'Porteur 20 m³', plate: 'GH-413-XK', driver: 'Karim', payload: 850, pax: 2, color: '#42A5F5' };
+    const mk = (code, name, color, veh, tare, items, fragile) => ({ id: uid(), code, name, color, veh: veh && veh.id, ord: 0, fragile: !!fragile, tare, items: items.map(([n, q, kg, sn]) => [uid(), n, q, kg, sn || '']) });
+    const cases = [
+        mk('FC-01', 'Caméra 1 · plateau', '#E53935', v1, 16, [['Sony HDC-3500 + viseur', 1, 9.5, 'HDC-10421'], ['Zoom broadcast UA70x9', 1, 11, 'UA70-2231'], ['Panneau RCP caméra', 1, 1.2, 'RCP-5512'], ['Housse de pluie', 1, 0.5]], true),
+        mk('FC-03', 'Caméras épaule', '#43A047', v1, 13.4, [['Sony FX9 (boîtier)', 2, 2, 'FX9-7781'], ['Canon CN-E 18-80', 2, 2.4], ['Batterie V-mount 150 Wh', 8, 1.1], ['Chargeur 4 voies V-mount', 2, 1.5], ['Carte CFexpress', 8, 0.02], ['Moniteur / viseur 7"', 2, 0.9]], true),
+        mk('FC-05', 'Câbles vidéo', '#00ACC1', v1, 35, [['Touret SMPTE fibre 100 m', 2, 6], ['Câble SDI 10 m', 10, 0.5], ['Câbles SDI 3 m (lot 10)', 2, 1.5], ['Trousse adaptateurs', 1, 1]]),
+        mk('SAC-11', 'Outillage & conso', '#78909C', null, 2.5, [['Trousse outillage', 1, 3], ['Gaffer toilé', 6, 0.4], ['Trousse de secours', 1, 1], ['Lampe frontale', 3, 0.1]])];
+    cases.forEach((c, i) => c.ord = i + 1);
+    const checks = { [cps[0].id]: {} }; const m = checks[cps[0].id];
+    cases[0].items.forEach(i => m[i[0]] = { s: 'ok', t: '07:12', by: 'Chef de parc' }); m[cases[1].items[0][0]] = { s: 'ok', t: '07:20' }; m[cases[1].items[2][0]] = { s: 'miss', t: '07:22', n: 'Il manque 2 batteries (en charge au dépôt ?)' };
+    return { prod: { name: 'Concert Live — Captation 6 caméras (exemple)', client: 'Prod XIII', lieu: 'Zénith de Lyon', depart: d, retour: addDays(d, 2), resp: 'Chef de parc', paxKg: 75 }, cps, curCp: cps[0].id, vehicles: [v1], cases, checks };
+}
+function newProject() {
+    const sh = XM.sheet(`<label class="m-field"><span>Nom du tournage</span><input type="text" id="p-name" placeholder="ex. Concert Live"></label><label class="m-field"><span>Responsable du pointage</span><input type="text" id="p-resp"></label><div class="m-actions"><button class="m-btn primary" id="p-ok">✓ Créer</button></div><p class="m-hint">Une liste créée ici est renvoyée au bureau comme ajout (cases et éléments).</p>`, { title: '✨ Nouvelle liste' });
+    $('#p-ok', sh).onclick = () => {
+        const d = todayISO(); phClear(); S = normalize({ prod: { name: $('#p-name', sh).value.trim(), resp: $('#p-resp', sh).value.trim(), depart: d, retour: addDays(d, 2) }, cases: [], vehicles: [], checks: {} }, '', { standalone: true });
+        UI.tab = 'chk'; persist(); XM.closeSheet(); render(); XM.toast('✨ Liste créée : touchez ＋ pour ajouter un case');
+    };
+}
+
+// ---------- Événements ----------
+document.addEventListener('click', e => {
+    const cpb = e.target.closest('[data-cp]'); if (cpb && S) { S.curCp = cpb.dataset.cp; persist(); render(); return; }
+    const tab = e.target.closest('#pk-tabs [data-tab]'); if (tab) { UI.tab = tab.dataset.tab; render(); window.scrollTo(0, 0); return; }
+    const fl = e.target.closest('[data-f]'); if (fl) { UI.f = fl.dataset.f; render(); return; }
+    const a = e.target.closest('[data-act]'); if (!a) return; const act = a.dataset.act, id = a.dataset.id;
+    if (act === 'homeLink') XM.importLink(APP, onEnv); else if (act === 'homeFile') XM.importFile(APP, onEnv);
+    else if (act === 'example') { phClear(); S = normalize(exampleData(), '', { example: true }); persist(); render(); XM.toast('📐 Exemple chargé : pointez le matériel'); }
+    else if (act === 'newProj') newProject();
+    else if (!S) return;
+    else if (act === 'tick') tick(id); else if (act === 'detail') detail(id); else if (act === 'all') checkCase(id); else if (act === 'seal') toggleSeal(id);
+    else if (act === 'col') { const c = caseOf(id), st = caseStats(curCp().id, c), done = st.total && !st.pend, open = UI.col[id] === undefined ? !done : !UI.col[id]; UI.col[id] = open; render(); }
+    else if (act === 'copy') XM.copy(summaryText()).then(ok => XM.toast(ok ? '📋 Résumé copié' : '⚠️ Copie impossible'));
+    else if (act === 'share') { const t = summaryText(); if (navigator.share) navigator.share({ title: 'PACKINGO XIII — ' + (S.prod.name || ''), text: t }).catch(() => { }); else XM.copy(t).then(() => XM.toast('📋 Partage indisponible : résumé copié')); }
+    else if (act === 'ret') sendReturn(); else if (act === 'reset') resetCp();
+});
+document.addEventListener('input', e => { if (e.target.id === 'pk-q') { UI.q = e.target.value; $('#pk-list').innerHTML = caseList(); } });
+$('#pk-fab').onclick = () => { if (!S) return; const sh = XM.sheet(`<div class="m-actions" style="margin-top:0"><button class="m-btn primary block" id="f-item">➕ Ajouter un élément dans un case</button><button class="m-btn block" id="f-case">📦 Nouveau case</button></div>`, { title: 'Ajouter' }); $('#f-item', sh).onclick = () => { XM.closeSheet(); addItemSheet(); }; $('#f-case', sh).onclick = () => { XM.closeSheet(); addCaseSheet(); }; };
+$('#pk-ret').onclick = sendReturn; $('#pk-menu').onclick = openMenu;
+
+// ---------- Démarrage ----------
+(async function start() {
+    await phLoad();
+    const saved = XM.load(APP); if (saved && Array.isArray(saved.cases) && saved.cps) { S = saved; if (!S.base) S.base = {}; if (!S.cps.some(c => c.id === S.curCp)) S.curCp = S.cps[0].id; }
+    await XM.fromHash(APP, onEnv);
+    render();
+})();
+window.PKM = { get S() { return S; }, buildPatch, PH, UI, render };
+})();
+
+</script>
+</body>
+</html>

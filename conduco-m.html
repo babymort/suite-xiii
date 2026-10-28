@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#222222">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>CONDUCO XIII · Mobile</title>
+<style>
+/* SUITE XIII — socle mobile (partagé par toutes les pages *-m.html) */
+:root { color-scheme: dark; --bg-main:#1e1e1e; --bg-panel:#2d2d2d; --bg-panel-alt:#252525; --bg-header:#1a1a1a; --bg-topbar:#222; --bg-input:#3a3a3a; --bg-menu:#2d2d2d; --border-color:#444; --border-soft:#333; --text-main:#fff; --text-muted:#aaa; --text-dim:#888; --row-bg:#262626; --row-alt:#2a2a2a;
+  --accent:240,179,120; --accent-text:rgb(240,179,120); --btn-bg:rgba(var(--accent),.12); --btn-border:rgba(var(--accent),.35); --blue:#007acc; --danger:#e53935; --warn:#ffa726; --ok:#66bb6a;
+  --sat: env(safe-area-inset-top, 0px); --sab: env(safe-area-inset-bottom, 0px); --sal: env(safe-area-inset-left, 0px); --sar: env(safe-area-inset-right, 0px); }
+body.light-theme { color-scheme: light; --bg-main:#eef0f2; --bg-panel:#fff; --bg-panel-alt:#f5f6f7; --bg-header:#e4e6e8; --bg-topbar:#fff; --bg-input:#e9ebed; --bg-menu:#fff; --border-color:#d5d8db; --border-soft:#ddd; --text-main:#1a1a1a; --text-muted:#555; --text-dim:#777; --row-bg:#fff; --row-alt:#f8f9fa; --accent-text:#b8651f; --ok:#2e7d32; }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html { -webkit-text-size-adjust: 100%; }
+body.xm { margin: 0; min-height: 100dvh; background: var(--bg-main); color: var(--text-main); font-family: 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif; font-size: 15px; line-height: 1.4; overscroll-behavior-y: none; }
+body.xm a { color: var(--accent-text); }
+.xm button { font-family: inherit; }
+/* barre du haut */
+.m-top { position: sticky; top: 0; z-index: 40; display: flex; align-items: center; gap: 8px; padding: calc(8px + var(--sat)) calc(10px + var(--sar)) 8px calc(10px + var(--sal)); background: var(--bg-topbar); border-bottom: 1px solid var(--border-soft); min-height: 56px; }
+.m-top .m-title { flex: 1; min-width: 0; line-height: 1.15; }
+.m-top .m-title b { display: block; font-size: 16px; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.m-top .m-title b i { font-style: normal; color: var(--accent-text); }
+.m-top .m-title small { display: block; font-size: 11.5px; color: var(--text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.m-ibtn { flex: 0 0 auto; width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center; font-size: 20px; border-radius: 12px; border: 1px solid var(--btn-border); background: var(--btn-bg); color: var(--text-main); cursor: pointer; text-decoration: none; padding: 0; }
+.m-ibtn:active { background: rgba(var(--accent), .35); }
+.m-ibtn.plain { border-color: transparent; background: transparent; }
+/* contenu */
+.m-main { padding: 12px calc(14px + var(--sar)) calc(128px + var(--sab)) calc(14px + var(--sal)); max-width: 760px; margin: 0 auto; }
+.m-main.no-tabs { padding-bottom: calc(28px + var(--sab)); }
+.m-sec { font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--text-dim); margin: 18px 4px 8px; }
+.m-card { background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 14px; padding: 14px; margin-bottom: 12px; }
+.m-card > h3 { margin: 0 0 10px; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+.m-card > h3 .grow { flex: 1; }
+.m-card.accent { border-color: rgba(var(--accent), .6); background: linear-gradient(180deg, rgba(var(--accent), .12), var(--bg-panel)); }
+.m-kv { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; font-size: 14px; }
+.m-kv dt { color: var(--text-dim); } .m-kv dd { margin: 0; text-align: right; font-weight: 600; word-break: break-word; }
+.m-row { display: flex; align-items: center; gap: 10px; padding: 11px 0; border-bottom: 1px solid var(--border-soft); } .m-row:last-child { border-bottom: 0; }
+.m-row .grow { flex: 1; min-width: 0; } .m-row small { display: block; color: var(--text-dim); font-size: 12.5px; }
+.m-list { background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 14px; overflow: hidden; margin-bottom: 12px; }
+.m-item { display: flex; align-items: center; gap: 12px; padding: 12px 14px; min-height: 56px; border-bottom: 1px solid var(--border-soft); color: inherit; text-decoration: none; cursor: pointer; background: transparent; width: 100%; text-align: left; border-left: 0; border-right: 0; border-top: 0; font-size: 15px; }
+.m-item:last-child { border-bottom: 0; } .m-item:active { background: rgba(var(--accent), .12); }
+.m-item .ico { font-size: 22px; flex: 0 0 auto; width: 30px; text-align: center; } .m-item .grow { flex: 1; min-width: 0; } .m-item b { display: block; font-weight: 600; } .m-item small { display: block; color: var(--text-dim); font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.m-item .go { color: var(--text-dim); font-size: 18px; }
+.m-chip { display: inline-flex; align-items: center; gap: 5px; padding: 5px 11px; border-radius: 99px; font-size: 13px; background: var(--btn-bg); border: 1px solid var(--btn-border); color: var(--text-main); white-space: nowrap; }
+.m-chips { display: flex; gap: 8px; overflow-x: auto; padding: 2px 0 8px; scrollbar-width: none; } .m-chips::-webkit-scrollbar { display: none; }
+.m-chip.on { background: rgba(var(--accent), .4); border-color: rgba(var(--accent), .95); font-weight: 600; }
+.m-pill { display: inline-block; padding: 2px 9px; border-radius: 99px; font-size: 12px; font-weight: 600; border: 1px solid var(--border-color); background: var(--bg-panel-alt); }
+.m-pill.ok { color: var(--ok); border-color: rgba(102,187,106,.5); } .m-pill.warn { color: var(--warn); border-color: rgba(255,167,38,.5); } .m-pill.danger { color: #ef5350; border-color: rgba(229,57,53,.5); }
+/* boutons */
+.m-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 46px; padding: 10px 18px; font-size: 15px; font-weight: 600; border-radius: 12px; border: 1px solid var(--btn-border); background: var(--btn-bg); color: var(--text-main); cursor: pointer; text-decoration: none; }
+.m-btn:active { background: rgba(var(--accent), .35); }
+.m-btn.primary { background: rgba(var(--accent), .3); border-color: rgba(var(--accent), .9); }
+.m-btn.danger { border-color: rgba(229,57,53,.55); background: rgba(229,57,53,.14); }
+.m-btn.block { display: flex; width: 100%; } .m-btn.sm { min-height: 36px; padding: 6px 12px; font-size: 13.5px; border-radius: 10px; }
+.m-btn:disabled { opacity: .45; }
+.m-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; } .m-actions > * { flex: 1 1 140px; }
+.m-fab { position: fixed; right: calc(16px + var(--sar)); bottom: calc(120px + var(--sab)); z-index: 35; width: 58px; height: 58px; border-radius: 50%; font-size: 26px; border: 1px solid rgba(var(--accent), .95); background: rgba(var(--accent), .92); color: #1a1a1a; box-shadow: 0 6px 18px rgba(0,0,0,.45); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.m-fab.no-tabs { bottom: calc(64px + var(--sab)); }
+/* champs */
+.m-field { display: block; margin-bottom: 12px; } .m-field > span { display: block; font-size: 11.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--text-dim); margin-bottom: 4px; }
+.xm input[type=text], .xm input[type=number], .xm input[type=date], .xm input[type=time], .xm input[type=tel], .xm input[type=email], .xm input[type=search], .xm input[type=url], .xm select, .xm textarea { width: 100%; min-height: 46px; padding: 10px 12px; font-size: 16px; font-family: inherit; border: 1px solid var(--border-color); border-radius: 10px; background: var(--bg-input); color: var(--text-main); appearance: none; -webkit-appearance: none; }
+.xm select { background-image: linear-gradient(45deg, transparent 50%, var(--text-dim) 50%), linear-gradient(135deg, var(--text-dim) 50%, transparent 50%); background-position: calc(100% - 18px) 20px, calc(100% - 13px) 20px; background-size: 5px 5px; background-repeat: no-repeat; padding-right: 32px; }
+.xm textarea { min-height: 90px; resize: vertical; line-height: 1.4; }
+.xm input:focus, .xm select:focus, .xm textarea:focus { outline: none; border-color: rgba(var(--accent), .9); box-shadow: 0 0 0 2px rgba(var(--accent), .25); }
+.xm input[type=checkbox], .xm input[type=radio] { width: 24px; height: 24px; accent-color: rgb(var(--accent)); flex: 0 0 auto; }
+.m-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; } .m-grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.m-seg { display: flex; border: 1px solid var(--btn-border); border-radius: 12px; overflow: hidden; margin-bottom: 12px; } .m-seg button { flex: 1; min-height: 44px; border: 0; border-right: 1px solid var(--btn-border); background: var(--btn-bg); color: var(--text-main); font-size: 14px; font-weight: 600; cursor: pointer; } .m-seg button:last-child { border-right: 0; } .m-seg button.on { background: rgba(var(--accent), .45); }
+.m-progress { height: 8px; border-radius: 99px; background: var(--bg-input); overflow: hidden; } .m-progress > i { display: block; height: 100%; background: rgb(var(--accent)); border-radius: 99px; transition: width .25s; }
+.m-empty { text-align: center; color: var(--text-dim); padding: 34px 18px; font-size: 14px; } .m-empty b { display: block; font-size: 38px; margin-bottom: 8px; }
+.m-hint { font-size: 12.5px; color: var(--text-dim); line-height: 1.45; }
+/* onglets du bas */
+.m-tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; display: flex; background: var(--bg-topbar); border-top: 1px solid var(--border-soft); padding: 4px calc(4px + var(--sar)) calc(48px + var(--sab)) calc(4px + var(--sal)); } /* au-dessus du badge Netlify */
+.m-tabs button { flex: 1; min-width: 0; min-height: 54px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; border: 0; background: transparent; color: var(--text-dim); font-size: 11px; font-weight: 600; cursor: pointer; border-radius: 10px; }
+.m-tabs button .ti { font-size: 21px; line-height: 1; } .m-tabs button.on { color: var(--accent-text); background: rgba(var(--accent), .12); }
+/* fenêtres du bas */
+.m-ov { position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,.62); display: flex; align-items: flex-end; justify-content: center; animation: mfade .15s; }
+.m-sheet { width: 100%; max-width: 640px; max-height: 92dvh; overflow-y: auto; background: var(--bg-menu); border: 1px solid var(--border-color); border-bottom: 0; border-radius: 18px 18px 0 0; padding: 8px 16px calc(18px + var(--sab)); animation: mup .2s; }
+.m-sheet .grab { width: 44px; height: 5px; border-radius: 3px; background: var(--border-color); margin: 4px auto 10px; }
+.m-sheet h2 { font-size: 17px; margin: 4px 0 12px; display: flex; align-items: center; gap: 8px; } .m-sheet h2 .grow { flex: 1; }
+@keyframes mup { from { transform: translateY(40px); opacity: .4; } } @keyframes mfade { from { opacity: 0; } }
+.m-toast { position: fixed; left: 50%; bottom: calc(86px + var(--sab)); transform: translate(-50%, 20px); z-index: 200; max-width: 90vw; padding: 11px 18px; border-radius: 12px; background: #111; color: #fff; border: 1px solid rgba(var(--accent), .6); font-size: 14px; opacity: 0; pointer-events: none; transition: .2s; text-align: center; }
+.m-toast.show { opacity: 1; transform: translate(-50%, 0); }
+.m-qr { background: #fff; border-radius: 12px; padding: 6px; width: min(86vw, 380px); margin: 6px auto; } .m-qr svg { display: block; width: 100%; height: auto; }
+.m-credit { text-align: center; color: var(--text-dim); font-size: 11.5px; margin: 22px 0 6px; }
+@media (min-width: 761px) { body.xm { max-width: 520px; margin: 0 auto; border-left: 1px solid var(--border-soft); border-right: 1px solid var(--border-soft); } .m-tabs { max-width: 520px; left: 50%; transform: translateX(-50%); } }
+@media print { .m-top, .m-tabs, .m-fab { display: none !important; } }
+
+/* CONDUCO XIII — mobile : écran de direct */
+body.xm { display: flex; flex-direction: column; height: 100dvh; overflow: hidden; }
+@media (min-width: 761px) { body.xm { max-width: 520px; } }
+.cx-main { flex: 1 1 auto; min-height: 0; position: relative; padding-bottom: calc(60px + var(--sab)); }
+.cx-view { height: 100%; overflow-y: auto; padding: 10px calc(12px + var(--sar)) 14px calc(12px + var(--sal)); -webkit-overflow-scrolling: touch; }
+.cx-view[hidden] { display: none !important; }
+.cx-wake { font-size: 17px; opacity: .85; padding: 0 2px; }
+.m-top { min-height: 52px; }
+/* --- direct --- */
+.m-toast { bottom: auto !important; top: calc(60px + var(--sat)); transform: translate(-50%, -14px); } .m-toast.show { transform: translate(-50%, 0); }
+#v-live { display: flex; flex-direction: column; gap: 8px; overflow-y: auto; }
+.cx-kpis { display: grid; grid-template-columns: 1.25fr 1fr 1.1fr .9fr; gap: 6px; flex: none; }
+.cx-kpi { background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 10px; padding: 5px 6px 6px; text-align: center; min-width: 0; }
+.cx-kpi b { display: block; font-size: 9.5px; letter-spacing: .09em; text-transform: uppercase; color: var(--text-dim); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cx-kpi span { display: block; font-family: Consolas, 'SF Mono', Menlo, monospace; font-size: 16px; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.cx-kpi.over span, .cx-kpi.over b { color: #ff6b6b; } .cx-kpi.under span, .cx-kpi.under b { color: #4fc3f7; }
+.cx-cur { --cc: var(--text-main); --col: #9e9e9e; flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; gap: 6px; background: var(--bg-panel); border: 2px solid var(--border-color); border-left: 8px solid var(--col); border-radius: 16px; padding: 10px 12px 8px; transition: background .3s, border-color .3s; overflow: hidden; }
+.cx-cur.warn { background: rgba(255,167,38,.13); border-color: #ffa726; }
+.cx-cur.crit { background: rgba(229,57,53,.2); border-color: #ef5350; }
+.cx-cur.over { background: rgba(229,57,53,.32); border-color: #ff5252; }
+.cx-cur.live { border-color: rgba(229,57,53,.6); }
+.cx-cur.ended { opacity: .85; }
+.cx-state { display: flex; align-items: center; gap: 8px; flex: none; min-width: 0; }
+.cx-onair { flex: none; font-weight: 900; letter-spacing: .15em; font-size: 13px; padding: 4px 10px; border-radius: 7px; border: 2px solid #5a1d1d; color: #9a5a5a; background: #1d1111; }
+body.light-theme .cx-onair { background: #f3dede; color: #a05050; }
+.cx-onair.on { color: #fff; background: #e53935; border-color: #ff8a80; box-shadow: 0 0 16px rgba(229,57,53,.7); animation: cxpulse 2s infinite; }
+.cx-onair.pause { color: #1a1a1a; background: #ffa726; border-color: #ffd180; }
+.cx-onair.end { color: #fff; background: #5c6bc0; border-color: #9fa8da; }
+.cx-lbl { font-size: 12px; letter-spacing: .05em; text-transform: uppercase; color: var(--text-muted); font-weight: 700; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cx-title { flex: none; text-align: left; background: none; border: 0; color: var(--text-main); font-size: clamp(20px, 6.2vw, 30px); font-weight: 800; line-height: 1.12; padding: 2px 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; cursor: pointer; width: 100%; }
+.cx-count { --cf: clamp(46px, min(21vw, 10.5dvh), 118px); font-size: var(--cf); min-height: calc(var(--cf) * 1.04); overflow: hidden; flex: 1 1 auto; display: flex; align-items: center; justify-content: center; font-family: Consolas, 'SF Mono', Menlo, monospace; font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: .02em; line-height: 1; color: var(--cc); white-space: nowrap; text-align: center; }
+.cx-cur.warn .cx-count { color: #ffa726; } .cx-cur.crit .cx-count { color: #ff6e60; } .cx-cur.over .cx-count { color: #ff5252; animation: cxblink 1s steps(2) infinite; }
+.cx-cur.paused .cx-count { opacity: .6; animation: cxblink 1.6s steps(2) infinite; }
+.cx-count small { font-size: .34em; margin-left: .25em; letter-spacing: 0; color: var(--text-dim); font-weight: 700; }
+.cx-bar { height: 12px; border-radius: 99px; background: var(--bg-input); overflow: hidden; flex: none; }
+.cx-bar i { display: block; height: 100%; width: 0; background: var(--col); border-radius: 99px; transition: width .25s linear, background .3s; }
+.cx-cur.warn .cx-bar i { background: #ffa726; } .cx-cur.crit .cx-bar i, .cx-cur.over .cx-bar i { background: #ef5350; }
+.cx-sub { flex: none; display: flex; flex-wrap: wrap; gap: 2px 14px; font-size: 13px; color: var(--text-muted); justify-content: space-between; }
+.cx-sub b { color: var(--text-main); font-variant-numeric: tabular-nums; }
+.cx-sub .neg { color: #ff6b6b; } .cx-sub .pos { color: #4fc3f7; }
+.cx-shot { border: 2px solid var(--border-color); border-radius: 10px; padding: 5px 8px; background: var(--bg-panel-alt); min-width: 0; font-size: 12.5px; line-height: 1.25; }
+.cx-shot h6 { margin: 0 0 1px; font-size: 10px; letter-spacing: .1em; color: var(--text-dim); }
+.cx-shot.pgm { border-color: #e53935; background: rgba(229,57,53,.16); } .cx-shot.pgm h6 { color: #ff8a80; }
+.cx-shot.pvw { border-color: #43a047; background: rgba(67,160,71,.14); } .cx-shot.pvw h6 { color: #81c784; }
+.cx-shot .cam { font-family: Consolas, 'SF Mono', Menlo, monospace; font-size: 17px; font-weight: 900; } .cx-shot .cam i { font-style: normal; font-size: 13px; color: var(--text-main); margin-left: 4px; }
+.cx-shot .d { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .cx-shot small { color: var(--text-dim); display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cx-start { flex: none; }
+.cx-start:empty { display: none; }
+.cx-start .st { background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 12px; padding: 6px 8px; display: flex; align-items: center; gap: 8px; flex-wrap: nowrap; }
+.cx-start .st label { font-size: 12px; color: var(--text-muted); flex: 1 1 auto; line-height: 1.2; min-width: 0; }
+.cx-start .st input { flex: 0 0 118px; width: 118px; min-height: 44px; text-align: center; font-family: Consolas, 'SF Mono', monospace; font-size: 17px !important; padding: 6px !important; }
+.cx-start .st button { flex: 0 0 auto; min-height: 44px; padding: 8px 12px; }
+.cx-start .st.armed { flex-wrap: wrap; } .cx-start .st.armed button { flex: 1 1 100%; min-height: 40px; }
+.cx-start .st.armed { border-color: rgba(var(--accent), .8); background: rgba(var(--accent), .12); }
+.cx-next { flex: none; background: var(--bg-panel); border: 1px solid var(--border-color); border-left: 6px solid #43a047; border-radius: 14px; padding: 8px 12px; min-width: 0; }
+.cx-next .l { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; font-weight: 800; color: #7bd87f; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cx-next .t { font-size: 18px; font-weight: 700; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin: 1px 0; }
+.cx-next .s { display: flex; gap: 4px 14px; flex-wrap: wrap; font-size: 12.5px; color: var(--text-muted); } .cx-next .s b { color: var(--text-main); font-variant-numeric: tabular-nums; }
+.cx-next .then { margin-top: 5px; padding-top: 5px; border-top: 1px solid var(--border-soft); font-size: 12.5px; color: var(--text-dim); }
+.cx-next .then div { display: flex; gap: 8px; white-space: nowrap; overflow: hidden; } .cx-next .then span { overflow: hidden; text-overflow: ellipsis; flex: 1; } .cx-next .then i { font-style: normal; font-variant-numeric: tabular-nums; flex: none; }
+.cx-ctrl { flex: none; display: flex; flex-direction: column; gap: 8px; }
+.cx-go { min-height: 70px; border-radius: 16px; border: 2px solid #66bb6a; background: rgba(67,160,71,.3); color: var(--text-main); font-size: 25px; font-weight: 900; letter-spacing: .06em; cursor: pointer; box-shadow: 0 3px 0 rgba(0,0,0,.35); }
+.cx-go:active { background: rgba(67,160,71,.6); transform: translateY(2px); box-shadow: none; }
+.cx-go.top { border-color: #ef5350; background: rgba(229,57,53,.32); } .cx-go.top:active { background: rgba(229,57,53,.6); }
+.cx-go.last { border-color: #7e57c2; background: rgba(126,87,194,.3); }
+.cx-go:disabled { opacity: .4; }
+.cx-ctrl2 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+.cx-ctrl2 button { min-height: 54px; border-radius: 14px; border: 1px solid var(--btn-border); background: var(--btn-bg); color: var(--text-main); font-size: 20px; font-weight: 800; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; padding: 4px 2px; }
+.cx-ctrl2 button span { font-size: 10.5px; letter-spacing: .05em; font-weight: 800; }
+.cx-ctrl2 button:active { background: rgba(var(--accent), .35); }
+.cx-ctrl2 button:disabled { opacity: .35; }
+#b-pause.on { background: rgba(255,167,38,.35); border-color: #ffa726; }
+#b-reset { border-color: rgba(229,57,53,.5); }
+.cx-snack { position: fixed; left: 50%; transform: translateX(-50%); top: calc(58px + var(--sat)); z-index: 60; display: flex; align-items: center; gap: 12px; background: #111; color: #fff; border: 1px solid rgba(var(--accent), .7); border-radius: 12px; padding: 6px 6px 6px 16px; font-size: 14px; max-width: 94vw; box-shadow: 0 6px 18px rgba(0,0,0,.5); }
+.cx-snack[hidden] { display: none; } .cx-snack button { min-height: 40px; padding: 0 14px; border-radius: 9px; border: 1px solid rgba(var(--accent), .8); background: rgba(var(--accent), .3); color: #fff; font-weight: 700; cursor: pointer; }
+/* --- liste conducteur / journal --- */
+.cx-sum { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 10px; }
+.cx-sum div { background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 10px; padding: 6px 8px; text-align: center; min-width: 0; }
+.cx-sum b { display: block; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--text-dim); } .cx-sum span { font-family: Consolas, 'SF Mono', monospace; font-weight: 700; font-size: 15px; font-variant-numeric: tabular-nums; }
+.cx-sum .neg span { color: #ff6b6b; } .cx-sum .pos span { color: #4fc3f7; }
+.cx-hdr { display: flex; align-items: center; gap: 8px; margin: 12px 2px 4px; padding: 6px 10px; border-left: 5px solid var(--col); background: var(--bg-panel-alt); border-radius: 0 8px 8px 0; font-weight: 800; font-size: 13.5px; text-transform: uppercase; letter-spacing: .04em; }
+.cx-hdr small { margin-left: auto; color: var(--text-dim); font-weight: 600; text-transform: none; letter-spacing: 0; font-size: 11.5px; white-space: nowrap; }
+.cx-rows { background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 14px; overflow: hidden; margin-bottom: 8px; }
+.cx-row { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 58px; padding: 8px 10px 8px 0; border: 0; border-bottom: 1px solid var(--border-soft); border-left: 6px solid var(--col); background: transparent; color: inherit; text-align: left; cursor: pointer; font-size: 15px; }
+.cx-row:last-child { border-bottom: 0; } .cx-row:active { background: rgba(var(--accent), .14); }
+.cx-row .n { flex: none; width: 30px; text-align: center; font-family: Consolas, monospace; font-weight: 800; color: var(--text-dim); font-size: 14px; }
+.cx-row .ico { flex: none; font-size: 20px; }
+.cx-row .g { flex: 1; min-width: 0; } .cx-row .g b { display: block; font-weight: 700; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cx-row .g small { display: block; color: var(--text-dim); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cx-row .t { flex: none; text-align: right; font-variant-numeric: tabular-nums; } .cx-row .t b { display: block; font-family: Consolas, monospace; font-size: 14.5px; } .cx-row .t small { display: block; font-size: 12px; color: var(--text-dim); }
+.cx-row.cur { background: rgba(229,57,53,.18); border-left-color: #e53935; } .cx-row.done { opacity: .72; } .cx-row.cut { opacity: .38; text-decoration: line-through; } .cx-row.res .g b::after { content: ' (réserve)'; color: var(--text-dim); font-weight: 400; font-size: 12px; }
+.cx-tag { display: inline-block; font-size: 10.5px; font-weight: 700; padding: 1px 6px; border-radius: 6px; margin-left: 4px; border: 1px solid var(--border-color); vertical-align: 1px; }
+.cx-tag.neg { color: #ff6b6b; border-color: rgba(255,107,107,.5); } .cx-tag.pos { color: #4fc3f7; border-color: rgba(79,195,247,.5); } .cx-tag.ok { color: var(--ok); border-color: rgba(102,187,106,.5); }
+.cx-ev { font-size: 13px; display: flex; gap: 10px; padding: 6px 2px; border-bottom: 1px solid var(--border-soft); } .cx-ev:last-child { border-bottom: 0; } .cx-ev i { font-style: normal; font-family: Consolas, monospace; color: var(--text-dim); flex: none; } .cx-ev span { min-width: 0; }
+/* --- feuille détails --- */
+.cx-dh { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin: 0 0 10px; }
+.cx-dlive { margin: 0 0 12px; padding: 8px 12px; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-panel-alt); display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.cx-dlive b { font-family: Consolas, monospace; font-size: 30px; font-variant-numeric: tabular-nums; }
+.cx-dlive.warn b { color: #ffa726; } .cx-dlive.crit b, .cx-dlive.over b { color: #ff5252; }
+.cx-chipcam { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px 3px 4px; border-radius: 99px; border: 1px solid var(--border-color); margin: 0 6px 6px 0; font-size: 13px; background: var(--bg-panel-alt); }
+.cx-chipcam i { font-style: normal; font-weight: 800; padding: 2px 8px; border-radius: 99px; color: #111; font-size: 12.5px; }
+.cx-dsec { font-size: 11px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--text-dim); margin: 14px 2px 6px; }
+.cx-box { background: var(--bg-panel-alt); border: 1px solid var(--border-color); border-radius: 12px; padding: 9px 12px; font-size: 14.5px; white-space: pre-wrap; word-break: break-word; }
+.cx-pl { display: flex; gap: 8px; align-items: baseline; padding: 6px 0; border-bottom: 1px solid var(--border-soft); font-size: 14px; } .cx-pl:last-child { border-bottom: 0; } .cx-pl.on { background: rgba(229,57,53,.15); margin: 0 -8px; padding: 6px 8px; border-radius: 8px; }
+.cx-pl .no { flex: none; width: 20px; color: var(--text-dim); font-family: Consolas, monospace; } .cx-pl .tx { flex: 1; min-width: 0; } .cx-pl .tx small { color: var(--text-dim); display: block; } .cx-pl .du { flex: none; font-variant-numeric: tabular-nums; color: var(--text-muted); }
+/* --- paysage --- */
+@media (orientation: landscape) and (max-height: 520px) {
+  body.xm { max-width: none !important; margin: 0 !important; border: 0 !important; }
+  .m-tabs { transform: none !important; max-width: none !important; }
+  .m-tabs { top: 0; bottom: 0; left: 0; right: auto; width: calc(64px + var(--sal)); flex-direction: column; border-top: 0; border-right: 1px solid var(--border-soft); padding: calc(4px + var(--sat)) 4px calc(4px + var(--sab)) calc(4px + var(--sal)); justify-content: center; gap: 6px; }
+  .m-tabs button { flex: none; min-height: 60px; font-size: 9.5px; padding: 0; } .cx-meta, .cx-shot small { display: none !important; } .cx-shot .d { font-size: 12px; }
+  body.xm.has-tabs { padding-left: calc(64px + var(--sal)); }
+  body.xm.has-tabs .m-top { padding-left: 10px; }
+  .m-top { min-height: 44px; padding-top: calc(4px + var(--sat)); padding-bottom: 4px; } .m-top .m-ibtn { width: 38px; height: 38px; }
+  .cx-main { padding-bottom: 0; }
+  .cx-view { padding: 6px 10px 8px 10px; }
+  #v-live { display: grid !important; grid-template-columns: 1.35fr 1fr; grid-template-rows: auto minmax(0, 1fr) auto; gap: 6px 10px; overflow: hidden; }
+  #v-live[hidden] { display: none !important; }
+  .cx-kpis { grid-column: 1 / -1; grid-row: 1; } .cx-kpi { padding: 2px 6px 3px; } .cx-kpi span { font-size: 15px; }
+  .cx-cur { grid-column: 1; grid-row: 2 / 4; padding: 6px 10px 6px; gap: 3px; }
+  .cx-title { font-size: clamp(17px, 4.2vw, 24px); -webkit-line-clamp: 1; }
+  .cx-count { --cf: clamp(40px, min(11vw, 24dvh), 110px); }
+  .cx-bar { height: 9px; }   .cx-next .t { font-size: 16px; } .cx-next .then { display: none; }
+  .cx-ctrl { grid-column: 2; grid-row: 3; gap: 6px; } .cx-go { min-height: 56px; font-size: 22px; } .cx-ctrl2 button { min-height: 48px; flex-direction: row; gap: 6px; font-size: 18px; } .cx-ctrl2 button span { font-size: 9px; }
+  .cx-snack { top: 10px; }
+}
+@media (max-height: 740px) and (orientation: portrait) { .cx-go { min-height: 60px; font-size: 22px; } .cx-ctrl2 button { min-height: 48px; } .cx-next .then { display: none; } .cx-kpi span { font-size: 14.5px; } .cx-title { font-size: clamp(18px, 5.4vw, 26px); } }
+@media (max-width: 340px) { .cx-ctrl2 button span { font-size: 8.5px; letter-spacing: 0; } .cx-kpi span { font-size: 13px; } .cx-kpi b { font-size: 8.5px; letter-spacing: .04em; } .cx-sub { font-size: 12px; } }
+@keyframes cxpulse { 0%,100% { box-shadow: 0 0 16px rgba(229,57,53,.7); } 50% { box-shadow: 0 0 4px rgba(229,57,53,.3); } }
+@keyframes cxblink { 50% { opacity: .35; } }
+@media (prefers-reduced-motion: reduce) { .cx-cur.over .cx-count, .cx-cur.paused .cx-count, .cx-onair.on { animation: none !important; } }
+
+.cx-shots { display: grid; grid-template-columns: 40px 1fr 1fr 40px; gap: 5px; flex: none; }
+.cx-shots .sn { border-radius: 10px; border: 1px solid var(--btn-border); background: var(--btn-bg); color: var(--text-main); font-size: 18px; font-weight: 800; cursor: pointer; padding: 0; min-height: 44px; }
+.cx-shots .sn:disabled { opacity: .3; } .cx-shots .sn:active { background: rgba(var(--accent), .4); }
+.cx-detb { flex: none; margin-left: auto; min-height: 36px; padding: 0 12px; border-radius: 10px; border: 1px solid var(--btn-border); background: var(--btn-bg); color: var(--accent-text); font-size: 13px; font-weight: 800; cursor: pointer; white-space: nowrap; }
+.cx-meta { flex: none; font-size: 12.5px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .cx-meta:empty { display: none; }
+.cx-snack span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 62vw; } .cx-snack button { flex: none; }
+
+</style>
+<link rel="icon" type="image/png" href="xiii-icon-192.png">
+</head>
+<body class="xm">
+<header class="m-top" id="cx-top">
+  <a class="m-ibtn plain" href="index.html" aria-label="Accueil SUITE XIII">‹</a>
+  <div class="m-title"><b>CONDUCO <i>XIII</i></b><small id="cx-sub">Conducteur mobile</small></div>
+  <span class="cx-wake" id="cx-wake" hidden></span>
+  <button class="m-ibtn" id="cx-pick" aria-label="Choisir le conducteur" hidden>📑</button>
+  <button class="m-ibtn" id="cx-menu" aria-label="Menu">⋯</button>
+</header>
+<main class="cx-main" id="cx-main">
+  <section id="v-home" class="cx-view" hidden>
+    <div class="m-card accent">
+      <h3>🎬 Le conducteur dans la poche</h3>
+      <p class="m-hint" style="margin:0 0 10px;font-size:14px">Cette page affiche votre conducteur en <b>mode direct</b> : séquence en cours, compte à rebours, suivant, écart, boutons plein pouce. Elle fonctionne hors ligne.</p>
+      <p class="m-hint" style="margin:0">Pour recevoir un conducteur depuis l'ordinateur :</p>
+    </div>
+    <div class="m-list">
+      <div class="m-item" style="cursor:default"><span class="ico">1️⃣</span><span class="grow"><b>Sur le bureau</b><small>Ouvrez CONDUCO XIII puis le bouton « 📱 »</small></span></div>
+      <div class="m-item" style="cursor:default"><span class="ico">2️⃣</span><span class="grow"><b>Scannez le QR code</b><small>avec l'appareil photo du téléphone</small></span></div>
+    </div>
+    <div class="m-actions" style="margin-top:0">
+      <button class="m-btn primary" id="h-link">🔗 Coller un lien</button>
+      <button class="m-btn" id="h-file">📂 Importer un fichier</button>
+    </div>
+    <button class="m-btn block" id="h-demo" style="margin-top:10px">🎙️ Essayer avec un exemple</button>
+    <p class="m-credit">Application développée par Matthieu Lamotte</p>
+  </section>
+
+  <section id="v-live" class="cx-view" hidden>
+    <div class="cx-kpis">
+      <div class="cx-kpi"><b>Heure</b><span id="k-clock">--:--:--</span></div>
+      <div class="cx-kpi" id="k-gap-w"><b id="k-gap-l">Écart</b><span id="k-gap">0:00</span></div>
+      <div class="cx-kpi"><b>Fin estimée</b><span id="k-end">--:--:--</span></div>
+      <div class="cx-kpi"><b>Antenne</b><span id="k-el">0:00</span></div>
+    </div>
+    <div class="cx-cur" id="cx-cur">
+      <div class="cx-state"><span class="cx-onair" id="cx-onair">STAND-BY</span><span class="cx-lbl" id="cx-lbl"></span><button class="cx-detb" id="cx-det" aria-label="Détails de la séquence : notes, intervenants, caméras, régie">Détails ▲</button></div>
+      <button class="cx-title" id="cx-title" aria-label="Détails de la séquence"></button>
+      <div class="cx-count" id="cx-count">0:00</div>
+      <div class="cx-bar"><i id="cx-bar"></i></div>
+      <div class="cx-sub" id="cx-sub2"></div>
+      <div class="cx-meta" id="cx-meta"></div>
+      <div id="cx-shots"></div>
+    </div>
+    <div class="cx-start" id="cx-start"></div>
+    <div class="cx-next" id="cx-next"></div>
+    <div class="cx-ctrl">
+      <button class="cx-go" id="b-next">▶ SUIVANT</button>
+      <div class="cx-ctrl2"><button id="b-prev">⏮<span>PRÉCÉDENT</span></button><button id="b-pause">⏸<span>PAUSE</span></button><button id="b-reset">↺<span>REMISE À ZÉRO</span></button></div>
+    </div>
+  </section>
+
+  <section id="v-list" class="cx-view" hidden></section>
+  <section id="v-log" class="cx-view" hidden></section>
+</main>
+<div class="cx-snack" id="cx-snack" hidden><span id="cx-snack-t"></span><button id="cx-snack-b">↶ Annuler</button></div>
+<nav class="m-tabs" id="cx-tabs" hidden>
+  <button data-v="live" class="on"><span class="ti">🔴</span>Direct</button>
+  <button data-v="list"><span class="ti">📋</span>Conducteur</button>
+  <button data-v="log"><span class="ti">🕒</span>Journal</button>
+</nav>
+
+<script>
+// =====================================================================
+//  XQR : générateur de QR code (mode octets, niveaux L/M/Q/H, versions 1 à 40) — sans dépendance
+//  XQR.make(texte, 'L') → { size, ver, get(x, y) } ou null si trop long ; XQR.svg(texte, opts) → chaîne SVG ou null
+// =====================================================================
+const XQR = (() => {
+    const ECC = [[-1, 7, 10, 15, 20, 26, 18, 20, 24, 30, 18, 20, 24, 26, 30, 22, 24, 28, 30, 28, 28, 28, 28, 30, 30, 26, 28, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30],
+        [-1, 10, 16, 26, 18, 24, 16, 18, 22, 22, 26, 30, 22, 22, 24, 24, 28, 28, 26, 26, 26, 26, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28],
+        [-1, 13, 22, 18, 26, 18, 24, 18, 22, 20, 24, 28, 26, 24, 20, 30, 24, 28, 28, 26, 30, 28, 30, 30, 30, 30, 28, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30],
+        [-1, 17, 28, 22, 16, 22, 28, 26, 26, 24, 28, 24, 28, 22, 24, 24, 30, 28, 28, 26, 28, 30, 24, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30]];
+    const BLK = [[-1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 4, 4, 4, 4, 4, 6, 6, 6, 6, 7, 8, 8, 9, 9, 10, 12, 12, 12, 13, 14, 15, 16, 17, 18, 19, 19, 20, 21, 22, 24, 25],
+        [-1, 1, 1, 1, 2, 2, 4, 4, 4, 5, 5, 5, 8, 9, 9, 10, 10, 11, 13, 14, 16, 17, 17, 18, 20, 21, 23, 25, 26, 28, 29, 31, 33, 35, 37, 38, 40, 43, 45, 47, 49],
+        [-1, 1, 1, 2, 2, 4, 4, 6, 6, 8, 8, 8, 10, 12, 16, 12, 17, 16, 18, 21, 20, 23, 23, 25, 27, 29, 34, 34, 35, 38, 40, 43, 45, 48, 51, 53, 56, 59, 62, 65, 68],
+        [-1, 1, 1, 2, 4, 4, 4, 5, 6, 8, 8, 11, 11, 16, 16, 18, 16, 19, 21, 25, 25, 25, 34, 30, 32, 35, 37, 40, 42, 45, 48, 51, 54, 57, 60, 63, 66, 70, 74, 77, 81]];
+    const ECL = { L: [0, 1], M: [1, 0], Q: [2, 3], H: [3, 2] };
+    const raw = v => { let r = (16 * v + 128) * v + 64; if (v >= 2) { const n = Math.floor(v / 7) + 2; r -= (25 * n - 10) * n - 55; if (v >= 7) r -= 36; } return r; };
+    const dataCw = (v, e) => Math.floor(raw(v) / 8) - ECC[e][v] * BLK[e][v];
+    const bit = (x, i) => ((x >>> i) & 1) !== 0;
+    const mul = (x, y) => { let z = 0; for (let i = 7; i >= 0; i--) { z = (z << 1) ^ ((z >>> 7) * 0x11D); z ^= ((y >>> i) & 1) * x; } return z; };
+    const rsDiv = d => { const r = new Array(d - 1).fill(0); r.push(1); let root = 1; for (let i = 0; i < d; i++) { for (let j = 0; j < r.length; j++) { r[j] = mul(r[j], root); if (j + 1 < r.length) r[j] ^= r[j + 1]; } root = mul(root, 2); } return r; };
+    const rsRem = (data, div) => { const r = div.map(() => 0); data.forEach(b => { const f = b ^ r.shift(); r.push(0); div.forEach((c, i) => { r[i] ^= mul(c, f); }); }); return r; };
+    function make(text, level) {
+        const e = (ECL[level || 'L'] || ECL.L)[0], bytes = Array.from(new TextEncoder().encode(String(text)));
+        let ver = 0; for (let v = 1; v <= 40; v++) { const cc = v <= 9 ? 8 : 16; if (4 + cc + 8 * bytes.length <= dataCw(v, e) * 8) { ver = v; break; } }
+        if (!ver) return null;
+        const bits = []; const put = (val, n) => { for (let i = n - 1; i >= 0; i--) bits.push((val >>> i) & 1); };
+        put(4, 4); put(bytes.length, ver <= 9 ? 8 : 16); bytes.forEach(b => put(b, 8));
+        const cap = dataCw(ver, e) * 8; put(0, Math.min(4, cap - bits.length)); put(0, (8 - bits.length % 8) % 8);
+        for (let p = 0xEC; bits.length < cap; p ^= 0xEC ^ 0x11) put(p, 8);
+        const data = []; for (let i = 0; i < bits.length; i += 8) { let b = 0; for (let j = 0; j < 8; j++) b = (b << 1) | bits[i + j]; data.push(b); }
+        // blocs + correction d'erreur
+        const nb = BLK[e][ver], el = ECC[e][ver], rc = Math.floor(raw(ver) / 8), ns = nb - rc % nb, sl = Math.floor(rc / nb), div = rsDiv(el), blocks = [];
+        for (let i = 0, k = 0; i < nb; i++) { const dl = sl - el + (i < ns ? 0 : 1), dat = data.slice(k, k + dl); k += dl; const ecc = rsRem(dat, div); if (i < ns) dat.push(0); blocks.push(dat.concat(ecc)); }
+        const all = []; for (let i = 0; i < blocks[0].length; i++) blocks.forEach((b, j) => { if (i !== sl - el || j >= ns) all.push(b[i]); });
+        const size = ver * 4 + 17, M = Array.from({ length: size }, () => new Array(size).fill(false)), F = Array.from({ length: size }, () => new Array(size).fill(false));
+        const setF = (x, y, d) => { M[y][x] = d; F[y][x] = true; };
+        for (let i = 0; i < size; i++) { setF(6, i, i % 2 === 0); setF(i, 6, i % 2 === 0); }
+        const finder = (x, y) => { for (let dy = -4; dy <= 4; dy++) for (let dx = -4; dx <= 4; dx++) { const d = Math.max(Math.abs(dx), Math.abs(dy)), xx = x + dx, yy = y + dy; if (xx >= 0 && xx < size && yy >= 0 && yy < size) setF(xx, yy, d !== 2 && d !== 4); } };
+        finder(3, 3); finder(size - 4, 3); finder(3, size - 4);
+        let ap = []; if (ver > 1) { const n = Math.floor(ver / 7) + 2, st = ver === 32 ? 26 : Math.ceil((ver * 4 + 4) / (n * 2 - 2)) * 2; ap = [6]; for (let p = size - 7; ap.length < n; p -= st) ap.splice(1, 0, p); }
+        ap.forEach((x, i) => ap.forEach((y, j) => { if ((i === 0 && j === 0) || (i === 0 && j === ap.length - 1) || (i === ap.length - 1 && j === 0)) return; for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++) setF(x + dx, y + dy, Math.max(Math.abs(dx), Math.abs(dy)) !== 1); }));
+        const fmt = mask => {
+            const d = (ECL[level || 'L'][1] << 3) | mask; let r = d; for (let i = 0; i < 10; i++) r = (r << 1) ^ ((r >>> 9) * 0x537); const b = ((d << 10) | r) ^ 0x5412;
+            for (let i = 0; i <= 5; i++) setF(8, i, bit(b, i)); setF(8, 7, bit(b, 6)); setF(8, 8, bit(b, 7)); setF(7, 8, bit(b, 8)); for (let i = 9; i < 15; i++) setF(14 - i, 8, bit(b, i));
+            for (let i = 0; i < 8; i++) setF(size - 1 - i, 8, bit(b, i)); for (let i = 8; i < 15; i++) setF(8, size - 15 + i, bit(b, i)); setF(8, size - 8, true);
+        };
+        fmt(0);
+        if (ver >= 7) { let r = ver; for (let i = 0; i < 12; i++) r = (r << 1) ^ ((r >>> 11) * 0x1F25); const b = (ver << 12) | r; for (let i = 0; i < 18; i++) { const c = bit(b, i), a = size - 11 + i % 3, d = Math.floor(i / 3); setF(a, d, c); setF(d, a, c); } }
+        for (let i = 0, right = size - 1; right >= 1; right -= 2) { if (right === 6) right = 5; for (let vert = 0; vert < size; vert++) for (let j = 0; j < 2; j++) { const x = right - j, up = ((right + 1) & 2) === 0, y = up ? size - 1 - vert : vert; if (!F[y][x] && i < all.length * 8) { M[y][x] = bit(all[i >>> 3], 7 - (i & 7)); i++; } } }
+        const inv = (m, x, y) => [(x + y) % 2 === 0, y % 2 === 0, x % 3 === 0, (x + y) % 3 === 0, (Math.floor(x / 3) + Math.floor(y / 2)) % 2 === 0, x * y % 2 + x * y % 3 === 0, (x * y % 2 + x * y % 3) % 2 === 0, ((x + y) % 2 + x * y % 3) % 2 === 0][m];
+        const apply = m => { for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) if (!F[y][x] && inv(m, x, y)) M[y][x] = !M[y][x]; };
+        const penalty = () => {
+            let p = 0, dark = 0;
+            for (let y = 0; y < size; y++) { let run = 1; for (let x = 1; x < size; x++) { if (M[y][x] === M[y][x - 1]) { run++; if (run === 5) p += 3; else if (run > 5) p++; } else run = 1; } }
+            for (let x = 0; x < size; x++) { let run = 1; for (let y = 1; y < size; y++) { if (M[y][x] === M[y - 1][x]) { run++; if (run === 5) p += 3; else if (run > 5) p++; } else run = 1; } }
+            for (let y = 0; y < size - 1; y++) for (let x = 0; x < size - 1; x++) { const c = M[y][x]; if (c === M[y][x + 1] && c === M[y + 1][x] && c === M[y + 1][x + 1]) p += 3; }
+            for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) if (M[y][x]) dark++;
+            p += Math.floor(Math.abs(dark * 20 - size * size * 10) / (size * size)) * 10; return p;
+        };
+        let best = 0, bp = Infinity; for (let m = 0; m < 8; m++) { apply(m); fmt(m); const p = penalty(); if (p < bp) { bp = p; best = m; } apply(m); }
+        apply(best); fmt(best);
+        return { size, ver, get: (x, y) => x >= 0 && y >= 0 && x < size && y < size && M[y][x] };
+    }
+    function svg(text, o) {
+        o = o || {}; const q = make(text, o.ecl || 'L'); if (!q) return null; const b = o.border == null ? 4 : o.border, n = q.size + 2 * b; let d = '';
+        for (let y = 0; y < q.size; y++) { let x = 0; while (x < q.size) { if (q.get(x, y)) { let w = 1; while (x + w < q.size && q.get(x + w, y)) w++; d += 'M' + (x + b) + ',' + (y + b) + 'h' + w + 'v1h-' + w + 'z'; x += w; } else x++; } }
+        return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + n + ' ' + n + '" shape-rendering="crispEdges" role="img" aria-label="QR code"><rect width="' + n + '" height="' + n + '" fill="' + (o.light || '#fff') + '"/><path d="' + d + '" fill="' + (o.dark || '#000') + '"/></svg>';
+    }
+    return { make, svg, capacity: (level) => { const e = (ECL[level || 'L'] || ECL.L)[0]; return dataCw(40, e) - 3; } };
+})();
+if (typeof module !== 'undefined') module.exports = XQR;
+
+// =====================================================================
+//  XM : socle mobile SUITE XIII (pages *-m.html) + panneau « 📱 Mobile » des outils bureau
+//  Enveloppe d'échange : { format:'xiii-mobile', v:1, app, kind:'project'|'return', name, ts, data }
+//  Transfert : lien (#mx=… compressé), QR code (si assez court) ou fichier .xiii-m.json
+// =====================================================================
+const XM = (() => {
+    const FORMAT = 'xiii-mobile', QR_MAX = 1800;
+    const $ = (s, r) => (r || document).querySelector(s), $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+    const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const uid = () => Math.random().toString(36).slice(2, 10);
+    const safe = s => String(s || 'projet').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^\w-]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 40) || 'projet';
+    const isPhone = () => { try { return matchMedia('(max-width:700px)').matches && matchMedia('(pointer:coarse)').matches; } catch (e) { return false; } };
+    // ---------- encodage ----------
+    const b64u = u8 => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
+    const unb64u = t => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
+    async function pipe(u8, Ctor, fmt) { const st = new Blob([u8]).stream().pipeThrough(new Ctor(fmt)); return new Uint8Array(await new Response(st).arrayBuffer()); }
+    async function pack(obj) {
+        const u8 = new TextEncoder().encode(JSON.stringify(obj));
+        if (typeof CompressionStream !== 'undefined') { try { return 'z' + b64u(await pipe(u8, CompressionStream, 'deflate-raw')); } catch (e) { } }
+        return 'r' + b64u(u8);
+    }
+    async function unpack(s) {
+        s = String(s || '').trim(); if (!s) throw new Error('Lien vide');
+        let u8 = unb64u(s.slice(1)); if (s[0] === 'z') u8 = await pipe(u8, DecompressionStream, 'deflate-raw'); else if (s[0] !== 'r') throw new Error('Lien non reconnu');
+        return JSON.parse(new TextDecoder().decode(u8));
+    }
+    const baseUrl = page => { const u = new URL(page || location.pathname.split('/').pop(), location.href); u.hash = ''; u.search = ''; return u.href; };
+    const envelope = (app, kind, name, data) => ({ format: FORMAT, v: 1, app, kind: kind || 'project', name: name || '', ts: Date.now(), data });
+    async function link(page, env) { return baseUrl(page) + '#mx=' + await pack(env); }
+    function checkEnv(env, app) {
+        if (!env || env.format !== FORMAT) throw new Error('Ce fichier n\'est pas un envoi SUITE XIII mobile');
+        if (app && env.app !== app) throw new Error('Cet envoi est destiné à « ' + env.app + ' », pas à « ' + app + ' »');
+        return env;
+    }
+    // ---------- stockage local (une enveloppe par application) ----------
+    const mem = {};
+    const load = app => { try { return JSON.parse(localStorage.getItem('xiii.m.' + app)); } catch (e) { return mem[app] || null; } };
+    const save = (app, obj) => { mem[app] = obj; try { localStorage.setItem('xiii.m.' + app, JSON.stringify(obj)); return true; } catch (e) { return false; } };
+    const drop = app => { delete mem[app]; try { localStorage.removeItem('xiii.m.' + app); } catch (e) { } };
+    // ---------- interface ----------
+    let toastT;
+    function toast(msg, ms) { let t = $('.m-toast'); if (!t) { t = document.createElement('div'); t.className = 'm-toast'; document.body.appendChild(t); } t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), ms || 2600); }
+    function sheet(html, o) {
+        o = o || {}; closeSheet(); const ov = document.createElement('div'); ov.className = 'm-ov'; ov.id = 'm-ov';
+        ov.innerHTML = '<div class="m-sheet" role="dialog"><div class="grab"></div>' + (o.title ? '<h2><span class="grow">' + o.title + '</span><button class="m-ibtn plain" data-x aria-label="Fermer">✕</button></h2>' : '') + html + '</div>';
+        ov.addEventListener('mousedown', e => { if (e.target === ov) closeSheet(); }); ov.addEventListener('touchstart', e => { if (e.target === ov) closeSheet(); }, { passive: true });
+        document.body.appendChild(ov); const x = $('[data-x]', ov); if (x) x.onclick = closeSheet; ov._onClose = o.onClose; return ov.querySelector('.m-sheet');
+    }
+    function closeSheet() { const ov = $('#m-ov'); if (ov) { ov.remove(); if (ov._onClose) try { ov._onClose(); } catch (e) { } } }
+    // choix : renvoie l'index du bouton (ou -1 si fermé)
+    function ask(title, text, buttons) {
+        return new Promise(res => {
+            const s = sheet('<p style="margin:0 0 14px;color:var(--text-muted)">' + text + '</p><div class="m-actions" style="margin-top:0">' + (buttons || ['OK']).map((b, i) => '<button class="m-btn ' + (i === 0 ? 'primary' : '') + (b.danger ? ' danger' : '') + '" data-i="' + i + '">' + esc(b.label || b) + '</button>').join('') + '</div>', { title: esc(title), onClose: () => res(-1) });
+            $$('[data-i]', s).forEach(b => b.onclick = () => { const ov = $('#m-ov'); if (ov) ov._onClose = null; closeSheet(); res(+b.dataset.i); });
+        });
+    }
+    function download(name, content, mime) { const b = content instanceof Blob ? content : new Blob([content], { type: mime || 'application/json' }), a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { a.remove(); URL.revokeObjectURL(a.href); }, 1500); }
+    async function copy(text) { try { await navigator.clipboard.writeText(text); return true; } catch (e) { const t = document.createElement('textarea'); t.value = text; t.style.cssText = 'position:fixed;opacity:0'; document.body.appendChild(t); t.select(); let ok = false; try { ok = document.execCommand('copy'); } catch (e2) { } t.remove(); return ok; } }
+    function pickFile(accept, cb) { const i = document.createElement('input'); i.type = 'file'; i.accept = accept || '.json,application/json'; i.style.display = 'none'; i.onchange = async () => { const f = i.files[0]; i.remove(); if (f) cb(f); }; document.body.appendChild(i); i.click(); }
+    async function readEnvFile(f, app) { return checkEnv(JSON.parse(await f.text()), app); }
+    // ---------- fenêtre d'envoi : QR + lien + fichier (bureau et mobile) ----------
+    //  cfg = { app, page, title, kind, name, make: () => data | null, note, empty }
+    async function send(cfg) {
+        const data = cfg.make(); if (data == null) { toast(cfg.empty || 'Rien à envoyer'); return; }
+        const env = envelope(cfg.app, cfg.kind || 'project', cfg.name ? (typeof cfg.name === 'function' ? cfg.name() : cfg.name) : '', data);
+        const url = await link(cfg.page, env), json = JSON.stringify(env), qr = url.length <= QR_MAX ? XQR.svg(url, { ecl: 'L', border: 2 }) : null, mob = document.body.classList.contains('xm');
+        const fname = cfg.file || ((cfg.title || cfg.app) + '_' + safe(env.name) + '.xiii-m.json').replace(/\s+/g, '_');
+        const body = (qr ? '<div class="m-qr">' + qr + '</div><p class="m-hint" style="text-align:center;margin:4px 0 12px">Scannez ce code avec l\'appareil photo' + (cfg.kind === 'return' ? ' de l\'ordinateur' : ' du téléphone') + '.' + (url.length > 1100 ? ' Code dense : affichez-le en grand.' : '') + '</p>'
+            : '<div class="m-card" style="margin-top:0"><b>Trop volumineux pour un QR code</b><p class="m-hint" style="margin:6px 0 0">' + (url.length < 8000 ? 'Utilisez le lien (message, mail, AirDrop…) ou le fichier ci-dessous.' : 'Utilisez le fichier ci-dessous (AirDrop, mail, cloud…) : le lien serait trop long.') + '</p></div>') +
+            '<div class="m-actions" style="margin-top:0">' + (url.length < 8000 ? '<button class="m-btn" id="xm-copy">🔗 Copier le lien</button>' : '') + ((navigator.share && mob) ? '<button class="m-btn" id="xm-share">📤 Partager…</button>' : '') + '<button class="m-btn primary" id="xm-file">⬇️ Fichier</button></div>' +
+            (cfg.note ? '<p class="m-hint" style="margin:12px 2px 0">' + cfg.note + '</p>' : '') + '<p class="m-hint" style="margin:8px 2px 0">' + (json.length / 1024 < 10 ? Math.max(1, Math.round(json.length / 102.4) / 10) : Math.round(json.length / 1024)) + ' Ko · le projet n\'est pas envoyé sur Internet : tout est dans le lien ou le fichier.</p>';
+        const s = host(body, '📱 ' + esc(cfg.heading || (cfg.kind === 'return' ? 'Renvoyer au bureau' : 'Envoyer vers le mobile')), mob);
+        const q = id => $(id, s.ov || s);
+        const c = q('#xm-copy'); if (c) c.onclick = async () => toast(await copy(url) ? '🔗 Lien copié' : '⚠️ Copie impossible : utilisez le fichier');
+        const sh = q('#xm-share'); if (sh) sh.onclick = async () => { try { await navigator.share({ title: cfg.title || cfg.app, text: cfg.title || cfg.app, url }); } catch (e) { } };
+        q('#xm-file').onclick = () => { download(fname, json, 'application/json'); toast('⬇️ Fichier enregistré'); };
+    }
+    // fenêtre : feuille du bas sur mobile, boîte centrée sur le bureau (styles en ligne : aucun CSS requis)
+    function host(html, title, mob) {
+        if (mob) { const s = sheet(html, { title }); s.ov = s.parentNode; return s; }
+        const old = document.getElementById('xm-d-ov'); if (old) old.remove();
+        const ov = document.createElement('div'); ov.id = 'xm-d-ov'; ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:10060;display:flex;align-items:center;justify-content:center;';
+        ov.innerHTML = '<div style="background:var(--bg-menu,#2d2d2d);color:var(--text-main,#fff);width:520px;max-width:94vw;max-height:90vh;overflow-y:auto;border-radius:10px;border:1px solid var(--border-color,#444);padding:20px;box-shadow:0 4px 18px rgba(0,0,0,.5);font-size:13.5px;font-family:inherit;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;border-bottom:1px solid var(--border-color,#444);padding-bottom:8px;"><b style="font-size:15px;">' + title + '</b><span data-x style="cursor:pointer;font-weight:bold;color:var(--text-muted,#aaa);padding:0 4px;">✕</span></div><div class="xm-d">' + html + '</div></div>';
+        ov.addEventListener('mousedown', e => { if (e.target === ov) ov.remove(); }); document.body.appendChild(ov); $('[data-x]', ov).onclick = () => ov.remove();
+        const s = $('.xm-d', ov); s.ov = ov; if (!document.getElementById('xm-d-css')) { const st = document.createElement('style'); st.id = 'xm-d-css'; st.textContent = '#xm-d-ov .m-qr{background:#fff;border-radius:10px;padding:6px;width:min(100%,340px);margin:6px auto}#xm-d-ov .m-qr svg{display:block;width:100%;height:auto}#xm-d-ov .m-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}#xm-d-ov .m-actions>*{flex:1 1 130px}#xm-d-ov .m-btn{padding:9px 12px;font-size:13.5px;border-radius:8px;border:1px solid var(--btn-border,rgba(240,179,120,.35));background:var(--btn-bg,rgba(240,179,120,.12));color:inherit;cursor:pointer;font-weight:600}#xm-d-ov .m-btn.primary{border-color:rgba(240,179,120,.85);background:rgba(240,179,120,.28)}#xm-d-ov .m-hint{font-size:12px;color:var(--text-dim,#888);line-height:1.45}#xm-d-ov .m-card{border:1px solid var(--border-color,#444);border-radius:8px;padding:10px 12px;background:var(--bg-panel-alt,#252525);margin:10px 0}#xm-d-ov .m-sec{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-dim,#888);margin:16px 2px 6px}'; document.head.appendChild(st); }
+        return s;
+    }
+    // ---------- réception : lien (#mx=…), fichier ou lien collé ----------
+    async function fromHash(app, onEnv) {
+        const m = /[#&]mx=([\w-]+)/.exec(location.hash || ''); if (!m) return false;
+        try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { }
+        try { const env = checkEnv(await unpack(m[1]), app); await onEnv(env, 'link'); } catch (e) { toast('⚠️ ' + (e.message || 'Lien illisible'), 4500); }
+        return true;
+    }
+    function importFile(app, onEnv) { pickFile('.json,application/json', async f => { try { await onEnv(await readEnvFile(f, app), 'file'); } catch (e) { toast('⚠️ ' + (e.message || 'Fichier illisible'), 4500); } }); }
+    async function importLink(app, onEnv) {
+        const mob = document.body.classList.contains('xm');
+        const s = host('<label class="m-field" style="display:block;margin-bottom:10px"><span class="m-hint">Collez le lien reçu</span><textarea id="xm-paste" rows="4" style="width:100%;box-sizing:border-box;font-size:16px;padding:10px;border-radius:8px;border:1px solid var(--border-color,#444);background:var(--bg-input,#3a3a3a);color:inherit"></textarea></label><div class="m-actions"><button class="m-btn primary" id="xm-pgo">Importer</button></div>', '🔗 Importer un lien', mob);
+        $('#xm-pgo', s.ov || s).onclick = async () => { const v = $('#xm-paste', s.ov || s).value, m = /mx=([\w-]+)/.exec(v) || [0, v.trim()]; try { const env = checkEnv(await unpack(m[1]), app); if (s.ov) s.ov.remove(); closeSheet(); await onEnv(env, 'link'); } catch (e) { toast('⚠️ ' + (e.message || 'Lien illisible'), 4500); } };
+    }
+    // ---------- panneau « 📱 Mobile » des outils bureau ----------
+    //  cfg = { app, page, title, name:()=>'', make:()=>data|null, apply:async(env)=>message, note }
+    function desktopPanel(cfg) {
+        const s = host('<p class="m-hint" style="margin:0 0 10px">Emportez ce projet sur le téléphone : ouvrez la <b>version mobile</b> de ' + esc(cfg.title) + ' en scannant un QR code, en ouvrant un lien ou en important un fichier.</p>' +
+            '<div class="m-actions" style="margin-top:0"><button class="m-btn primary" id="xm-go">📱 Envoyer vers le mobile</button><button class="m-btn" id="xm-open">↗ Ouvrir la version mobile ici</button></div>' +
+            (cfg.apply ? '<div class="m-sec">Récupérer ce qui a été fait sur le mobile</div><div class="m-actions" style="margin-top:0"><button class="m-btn" id="xm-ifile">📂 Importer un fichier</button><button class="m-btn" id="xm-ilink">🔗 Coller un lien</button></div><p class="m-hint" style="margin:8px 2px 0">' + (cfg.returnNote || 'Sur le mobile, « Renvoyer au bureau » produit le fichier ou le lien à importer ici.') + '</p>' : ''), '📱 Version mobile — ' + esc(cfg.title), false);
+        const q = id => $(id, s.ov);
+        q('#xm-go').onclick = () => { s.ov.remove(); send({ app: cfg.app, page: cfg.page, title: cfg.title, name: cfg.name, make: cfg.make, note: cfg.note, empty: cfg.empty }); };
+        q('#xm-open').onclick = async () => { const d = cfg.make(); if (d == null) { toast(cfg.empty || 'Rien à envoyer'); return; } s.ov.remove(); window.open(await link(cfg.page, envelope(cfg.app, 'project', typeof cfg.name === 'function' ? cfg.name() : cfg.name, d)), '_blank'); };
+        if (cfg.apply) { const ap = async env => { s.ov && s.ov.remove(); const m = await cfg.apply(env); if (m) toast(m, 5000); }; q('#xm-ifile').onclick = () => importFile(cfg.app, ap); q('#xm-ilink').onclick = () => { s.ov.remove(); importLink(cfg.app, async env => { const m = await cfg.apply(env); if (m) toast(m, 5000); }); }; }
+    }
+    // retour par lien sur le bureau (#mx=… de type return)
+    function desktopBoot(cfg) { return fromHash(cfg.app, async env => { if (env.kind === 'return' && cfg.apply) { const m = await cfg.apply(env); if (m) toast(m, 5000); } }); }
+    // ---------- thème, en-tête et menu des pages mobiles ----------
+    function initTheme() { let p = {}; try { p = JSON.parse(localStorage.getItem('hubXIII.prefs')) || {}; } catch (e) { } document.body.classList.add('xm'); document.body.classList.toggle('light-theme', p.theme === 'light'); const m = document.querySelector('meta[name=theme-color]'); if (m) m.content = p.theme === 'light' ? '#ffffff' : '#222222'; }
+    function toggleTheme() { let p = {}; try { p = JSON.parse(localStorage.getItem('hubXIII.prefs')) || {}; } catch (e) { } p.theme = p.theme === 'light' ? 'dark' : 'light'; try { localStorage.setItem('hubXIII.prefs', JSON.stringify(p)); } catch (e) { } initTheme(); }
+    //  menu standard ⋯ : cfg = { app, deskPage, items:[{icon,label,sub,run}] , onImport(env, via) , sendReturn() }
+    function menu(cfg) {
+        const items = (cfg.items || []).concat([
+            cfg.onImport ? { icon: '📂', label: 'Importer un fichier', sub: 'Envoi du bureau (.xiii-m.json)', run: () => importFile(cfg.app, cfg.onImport) } : null,
+            cfg.onImport ? { icon: '🔗', label: 'Coller un lien', sub: 'Lien ou QR reçu du bureau', run: () => importLink(cfg.app, cfg.onImport) } : null,
+            cfg.sendReturn ? { icon: '📤', label: 'Renvoyer au bureau', sub: 'QR code, lien ou fichier', run: cfg.sendReturn } : null,
+            { icon: '🌓', label: 'Thème clair / sombre', run: toggleTheme },
+            cfg.deskPage ? { icon: '🖥️', label: 'Version bureau', sub: 'Interface complète', run: () => { try { sessionStorage.setItem('xiiiDesk', '1'); } catch (e) { } location.href = cfg.deskPage + '?desktop=1'; } } : null,
+            { icon: '🏠', label: 'Accueil SUITE XIII', run: () => { location.href = 'index.html'; } }].filter(Boolean));
+        const s = sheet('<div class="m-list" style="margin:0">' + items.map((it, i) => '<button class="m-item" data-i="' + i + '"><span class="ico">' + it.icon + '</span><span class="grow"><b>' + esc(it.label) + '</b>' + (it.sub ? '<small>' + esc(it.sub) + '</small>' : '') + '</span></button>').join('') + '</div><p class="m-credit">Application développée par Matthieu Lamotte</p>', { title: 'Menu' });
+        $$('[data-i]', s).forEach(b => b.onclick = () => { closeSheet(); setTimeout(() => items[+b.dataset.i].run(), 60); });
+    }
+    return { FORMAT, $, $$, esc, uid, safe, isPhone, pack, unpack, link, envelope, checkEnv, load, save, drop, toast, sheet, closeSheet, ask, download, copy, pickFile, readEnvFile, send, host, fromHash, importFile, importLink, desktopPanel, desktopBoot, initTheme, toggleTheme, menu };
+})();
+// 🏠 retour à l'accueil SUITE XIII : même bouton en tête de chaque version mobile
+(function () {
+    const add = () => { const top = document.querySelector('.m-top'); if (!top || top.querySelector('.xm-home')) return; const a = document.createElement('a'); a.className = 'm-ibtn plain xm-home'; a.href = 'index.html'; a.title = 'Accueil SUITE XIII'; a.setAttribute('aria-label', 'Accueil'); a.textContent = '🏠'; a.style.cssText = 'text-decoration:none;font-size:17px;display:inline-flex;align-items:center;justify-content:center'; top.insertBefore(a, top.firstChild); };
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', add); else add();
+})();
+
+// 📱 XIII Équipe : une fois dans l'application, on y reste (l'accueil ramène à l'application, pas au site)
+(function () {
+    if (window.__xinapp) return; window.__xinapp = 1;
+    var page = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
+    try { if (page === 'equipe.html' && (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (window.matchMedia && matchMedia('(display-mode: standalone)').matches))) sessionStorage.setItem('xiii.inapp', '1'); } catch (e) { }
+    function inApp() { try { return sessionStorage.getItem('xiii.inapp') === '1'; } catch (e) { return false; } }
+    if (!inApp()) return;
+    if (page === 'index.html' || page === '') { location.replace('equipe.html'); return; }
+    document.addEventListener('click', function (e) {
+        var a = e.target.closest && e.target.closest('a[href]'); if (!a) return;
+        var u; try { u = new URL(a.getAttribute('href'), location.href); } catch (er) { return; }
+        if (u.origin !== location.origin) return;
+        var f = (u.pathname.split('/').pop() || 'index.html').toLowerCase();
+        if (f === 'index.html' || f === '') { e.preventDefault(); e.stopPropagation(); location.href = 'equipe.html'; return; }
+        if (a.target === '_blank') { a.removeAttribute('target'); }
+    }, true);
+})();
+
+</script>
+<script>
+XM.initTheme();
+// =====================================================================
+//  CONDUCO XIII — version mobile : écran de direct (On Air), liste de lecture, journal
+//  Modèle de temps repris de conduco.html (compute, shotTimes, overUnder, as-run).
+// =====================================================================
+(() => {
+const $ = XM.$, $$ = XM.$$, esc = XM.esc, APP = 'conduco';
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const pad2 = n => String(n).padStart(2, '0');
+const now = () => Date.now();                       // seule source d'heure (mockable par les tests)
+const nowSec = () => { const d = new Date(now()); return d.getHours() * 3600 + d.getMinutes() * 60 + d.getSeconds() + d.getMilliseconds() / 1000; };
+
+// ---------- Référentiels (identiques au bureau) ----------
+const TYPES = [
+    { id: 'open', name: 'Ouverture / Générique', short: 'Générique', ico: '🎬', col: '#AB47BC', dur: 45 }, { id: 'plateau', name: 'Plateau / Présentation', short: 'Plateau', ico: '🎙️', col: '#42A5F5', dur: 120 },
+    { id: 'itw', name: 'Interview', short: 'Interview', ico: '💬', col: '#26A69A', dur: 300 }, { id: 'live', name: 'Live musical', short: 'Live', ico: '🎵', col: '#EC407A', dur: 210 },
+    { id: 'vt', name: 'Reportage / VT', short: 'VT', ico: '📼', col: '#FFA726', dur: 120 }, { id: 'duplex', name: 'Duplex / Direct extérieur', short: 'Duplex', ico: '📡', col: '#26C6DA', dur: 180 },
+    { id: 'jingle', name: 'Jingle / Virgule', short: 'Jingle', ico: '✨', col: '#FFD54F', dur: 10 }, { id: 'pub', name: 'Coupure pub', short: 'Pub', ico: '💰', col: '#8D6E63', dur: 180 },
+    { id: 'trans', name: 'Changement de plateau', short: 'Changement', ico: '🔁', col: '#90A4AE', dur: 60 }, { id: 'speech', name: 'Discours / Remise de prix', short: 'Discours', ico: '🏆', col: '#D4E157', dur: 240 },
+    { id: 'game', name: 'Jeu / Chronique', short: 'Chronique', ico: '🎲', col: '#66BB6A', dur: 240 }, { id: 'info', name: 'Info / Météo', short: 'Info', ico: '🌦️', col: '#5C6BC0', dur: 90 },
+    { id: 'public', name: 'Public / Ambiance', short: 'Public', ico: '👏', col: '#FF7043', dur: 30 }, { id: 'end', name: 'Fin / Générique de fin', short: 'Fin', ico: '🏁', col: '#7E57C2', dur: 60 },
+    { id: 'other', name: 'Autre', short: 'Autre', ico: '⬜', col: '#9E9E9E', dur: 60 }];
+const typeOf = id => TYPES.find(t => t.id === id) || TYPES[TYPES.length - 1];
+const PLANS = [['TGP', 'Très gros plan'], ['GP', 'Gros plan'], ['PR', 'Plan rapproché'], ['PP', 'Plan poitrine'], ['PT', 'Plan taille'], ['PA', 'Plan américain'], ['PM', 'Plan moyen'], ['PE', "Plan d'ensemble"], ['PL', 'Plan large'], ['PG', 'Plan général'], ['2S', 'Plan à deux'], ['3S', 'Plan à trois'], ['AMO', 'Amorce'], ['CC', 'Contrechamp'], ['INS', 'Insert / détail'], ['PUB', 'Public'], ['PLO', 'Plongée'], ['CPL', 'Contre-plongée'], ['DRN', 'Vue drone'], ['SUBJ', 'Plan subjectif']];
+const planName = c => (PLANS.find(p => p[0] === c) || [c, c])[1];
+const STATUS = { prep: 'En préparation', rep: 'Répété', ok: 'Validé', cut: 'Coupé' };
+const GFX_ICO = { 'Synthé nom': '🏷️', 'Titre': '🔤', 'Bandeau': '📰', 'Logo': '🔰', 'Plein écran': '🖼️', 'Compteur': '⏲️', 'Réseaux sociaux': '💬', 'Crédits': '📜', 'QR code': '🔳', 'Paroles': '🎼', 'Sous-titres': '💭', 'Autre': '✳️' };
+
+// ---------- Temps (copie fidèle de conduco.html) ----------
+function parseClock(v) {
+    if (v == null) return null; const s = String(v).trim().replace(/[h.]/gi, ':'); if (!s) return null;
+    const p = s.split(':').map(x => x === '' ? 0 : Number(x)); if (p.some(isNaN) || p.length > 3) return null;
+    while (p.length < 3) p.push(0); if (p[0] > 47 || p[1] > 59 || p[2] > 59) return null; return p[0] * 3600 + p[1] * 60 + p[2];
+}
+function fmtClock(sec) { if (sec == null || isNaN(sec)) return '--:--:--'; sec = Math.round(sec); sec = ((sec % 86400) + 86400) % 86400; return pad2(Math.floor(sec / 3600)) + ':' + pad2(Math.floor(sec / 60) % 60) + ':' + pad2(sec % 60); }
+function fmtDur(sec, forceH) {
+    if (sec == null || isNaN(sec)) return ''; sec = Math.round(sec); const neg = sec < 0; sec = Math.abs(sec);
+    const h = Math.floor(sec / 3600), m = Math.floor(sec / 60) % 60, s = sec % 60, long = forceH || (S && S.P && S.P.settings.durFmt === 'hms');
+    const out = (h || long) ? h + ':' + pad2(m) + ':' + pad2(s) : m + ':' + pad2(s); return (neg ? '−' : '') + out;
+}
+function fmtGap(sec) { if (!sec) return '0:00'; return (sec > 0 ? '+' : '') + fmtDur(sec); }
+function fmtDateFR(iso) { if (!iso) return ''; const [y, m, d] = iso.split('-'); return d && m && y ? `${d}/${m}/${y}` : iso; }
+const counted = it => it.kind === 'item' && !it.reserve && it.status !== 'cut';
+function compute(t) {
+    const out = { rows: {}, sections: {}, total: 0 }, start = parseClock(t.start) ?? 0;
+    let cur = start, n = 0, r = 0, curSec = null;
+    t.items.forEach(it => {
+        if (it.kind === 'header') { curSec = it.id; out.sections[it.id] = { dur: 0, count: 0, start: cur }; out.rows[it.id] = { start: cur }; return; }
+        const row = { gap: null };
+        if (it.hard) { const h = parseClock(it.hard); if (h != null) { row.gap = h - cur; cur = h; row.hardOk = true; } }
+        row.start = cur; const c = counted(it);
+        if (it.reserve) { r++; row.num = 'R' + r; } else { n++; row.num = String(n); }
+        if (c) { cur += (+it.dur || 0); if (curSec) { out.sections[curSec].dur += (+it.dur || 0); out.sections[curSec].count++; } }
+        row.end = row.start + (+it.dur || 0); row.cumul = cur - start; row.counted = c; out.rows[it.id] = row;
+    });
+    out.start = start; out.end = cur; out.total = cur - start; out.count = n; out.reserveCount = r;
+    const targetEnd = start + (+t.target || 0); let rem = 0;
+    for (let i = t.items.length - 1; i >= 0; i--) { const it = t.items[i]; if (!counted(it)) continue; rem += (+it.dur || 0); out.rows[it.id].back = targetEnd - rem; }
+    out.targetEnd = targetEnd; out.gap = out.total - (+t.target || 0); return out;
+}
+function shotTimes(it) {
+    const sh = it.shots || []; if (!sh.length) return [];
+    const known = sh.reduce((a, s) => a + (s.dur > 0 ? +s.dur : 0), 0), unk = sh.filter(s => !(s.dur > 0)).length;
+    const each = unk ? Math.max(0, (+it.dur || 0) - known) / unk : 0; let t = 0;
+    return sh.map(s => { const d = s.dur > 0 ? +s.dur : each; const o = { start: t, dur: d, auto: !(s.dur > 0) }; t += d; return o; });
+}
+
+// ---------- Données : décodage de l'envoi du bureau ----------
+//  data = { v, name, author, warn, autoShots, durFmt, active, cams:[[num,nom,couleur,op,optique,pos]], tal:[[nom,rôle,micro,couleur]], src:[[code,nom,type]],
+//           tabs:[{id,name,start,target,date,items:[ {h:1,id,title,color} | {id,type,title,dur,hard,tal:[i],cams:[i],shots:[[cam,plan,move,desc,cue,dur]],gfx:[[kind,text,at]],src,audio,light,notes,st,color,res} ]}] }
+function unpackProject(d) {
+    if (!d || !Array.isArray(d.tabs) || !d.tabs.length) throw new Error('Aucun conducteur dans cet envoi');
+    const cams = (d.cams || []).map((c, i) => ({ id: 'c' + i, num: c[0], name: c[1] || '', color: c[2] || '#9e9e9e', op: c[3] || '', optic: c[4] || '', pos: c[5] || '' }));
+    const talents = (d.tal || []).map((t, i) => ({ id: 't' + i, name: t[0] || '', role: t[1] || '', mic: t[2] || '', color: t[3] || '#999' }));
+    const sources = (d.src || []).map((s, i) => ({ id: 's' + i, code: s[0] || '', name: s[1] || '', kind: s[2] || '' }));
+    const tabs = d.tabs.map(t => ({
+        id: t.id, name: t.name || 'Conducteur', start: t.start || '20:00:00', target: t.target == null ? 3600 : t.target, date: t.date || '',
+        items: (t.items || []).map(x => {
+            if (x.h) return { id: x.id, kind: 'header', title: x.title || '', color: x.color || '#90A4AE' };
+            return { id: x.id, kind: 'item', type: x.type || 'other', title: x.title || '', dur: +x.dur || 0, hard: x.hard || '', talents: (x.tal || []).map(i => 't' + i), cams: (x.cams || []).map(i => 'c' + i),
+                shots: (x.shots || []).map(s => ({ cam: s[0] == null || s[0] < 0 ? '' : 'c' + s[0], plan: s[1] || 'PM', move: s[2] || 'Fixe', desc: s[3] || '', cue: s[4] || '', dur: s[5] || null })),
+                gfx: (x.gfx || []).map(g => ({ kind: g[0] || 'Autre', text: g[1] || '', at: g[2] || '' })), source: x.src == null || x.src < 0 ? '' : 's' + x.src, audio: x.audio || '', light: x.light || '', notes: x.notes || '',
+                status: x.st || 'prep', color: x.color || null, reserve: !!x.res };
+        })
+    }));
+    return { name: d.name || '', author: d.author || '', settings: { warn: d.warn || 10, autoShots: !!d.autoShots, durFmt: d.durFmt || 'auto' }, res: { cams, talents, sources }, tabs, active: clamp(d.active || 0, 0, tabs.length - 1) };
+}
+
+// ---------- État persistant ----------
+//  S = { v:1, name, ts, P:{…projet décodé…}, runs:{ [idConducteur]: run }, prefs:{ vib, wake } }
+let S = null, CC = null, view = 'live';
+const newRun = () => ({ started: false, ended: false, curId: null, shotIdx: 0, itemStart: 0, shotStart: 0, pausedAcc: 0, shotPausedAcc: 0, paused: false, pauseAt: 0, showStart: 0, endAt: 0, itemClock: 0, asrun: {}, log: [], armedAt: 0 });
+const tab = () => S.P.tabs[S.P.active];
+const items = () => tab().items;
+const byId = id => items().find(i => i.id === id);
+const run = () => S.runs[tab().id] || (S.runs[tab().id] = newRun());
+const cam = id => S.P.res.cams.find(c => c.id === id), talent = id => S.P.res.talents.find(t => t.id === id), source = id => S.P.res.sources.find(s => s.id === id);
+const camLabel = c => c ? 'C' + c.num : '—';
+const itemColor = it => it.kind === 'header' ? (it.color || '#90A4AE') : (it.color || typeOf(it.type).col);
+function itemCams(it) { const s = new Set(it.cams || []); (it.shots || []).forEach(sh => { if (sh.cam) s.add(sh.cam); }); return [...s].map(cam).filter(Boolean).sort((a, b) => a.num - b.num); }
+const save = () => { if (!S) return; if (!XM.save(APP, S)) { if (!save.warned) { save.warned = 1; XM.toast('⚠️ Stockage plein : le direct continue mais ne sera pas conservé'); } } };
+function recompute() { CC = S ? compute(tab()) : null; }
+function ensureCur() { const r = run(); if (!r.curId || !byId(r.curId)) { const f = items().find(counted); r.curId = f ? f.id : null; r.shotIdx = 0; } }
+function nextPlayable(id) { const l = items(); let i = l.findIndex(x => x.id === id); for (i = i + 1; i < l.length; i++) if (counted(l[i])) return l[i]; return null; }
+function prevPlayable(id) { const l = items(); let i = l.findIndex(x => x.id === id); for (i = i - 1; i >= 0; i--) if (counted(l[i])) return l[i]; return null; }
+
+// ---------- Moteur de direct (mêmes règles que le mode Direct du bureau) ----------
+const liveNow = () => { const r = run(); return r.paused ? r.pauseAt : now(); };
+const elapsed = () => { const r = run(); return (!r.started || !r.itemStart) ? 0 : Math.max(0, (liveNow() - r.itemStart - r.pausedAcc) / 1000); };
+const shotElapsed = () => { const r = run(); return (!r.started || !r.shotStart) ? 0 : Math.max(0, (liveNow() - r.shotStart - r.shotPausedAcc) / 1000); };
+const logEv = (e, id, txt) => { const r = run(); r.log.push({ t: now(), e, id: id || '', txt: txt || '' }); if (r.log.length > 500) r.log.splice(0, r.log.length - 500); };
+function finalizeCurrent() { const r = run(), it = byId(r.curId); if (!it || !r.started) return; r.asrun[it.id] = { clock: r.itemClock, dur: Math.round(elapsed()), shots: it.shots.length }; }
+function startItem(it, at) {
+    const r = run(); at = at || now(); r.curId = it.id; r.shotIdx = 0; r.itemStart = at; r.shotStart = at; r.pausedAcc = 0; r.shotPausedAcc = 0;
+    const d = new Date(at); r.itemClock = Math.round(d.getHours() * 3600 + d.getMinutes() * 60 + d.getSeconds() + d.getMilliseconds() / 1000); r.paused = false; delete r.asrun[it.id];
+}
+function snapshotForUndo() { S.undo = { tabId: tab().id, run: JSON.stringify(run()) }; }
+function afterChange(msg, canUndo) { save(); buildLive(); if (view === 'list') renderList(); if (view === 'log') renderLog(); updateTabsBadge(); if (msg) snack(msg, canUndo); }
+function doNext(at) {
+    ensureCur(); const r = run(); if (!r.curId) return;
+    if (r.ended) { XM.toast("Fin d'émission : ↺ Remise à zéro pour recommencer"); return; }
+    snapshotForUndo(); r.armedAt = 0; let msg;
+    if (!r.started) { r.started = true; r.showStart = at || now(); startItem(byId(r.curId), at); logEv('top', r.curId); msg = '🔴 Top antenne'; vibe([150]); }
+    else {
+        finalizeCurrent(); const n = nextPlayable(r.curId);
+        if (!n) { r.ended = true; r.endAt = now(); r.paused = false; logEv('end', r.curId); msg = "🏁 Fin d'émission"; vibe([300, 100, 300]); }
+        else { startItem(n); logEv('next', n.id); msg = '▶ ' + n.title; vibe([120]); }
+    }
+    afterChange(msg, true);
+}
+function doPrev() {
+    ensureCur(); const r = run(), p = prevPlayable(r.curId); if (!p) { XM.toast('Premier élément'); return; }
+    snapshotForUndo();
+    if (r.started) { delete r.asrun[r.curId]; startItem(p); logEv('prev', p.id); } else r.curId = p.id;
+    r.ended = false; vibe([120, 60, 120]); afterChange('⏮ ' + p.title, true);
+}
+function doJump(id) {
+    const it = byId(id), r = run(); if (!it || it.kind !== 'item') return; snapshotForUndo();
+    if (r.started && !r.ended) { finalizeCurrent(); startItem(it); logEv('jump', id); }
+    else { r.curId = id; r.shotIdx = 0; if (r.ended) { r.ended = false; startItem(it); logEv('jump', id); } }
+    vibe([120]); afterChange('▶ ' + it.title, true);
+}
+function doShot(d) {
+    const r = run(), it = byId(r.curId); if (!it || !it.shots.length) return;
+    const n = clamp(r.shotIdx + d, 0, it.shots.length - 1); if (n === r.shotIdx) return;
+    r.shotIdx = n; r.shotStart = now(); r.shotPausedAcc = 0; if (r.paused) r.shotStart = r.pauseAt; vibe([40]); save(); buildLive();
+}
+function doPause() {
+    const r = run(); if (!r.started || r.ended) return;
+    if (!r.paused) { r.paused = true; r.pauseAt = now(); logEv('pause', r.curId); }
+    else { const d = now() - r.pauseAt; r.pausedAcc += d; r.shotPausedAcc += d; r.paused = false; logEv('resume', r.curId); }
+    vibe([60]); save(); buildLive();
+}
+async function doReset() {
+    const r = run(), n = Object.keys(r.asrun).length;
+    const i = await XM.ask('Remise à zéro du direct ?', n ? `Les <b>${n} heure${n > 1 ? 's' : ''} réelle${n > 1 ? 's' : ''}</b> et le journal de ce conducteur seront effacés. Pensez à « Renvoyer au bureau » avant si vous voulez les garder.` : 'Le direct de ce conducteur repart de zéro.', [{ label: 'Remettre à zéro', danger: true }, 'Annuler']);
+    if (i !== 0) return;
+    S.runs[tab().id] = newRun(); S.undo = null; ensureCur(); save(); buildLive(); renderList(); renderLog(); XM.toast('↺ Direct remis à zéro');
+}
+function overUnder() {
+    const r = run(); let g = 0; items().forEach(it => { const a = r.asrun[it.id]; if (a && counted(it) && it.id !== r.curId) g += a.dur - (+it.dur || 0); });
+    const cur = byId(r.curId);
+    if (cur && r.started && !r.ended && counted(cur)) g += Math.max(0, elapsed() - (+cur.dur || 0));
+    if (r.ended && cur && r.asrun[cur.id] && counted(cur)) g += r.asrun[cur.id].dur - (+cur.dur || 0);
+    return Math.round(g);
+}
+function nextOccurrence(clockSec) { const d = new Date(now()); d.setHours(0, 0, 0, 0); let t = d.getTime() + clockSec * 1000; if (t < now() - 2000) t += 86400000; return t; }
+function arm(sec) { const r = run(); r.armedAt = nextOccurrence(sec); logEv('arm', r.curId, fmtClock(sec)); save(); buildLive(); XM.toast('⏱ Top antenne programmé à ' + fmtClock(sec)); }
+function disarm() { const r = run(); r.armedAt = 0; save(); buildLive(); }
+
+// ---------- Vibration / écran allumé ----------
+function vibe(p) { try { if (S && S.prefs.vib && navigator.vibrate) navigator.vibrate(p); } catch (e) { } }
+let wl = null;
+function wakeBadge() { const b = $('#cx-wake'); if (!b) return; const sup = !!navigator.wakeLock; b.hidden = !S; b.textContent = wl ? '☀️' : sup && S && S.prefs.wake ? '🌙' : '🔅'; b.title = wl ? 'Écran maintenu allumé' : sup ? (S && S.prefs.wake ? 'Verrouillage d\'écran non empêché pour l\'instant' : 'Écran non maintenu allumé (réglage désactivé)') : 'Cet appareil ne permet pas de garder l\'écran allumé'; }
+async function wakeOn() {
+    try { if (S && S.prefs.wake && navigator.wakeLock && !wl && document.visibilityState === 'visible') { wl = await navigator.wakeLock.request('screen'); wl.addEventListener('release', () => { wl = null; wakeBadge(); }); } } catch (e) { wl = null; }
+    wakeBadge();
+}
+function wakeOff() { try { if (wl) wl.release(); } catch (e) { } wl = null; wakeBadge(); }
+
+// ---------- Rendu : écran de direct ----------
+const bar = (it) => itemColor(it);
+function dayDelta(a, b) { let d = a - b; d = ((d + 43200) % 86400 + 86400) % 86400 - 43200; return d; }
+function buildLive() {
+    if (!S) return; ensureCur(); recompute();
+    const r = run(), it = byId(r.curId), c = CC; if (!it) { $('#cx-title').textContent = 'Conducteur vide'; return; }
+    const t = typeOf(it.type), row = c.rows[it.id], next = nextPlayable(it.id), col = itemColor(it);
+    const cur = $('#cx-cur'); cur.style.setProperty('--col', col);
+    cur.classList.toggle('live', r.started && !r.ended && !r.paused); cur.classList.toggle('ended', r.ended); cur.classList.toggle('paused', r.paused);
+    const on = $('#cx-onair'); on.textContent = r.ended ? 'FIN' : r.paused ? 'PAUSE' : r.started ? 'ON AIR' : r.armedAt ? 'PROGRAMMÉ' : 'STAND-BY';
+    on.className = 'cx-onair' + (r.ended ? ' end' : r.paused ? ' pause' : r.started ? ' on' : '');
+    $('#cx-lbl').innerHTML = `N° ${esc(row.num)} · ${t.ico} ${esc(t.short)}${it.reserve ? ' · RÉSERVE' : ''}`;
+    $('#cx-title').textContent = it.title || '—';
+    // ligne « prévu / réel »
+    let sub = `<span>Prévu <b>${fmtClock(row.start)}</b></span><span>Durée <b>${fmtDur(it.dur)}</b></span>`;
+    if (r.started) { const dd = Math.round(dayDelta(r.itemClock, row.start)); sub += `<span>Réel <b>${fmtClock(r.itemClock)}</b> <b class="${dd > 1 ? 'neg' : dd < -1 ? 'pos' : ''}">${Math.abs(dd) > 1 ? '(' + fmtGap(dd) + ')' : ''}</b></span>`; }
+    else if (it.hard) sub += `<span>⏰ Heure fixe <b>${esc(it.hard)}</b></span>`;
+    $('#cx-sub2').innerHTML = sub;
+    // plans (programme / preview)
+    let sh = '';
+    if (it.shots.length) {
+        const tt = shotTimes(it), s = it.shots[r.shotIdx], ns = it.shots[r.shotIdx + 1], nIt = !ns && next && next.shots.length ? next.shots[0] : null;
+        const box = (s, k, i, n, extra) => { if (!s) return `<div class="cx-shot ${k}"><h6>${k === 'pgm' ? '● PROGRAMME' : '○ PREVIEW'}</h6><div class="d" style="color:var(--text-dim)">—</div></div>`; const cm = cam(s.cam); return `<div class="cx-shot ${k}"><h6>${k === 'pgm' ? '● PROGRAMME' : '○ PREVIEW'}${extra || ''}</h6><div class="cam" style="color:${cm ? cm.color : '#aaa'}">${cm ? 'CAM ' + cm.num : '—'}<i>${esc(s.plan)}</i></div><div class="d">${esc(s.desc || planName(s.plan))}${s.move && s.move !== 'Fixe' ? ' · ' + esc(s.move) : ''}</div><small>${s.cue ? 'Top : ' + esc(s.cue) + ' · ' : ''}plan ${i + 1}/${n}<span class="sr"></span></small></div>`; };
+        sh = `<div class="cx-shots"><button class="sn" id="b-sp" aria-label="Plan précédent" ${r.shotIdx <= 0 ? 'disabled' : ''}>◀</button>${box(s, 'pgm', r.shotIdx, it.shots.length)}${ns ? box(ns, 'pvw', r.shotIdx + 1, it.shots.length) : nIt ? box(nIt, 'pvw', 0, next.shots.length, ' · SUIVANT') : box(null, 'pvw')}<button class="sn" id="b-sn" aria-label="Plan suivant" ${r.shotIdx >= it.shots.length - 1 ? 'disabled' : ''}>▶</button></div>`;
+    } else if (itemCams(it).length || it.source) {
+        const src = source(it.source);
+        sh = `<div class="cx-sub" style="justify-content:flex-start">${src ? `<span>Source <b>${esc(src.code)}${src.name ? ' — ' + esc(src.name) : ''}</b></span>` : ''}${itemCams(it).length ? `<span>Caméras <b>${itemCams(it).map(camLabel).join(' ')}</b></span>` : ''}</div>`;
+    }
+    $('#cx-shots').innerHTML = sh;
+    const b1 = $('#b-sp'), b2 = $('#b-sn'); if (b1) b1.onclick = () => doShot(-1); if (b2) b2.onclick = () => doShot(1);
+    // résumé des détails
+    const tal = it.talents.map(talent).filter(Boolean), nbg = it.gfx.length;
+    $('#cx-meta').textContent = [tal.length ? '👥 ' + tal.map(x => x.name).join(', ') : '', itemCams(it).length && it.shots.length ? '🎥 ' + itemCams(it).map(camLabel).join(' ') : '', it.notes ? '📝 notes' : '', nbg ? '🏷️ ' + nbg : ''].filter(Boolean).join('  ·  ');
+    // suivant + ensuite
+    let nx;
+    if (next) {
+        const nr = c.rows[next.id], nt = typeOf(next.type), after = []; let p = next; for (let k = 0; k < 2; k++) { p = nextPlayable(p.id); if (!p) break; after.push(p); }
+        nx = `<div class="l">▶ Suivant · N° ${esc(nr.num)} · ${nt.ico} ${esc(nt.short)}</div><div class="t" style="border-left:0">${esc(next.title)}</div><div class="s"><span>Durée <b>${fmtDur(next.dur)}</b></span><span>Prévu <b>${fmtClock(nr.start)}</b></span><span class="est"></span>${itemCams(next).length ? `<span>${itemCams(next).map(camLabel).join(' ')}</span>` : ''}</div>`
+            + (after.length ? `<div class="then">${after.map(a => `<div><span>${typeOf(a.type).ico} ${esc(a.title)}</span><i>${fmtClock(c.rows[a.id].start)}</i></div>`).join('')}</div>` : '');
+    } else nx = `<div class="l" style="color:var(--text-dim)">▶ Suivant</div><div class="t" style="color:var(--text-dim)">${r.ended ? 'Émission terminée' : 'Fin du conducteur'}</div>`;
+    $('#cx-next').innerHTML = nx; $('#cx-next').style.borderLeftColor = next ? '#43a047' : 'var(--border-color)';
+    // démarrage programmé (stand-by uniquement)
+    const st = $('#cx-start');
+    if (!r.started && !r.ended) {
+        if (r.armedAt) st.innerHTML = `<div class="st armed"><label>⏱ Top antenne programmé à <b>${fmtClock(new Date(r.armedAt).getHours() * 3600 + new Date(r.armedAt).getMinutes() * 60 + new Date(r.armedAt).getSeconds())}</b> — dans <b id="st-in">…</b></label><button class="m-btn" id="st-off">Annuler la programmation</button></div>`;
+        else st.innerHTML = `<div class="st"><label for="st-time">Top programmé àOu programmer le top à l'heure&nbsp;:nbsp;:</label><input type="text" inputmode="numeric" autocomplete="off" id="st-time" placeholder="hh:mm:ss" value="${fmtClock(parseClock(tab().start) ?? 0)}"><button class="m-btn primary" id="st-on">⏱ Programmer</button></div>`;
+        const so = $('#st-off'); if (so) so.onclick = disarm;
+        const sn = $('#st-on'); if (sn) sn.onclick = () => { const v = parseClock($('#st-time').value); if (v == null) return XM.toast('Heure invalide'); arm(v); };
+    } else st.innerHTML = '';
+    // boutons
+    const go = $('#b-next');
+    go.className = 'cx-go' + (!r.started && !r.ended ? ' top' : r.started && !r.ended && !next ? ' last' : '');
+    go.textContent = r.ended ? '🏁 TERMINÉ' : !r.started ? '🔴 TOP ANTENNE' : next ? '▶ SUIVANT' : '🏁 TERMINER'; go.disabled = !!r.ended;
+    $('#b-prev').disabled = !prevPlayable(r.curId); const pa = $('#b-pause'); pa.disabled = !r.started || r.ended; pa.classList.toggle('on', r.paused);
+    pa.innerHTML = (r.paused ? '▶' : '⏸') + '<span>' + (r.paused ? 'REPRISE' : 'PAUSE') + '</span>';
+    $('#cx-sub').textContent = (S.P.name ? S.P.name + ' — ' : '') + tab().name;
+    updateLive();
+}
+// mises à jour rapides (chaque tick) : textes et couleurs seulement
+function thresholds(it) { const warn = S.P.settings.warn || 10, d = +it.dur || 0; return { orange: Math.min(30, d * 0.5), red: Math.min(warn, d * 0.25), warn }; }
+let vibKey = '';
+function updateLive() {
+    if (!S || view !== 'live' && !$('#dr-live')) { return; }
+    const r = run(), it = byId(r.curId); if (!it || !CC) return;
+    const el = elapsed(), dur = +it.dur || 0, rem = dur - el, th = thresholds(it);
+    let cls = '', cnt;
+    if (r.ended) cnt = 'FIN';
+    else if (!r.started) { if (r.armedAt) { const left = Math.max(0, (r.armedAt - now()) / 1000); cnt = 'T−' + fmtDur(Math.ceil(left), left >= 3600); const e = $('#st-in'); if (e) e.textContent = fmtDur(Math.ceil(left), left >= 3600); } else cnt = fmtDur(dur); }
+    else if (rem >= 0) { cnt = fmtDur(Math.ceil(rem)); cls = rem <= th.red ? 'crit' : rem <= th.orange ? 'warn' : ''; }
+    else { cnt = '+' + fmtDur(Math.floor(-rem)); cls = 'over'; }
+    if (view === 'live') {
+        const cur = $('#cx-cur'); ['warn', 'crit', 'over'].forEach(k => cur.classList.toggle(k, cls === k));
+        const ce = $('#cx-count'); const txt = r.started && !r.ended && !r.paused && rem < 0 ? cnt : cnt; if (ce.dataset.v !== txt) { ce.dataset.v = txt; ce.textContent = txt; }
+        $('#cx-bar').style.width = (r.started && dur ? clamp(el / dur * 100, 0, 100) : 0) + '%';
+        $('#k-clock').textContent = fmtClock(nowSec());
+        $('#k-el').textContent = r.started ? fmtDur(((r.ended ? (r.endAt || now()) : liveNow()) - r.showStart) / 1000) : '0:00';
+        const ou = overUnder(); $('#k-gap').textContent = fmtGap(ou); $('#k-end').textContent = fmtClock(CC.end + ou);
+        const gw = $('#k-gap-w'); gw.className = 'cx-kpi ' + (ou > 1 ? 'over' : ou < -1 ? 'under' : ''); $('#k-gap-l').textContent = ou > 1 ? 'Retard' : ou < -1 ? 'Avance' : 'Écart';
+        if (it.shots.length && r.started) { const tt = shotTimes(it), sr = tt[r.shotIdx] ? tt[r.shotIdx].dur - shotElapsed() : 0, e = $('.cx-shot.pgm .sr'); if (e) e.textContent = ` · reste ${sr >= 0 ? fmtDur(Math.ceil(sr)) : '+' + fmtDur(Math.floor(-sr))}`; }
+        const nx = byId(r.curId) && nextPlayable(r.curId), ee = $('#cx-next .est');
+        if (ee) { if (r.started && !r.ended && nx) { const est = nowSec() + Math.max(0, rem); ee.innerHTML = `Estimé <b>${fmtClock(est)}</b>`; } else ee.textContent = ''; }
+    }
+    const dl = $('#dr-live'); if (dl && dl.dataset.id === it.id) { dl.className = 'cx-dlive ' + cls; $('#dr-cnt').textContent = r.started ? cnt : fmtDur(dur); $('#dr-st').textContent = r.ended ? 'Fin' : r.paused ? 'En pause' : r.started ? 'À l\'antenne' : 'En attente'; }
+}
+function tick() {
+    if (!S) return; const r = run(); if (!CC) recompute(); ensureCur();
+    // démarrage programmé
+    if (r.armedAt && !r.started && now() >= r.armedAt) { const at = r.armedAt; r.armedAt = 0; doNext(at); return; }
+    if (r.started && !r.ended && !r.paused) {
+        const it = byId(r.curId); if (it) {
+            if (S.P.settings.autoShots && it.shots.length) { const tt = shotTimes(it); if (r.shotIdx < it.shots.length - 1 && shotElapsed() >= tt[r.shotIdx].dur) doShot(1); }
+            const rem = (+it.dur || 0) - elapsed(), th = thresholds(it), key = it.id + '|' + r.itemStart;
+            if (rem <= th.warn && rem > 0 && (+it.dur || 0) > th.warn && vibKey !== key + 'w') { vibKey = key + 'w'; vibe([200, 100, 200, 100, 200]); }
+            if (rem <= 0 && vibKey !== key + 'o') { vibKey = key + 'o'; vibe([500]); }
+        }
+    }
+    updateLive();
+}
+
+// ---------- Détails d'une séquence (tiroir) ----------
+function openDetails(id) {
+    const it = byId(id); if (!it) return; recompute(); const r = run(), c = CC.rows[it.id], t = typeOf(it.type), isCur = r.curId === it.id;
+    const tal = it.talents.map(talent).filter(Boolean), cams = itemCams(it), src = source(it.source), tt = shotTimes(it), a = r.asrun[it.id];
+    let h = `<div class="cx-dh"><span class="m-pill" style="border-color:${itemColor(it)}">${t.ico} ${esc(t.name)}</span><span class="m-pill">N° ${esc(c.num)}</span><span class="m-pill">${STATUS[it.status] || ''}</span>${it.reserve ? '<span class="m-pill warn">Réserve</span>' : ''}</div>`;
+    h += `<div class="cx-dh" style="gap:14px;font-size:14px"><span>Prévu <b>${fmtClock(c.start)}</b></span><span>Durée <b>${fmtDur(it.dur)}</b></span>${c.back != null ? `<span>Back-time <b>${fmtClock(c.back)}</b></span>` : ''}${it.hard ? `<span>⏰ Heure fixe <b>${esc(it.hard)}</b></span>` : ''}</div>`;
+    if (isCur) h += `<div class="cx-dlive" id="dr-live" data-id="${it.id}"><span id="dr-st">…</span><b id="dr-cnt">0:00</b></div>`;
+    else if (a) h += `<div class="cx-dlive"><span>Diffusé à ${fmtClock(a.clock)} · ${fmtDur(a.dur)}</span><b style="font-size:22px;color:${a.dur - it.dur > 1 ? '#ff6b6b' : a.dur - it.dur < -1 ? '#4fc3f7' : 'var(--ok)'}">${fmtGap(a.dur - it.dur)}</b></div>`;
+    if (it.notes) h += `<div class="cx-dsec">📝 Notes</div><div class="cx-box">${esc(it.notes)}</div>`;
+    if (tal.length) h += `<div class="cx-dsec">👥 Intervenants</div><div class="m-list" style="margin:0">${tal.map(x => `<div class="m-row" style="padding:9px 12px"><span style="width:10px;height:10px;border-radius:50%;background:${esc(x.color)};flex:none"></span><span class="grow"><b>${esc(x.name)}</b>${x.role ? `<small>${esc(x.role)}</small>` : ''}</span>${x.mic ? `<span class="m-pill">🎤 ${esc(x.mic)}</span>` : ''}</div>`).join('')}</div>`;
+    if (cams.length) h += `<div class="cx-dsec">🎥 Caméras</div><div>${cams.map(x => `<span class="cx-chipcam"><i style="background:${esc(x.color)}">C${x.num}</i>${esc(x.name)}${x.op ? ' · ' + esc(x.op) : ''}${x.optic ? ' · ' + esc(x.optic) : ''}${x.pos ? ' · ' + esc(x.pos) : ''}</span>`).join('')}</div>`;
+    if (it.shots.length) h += `<div class="cx-dsec">🎞️ Découpage (${it.shots.length} plans)</div><div class="cx-box" style="padding:4px 12px">${it.shots.map((s, i) => { const cm = cam(s.cam); return `<div class="cx-pl${isCur && r.shotIdx === i ? ' on' : ''}"><span class="no">${i + 1}</span><span class="tx"><b style="color:${cm ? esc(cm.color) : 'inherit'}">${cm ? 'C' + cm.num : '—'}</b> ${esc(s.plan)}${s.move && s.move !== 'Fixe' ? ' · ' + esc(s.move) : ''}${s.desc ? ' — ' + esc(s.desc) : ''}${s.cue ? `<small>Top : ${esc(s.cue)}</small>` : ''}</span><span class="du">${fmtDur(tt[i].dur)}${tt[i].auto ? ' ~' : ''}</span></div>`; }).join('')}</div>`;
+    const reg = []; if (src) reg.push(['📼 Source', `${src.code}${src.name ? ' — ' + src.name : ''}${src.kind ? ' (' + src.kind + ')' : ''}`]); if (it.audio) reg.push(['🎚️ Son', it.audio]); if (it.light) reg.push(['💡 Lumière', it.light]);
+    if (it.gfx.length) reg.push(['🏷️ Habillage', it.gfx.map(g => (GFX_ICO[g.kind] || '') + ' ' + g.kind + ' : ' + g.text + (g.at ? ' (' + g.at + ')' : '')).join('\n')]);
+    if (reg.length) h += `<div class="cx-dsec">🎛️ Régie &amp; moyens</div><div class="cx-box">${reg.map(x => `<div style="margin:3px 0"><b>${x[0]}</b><br>${esc(x[1])}</div>`).join('')}</div>`;
+    if (!it.notes && !tal.length && !cams.length && !it.shots.length && !reg.length) h += '<p class="m-empty" style="padding:18px">Aucun détail renseigné pour cette séquence.</p>';
+    if (!isCur && it.kind === 'item') h += `<div class="m-actions"><button class="m-btn primary" id="dr-jump">▶ Prendre à l'antenne</button></div>`;
+    const s = XM.sheet(h, { title: esc(it.title || 'Séquence') });
+    const j = $('#dr-jump', s); if (j) j.onclick = async () => { if (run().started && !run().ended) { const i = await XM.ask('Prendre cette séquence à l\'antenne ?', 'La séquence en cours sera clôturée et celle-ci démarre maintenant.', ['Prendre à l\'antenne', 'Annuler']); if (i !== 0) return; } else XM.closeSheet(); doJump(id); setView('live'); };
+    updateLive();
+}
+
+// ---------- Liste de lecture ----------
+function renderList() {
+    const el = $('#v-list'); if (!S) { el.innerHTML = ''; return; } recompute(); const c = CC, r = run(), t = tab();
+    let h = '';
+    if (S.P.tabs.length > 1) h += `<div class="m-chips">${S.P.tabs.map((x, i) => `<button class="m-chip${i === S.P.active ? ' on' : ''}" data-tab="${i}">${esc(x.name)}</button>`).join('')}</div>`;
+    h += `<div class="cx-sum"><div><b>Début</b><span>${fmtClock(c.start)}</span></div><div><b>Fin prévue</b><span>${fmtClock(c.end)}</span></div><div><b>Durée</b><span>${fmtDur(c.total, true)}</span></div>`
+        + `<div><b>Cible</b><span>${fmtDur(t.target, true)}</span></div><div class="${c.gap > 1 ? 'neg' : c.gap < -1 ? 'pos' : ''}"><b>Écart cible</b><span>${fmtGap(c.gap)}</span></div><div><b>Éléments</b><span>${c.count}${c.reserveCount ? ' +' + c.reserveCount + 'R' : ''}</span></div></div>`;
+    if (t.date) h += `<p class="m-hint" style="margin:-2px 2px 6px">📅 Diffusion le ${fmtDateFR(t.date)}</p>`;
+    let open = false; const close = () => { if (open) h += '</div>'; open = false; };
+    items().forEach(it => {
+        if (it.kind === 'header') { close(); const s = c.sections[it.id] || { dur: 0, count: 0, start: 0 }; h += `<div class="cx-hdr" style="--col:${esc(itemColor(it))}">${esc(it.title)}<small>${fmtClock(s.start)} · ${s.count} élém. · ${fmtDur(s.dur)}</small></div><div class="cx-rows">`; open = true; return; }
+        if (!open) { h += '<div class="cx-rows">'; open = true; }
+        const row = c.rows[it.id], ty = typeOf(it.type), a = r.asrun[it.id], isCur = r.curId === it.id && (r.started || true);
+        let tags = ''; if (it.hard) tags += '<span class="cx-tag">⏰</span>'; if (row.gap != null && Math.abs(row.gap) >= 1) tags += row.gap < 0 ? `<span class="cx-tag neg">dépasse ${fmtDur(-row.gap)}</span>` : `<span class="cx-tag pos">trou ${fmtDur(row.gap)}</span>`;
+        if (it.status === 'cut') tags += '<span class="cx-tag">coupé</span>';
+        const meta = [ty.short, itemCams(it).map(camLabel).join(' '), it.talents.map(talent).filter(Boolean).map(x => x.name).join(', ')].filter(Boolean).join(' · ');
+        const right = a ? `<b>${fmtClock(a.clock)}</b><small style="color:${a.dur - it.dur > 1 ? '#ff6b6b' : a.dur - it.dur < -1 ? '#4fc3f7' : 'var(--ok)'}">${fmtDur(a.dur)} ${fmtGap(a.dur - it.dur)}</small>` : `<b>${fmtClock(row.start)}</b><small>${fmtDur(it.dur)}</small>`;
+        h += `<button class="cx-row${r.curId === it.id && r.started && !r.ended ? ' cur' : ''}${a ? ' done' : ''}${it.status === 'cut' ? ' cut' : ''}${it.reserve ? ' res' : ''}" data-id="${it.id}" style="--col:${esc(itemColor(it))}"><span class="n">${esc(row.num)}</span><span class="ico">${ty.ico}</span><span class="g"><b>${esc(it.title)}${tags}</b><small>${esc(meta) || '&nbsp;'}</small></span><span class="t">${right}</span></button>`;
+    });
+    close();
+    h += '<p class="m-hint" style="text-align:center;margin:10px 0 4px">Touchez une séquence pour ses détails.</p>';
+    el.innerHTML = h;
+    $$('[data-tab]', el).forEach(b => b.onclick = () => switchTab(+b.dataset.tab));
+    $$('[data-id]', el).forEach(b => b.onclick = () => openDetails(b.dataset.id));
+    const cur = $('.cx-row.cur', el); if (cur && view === 'list' && !renderList.scrolled) { renderList.scrolled = 1; cur.scrollIntoView({ block: 'center' }); }
+}
+
+// ---------- Journal ----------
+const EV = { top: '🔴 Top antenne', next: '▶ Suivant', prev: '⏮ Retour', jump: '↪ Saut', pause: '⏸ Pause', resume: '▶ Reprise', end: '🏁 Fin d\'émission', arm: '⏱ Programmé' };
+function renderLog() {
+    const el = $('#v-log'); if (!S) { el.innerHTML = ''; return; } recompute(); const c = CC, r = run();
+    let gp = 0, gr = 0, n = 0; const rows = [];
+    items().forEach(it => { if (it.kind !== 'item') return; const a = r.asrun[it.id]; if (a) { gp += +it.dur || 0; gr += a.dur; n++; } rows.push(it); });
+    let h = '';
+    if (S.P.tabs.length > 1) h += `<div class="m-chips">${S.P.tabs.map((x, i) => `<button class="m-chip${i === S.P.active ? ' on' : ''}" data-tab="${i}">${esc(x.name)}</button>`).join('')}</div>`;
+    h += `<div class="cx-sum"><div><b>Séquences</b><span>${n}/${c.count + c.reserveCount}</span></div><div><b>Prévu</b><span>${fmtDur(gp, true)}</span></div><div><b>Réel</b><span>${fmtDur(gr, true)}</span></div></div>`;
+    h += `<div class="cx-sum" style="grid-template-columns:1fr 1fr"><div class="${gr - gp > 1 ? 'neg' : gr - gp < -1 ? 'pos' : ''}"><b>Écart diffusé</b><span>${fmtGap(gr - gp)}</span></div><div><b>Top antenne</b><span>${r.started ? fmtClock(new Date(r.showStart).getHours() * 3600 + new Date(r.showStart).getMinutes() * 60 + new Date(r.showStart).getSeconds()) : '—'}</span></div></div>`;
+    if (!n && !r.started) h += '<div class="m-empty"><b>🕒</b>Le journal se remplit au fil du direct : heure réelle de chaque séquence, durée, écart.</div>';
+    else {
+        h += '<div class="cx-rows">' + rows.map(it => { const a = r.asrun[it.id], row = c.rows[it.id], ty = typeOf(it.type), live = r.curId === it.id && r.started && !r.ended;
+            const d = a ? Math.round(a.dur - (+it.dur || 0)) : 0, col = Math.abs(d) < 2 ? 'var(--ok)' : d > 0 ? '#ff6b6b' : '#4fc3f7', dd = a ? Math.round(dayDelta(a.clock, row.start)) : 0;
+            return `<button class="cx-row${a ? '' : ' done'}${live ? ' cur' : ''}${it.status === 'cut' ? ' cut' : ''}${it.reserve ? ' res' : ''}" data-id="${it.id}" style="--col:${esc(itemColor(it))};${a || live ? '' : 'opacity:.55'}"><span class="n">${esc(row.num)}</span><span class="ico">${ty.ico}</span><span class="g"><b>${esc(it.title)}</b><small>${a ? `prévu ${fmtClock(row.start)} · réel ${fmtClock(a.clock)} (${fmtGap(dd)})` : live ? 'à l\'antenne…' : 'non diffusé'}</small></span><span class="t">${a ? `<b>${fmtDur(a.dur)}</b><small style="color:${col}">${fmtGap(d)}</small>` : `<b style="color:var(--text-dim)">${fmtDur(it.dur)}</b><small>prévu</small>`}</span></button>`; }).join('') + '</div>';
+        if (r.log.length) h += `<div class="m-sec">Événements</div><div class="m-card" style="padding:6px 12px">${r.log.slice().reverse().slice(0, 80).map(e => { const it = e.id && byId(e.id); const d = new Date(e.t); return `<div class="cx-ev"><i>${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}</i><span>${EV[e.e] || e.e}${it ? ' — ' + esc(it.title) : ''}${e.txt ? ' ' + esc(e.txt) : ''}</span></div>`; }).join('')}</div>`;
+        h += `<div class="m-actions"><button class="m-btn" id="lg-csv">📄 Exporter l'as-run (CSV)</button><button class="m-btn primary" id="lg-ret">📤 Renvoyer au bureau</button></div><p class="m-hint" style="margin:8px 2px 0">Au bureau, les heures réelles s'ajoutent à la colonne « Réel » du conducteur et à l'export « As-run » ; le conducteur lui-même n'est pas modifié.</p>`;
+    }
+    el.innerHTML = h;
+    $$('[data-tab]', el).forEach(b => b.onclick = () => switchTab(+b.dataset.tab));
+    $$('[data-id]', el).forEach(b => b.onclick = () => openDetails(b.dataset.id));
+    const csv = $('#lg-csv', el); if (csv) csv.onclick = exportAsRun; const rt = $('#lg-ret', el); if (rt) rt.onclick = sendReturn;
+}
+function csvCell(v) { v = String(v == null ? '' : v); return /[;"\n\r]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }
+function exportAsRun() {
+    const c = CC, ar = run().asrun; if (!Object.keys(ar).length) return XM.toast('Aucune donnée de direct à exporter');
+    const rows = [['N°', 'Élément', 'Type', 'Début prévu', 'Début réel', 'Durée prévue', 'Durée réelle', 'Écart', 'Plans']]; let gp = 0, gr = 0;
+    items().forEach(it => { if (it.kind !== 'item') return; const a = ar[it.id], r = c.rows[it.id]; if (a) { gp += +it.dur || 0; gr += a.dur; } rows.push([r.num, it.title, typeOf(it.type).name, fmtClock(r.start), a ? fmtClock(a.clock) : '', fmtDur(it.dur, true), a ? fmtDur(a.dur, true) : 'non diffusé', a ? fmtGap(a.dur - it.dur) : '', it.shots.length]); });
+    rows.push([]); rows.push(['', 'TOTAL DIFFUSÉ', '', '', '', fmtDur(gp, true), fmtDur(gr, true), fmtGap(gr - gp)]);
+    XM.download(('CONDUCO XIII - ' + (S.P.name || 'Émission') + ' - ' + tab().name + ' - As-run.csv').replace(/[\\/:*?"<>|]/g, '_'), '﻿' + rows.map(r => r.map(csvCell).join(';')).join('\r\n'), 'text/csv;charset=utf-8');
+    XM.toast('⬇️ As-run exporté');
+}
+
+// ---------- Retour au bureau : heures réelles (as-run) + événements, par conducteur ----------
+function returnData() {
+    const tabs = []; S.P.tabs.forEach(t => {
+        const r = S.runs[t.id]; if (!r || !Object.keys(r.asrun).length) return;
+        const asrun = {}; Object.keys(r.asrun).forEach(id => { const a = r.asrun[id]; asrun[id] = { clock: a.clock, dur: a.dur, shots: a.shots }; });
+        tabs.push({ id: t.id, name: t.name, asrun, log: r.log.map(e => [e.t, e.e, e.id, e.txt || '']), showStart: r.showStart || 0, endAt: r.endAt || 0, ended: !!r.ended });
+    });
+    return tabs.length ? { v: 1, name: S.P.name, tabs } : null;
+}
+function sendReturn() {
+    if (!S) return XM.toast('Aucun projet');
+    XM.send({ app: APP, page: 'conduco.html', title: 'CONDUCO', kind: 'return', name: S.P.name || 'Émission', make: returnData, empty: 'Aucune heure réelle à renvoyer : lancez le direct d\'abord',
+        note: 'Sur l\'ordinateur : CONDUCO XIII → bouton « 📱 » → « Importer ». Les heures réelles rejoignent la colonne « Réel » ; le conducteur n\'est pas modifié.' });
+}
+
+// ---------- Navigation ----------
+function setView(v) {
+    view = v; { const sn = $('#cx-snack'); if (sn) sn.hidden = true; } ['live', 'list', 'log'].forEach(k => { $('#v-' + k).hidden = !S || k !== v; });
+    $('#v-home').hidden = !!S; $('#cx-tabs').hidden = !S; document.body.classList.toggle('has-tabs', !!S);
+    $$('#cx-tabs button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
+    if (!S) return;
+    if (v === 'live') buildLive(); if (v === 'list') { renderList.scrolled = 0; renderList(); } if (v === 'log') renderLog();
+}
+function updateTabsBadge() { $('#cx-pick').hidden = !S || S.P.tabs.length < 2; }
+function updateHeader() { $('#cx-sub').textContent = S ? (S.P.name ? S.P.name + ' — ' : '') + tab().name : 'Conducteur mobile'; updateTabsBadge(); wakeBadge(); }
+async function switchTab(i) {
+    if (i === S.P.active) { XM.closeSheet(); return; }
+    const r = run(); if (r.started && !r.ended) { const k = await XM.ask('Changer de conducteur ?', 'Un direct est en cours sur « ' + esc(tab().name) + ' ». Il reste en pause logique : ses heures sont conservées.', ['Changer', 'Rester']); if (k !== 0) return; }
+    XM.closeSheet(); S.P.active = i; renderList.scrolled = 0; recompute(); ensureCur(); save(); updateHeader(); setView(view);
+}
+function pickTab() {
+    const s = XM.sheet('<div class="m-list" style="margin:0">' + S.P.tabs.map((t, i) => { const c = compute(t), r = S.runs[t.id]; return `<button class="m-item" data-i="${i}"><span class="ico">${i === S.P.active ? '🔴' : '📑'}</span><span class="grow"><b>${esc(t.name)}</b><small>${fmtClock(c.start)} → ${fmtClock(c.end)} · ${c.count} élém. · ${fmtDur(c.total, true)}${r && r.started ? (r.ended ? ' · terminé' : ' · en direct') : ''}</small></span></button>`; }).join('') + '</div>', { title: 'Conducteurs' });
+    $$('[data-i]', s).forEach(b => b.onclick = () => switchTab(+b.dataset.i));
+}
+let snackT;
+function snack(msg, undo) {
+    const sn = $('#cx-snack'); $('#cx-snack-t').textContent = msg; $('#cx-snack-b').hidden = !undo || !S.undo; sn.hidden = false; clearTimeout(snackT); snackT = setTimeout(() => sn.hidden = true, 6000);
+}
+$('#cx-snack-b').onclick = () => {
+    if (!S || !S.undo) return; const u = S.undo; S.undo = null;
+    if (tab().id !== u.tabId) return; S.runs[u.tabId] = JSON.parse(u.run); $('#cx-snack').hidden = true; save(); buildLive(); renderList(); renderLog(); vibe([60]); XM.toast('↶ Dernière transition annulée');
+};
+
+// ---------- Réception / exemple ----------
+function sampleData() {
+    const X = (type, title, dur, p = {}) => Object.assign({ id: XM.uid(), type, title, dur }, p), H = (title, color) => ({ h: 1, id: XM.uid(), title, color });
+    const now0 = new Date(now()), st = fmtClock(now0.getHours() * 3600 + (now0.getMinutes() + 2) * 60);
+    return { v: 1, name: 'Exemple — Le Journal', author: '', warn: 10, autoShots: false, active: 0,
+        cams: [[1, 'Présentateur', '#EF5350', 'Julien M.', '', 'Plateau'], [2, 'Large', '#FFA726', 'Sarah K.', '', 'Grue'], [3, 'Invité', '#66BB6A', 'Hugo R.', '', 'Jardin']], tal: [['Présentateur', 'Journaliste', 'HF 1', '#4FC3F7'], ['Invité plateau', 'Expert', 'HF 2', '#F06292'], ['Météo', 'Présentatrice', 'HF 3', '#81C784']], src: [['VT1', 'Sujet 1', 'VT'], ['VT2', 'Sujet 2', 'VT'], ['DPX1', 'Correspondant', 'Duplex']],
+        tabs: [{ id: 'demo1', name: 'Journal 20 min', start: st, target: 600, date: '', items: [
+            H('Ouverture', '#AB47BC'), X('jingle', 'Top horaire', 10, { cams: [1] }), X('open', 'Titres', 40, { tal: [0], shots: [[1, 'PR', 'Fixe', 'Présentateur', 'Titres', 20], [1, 'GP', 'Zoom avant', 'Présentateur', 'Dernier titre', null]], gfx: [['Bandeau', 'Titres du journal', '0:05']], notes: 'Lecture rapide, ne pas dépasser 40 s.' }),
+            H('Sujets', '#42A5F5'), X('plateau', 'Lancement sujet 1', 20, { tal: [0], shots: [[2, 'PL', 'Fixe', 'Plateau', 'Lancement', null]] }), X('vt', 'Sujet 1 — La rentrée', 60, { src: 0, audio: 'VT stéréo', notes: 'Fin VT : « ...à la rentrée. »' }),
+            X('duplex', 'Duplex correspondant', 80, { src: 2, tal: [0], cams: [1], audio: 'N-1 retour correspondant', light: 'Plein feu', notes: 'Liaison 4G de secours prête.' }), X('itw', 'Invité plateau', 150, { tal: [0, 1], shots: [[2, '2S', 'Fixe', 'Présentateur et invité', 'Début', 30], [3, 'PR', 'Fixe', 'Invité', 'Réponses', null], [1, 'PR', 'Fixe', 'Présentateur', 'Questions', null]], gfx: [['Synthé nom', 'Invité plateau — Expert', '0:10']] }),
+            X('live', 'Titre de réserve', 120, { res: 1, notes: 'Uniquement si le duplex saute.' }), H('Fin', '#7E57C2'), X('info', 'Météo', 70, { tal: [2], shots: [[2, 'PA', 'Fixe', 'Devant l\'écran', 'Météo', null]] }), X('end', 'Fin du journal', 25, { tal: [0], shots: [[2, 'PL', 'Zoom arrière', 'Plateau', 'Au revoir', null]] })] }] };
+}
+async function receive(env) {
+    if (env.kind === 'return') { XM.toast('Ce lien est un retour : ouvrez-le sur l\'ordinateur'); return; }
+    let P2; try { P2 = unpackProject(env.data); } catch (e) { XM.toast('⚠️ ' + e.message, 4500); return; }
+    let keep = true;
+    if (S) {
+        const played = S.P.tabs.filter(t => S.runs[t.id] && Object.keys(S.runs[t.id].asrun).length).length, sameTab = P2.tabs.some(t => S.runs[t.id] && S.runs[t.id].started);
+        if (played || sameTab) { const i = await XM.ask('Remplacer le projet du téléphone ?', 'Le téléphone contient déjà des heures réelles de direct' + (sameTab ? ' sur ce conducteur' : '') + '. Les garder pour les conducteurs reconnus ?', ['Remplacer, garder les heures', { label: 'Remplacer, tout effacer', danger: true }, 'Annuler']); if (i === -1 || i === 2) return; keep = i === 0; }
+    }
+    const runs = {}; if (S && keep) P2.tabs.forEach(t => { if (S.runs[t.id]) runs[t.id] = S.runs[t.id]; });
+    S = { v: 1, name: env.name || P2.name, ts: Date.now(), P: P2, runs, prefs: S ? S.prefs : { vib: true, wake: true }, undo: null };
+    // l'ancien conducteur actif reste actif si l'envoi n'en précise pas
+    save(); recompute(); ensureCur(); updateHeader(); setView('live'); wakeOn(); XM.toast('📥 ' + (P2.name || 'Conducteur') + ' reçu : ' + P2.tabs.length + ' conducteur' + (P2.tabs.length > 1 ? 's' : ''));
+}
+
+// ---------- Menu et événements ----------
+function openMenu() {
+    const pr = S ? S.prefs : { vib: true, wake: true };
+    XM.menu({ app: APP, deskPage: 'conduco.html', onImport: (env, via) => receive(env), sendReturn: S ? sendReturn : null, items: S ? [
+        S.P.tabs.length > 1 ? { icon: '📑', label: 'Choisir le conducteur', sub: tab().name, run: pickTab } : null,
+        { icon: '📳', label: 'Vibrations : ' + (pr.vib ? 'activées' : 'désactivées'), sub: 'À chaque changement et à T-10 s (non disponible sur iPhone)', run: () => { S.prefs.vib = !S.prefs.vib; save(); XM.toast(S.prefs.vib ? '📳 Vibrations activées' : 'Vibrations désactivées'); if (S.prefs.vib) vibe([80]); } },
+        { icon: '☀️', label: 'Écran toujours allumé : ' + (pr.wake ? 'oui' : 'non'), sub: 'Évite le verrouillage pendant le direct', run: () => { S.prefs.wake = !S.prefs.wake; save(); if (S.prefs.wake) wakeOn(); else wakeOff(); XM.toast(S.prefs.wake ? '☀️ Écran maintenu allumé' : 'Verrouillage d\'écran autorisé'); } },
+        { icon: '⛶', label: 'Plein écran', sub: 'Si l\'appareil le permet', run: () => { try { (document.documentElement.requestFullscreen ? document.documentElement.requestFullscreen() : Promise.reject()).catch(() => XM.toast('Plein écran indisponible ici')); } catch (e) { XM.toast('Plein écran indisponible ici'); } } },
+        { icon: '📄', label: 'Exporter l\'as-run (CSV)', sub: 'Heures et durées réelles', run: exportAsRun },
+        { icon: '🗑️', label: 'Effacer ce projet du téléphone', sub: 'Conducteurs et journal', run: async () => { const i = await XM.ask('Effacer le projet ?', 'Le conducteur et le journal de direct seront supprimés de ce téléphone.', [{ label: 'Effacer', danger: true }, 'Annuler']); if (i === 0) { XM.drop(APP); S = null; CC = null; updateHeader(); setView('live'); wakeOff(); } } }
+    ].filter(Boolean) : [] });
+}
+$('#cx-menu').onclick = openMenu; $('#cx-pick').onclick = pickTab;
+$$('#cx-tabs button').forEach(b => b.onclick = () => setView(b.dataset.v));
+$('#b-next').onclick = () => { wakeOn(); doNext(); };
+$('#b-prev').onclick = doPrev; $('#b-pause').onclick = doPause; $('#b-reset').onclick = doReset;
+$('#cx-det').onclick = () => { const r = run(); if (r.curId) openDetails(r.curId); }; $('#cx-title').onclick = $('#cx-det').onclick;
+$('#h-link').onclick = () => XM.importLink(APP, receive); $('#h-file').onclick = () => XM.importFile(APP, receive);
+$('#h-demo').onclick = () => receive(XM.envelope(APP, 'project', 'Exemple', sampleData()));
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { wakeOn(); tick(); } });
+// clavier (tests / tablette avec clavier) : espace = suivant, P = pause
+document.addEventListener('keydown', e => { if (!S || view !== 'live' || /INPUT|TEXTAREA|SELECT/.test((e.target || {}).tagName || '') || document.getElementById('m-ov')) return; if (e.code === 'Space') { e.preventDefault(); doNext(); } else if (e.key === 'p' || e.key === 'P') doPause(); });
+
+// ---------- Démarrage ----------
+(function boot() {
+    const st = XM.load(APP); if (st && st.P && st.P.tabs) { S = st; S.runs = S.runs || {}; S.prefs = Object.assign({ vib: true, wake: true }, S.prefs || {}); S.P.active = clamp(S.P.active || 0, 0, S.P.tabs.length - 1); }
+    if (S) { recompute(); ensureCur(); }
+    updateHeader(); setView('live'); if (S) wakeOn();
+    XM.fromHash(APP, async env => { await receive(env); });
+    setInterval(tick, 200);
+    window.__cx = { get S() { return S; }, tick, doNext, doPrev, doPause, compute, run, receive, unpackProject, fmtDur, fmtClock, overUnder, shotTimes };
+})();
+})();
+
+</script>
+</body>
+</html>

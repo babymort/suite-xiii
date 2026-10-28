@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>XIII Équipe</title>
+<link rel="manifest" href="equipe.webmanifest">
+<meta name="theme-color" content="#1d1b19">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="XIII Équipe">
+<link rel="apple-touch-icon" href="xiii-apple-touch.png">
+<style>
+:root{--bg:#141312;--panel:#1f1d1b;--panel2:#292624;--line:#3a3632;--fg:#f2ede6;--dim:#a39b91;--acc:#f0b378;--ok:#81c784;--warn:#ffb74d;--bad:#e57373;--now:#4fc3f7;color-scheme:dark}
+@media (prefers-color-scheme:light){:root{--bg:#f3f1ee;--panel:#fff;--panel2:#f6f3ef;--line:#ddd7cf;--fg:#1d1b19;--dim:#6d675f;--acc:#b8651f;--ok:#2e7d32;--warn:#c77700;--bad:#c62828;--now:#0277bd;color-scheme:light}}
+*{box-sizing:border-box}html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.45 -apple-system,"Segoe UI",Roboto,sans-serif;padding:max(14px,env(safe-area-inset-top)) 16px max(28px,env(safe-area-inset-bottom))}
+.w{max-width:620px;margin:0 auto}
+header{display:flex;align-items:center;gap:10px;margin-bottom:14px}header img{height:30px}header .t{flex:1;min-width:0}header small{display:block;color:var(--dim);font-size:12px}header b{display:block;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+button,.btn{font:inherit;font-size:15px;color:var(--fg);background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:11px 14px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.pri{background:var(--acc);color:#1d1b19;border-color:var(--acc);font-weight:700}.full{width:100%}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:12px}
+.card h2{margin:0 0 8px;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+.hero{text-align:center;padding:26px 16px}.hero .big{font-size:54px}.hero h1{margin:6px 0;font-size:24px}.hero p{color:var(--dim);margin:6px 0 18px}
+input,select{font:inherit;width:100%;padding:11px 12px;border-radius:10px;border:1px solid var(--line);background:var(--panel2);color:var(--fg);margin:4px 0 12px}
+label{font-size:13px;color:var(--dim)}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.tool{display:flex;flex-direction:column;align-items:center;gap:4px;padding:14px 6px;border-radius:14px;background:var(--panel2);border:1px solid var(--line);text-decoration:none;color:inherit;text-align:center;font-size:12.5px;position:relative}.tool i{font-style:normal;font-size:28px}.tool b{font-size:13px}
+.tool .bd{position:absolute;top:6px;right:8px;min-width:18px;height:18px;border-radius:9px;background:var(--bad);color:#fff;font-size:11px;line-height:18px;padding:0 5px}
+.nt{display:flex;gap:10px;padding:9px 0;border-top:1px solid var(--line)}.nt:first-child{border-top:0}.nt small{color:var(--dim);display:block;font-size:12px}.nt.urg b{color:var(--bad)}
+.ok{color:var(--ok)}.dim{color:var(--dim);font-size:13px}.warnb{border-color:var(--warn)}
+#cam{position:fixed;inset:0;background:#000;z-index:50;display:none;flex-direction:column;align-items:center;justify-content:center}#cam.on{display:flex}#cam video{width:100%;max-height:78vh;object-fit:cover}
+#cam .fr{position:absolute;width:62vmin;height:62vmin;border:3px solid var(--acc);border-radius:18px;box-shadow:0 0 0 100vmax rgba(0,0,0,.45)}#cam p{color:#fff;position:absolute;bottom:90px;text-align:center;padding:0 20px}#cam button{position:absolute;bottom:30px}
+#toast{position:fixed;left:50%;bottom:140px;transform:translateX(-50%);background:#333;color:#fff;padding:10px 16px;border-radius:10px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:60;max-width:90vw}#toast.on{opacity:1}
+.row{display:flex;gap:8px}.row>*{flex:1}
+</style>
+<link rel="icon" type="image/png" href="xiii-icon-192.png">
+</head>
+<body>
+<div class="w">
+<header><img src="xiii-logo.png" alt="XIII"><div class="t"><small>XIII Équipe</small><b id="pj">Application de l'équipe</b></div><span id="st" class="dim"></span></header>
+<main id="m"></main>
+</div>
+<div id="cam"><video id="vid" playsinline muted></video><div class="fr"></div><p>Visez le QR code affiché par la régie (Master / référent)</p><button id="cam-x">✕ Fermer</button></div>
+<div id="toast"></div>
+<script>
+// =====================================================================
+//  XIII ÉQUIPE — l'application de l'équipe de tournage (PWA installable)
+//  Scanner le QR code du Master / référent → accès personnel au ☁️ Drive du projet + canal Régie ⇄ équipe,
+//  tous les outils partagés à portée de pouce, et de vraies notifications (Web Push) même application fermée.
+// =====================================================================
+const $ = id => document.getElementById(id), esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } };
+const W = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { } };
+const ub64 = s => { s = String(s || '').replace(/-/g, '+').replace(/_/g, '/'); while (s.length % 4) s += '='; return Uint8Array.from(atob(s), c => c.charCodeAt(0)); };
+const toast = (t, ms) => { const e = $('toast'); e.textContent = t; e.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(() => e.classList.remove('on'), ms || 2800); };
+const SECT = [['', '—'], ['production', 'Production'], ['realisation', 'Réalisation'], ['image', 'Image'], ['son', 'Son'], ['lumiere', 'Lumière'], ['regie', 'Régie'], ['technique', 'Technique'], ['decor', 'Décor'], ['hmc', 'HMC'], ['post', 'Post-production'], ['artistes', 'Artistes'], ['client', 'Client']];
+const TOOLS = [['annonces', '📣', 'Régie', 'Annonces, demandes, chat'], ['jour', '🎬', 'Tournage', 'La journée en direct'], ['callsheeto', '📋', 'Feuille', 'Feuille de service'], ['planno', '📅', 'Planning', 'Planning de production'], ['transporto', '🚐', 'Transports', 'Navettes, hôtels'], ['scripto', '📝', 'Script', 'Plans et rapports'], ['documents', '📂', 'Documents', 'Partagés avec vous'], ['casto', '🎭', 'Casting', 'Talents'], ['repero', '📍', 'Lieux', 'Repérages'], ['conduco', '🎬', 'Conducteur', 'Direct'], ['sono', '🎚️', 'Son', 'Patch et HF'], ['lumo', '💡', 'Lumière', 'Plan de feu'], ['packingo', '🧳', 'Matériel', 'Colisage'], ['calendrier', '🗓️', 'Agenda', 'Toutes les dates']];
+let ME = J('xiii.app.me', null), PEND = null, REG = null, NL = [], TAB = 'home';
+if (!ME) { const d0 = J('xiii.drive', null); if (d0 && d0.url && (d0.tok || d0.code) && !d0.wait) { ME = { p: d0.proj || '', nom: (d0.me && d0.me.name) || d0.master || 'Moi', secteur: String(d0.secteur || '').split(',')[0], v: (J('xiii.app.cfg', {}) || {}).v || '', d: { u: d0.url, master: !!d0.code, droit: d0.perm }, at: Date.now() }; try { localStorage.setItem('xiii.app.me', JSON.stringify(ME)); } catch (e) { } } } // relié par 👥 Équipe : l'application reprend la connexion du poste
+const standalone = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+const isIOS = () => /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+// ---------- lecture du QR / du lien ----------
+function parse(txt) {
+    txt = String(txt || '').trim(); let h = ''; try { h = new URL(txt, location.href).hash; } catch (e) { h = txt.indexOf('#') > -1 ? txt.slice(txt.indexOf('#')) : ''; }
+    const q = new URLSearchParams(h.slice(1));
+    if (q.get('j')) { try { const o = JSON.parse(new TextDecoder().decode(ub64(q.get('j')))); return o; } catch (e) { return null; } }
+    if (q.get('r') && q.get('k')) return { p: q.get('p') || '', a: { r: q.get('r'), k: q.get('k'), b: q.get('b') || '' } };
+    return null;
+}
+// ---------- scanner ----------
+let stream = null, scanning = false;
+async function scan() {
+    try { stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } }); } catch (e) { toast('📷 Caméra refusée ou indisponible : collez le lien à la place', 4000); return; }
+    const v = $('vid'); v.srcObject = stream; await v.play().catch(() => { }); $('cam').classList.add('on'); scanning = true;
+    let det = null; if ('BarcodeDetector' in window) { try { det = new BarcodeDetector({ formats: ['qr_code'] }); } catch (e) { det = null; } }
+    if (!det && !window.jsQR) await new Promise(r => { const s = document.createElement('script'); s.src = 'https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js'; s.onload = r; s.onerror = r; document.head.appendChild(s); });
+    const cv = document.createElement('canvas'), cx = cv.getContext('2d', { willReadFrequently: true });
+    const loop = async () => {
+        if (!scanning) return; let val = null;
+        try {
+            if (det) { const r = await det.detect(v); if (r && r[0]) val = r[0].rawValue; }
+            else if (window.jsQR && v.videoWidth) { const w = Math.min(640, v.videoWidth), hh = Math.round(v.videoHeight * w / v.videoWidth); cv.width = w; cv.height = hh; cx.drawImage(v, 0, 0, w, hh); const r = jsQR(cx.getImageData(0, 0, w, hh).data, w, hh); if (r) val = r.data; }
+        } catch (e) { }
+        if (val && MTSCAN && !/caisse\.html#/.test(val)) { stopScan(); MTSCAN = false; navigator.vibrate && navigator.vibrate(80); const g = await api('get', { app: 'matos', since: -1 }); let P = {}; try { P = JSON.parse((g.data || {})['matosXIII.parc'] || '{}'); } catch (e) { } const u = mtFind(P, val); if (u) { MTU = u.id; TAB = 'mt'; render(); } else toast('⚠️ Code inconnu dans le parc : ' + val, 4000); return; }
+        if (val && /\/(tally|remote)\.html/.test(val)) { stopScan(); navigator.vibrate && navigator.vibrate(80); try { localStorage.setItem('xiii.tally.url', val); } catch (e) { } location.href = val; return; }
+        if (val) { if (/caisse\.html#/.test(val)) { stopScan(); navigator.vibrate && navigator.vibrate(80); location.href = 'caisse.html' + val.slice(val.indexOf('#')); return; } if (/#j=[zjp]\./.test(val)) { stopScan(); navigator.vibrate && navigator.vibrate(80); try { sessionStorage.setItem('xiii.ret', location.pathname.split('/').pop() || 'equipe.html'); } catch (e) { } location.href = 'drive.html' + val.slice(val.indexOf('#')); return; } const o = parse(val); if (o) { stopScan(); navigator.vibrate && navigator.vibrate(80); PEND = o; render(); return; } toast('Ce QR code n\'est pas celui de la régie XIII'); }
+        setTimeout(loop, 220);
+    }; loop();
+}
+function stopScan() { scanning = false; $('cam').classList.remove('on'); if (stream) stream.getTracks().forEach(t => t.stop()); stream = null; }
+$('cam-x').onclick = stopScan;
+// ---------- Drive ----------
+async function api(a, p, url) { const d = J('xiii.drive', null), u = url || (d && d.url); if (!u) return { ok: false, err: 'off' }; try { const r = await fetch(u, { method: 'POST', body: JSON.stringify(Object.assign({ a }, url ? {} : d.tok ? { tok: d.tok } : { code: d.code, by: (d.me && d.me.name) || (ME && ME.nom) || 'Master' }, p || {})), redirect: 'follow' }); const j = await r.json(); if (j && j.err === 'action') j.err = 'script Google du Master à mettre à jour (page Drive XIII)'; return j; } catch (e) { return { ok: false, err: 'net' }; } }
+async function join(nom, secteur) {
+    const o = PEND; if (!o) return; const me = { p: o.p || '', a: o.a || null, v: o.v || '', nom, secteur, at: Date.now() };
+    if (o.d && o.d.u && o.d.j) {
+        const cur = J('xiii.drive', null);
+        if (cur && cur.code && cur.url === o.d.u) { me.d = { u: o.d.u, master: true }; toast('Vous êtes le Master sur cet appareil : accès conservé'); }
+        else {
+            $('m').querySelector('#jn').disabled = true; $('m').querySelector('#jn').textContent = '⏳ Connexion au Drive du projet…';
+            const r = await api('join', { jk: o.d.j, nom, secteur }, o.d.u);
+            if (!r.ok) { toast(r.err === 'code' ? '⚠️ QR code expiré ou application équipe désactivée : demandez le nouveau QR à la régie' : '⚠️ Drive injoignable (' + (r.err || 'réseau') + ')', 5000); render(); return; }
+            Object.keys(localStorage).filter(k => /^xiii\.drive\.base\./.test(k)).forEach(k => localStorage.removeItem(k));
+            W('xiii.drive', { url: o.d.u, tok: r.tok, secteur, perm: r.droit || 'read', apps: null, proj: o.p || r.name || '', role: 'member', me: { name: nom }, master: o.m || '', at: Date.now(), app: 1 }); me.d = { u: o.d.u, droit: r.droit };
+        }
+    }
+    if (o.a) W('xiii.ann.me.' + o.a.r, Object.assign(J('xiii.ann.me.' + o.a.r, {}) || {}, { n: nom, d: secteur }));
+    ME = me; W('xiii.app.me', ME); PEND = null; history.replaceState(null, '', location.pathname); render(); setTimeout(perms, 600);
+}
+// ---------- outils accessibles ----------
+let OUT = null;
+async function perms() { if (!ME || !ME.d || ME.d.master) return; const r = await api('ping'); if (r.ok && r.vk && ME.v !== r.vk) ME.v = r.vk; if (r.ok && r.me) { OUT = r.me.outils; ME.d.droit = r.me.droit; W('xiii.app.me', ME); const d = J('xiii.drive', null); if (d && d.tok) { d.perm = r.me.droit; d.apps = r.me.outils || null; W('xiii.drive', d); } render(); } else if (r.err === 'revoked' || r.err === 'expired') { toast('⚠️ Votre accès au Drive a été ' + (r.err === 'revoked' ? 'retiré' : 'expiré') + ' : scannez le nouveau QR code', 6000); } }
+const url = t => {
+    if (t === 'annonces') return ME.a ? 'annonces.html#r=' + ME.a.r + '&k=' + ME.a.k + (ME.p ? '&p=' + encodeURIComponent(ME.p) : '') + (ME.a.b ? '&b=' + ME.a.b : '') : null;
+    if (['jour', 'documents', 'calendrier'].indexOf(t) > -1) return t + '.html';
+    return t + '-m.html';
+};
+// ---------- 🔔 notifications ----------
+async function swReg() { if (!('serviceWorker' in navigator)) return null; if (REG) return REG; const mode = (() => { try { return localStorage.getItem('xiii.pwa.mode') || 'offline'; } catch (e) { return 'offline'; } })(); try { REG = await navigator.serviceWorker.register('sw.js' + (mode === 'online' ? '?mode=online' : '')); await navigator.serviceWorker.ready; REG = await navigator.serviceWorker.getRegistration() || REG; } catch (e) { REG = null; } return REG; }
+async function pushState() { if (!('PushManager' in window) || !('Notification' in window)) return 'unsupported'; if (Notification.permission === 'denied') return 'denied'; const r = await swReg(); if (!r) return 'unsupported'; const s = await r.pushManager.getSubscription(); return s ? 'on' : 'off'; }
+async function enablePush() {
+    if (isIOS() && !standalone()) { toast('Sur iPhone : ajoutez d\'abord l\'application à l\'écran d\'accueil (Partager → Sur l\'écran d\'accueil), puis ouvrez-la', 7000); return; }
+    if (!ME.v) { const r0 = await api('ping'); if (r0 && r0.vk) { ME.v = r0.vk; W('xiii.app.me', ME); } }
+    if (!ME.v) { toast('Notifications pas encore prêtes : elles s\'activeront dès que le Master aura ouvert la suite XIII sur son ordinateur. Réessayez plus tard.', 6000); return; }
+    const p = await Notification.requestPermission(); if (p !== 'granted') { toast('Notifications refusées : autorisez-les dans les réglages du téléphone', 5000); render(); return; }
+    const r = await swReg(); if (!r) { toast('⚠️ Service indisponible sur ce navigateur'); return; }
+    let s = await r.pushManager.getSubscription();
+    try { if (s && s.options && s.options.applicationServerKey && btoa(String.fromCharCode(...new Uint8Array(s.options.applicationServerKey))) !== btoa(String.fromCharCode(...ub64(ME.v)))) { await s.unsubscribe(); s = null; } } catch (e) { }
+    if (!s) s = await r.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: ub64(ME.v) });
+    const x = await api('push_sub', { sub: s.toJSON(), nom: ME.nom, secteur: ME.secteur });
+    if (x.ok) { ME.push = Date.now(); W('xiii.app.me', ME); toast('🔔 Notifications activées : la régie peut vous prévenir même application fermée', 4500); } else toast('⚠️ Abonnement non enregistré dans le Drive (' + (x.err || 'réseau') + ')', 5000);
+    render();
+}
+async function notifs() { try { const c = await caches.open('xnotifs'), r = await c.match('list'); NL = r ? await r.json() : []; } catch (e) { NL = []; } }
+if (navigator.serviceWorker) navigator.serviceWorker.addEventListener('message', e => { const d = e.data || {}; if (d.t === 'xiii-push') { toast((d.m.lvl === 'urg' ? '🚨 ' : '🔔 ') + (d.m.title || '') + (d.m.body ? ' — ' + d.m.body : ''), 5000); notifs().then(render); } });
+// ---------- installation ----------
+let BIP = null; addEventListener('beforeinstallprompt', e => { e.preventDefault(); BIP = e; render(); instBar(); });
+// 📲 bandeau d'installation (raccourci application sur l'écran d'accueil) : visible tant que l'application n'est pas installée
+function instBar() {
+    let b = document.getElementById('ib'); if (standalone() || !/Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || sessionStorage.getItem('xiii.ib.no')) { if (b) b.remove(); return; }
+    if (!b) { b = document.createElement('div'); b.id = 'ib'; b.style.cssText = 'position:sticky;top:0;z-index:20;background:#f0b378;color:#1d1b19;padding:10px 14px;display:flex;gap:10px;align-items:center;font:600 14px/1.3 system-ui,sans-serif'; document.body.prepend(b); }
+    b.innerHTML = '<span style="flex:1">📲 Installez XIII sur l\'écran d\'accueil : elle s\'ouvrira comme une application.</span>' + (BIP ? '<button id="ib-go" style="font:700 14px system-ui;padding:8px 12px;border-radius:10px;border:0;background:#1d1b19;color:#f0b378">Installer</button>' : isIOS() ? '<small style="max-width:140px">Partager ⎋ puis « Sur l\'écran d\'accueil »</small>' : '<small style="max-width:150px">Menu ⋮ › « Installer l\'application »</small>') + '<button id="ib-x" style="border:0;background:transparent;font-size:18px">✕</button>';
+    const g = document.getElementById('ib-go'); if (g) g.onclick = async () => { BIP.prompt(); await BIP.userChoice.catch(() => { }); BIP = null; instBar(); render(); };
+    document.getElementById('ib-x').onclick = () => { sessionStorage.setItem('xiii.ib.no', '1'); b.remove(); };
+}
+addEventListener('appinstalled', () => { BIP = null; instBar(); }); setTimeout(instBar, 300);
+// ---------- 💬 échanges d'équipe : avis des outils, message au Master, mentions, activité ----------
+const NM = { callsheeto: 'Feuille de service', planno: 'Planning', calendrier: 'Calendrier', deviso: 'Devis', dossier: 'Dossier', moodo: 'Moodboard', repero: 'Repérages', storyboardo: 'Storyboard', decoup: 'Découpage', scripto: 'Script', posto: 'Post-prod', casto: 'Casting', plano: 'Plan', syno: 'Synoptique', conduco: 'Conducteur', transporto: 'Transports', packingo: 'Colisage', backupo: 'Rushes', matos: 'Matos', lumo: 'Lumière', sono: 'Son', runo: 'Déroulé', ressourco: 'Contrats', cadro: 'Cadre', soustitro: 'Sous-titres', catalogue: 'Catalogue', jour: 'Tournage' };
+const nm = a => NM[a] || String(a || '').toUpperCase();
+function tabBar() {
+    let b = document.getElementById('tb'); if (!ME || !ME.d) { if (b) b.remove(); return; }
+    if (!b) { b = document.createElement('nav'); b.id = 'tb'; b.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:15;display:grid;grid-template-columns:repeat(4,1fr);background:#1d1b19;border-top:1px solid #3a3632;padding:6px 4px calc(50px + env(safe-area-inset-bottom))'; document.body.appendChild(b); document.body.style.paddingBottom = '130px'; }
+    const T = [['home', '🏠', 'Accueil'], ['ex', '💬', 'Échanges'], ['me', '📣', 'Mentions'], ['act', '🔄', 'Activité']];
+    b.innerHTML = T.map(t => '<button data-t="' + t[0] + '" style="background:transparent;border:0;color:' + (TAB === t[0] ? '#f0b378' : '#a39b91') + ';font:600 11px system-ui;display:flex;flex-direction:column;align-items:center;gap:2px;position:relative"><span style="font-size:22px">' + t[1] + '</span>' + t[2] + (t[0] === 'me' && MCOUNT ? '<i style="position:absolute;top:0;right:22%;background:#ef5350;color:#fff;border-radius:99px;font:700 10px system-ui;padding:1px 5px;font-style:normal">' + MCOUNT + '</i>' : '') + '</button>').join('');
+    b.querySelectorAll('[data-t]').forEach(x => x.onclick = () => { TAB = x.dataset.t; scrollTo(0, 0); render(); });
+}
+let MCOUNT = 0; async function mCount() { if (!ME || !ME.d) return; const r = await api('ment_list'); MCOUNT = r.ok ? (r.ments || []).length : 0; tabBar(); } setTimeout(mCount, 1500); setInterval(mCount, 60000);
+const card = (t, b) => '<div class="card"><h2>' + t + '</h2>' + b + '</div>';
+// 💬 avis récents de tous les outils + message au Master
+async function vEx() {
+    const m = $('m'), master = ME.d.master; let h = '';
+    if (master) { const r = await api('msg_list'); h += card('✉️ Messages de l\'équipe', r.ok && r.msgs.length ? r.msgs.slice(0, 15).map(x => '<div class="nt" style="' + (x.lu ? 'opacity:.55' : '') + '"><span>' + (x.lu ? '✉️' : '📩') + '</span><div style="flex:1"><b>' + esc(x.nom) + '</b><small>' + esc(x.txt) + ' · ' + ago(x.ts) + '</small></div>' + (x.lu ? '' : '<button data-rd="' + x.ts + '" style="font-size:12px">✓ Lu</button>') + '</div>').join('') : '<p class="dim" style="margin:0">Aucun message.</p>'); }
+    else { const S = J('xiii.app.sent', []); h += card('✉️ Message au Master', '<textarea id="mx" rows="3" placeholder="Une question, une info pour la production…" style="width:100%;box-sizing:border-box"></textarea><button class="pri full" id="mxs" style="margin-top:8px">Envoyer au Master</button>' + (S.length ? '<p class="dim" style="margin:10px 0 0;font-size:12px">Envoyés : ' + S.slice(0, 5).map(x => esc(x.t.slice(0, 50)) + ' (' + ago(x.at) + ')').join(' · ') + '</p>' : '')); }
+    h += '<div class="card"><h2>💬 Avis récents dans les outils</h2><div id="av"><p class="dim" style="margin:0">Chargement des outils…</p></div></div>';
+    m.innerHTML = h;
+    m.querySelectorAll('[data-rd]').forEach(b => b.onclick = async () => { await api('msg_read', { ts: +b.dataset.rd }); vEx(); });
+    const mxs = $('mxs'); if (mxs) mxs.onclick = async () => { const t = $('mx').value.trim(); if (!t) return; mxs.disabled = true; const r = await api('msg_send', { txt: t }); mxs.disabled = false; if (!r.ok) { toast('⚠️ Envoi impossible (' + r.err + ')'); return; } const S = J('xiii.app.sent', []); S.unshift({ t, at: Date.now() }); W('xiii.app.sent', S.slice(0, 20)); toast('✉️ Envoyé au Master'); vEx(); };
+    // avis : un fil par élément dans chaque outil (xiii.notes.<outil>)
+    const p = await api('ping'); if (!p.ok) { $('av').innerHTML = '<p class="dim">Drive injoignable.</p>'; return; }
+    const apps = Object.keys(p.apps || {}).filter(a => NM[a]), all = [], D = {};
+    await Promise.all(apps.map(async a => { const g = await api('get', { app: a, since: -1 }); if (!g.ok || !g.data) return; D[a] = g; let N = {}; try { N = JSON.parse(g.data['xiii.notes.' + a] || '{}'); } catch (e) { } Object.keys(N).forEach(id => { const t = N[id] || {}; (t.thread || []).forEach(x => all.push({ a, id, lab: t.label || '', st: t.status || '', who: x.who, txt: x.txt, ts: x.ts })); }); }));
+    all.sort((x, y) => y.ts - x.ts); const seen = new Set(), L = all.filter(x => { const k = x.a + '|' + x.id; if (seen.has(k)) return false; seen.add(k); return true; }).slice(0, 25);
+    $('av').innerHTML = L.length ? L.map((x, i) => '<div style="padding:10px 0;border-top:1px solid #3a3632"><small class="dim">' + esc(nm(x.a)) + (x.lab ? ' › ' + esc(x.lab) : '') + (x.st === 'ok' ? ' · ✅ validé' : x.st ? ' · ' + esc(x.st) : '') + '</small><div><b>' + esc(x.who || '—') + '</b> : ' + esc(x.txt).replace(/(^|\s)@([\wÀ-ÿ'.-]+)/g, '$1<mark style="background:rgba(240,179,120,.3);color:inherit">@$2</mark>') + ' <small class="dim">' + ago(x.ts) + '</small></div>' + (ME.d.droit === 'read' ? '' : '<div style="display:flex;gap:6px;margin-top:6px"><input data-ri="' + i + '" placeholder="Répondre… (@Prénom pour mentionner)" style="flex:1;min-width:0"><button data-rs="' + i + '" style="flex:0 0 auto;width:auto;padding:0 16px">↩</button></div>') + '</div>').join('') : '<p class="dim" style="margin:0">Aucun avis pour l\'instant. Les 💬 avis laissés sur les éléments des outils apparaissent ici.</p>';
+    $('av').querySelectorAll('[data-rs]').forEach(b => b.onclick = async () => { const x = L[+b.dataset.rs], inp = $('av').querySelector('[data-ri="' + b.dataset.rs + '"]'), t = inp.value.trim(); if (!t) return; b.disabled = true;
+        for (let n = 0; n < 3; n++) { const g = await api('get', { app: x.a, since: -1 }); if (!g.ok) break; const data = Object.assign({}, g.data), k = 'xiii.notes.' + x.a; let N = {}; try { N = JSON.parse(data[k] || '{}'); } catch (e) { } const th = N[x.id] || (N[x.id] = { label: x.lab, thread: [] }); th.thread = th.thread || []; th.thread.push({ who: ME.nom, txt: t, ts: Date.now() }); data[k] = JSON.stringify(N);
+            const r = await api('put', { app: x.a, base: g.rev, data, sum: '💬 avis de ' + ME.nom + ' (application)' }); if (r.ok) { const tags = (t.match(/(^|\s)@([\wÀ-ÿ'.-]+)/g) || []).map(s => s.trim().slice(1)); if (tags.length) api('ment_add', { to: tags, app: x.a, el: x.lab, txt: t }); toast('💬 Réponse envoyée'); vEx(); return; } if (r.err !== 'conflict') { toast('⚠️ ' + r.err); break; } }
+        b.disabled = false; });
+}
+// 🎞️ retours client (POSTO) : versions, retours horodatés, ✓ traité, ajout d'un retour, validation
+const PVST = { wip: ['En cours', '#90a4ae'], sent: ['Envoyée', '#64b5f6'], notes: ['Retours reçus', '#ffb74d'], ok: ['Validée', '#66bb6a'] }, PCAT = [['montage', 'Montage'], ['son', 'Son / mixage'], ['etalo', 'Étalonnage'], ['gfx', 'Graphisme / VFX'], ['st', 'Sous-titres'], ['autre', 'Autre']];
+let POV = '';
+const tcf = s => { s = +s || 0; const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), x = Math.floor(s % 60); return (h ? h + ':' : '') + String(m).padStart(2, '0') + ':' + String(x).padStart(2, '0'); };
+async function poEdit(fn) { for (let n = 0; n < 3; n++) { const g = await api('get', { app: 'posto', since: -1 }); if (!g.ok) return g; const data = Object.assign({}, g.data); let P = {}; try { P = JSON.parse(data['postoXIII.project'] || '{}'); } catch (e) { } const msg = fn(P); if (!msg) return { ok: false, err: 'rien' }; P.updated = Date.now(); data['postoXIII.project'] = JSON.stringify(P); const r = await api('put', { app: 'posto', base: g.rev, data, sum: '🎞️ ' + msg + ' (' + ME.nom + ', application)' }); if (r.ok || r.err !== 'conflict') return r; } return { ok: false, err: 'conflict' }; }
+async function vPo() {
+    const m = $('m'), g = await api('get', { app: 'posto', since: -1 }), ed = ME.d.master || ME.d.droit === 'edit';
+    let P = {}; try { P = JSON.parse((g.data || {})['postoXIII.project'] || '{}'); } catch (e) { } const V = (P.versions || []).slice().reverse();
+    const back = '<button class="full" id="pob">← ' + (POV ? 'Versions' : 'Retour') + '</button>';
+    if (!g.ok || !V.length) { m.innerHTML = card('🎞️ Retours client', '<p class="dim" style="margin:0">' + (g.err === 'forbidden' ? 'POSTO n\'est pas partagé avec vous.' : 'Aucune version dans POSTO pour l\'instant.') + '</p>') + back; $('pob').onclick = () => { TAB = 'home'; render(); }; return; }
+    const v = POV && V.find(x => x.id === POV);
+    if (!v) { m.innerHTML = '<div class="card"><h2>🎞️ Retours client' + (P.name ? ' · ' + esc(P.name) : '') + '</h2>' + V.map(x => { const c = x.comments || [], d = c.filter(y => y.done).length, s = PVST[x.status] || PVST.wip; return '<button class="full" data-v="' + esc(x.id) + '" style="text-align:left;display:flex;gap:10px;align-items:center;padding:12px 4px;border:0;border-top:1px solid #3a3632;background:transparent;color:inherit;font:600 15px system-ui"><span style="flex:1">' + esc(x.label || 'Version') + '<br><small class="dim" style="font-weight:400">' + esc(x.date || '') + ' · ' + c.length + ' retour(s)' + (c.length ? ' · ' + d + ' traité(s)' : '') + '</small></span><span style="font-size:11.5px;padding:3px 9px;border-radius:99px;border:1px solid ' + s[1] + ';color:' + s[1] + '">' + s[0] + '</span></button>'; }).join('') + '</div>' + back;
+        m.querySelectorAll('[data-v]').forEach(b => b.onclick = () => { POV = b.dataset.v; vPo(); }); $('pob').onclick = () => { TAB = 'home'; render(); }; return; }
+    const C = (v.comments || []).slice().sort((a, b) => (a.tc || 0) - (b.tc || 0)), s = PVST[v.status] || PVST.wip, cn = k => (PCAT.find(x => x[0] === k) || [0, k || ''])[1];
+    m.innerHTML = '<div class="card"><h2>🎞️ ' + esc(v.label || 'Version') + ' <span style="font-size:11.5px;padding:3px 9px;border-radius:99px;border:1px solid ' + s[1] + ';color:' + s[1] + ';letter-spacing:0;text-transform:none">' + s[0] + '</span></h2>' + (v.url ? '<a href="' + esc(v.url) + '" target="_blank" style="color:#f0b378">▶ Voir la version</a>' : '') + (v.notes ? '<p class="dim" style="margin:6px 0 0">' + esc(v.notes) + '</p>' : '') +
+        (C.length ? C.map(c => '<div style="display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-top:1px solid #3a3632' + (c.done ? ';opacity:.5' : '') + '"><span style="font:700 12px ui-monospace,Menlo,monospace;color:#f0b378;min-width:52px">' + tcf(c.tc) + '</span><div style="flex:1"><small class="dim">' + esc(cn(c.cat)) + (c.who ? ' · ' + esc(c.who) : '') + '</small><div' + (c.done ? ' style="text-decoration:line-through"' : '') + '>' + esc(c.text) + '</div></div>' + (ed ? '<button data-c="' + esc(c.id) + '" style="flex:0 0 auto;width:auto;padding:6px 10px">' + (c.done ? '↺' : '✓') + '</button>' : '') + '</div>').join('') : '<p class="dim">Aucun retour sur cette version.</p>') + '</div>' +
+        (ed ? '<div class="card"><h2>➕ Ajouter un retour</h2><div style="display:grid;grid-template-columns:110px 1fr;gap:6px"><input id="po-tc" placeholder="01:23" inputmode="numeric"><select id="po-cat">' + PCAT.map(x => '<option value="' + x[0] + '">' + x[1] + '</option>').join('') + '</select></div><textarea id="po-tx" rows="3" placeholder="ex. raccourcir le plan d\'ouverture, logo trop petit…" style="width:100%;box-sizing:border-box;margin-top:6px"></textarea><button class="pri full" id="po-add" style="margin-top:8px">Ajouter le retour</button>' + (v.status !== 'ok' ? '<button class="full" id="po-ok" style="margin-top:8px">✅ Valider la version</button>' : '') + '</div>' : '<p class="dim" style="font-size:12px">Lecture seule : le Master peut vous donner le droit de modification pour cocher les retours.</p>') + back;
+    $('pob').onclick = () => { POV = ''; vPo(); };
+    m.querySelectorAll('[data-c]').forEach(b => b.onclick = async () => { b.disabled = true; const r = await poEdit(P2 => { const x = (P2.versions || []).find(y => y.id === v.id), c = x && (x.comments || []).find(y => y.id === b.dataset.c); if (!c) return ''; c.done = !c.done; return 'retour ' + (c.done ? 'traité' : 'rouvert') + ' sur ' + (x.label || 'version'); }); if (!r.ok) toast('⚠️ ' + r.err); vPo(); });
+    const add = $('po-add'); if (add) add.onclick = async () => { const tx = $('po-tx').value.trim(); if (!tx) return; const t = String($('po-tc').value).split(':').map(Number).filter(n => !isNaN(n)); let sec = 0; t.forEach(n => sec = sec * 60 + n); add.disabled = true;
+        const r = await poEdit(P2 => { const x = (P2.versions || []).find(y => y.id === v.id); if (!x) return ''; (x.comments = x.comments || []).push({ id: Math.random().toString(36).slice(2, 10), tc: sec, text: tx, cat: $('po-cat').value, who: ME.nom, done: false, ts: Date.now() }); if (x.status === 'sent' || x.status === 'wip') x.status = 'notes'; return 'retour ajouté sur ' + (x.label || 'version'); }); toast(r.ok ? '➕ Retour ajouté' : '⚠️ ' + r.err); vPo(); };
+    const ok = $('po-ok'); if (ok) ok.onclick = async () => { if (!confirm('Valider ' + (v.label || 'cette version') + ' ?')) return; const r = await poEdit(P2 => { const x = (P2.versions || []).find(y => y.id === v.id); if (!x) return ''; x.status = 'ok'; return (x.label || 'version') + ' validée'; }); toast(r.ok ? '✅ Version validée' : '⚠️ ' + r.err); vPo(); };
+}
+// 📦 matos sur le terrain (MATOS / CATALOGUE) : scanner un appareil, changer son état, sortir / rentrer, ajouter du matériel
+const MCAT = [['cam', '🎥 Caméras'], ['opt', '🔭 Optiques'], ['mach', '🎞️ Machinerie'], ['hfv', '📡 HF vidéo'], ['mon', '🖥️ Moniteurs'], ['lum', '💡 Lumière'], ['son', '🎚️ Son'], ['com', '🎧 Intercom'], ['vid', '🎛️ Régie vidéo'], ['rec', '💾 Stockage'], ['nrj', '⚡ Énergie'], ['cab', '🔌 Câblage'], ['veh', '🚚 Véhicules'], ['div', '📦 Divers']];
+const MST = [['ok', 'Disponible', '#66bb6a'], ['rev', 'En révision', '#ffb74d'], ['panne', 'En panne', '#ef5350'], ['hs', 'Hors service', '#9e9e9e']];
+let MTU = '', MTQ = '';
+async function mtEdit(fn) { for (let n = 0; n < 3; n++) { const g = await api('get', { app: 'matos', since: -1 }); if (!g.ok && g.err !== 'nodata') return g; const data = Object.assign({}, g.data || {}); let P = {}; try { P = JSON.parse(data['matosXIII.parc'] || '{}'); } catch (e) { } P.units = P.units || []; P.resas = P.resas || []; P.moves = P.moves || []; const msg = fn(P); if (!msg) return { ok: false, err: 'rien' }; P.updated = Date.now(); data['matosXIII.parc'] = JSON.stringify(P); const r = await api('put', { app: 'matos', base: g.rev || 0, data, sum: '📦 ' + msg + ' (' + ME.nom + ', application)' }); if (r.ok || r.err !== 'conflict') return r; } return { ok: false, err: 'conflict' }; }
+const mtOut = (P, id) => { const L = (P.moves || []).filter(m => m.unit === id), l = L[L.length - 1]; return l && l.t === 'out' ? l : null; };
+const mtFind = (P, code) => { const m = /MATOS:([\w-]+)/.exec(code), k = String(m ? m[1] : code).trim().toUpperCase(); return (P.units || []).find(u => String(u.code).toUpperCase() === k || (u.sn && String(u.sn).toUpperCase() === k)); };
+let MTSCAN = false;
+async function vMt() {
+    const m = $('m'), g = await api('get', { app: 'matos', since: -1 }), ed = ME.d.master || ME.d.droit === 'edit'; let P = {}; try { P = JSON.parse((g.data || {})['matosXIII.parc'] || '{}'); } catch (e) { } P.units = P.units || []; P.resas = P.resas || []; P.moves = P.moves || [];
+    if (!g.ok && g.err === 'forbidden') { m.innerHTML = card('📦 Matos', '<p class="dim" style="margin:0">MATOS n\'est pas partagé avec vous.</p>') + '<button class="full" id="mtb">← Retour</button>'; $('mtb').onclick = () => { TAB = 'home'; render(); }; return; }
+    const u = MTU && P.units.find(x => x.id === MTU);
+    if (u) { const o = mtOut(P, u.id), st = MST.find(s => s[0] === (u.state || 'ok')) || MST[0], R = P.resas.filter(r => r.status !== 'clos' && r.to >= new Date().toISOString().slice(0, 10)).slice(0, 20);
+        m.innerHTML = '<div class="card"><h2>📦 ' + esc(u.name) + '</h2><p style="margin:0"><b style="font-family:ui-monospace,Menlo,monospace">' + esc(u.code) + '</b>' + (u.sn ? ' · n° ' + esc(u.sn) : '') + '<br><span class="dim">' + esc((MCAT.find(c => c[0] === u.cat) || [0, ''])[1]) + (u.loc ? ' · ' + esc(u.loc) : '') + '</span></p><p style="margin:8px 0 0"><b>' + (o ? '🚚 Sorti' + (o.who ? ' (' + esc(o.who) + ')' : '') : '🏠 Au dépôt') + '</b> · <span style="color:' + st[2] + '">● ' + st[1] + '</span></p>' + ((u.revs || []).length ? '<p class="dim" style="font-size:12px;margin:6px 0 0">Dernière note : ' + esc(u.revs[u.revs.length - 1].note || '') + '</p>' : '') + '</div>' +
+            (ed ? '<div class="card"><h2>État</h2><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">' + MST.map(s => '<button data-st="' + s[0] + '" style="border-color:' + s[2] + (s[0] === (u.state || 'ok') ? ';background:' + s[2] + ';color:#111' : '') + '">' + s[1] + '</button>').join('') + '</div><input id="mt-n" placeholder="Note (dégât, révision…)" style="margin-top:8px"></div>' +
+            '<div class="card"><h2>' + (o ? '🏠 Retour' : '🚚 Sortie') + '</h2>' + (o ? '' : '<select id="mt-r"><option value="">— Sans réservation —</option>' + R.map(r => '<option value="' + esc(r.id) + '"' + ((r.units || []).includes(u.id) ? ' selected' : '') + '>' + esc(r.proj) + '</option>').join('') + '</select>') + '<button class="pri full" id="mt-mv" style="margin-top:8px;padding:16px">' + (o ? '🏠 Rentrer au dépôt' : '🚚 Sortir') + '</button></div>' : '<p class="dim">Lecture seule.</p>') +
+            '<button class="full" id="mtb">← Matos</button>';
+        $('mtb').onclick = () => { MTU = ''; vMt(); };
+        m.querySelectorAll('[data-st]').forEach(b => b.onclick = async () => { const n = $('mt-n').value.trim(), s2 = b.dataset.st; const r = await mtEdit(P2 => { const x = P2.units.find(y => y.id === u.id); if (!x) return ''; x.state = s2; if (n || s2 !== 'ok') (x.revs = x.revs || []).push({ date: new Date().toISOString().slice(0, 10), note: (MST.find(s => s[0] === s2) || [0, s2])[1] + (n ? ' : ' + n : '') + ' (' + ME.nom + ')' }); return x.name + ' → ' + (MST.find(s => s[0] === s2) || [0, s2])[1]; }); toast(r.ok ? '✓ État enregistré' : '⚠️ ' + r.err); vMt(); });
+        const mv = $('mt-mv'); if (mv) mv.onclick = async () => { const rid = o ? (o.resa || '') : ($('mt-r') || {}).value || ''; mv.disabled = true; const r = await mtEdit(P2 => { const x = P2.units.find(y => y.id === u.id); if (!x) return ''; const t = mtOut(P2, x.id) ? 'in' : 'out'; P2.moves.push({ id: Math.random().toString(36).slice(2, 10), unit: x.id, t, at: Date.now(), resa: rid, who: ME.nom, state: '', note: '📱' }); const rs = rid && P2.resas.find(y => y.id === rid); if (rs && t === 'out' && !(rs.units || []).includes(x.id)) (rs.units = rs.units || []).push(x.id); return (t === 'out' ? 'sortie : ' : 'retour : ') + x.name; }); toast(r.ok ? (o ? '🏠 Rentré' : '🚚 Sorti') : '⚠️ ' + r.err); try { navigator.vibrate && navigator.vibrate(60); } catch (e) { } vMt(); };
+        return; }
+    const q = MTQ.toLowerCase(), L = P.units.filter(x => !q || (x.name + ' ' + x.code + ' ' + (x.sn || '')).toLowerCase().includes(q)).slice(0, 60), outN = P.units.filter(x => mtOut(P, x.id)).length;
+    m.innerHTML = '<div class="card"><h2>📦 Matos <small class="dim" style="letter-spacing:0;text-transform:none;font-weight:400">' + P.units.length + ' équipement(s) · ' + outN + ' sorti(s)</small></h2><button class="pri full" id="mt-sc" style="padding:16px">📷 Scanner un appareil ou une caisse</button><input id="mt-q" placeholder="🔍 Nom, code MAT-…, n° de série" value="' + esc(MTQ) + '" style="margin-top:8px"></div>' +
+        '<div class="card" style="padding-top:4px">' + (L.length ? L.map(x => { const o = mtOut(P, x.id), st = MST.find(s => s[0] === (x.state || 'ok')) || MST[0]; return '<button class="full" data-u="' + esc(x.id) + '" style="text-align:left;display:flex;gap:10px;align-items:center;padding:10px 2px;border:0;border-top:1px solid #3a3632;background:transparent;color:inherit;font:600 14px system-ui"><span style="width:9px;height:9px;border-radius:50%;background:' + st[2] + ';flex:0 0 auto"></span><span style="flex:1;min-width:0">' + esc(x.name) + '<br><small class="dim" style="font-weight:400">' + esc(x.code) + (x.sn ? ' · ' + esc(x.sn) : '') + '</small></span><span style="font-size:12px">' + (o ? '🚚' : '🏠') + '</span></button>'; }).join('') : '<p class="dim">' + (P.units.length ? 'Aucun résultat.' : 'Le parc est vide.') + '</p>') + '</div>' +
+        (ed ? '<div class="card"><h2>➕ Ajouter un équipement</h2><input id="mt-an" placeholder="ex. Sony FX6"><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px"><select id="mt-ac">' + MCAT.map(c => '<option value="' + c[0] + '">' + c[1] + '</option>').join('') + '</select><input id="mt-as" placeholder="N° de série"></div><input id="mt-al" placeholder="Lieu de rangement (facultatif)" style="margin-top:6px"><button class="full" id="mt-ad" style="margin-top:8px">Ajouter au parc</button></div>' : '') + '<button class="full" id="mtb">← Retour</button>';
+    $('mtb').onclick = () => { TAB = 'home'; render(); };
+    $('mt-q').oninput = e => { MTQ = e.target.value; clearTimeout(vMt.t); vMt.t = setTimeout(() => { vMt().then(() => { const i = $('mt-q'); if (i) { i.focus(); i.setSelectionRange(i.value.length, i.value.length); } }); }, 300); };
+    m.querySelectorAll('[data-u]').forEach(b => b.onclick = () => { MTU = b.dataset.u; scrollTo(0, 0); vMt(); });
+    $('mt-sc').onclick = () => { MTSCAN = true; scan(); };
+    const ad = $('mt-ad'); if (ad) ad.onclick = async () => { const nm = $('mt-an').value.trim(); if (!nm) { $('mt-an').focus(); return; } ad.disabled = true; let nid = '';
+        const r = await mtEdit(P2 => { P2.seq = Math.max(P2.seq || 0, ...P2.units.map(x => +String(x.code || '').replace(/\D/g, '') || 0)) + 1; nid = Math.random().toString(36).slice(2, 10); P2.units.push({ id: nid, code: 'MAT-' + String(P2.seq).padStart(4, '0'), cat: $('mt-ac').value, catId: '', name: nm, sn: $('mt-as').value.trim(), state: 'ok', loc: $('mt-al').value.trim(), kg: '', price: '', value: '', buy: '', nextRev: '', revs: [], notes: '📱 ajouté par ' + ME.nom }); return 'ajout : ' + nm; });
+        toast(r.ok ? '➕ ' + nm + ' ajouté au parc' : '⚠️ ' + r.err); if (r.ok) MTU = nid; vMt(); };
+}
+// 💽 estimation de la taille des rushes (BACKUPO) : codec, définition, cadence, caméras, durée → débit, Go, cartes et disques
+const BKC = [
+    ['Apple ProRes', [
+        ['prores_proxy', 'ProRes 422 Proxy', 'bpp', 0.724], ['prores_lt', 'ProRes 422 LT', 'bpp', 1.64], ['prores_422', 'ProRes 422', 'bpp', 2.366],
+        ['prores_hq', 'ProRes 422 HQ', 'bpp', 3.54], ['prores_4444', 'ProRes 4444', 'bpp', 5.31], ['prores_xq', 'ProRes 4444 XQ', 'bpp', 8.05],
+        ['prores_raw', 'ProRes RAW', 'bpp', 4.2, 1], ['prores_rawhq', 'ProRes RAW HQ', 'bpp', 6.3, 1]]],
+    ['Avid DNxHR', [
+        ['dnxhr_lb', 'DNxHR LB', 'bpp', 0.72], ['dnxhr_sq', 'DNxHR SQ', 'bpp', 2.32], ['dnxhr_hq', 'DNxHR HQ', 'bpp', 3.51],
+        ['dnxhr_hqx', 'DNxHR HQX', 'bpp', 3.51], ['dnxhr_444', 'DNxHR 444', 'bpp', 7.03]]],
+    ['ARRI', [['arriraw', 'ARRIRAW', 'bpp', 12.1, 1], ['arriraw_hde', 'ARRIRAW HDE', 'bpp', 7.3, 1]]],
+    ['RED', [['r3d_hq', 'REDCODE HQ', 'bpp', 3.2, 1], ['r3d_mq', 'REDCODE MQ', 'bpp', 2.0, 1], ['r3d_lq', 'REDCODE LQ', 'bpp', 1.33, 1], ['r3d_elq', 'REDCODE ELQ', 'bpp', 0.9, 1]]],
+    ['Blackmagic RAW', [
+        ['braw_3', 'BRAW 3:1', 'bpp', 4.0, 1], ['braw_5', 'BRAW 5:1', 'bpp', 2.4, 1], ['braw_8', 'BRAW 8:1', 'bpp', 1.5, 1],
+        ['braw_12', 'BRAW 12:1', 'bpp', 1.0, 1], ['braw_18', 'BRAW 18:1', 'bpp', 0.67, 1], ['braw_q0', 'BRAW Q0 (max.)', 'bpp', 4.0, 1], ['braw_q5', 'BRAW Q5 (max.)', 'bpp', 1.3, 1]]],
+    ['Sony', [
+        ['xocn_lt', 'X-OCN LT', 'bpp', 1.6, 1], ['xocn_st', 'X-OCN ST', 'bpp', 2.4, 1], ['xocn_xt', 'X-OCN XT', 'bpp', 3.6, 1],
+        ['xavc_i', 'XAVC-I / XAVC S-I (Class 300)', 'bpp', 1.207], ['xavc_lgop', 'XAVC Long GOP / XAVC S', 'mbps', 150], ['xavc_hs', 'XAVC HS (H.265)', 'mbps', 100]]],
+    ['Canon', [
+        ['crm_lt', 'Cinema RAW Light LT', 'bpp', 1.9, 1], ['crm_st', 'Cinema RAW Light ST', 'bpp', 3.1, 1], ['crm_hq', 'Cinema RAW Light HQ', 'bpp', 4.7, 1],
+        ['xfavc_i', 'XF-AVC Intra', 'bpp', 1.55], ['xfavc_lgop', 'XF-AVC Long GOP', 'mbps', 160]]],
+    ['Panasonic', [['avc_intra', 'AVC-Intra 100 / 4K 422', 'bpp', 1.61], ['lgop_10', 'Long GOP 10 bits (H.264/H.265)', 'mbps', 150]]],
+    ['Compressés', [['h264', 'H.264 / AVC', 'mbps', 50], ['h265', 'H.265 / HEVC', 'mbps', 100], ['custom', 'Débit personnalisé', 'mbps', 100]]],
+    ['Audio', [['wav48', 'WAV 48 kHz / 24 bits', 'audio', 1.152], ['wav96', 'WAV 96 kHz / 24 bits', 'audio', 2.304], ['wav48f', 'WAV 48 kHz / 32 bits float', 'audio', 1.536]]]
+];
+const BKR = [['1920x1080', 'HD 1920×1080'], ['2880x1620', '2.8K 2880×1620'], ['3840x2160', 'UHD 3840×2160'], ['4096x2160', 'DCI 4K 4096×2160'], ['4608x2592', '4.6K 4608×2592'], ['6144x3240', '6K 6144×3240'], ['8192x4320', '8K 8192×4320']];
+function vBk() {
+    const S = Object.assign({ c: 'prores_422', r: '3840x2160', f: 25, n: 2, h: 3, d: 5, k: 2, card: 512 }, J('xiii.app.bk', {})), opt = (L, v) => L.map(x => '<option value="' + x[0] + '"' + (String(x[0]) === String(v) ? ' selected' : '') + '>' + x[1] + '</option>').join('');
+    $('m').innerHTML = '<div class="card"><h2>💽 Taille des rushes</h2><label>Codec</label><select id="bk-c">' + BKC.map(g => '<optgroup label="' + esc(g[0]) + '">' + g[1].map(c => '<option value="' + c[0] + '"' + (c[0] === S.c ? ' selected' : '') + '>' + esc(c[1]) + '</option>').join('') + '</optgroup>').join('') + '</select>' +
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px"><div><label>Définition</label><select id="bk-r">' + opt(BKR, S.r) + '</select></div><div><label>Cadence</label><select id="bk-f">' + opt([23.976, 24, 25, 29.97, 30, 48, 50, 59.94, 60, 100, 120].map(x => [x, x + ' i/s']), S.f) + '</select></div>' +
+        '<div><label>Caméras</label><input id="bk-n" type="number" min="1" inputmode="numeric" value="' + S.n + '"></div><div><label>Heures tournées / jour</label><input id="bk-h" type="number" min="0" step="0.5" inputmode="decimal" value="' + S.h + '"></div>' +
+        '<div><label>Jours</label><input id="bk-d" type="number" min="1" inputmode="numeric" value="' + S.d + '"></div><div><label>Copies de sécurité</label><select id="bk-k">' + opt([[1, '1 copie'], [2, '2 copies'], [3, '3 copies']], S.k) + '</select></div>' +
+        '<div style="grid-column:1/-1"><label>Cartes</label><select id="bk-cd">' + opt([[128, '128 Go'], [256, '256 Go'], [512, '512 Go'], [1024, '1 To'], [2048, '2 To']], S.card) + '</select></div></div><div id="bk-o" style="margin-top:12px"></div></div><button class="full" id="bkb">← Retour</button>';
+    const calc = () => {
+        const v = id => $(id).value, c = BKC.flatMap(g => g[1]).find(x => x[0] === v('bk-c')) || BKC[0][1][0], [w, hh] = v('bk-r').split('x').map(Number), f = +v('bk-f'), n = Math.max(1, +v('bk-n') || 1), h = Math.max(0, +String(v('bk-h')).replace(',', '.') || 0), d = Math.max(1, +v('bk-d') || 1), k = +v('bk-k'), card = +v('bk-cd');
+        const S2 = { c: c[0], r: v('bk-r'), f, n, h, d, k, card }; W('xiii.app.bk', S2);
+        const mbps = c[2] !== 'bpp' ? c[3] : w * hh * f * c[3] / 1e6, gbh = mbps / 8 * 3600 / 1000, day = gbh * h * n, tot = day * d, cardMin = card / (mbps / 8 / 1000) / 60;
+        const go = x => x >= 1000 ? (x / 1000).toFixed(x >= 10000 ? 0 : 1).replace('.', ',') + ' To' : Math.round(x) + ' Go';
+        $('bk-o').innerHTML = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">' + [['Débit / caméra', Math.round(mbps) + ' Mb/s'], ['Par heure / caméra', go(gbh)], ['Par jour', go(day)], ['Tournage (' + d + ' j)', go(tot)], ['Avec ' + k + ' copie(s)', go(tot * k)], ['Une carte ' + (card >= 1024 ? card / 1024 + ' To' : card + ' Go'), Math.floor(cardMin / 60) + ' h ' + String(Math.round(cardMin % 60)).padStart(2, '0')], ['Cartes / jour', Math.ceil(day / card) + ' (toutes caméras)'], ['Disques 8 To', Math.ceil(tot * k / 8000) + ' disque(s)']].map(x => '<div style="background:rgba(240,179,120,.1);border-radius:10px;padding:8px 10px"><small class="dim">' + x[0] + '</small><div style="font:800 20px system-ui">' + x[1] + '</div></div>').join('') + '</div>' + (c[4] ? '<p class="dim" style="font-size:12px;margin:8px 0 0">Codec RAW : le débit réel varie avec l\'image (estimation moyenne).</p>' : '');
+    };
+    ['bk-c', 'bk-r', 'bk-f', 'bk-n', 'bk-h', 'bk-d', 'bk-k', 'bk-cd'].forEach(id => { $(id).oninput = calc; $(id).onchange = calc; }); calc(); $('bkb').onclick = () => { TAB = 'home'; render(); };
+}
+// 📚 DOSSIER : PDF final à relire et textes à remplir (publiés par le DOSSIER du Master, retour automatique)
+let DOS = '';
+async function vDo() {
+    const m = $('m'), g = await api('get', { app: 'dossier_m', since: -1 }), ed = ME.d.master || ME.d.droit === 'edit'; let D = {}; try { D = JSON.parse((g.data || {}).m || '{}'); } catch (e) { }
+    const back = '<button class="full" id="dob">← ' + (DOS ? 'Dossier' : 'Retour') + '</button>';
+    if (!D.secs) { m.innerHTML = card('📚 Dossier', '<p class="dim" style="margin:0">' + (g.err === 'forbidden' ? 'DOSSIER n\'est pas partagé avec vous.' : 'Le Master n\'a pas encore ouvert son DOSSIER relié au Drive.') + '</p>') + back; $('dob').onclick = () => { TAB = 'home'; render(); }; return; }
+    const s = DOS && D.secs.find(x => x.id === DOS);
+    if (s) { m.innerHTML = '<div class="card"><small class="dim">' + esc(s.ch) + '</small><h2 style="margin-top:4px">' + esc(s.t) + (s.req ? ' <span style="color:#ef5350">*</span>' : '') + '</h2>' + (s.h ? '<p class="dim" style="font-size:12.5px;margin:0 0 8px">' + esc(s.h) + '</p>' : '') + '<textarea id="do-x" rows="12" style="width:100%;box-sizing:border-box;font:15px/1.5 system-ui"' + (ed ? '' : ' readonly') + '>' + esc(s.x) + '</textarea>' + (s.f ? '<p class="dim" style="font-size:12px;margin:6px 0 0">+ ' + s.f + ' fichier(s) joint(s) dans le DOSSIER</p>' : '') + (ed ? '<button class="pri full" id="do-sv" style="margin-top:8px">Enregistrer dans le dossier</button>' : '') + '</div>' + back;
+        $('dob').onclick = () => { DOS = ''; vDo(); };
+        const sv = $('do-sv'); if (sv) sv.onclick = async () => { const x = $('do-x').value; sv.disabled = true; for (let n = 0; n < 3; n++) { const g2 = await api('get', { app: 'dossier_m', since: -1 }); let D2 = {}; try { D2 = JSON.parse((g2.data || {}).m || '{}'); } catch (e) { } D2.edits = (D2.edits || []).filter(e => e.id !== s.id).concat([{ id: s.id, x, by: ME.nom, ts: Date.now() }]); (D2.secs || []).forEach(y => { if (y.id === s.id) y.x = x; });
+            const r = await api('put', { app: 'dossier_m', base: g2.rev, data: { m: JSON.stringify(D2) }, sum: '📚 « ' + s.t + ' » rempli par ' + ME.nom + ' (application)' }); if (r.ok) { toast('✓ Enregistré : arrive dans le DOSSIER du Master'); DOS = ''; vDo(); return; } if (r.err !== 'conflict') { toast('⚠️ ' + r.err); break; } } sv.disabled = false; };
+        return; }
+    const by = {}; D.secs.forEach(x => (by[x.ch] = by[x.ch] || []).push(x)); const done = D.secs.filter(x => String(x.x || '').trim() || x.f).length, miss = D.secs.filter(x => x.req && !String(x.x || '').trim() && !x.f).length;
+    m.innerHTML = '<div class="card"><h2>📚 ' + esc(D.title || 'Dossier') + '</h2><p class="dim" style="margin:0 0 10px">' + done + ' / ' + D.secs.length + ' rubrique(s) remplie(s)' + (miss ? ' · <span style="color:#ef5350">' + miss + ' obligatoire(s) vide(s)</span>' : '') + '</p>' + (D.pdf ? '<button class="pri full" id="do-pdf" style="padding:16px">📄 Ouvrir le PDF final</button><p class="dim" style="font-size:12px;margin:6px 0 0">Généré le ' + new Date(D.pdf.ts).toLocaleString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) + ' · ' + (D.pdf.kb > 1024 ? (D.pdf.kb / 1024).toFixed(1).replace('.', ',') + ' Mo' : D.pdf.kb + ' Ko') + '</p>' : '<p class="dim" style="margin:0">Le PDF final apparaîtra ici dès que le Master l\'aura généré dans DOSSIER.</p>') + '</div>' +
+        Object.keys(by).map(ch => '<div class="card"><h2>' + esc(ch) + '</h2>' + by[ch].map(x => { const ok = String(x.x || '').trim() || x.f; return '<button class="full" data-s="' + esc(x.id) + '" style="text-align:left;display:flex;gap:10px;align-items:center;padding:10px 2px;border:0;border-top:1px solid #3a3632;background:transparent;color:inherit;font:600 14px system-ui"><span>' + (ok ? '✅' : x.req ? '🔴' : '⚪') + '</span><span style="flex:1;min-width:0">' + esc(x.t) + '<br><small class="dim" style="font-weight:400">' + (ok ? esc(String(x.x || '').slice(0, 70) || x.f + ' fichier(s)') : x.req ? 'Obligatoire · à remplir' : 'À remplir') + '</small></span><span style="color:#f0b378">›</span></button>'; }).join('') + '</div>').join('') + back;
+    $('dob').onclick = () => { TAB = 'home'; render(); }; m.querySelectorAll('[data-s]').forEach(b => b.onclick = () => { DOS = b.dataset.s; scrollTo(0, 0); vDo(); });
+    const pb = $('do-pdf'); if (pb) pb.onclick = async () => { const w = window.open('', '_blank'); pb.disabled = true; pb.textContent = '⏳ Téléchargement…'; const f = await api('file_get', { id: D.pdf.fid }); pb.disabled = false; pb.textContent = '📄 Ouvrir le PDF final'; if (!f.ok) { if (w) w.close(); toast('⚠️ ' + f.err); return; } const bin = atob(f.b64), u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); const url = URL.createObjectURL(new Blob([u], { type: 'application/pdf' })); if (w) w.location = url; else location.href = url; };
+}
+// 🧳 colisage : caisses de PACKINGO à pointer (rangement, chargement, retour)
+async function vPk() {
+    const m = $('m'); m.innerHTML = '<div class="card"><p class="dim" style="margin:0">Chargement des caisses…</p></div>';
+    const [g, k] = await Promise.all([api('get', { app: 'packingo', since: -1 }), api('case_key')]);
+    if (!g.ok) { m.innerHTML = card('🧳 Colisage', '<p class="dim" style="margin:0">' + (g.err === 'forbidden' ? 'PACKINGO n\'est pas partagé avec vous.' : 'Pas encore de colisage dans le Drive du projet.') + '</p><button class="full" id="pkb" style="margin-top:10px">← Retour</button>'); $('pkb').onclick = () => { TAB = 'home'; render(); }; return; }
+    let P = {}; try { P = JSON.parse((g.data || {})['packingoXIII.project'] || '{}'); } catch (e) { }
+    const cps = P.cps || [], cur = P.curCp || (cps[0] || {}).id, ch = (P.checks || {})[cur] || {}, cs = P.cases || [];
+    const prog = c => { const it = c.items || [], ok = it.filter(x => ch[x.id] && ch[x.id].s === 'ok').length, miss = it.filter(x => ch[x.id] && ch[x.id].s === 'miss').length; return { ok, miss, n: it.length, sealed: !!ch['c:' + c.id] }; };
+    const curN = (cps.find(x => x.id === cur) || {}).name || '';
+    m.innerHTML = '<div class="card"><h2>🧳 Colisage' + (curN ? ' · ' + esc(curN) : '') + '</h2><button class="pri full" id="pks">📷 Scanner une étiquette de caisse</button><p class="dim" style="margin:8px 0 0;font-size:12px">Ou touchez une caisse ci-dessous pour pointer son contenu : ✓ rangé / ✗ manquant, tout est visible en direct dans PACKINGO.</p></div>' +
+        '<div class="card">' + (cs.length ? cs.map(c => { const p = prog(c), pct = p.n ? Math.round(p.ok / p.n * 100) : 0; return '<a class="nt" style="text-decoration:none;color:inherit;display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid #3a3632" href="' + (k.ok ? 'caisse.html#u=' + encodeURIComponent(ME.d.u) + '&k=' + encodeURIComponent(k.k) + '&c=' + encodeURIComponent(c.id) : '#') + '"><span style="width:10px;height:38px;border-radius:4px;background:' + esc(c.color || '#f0b378') + '"></span><div style="flex:1;min-width:0"><b>' + esc(c.code || '') + ' ' + esc(c.name || '') + '</b><small>' + p.ok + ' / ' + p.n + ' pointé(s)' + (p.miss ? ' · <span style="color:#ef5350">' + p.miss + ' manquant(s)</span>' : '') + (p.sealed ? ' · 🔒 fermée' : '') + '</small><div style="height:5px;background:#2c2926;border-radius:9px;margin-top:5px;overflow:hidden"><i style="display:block;height:100%;width:' + pct + '%;background:' + (p.miss ? '#ef5350' : '#66bb6a') + '"></i></div></div><span style="color:#f0b378">›</span></a>'; }).join('') : '<p class="dim" style="margin:0">Aucune caisse dans PACKINGO.</p>') + (k.ok ? '' : '<p class="dim" style="font-size:12px">Pointage depuis la liste indisponible (le Master doit ouvrir PACKINGO une fois, relié au Drive) : scannez l\'étiquette.</p>') + '</div><button class="full" id="pkb">← Retour</button>';
+    $('pks').onclick = scan; $('pkb').onclick = () => { TAB = 'home'; render(); };
+    m.querySelectorAll('a[href="#"]').forEach(a => a.onclick = e => { e.preventDefault(); toast('Scannez l\'étiquette de la caisse'); });
+}
+// 📷 photo pour un outil (MOODO : planche, REPERO : lieu, CASTO : candidat…) — envoyée au Drive, intégrée sur l'ordinateur
+const PHT = { moodo: ['🎨', 'Photo pour la planche', 'MOODO', 'Une référence, une matière, une lumière : elle s\'ajoute à la planche d\'intention.'], casto: ['🎭', 'Casting', 'CASTO', 'Ajoutez un rôle ou un candidat (avec sa photo) : il arrive dans CASTO, statut « Casting / essais ».'], repero: ['📍', 'Photos de repérage', 'REPERO', 'Sur place : les photos s\'ajoutent au lieu choisi (ou à un nouveau lieu, à votre position).'] };
+let PHS = [];
+function vPh(a) {
+    const t = PHT[a]; PHS = [];
+    $('m').innerHTML = '<div class="card"><h2>' + t[0] + ' ' + t[1] + '</h2><p class="dim" style="margin:0 0 10px">' + t[3] + '</p><input id="phf" type="file" accept="image/*" capture="environment" multiple style="display:none"><button class="pri full" id="phb" style="padding:22px;font-size:17px">📷 Prendre une photo</button><div id="phl" style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px"></div>' + (a === 'casto' ? '<div style="display:flex;gap:6px;margin:10px 0 4px"><button id="cm-c" class="pri" style="flex:1">🧑 Candidat</button><button id="cm-r" style="flex:1">🎭 Rôle seul</button></div><div id="cf-c"><label>Nom du candidat</label><input id="cs-n" placeholder="Prénom Nom"><label>Rôle</label><input id="cs-r" list="cs-rl" placeholder="ex. Léa"><datalist id="cs-rl"></datalist><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px"><div><label>Téléphone</label><input id="cs-p" type="tel"></div><div><label>E-mail</label><input id="cs-e" type="email"></div></div><label>Note</label><input id="cs-o" placeholder="ex. très juste en impro, dispo juin"></div><div id="cf-r" style="display:none"><label>Nom du rôle</label><input id="cs-rn"><label>Description</label><input id="cs-rd" placeholder="ex. 30 ans, sportive, accent du sud"></div>' : '') + (a === 'repero' ? '<label style="margin-top:10px">Lieu</label><select id="phs-l"><option value="">⏳ Chargement des lieux…</option></select><input id="phs-n" placeholder="Nom du nouveau lieu" style="margin-top:6px;display:none"><p id="phs-g" class="dim" style="margin:6px 0 0;font-size:12px"></p>' : '') + '<label style="margin-top:10px">Légende (facultatif)</label><input id="phc" placeholder="ex. Lumière du quai à 18 h"><button class="full" id="phs" style="margin-top:10px" disabled>Envoyer à ' + t[2] + '</button><p id="pho" class="dim" style="margin:8px 0 0;font-size:12px"></p></div><button class="full" id="phx">← Retour</button>';
+    $('phx').onclick = () => { TAB = 'home'; render(); }; $('phb').onclick = () => $('phf').click();
+    let GEO = null; if (a === 'repero') { (async () => { const g = await api('get', { app: 'repero', since: -1 }); let S = []; try { S = (JSON.parse((g.data || {})['reperoXIII.project'] || '{}').spots || []); } catch (e) { } const sel = $('phs-l'); if (!sel) return; sel.innerHTML = '<option value="new">➕ Nouveau lieu (à ma position)</option>' + S.map(s => '<option value="' + esc(s.id) + '">' + esc(s.name || 'Lieu') + (s.city ? ' · ' + esc(s.city) : '') + '</option>').join(''); const up = () => { $('phs-n').style.display = sel.value === 'new' ? '' : 'none'; }; sel.onchange = up; up(); })();
+        if (navigator.geolocation) navigator.geolocation.getCurrentPosition(p => { GEO = { lat: +p.coords.latitude.toFixed(6), lon: +p.coords.longitude.toFixed(6) }; const e = $('phs-g'); if (e) e.textContent = '📍 Position : ' + GEO.lat.toFixed(4) + ', ' + GEO.lon.toFixed(4) + ' (± ' + Math.round(p.coords.accuracy) + ' m)'; }, () => { const e = $('phs-g'); if (e) e.textContent = 'Position indisponible (autorisez la localisation pour placer le lieu sur la carte)'; }, { enableHighAccuracy: true, timeout: 15000 }); }
+    let CM = 'c'; if (a === 'casto') { const sw = m => { CM = m; $('cf-c').style.display = m === 'c' ? '' : 'none'; $('cf-r').style.display = m === 'r' ? '' : 'none'; $('cm-c').className = m === 'c' ? 'pri' : ''; $('cm-r').className = m === 'r' ? 'pri' : ''; $('phb').style.display = m === 'c' ? '' : 'none'; $('phs').disabled = false; $('phs').textContent = m === 'c' ? 'Envoyer le candidat à CASTO' : 'Envoyer le rôle à CASTO'; }; $('cm-c').onclick = () => sw('c'); $('cm-r').onclick = () => sw('r'); sw('c');
+        (async () => { const g = await api('get', { app: 'casto', since: -1 }); let R = []; try { R = JSON.parse((g.data || {})['castoXIII.project'] || '{}').roles || []; } catch (e) { } const dl = $('cs-rl'); if (dl) dl.innerHTML = R.map(r => '<option value="' + esc(r.name) + '">').join(''); })(); }
+    const target = () => { if (a === 'casto') return JSON.stringify(CM === 'r' ? { kind: 'role', role: $('cs-rn').value.trim(), rdesc: $('cs-rd').value.trim() } : { kind: 'cand', name: $('cs-n').value.trim(), role: $('cs-r').value.trim(), phone: $('cs-p').value.trim(), email: $('cs-e').value.trim(), note: $('cs-o').value.trim() }); if (a !== 'repero') return ''; const v = ($('phs-l') || {}).value || 'new'; return JSON.stringify(v === 'new' ? Object.assign({ n: ($('phs-n').value || '').trim() }, GEO || {}) : Object.assign({ s: v, n: (($('phs-l').selectedOptions[0] || {}).textContent || '').split(' · ')[0] }, GEO || {})); };
+    const draw = () => { $('phl').innerHTML = PHS.map((s, i) => '<div style="position:relative"><img src="' + s + '" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px"><button data-d="' + i + '" style="position:absolute;top:2px;right:2px;padding:2px 7px;border-radius:99px">✕</button></div>').join(''); if (a === 'casto') { $('phs').disabled = false; $('phs').textContent = 'Envoyer le candidat à CASTO' + (PHS.length ? ' (avec photo)' : ''); } else { $('phs').disabled = !PHS.length; $('phs').textContent = PHS.length ? 'Envoyer ' + PHS.length + ' photo(s) à ' + t[2] : 'Envoyer à ' + t[2]; } $('phl').querySelectorAll('[data-d]').forEach(b => b.onclick = () => { PHS.splice(+b.dataset.d, 1); draw(); }); };
+    $('phf').onchange = async () => { for (const f of $('phf').files) { try { PHS.push(await depShrink(f, 1600)); } catch (e) { } } $('phf').value = ''; draw(); };
+    $('phs').onclick = async () => { if (a === 'casto') { const tg = JSON.parse(target()); if (tg.kind === 'role' ? !tg.role : !tg.name) { toast(tg.kind === 'role' ? 'Nom du rôle ?' : 'Nom du candidat ?'); return; } if (tg.kind === 'role' || !PHS.length) { const r = await api('ph_add', { app: a, target: JSON.stringify(tg), cap: '', b64: '', mime: '' }); toast(r.ok ? '🎭 Envoyé à CASTO' : '⚠️ ' + r.err); if (r.ok) vPh(a); return; } }
+        const b = $('phs'); b.disabled = true; let n = 0; for (let i = 0; i < PHS.length; i++) { b.textContent = 'Envoi ' + (i + 1) + ' / ' + PHS.length + '…'; const r = await api('ph_add', { app: a, target: target(), cap: $('phc').value.trim(), b64: PHS[i].split(',')[1], mime: 'image/jpeg' }); if (r.ok) n++; else { toast('⚠️ ' + (r.err === 'net' ? 'Pas de réseau' : r.err === 'forbidden' ? t[2] + ' n\'est pas partagé avec vous' : r.err)); break; } }
+        if (n && a === 'casto') { toast('🎭 Candidat envoyé à CASTO'); vPh(a); return; } if (n) { toast('📷 ' + n + ' photo(s) envoyée(s) : elles s\'ajoutent dès que ' + t[2] + ' est ouvert sur l\'ordinateur', 4500); PHS = PHS.slice(n); $('phc').value = ''; } draw(); };
+}
+// 📣 mentions
+async function vMe() {
+    const r = await api('ment_list'), L = r.ok ? r.ments || [] : [];
+    $('m').innerHTML = card('📣 On vous a mentionné', L.length ? L.map(x => '<div class="nt"><span>📣</span><div style="flex:1"><b>' + esc(x.by) + '</b> · ' + esc(nm(x.app)) + (x.el ? ' › ' + esc(x.el) : '') + '<small>' + esc(x.txt) + ' · ' + ago(x.ts) + '</small></div></div>').join('') + '<button class="full" id="mrd" style="margin-top:10px">✓ Tout marquer comme lu</button>' : '<p class="dim" style="margin:0">Aucune mention non lue. Quand quelqu\'un écrit @' + esc(String(ME.nom).split(' ')[0]) + ' dans un avis ou un mot, vous le verrez ici.</p>');
+    const b = $('mrd'); if (b) b.onclick = async () => { await api('ment_read'); MCOUNT = 0; vMe(); tabBar(); };
+}
+// 🔄 activité : qui a mis à jour quel outil
+async function vAct() {
+    const r = await api('log'), L = r.ok ? (r.log || []).filter(x => x.app && !/_/.test(x.app)).slice(0, 60) : [];
+    $('m').innerHTML = card('🔄 Mises à jour des outils', L.length ? L.map(x => '<div class="nt"><span>🔄</span><div style="flex:1"><b>' + esc(nm(x.app)) + '</b> · ' + esc(String(x.by || '').replace(/ \(app\)$/, '')) + '<small>' + esc(x.sum || ('version ' + x.rev)) + ' · ' + ago(x.ts) + '</small></div>' + (url(x.app) ? '<a href="' + esc(url(x.app)) + '" style="color:#f0b378;text-decoration:none">Voir ›</a>' : '') + '</div>').join('') : '<p class="dim" style="margin:0">' + (r.ok ? 'Aucune mise à jour pour l\'instant.' : 'Drive injoignable.') + '</p>');
+}
+// ---------- vues ----------
+const ago = t => { const s = (Date.now() - t) / 1000; return s < 60 ? 'à l\'instant' : s < 3600 ? 'il y a ' + Math.floor(s / 60) + ' min' : s < 86400 ? 'il y a ' + Math.floor(s / 3600) + ' h' : new Date(t).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }); };
+// ---------- ⏰ ma convocation (CALL SHEETO) : nom de l'équipier = nom sur la feuille ----------
+const nkey = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim().split(' ').filter(Boolean).sort().join(' ');
+function convFind(P, nom) {
+    const k = nkey(nom); if (!k || !P || !Array.isArray(P.days)) return null;
+    const t0 = new Date(); t0.setHours(0, 0, 0, 0); const today = t0.getFullYear() + '-' + String(t0.getMonth() + 1).padStart(2, '0') + '-' + String(t0.getDate()).padStart(2, '0');
+    const days = P.days.filter(d => d && d.date && d.date >= today).sort((a, b) => a.date < b.date ? -1 : 1);
+    for (const d of days) { const c = (d.crew || []).find(x => x && nkey(x.name) === k); if (c) { const loc = (d.locations || [])[0] || {}; return { date: d.date, day: d.name || '', call: c.call || (d.times || {}).general || '', hmc: c.hmc || '', role: c.role || '', note: c.note || '', loc: loc.name || '', adr: loc.address || '', pat: (d.times || {}).pat || '' }; } }
+    return null;
+}
+function convAll(P, nom) { // toutes les convocations à venir (pour l'agenda)
+    const k = nkey(nom), out = []; if (!k || !P || !Array.isArray(P.days)) return out; const t = new Date(); t.setHours(0, 0, 0, 0); const today = t.toISOString().slice(0, 10);
+    P.days.filter(d => d && d.date && d.date >= today).forEach(d => { const c = (d.crew || []).find(x => x && nkey(x.name) === k); if (!c) return; const loc = (d.locations || [])[0] || {}; out.push({ date: d.date, day: d.name || '', title: d.title || P.name || '', call: c.call || (d.times || {}).general || '', wrap: (d.times || {}).wrap || '', role: c.role || '', loc: [loc.name, loc.address].filter(Boolean).join(', '), note: c.note || '' }); });
+    return out;
+}
+function convIcs(L) {
+    const z = s => String(s || '').replace(/\\/g, '\\\\').replace(/;/g, '\;').replace(/,/g, '\\,').replace(/\n/g, '\\n'), hm = s => (/^(\d{1,2})[:h](\d{2})/.exec(s || '') || [0, '08', '00']), st = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d+/, '');
+    const R = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//SUITE XIII//Convocations//FR', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH', 'X-WR-CALNAME:Mes convocations SUITE XIII'];
+    L.forEach(c => { const a = hm(c.call), b = hm(c.wrap || ''), d = c.date.replace(/-/g, ''), s0 = d + 'T' + String(a[1]).padStart(2, '0') + a[2] + '00', e0 = c.wrap ? d + 'T' + String(b[1]).padStart(2, '0') + b[2] + '00' : s0.slice(0, 9) + String(Math.min(23, +a[1] + 10)).padStart(2, '0') + a[2] + '00';
+        R.push('BEGIN:VEVENT', 'UID:conv-' + d + '-' + nkey(ME.nom).replace(/ /g, '-') + '@suite-xiii', 'DTSTAMP:' + st, 'DTSTART;TZID=Europe/Paris:' + s0, 'DTEND;TZID=Europe/Paris:' + (e0 > s0 ? e0 : s0), 'SUMMARY:' + z('🎬 Convocation ' + (c.day ? c.day + ' ' : '') + (c.title ? '— ' + c.title : '')), 'LOCATION:' + z(c.loc), 'DESCRIPTION:' + z([c.role, c.note, 'Feuille de service : app SUITE XIII'].filter(Boolean).join('\n')),
+            'BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:' + z('Demain : convocation ' + c.call), 'TRIGGER:-P1D', 'END:VALARM', 'BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:' + z('Convocation ' + c.call), 'TRIGGER:-PT1H30M', 'END:VALARM', 'END:VEVENT'); });
+    R.push('END:VCALENDAR'); return R.join('\r\n');
+}
+function convAgenda() {
+    const L = J('xiii.app.convs', []); if (!L.length) { toast('Aucune convocation à venir'); return; }
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([convIcs(L)], { type: 'text/calendar;charset=utf-8' })); a.download = 'mes-convocations.ics'; document.body.appendChild(a); a.click(); a.remove();
+    toast('📅 Ouvrez le fichier : vos ' + L.length + ' convocation(s) s\'ajoutent à votre agenda, avec rappel la veille et 1 h 30 avant', 5000);
+}
+function convGoogle(c) { const a = (/^(\d{1,2})[:h](\d{2})/.exec(c.call || '') || [0, '08', '00']), d = c.date.replace(/-/g, ''), s0 = d + 'T' + String(a[1]).padStart(2, '0') + a[2] + '00', e0 = d + 'T' + String(Math.min(23, +a[1] + 10)).padStart(2, '0') + a[2] + '00';
+    return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + encodeURIComponent('🎬 Convocation ' + (c.day || '')) + '&dates=' + s0 + '/' + e0 + '&ctz=Europe/Paris&location=' + encodeURIComponent([c.loc, c.adr].filter(Boolean).join(', ')) + '&details=' + encodeURIComponent([c.role, c.note].filter(Boolean).join(' — ')); }
+// 🚗 heure de départ conseillée : adresse de départ (réglée une fois) → lieu de la convocation (OpenStreetMap / OSRM)
+const geo = async q => { const k = 'xiii.geo.' + q.toLowerCase(), c = J(k, null); if (c) return c; const r = await fetch('https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=fr,be,ch,lu,mc&accept-language=fr&q=' + encodeURIComponent(q)); const j = (await r.json() || [])[0]; if (!j) return null; const o = { lat: +j.lat, lon: +j.lon }; W(k, o); return o; };
+async function trajet(c) {
+    const home = J('xiii.app.home', null), dest = c.adr || c.loc; if (!home || !home.lat || !dest) return null;
+    const key = 'xiii.app.traj', T = J(key, {}), id = dest + '|' + home.lat + ',' + home.lon; if (T[id] && Date.now() - T[id].at < 7 * 864e5) return T[id];
+    try { const d = await geo(dest); if (!d) return null; const r = await (await fetch('https://router.project-osrm.org/route/v1/driving/' + home.lon + ',' + home.lat + ';' + d.lon + ',' + d.lat + '?overview=false')).json(); const rt = r && r.routes && r.routes[0]; if (!rt) return null; T[id] = { min: Math.round(rt.duration / 60), km: Math.round(rt.distance / 100) / 10, at: Date.now() }; W(key, T); return T[id]; } catch (e) { return null; }
+}
+function depart(c, tr) { const m = /^(\d{1,2})[:h](\d{2})/.exec(c.call || ''); if (!m || !tr) return ''; const marge = 10 + Math.round(tr.min * 0.25), t = +m[1] * 60 + +m[2] - tr.min - marge, h = ((t % 1440) + 1440) % 1440; return String(Math.floor(h / 60)).padStart(2, '0') + ':' + String(h % 60).padStart(2, '0'); }
+async function setHome() {
+    const cur = J('xiii.app.home', null), v = prompt('Votre adresse de départ habituelle (domicile, hôtel…) pour calculer l\'heure de départ :', cur ? cur.q : ''); if (v == null) return;
+    if (!v.trim()) { localStorage.removeItem('xiii.app.home'); render(); return; }
+    toast('📍 Recherche de l\'adresse…'); const g = await geo(v.trim()).catch(() => null); if (!g) { toast('⚠️ Adresse introuvable'); return; }
+    W('xiii.app.home', { q: v.trim(), lat: g.lat, lon: g.lon }); toast('✅ Adresse de départ enregistrée (sur ce téléphone uniquement)'); render();
+}
+let CONVQ = 0;
+async function convRefresh() {
+    if (!ME || !ME.d || Date.now() - CONVQ < 60000) return; CONVQ = Date.now();
+    const g = await api('get', { app: 'callsheeto', since: -1 }); if (!g.ok) return;
+    let P = null; try { P = JSON.parse((g.data || {})['callsheetoXIII.project'] || 'null'); } catch (e) { }
+    try { W('xiii.app.convs', convAll(P, ME.nom)); } catch (e) { }
+    const c = convFind(P, ME.nom), old = JSON.stringify(J('xiii.app.conv', null)); W('xiii.app.conv', c ? Object.assign(c, { nom: ME.nom }) : null);
+    if (JSON.stringify(J('xiii.app.conv', null)) !== old && TAB === 'home') render();
+}
+function convCard() {
+    const c = J('xiii.app.conv', null); if (!c || !ME || nkey(c.nom) !== nkey(ME.nom)) return '';
+    const t0 = new Date(); t0.setHours(0, 0, 0, 0); const dd = new Date(c.date + 'T00:00:00'), n = Math.round((dd - t0) / 86400000);
+    const quand = n === 0 ? "Aujourd'hui" : n === 1 ? 'Demain' : dd.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+    return '<div class="card" style="border-color:var(--acc,#f0b429)"><h2>⏰ Votre convocation</h2><p style="margin:0 0 4px">' + esc(quand) + (c.day ? ' · ' + esc(c.day) : '') + (c.role ? ' · ' + esc(c.role) : '') + '</p><p style="margin:0;font-size:34px;font-weight:800;letter-spacing:.02em">' + esc(c.call || '—') + '</p>' + (c.hmc ? '<p class="dim" style="margin:4px 0 0">HMC ' + esc(c.hmc) + '</p>' : '') + (c.pat ? '<p class="dim" style="margin:2px 0 0">PAT ' + esc(c.pat) + '</p>' : '') + (c.loc || c.adr ? '<p style="margin:8px 0 0">📍 ' + esc(c.loc || c.adr) + ((c.adr || c.loc) ? ' <a href="https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(c.adr || c.loc) + '" target="_blank" rel="noopener">🧭 Itinéraire</a>' : '') + '</p>' : '') + (c.note ? '<p class="dim" style="margin:6px 0 0">' + esc(c.note) + '</p>' : '') + '<p id="cv-dep" style="margin:8px 0 0">' + (J('xiii.app.home', null) ? '<span class="dim">🚗 Calcul du trajet…</span>' : '<button class="btn" onclick="setHome()">🚗 Heure de départ conseillée</button>') + '</p>' + '<details style="margin:10px 0 0"><summary class="btn" style="display:inline-block;cursor:pointer;list-style:none">📅 Ajouter à mon agenda ▾</summary><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><button class="btn" onclick="convAgenda()">Tous mes jours (fichier agenda, avec rappels)</button><a class="btn" target="_blank" rel="noopener" href="' + esc(convGoogle(c)) + '">Prochain jour dans Google Agenda</a></div></details></div>';
+}
+async function render() {
+    const m = $('m');
+    if (PEND) {
+        $('pj').textContent = PEND.p || 'Nouveau tournage';
+        m.innerHTML = '<div class="card hero"><div class="big">🎬</div><h1>' + esc(PEND.p || 'Tournage') + '</h1><p>' + (PEND.d ? 'Vous allez accéder aux outils partagés par la régie' + (PEND.a ? ' et au canal Régie ⇄ équipe' : '') : 'Canal Régie ⇄ équipe (annonces, planning, demandes)') + '.</p>' +
+            '<div style="text-align:left"><label>Votre nom (tel qu\'il apparaît sur la feuille de service)</label><input id="nm" autocomplete="name" value="' + esc((ME && ME.nom) || '') + '"><label>Votre équipe</label><select id="sc">' + SECT.map(s => '<option value="' + s[0] + '"' + (ME && ME.secteur === s[0] ? ' selected' : '') + '>' + s[1] + '</option>').join('') + '</select></div>' +
+            '<button class="pri full" id="jn">✅ Rejoindre le tournage</button>' + (ME ? '<p class="dim" style="margin-top:12px">Vous quitterez « ' + esc(ME.p || 'le tournage actuel') + ' ».</p>' : '') + '<button class="full" style="margin-top:8px" id="cx">Annuler</button></div>';
+        $('jn').onclick = () => { const n = $('nm').value.trim(); if (!n) { $('nm').focus(); toast('Indiquez votre nom'); return; } join(n, $('sc').value); };
+        $('cx').onclick = () => { PEND = null; history.replaceState(null, '', location.pathname); render(); };
+        return;
+    }
+    if (!ME) {
+        $('pj').textContent = 'Application de l\'équipe';
+        m.innerHTML = '<div class="card hero"><div class="big">📲</div><h1>Rejoindre un tournage</h1><p>Scannez le QR code affiché par la régie (Master ou référent) : vous retrouvez ici tous les outils partagés et recevez les notifications du tournage.</p>' +
+            '<button class="pri full" id="sc">📷 Scanner le QR code</button><p class="dim" style="margin:16px 0 6px">ou collez le lien reçu :</p><div class="row"><input id="lk" placeholder="https://…/equipe.html#j=…" style="margin:0"><button id="go" style="flex:0 0 auto">OK</button></div></div>' + installCard();
+        $('sc').onclick = scan; $('go').onclick = () => { const o = parse($('lk').value); if (o) { PEND = o; render(); } else toast('Lien non reconnu'); }; bindInstall(); return;
+    }
+    $('pj').textContent = ME.p || 'Tournage';
+    $('st').innerHTML = ME.d ? (ME.d.master ? '👑 Master' : ME.d.droit === 'edit' ? '✏️' : ME.d.droit === 'comment' ? '💬' : '👁️') : '';
+    tabBar(); if (TAB === 'pk' && ME.d) return vPk(); if (TAB === 'po' && ME.d) return vPo(); if (TAB === 'mt' && ME.d) return vMt(); if (TAB === 'bk') return vBk(); if (TAB === 'do' && ME.d) return vDo(); if (/^ph:/.test(TAB) && ME.d) return vPh(TAB.slice(3));
+    if (TAB !== 'home' && ME.d) { $('m').innerHTML = '<div class="card"><p class="dim" style="margin:0">Chargement…</p></div>'; return ({ ex: vEx, me: vMe, act: vAct })[TAB](); }
+    const ps = await pushState(); await notifs();
+    const list = TOOLS.filter(t => t[0] === 'annonces' ? !!ME.a : t[0] === 'jour' || t[0] === 'calendrier' ? true : !!ME.d && (t[0] === 'documents' || !OUT || OUT.indexOf(t[0]) > -1));
+    let h = '';
+    const nHide = (() => { try { return localStorage.getItem('xiii.app.nhide') === '1'; } catch (e) { return false; } })();
+    h += convCard(); setTimeout(convRefresh, 50);
+    setTimeout(async () => { const cv = J('xiii.app.conv', null), el = $('cv-dep'); if (!cv || !el || !J('xiii.app.home', null)) return; const tr = await trajet(cv); const e2 = $('cv-dep'); if (!e2) return; e2.innerHTML = tr ? '🚗 <b>Partir vers ' + depart(cv, tr) + '</b> <span class="dim">· ' + tr.min + ' min, ' + String(tr.km).replace('.', ',') + ' km en voiture sans trafic, marge comprise</span> <button class="btn" style="padding:2px 8px" onclick="setHome()" title="Changer l\'adresse de départ">✏️</button> <a target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(cv.adr || cv.loc) + '">🧭 Trafic en direct</a>' : '<span class="dim">🚗 Trajet non calculable (adresse du lieu ?)</span> <button class="btn" style="padding:2px 8px" onclick="setHome()">✏️</button>'; }, 300);
+    if (ps === 'off' && nHide) h += '<p style="text-align:center;margin:0 0 12px"><button id="np" style="background:none;border:0;color:var(--dim);font:13px system-ui;text-decoration:underline;cursor:pointer">🔕 Notifications désactivées · activer</button></p>';
+    if (ps !== 'on' && !nHide) h += '<div class="card warnb" style="position:relative"><button id="nx" title="Masquer" style="position:absolute;top:8px;right:8px;background:none;border:0;font-size:18px;color:inherit;cursor:pointer">✕</button><h2>🔔 Notifications</h2><p style="margin:0 0 10px">' + (ps === 'denied' ? 'Les notifications sont bloquées : autorisez-les pour XIII Équipe dans les réglages du téléphone.' : ps === 'unsupported' ? 'Ce navigateur ne reçoit pas les notifications. ' + (isIOS() ? 'Sur iPhone (iOS 16.4 ou plus) : Partager → « Sur l\'écran d\'accueil », puis ouvrez XIII Équipe depuis l\'écran d\'accueil.' : 'Utilisez Chrome, Edge, Firefox ou Safari récent.') : 'Recevez les annonces de la régie, les changements de planning et de feuille de service, même application fermée.') + '</p>' + (ps === 'off' ? '<button class="pri full" id="np">🔔 Activer les notifications</button>' : '') + (!ME.d ? '<p class="dim" style="margin:8px 0 0">Le Drive du projet n\'est pas relié par la régie : notifications seulement application ouverte.</p>' : '') + '</div>';
+    else h += '<div class="card"><h2>🔔 Notifications <span class="ok" style="letter-spacing:0;text-transform:none">● actives</span></h2>' + (NL.length ? NL.slice(0, 6).map(n => '<div class="nt' + (n.lvl === 'urg' ? ' urg' : '') + '"><span>' + (n.lvl === 'urg' ? '🚨' : '🔔') + '</span><div><b>' + esc(n.title || '') + '</b><small>' + esc(n.body || '') + ' · ' + ago(n.at) + '</small></div></div>').join('') : '<p class="dim" style="margin:0">Aucune notification pour l\'instant.</p>') + '</div>';
+    h += '<div class="card"><h2>🧰 Outils du tournage</h2><div class="grid">' + list.map(t => { const u = url(t[0]); return u ? '<a class="tool" href="' + esc(u) + '"><i>' + t[1] + '</i><b>' + t[2] + '</b><small class="dim" style="font-size:11px">' + t[3] + '</small></a>' : ''; }).join('') + '</div>' +
+        (ME.d ? '<p class="dim" style="margin:12px 0 0">☁️ Connecté au Drive du projet en tant que <b>' + esc(ME.nom) + '</b>' + (ME.d.droit === 'read' ? ' (lecture seule)' : ME.d.droit === 'comment' ? ' (commentaires)' : '') + ' : les outils se mettent à jour tout seuls.</p>' : '<p class="dim" style="margin:12px 0 0">Seul le canal Régie ⇄ équipe est partagé.</p>') + '</div>';
+    if (ME.d && (!OUT || OUT.indexOf('packingo') > -1)) h += '<div class="card" style="padding:0"><button class="full" id="pkt" style="text-align:left;padding:14px 16px;border:0;background:transparent;color:inherit;font:600 15px system-ui;display:flex;gap:12px;align-items:center"><span style="font-size:26px">🧳</span><span style="flex:1">Colisage<br><small class="dim" style="font-weight:400">Pointer les caisses (scan ou liste)</small></span><span style="color:#f0b378">›</span></button></div>';
+    Object.keys(PHT).forEach(a => { if (ME.d && (!OUT || OUT.indexOf(a) > -1)) h += '<div class="card" style="padding:0"><button class="full" data-ph="' + a + '" style="text-align:left;padding:14px 16px;border:0;background:transparent;color:inherit;font:600 15px system-ui;display:flex;gap:12px;align-items:center"><span style="font-size:26px">' + PHT[a][0] + '</span><span style="flex:1">' + PHT[a][1] + '<br><small class="dim" style="font-weight:400">' + PHT[a][2] + '</small></span><span style="color:#f0b378">›</span></button></div>'; });
+    h += '<div class="card" style="padding:0"><button class="full" id="bkt" style="text-align:left;padding:14px 16px;border:0;background:transparent;color:inherit;font:600 15px system-ui;display:flex;gap:12px;align-items:center"><span style="font-size:26px">💽</span><span style="flex:1">Taille des rushes<br><small class="dim" style="font-weight:400">BACKUPO · débit, Go par jour, cartes, disques</small></span><span style="color:#f0b378">›</span></button></div>';
+    if (ME.d && (!OUT || OUT.indexOf('ressourco') > -1)) h += '<div class="card" style="padding:0"><a href="ressourco-m.html" style="text-decoration:none;color:inherit;padding:14px 16px;display:flex;gap:12px;align-items:center;font:600 15px system-ui"><span style="font-size:26px">✍️</span><span style="flex:1">Documents et signatures<br><small class="dim" style="font-weight:400">RESSOURCO · remplir les documents, faire signer au doigt</small></span><span style="color:#f0b378">›</span></a></div>';
+    if (ME.d && (!OUT || OUT.indexOf('dossier') > -1)) h += '<div class="card" style="padding:0"><button class="full" id="dot" style="text-align:left;padding:14px 16px;border:0;background:transparent;color:inherit;font:600 15px system-ui;display:flex;gap:12px;align-items:center"><span style="font-size:26px">📚</span><span style="flex:1">Dossier<br><small class="dim" style="font-weight:400">Relire le PDF final, remplir les textes</small></span><span style="color:#f0b378">›</span></button></div>';
+    if (ME.d && (!OUT || OUT.indexOf('matos') > -1)) h += '<div class="card" style="padding:0"><button class="full" id="mtt" style="text-align:left;padding:14px 16px;border:0;background:transparent;color:inherit;font:600 15px system-ui;display:flex;gap:12px;align-items:center"><span style="font-size:26px">📦</span><span style="flex:1">Matos<br><small class="dim" style="font-weight:400">Scanner un appareil, état, sorties / retours, ajouter</small></span><span style="color:#f0b378">›</span></button></div>';
+    if (ME.d && (!OUT || OUT.indexOf('posto') > -1)) h += '<div class="card" style="padding:0"><button class="full" id="pot" style="text-align:left;padding:14px 16px;border:0;background:transparent;color:inherit;font:600 15px system-ui;display:flex;gap:12px;align-items:center"><span style="font-size:26px">🎞️</span><span style="flex:1">Retours client<br><small class="dim" style="font-weight:400">POSTO · versions, retours à cocher, validation</small></span><span style="color:#f0b378">›</span></button></div>';
+    h += '<div class="card" style="padding:0"><a href="viseur.html" style="text-decoration:none;color:inherit;padding:14px 16px;display:flex;gap:12px;align-items:center;font:600 15px system-ui"><span style="font-size:26px">🎯</span><span style="flex:1">Viseur de focales<br><small class="dim" style="font-weight:400">CADRO · le cadre de la caméra et de chaque focale, avec l\'appareil photo</small></span><span style="color:#f0b378">›</span></a></div>';
+    h += depCard();
+    h += installCard();
+    h += '<div class="card"><h2>👤 ' + esc(ME.nom) + (ME.secteur ? ' · ' + esc((SECT.find(s => s[0] === ME.secteur) || [])[1] || '') : '') + '</h2><div class="row"><button id="rs">📷 Autre QR code</button><button id="lv">🚪 Quitter</button></div></div>';
+    m.innerHTML = h;
+    const np = $('np'); if (np) np.onclick = enablePush; const nx = $('nx'); if (nx) nx.onclick = () => { try { localStorage.setItem('xiii.app.nhide', '1'); } catch (e) { } toast('Bandeau masqué'); render(); }; $('rs').onclick = scan; bindInstall(); bindDep(); const dot = $('dot'); if (dot) dot.onclick = () => { TAB = 'do'; DOS = ''; scrollTo(0, 0); render(); }; const bkt = $('bkt'); if (bkt) bkt.onclick = () => { TAB = 'bk'; scrollTo(0, 0); render(); }; const mtt = $('mtt'); if (mtt) mtt.onclick = () => { TAB = 'mt'; MTU = ''; scrollTo(0, 0); render(); }; const pot = $('pot'); if (pot) pot.onclick = () => { TAB = 'po'; POV = ''; scrollTo(0, 0); render(); }; const pkt = $('pkt'); if (pkt) pkt.onclick = () => { TAB = 'pk'; scrollTo(0, 0); render(); }; m.querySelectorAll('[data-ph]').forEach(b => b.onclick = () => { TAB = 'ph:' + b.dataset.ph; scrollTo(0, 0); render(); });
+    $('lv').onclick = async () => { if (!confirm('Quitter « ' + (ME.p || 'ce tournage') + ' » sur cet appareil ?')) return; try { const r = await swReg(), s = r && await r.pushManager.getSubscription(); if (s) { await api('push_unsub', { sub: s.toJSON() }); await s.unsubscribe(); } } catch (e) { } const d = J('xiii.drive', null); if (d && d.tok && d.app) localStorage.removeItem('xiii.drive'); localStorage.removeItem('xiii.app.me'); ME = null; render(); };
+}
+// ---------- 🧾 dépenses du jour : photo du ticket + montant → 💳 Réel de DEVISO (Master) ----------
+let DEPPH = null;
+function depCard() {
+    if (!ME || !ME.d) return ''; const L = J('xiii.app.deps', []).filter(x => Date.now() - x.at < 3 * 86400000);
+    return '<div class="card"><h2>🧾 Dépense du jour</h2><div style="display:grid;gap:8px"><label class="full" style="display:flex;gap:10px;align-items:center"><button id="dp-ph" type="button">📷 Photo du ticket</button><img id="dp-pv" style="max-height:56px;border-radius:6px;display:none"></label><small id="dp-ocr" class="dim"></small><input id="dp-file" type="file" accept="image/*" capture="environment" style="display:none">' +
+        '<input id="dp-m" type="text" inputmode="decimal" placeholder="Montant TTC (€)" style="font-size:18px"><select id="dp-c"><option value="fees">🍽️ Frais (repas, carburant, péages…)</option><option value="eq">🎥 Matériel</option><option value="other">📦 Autre</option></select><input id="dp-l" placeholder="Libellé (ex. repas équipe, gasoil camion)"><button class="pri full" id="dp-go">Envoyer à la production</button></div>' +
+        ((J('xiii.app.depq', []).length ? '<p style="margin:10px 0 0;color:#ffb74d">📴 ' + J('xiii.app.depq', []).length + ' ticket(s) en attente de réseau</p>' : '') + (L.length ? '<p class="dim" style="margin:10px 0 0">Envoyées : ' + L.map(x => esc(x.label || 'dépense') + ' · ' + x.ttc.toFixed(2).replace('.', ',') + ' €').join(' — ') + '</p>' : '')) + '</div>';
+}
+function depShrink(file, mx) { return new Promise((res, rej) => { const u = URL.createObjectURL(file), im = new Image(); im.onload = () => { const k = Math.min(1, (mx || 1200) / Math.max(im.width, im.height)), c = document.createElement('canvas'); c.width = Math.round(im.width * k); c.height = Math.round(im.height * k); c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); URL.revokeObjectURL(u); res(c.toDataURL('image/jpeg', .72)); }; im.onerror = rej; im.src = u; }); }
+// 🔍 lecture automatique du ticket (montant, commerçant) — moteur de lecture chargé au premier ticket
+let TESS = null; const tess = () => TESS || (TESS = new Promise((res, rej) => { const s = document.createElement('script'); s.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js'; s.onload = () => res(window.Tesseract); s.onerror = rej; document.head.appendChild(s); }));
+async function ocr(file) {
+    const st = $('dp-ocr'); if (st) st.textContent = '🔍 Lecture du ticket…';
+    try { const T = await tess(); const r = await T.recognize(file, 'fra'); const txt = (r && r.data && r.data.text) || '', L = txt.split('\n').map(x => x.trim()).filter(Boolean);
+        const num = s => { const m = String(s).match(/(\d{1,5}(?:[ .]\d{3})*[.,]\d{2})/g); return m ? m.map(x => parseFloat(x.replace(/[ .](?=\d{3})/g, '').replace(',', '.'))) : []; };
+        let amt = 0; for (const l of L) if (/total|ttc|net\s*[aà]\s*payer|montant|[aà]\s*payer|carte|cb\b/i.test(l) && !/ht\b|tva/i.test(l)) { const v = num(l); if (v.length) amt = Math.max(amt, ...v); }
+        if (!amt) { const all = L.flatMap(num).filter(v => v < 100000); if (all.length) amt = Math.max(...all); }
+        const shop = (L.find(l => /[A-Za-zÀ-ÿ]{3}/.test(l) && !/ticket|facture|bienvenue|merci|tel|siret|tva/i.test(l)) || '').replace(/[^\wÀ-ÿ '&.-]/g, '').trim().slice(0, 40);
+        if (amt && !$('dp-m').value) $('dp-m').value = String(amt.toFixed(2)).replace('.', ',');
+        if (shop && !$('dp-l').value) $('dp-l').value = shop;
+        if (st) st.textContent = amt ? '✓ Montant lu : ' + amt.toFixed(2).replace('.', ',') + ' € — vérifiez avant d\'envoyer' : 'Montant non reconnu : tapez-le';
+    } catch (e) { if (st) st.textContent = 'Lecture automatique indisponible : tapez le montant'; }
+}
+// 📴 tickets en attente (pas de réseau) : envoyés dès que possible
+async function depFlush() { const Q = J('xiii.app.depq', []); if (!Q.length || !navigator.onLine) return; const left = []; for (const x of Q) { const r = await api('dep_add', x); if (!r.ok) left.push(x); else { const L = J('xiii.app.deps', []); L.unshift({ at: Date.now(), ttc: x.ttc, label: x.label }); localStorage.setItem('xiii.app.deps', JSON.stringify(L.slice(0, 20))); } } localStorage.setItem('xiii.app.depq', JSON.stringify(left)); if (left.length < Q.length) { toast('🧾 ' + (Q.length - left.length) + ' ticket(s) en attente envoyé(s)'); if (TAB === 'home') render(); } }
+addEventListener('online', depFlush); setInterval(depFlush, 60000); setTimeout(depFlush, 4000);
+function bindDep() {
+    const b = $('dp-ph'); if (!b) return; const f = $('dp-file');
+    b.onclick = () => f.click(); f.onchange = async () => { if (!f.files[0]) return; try { DEPPH = await depShrink(f.files[0]); $('dp-pv').src = DEPPH; $('dp-pv').style.display = ''; b.textContent = '📷 Changer'; ocr(f.files[0]); } catch (e) { alert('Photo illisible'); } };
+    $('dp-go').onclick = async () => {
+        const m = parseFloat(String($('dp-m').value).replace(',', '.')); if (!(m > 0)) { $('dp-m').focus(); return; }
+        const g = $('dp-go'); g.disabled = true; g.textContent = 'Envoi…';
+        const r = await api('dep_add', { ttc: m, cat: $('dp-c').value, label: $('dp-l').value.trim(), b64: DEPPH ? DEPPH.split(',')[1] : '', mime: 'image/jpeg' });
+        g.disabled = false; g.textContent = 'Envoyer à la production';
+        if (!r.ok && r.err === 'net') { const Q = J('xiii.app.depq', []); Q.push({ ttc: m, cat: $('dp-c').value, label: $('dp-l').value.trim(), b64: DEPPH ? DEPPH.split(',')[1] : '', at: Date.now() }); try { localStorage.setItem('xiii.app.depq', JSON.stringify(Q)); } catch (e) { alert('Pas de réseau et mémoire du téléphone pleine : réessayez plus tard.'); return; } toast('📴 Pas de réseau : le ticket partira tout seul dès le retour du réseau', 4500); DEPPH = null; render(); return; }
+        if (!r.ok) { alert('Envoi impossible (' + r.err + ')'); return; }
+        const L = J('xiii.app.deps', []); L.unshift({ at: Date.now(), ttc: m, label: $('dp-l').value.trim() }); localStorage.setItem('xiii.app.deps', JSON.stringify(L.slice(0, 20))); DEPPH = null; render();
+    };
+}
+function installCard() { if (standalone()) return ''; return '<div class="card"><h2>📲 Installer</h2>' +  (BIP ? '<button class="full" id="in">⬇️ Installer XIII Équipe sur ce téléphone</button>' : isIOS() ? '<p class="dim" style="margin:0">Safari : touchez <b>Partager</b> puis <b>« Sur l\'écran d\'accueil »</b>. L\'application s\'ouvre alors en plein écran et peut recevoir les notifications.</p>' : '<p class="dim" style="margin:0">Menu du navigateur → <b>« Installer l\'application »</b> ou « Ajouter à l\'écran d\'accueil ».</p>') + '</div>'; }
+function bindInstall() { const b = $('in'); if (b) b.onclick = async () => { BIP.prompt(); await BIP.userChoice.catch(() => { }); BIP = null; render(); }; }
+// ---------- démarrage ----------
+(function () { const o = parse(location.href); if (o) PEND = o; })();
+render(); if (ME) perms(); swReg();
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && !PEND && ME) render(); });
+</script>
+<script>
+// =====================================================================
+//  SUITE XIII — visite guidée commune (XTOUR)
+//  Au premier lancement de chaque outil : mise en lumière de chaque zone / groupe de boutons, le reste de l'écran est assombri.
+//  Boutons « Passer le tuto » / « Tuto suivant », case « Ne plus afficher ». Relance : ⚙️ Paramètres → Aide → Visite guidée.
+// =====================================================================
+const XTOUR = (() => {
+    const APP = (location.pathname.split('/').pop() || 'index').replace(/\.html?$/i, '') || 'index';
+    let KEY = 'xiii.tour2.' + APP + '.hide'; // v2 : l'ancienne clé avait été posée d'office pour tout le monde
+    const T = {
+        // textes propres à chaque outil : intro + description des grandes zones
+        syno: { n: 'SYNO XIII', i: 'Dessinez le synoptique complet de votre régie : équipements, entrées / sorties, câbles et formats de signal.', lib: 'La bibliothèque : vos modèles d\'équipements et la <b>Base de données</b> (≈450 appareils avec leurs IN / OUT nommés). « + Insérer » pose un équipement sur le plan.', ws: 'Le plan de travail : glissez les équipements, tirez un câble d\'une sortie (à droite) vers une entrée (à gauche), molette pour zoomer, clic droit pour les options.' },
+        plano: { n: 'PLANO XIII', i: 'Dessinez le plan d\'implantation du plateau : caméras, lumières, décor, mobilier, avec les angles et les distances.', lib: 'La bibliothèque d\'éléments par catégorie (caméras, lumière, mobilier, décor…). Glissez-déposez sur le plan.', ws: 'Le plan : déplacez, faites pivoter, mesurez. Molette pour zoomer, espace + glisser pour se déplacer.' },
+        conduco: { n: 'CONDUCO XIII', i: 'Construisez le conducteur de vos émissions live et captations, séquence par séquence, avec le minutage.', lib: 'Les éléments types à ajouter au conducteur (séquences, plateaux, sujets, pubs…).', ws: 'Le conducteur : chaque ligne est une séquence, avec durée, cumul et horaires. Le mode On Air suit le direct.' },
+        callsheeto: { n: 'CALL SHEETO XIII', i: 'Préparez la feuille de service : équipe, horaires, lieux, accès, contacts d\'urgence, météo.', lib: 'L\'annuaire et les éléments à ajouter à la feuille de service.', ws: 'La feuille de service, mise en page et prête à partager ou à imprimer.' },
+        packingo: { n: 'PACKINGO XIII', i: 'Organisez le colisage et le chargement : flight cases, matériel, poids, volumes et check-in / check-out.', lib: 'Le matériel et les types de flight cases à ranger.', ws: 'Les colis et leur contenu, avec poids et volumes calculés.' },
+        backupo: { n: 'BACKUPO XIII', i: 'Estimez l\'espace disque des rushes et tracez chaque déchargement de carte (checksums, caméras, dossiers).', lib: 'Les caméras, codecs et sources à ajouter.', ws: 'Le calcul d\'espace et le journal des déchargements.' },
+        deviso: { n: 'DEVISO XIII', i: 'Construisez un devis estimatif : matériel loué, équipe technique, frais, avec les grilles de tarifs.', lib: 'La base de prix : matériel des loueurs et postes de l\'équipe, à ajouter au devis.', ws: 'Le devis : lignes, quantités, jours, remises et totaux.' },
+        ressourco: { n: 'RESSOURCO XIII', i: 'Générez en lot les documents du dossier (contrats, autorisations, attestations…) à partir de modèles.', lib: 'Les modèles de documents disponibles.', ws: 'Le document en cours, ses champs et l\'aperçu.' },
+        cadro: { n: 'CADRO XIII', i: 'Anticipez le cadre : focale, champ, profondeur de champ, monture et adaptateur, risque de moiré sur écran.', lib: 'Les capteurs de caméra (et les vôtres).', ws: 'Réglages à gauche, schémas et calculs expliqués à droite.' },
+        repero: { n: 'REPERO XIII', i: 'Repérez un lieu sur la carte : soleil, bruit, secours, commerces, zones de drones, fréquences, droit à l\'image.', lib: 'Les couches d\'informations et vos repères.', ws: 'La carte : cliquez pour placer un repère, les analyses s\'affichent autour.' },
+        dossier: { n: 'DOSSIER XIII', i: 'Rassemblez tout le projet en un dossier de production / dossier technique, avec les documents envoyés par les autres outils.', lib: 'Les sections et pièces du dossier.', ws: 'Le dossier : page de garde, sections, textes (avec brouillon IA) et pièces jointes.' },
+        moodo: { n: 'MOODO XIII', i: 'Structurez toutes les idées en planches : personnages, lieux, direction artistique, lumière, costumes.', lib: 'Les types de cartes et les sources d\'inspiration.', ws: 'La planche : glissez-déposez images, palettes et fiches.' },
+        storyboardo: { n: 'STORYBOARDO XIII', i: 'Dessinez chaque plan avec des personnages articulés, du mobilier et des flèches de caméra, puis l\'animatique.', lib: 'Personnages, poses, mobilier, décors et éléments à poser dans le plan.', ws: 'Le plan en cours, la planche et l\'animatique.' },
+        scripto: { n: 'SCRIPTO XIII', i: 'Écrivez et suivez le script de tournage : séquences, dialogues, continuité.', lib: 'Les éléments du script (séquences, personnages, lieux).', ws: 'Le script, mis en forme et minuté.' },
+        decoup: { n: 'DECOUP TECHNICO XIII', i: 'Le découpage technique plan par plan, minuté au timecode : valeur, angle, mouvement, focale, transition.', lib: 'Les valeurs de plan, mouvements et transitions.', ws: 'Le découpage, séquence par séquence.' },
+        graphico: { n: 'GRAPHICO XIII', i: 'Créez vos habillages TV et overlays live, animez-les, puis pilotez-les depuis le pupitre vers OBS, vMix, TriCaster ou en NDI.', lib: 'Les modèles (≈110), les éléments de base et les graphiques de votre projet.', ws: 'Selon la vue : éditeur (scène, timeline, propriétés), pupitre (IN / OUT, conducteur) ou adresses des sorties.' },
+        index: { n: 'SUITE XIII', i: 'La suite d\'outils de production audiovisuelle : de la conception au dossier final, avec toute l\'équipe.', steps: [
+            [null, '👋 Bienvenue dans SUITE XIII', '<p>Vingt-quatre outils pour préparer, organiser, tourner et livrer un projet audiovisuel, <b>dans le navigateur</b>, sans installation.</p><p>Ce grand tuto fait le tour de l\'accueil : le projet, les outils, l\'équipe, le Drive, l\'application mobile. Comptez 2 minutes. Chaque outil a ensuite sa propre visite à sa première ouverture.</p>'],
+            [() => btn('Projet XIII'), '🎬 Le projet', '<p>La <b>fiche projet</b> est partagée par tous les outils : titre, dates, lieux, production, logo.</p><ul><li><b>＋ Nouveau projet</b> : un assistant pas à pas</li><li><b>📦 Fichier</b> : enregistrer / ouvrir tout le projet en un seul fichier <b>.xiii</b>, ou <b>📥 Importer d\'un logiciel</b> (Excel, Movie Magic, PDF…)</li><li>Personnalisation : thème, outils masqués, photo de fond</li></ul>'],
+            ['#xd-dash', '📊 Le tableau de bord', '<p>L\'essentiel du projet en un coup d\'œil : <b>projet en cours</b>, <b>prochaines échéances</b> (toutes les dates des outils), <b>derniers retours de l\'équipe</b> et <b>message du Master</b> affiché à tous.</p>'],
+            [() => document.querySelector('section.phase'), '🧰 Les outils', '<p>Rangés par étape : <b>concevoir</b>, <b>préparer</b>, <b>tourner</b>, <b>livrer</b>. Cliquez une carte pour ouvrir l\'outil.</p><p>Les outils <b>se parlent</b> : dans chaque outil, <b>📤 Vers Suite XIII</b> envoie son travail vers les autres (devis, feuille de service, colisage, dossier…).</p>'],
+            [() => btn('Rechercher'), '🔎 Recherche', '<p><b>Ctrl K</b> (ou ⌘ K) depuis n\'importe où : un outil, un élément, une personne, une action.</p>'],
+            [() => btn('Drive'), '☁️ Le Drive du projet', '<p>Relie le projet au <b>Google Drive du Master</b> : tout le monde travaille sur les mêmes données, sans compte, avec la synchronisation, la présence en direct (pastilles), le verrou des éléments modifiés, le journal et les rapports de fin de journée.</p>'],
+            [() => btn('Équipe'), '👥 L\'équipe', '<p>Toute la gestion de l\'équipe :</p><ul><li><b>Membres</b> : noms, secteurs, droits, outils (et vues précises), fin d\'accès</li><li><b>En attente</b> : les demandes à valider</li><li><b>Secteurs</b> : à créer et renommer</li><li><b>Liens & QR</b> : connecter une personne, un secteur, votre téléphone, la <b>vitrine client</b>, les <b>écrans kiosque</b></li><li><b>Échanges</b> : délégations et envois</li></ul>'],
+            ['#xp-btn', '📲 Application et mobile', '<p>Installez la suite comme une application (hors ligne possible), et l\'<b>application mobile XIII</b> sur le téléphone de chacun : échanges, mentions, colisage, photos de repérage, dépenses, signatures…</p>'],
+            ['#xs-gear', '⚙️ Paramètres et aide', '<p>Thème, sauvegarde automatique, versions, notifications… et la rubrique <b>Aide</b> : relancer ce tuto, et <b>chercher un tuto par mot-clé</b> (« devis », « QR », « signature »…).</p>'],
+            [null, '✅ À vous de jouer', '<p>Commencez par <b>🎬 Projet XIII → ＋ Nouveau projet</b>, puis ouvrez le premier outil utile. Partout : <b>survolez un bouton</b> pour son info-bulle, <b>🔗 Partager</b> pour envoyer, <b>💬 Avis</b> et <b>@Prénom</b> pour échanger.</p><p>Ce tuto se relance dans <b>⚙️ Paramètres → Aide</b>.</p>']] },
+        projet: { n: 'Projet XIII', steps: [ // 🎓 tuto de la fiche projet, à la première ouverture
+            [null, '🎬 La fiche projet', '<p>Une seule fiche pour tout le projet : <b>tous les outils la reprennent</b> (feuille de service, devis, dossier, repérages…). Remplissez ce que vous savez, le reste peut attendre.</p>'],
+            ['#xpj-g', '🧭 Informations globales', '<p>Type de projet, titre, dates de tournage, production, réalisation, contact : la base de tous les documents.</p>'],
+            ['#xpj-l', '📍 Lieux', '<p>Ajoutés à chaque journée de CALL SHEETO et aux lieux à repérer dans REPERO.</p>'],
+            ['#xpj-t', '🎥 Technique', '<p>Caméras, optiques, cadence, format : repris par CADRO, STORYBOARDO, PLANO et BACKUPO.</p>'],
+            ['#xpj-h', '👥 Équipe', '<p>Ajoutée à la feuille de service et à l\'annuaire XIII.</p>'],
+            ['#xpj-p', '🖼️ Personnalisation', '<p>Thème, outils masqués, photo de fond : pour toute l\'équipe, par le ☁️ Drive.</p>'],
+            ['#xpj-f', '📦 Fichier du projet', '<p>Tout le projet en <b>un seul fichier .xiii</b> (à envoyer, archiver, rouvrir), et <b>📥 Importer d\'un logiciel</b>.</p>']] },
+        team: { n: 'ÉQUIPE XIII', when: () => !!document.querySelector('nav [data-t=wait]') && !/Chargement/.test((document.getElementById('m') || {}).textContent || ''), steps: [
+            [null, '👥 La page Équipe', '<p>Toute l\'équipe du projet, ses accès et ses échanges, gérés par le <b>Master</b> (et les Sous-Masters).</p>'],
+            ['nav [data-t=mem]', '👥 Membres', '<p>Chaque personne : <b>renommez</b> d\'un clic sur le nom, choisissez ses <b>secteurs</b> (plusieurs possibles), son <b>droit</b>, ses <b>outils</b> (avec l\'<b>autorisation précise</b> : seulement certains onglets), une <b>fin d\'accès</b>, son <b>QR personnel</b> 📲, ou retirez l\'accès 🚫. Tout s\'applique chez elle sans nouveau lien.</p>'],
+            ['nav [data-t=wait]', '⏳ En attente', '<p>Les personnes entrées par le <b>lien général</b> attendent ici : vérifiez leur nom, choisissez secteurs et droit, puis <b>Valider</b>.</p>'],
+            ['nav [data-t=sec]', '🏷️ Secteurs', '<p>Créez, renommez, ordonnez les secteurs (Image, Son, Régie, Client…).</p>'],
+            ['nav [data-t=link]', '📲 Liens & QR', '<p>Nouveau membre (nom imposé), <b>lien général</b> (chacun donne son nom), <b>QR de secteur</b>, <b>vitrine client</b>, <b>écrans kiosque</b> et <b>votre téléphone</b>.</p>'],
+            ['nav [data-t=ex]', '💬 Échanges', '<p>Délégations envoyées et reçues, travaux à importer, envois vers DOSSIER.</p>']] },
+        drive: { n: 'DRIVE XIII', steps: [
+            [null, '☁️ Le Drive du projet', '<p>Les données du projet vivent dans le <b>Google Drive du Master</b> : chacun travaille sur la même version, sans compte. Le Master installe une fois le script Google, puis invite l\'équipe.</p>'],
+            ['#rap', '📨 Rapport de fin de journée', '<p>Chaque soir de tournage, un e-mail à la production : horaires, arrivées, plans, rushes, dépenses.</p>'],
+            ['#jr', '📜 Journal du projet', '<p>Qui a modifié quel outil, et quand. Chaque version peut être consultée.</p>']] },
+        equipe: { n: 'XIII Équipe', mobile: true, when: () => !!document.getElementById('tb'), steps: [
+            [null, '📱 L\'application de l\'équipe', '<p>Tout le tournage dans votre poche : outils en consultation, outils de terrain et échanges avec l\'équipe.</p>'],
+            ['#tb [data-t=ex]', '💬 Échanges', '<p>Les avis laissés dans les outils (répondez directement, <b>@Prénom</b> pour mentionner) et vos messages au Master.</p>'],
+            ['#tb [data-t=me]', '📣 Mentions', '<p>Quand quelqu\'un vous mentionne, c\'est ici (le compteur rouge vous prévient).</p>'],
+            ['#tb [data-t=act]', '🔄 Activité', '<p>Qui a mis à jour quel outil, et quand.</p>'],
+            [() => document.querySelector('.grid'), '🧰 Outils', '<p>Les outils du tournage, et dessous les <b>outils de terrain</b> : colisage, photos, casting, viseur, matos, retours client, dossier, documents et signatures, dépenses.</p>']] },
+        ludo: { n: 'LUDO XIII', i: 'La pause : quelques jeux pour souffler entre deux prises.', lib: 'Les jeux disponibles.', ws: 'L\'aire de jeu.' }
+    };
+    let cfg = T[APP] || { n: (document.title || APP).split(' - ')[0], i: 'Bienvenue dans cet outil de la SUITE XIII.', lib: 'La bibliothèque d\'éléments.', ws: 'La zone de travail.' };
+    const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const vis = el => { if (!el || !el.isConnected) return false; const s = getComputedStyle(el); if (s.display === 'none' || s.visibility === 'hidden' || +s.opacity === 0) return false; const r = el.getBoundingClientRect(); return r.width > 4 && r.height > 4; };
+    const hidden = () => { try { return localStorage.getItem(KEY) === '1'; } catch (e) { return false; } };
+
+    function describeButtons(box) {
+        const seen = new Set(), items = [];
+        box.querySelectorAll('button, select, input[type=text], input[type=search]').forEach(b => {
+            if (!vis(b) || b.closest('#xt-root')) return;
+            const ic = b.querySelector('.btn-icon'), lb = b.querySelector('.btn-label');
+            let label = b.tagName === 'SELECT' ? '▾ Liste' : b.tagName === 'INPUT' ? '✎ ' + (b.placeholder || 'Champ') : ((ic ? ic.textContent.trim() : '') + ' ' + (lb ? lb.textContent.trim() : (ic ? '' : b.textContent.trim()))).trim();
+            const tip = (b.getAttribute('title') || b.getAttribute('aria-label') || '').trim();
+            if (!label && !tip) return; const k = label + '|' + tip; if (seen.has(k)) return; seen.add(k);
+            items.push('<li><b>' + esc(label.slice(0, 40) || '•') + '</b>' + (tip && tip !== label ? ' — ' + esc(tip) : '') + '</li>');
+        });
+        return items;
+    }
+    const btn = t => Array.from(document.querySelectorAll('#top-bar button, #top-bar a')).find(b => vis(b) && (b.textContent || '').indexOf(t) > -1) || null;
+    function buildSteps() {
+        const S = [];
+        if (cfg.steps) { cfg.steps.forEach(([sel, t, h]) => { const el = sel == null ? null : typeof sel === 'function' ? sel() : document.querySelector(sel); if (sel == null || vis(el)) S.push({ el, t, h }); }); return S; }
+        S.push({ el: null, t: '👋 Bienvenue dans ' + cfg.n, h: '<p>' + cfg.i + '</p><p>Cette visite présente chaque zone et chaque groupe de boutons. <b>Tuto suivant</b> pour avancer, <b>Passer le tuto</b> pour commencer directement.</p>' });
+        const add = (sel, t, h) => { const el = typeof sel === 'string' ? document.querySelector(sel) : sel; if (vis(el)) S.push({ el, t, h }); };
+        add('#tabs-container', '🗂️ Onglets / projet', '<p>Vos projets ouverts. Cliquez pour changer de projet, double-cliquez sur le nom pour le renommer ou modifier ses réglages.</p>');
+        // barre du haut et barre d'outils : un arrêt par groupe de boutons
+        [['#top-bar', '⬆️ Barre du haut'], ['#toolbar', '🧰 Barre d\'outils']].forEach(([sel, name]) => {
+            const bar = document.querySelector(sel); if (!vis(bar)) return;
+            let groups = Array.from(bar.querySelectorAll('.btn-group')).filter(vis);
+            const loose = Array.from(bar.querySelectorAll('button, select')).filter(b => vis(b) && !b.closest('.btn-group') && !b.closest('#tabs-container'));
+            groups.forEach((g, i) => { const it = describeButtons(g); if (it.length) S.push({ el: g, t: name + (groups.length > 1 ? ' · ' + (i + 1) + '/' + groups.length : ''), h: '<ul>' + it.slice(0, 10).join('') + '</ul>' }); });
+            if (loose.length) { const box = document.createElement('div'); loose.forEach(b => box.appendChild(b.cloneNode(true))); document.body.appendChild(box); box.style.cssText = 'position:fixed;left:-9999px;top:0'; const it = []; loose.forEach(b => { const tip = (b.getAttribute('title') || '').trim(), lab = b.textContent.trim().slice(0, 40); if (tip || lab) it.push('<li><b>' + esc(lab || '•') + '</b>' + (tip && tip !== lab ? ' — ' + esc(tip) : '') + '</li>'); }); box.remove(); if (it.length && !groups.length) S.push({ el: bar, t: name, h: '<ul>' + it.slice(0, 12).join('') + '</ul>' }); else if (it.length) loose.slice(0, 6).forEach(b => { const tip = b.getAttribute('title'); if (tip && vis(b)) S.push({ el: b, t: name, h: '<p><b>' + esc(b.textContent.trim().slice(0, 40)) + '</b> — ' + esc(tip) + '</p>' }); }); }
+        });
+        add('#library-panel', '📚 Panneau de gauche', '<p>' + cfg.lib + '</p><p>Le bouton ◀ de la barre d\'outils le masque pour agrandir la zone de travail.</p>');
+        add('#lib-categories-bar', '🏷️ Catégories', '<p>Les onglets colorés filtrent la bibliothèque par catégorie.</p>');
+        add('#lib-search', '🔎 Recherche', '<p>Tapez quelques lettres pour retrouver un élément dans la bibliothèque.</p>');
+        add('#ws-stats', '📊 Compteurs', '<p>Les chiffres clés du projet, mis à jour en direct.</p>');
+        add(document.querySelector('#content') || document.querySelector('#workspace-container'), '🖥️ Zone de travail', '<p>' + cfg.ws + '</p>');
+        add('#xs-gear', '⚙️ Paramètres', '<p>Thème clair / sombre, valeurs par défaut de l\'outil, guide complet' + (window.XAI ? ', <b>connexion IA</b>' : '') + ' et <b>Visite guidée</b> pour revoir ce tutoriel à tout moment.</p>');
+        S.push({ el: null, t: '✅ C\'est parti !', h: '<p>Vous connaissez l\'essentiel. Survolez un bouton pour revoir son rôle (info-bulle) et retrouvez cette visite dans <b>⚙️ Paramètres → Aide → Visite guidée</b>.</p><p>Cochez <b>Ne plus afficher</b> pour qu\'elle ne revienne pas à la prochaine ouverture.</p>' });
+        return S;
+    }
+
+    let root = null, steps = [], idx = 0, onKey = null, onRe = null;
+    function css() {
+        if (document.getElementById('xtour-css')) return; const st = document.createElement('style'); st.id = 'xtour-css';
+        st.textContent = '#xt-root{position:fixed;inset:0;z-index:2147483000;font:13px "Segoe UI",Tahoma,Verdana,sans-serif;color:#fff}' +
+            '#xt-block{position:fixed;inset:0;background:transparent}' +
+            '#xt-hole{position:fixed;border-radius:10px;box-shadow:0 0 0 200vmax rgba(5,5,10,.74);outline:2px solid rgba(240,179,120,.95);outline-offset:2px;transition:all .25s ease;pointer-events:none}' +
+            '#xt-hole.center{left:50%!important;top:42%!important;width:0!important;height:0!important;outline:none}' +
+            '#xt-pop{position:fixed;max-width:380px;min-width:260px;background:#26262b;border:1px solid rgba(240,179,120,.7);border-radius:12px;padding:14px 16px;box-shadow:0 10px 40px rgba(0,0,0,.6);transition:left .25s,top .25s}' +
+            '#xt-pop h4{margin:0 0 8px;font-size:15px;color:rgb(240,179,120)}#xt-pop p{margin:6px 0;line-height:1.5;color:#ddd}#xt-pop ul{margin:4px 0;padding-left:18px;line-height:1.5;color:#ddd;max-height:46vh;overflow:auto}#xt-pop li{margin:2px 0}#xt-pop b{color:#fff}' +
+            '#xt-bar{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);display:flex;gap:10px;align-items:center;background:#1c1c20;border:1px solid #444;border-radius:14px;padding:10px 14px;box-shadow:0 8px 30px rgba(0,0,0,.6);white-space:nowrap}' +
+            '#xt-bar button{font:600 13px "Segoe UI",sans-serif;color:#fff;border-radius:9px;padding:9px 16px;cursor:pointer;border:1px solid #555;background:#333}#xt-bar button:hover{border-color:rgb(240,179,120)}' +
+            '#xt-bar .nx{background:rgba(240,179,120,.35);border-color:rgb(240,179,120)}#xt-bar .pv{padding:9px 11px;display:inline-block;height:auto;width:auto;grid-template-columns:none}#xt-bar button,#xt-bar label,#xt-bar .ct{flex:0 0 auto;width:auto;height:auto;margin:0}#xt-bar label{display:flex;gap:6px;align-items:center;color:#ccc;cursor:pointer;font-size:12.5px}#xt-bar .ct{color:#999;font-size:12px;min-width:44px;text-align:center}' +
+            '@media (max-width:700px){#xt-bar{flex-wrap:wrap;justify-content:center;width:calc(100% - 32px);white-space:normal}#xt-pop{max-width:calc(100vw - 32px)}}';
+        document.head.appendChild(st);
+    }
+    function place() {
+        if (!root) return; const s = steps[idx], hole = root.querySelector('#xt-hole'), pop = root.querySelector('#xt-pop'), bar = root.querySelector('#xt-bar');
+        const W = innerWidth, H = innerHeight, barH = bar.getBoundingClientRect().height + 30;
+        if (!s.el || !vis(s.el)) { hole.className = 'center'; hole.style.cssText = ''; pop.style.left = Math.max(16, (W - pop.offsetWidth) / 2) + 'px'; pop.style.top = Math.max(16, (H - barH - pop.offsetHeight) / 2) + 'px'; return; }
+        hole.className = ''; const r = s.el.getBoundingClientRect(), p = 6;
+        const x = Math.max(4, r.left - p), y = Math.max(4, r.top - p), w = Math.min(W - 8, r.right + p) - x, h = Math.min(H - 8, r.bottom + p) - y;
+        hole.style.cssText = 'left:' + x + 'px;top:' + y + 'px;width:' + w + 'px;height:' + h + 'px';
+        const pw = pop.offsetWidth, ph = pop.offsetHeight, m = 14; let L, Tp;
+        if (x + w + m + pw < W - 8) { L = x + w + m; Tp = y; }                // à droite
+        else if (x - m - pw > 8) { L = x - m - pw; Tp = y; }                  // à gauche
+        else if (y + h + m + ph < H - barH) { L = x; Tp = y + h + m; }        // dessous
+        else if (y - m - ph > 8) { L = x; Tp = y - m - ph; }                  // dessus
+        else { L = (W - pw) / 2; Tp = Math.max(8, H - barH - ph - 10); }     // à défaut : au-dessus de la barre
+        pop.style.left = Math.max(8, Math.min(W - pw - 8, L)) + 'px'; pop.style.top = Math.max(8, Math.min(H - barH - ph, Tp)) + 'px';
+    }
+    function show(i) {
+        idx = Math.max(0, Math.min(steps.length - 1, i)); const s = steps[idx];
+        if (s.el && s.el.scrollIntoView) { try { s.el.scrollIntoView({ block: 'nearest', inline: 'nearest' }); } catch (e) { } }
+        root.querySelector('#xt-pop').innerHTML = '<h4>' + s.t + '</h4>' + s.h;
+        root.querySelector('.ct').textContent = (idx + 1) + ' / ' + steps.length;
+        root.querySelector('.pv').disabled = idx === 0; root.querySelector('.nx').textContent = idx === steps.length - 1 ? 'Terminer ✓' : 'Tuto suivant ▶';
+        place(); requestAnimationFrame(place);
+    }
+    function end() {
+        if (!root) return; const ck = root.querySelector('#xt-hide'); try { if (ck && ck.checked) localStorage.setItem(KEY, '1'); else localStorage.removeItem(KEY); } catch (e) { }
+        root.remove(); root = null; document.removeEventListener('keydown', onKey, true); removeEventListener('resize', onRe); removeEventListener('scroll', onRe, true);
+    }
+    function start(force) {
+        if (root) return; css(); steps = buildSteps(); if (!steps.length) return;
+        root = document.createElement('div'); root.id = 'xt-root';
+        root.innerHTML = '<div id="xt-block"></div><div id="xt-hole"></div><div id="xt-pop" role="dialog" aria-live="polite"></div><div id="xt-bar"><label><input type="checkbox" id="xt-hide"' + (hidden() ? ' checked' : '') + '> Ne plus afficher</label><span class="ct"></span><button class="pv" title="Étape précédente">◀</button><button class="sk">Passer le tuto</button><button class="nx">Tuto suivant ▶</button></div>';
+        document.body.appendChild(root);
+        root.querySelector('.sk').onclick = end; root.querySelector('.nx').onclick = () => { if (idx >= steps.length - 1) end(); else show(idx + 1); }; root.querySelector('.pv').onclick = () => show(idx - 1);
+        root.querySelector('#xt-hide').onchange = e => { try { if (e.target.checked) localStorage.setItem(KEY, '1'); else localStorage.removeItem(KEY); } catch (x) { } };
+        onKey = e => { if (!root) return; if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); end(); } else if (e.key === 'ArrowRight' || e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); root.querySelector('.nx').click(); } else if (e.key === 'ArrowLeft') { e.preventDefault(); e.stopPropagation(); show(idx - 1); } else if (e.key !== 'Tab') e.stopPropagation(); };
+        onRe = () => place(); document.addEventListener('keydown', onKey, true); addEventListener('resize', onRe); addEventListener('scroll', onRe, true);
+        show(0);
+    }
+    function auto() {
+        const q = location.search;
+        if (/[#&]xtour=projet/.test(location.hash) && typeof XPROJET !== 'undefined') { history.replaceState(null, '', location.pathname); setTimeout(() => { XPROJET.open(); setTimeout(() => run('projet', T.projet, true), 300); }, 1500); return; }
+        if (/[#&]xtour\b/.test(location.hash)) { history.replaceState(null, '', location.pathname + location.search); let n = 0; const go = () => { if (cfg.when && !cfg.when() && ++n < 40) { setTimeout(go, 500); return; } start(true); }; setTimeout(go, 1500); return; } // lien « tuto » depuis la recherche d'aide
+        if (/[#&](j|join|ci|k)=/.test(location.hash) || /^(caisse|arrivee|kiosque|direct|vitrine)$/.test(APP)) return; // liens d'invitation / pages publiques : jamais de tuto par-dessus
+        if (hidden() || window.top !== window || /[?&](out|view|share|consult|print|embed)=/i.test(q) || /-m\.html?$/i.test(location.pathname) || (innerWidth < 760 && !cfg.mobile)) return;
+        if (document.body.classList.contains('out-mode') || document.body.classList.contains('presentation-mode')) return;
+        // attend qu'aucune fenêtre (accueil, reprise de projet…) ne soit ouverte avant de démarrer
+        const busy = () => Array.from(document.querySelectorAll('.modal-overlay, #modal, #xs-ov, #xai-ov, #xnw-ov, #xmt-ov, #xfin, #xg-ov, [role=dialog]')).some(e => !e.closest('#xt-root') && vis(e) && e.getBoundingClientRect().width > innerWidth * .4);
+        let tries = 0; const wait = () => { if (root || hidden()) return; if (!busy() && (!cfg.when || cfg.when())) { try { localStorage.setItem(KEY, '1'); } catch (e) { } start(); } else if (++tries < 600) setTimeout(wait, 700); };
+        setTimeout(wait, 1400);
+    }
+    if (document.readyState === 'complete') auto(); else addEventListener('load', auto);
+    // tuto d'une page / fenêtre précise (fiche projet, Équipe, Drive, application…) : une fois, à la première ouverture
+    function run(key, def, force) {
+        const K2 = 'xiii.tour2.' + key + '.hide'; let h = false; try { h = localStorage.getItem(K2) === '1'; } catch (e) { } if ((h && !force) || root) return false;
+        const old = [cfg, KEY]; cfg = def; KEY = K2; try { localStorage.setItem(K2, '1'); } catch (e) { }
+        setTimeout(() => { start(); const back = () => { if (root) { setTimeout(back, 500); return; } cfg = old[0]; KEY = old[1]; }; setTimeout(back, 500); }, 350); return true;
+    }
+    // 🔎 tuto par recherche : mots-clés → bon tuto (outil, page ou fenêtre)
+    const TOPICS = [
+        ['index', 'Accueil de la suite', 'accueil tableau de bord outils recherche demarrer debuter commencer suite'],
+        ['projet', 'Fiche projet', 'projet fiche titre dates lieux camera technique equipe fichier xiii importer import logiciel excel movie magic nouveau projet personnalisation fond theme'],
+        ['team', 'Équipe : membres, accès, QR', 'equipe membre secteur droit acces autorisation invite inviter qr lien general attente valider sous-master retirer fin vitrine client kiosque ecran telephone connecter'],
+        ['drive', 'Drive du projet', 'drive google synchronisation synchro partage master script installer rapport journal version sauvegarde'],
+        ['equipe', 'Application mobile de l\'équipe', 'mobile telephone application app installer notifications mention message master depense ticket photo colisage scan viseur'],
+        ['syno', 'SYNO — synoptique', 'synoptique cable cablage signal sdi hdmi regie connecteur equipement schema'], ['plano', 'PLANO — plan d\'implantation', 'plan sol implantation plateau camera lumiere decor distance angle fond de plan'],
+        ['conduco', 'CONDUCO — conducteur', 'conducteur emission direct live prompteur minutage sequence regie horloge partager direct'], ['callsheeto', 'CALL SHEETO — feuille de service', 'feuille de service convocation horaire equipe journee meteo hopital acces'],
+        ['packingo', 'PACKINGO — colisage', 'colisage caisse flight case etiquette qr chargement poids volume verification'], ['backupo', 'BACKUPO — rushes', 'rushes carte dechargement sauvegarde copie checksum disque codec debit taille'],
+        ['deviso', 'DEVISO — devis et budget', 'devis budget tarif prix location facture depense reel ticket tva'], ['ressourco', 'RESSOURCO — documents', 'contrat document autorisation droit image signature signer attestation modele'],
+        ['cadro', 'CADRO — cadre et optiques', 'focale objectif capteur champ profondeur moire cadre viseur'], ['repero', 'REPERO — repérages', 'reperage lieu carte soleil bruit drone photo gps autorisation'],
+        ['dossier', 'DOSSIER — dossier de production', 'dossier pdf final production chapitre rubrique page de garde candidature'], ['moodo', 'MOODO — moodboard', 'moodboard planche intention reference image palette inspiration'],
+        ['storyboardo', 'STORYBOARDO — storyboard', 'storyboard dessin plan personnage animatique case'], ['scripto', 'SCRIPTO — script', 'script scripte continuite raccord prise plan tourne rapport'],
+        ['decoup', 'DECOUP — découpage technique', 'decoupage technique plan valeur mouvement transition'], ['posto', 'POSTO — post-production', 'post production montage version retour client livrable derushage archive etalonnage'],
+        ['casto', 'CASTO — casting', 'casting talent comedien role candidat cachet disponibilite'], ['transporto', 'TRANSPORTO — logistique', 'transport navette hotel chambre voyage vehicule logistique'],
+        ['calendrier', 'CALENDRIER — planning', 'calendrier planning production date tache jalon gantt'], ['matos', 'MATOS — parc matériel', 'matos materiel parc reservation sortie retour scan catalogue inventaire'],
+        ['lumo', 'LUMO — lumière', 'lumiere projecteur plan de feu dmx'], ['sono', 'SONO — son', 'son patch micro hf console audio'], ['runo', 'RUNO — déroulé live', 'deroule live run of show'], ['soustitro', 'SOUSTITRO — sous-titres', 'sous-titres srt traduction live ndi'], ['graphico', 'GRAPHICO — habillage', 'habillage graphique overlay ndi obs vmix synthe'], ['jour', 'MODE TOURNAGE', 'tournage jour j check-in arrivee qr kiosque regie']];
+    const fold = s => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    function search(q) { const W = fold(q).split(/[^a-z0-9]+/).filter(w => w.length > 1); if (!W.length) return []; return TOPICS.map(t => { const hay = fold(t[1] + ' ' + t[2] + ' ' + ((T[t[0]] || {}).i || '')); let sc = 0; W.forEach(w => { if (hay.indexOf(w) > -1) sc += (fold(t[1]).indexOf(w) > -1 ? 3 : 1); else if (w.length > 3 && hay.indexOf(w.slice(0, -1)) > -1) sc += .5; }); return [sc, t]; }).filter(x => x[0] > 0).sort((a, b) => b[0] - a[0]).slice(0, 8).map(x => x[1]); }
+    function go(k) { if (k === APP) { start(true); return; } if (k === 'projet') { if (APP === 'index' && typeof XPROJET !== 'undefined') { XPROJET.open(); setTimeout(() => run('projet', T.projet, true), 300); } else location.href = 'index.html#xtour=projet'; return; } location.href = (k === 'index' ? 'index' : k) + '.html#xtour'; }
+    return { start, run, T, search, go, TOPICS, app: APP, reset() { try { localStorage.removeItem(KEY); } catch (e) { } } };
+})();
+
+// 📱 XIII Équipe : une fois dans l'application, on y reste (l'accueil ramène à l'application, pas au site)
+(function () {
+    if (window.__xinapp) return; window.__xinapp = 1;
+    var page = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
+    try { if (page === 'equipe.html' && (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (window.matchMedia && matchMedia('(display-mode: standalone)').matches))) sessionStorage.setItem('xiii.inapp', '1'); } catch (e) { }
+    function inApp() { try { return sessionStorage.getItem('xiii.inapp') === '1'; } catch (e) { return false; } }
+    if (!inApp()) return;
+    if (page === 'index.html' || page === '') { location.replace('equipe.html'); return; }
+    document.addEventListener('click', function (e) {
+        var a = e.target.closest && e.target.closest('a[href]'); if (!a) return;
+        var u; try { u = new URL(a.getAttribute('href'), location.href); } catch (er) { return; }
+        if (u.origin !== location.origin) return;
+        var f = (u.pathname.split('/').pop() || 'index.html').toLowerCase();
+        if (f === 'index.html' || f === '') { e.preventDefault(); e.stopPropagation(); location.href = 'equipe.html'; return; }
+        if (a.target === '_blank') { a.removeAttribute('target'); }
+    }, true);
+})();
+
+</script>
+</body>
+</html>

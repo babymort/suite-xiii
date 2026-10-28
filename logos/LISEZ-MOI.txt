@@ -1,0 +1,7 @@
+Dossier « logos » de la SUITE XIII
+- OUTIL.png : logo personnalisé de l'outil (barre, tableau de bord, PDF). Ex. : plano.png, syno.png
+- OUTIL.gif : animation affichée pendant le chargement de l'outil. Ex. : plano.gif, conduco.gif, index.gif (accueil)
+  Sans fichier .gif, c'est l'animation XIII (anneau + nom de l'outil) qui s'affiche.
+  Conseil : GIF carré, fond transparent ou de la couleur du thème, ~160 × 160 px, moins de 300 Ko.
+  Après ajout d'un GIF, il est pris en compte dès la visite suivante (vérification toutes les heures).
+Noms des outils : backupo cadro calendrier callsheeto casto catalogue conduco controle decoup deviso dossier graphico importo index jour ludo lumo matos melango moodo packingo planno plano posto repero ressourco runo scripto sono soustitro storyboardo syno transporto

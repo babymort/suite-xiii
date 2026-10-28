@@ -1,0 +1,80 @@
+{
+ "name": "SUITE XIII — outils de production audiovisuelle",
+ "short_name": "SUITE XIII",
+ "id": "suite-xiii",
+ "lang": "fr",
+ "start_url": "index.html",
+ "scope": "./",
+ "display": "standalone",
+ "background_color": "#1d1b19",
+ "theme_color": "#1d1b19",
+ "description": "Synoptiques, plans, conducteurs, feuilles de service, devis, repérages, dossiers… utilisables hors connexion.",
+ "icons": [
+  {
+   "src": "xiii-icon-192.png",
+   "sizes": "192x192",
+   "type": "image/png"
+  },
+  {
+   "src": "xiii-icon-512.png",
+   "sizes": "512x512",
+   "type": "image/png"
+  },
+  {
+   "src": "xiii-icon-maskable.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "maskable"
+  }
+ ],
+ "shortcuts": [
+  {
+   "name": "SYNO",
+   "short_name": "SYNO",
+   "description": "Synoptiques",
+   "url": "syno.html",
+   "icons": [
+    {
+     "src": "xiii-icon-192.png",
+     "sizes": "192x192"
+    }
+   ]
+  },
+  {
+   "name": "PLANO",
+   "short_name": "PLANO",
+   "description": "Plans",
+   "url": "plano.html",
+   "icons": [
+    {
+     "src": "xiii-icon-192.png",
+     "sizes": "192x192"
+    }
+   ]
+  },
+  {
+   "name": "CALL SHEETO",
+   "short_name": "CALL SHEETO",
+   "description": "Feuilles de service",
+   "url": "callsheeto.html",
+   "icons": [
+    {
+     "src": "xiii-icon-192.png",
+     "sizes": "192x192"
+    }
+   ]
+  },
+  {
+   "name": "DOSSIER",
+   "short_name": "DOSSIER",
+   "description": "Dossier de production",
+   "url": "dossier.html",
+   "icons": [
+    {
+     "src": "xiii-icon-192.png",
+     "sizes": "192x192"
+    }
+   ]
+  }
+ ]
+}

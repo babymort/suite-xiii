@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#222222">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>CADRO XIII · Mobile</title>
+<style>
+/* SUITE XIII — socle mobile (partagé par toutes les pages *-m.html) */
+:root { color-scheme: dark; --bg-main:#1e1e1e; --bg-panel:#2d2d2d; --bg-panel-alt:#252525; --bg-header:#1a1a1a; --bg-topbar:#222; --bg-input:#3a3a3a; --bg-menu:#2d2d2d; --border-color:#444; --border-soft:#333; --text-main:#fff; --text-muted:#aaa; --text-dim:#888; --row-bg:#262626; --row-alt:#2a2a2a;
+  --accent:240,179,120; --accent-text:rgb(240,179,120); --btn-bg:rgba(var(--accent),.12); --btn-border:rgba(var(--accent),.35); --blue:#007acc; --danger:#e53935; --warn:#ffa726; --ok:#66bb6a;
+  --sat: env(safe-area-inset-top, 0px); --sab: env(safe-area-inset-bottom, 0px); --sal: env(safe-area-inset-left, 0px); --sar: env(safe-area-inset-right, 0px); }
+body.light-theme { color-scheme: light; --bg-main:#eef0f2; --bg-panel:#fff; --bg-panel-alt:#f5f6f7; --bg-header:#e4e6e8; --bg-topbar:#fff; --bg-input:#e9ebed; --bg-menu:#fff; --border-color:#d5d8db; --border-soft:#ddd; --text-main:#1a1a1a; --text-muted:#555; --text-dim:#777; --row-bg:#fff; --row-alt:#f8f9fa; --accent-text:#b8651f; --ok:#2e7d32; }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html { -webkit-text-size-adjust: 100%; }
+body.xm { margin: 0; min-height: 100dvh; background: var(--bg-main); color: var(--text-main); font-family: 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif; font-size: 15px; line-height: 1.4; overscroll-behavior-y: none; }
+body.xm a { color: var(--accent-text); }
+.xm button { font-family: inherit; }
+/* barre du haut */
+.m-top { position: sticky; top: 0; z-index: 40; display: flex; align-items: center; gap: 8px; padding: calc(8px + var(--sat)) calc(10px + var(--sar)) 8px calc(10px + var(--sal)); background: var(--bg-topbar); border-bottom: 1px solid var(--border-soft); min-height: 56px; }
+.m-top .m-title { flex: 1; min-width: 0; line-height: 1.15; }
+.m-top .m-title b { display: block; font-size: 16px; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.m-top .m-title b i { font-style: normal; color: var(--accent-text); }
+.m-top .m-title small { display: block; font-size: 11.5px; color: var(--text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.m-ibtn { flex: 0 0 auto; width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center; font-size: 20px; border-radius: 12px; border: 1px solid var(--btn-border); background: var(--btn-bg); color: var(--text-main); cursor: pointer; text-decoration: none; padding: 0; }
+.m-ibtn:active { background: rgba(var(--accent), .35); }
+.m-ibtn.plain { border-color: transparent; background: transparent; }
+/* contenu */
+.m-main { padding: 12px calc(14px + var(--sar)) calc(128px + var(--sab)) calc(14px + var(--sal)); max-width: 760px; margin: 0 auto; }
+.m-main.no-tabs { padding-bottom: calc(28px + var(--sab)); }
+.m-sec { font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--text-dim); margin: 18px 4px 8px; }
+.m-card { background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 14px; padding: 14px; margin-bottom: 12px; }
+.m-card > h3 { margin: 0 0 10px; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+.m-card > h3 .grow { flex: 1; }
+.m-card.accent { border-color: rgba(var(--accent), .6); background: linear-gradient(180deg, rgba(var(--accent), .12), var(--bg-panel)); }
+.m-kv { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; font-size: 14px; }
+.m-kv dt { color: var(--text-dim); } .m-kv dd { margin: 0; text-align: right; font-weight: 600; word-break: break-word; }
+.m-row { display: flex; align-items: center; gap: 10px; padding: 11px 0; border-bottom: 1px solid var(--border-soft); } .m-row:last-child { border-bottom: 0; }
+.m-row .grow { flex: 1; min-width: 0; } .m-row small { display: block; color: var(--text-dim); font-size: 12.5px; }
+.m-list { background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 14px; overflow: hidden; margin-bottom: 12px; }
+.m-item { display: flex; align-items: center; gap: 12px; padding: 12px 14px; min-height: 56px; border-bottom: 1px solid var(--border-soft); color: inherit; text-decoration: none; cursor: pointer; background: transparent; width: 100%; text-align: left; border-left: 0; border-right: 0; border-top: 0; font-size: 15px; }
+.m-item:last-child { border-bottom: 0; } .m-item:active { background: rgba(var(--accent), .12); }
+.m-item .ico { font-size: 22px; flex: 0 0 auto; width: 30px; text-align: center; } .m-item .grow { flex: 1; min-width: 0; } .m-item b { display: block; font-weight: 600; } .m-item small { display: block; color: var(--text-dim); font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.m-item .go { color: var(--text-dim); font-size: 18px; }
+.m-chip { display: inline-flex; align-items: center; gap: 5px; padding: 5px 11px; border-radius: 99px; font-size: 13px; background: var(--btn-bg); border: 1px solid var(--btn-border); color: var(--text-main); white-space: nowrap; }
+.m-chips { display: flex; gap: 8px; overflow-x: auto; padding: 2px 0 8px; scrollbar-width: none; } .m-chips::-webkit-scrollbar { display: none; }
+.m-chip.on { background: rgba(var(--accent), .4); border-color: rgba(var(--accent), .95); font-weight: 600; }
+.m-pill { display: inline-block; padding: 2px 9px; border-radius: 99px; font-size: 12px; font-weight: 600; border: 1px solid var(--border-color); background: var(--bg-panel-alt); }
+.m-pill.ok { color: var(--ok); border-color: rgba(102,187,106,.5); } .m-pill.warn { color: var(--warn); border-color: rgba(255,167,38,.5); } .m-pill.danger { color: #ef5350; border-color: rgba(229,57,53,.5); }
+/* boutons */
+.m-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 46px; padding: 10px 18px; font-size: 15px; font-weight: 600; border-radius: 12px; border: 1px solid var(--btn-border); background: var(--btn-bg); color: var(--text-main); cursor: pointer; text-decoration: none; }
+.m-btn:active { background: rgba(var(--accent), .35); }
+.m-btn.primary { background: rgba(var(--accent), .3); border-color: rgba(var(--accent), .9); }
+.m-btn.danger { border-color: rgba(229,57,53,.55); background: rgba(229,57,53,.14); }
+.m-btn.block { display: flex; width: 100%; } .m-btn.sm { min-height: 36px; padding: 6px 12px; font-size: 13.5px; border-radius: 10px; }
+.m-btn:disabled { opacity: .45; }
+.m-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; } .m-actions > * { flex: 1 1 140px; }
+.m-fab { position: fixed; right: calc(16px + var(--sar)); bottom: calc(120px + var(--sab)); z-index: 35; width: 58px; height: 58px; border-radius: 50%; font-size: 26px; border: 1px solid rgba(var(--accent), .95); background: rgba(var(--accent), .92); color: #1a1a1a; box-shadow: 0 6px 18px rgba(0,0,0,.45); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.m-fab.no-tabs { bottom: calc(64px + var(--sab)); }
+/* champs */
+.m-field { display: block; margin-bottom: 12px; } .m-field > span { display: block; font-size: 11.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--text-dim); margin-bottom: 4px; }
+.xm input[type=text], .xm input[type=number], .xm input[type=date], .xm input[type=time], .xm input[type=tel], .xm input[type=email], .xm input[type=search], .xm input[type=url], .xm select, .xm textarea { width: 100%; min-height: 46px; padding: 10px 12px; font-size: 16px; font-family: inherit; border: 1px solid var(--border-color); border-radius: 10px; background: var(--bg-input); color: var(--text-main); appearance: none; -webkit-appearance: none; }
+.xm select { background-image: linear-gradient(45deg, transparent 50%, var(--text-dim) 50%), linear-gradient(135deg, var(--text-dim) 50%, transparent 50%); background-position: calc(100% - 18px) 20px, calc(100% - 13px) 20px; background-size: 5px 5px; background-repeat: no-repeat; padding-right: 32px; }
+.xm textarea { min-height: 90px; resize: vertical; line-height: 1.4; }
+.xm input:focus, .xm select:focus, .xm textarea:focus { outline: none; border-color: rgba(var(--accent), .9); box-shadow: 0 0 0 2px rgba(var(--accent), .25); }
+.xm input[type=checkbox], .xm input[type=radio] { width: 24px; height: 24px; accent-color: rgb(var(--accent)); flex: 0 0 auto; }
+.m-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; } .m-grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.m-seg { display: flex; border: 1px solid var(--btn-border); border-radius: 12px; overflow: hidden; margin-bottom: 12px; } .m-seg button { flex: 1; min-height: 44px; border: 0; border-right: 1px solid var(--btn-border); background: var(--btn-bg); color: var(--text-main); font-size: 14px; font-weight: 600; cursor: pointer; } .m-seg button:last-child { border-right: 0; } .m-seg button.on { background: rgba(var(--accent), .45); }
+.m-progress { height: 8px; border-radius: 99px; background: var(--bg-input); overflow: hidden; } .m-progress > i { display: block; height: 100%; background: rgb(var(--accent)); border-radius: 99px; transition: width .25s; }
+.m-empty { text-align: center; color: var(--text-dim); padding: 34px 18px; font-size: 14px; } .m-empty b { display: block; font-size: 38px; margin-bottom: 8px; }
+.m-hint { font-size: 12.5px; color: var(--text-dim); line-height: 1.45; }
+/* onglets du bas */
+.m-tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; display: flex; background: var(--bg-topbar); border-top: 1px solid var(--border-soft); padding: 4px calc(4px + var(--sar)) calc(48px + var(--sab)) calc(4px + var(--sal)); } /* au-dessus du badge Netlify */
+.m-tabs button { flex: 1; min-width: 0; min-height: 54px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; border: 0; background: transparent; color: var(--text-dim); font-size: 11px; font-weight: 600; cursor: pointer; border-radius: 10px; }
+.m-tabs button .ti { font-size: 21px; line-height: 1; } .m-tabs button.on { color: var(--accent-text); background: rgba(var(--accent), .12); }
+/* fenêtres du bas */
+.m-ov { position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,.62); display: flex; align-items: flex-end; justify-content: center; animation: mfade .15s; }
+.m-sheet { width: 100%; max-width: 640px; max-height: 92dvh; overflow-y: auto; background: var(--bg-menu); border: 1px solid var(--border-color); border-bottom: 0; border-radius: 18px 18px 0 0; padding: 8px 16px calc(18px + var(--sab)); animation: mup .2s; }
+.m-sheet .grab { width: 44px; height: 5px; border-radius: 3px; background: var(--border-color); margin: 4px auto 10px; }
+.m-sheet h2 { font-size: 17px; margin: 4px 0 12px; display: flex; align-items: center; gap: 8px; } .m-sheet h2 .grow { flex: 1; }
+@keyframes mup { from { transform: translateY(40px); opacity: .4; } } @keyframes mfade { from { opacity: 0; } }
+.m-toast { position: fixed; left: 50%; bottom: calc(86px + var(--sab)); transform: translate(-50%, 20px); z-index: 200; max-width: 90vw; padding: 11px 18px; border-radius: 12px; background: #111; color: #fff; border: 1px solid rgba(var(--accent), .6); font-size: 14px; opacity: 0; pointer-events: none; transition: .2s; text-align: center; }
+.m-toast.show { opacity: 1; transform: translate(-50%, 0); }
+.m-qr { background: #fff; border-radius: 12px; padding: 6px; width: min(86vw, 380px); margin: 6px auto; } .m-qr svg { display: block; width: 100%; height: auto; }
+.m-credit { text-align: center; color: var(--text-dim); font-size: 11.5px; margin: 22px 0 6px; }
+@media (min-width: 761px) { body.xm { max-width: 520px; margin: 0 auto; border-left: 1px solid var(--border-soft); border-right: 1px solid var(--border-soft); } .m-tabs { max-width: 520px; left: 50%; transform: translateX(-50%); } }
+@media print { .m-top, .m-tabs, .m-fab { display: none !important; } }
+
+.cd-card { background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 14px; padding: 12px 14px; margin-bottom: 12px; }
+.cd-card h3 { margin: 0 0 8px; font-size: 15px; display: flex; align-items: center; gap: 8px; } .cd-card h3 small { font-weight: 400; color: var(--text-dim); margin-left: auto; font-size: 12px; }
+.cd-row { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 0 10px; } .cd-row .full { grid-column: 1 / -1; }
+.cd-row .m-field { margin-bottom: 10px; } .cd-u { display: flex; align-items: center; gap: 6px; } .cd-u em { font-style: normal; color: var(--text-dim); font-size: 12px; white-space: nowrap; }
+.cd-seg { display: flex; border: 1px solid var(--btn-border); border-radius: 10px; overflow: hidden; margin-bottom: 10px; } .cd-seg button { flex: 1; min-height: 42px; border: 0; background: transparent; color: var(--text-main); font-size: 13px; padding: 4px; } .cd-seg button.on { background: rgba(var(--accent), .22); font-weight: 700; }
+.cd-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 8px; } .cd-chips button { min-height: 36px; padding: 4px 12px; border-radius: 99px; border: 1px solid var(--btn-border); background: var(--btn-bg); color: var(--text-main); font-size: 13px; } .cd-chips button.on { background: rgba(var(--accent), .25); border-color: rgba(var(--accent), .8); }
+.tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; } .tile { background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 12px; padding: 8px 10px; } .tile small { display: block; font-size: 10.5px; text-transform: uppercase; letter-spacing: .04em; color: var(--text-dim); } .tile b { display: block; font-size: 21px; color: var(--accent-text); } .tile i { font-style: normal; font-size: 11.5px; color: var(--text-dim); }
+.alert { border-radius: 10px; padding: 8px 12px; font-size: 13px; border: 1px solid var(--border-color); background: var(--bg-panel-alt); margin-bottom: 10px; } .alert.ok { border-color: rgba(102,187,106,.6); } .alert.warn { border-color: rgba(255,167,38,.7); } .alert.bad { border-color: rgba(239,83,80,.7); }
+.cdv { width: 100%; height: auto; display: block; background: var(--bg-panel-alt); border: 1px solid var(--border-color); border-radius: 10px; }
+figure { margin: 0 0 12px; } figcaption { font-size: 12px; color: var(--text-dim); margin-top: 3px; }
+details.ex { background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 12px; padding: 10px 14px; margin-bottom: 12px; } details.ex > summary { font-weight: 700; font-size: 14px; min-height: 28px; } details.ex ol { margin: 10px 0 4px; padding-left: 20px; display: flex; flex-direction: column; gap: 10px; }
+.fm { font-family: Consolas, monospace; font-size: 12px; color: var(--accent-text); margin-top: 3px; word-break: break-word; } .vl { font-family: Consolas, monospace; font-size: 12px; color: var(--text-muted); word-break: break-word; } .rs { font-weight: 700; } details.ex small { color: var(--text-dim); display: block; }
+.verdict { display: flex; align-items: center; gap: 12px; background: var(--bg-panel); border: 2px solid var(--border-color); border-radius: 14px; padding: 12px 14px; margin-bottom: 12px; } .verdict .big { font-size: 26px; font-weight: 800; white-space: nowrap; } .verdict small { display: block; font-size: 12px; color: var(--text-dim); font-weight: 400; }
+.verdict.l0 { border-color: #66bb6a; } .verdict.l1 { border-color: #aed581; } .verdict.l2 { border-color: #ffd54f; } .verdict.l3 { border-color: #ff9800; } .verdict.l4 { border-color: #ef5350; }
+.sim { image-rendering: pixelated; width: 100%; aspect-ratio: 200 / 120; border: 1px solid var(--border-color); border-radius: 10px; background: #000; }
+.recs { margin: 4px 0 0; padding-left: 20px; font-size: 13.5px; display: flex; flex-direction: column; gap: 6px; }
+.tbl { width: 100%; border-collapse: collapse; font-size: 13px; } .tbl th { text-align: left; font-size: 10.5px; text-transform: uppercase; color: var(--text-dim); padding: 4px 3px; border-bottom: 1px solid var(--border-color); } .tbl td { padding: 6px 3px; border-bottom: 1px solid var(--border-soft); }
+.cd-hint { font-size: 12.5px; color: var(--text-dim); line-height: 1.45; }
+/* viseur */
+.vf { position: relative; background: #000; border-radius: 14px; overflow: hidden; height: calc(100dvh - 330px); min-height: 280px; margin-bottom: 10px; touch-action: none; }
+.vf video, .vf canvas { position: absolute; inset: 0; width: 100%; height: 100%; } .vf video { object-fit: contain; background: #111; } .vf .nocam { position: absolute; inset: 0; background: repeating-linear-gradient(45deg, #1d1d22, #1d1d22 18px, #25252b 18px, #25252b 36px); }
+.vf-hud { position: absolute; left: 8px; right: 8px; top: 8px; display: flex; justify-content: space-between; gap: 8px; pointer-events: none; font-size: 12.5px; color: #fff; text-shadow: 0 1px 3px #000; } .vf-hud b { font-size: 22px; color: #ffd08a; display: block; line-height: 1.1; }
+.vf-msg { position: absolute; left: 10px; right: 10px; bottom: 10px; background: rgba(0,0,0,.65); color: #fff; font-size: 12.5px; padding: 6px 10px; border-radius: 8px; }
+.vf-bar { display: flex; gap: 8px; margin-bottom: 8px; } .vf-bar .m-btn { flex: 1; padding: 8px 6px; min-height: 44px; font-size: 14px; }
+input[type=range].cd-rg { width: 100%; accent-color: rgb(var(--accent)); height: 34px; margin: 0 0 4px; }
+.cand { background: var(--bg-panel-alt); border: 1px solid var(--border-color); border-radius: 12px; padding: 10px; margin-bottom: 10px; }
+.plan { display: flex; gap: 8px; align-items: center; padding: 10px 12px; border-bottom: 1px solid var(--border-soft); } .plan:last-child { border: 0; } .plan .grow { flex: 1; min-width: 0; } .plan small { display: block; color: var(--text-dim); font-size: 12px; }
+.cd-u input { flex: 1; min-width: 0; width: auto !important; }
+.cd-row .m-field, .cd-u { min-width: 0; }
+.m-field > span.cd-u { display: flex; align-items: center; gap: 6px; margin: 0; text-transform: none; letter-spacing: 0; font-size: 15px; color: var(--text-main); }
+.m-field > span.cd-u em { font-size: 12px; color: var(--text-dim); }
+
+</style>
+<link rel="icon" type="image/png" href="xiii-icon-192.png">
+</head>
+<body class="xm">
+<header class="m-top">
+  <a class="m-ibtn plain" href="index.html" aria-label="Accueil SUITE XIII">‹</a>
+  <div class="m-title"><b>CADRO <i>XIII</i></b><small id="cd-sub">Cadre, focale &amp; moiré</small></div>
+  <button class="m-btn sm primary" id="cd-ret" hidden aria-label="Renvoyer au bureau">📤 <span id="cd-retn">0</span></button>
+  <button class="m-ibtn" id="cd-menu" aria-label="Menu">⋯</button>
+</header>
+<main class="m-main" id="cd-main"></main>
+<nav class="m-tabs" id="cd-tabs">
+  <button data-tab="cadre"><span class="ti">🎯</span>Cadre</button>
+  <button data-tab="moire"><span class="ti">🔬</span>Moiré</button>
+  <button data-tab="vf"><span class="ti">🔭</span>Viseur</button>
+  <button data-tab="cap"><span class="ti">📷</span>Capteur</button>
+</nav>
+<input type="file" id="cd-photo" accept="image/*" capture="environment" hidden>
+<input type="file" id="cd-pfile" accept="image/*,.json,.csv,.txt" hidden>
+
+<script>
+// =====================================================================
+//  XQR : générateur de QR code (mode octets, niveaux L/M/Q/H, versions 1 à 40) — sans dépendance
+//  XQR.make(texte, 'L') → { size, ver, get(x, y) } ou null si trop long ; XQR.svg(texte, opts) → chaîne SVG ou null
+// =====================================================================
+const XQR = (() => {
+    const ECC = [[-1, 7, 10, 15, 20, 26, 18, 20, 24, 30, 18, 20, 24, 26, 30, 22, 24, 28, 30, 28, 28, 28, 28, 30, 30, 26, 28, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30],
+        [-1, 10, 16, 26, 18, 24, 16, 18, 22, 22, 26, 30, 22, 22, 24, 24, 28, 28, 26, 26, 26, 26, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28],
+        [-1, 13, 22, 18, 26, 18, 24, 18, 22, 20, 24, 28, 26, 24, 20, 30, 24, 28, 28, 26, 30, 28, 30, 30, 30, 30, 28, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30],
+        [-1, 17, 28, 22, 16, 22, 28, 26, 26, 24, 28, 24, 28, 22, 24, 24, 30, 28, 28, 26, 28, 30, 24, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30]];
+    const BLK = [[-1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 4, 4, 4, 4, 4, 6, 6, 6, 6, 7, 8, 8, 9, 9, 10, 12, 12, 12, 13, 14, 15, 16, 17, 18, 19, 19, 20, 21, 22, 24, 25],
+        [-1, 1, 1, 1, 2, 2, 4, 4, 4, 5, 5, 5, 8, 9, 9, 10, 10, 11, 13, 14, 16, 17, 17, 18, 20, 21, 23, 25, 26, 28, 29, 31, 33, 35, 37, 38, 40, 43, 45, 47, 49],
+        [-1, 1, 1, 2, 2, 4, 4, 6, 6, 8, 8, 8, 10, 12, 16, 12, 17, 16, 18, 21, 20, 23, 23, 25, 27, 29, 34, 34, 35, 38, 40, 43, 45, 48, 51, 53, 56, 59, 62, 65, 68],
+        [-1, 1, 1, 2, 4, 4, 4, 5, 6, 8, 8, 11, 11, 16, 16, 18, 16, 19, 21, 25, 25, 25, 34, 30, 32, 35, 37, 40, 42, 45, 48, 51, 54, 57, 60, 63, 66, 70, 74, 77, 81]];
+    const ECL = { L: [0, 1], M: [1, 0], Q: [2, 3], H: [3, 2] };
+    const raw = v => { let r = (16 * v + 128) * v + 64; if (v >= 2) { const n = Math.floor(v / 7) + 2; r -= (25 * n - 10) * n - 55; if (v >= 7) r -= 36; } return r; };
+    const dataCw = (v, e) => Math.floor(raw(v) / 8) - ECC[e][v] * BLK[e][v];
+    const bit = (x, i) => ((x >>> i) & 1) !== 0;
+    const mul = (x, y) => { let z = 0; for (let i = 7; i >= 0; i--) { z = (z << 1) ^ ((z >>> 7) * 0x11D); z ^= ((y >>> i) & 1) * x; } return z; };
+    const rsDiv = d => { const r = new Array(d - 1).fill(0); r.push(1); let root = 1; for (let i = 0; i < d; i++) { for (let j = 0; j < r.length; j++) { r[j] = mul(r[j], root); if (j + 1 < r.length) r[j] ^= r[j + 1]; } root = mul(root, 2); } return r; };
+    const rsRem = (data, div) => { const r = div.map(() => 0); data.forEach(b => { const f = b ^ r.shift(); r.push(0); div.forEach((c, i) => { r[i] ^= mul(c, f); }); }); return r; };
+    function make(text, level) {
+        const e = (ECL[level || 'L'] || ECL.L)[0], bytes = Array.from(new TextEncoder().encode(String(text)));
+        let ver = 0; for (let v = 1; v <= 40; v++) { const cc = v <= 9 ? 8 : 16; if (4 + cc + 8 * bytes.length <= dataCw(v, e) * 8) { ver = v; break; } }
+        if (!ver) return null;
+        const bits = []; const put = (val, n) => { for (let i = n - 1; i >= 0; i--) bits.push((val >>> i) & 1); };
+        put(4, 4); put(bytes.length, ver <= 9 ? 8 : 16); bytes.forEach(b => put(b, 8));
+        const cap = dataCw(ver, e) * 8; put(0, Math.min(4, cap - bits.length)); put(0, (8 - bits.length % 8) % 8);
+        for (let p = 0xEC; bits.length < cap; p ^= 0xEC ^ 0x11) put(p, 8);
+        const data = []; for (let i = 0; i < bits.length; i += 8) { let b = 0; for (let j = 0; j < 8; j++) b = (b << 1) | bits[i + j]; data.push(b); }
+        // blocs + correction d'erreur
+        const nb = BLK[e][ver], el = ECC[e][ver], rc = Math.floor(raw(ver) / 8), ns = nb - rc % nb, sl = Math.floor(rc / nb), div = rsDiv(el), blocks = [];
+        for (let i = 0, k = 0; i < nb; i++) { const dl = sl - el + (i < ns ? 0 : 1), dat = data.slice(k, k + dl); k += dl; const ecc = rsRem(dat, div); if (i < ns) dat.push(0); blocks.push(dat.concat(ecc)); }
+        const all = []; for (let i = 0; i < blocks[0].length; i++) blocks.forEach((b, j) => { if (i !== sl - el || j >= ns) all.push(b[i]); });
+        const size = ver * 4 + 17, M = Array.from({ length: size }, () => new Array(size).fill(false)), F = Array.from({ length: size }, () => new Array(size).fill(false));
+        const setF = (x, y, d) => { M[y][x] = d; F[y][x] = true; };
+        for (let i = 0; i < size; i++) { setF(6, i, i % 2 === 0); setF(i, 6, i % 2 === 0); }
+        const finder = (x, y) => { for (let dy = -4; dy <= 4; dy++) for (let dx = -4; dx <= 4; dx++) { const d = Math.max(Math.abs(dx), Math.abs(dy)), xx = x + dx, yy = y + dy; if (xx >= 0 && xx < size && yy >= 0 && yy < size) setF(xx, yy, d !== 2 && d !== 4); } };
+        finder(3, 3); finder(size - 4, 3); finder(3, size - 4);
+        let ap = []; if (ver > 1) { const n = Math.floor(ver / 7) + 2, st = ver === 32 ? 26 : Math.ceil((ver * 4 + 4) / (n * 2 - 2)) * 2; ap = [6]; for (let p = size - 7; ap.length < n; p -= st) ap.splice(1, 0, p); }
+        ap.forEach((x, i) => ap.forEach((y, j) => { if ((i === 0 && j === 0) || (i === 0 && j === ap.length - 1) || (i === ap.length - 1 && j === 0)) return; for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++) setF(x + dx, y + dy, Math.max(Math.abs(dx), Math.abs(dy)) !== 1); }));
+        const fmt = mask => {
+            const d = (ECL[level || 'L'][1] << 3) | mask; let r = d; for (let i = 0; i < 10; i++) r = (r << 1) ^ ((r >>> 9) * 0x537); const b = ((d << 10) | r) ^ 0x5412;
+            for (let i = 0; i <= 5; i++) setF(8, i, bit(b, i)); setF(8, 7, bit(b, 6)); setF(8, 8, bit(b, 7)); setF(7, 8, bit(b, 8)); for (let i = 9; i < 15; i++) setF(14 - i, 8, bit(b, i));
+            for (let i = 0; i < 8; i++) setF(size - 1 - i, 8, bit(b, i)); for (let i = 8; i < 15; i++) setF(8, size - 15 + i, bit(b, i)); setF(8, size - 8, true);
+        };
+        fmt(0);
+        if (ver >= 7) { let r = ver; for (let i = 0; i < 12; i++) r = (r << 1) ^ ((r >>> 11) * 0x1F25); const b = (ver << 12) | r; for (let i = 0; i < 18; i++) { const c = bit(b, i), a = size - 11 + i % 3, d = Math.floor(i / 3); setF(a, d, c); setF(d, a, c); } }
+        for (let i = 0, right = size - 1; right >= 1; right -= 2) { if (right === 6) right = 5; for (let vert = 0; vert < size; vert++) for (let j = 0; j < 2; j++) { const x = right - j, up = ((right + 1) & 2) === 0, y = up ? size - 1 - vert : vert; if (!F[y][x] && i < all.length * 8) { M[y][x] = bit(all[i >>> 3], 7 - (i & 7)); i++; } } }
+        const inv = (m, x, y) => [(x + y) % 2 === 0, y % 2 === 0, x % 3 === 0, (x + y) % 3 === 0, (Math.floor(x / 3) + Math.floor(y / 2)) % 2 === 0, x * y % 2 + x * y % 3 === 0, (x * y % 2 + x * y % 3) % 2 === 0, ((x + y) % 2 + x * y % 3) % 2 === 0][m];
+        const apply = m => { for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) if (!F[y][x] && inv(m, x, y)) M[y][x] = !M[y][x]; };
+        const penalty = () => {
+            let p = 0, dark = 0;
+            for (let y = 0; y < size; y++) { let run = 1; for (let x = 1; x < size; x++) { if (M[y][x] === M[y][x - 1]) { run++; if (run === 5) p += 3; else if (run > 5) p++; } else run = 1; } }
+            for (let x = 0; x < size; x++) { let run = 1; for (let y = 1; y < size; y++) { if (M[y][x] === M[y - 1][x]) { run++; if (run === 5) p += 3; else if (run > 5) p++; } else run = 1; } }
+            for (let y = 0; y < size - 1; y++) for (let x = 0; x < size - 1; x++) { const c = M[y][x]; if (c === M[y][x + 1] && c === M[y + 1][x] && c === M[y + 1][x + 1]) p += 3; }
+            for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) if (M[y][x]) dark++;
+            p += Math.floor(Math.abs(dark * 20 - size * size * 10) / (size * size)) * 10; return p;
+        };
+        let best = 0, bp = Infinity; for (let m = 0; m < 8; m++) { apply(m); fmt(m); const p = penalty(); if (p < bp) { bp = p; best = m; } apply(m); }
+        apply(best); fmt(best);
+        return { size, ver, get: (x, y) => x >= 0 && y >= 0 && x < size && y < size && M[y][x] };
+    }
+    function svg(text, o) {
+        o = o || {}; const q = make(text, o.ecl || 'L'); if (!q) return null; const b = o.border == null ? 4 : o.border, n = q.size + 2 * b; let d = '';
+        for (let y = 0; y < q.size; y++) { let x = 0; while (x < q.size) { if (q.get(x, y)) { let w = 1; while (x + w < q.size && q.get(x + w, y)) w++; d += 'M' + (x + b) + ',' + (y + b) + 'h' + w + 'v1h-' + w + 'z'; x += w; } else x++; } }
+        return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + n + ' ' + n + '" shape-rendering="crispEdges" role="img" aria-label="QR code"><rect width="' + n + '" height="' + n + '" fill="' + (o.light || '#fff') + '"/><path d="' + d + '" fill="' + (o.dark || '#000') + '"/></svg>';
+    }
+    return { make, svg, capacity: (level) => { const e = (ECL[level || 'L'] || ECL.L)[0]; return dataCw(40, e) - 3; } };
+})();
+if (typeof module !== 'undefined') module.exports = XQR;
+
+// =====================================================================
+//  XM : socle mobile SUITE XIII (pages *-m.html) + panneau « 📱 Mobile » des outils bureau
+//  Enveloppe d'échange : { format:'xiii-mobile', v:1, app, kind:'project'|'return', name, ts, data }
+//  Transfert : lien (#mx=… compressé), QR code (si assez court) ou fichier .xiii-m.json
+// =====================================================================
+const XM = (() => {
+    const FORMAT = 'xiii-mobile', QR_MAX = 1800;
+    const $ = (s, r) => (r || document).querySelector(s), $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+    const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const uid = () => Math.random().toString(36).slice(2, 10);
+    const safe = s => String(s || 'projet').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^\w-]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 40) || 'projet';
+    const isPhone = () => { try { return matchMedia('(max-width:700px)').matches && matchMedia('(pointer:coarse)').matches; } catch (e) { return false; } };
+    // ---------- encodage ----------
+    const b64u = u8 => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
+    const unb64u = t => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
+    async function pipe(u8, Ctor, fmt) { const st = new Blob([u8]).stream().pipeThrough(new Ctor(fmt)); return new Uint8Array(await new Response(st).arrayBuffer()); }
+    async function pack(obj) {
+        const u8 = new TextEncoder().encode(JSON.stringify(obj));
+        if (typeof CompressionStream !== 'undefined') { try { return 'z' + b64u(await pipe(u8, CompressionStream, 'deflate-raw')); } catch (e) { } }
+        return 'r' + b64u(u8);
+    }
+    async function unpack(s) {
+        s = String(s || '').trim(); if (!s) throw new Error('Lien vide');
+        let u8 = unb64u(s.slice(1)); if (s[0] === 'z') u8 = await pipe(u8, DecompressionStream, 'deflate-raw'); else if (s[0] !== 'r') throw new Error('Lien non reconnu');
+        return JSON.parse(new TextDecoder().decode(u8));
+    }
+    const baseUrl = page => { const u = new URL(page || location.pathname.split('/').pop(), location.href); u.hash = ''; u.search = ''; return u.href; };
+    const envelope = (app, kind, name, data) => ({ format: FORMAT, v: 1, app, kind: kind || 'project', name: name || '', ts: Date.now(), data });
+    async function link(page, env) { return baseUrl(page) + '#mx=' + await pack(env); }
+    function checkEnv(env, app) {
+        if (!env || env.format !== FORMAT) throw new Error('Ce fichier n\'est pas un envoi SUITE XIII mobile');
+        if (app && env.app !== app) throw new Error('Cet envoi est destiné à « ' + env.app + ' », pas à « ' + app + ' »');
+        return env;
+    }
+    // ---------- stockage local (une enveloppe par application) ----------
+    const mem = {};
+    const load = app => { try { return JSON.parse(localStorage.getItem('xiii.m.' + app)); } catch (e) { return mem[app] || null; } };
+    const save = (app, obj) => { mem[app] = obj; try { localStorage.setItem('xiii.m.' + app, JSON.stringify(obj)); return true; } catch (e) { return false; } };
+    const drop = app => { delete mem[app]; try { localStorage.removeItem('xiii.m.' + app); } catch (e) { } };
+    // ---------- interface ----------
+    let toastT;
+    function toast(msg, ms) { let t = $('.m-toast'); if (!t) { t = document.createElement('div'); t.className = 'm-toast'; document.body.appendChild(t); } t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), ms || 2600); }
+    function sheet(html, o) {
+        o = o || {}; closeSheet(); const ov = document.createElement('div'); ov.className = 'm-ov'; ov.id = 'm-ov';
+        ov.innerHTML = '<div class="m-sheet" role="dialog"><div class="grab"></div>' + (o.title ? '<h2><span class="grow">' + o.title + '</span><button class="m-ibtn plain" data-x aria-label="Fermer">✕</button></h2>' : '') + html + '</div>';
+        ov.addEventListener('mousedown', e => { if (e.target === ov) closeSheet(); }); ov.addEventListener('touchstart', e => { if (e.target === ov) closeSheet(); }, { passive: true });
+        document.body.appendChild(ov); const x = $('[data-x]', ov); if (x) x.onclick = closeSheet; ov._onClose = o.onClose; return ov.querySelector('.m-sheet');
+    }
+    function closeSheet() { const ov = $('#m-ov'); if (ov) { ov.remove(); if (ov._onClose) try { ov._onClose(); } catch (e) { } } }
+    // choix : renvoie l'index du bouton (ou -1 si fermé)
+    function ask(title, text, buttons) {
+        return new Promise(res => {
+            const s = sheet('<p style="margin:0 0 14px;color:var(--text-muted)">' + text + '</p><div class="m-actions" style="margin-top:0">' + (buttons || ['OK']).map((b, i) => '<button class="m-btn ' + (i === 0 ? 'primary' : '') + (b.danger ? ' danger' : '') + '" data-i="' + i + '">' + esc(b.label || b) + '</button>').join('') + '</div>', { title: esc(title), onClose: () => res(-1) });
+            $$('[data-i]', s).forEach(b => b.onclick = () => { const ov = $('#m-ov'); if (ov) ov._onClose = null; closeSheet(); res(+b.dataset.i); });
+        });
+    }
+    function download(name, content, mime) { const b = content instanceof Blob ? content : new Blob([content], { type: mime || 'application/json' }), a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { a.remove(); URL.revokeObjectURL(a.href); }, 1500); }
+    async function copy(text) { try { await navigator.clipboard.writeText(text); return true; } catch (e) { const t = document.createElement('textarea'); t.value = text; t.style.cssText = 'position:fixed;opacity:0'; document.body.appendChild(t); t.select(); let ok = false; try { ok = document.execCommand('copy'); } catch (e2) { } t.remove(); return ok; } }
+    function pickFile(accept, cb) { const i = document.createElement('input'); i.type = 'file'; i.accept = accept || '.json,application/json'; i.style.display = 'none'; i.onchange = async () => { const f = i.files[0]; i.remove(); if (f) cb(f); }; document.body.appendChild(i); i.click(); }
+    async function readEnvFile(f, app) { return checkEnv(JSON.parse(await f.text()), app); }
+    // ---------- fenêtre d'envoi : QR + lien + fichier (bureau et mobile) ----------
+    //  cfg = { app, page, title, kind, name, make: () => data | null, note, empty }
+    async function send(cfg) {
+        const data = cfg.make(); if (data == null) { toast(cfg.empty || 'Rien à envoyer'); return; }
+        const env = envelope(cfg.app, cfg.kind || 'project', cfg.name ? (typeof cfg.name === 'function' ? cfg.name() : cfg.name) : '', data);
+        const url = await link(cfg.page, env), json = JSON.stringify(env), qr = url.length <= QR_MAX ? XQR.svg(url, { ecl: 'L', border: 2 }) : null, mob = document.body.classList.contains('xm');
+        const fname = cfg.file || ((cfg.title || cfg.app) + '_' + safe(env.name) + '.xiii-m.json').replace(/\s+/g, '_');
+        const body = (qr ? '<div class="m-qr">' + qr + '</div><p class="m-hint" style="text-align:center;margin:4px 0 12px">Scannez ce code avec l\'appareil photo' + (cfg.kind === 'return' ? ' de l\'ordinateur' : ' du téléphone') + '.' + (url.length > 1100 ? ' Code dense : affichez-le en grand.' : '') + '</p>'
+            : '<div class="m-card" style="margin-top:0"><b>Trop volumineux pour un QR code</b><p class="m-hint" style="margin:6px 0 0">' + (url.length < 8000 ? 'Utilisez le lien (message, mail, AirDrop…) ou le fichier ci-dessous.' : 'Utilisez le fichier ci-dessous (AirDrop, mail, cloud…) : le lien serait trop long.') + '</p></div>') +
+            '<div class="m-actions" style="margin-top:0">' + (url.length < 8000 ? '<button class="m-btn" id="xm-copy">🔗 Copier le lien</button>' : '') + ((navigator.share && mob) ? '<button class="m-btn" id="xm-share">📤 Partager…</button>' : '') + '<button class="m-btn primary" id="xm-file">⬇️ Fichier</button></div>' +
+            (cfg.note ? '<p class="m-hint" style="margin:12px 2px 0">' + cfg.note + '</p>' : '') + '<p class="m-hint" style="margin:8px 2px 0">' + (json.length / 1024 < 10 ? Math.max(1, Math.round(json.length / 102.4) / 10) : Math.round(json.length / 1024)) + ' Ko · le projet n\'est pas envoyé sur Internet : tout est dans le lien ou le fichier.</p>';
+        const s = host(body, '📱 ' + esc(cfg.heading || (cfg.kind === 'return' ? 'Renvoyer au bureau' : 'Envoyer vers le mobile')), mob);
+        const q = id => $(id, s.ov || s);
+        const c = q('#xm-copy'); if (c) c.onclick = async () => toast(await copy(url) ? '🔗 Lien copié' : '⚠️ Copie impossible : utilisez le fichier');
+        const sh = q('#xm-share'); if (sh) sh.onclick = async () => { try { await navigator.share({ title: cfg.title || cfg.app, text: cfg.title || cfg.app, url }); } catch (e) { } };
+        q('#xm-file').onclick = () => { download(fname, json, 'application/json'); toast('⬇️ Fichier enregistré'); };
+    }
+    // fenêtre : feuille du bas sur mobile, boîte centrée sur le bureau (styles en ligne : aucun CSS requis)
+    function host(html, title, mob) {
+        if (mob) { const s = sheet(html, { title }); s.ov = s.parentNode; return s; }
+        const old = document.getElementById('xm-d-ov'); if (old) old.remove();
+        const ov = document.createElement('div'); ov.id = 'xm-d-ov'; ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:10060;display:flex;align-items:center;justify-content:center;';
+        ov.innerHTML = '<div style="background:var(--bg-menu,#2d2d2d);color:var(--text-main,#fff);width:520px;max-width:94vw;max-height:90vh;overflow-y:auto;border-radius:10px;border:1px solid var(--border-color,#444);padding:20px;box-shadow:0 4px 18px rgba(0,0,0,.5);font-size:13.5px;font-family:inherit;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;border-bottom:1px solid var(--border-color,#444);padding-bottom:8px;"><b style="font-size:15px;">' + title + '</b><span data-x style="cursor:pointer;font-weight:bold;color:var(--text-muted,#aaa);padding:0 4px;">✕</span></div><div class="xm-d">' + html + '</div></div>';
+        ov.addEventListener('mousedown', e => { if (e.target === ov) ov.remove(); }); document.body.appendChild(ov); $('[data-x]', ov).onclick = () => ov.remove();
+        const s = $('.xm-d', ov); s.ov = ov; if (!document.getElementById('xm-d-css')) { const st = document.createElement('style'); st.id = 'xm-d-css'; st.textContent = '#xm-d-ov .m-qr{background:#fff;border-radius:10px;padding:6px;width:min(100%,340px);margin:6px auto}#xm-d-ov .m-qr svg{display:block;width:100%;height:auto}#xm-d-ov .m-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}#xm-d-ov .m-actions>*{flex:1 1 130px}#xm-d-ov .m-btn{padding:9px 12px;font-size:13.5px;border-radius:8px;border:1px solid var(--btn-border,rgba(240,179,120,.35));background:var(--btn-bg,rgba(240,179,120,.12));color:inherit;cursor:pointer;font-weight:600}#xm-d-ov .m-btn.primary{border-color:rgba(240,179,120,.85);background:rgba(240,179,120,.28)}#xm-d-ov .m-hint{font-size:12px;color:var(--text-dim,#888);line-height:1.45}#xm-d-ov .m-card{border:1px solid var(--border-color,#444);border-radius:8px;padding:10px 12px;background:var(--bg-panel-alt,#252525);margin:10px 0}#xm-d-ov .m-sec{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-dim,#888);margin:16px 2px 6px}'; document.head.appendChild(st); }
+        return s;
+    }
+    // ---------- réception : lien (#mx=…), fichier ou lien collé ----------
+    async function fromHash(app, onEnv) {
+        const m = /[#&]mx=([\w-]+)/.exec(location.hash || ''); if (!m) return false;
+        try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { }
+        try { const env = checkEnv(await unpack(m[1]), app); await onEnv(env, 'link'); } catch (e) { toast('⚠️ ' + (e.message || 'Lien illisible'), 4500); }
+        return true;
+    }
+    function importFile(app, onEnv) { pickFile('.json,application/json', async f => { try { await onEnv(await readEnvFile(f, app), 'file'); } catch (e) { toast('⚠️ ' + (e.message || 'Fichier illisible'), 4500); } }); }
+    async function importLink(app, onEnv) {
+        const mob = document.body.classList.contains('xm');
+        const s = host('<label class="m-field" style="display:block;margin-bottom:10px"><span class="m-hint">Collez le lien reçu</span><textarea id="xm-paste" rows="4" style="width:100%;box-sizing:border-box;font-size:16px;padding:10px;border-radius:8px;border:1px solid var(--border-color,#444);background:var(--bg-input,#3a3a3a);color:inherit"></textarea></label><div class="m-actions"><button class="m-btn primary" id="xm-pgo">Importer</button></div>', '🔗 Importer un lien', mob);
+        $('#xm-pgo', s.ov || s).onclick = async () => { const v = $('#xm-paste', s.ov || s).value, m = /mx=([\w-]+)/.exec(v) || [0, v.trim()]; try { const env = checkEnv(await unpack(m[1]), app); if (s.ov) s.ov.remove(); closeSheet(); await onEnv(env, 'link'); } catch (e) { toast('⚠️ ' + (e.message || 'Lien illisible'), 4500); } };
+    }
+    // ---------- panneau « 📱 Mobile » des outils bureau ----------
+    //  cfg = { app, page, title, name:()=>'', make:()=>data|null, apply:async(env)=>message, note }
+    function desktopPanel(cfg) {
+        const s = host('<p class="m-hint" style="margin:0 0 10px">Emportez ce projet sur le téléphone : ouvrez la <b>version mobile</b> de ' + esc(cfg.title) + ' en scannant un QR code, en ouvrant un lien ou en important un fichier.</p>' +
+            '<div class="m-actions" style="margin-top:0"><button class="m-btn primary" id="xm-go">📱 Envoyer vers le mobile</button><button class="m-btn" id="xm-open">↗ Ouvrir la version mobile ici</button></div>' +
+            (cfg.apply ? '<div class="m-sec">Récupérer ce qui a été fait sur le mobile</div><div class="m-actions" style="margin-top:0"><button class="m-btn" id="xm-ifile">📂 Importer un fichier</button><button class="m-btn" id="xm-ilink">🔗 Coller un lien</button></div><p class="m-hint" style="margin:8px 2px 0">' + (cfg.returnNote || 'Sur le mobile, « Renvoyer au bureau » produit le fichier ou le lien à importer ici.') + '</p>' : ''), '📱 Version mobile — ' + esc(cfg.title), false);
+        const q = id => $(id, s.ov);
+        q('#xm-go').onclick = () => { s.ov.remove(); send({ app: cfg.app, page: cfg.page, title: cfg.title, name: cfg.name, make: cfg.make, note: cfg.note, empty: cfg.empty }); };
+        q('#xm-open').onclick = async () => { const d = cfg.make(); if (d == null) { toast(cfg.empty || 'Rien à envoyer'); return; } s.ov.remove(); window.open(await link(cfg.page, envelope(cfg.app, 'project', typeof cfg.name === 'function' ? cfg.name() : cfg.name, d)), '_blank'); };
+        if (cfg.apply) { const ap = async env => { s.ov && s.ov.remove(); const m = await cfg.apply(env); if (m) toast(m, 5000); }; q('#xm-ifile').onclick = () => importFile(cfg.app, ap); q('#xm-ilink').onclick = () => { s.ov.remove(); importLink(cfg.app, async env => { const m = await cfg.apply(env); if (m) toast(m, 5000); }); }; }
+    }
+    // retour par lien sur le bureau (#mx=… de type return)
+    function desktopBoot(cfg) { return fromHash(cfg.app, async env => { if (env.kind === 'return' && cfg.apply) { const m = await cfg.apply(env); if (m) toast(m, 5000); } }); }
+    // ---------- thème, en-tête et menu des pages mobiles ----------
+    function initTheme() { let p = {}; try { p = JSON.parse(localStorage.getItem('hubXIII.prefs')) || {}; } catch (e) { } document.body.classList.add('xm'); document.body.classList.toggle('light-theme', p.theme === 'light'); const m = document.querySelector('meta[name=theme-color]'); if (m) m.content = p.theme === 'light' ? '#ffffff' : '#222222'; }
+    function toggleTheme() { let p = {}; try { p = JSON.parse(localStorage.getItem('hubXIII.prefs')) || {}; } catch (e) { } p.theme = p.theme === 'light' ? 'dark' : 'light'; try { localStorage.setItem('hubXIII.prefs', JSON.stringify(p)); } catch (e) { } initTheme(); }
+    //  menu standard ⋯ : cfg = { app, deskPage, items:[{icon,label,sub,run}] , onImport(env, via) , sendReturn() }
+    function menu(cfg) {
+        const items = (cfg.items || []).concat([
+            cfg.onImport ? { icon: '📂', label: 'Importer un fichier', sub: 'Envoi du bureau (.xiii-m.json)', run: () => importFile(cfg.app, cfg.onImport) } : null,
+            cfg.onImport ? { icon: '🔗', label: 'Coller un lien', sub: 'Lien ou QR reçu du bureau', run: () => importLink(cfg.app, cfg.onImport) } : null,
+            cfg.sendReturn ? { icon: '📤', label: 'Renvoyer au bureau', sub: 'QR code, lien ou fichier', run: cfg.sendReturn } : null,
+            { icon: '🌓', label: 'Thème clair / sombre', run: toggleTheme },
+            cfg.deskPage ? { icon: '🖥️', label: 'Version bureau', sub: 'Interface complète', run: () => { try { sessionStorage.setItem('xiiiDesk', '1'); } catch (e) { } location.href = cfg.deskPage + '?desktop=1'; } } : null,
+            { icon: '🏠', label: 'Accueil SUITE XIII', run: () => { location.href = 'index.html'; } }].filter(Boolean));
+        const s = sheet('<div class="m-list" style="margin:0">' + items.map((it, i) => '<button class="m-item" data-i="' + i + '"><span class="ico">' + it.icon + '</span><span class="grow"><b>' + esc(it.label) + '</b>' + (it.sub ? '<small>' + esc(it.sub) + '</small>' : '') + '</span></button>').join('') + '</div><p class="m-credit">Application développée par Matthieu Lamotte</p>', { title: 'Menu' });
+        $$('[data-i]', s).forEach(b => b.onclick = () => { closeSheet(); setTimeout(() => items[+b.dataset.i].run(), 60); });
+    }
+    return { FORMAT, $, $$, esc, uid, safe, isPhone, pack, unpack, link, envelope, checkEnv, load, save, drop, toast, sheet, closeSheet, ask, download, copy, pickFile, readEnvFile, send, host, fromHash, importFile, importLink, desktopPanel, desktopBoot, initTheme, toggleTheme, menu };
+})();
+// 🏠 retour à l'accueil SUITE XIII : même bouton en tête de chaque version mobile
+(function () {
+    const add = () => { const top = document.querySelector('.m-top'); if (!top || top.querySelector('.xm-home')) return; const a = document.createElement('a'); a.className = 'm-ibtn plain xm-home'; a.href = 'index.html'; a.title = 'Accueil SUITE XIII'; a.setAttribute('aria-label', 'Accueil'); a.textContent = '🏠'; a.style.cssText = 'text-decoration:none;font-size:17px;display:inline-flex;align-items:center;justify-content:center'; top.insertBefore(a, top.firstChild); };
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', add); else add();
+})();
+
+// 📱 XIII Équipe : une fois dans l'application, on y reste (l'accueil ramène à l'application, pas au site)
+(function () {
+    if (window.__xinapp) return; window.__xinapp = 1;
+    var page = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
+    try { if (page === 'equipe.html' && (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (window.matchMedia && matchMedia('(display-mode: standalone)').matches))) sessionStorage.setItem('xiii.inapp', '1'); } catch (e) { }
+    function inApp() { try { return sessionStorage.getItem('xiii.inapp') === '1'; } catch (e) { return false; } }
+    if (!inApp()) return;
+    if (page === 'index.html' || page === '') { location.replace('equipe.html'); return; }
+    document.addEventListener('click', function (e) {
+        var a = e.target.closest && e.target.closest('a[href]'); if (!a) return;
+        var u; try { u = new URL(a.getAttribute('href'), location.href); } catch (er) { return; }
+        if (u.origin !== location.origin) return;
+        var f = (u.pathname.split('/').pop() || 'index.html').toLowerCase();
+        if (f === 'index.html' || f === '') { e.preventDefault(); e.stopPropagation(); location.href = 'equipe.html'; return; }
+        if (a.target === '_blank') { a.removeAttribute('target'); }
+    }, true);
+})();
+
+</script>
+<script>
+// =====================================================================
+//  CADRO XIII — bases de données : capteurs (cellules), montures, adaptateurs, formats, écrans
+//  Dimensions de capteur = valeurs constructeur arrondies (zone active du mode indiqué) : à vérifier sur la fiche de votre caméra.
+//  [nom, largeur mm, hauteur mm, photosites en largeur, photosites en hauteur, monture(s) native(s), filtre ('bayer'|'3ccd'|'mono'), catégorie]
+// =====================================================================
+const CD_SENS = [
+    ['ARRI Alexa 35 · Open Gate 4.6K', 27.99, 19.22, 4608, 3164, 'LPL PL', 'bayer', 'Cinéma'],
+    ['ARRI Alexa Mini LF · Open Gate', 36.70, 25.54, 4448, 3096, 'LPL PL', 'bayer', 'Cinéma'],
+    ['ARRI Alexa Mini / SXT · Open Gate 3.4K', 28.25, 18.17, 3424, 2202, 'PL', 'bayer', 'Cinéma'],
+    ['ARRI Alexa / Amira · 16:9 2.8K', 23.76, 13.37, 2880, 1620, 'PL', 'bayer', 'Cinéma'],
+    ['ARRI Alexa 65 · Open Gate', 54.12, 25.58, 6560, 3100, '', 'bayer', 'Cinéma'],
+    ['RED V-Raptor 8K VV', 40.96, 21.60, 8192, 4320, 'PL RF', 'bayer', 'Cinéma'],
+    ['RED Komodo 6K S35', 27.03, 14.26, 6144, 3240, 'RF', 'bayer', 'Cinéma'],
+    ['RED Gemini 5K S35', 30.72, 15.80, 5120, 2700, 'PL', 'bayer', 'Cinéma'],
+    ['Sony Venice · 6K plein format 3:2', 36.20, 24.10, 6048, 4032, 'PL E', 'bayer', 'Cinéma'],
+    ['Sony Venice 2 · 8.6K plein format', 36.20, 24.10, 8640, 5760, 'PL E', 'bayer', 'Cinéma'],
+    ['Sony FX9 · 6K plein format', 35.70, 18.80, 6048, 3192, 'E', 'bayer', 'Cinéma'],
+    ['Canon C70 / C300 Mk III · S35 4K', 26.20, 13.80, 4096, 2160, 'RF EF', 'bayer', 'Cinéma'],
+    ['Canon C500 Mk II · plein format 5.9K', 38.10, 20.10, 5952, 3140, 'EF PL', 'bayer', 'Cinéma'],
+    ['Blackmagic URSA Mini Pro 12K', 27.03, 14.25, 12288, 6480, 'EF PL', 'bayer', 'Cinéma'],
+    ['Blackmagic URSA Cine 12K LF', 35.64, 23.32, 12288, 8040, 'PL EF', 'bayer', 'Cinéma'],
+    ['Blackmagic Cinema Camera 6K plein format', 36.00, 24.00, 6048, 4032, 'L', 'bayer', 'Cinéma'],
+    ['Blackmagic Pocket 6K / 6K Pro', 23.10, 12.99, 6144, 3456, 'EF', 'bayer', 'Cinéma'],
+    ['Blackmagic Pocket 4K / G2', 18.96, 10.00, 4096, 2160, 'MFT', 'bayer', 'Cinéma'],
+    ['Sony FX6 / FX3 / A7S III · 12 Mpx', 35.60, 23.80, 4240, 2832, 'E', 'bayer', 'Hybride'],
+    ['Sony A7 IV', 35.90, 23.90, 7008, 4672, 'E', 'bayer', 'Hybride'],
+    ['Sony A1', 35.90, 24.00, 8640, 5760, 'E', 'bayer', 'Hybride'],
+    ['Sony α6400 / ZV-E10 (APS-C)', 23.50, 15.60, 6000, 4000, 'E', 'bayer', 'Hybride'],
+    ['Canon EOS R5 / R5 C', 36.00, 24.00, 8192, 5464, 'RF', 'bayer', 'Hybride'],
+    ['Canon EOS R6 Mark II', 35.90, 23.90, 6000, 4000, 'RF', 'bayer', 'Hybride'],
+    ['Canon EOS R7 (APS-C)', 22.30, 14.80, 6960, 4640, 'RF', 'bayer', 'Hybride'],
+    ['Panasonic S1H', 35.60, 23.80, 6024, 4020, 'L', 'bayer', 'Hybride'],
+    ['Panasonic GH6 (Micro 4/3)', 17.30, 13.00, 5776, 4336, 'MFT', 'bayer', 'Hybride'],
+    ['Panasonic GH5 II (Micro 4/3)', 17.30, 13.00, 5184, 3888, 'MFT', 'bayer', 'Hybride'],
+    ['Nikon Z9', 35.90, 23.90, 8256, 5504, 'Z', 'bayer', 'Hybride'],
+    ['Nikon Z6 III', 35.90, 23.90, 6048, 4032, 'Z', 'bayer', 'Hybride'],
+    ['Fujifilm X-H2S (APS-C)', 23.50, 15.60, 6240, 4160, 'X', 'bayer', 'Hybride'],
+    ['Fujifilm GFX100 II (moyen format)', 43.80, 32.90, 11648, 8736, 'GFX', 'bayer', 'Hybride'],
+    ['Sigma fp (plein format)', 35.90, 23.90, 6000, 4000, 'L', 'bayer', 'Hybride'],
+    ['Sony PXW-Z750 · 3 CMOS 2/3″ 4K', 9.59, 5.39, 3840, 2160, 'B4', '3ccd', 'Broadcast'],
+    ['Caméra broadcast 2/3″ HD (3 capteurs)', 9.59, 5.39, 1920, 1080, 'B4', '3ccd', 'Broadcast'],
+    ['Sony PXW-Z280 · 3 CMOS 1/2″', 6.40, 3.60, 1920, 1080, '', '3ccd', 'Broadcast'],
+    ['Caméscope 1/3″ (3 capteurs)', 4.80, 2.70, 1920, 1080, '', '3ccd', 'Broadcast'],
+    ['Caméscope 1″ (capteur unique)', 13.20, 7.43, 3840, 2160, '', 'bayer', 'Broadcast'],
+    ['iPhone 15 Pro · caméra principale (≈ 1/1.28″)', 9.80, 7.35, 4032, 3024, '', 'bayer', 'Téléphone'],
+    ['Smartphone · capteur 1/2.55″ (typique)', 5.60, 4.20, 4000, 3000, '', 'bayer', 'Téléphone'],
+    ['Plein format 36 × 24 (6000 × 4000)', 36.00, 24.00, 6000, 4000, '', 'bayer', 'Formats'],
+    ['Super 35 · 3 perf (24,89 × 18,66)', 24.89, 18.66, 4096, 3072, 'PL', 'bayer', 'Formats'],
+    ['Super 35 · 16:9 (24,89 × 14)', 24.89, 14.00, 4096, 2304, 'PL', 'bayer', 'Formats'],
+    ['Academy 35 mm (22,0 × 16,0)', 22.00, 16.00, 3520, 2560, 'PL', 'bayer', 'Formats'],
+    ['Super 16 (12,52 × 7,41)', 12.52, 7.41, 2048, 1212, 'PL C', 'bayer', 'Formats'],
+    ['16 mm (10,26 × 7,49)', 10.26, 7.49, 2048, 1495, 'C', 'bayer', 'Formats'],
+    ['APS-C Canon (22,3 × 14,9)', 22.30, 14.90, 6000, 4000, 'EF', 'bayer', 'Formats'],
+    ['APS-C Sony / Nikon / Fuji (23,5 × 15,6)', 23.50, 15.60, 6000, 4000, '', 'bayer', 'Formats'],
+    ['Micro 4/3 (17,3 × 13,0)', 17.30, 13.00, 4608, 3456, 'MFT', 'bayer', 'Formats'],
+    ['1 pouce (13,2 × 8,8)', 13.20, 8.80, 5472, 3648, '', 'bayer', 'Formats'],
+    ['Moyen format 44 × 33', 43.80, 32.90, 8256, 6192, '', 'bayer', 'Formats'],
+    ['65 mm 5 perf (52,48 × 23,01)', 52.48, 23.01, 6560, 2876, '', 'bayer', 'Formats'],
+    ['IMAX 15/70 (70,41 × 52,63)', 70.41, 52.63, 8192, 6124, '', 'mono', 'Formats']
+].map((r, i) => ({ id: 's' + i, name: r[0], w: r[1], h: r[2], rw: r[3], rh: r[4], mounts: r[5], cfa: r[6], cat: r[7] }));
+
+// monture : [nom, tirage mécanique (distance de registre) mm]
+const CD_MOUNTS = [
+    ['PL', 52.00], ['LPL', 44.00], ['PV (Panavision)', 57.15], ['EF / EF-S', 44.00], ['RF', 20.00], ['E (Sony FE)', 18.00], ['L (Leica / Sigma / Panasonic)', 20.00],
+    ['Z (Nikon)', 16.00], ['F (Nikon)', 46.50], ['MFT (Micro 4/3)', 19.25], ['X (Fujifilm)', 17.70], ['GFX (Fujifilm)', 26.70], ['EF-M (Canon)', 18.00],
+    ['B4 (2/3″ broadcast)', 48.00], ['C (16 mm)', 17.526], ['CS', 12.50], ['M42', 45.46], ['K (Pentax)', 45.46], ['FD (Canon)', 42.00], ['Leica M', 27.80], ['A (Sony / Minolta)', 44.50], ['FZ (Sony)', 19.00]
+].map(m => ({ id: m[0].split(' ')[0], name: m[0], ffd: m[1] }));
+
+// adaptateurs optiques : facteur de focale k (focale équivalente = focale × k ; ouverture × k)
+const CD_ADP = [
+    ['none', 'Aucun (monture identique ou native)', 1],
+    ['auto', 'Bague passive (calculée selon les deux montures)', 1],
+    ['0.58', 'Réducteur de focale 0,58× (élargit, +1,5 diaphragme)', .58],
+    ['0.64', 'Réducteur de focale 0,64× (ex. Speed Booster XL, +1,3)', .64],
+    ['0.71', 'Réducteur de focale 0,71× (ex. Speed Booster Ultra, +1)', .71],
+    ['0.75', 'Réducteur de focale 0,75×', .75],
+    ['1.25', 'Extender 1,25×', 1.25],
+    ['1.4', 'Doubleur 1,4× (−1 diaphragme)', 1.4],
+    ['2', 'Doubleur 2× (−2 diaphragmes)', 2],
+    ['custom', 'Personnalisé (facteur à saisir)', 1]
+].map(a => ({ id: a[0], name: a[1], k: a[2] }));
+
+// couverture des objectifs (diamètre du cercle image, mm)
+const CD_COVER = [['S16', 'Super 16 (Ø 14,5)', 14.5], ['B4', '2/3″ B4 (Ø 11)', 11], ['MFT', 'Micro 4/3 (Ø 21,6)', 21.6], ['APSC', 'APS-C (Ø 28,4)', 28.4], ['S35', 'Super 35 (Ø 31,1)', 31.1], ['FF', 'Plein format (Ø 43,3)', 43.27], ['LF', 'Grand format / VistaVision (Ø 46,5)', 46.5], ['MF', 'Moyen format 44 × 33 (Ø 55)', 55], ['65', '65 mm (Ø 57,3)', 57.3]].map(c => ({ id: c[0], name: c[1], d: c[2] }));
+const CD_ASPECT = [['1.7778', '16:9 (1,78)'], ['1.8963', '17:9 DCI (1,90)'], ['1.85', '1,85:1'], ['2', '2:1 Univisium'], ['2.39', '2,39:1 Scope'], ['2.35', '2,35:1'], ['1.3333', '4:3'], ['1.5', '3:2'], ['1', '1:1'], ['0.8', '4:5'], ['0.5625', '9:16 vertical'], ['2.76', '2,76:1 Ultra Panavision'], ['1.43', '1,43:1 IMAX']];
+const CD_REC = [['1920', 'HD 1920'], ['2048', '2K DCI 2048'], ['3840', 'UHD 3840'], ['4096', '4K DCI 4096'], ['4608', '4,6K 4608'], ['5120', '5K 5120'], ['6144', '6K 6144'], ['7680', '8K UHD 7680'], ['8192', '8K DCI 8192'], ['12288', '12K 12288']];
+const CD_SQ = [['1', 'Sphérique (1×)'], ['1.25', 'Anamorphique 1,25×'], ['1.33', 'Anamorphique 1,33×'], ['1.5', 'Anamorphique 1,5×'], ['1.8', 'Anamorphique 1,8×'], ['2', 'Anamorphique 2×']];
+const CD_LED = [0.7, 0.9, 1.2, 1.5, 1.8, 1.9, 2.0, 2.5, 2.6, 2.9, 3.9, 4.8, 5.9];
+// écrans : [nom, diagonale pouces, pixels L, pixels H]
+const CD_SCR = [['TV 43″ 4K', 43, 3840, 2160], ['TV 55″ 4K', 55, 3840, 2160], ['TV 65″ 4K', 65, 3840, 2160], ['TV 75″ 4K', 75, 3840, 2160], ['TV 85″ 4K', 85, 3840, 2160], ['Moniteur 24″ Full HD', 24, 1920, 1080], ['Moniteur 27″ Full HD', 27, 1920, 1080], ['Moniteur 27″ QHD', 27, 2560, 1440], ['Moniteur 32″ 4K', 32, 3840, 2160], ['Portable 15,6″ Full HD', 15.6, 1920, 1080], ['Portable 13,3″ Retina', 13.3, 2560, 1600], ['Tablette 10,9″', 10.9, 2360, 1640], ['Smartphone 6,1″', 6.1, 2532, 1170], ['Vidéoprojecteur écran 100″ Full HD', 100, 1920, 1080]];
+// tailles de plan (hauteur de cadre mesurée sur un personnage) : [hauteur max du cadre / taille du personnage, nom]
+const CD_SHOTS = [[.12, 'Très gros plan (œil, détail)'], [.2, 'Gros plan serré'], [.32, 'Gros plan (visage)'], [.5, 'Plan rapproché poitrine'], [.62, 'Plan rapproché taille'], [.8, 'Plan américain'], [1.0, 'Plan italien (genoux)'], [1.25, 'Plan en pied (serré)'], [1.7, 'Plan en pied'], [3, 'Plan large'], [8, 'Plan d\'ensemble'], [1e9, 'Plan de grand ensemble']];
+const CD_PRIMES = [8, 10, 12, 14, 16, 18, 21, 24, 25, 28, 32, 35, 40, 50, 65, 75, 85, 100, 135, 150, 180, 200, 250, 300, 400, 500, 600];
+
+// séries d'objectifs (valeurs constructeur arrondies) : monture, couverture (id CD_COVER), ouverture max (T ou f), focales, mise au point minimale par focale [focale max, MAP m]
+const CD_LENSES = [
+    ['sig', 'ARRI Signature Prime', 'LPL', 'LF', 1.8, [12, 15, 18, 21, 25, 29, 35, 40, 47, 58, 75, 95, 125, 150, 200, 280], [[29, .35], [58, .45], [95, .75], [150, 1.2], [280, 1.9]]],
+    ['up', 'ARRI Ultra Prime', 'PL', 'S35', 1.9, [8, 10, 12, 14, 16, 20, 24, 28, 32, 40, 50, 65, 85, 100, 135, 180], [[16, .3], [40, .4], [65, .6], [100, 1], [180, 1.5]]],
+    ['mp', 'ARRI / Zeiss Master Prime', 'PL', 'S35', 1.3, [12, 14, 16, 18, 21, 25, 27, 32, 35, 40, 50, 65, 75, 100, 135, 150], [[21, .35], [40, .44], [75, .8], [150, 1.5]]],
+    ['s4', 'Cooke S4/i', 'PL', 'S35', 2, [12, 14, 16, 18, 21, 25, 27, 32, 35, 40, 50, 65, 75, 100, 135, 150, 180, 300], [[21, .25], [40, .4], [75, .6], [135, 1], [300, 2]]],
+    ['s7', 'Cooke S7/i (plein format)', 'PL', 'FF', 2, [16, 18, 21, 25, 27, 32, 40, 50, 65, 75, 100, 135, 180, 300], [[27, .35], [50, .5], [100, .9], [300, 2.1]]],
+    ['sup', 'Zeiss Supreme Prime', 'PL', 'LF', 1.5, [15, 18, 21, 25, 29, 35, 50, 65, 85, 100, 135, 150, 200], [[29, .3], [50, .45], [100, .9], [200, 1.5]]],
+    ['cp3', 'Zeiss CP.3', 'PL', 'FF', 2.1, [15, 18, 21, 25, 28, 35, 50, 85, 100, 135], [[28, .25], [50, .45], [135, 1]]],
+    ['sigff', 'Sigma Cine FF High Speed', 'PL', 'FF', 1.5, [14, 20, 24, 28, 35, 40, 50, 65, 85, 105, 135], [[24, .25], [50, .4], [85, .85], [135, .875]]],
+    ['cne', 'Canon CN-E Prime', 'EF', 'FF', 1.3, [14, 20, 24, 35, 50, 85, 135], [[24, .3], [50, .45], [135, .8]]],
+    ['lux', 'Leitz Summilux-C', 'PL', 'S35', 1.4, [16, 18, 21, 25, 29, 35, 40, 50, 65, 75, 100, 135], [[29, .3], [50, .45], [100, .9], [135, 1]]],
+    ['vesp', 'DZOFilm Vespid', 'PL', 'LF', 2.1, [16, 21, 25, 35, 40, 50, 75, 90, 100, 125], [[25, .25], [50, .45], [125, .8]]],
+    ['xeen', 'Samyang Xeen CF', 'PL', 'FF', 1.5, [16, 24, 35, 50, 85], [[24, .25], [50, .45], [85, 1.1]]],
+    ['nik', 'Panasonic Lumix S / Sony G Master (photo)', 'E', 'FF', 1.4, [14, 24, 35, 50, 85, 135], [[35, .25], [85, .8], [135, .7]]],
+    ['z1', 'Zoom Angénieux Optimo 24-290', 'PL', 'S35', 2.8, [24, 35, 50, 85, 135, 200, 290], [[290, 1.22]]],
+    ['z2', 'Zoom Fujinon Premista 28-100', 'PL', 'LF', 2.9, [28, 35, 50, 75, 100], [[100, .8]]],
+    ['z3', 'Zoom Canon CN-E 18-80 (servo)', 'EF', 'S35', 4.4, [18, 24, 35, 50, 80], [[80, .5]]],
+    ['z4', 'Zoom Sony FE 24-70 GM II', 'E', 'FF', 2.8, [24, 35, 50, 70], [[70, .21]]],
+    ['z5', 'Zoom Sony FE PZ 28-135 G', 'E', 'FF', 4, [28, 35, 50, 70, 100, 135], [[135, .95]]],
+    ['b4', 'Zoom broadcast 2/3″ B4 (22×, 7,6-168)', 'B4', 'B4', 1.9, [7.6, 10, 15, 25, 50, 100, 168], [[168, .8]]]
+].map(l => ({ id: l[0], name: l[1], mount: l[2], cover: l[3], t: l[4], focals: l[5], mod: l[6] }));
+const CD_LENS_MOD = (L, f) => { if (!L) return null; for (const [mx, m] of L.mod) if (f <= mx + .01) return m; return L.mod[L.mod.length - 1][1]; };
+
+</script>
+<script>
+// =====================================================================
+//  CADRO XIII — moteur de calcul (aucun accès au DOM : partagé avec la version mobile)
+//  Optique : lentille mince, objectif rectiligne. Toutes les formules sont restituées pas à pas (fonctions « explain »).
+// =====================================================================
+const CD = (() => {
+    const nfm = new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 20 });
+    const nf = (x, d) => { if (x == null || !isFinite(x)) return '—'; d = d == null ? 2 : d; const a = Math.abs(x); if (a !== 0 && a < Math.pow(10, -d)) d = Math.min(6, d + 2); return Number(x).toLocaleString('fr-FR', { maximumFractionDigits: d, minimumFractionDigits: 0 }); };
+    const rad = d => d * Math.PI / 180, deg = r => r * 180 / Math.PI, clamp = (x, a, b) => Math.min(b, Math.max(a, x));
+    const FFD = 43.267; // diagonale du plein format 36 × 24
+    const mountOf = id => CD_MOUNTS.find(m => m.id === id) || null;
+    const sensOf = id => CD_SENS.find(s => s.id === id) || null;
+    const kOf = S => S.adp === 'custom' ? (+S.k > 0 ? +S.k : 1) : (S.adp === 'auto' || S.adp === 'none') ? 1 : ((CD_ADP.find(a => a.id === S.adp) || { k: 1 }).k);
+    function defaults() {
+        const s = CD_SENS.find(x => /FX6/.test(x.name)) || CD_SENS[0];
+        return { sid: s.id, name: s.name, sw: s.w, sh: s.h, srw: s.rw, srh: s.rh, cfa: s.cfa, aspect: 1.7778, recW: 3840, mode: 'full',
+            lmount: 'PL', cmount: 'E', cover: 'S35', adp: 'auto', k: 1, f: 35, N: 2.8, sq: 1,
+            s: 3, solve: 'field', subjH: 1.75, frac: 0.9, wantW: 2, camH: 1.5, coc: 1500,
+            roll: 0, scrType: 'led', pitch: 2.6, diag: 55, rx: 3840, ry: 2160, ang: 0, sscr: 4, sfocus: 4, pat: 'grid', pfill: .8, hz: 3840, fps: 25, shut: 180, lens: '' };
+    }
+    // ----- zone utile du capteur selon le mode d'enregistrement
+    function used(S) {
+        const p = S.sw / S.srw, sq = +S.sq || 1, A = S.aspect / sq; let w, h, up = false;
+        if (S.mode === 'window') { w = S.recW * p; if (w > S.sw) { w = S.sw; up = true; } h = w / A; if (h > S.sh) { h = S.sh; w = h * A; } }
+        else { w = S.sw; h = w / A; if (h > S.sh) { h = S.sh; w = h * A; } }
+        const diag = Math.hypot(w, h), nw = w / p;
+        return { p, A, w, h, diag, cf: FFD / diag, nw, nh: h / p, pOut: w / S.recW, recH: Math.round(S.recW / S.aspect), down: nw / S.recW, up, sq };
+    }
+    // ----- angles de champ
+    function fov(S) {
+        const u = used(S), k = kOf(S), fe = S.f * k, fh = fe / u.sq, fv = fe;
+        const th = u.w / (2 * fh), tv = u.h / (2 * fv);
+        return { u, k, fe, fh, fv, h: deg(2 * Math.atan(th)), v: deg(2 * Math.atan(tv)), d: deg(2 * Math.atan(Math.hypot(th, tv))), eq: fe * u.cf, eqN: S.N * k * u.cf, stops: -2 * Math.log2(k), Ne: S.N * k };
+    }
+    // ----- taille de champ à une distance (m) : lentille mince, distance mesurée de l'objectif au sujet
+    function field(S, s) { const F = fov(S), sm = s * 1000; return { F, W: F.u.w * (sm - F.fh) / F.fh / 1000, H: F.u.h * (sm - F.fv) / F.fv / 1000, m: F.fv / (sm - F.fv) }; }
+    function needFocal(S, s, Hsub, frac) {
+        const u = used(S), k = kOf(S), Vf = Hsub / frac * 1000, sm = s * 1000, fv = u.h * sm / (Vf + u.h);
+        return { Vf: Vf / 1000, fv, f: fv / k, u, k };
+    }
+    function distFor(S, Wm) { const F = fov(S); return { F, s: F.fh * (Wm * 1000 / F.u.w + 1) / 1000 }; }
+    function shotName(Hf, Hsub) { const r = Hf / Hsub; for (const [t, n] of CD_SHOTS) if (r <= t) return n; return CD_SHOTS[CD_SHOTS.length - 1][1]; }
+    const nearestPrime = f => CD_PRIMES.reduce((a, b) => Math.abs(b - f) < Math.abs(a - f) ? b : a);
+    // ----- profondeur de champ
+    function dof(S, s) {
+        const F = fov(S), f = F.fv, N = F.Ne, c = F.u.diag / (S.coc || 1500), sm = s * 1000, H = f * f / (N * c) + f;
+        const near = sm * (H - f) / (H + sm - 2 * f), far = sm < H ? sm * (H - f) / (H - sm) : Infinity;
+        return { F, c, H: H / 1000, near: near / 1000, far: far / 1000, tot: (far - near) / 1000, front: (sm - near) / 1000, back: (far - sm) / 1000 };
+    }
+    // ----- monture, adaptateur, couverture
+    function mount(S) {
+        const L = mountOf(S.lmount), C = mountOf(S.cmount), k = kOf(S), cov = CD_COVER.find(c => c.id === S.cover) || CD_COVER[4], u = used(S);
+        const o = { L, C, k, cov, u, thick: L && C ? L.ffd - C.ffd : 0, same: L && C && L.id === C.id };
+        o.eff = cov.d * k; o.coverOk = o.eff >= u.diag * 0.99; o.coverRatio = o.eff / u.diag;
+        if (o.same || S.adp === 'none') { o.kind = 'native'; o.ok = true; o.msg = o.same ? 'Même monture : aucun adaptateur nécessaire.' : 'Aucun adaptateur choisi : vérifiez que les montures sont bien compatibles.'; }
+        else if (S.adp === 'auto') {
+            if (o.thick > 0.05) { o.kind = 'ring'; o.ok = true; o.msg = 'Bague passive possible : épaisseur calculée ' + nf(o.thick, 2) + ' mm (' + L.name + ' → ' + C.name + '). Aucune optique : le cadre ne change pas.'; }
+            else if (o.thick < -0.05) { o.kind = 'impossible'; o.ok = false; o.msg = 'Impossible avec une bague passive : le tirage de l\'objectif (' + nf(L.ffd, 2) + ' mm) est plus court que celui de la caméra (' + nf(C.ffd, 2) + ' mm). Il faudrait une optique de correction (réducteur / adaptateur à verre) ou une autre monture.'; }
+            else { o.kind = 'ring'; o.ok = true; o.msg = 'Tirages identiques : adaptation sans épaisseur.'; }
+        } else { o.kind = 'optical'; o.ok = true; o.msg = 'Adaptateur optique ' + nf(o.k, 2) + '× : il intègre le changement de monture ; vérifiez qu\'il existe pour ' + (L ? L.name : '?') + ' → ' + (C ? C.name : '?') + '.'; }
+        return o;
+    }
+    // ----- moiré
+    function pitchScreen(S) { return S.scrType === 'led' ? +S.pitch : (S.diag * 25.4 / Math.hypot(S.rx, S.ry)); }
+    function moire(S) {
+        const u = used(S), k = kOf(S), f = S.f * k, N = S.N * k, sm = S.sscr * 1000, sf = (S.sfocus || S.sscr) * 1000, pitch = pitchScreen(S), co = Math.cos(rad(S.ang || 0)), m = f / (sm - f);
+        const pImg = pitch * co * m, ps = u.p, r = pImg / ps, rOut = pImg / u.pOut, bayer = S.cfa === 'bayer';
+        const uf = 1 / r; let ua = 0, beat = Infinity; if (uf > 0.5) { ua = Math.abs(uf - Math.round(uf)); beat = ua > 1e-6 ? 1 / ua : Infinity; }
+        const b = f * f / (N * (sf - f)) * Math.abs(sm - sf) / sm, rb = b / pImg;
+        const lvl = r < 1 ? 4 : r < 2 ? 3 : r < 2.5 ? 2 : r < 4 ? 1 : 0, names = ['Très faible', 'Faible', 'Modéré', 'Fort', 'Très fort'];
+        const chroma = bayer && r < 4;
+        const dmin = rt => f * (1 + pitch * co / (rt * ps)) / 1000;
+        return { u, k, f, N, pitch, co, m, pImg, ps, r, rOut, bayer, uf, ua, beat, b, rb, lvl, name: names[lvl], chroma, dmin, pMax: rt => rt * ps * (sm - f) / f / co,
+            Wf: u.w * (sm - f) / f / 1000, npx: u.w * (sm - f) / f / pitch, blurOk: rb >= 2 ? 'invisible' : rb >= 1 ? 'très atténué' : rb >= .5 ? 'atténué' : 'négligeable', sm, sf };
+    }
+    // ----- explications pas à pas : [{t, f, v, r, n}]
+    function explainCadre(S, s) {
+        const F = fov(S), u = F.u, sm = s * 1000, W = field(S, s), st = [];
+        st.push({ t: 'Zone utile du capteur', f: S.mode === 'window' ? 'largeur = pixels enregistrés × pas des photosites' : 'largeur = largeur du capteur, hauteur = largeur ÷ (format ÷ anamorphose)', v: 'pas des photosites p = ' + nf(S.sw, 2) + ' mm ÷ ' + S.srw + ' = ' + nf(u.p * 1000, 2) + ' µm · format utile = ' + nf(S.aspect, 3) + ' ÷ ' + nf(u.sq, 2) + ' = ' + nf(u.A, 3), r: nf(u.w, 2) + ' × ' + nf(u.h, 2) + ' mm (diagonale ' + nf(u.diag, 2) + ' mm)', n: u.up ? 'Le mode demandé dépasse la largeur du capteur : zone limitée au capteur entier.' : '' });
+        st.push({ t: 'Facteur de recadrage (crop) par rapport au plein format', f: 'cf = 43,27 mm ÷ diagonale utile', v: '43,27 ÷ ' + nf(u.diag, 2), r: nf(u.cf, 2) + '×', n: 'La diagonale du plein format 36 × 24 mm vaut 43,27 mm.' });
+        st.push({ t: 'Focale effective (adaptateur compris)', f: 'f_eff = f × k', v: nf(S.f, 1) + ' mm × ' + nf(F.k, 2) + (u.sq !== 1 ? ' · focale horizontale = f_eff ÷ anamorphose = ' + nf(F.fh, 1) + ' mm' : ''), r: nf(F.fe, 1) + ' mm', n: F.k !== 1 ? 'Le facteur k multiplie aussi l\'ouverture : f/' + nf(S.N, 1) + ' devient f/' + nf(F.Ne, 2) + ' (' + (F.stops >= 0 ? '+' : '') + nf(F.stops, 2) + ' diaph.).' : '' });
+        st.push({ t: 'Angle de champ horizontal', f: 'HFOV = 2 · arctan( largeur ÷ (2 · f_h) )', v: '2 · arctan( ' + nf(u.w, 2) + ' ÷ (2 × ' + nf(F.fh, 1) + ') )', r: nf(F.h, 1) + '°' });
+        st.push({ t: 'Angle de champ vertical et diagonal', f: 'VFOV = 2 · arctan( hauteur ÷ (2 · f_v) ) ; DFOV avec la diagonale', v: '2 · arctan( ' + nf(u.h, 2) + ' ÷ (2 × ' + nf(F.fv, 1) + ') )', r: 'V ' + nf(F.v, 1) + '° · D ' + nf(F.d, 1) + '°' });
+        st.push({ t: 'Focale équivalente plein format', f: 'f_éq = f_eff × cf', v: nf(F.fe, 1) + ' × ' + nf(u.cf, 2), r: nf(F.eq, 1) + ' mm', n: 'Même cadre qu\'un objectif de ' + nf(F.eq, 0) + ' mm sur un capteur 36 × 24 mm. Ouverture équivalente (profondeur de champ) : f/' + nf(F.eqN, 1) + '.' });
+        st.push({ t: 'Taille du champ à ' + nf(s, 2) + ' m', f: 'largeur du champ = largeur du capteur × (d − f) ÷ f   (lentille mince)', v: nf(u.w, 2) + ' mm × (' + nf(sm, 0) + ' − ' + nf(F.fh, 1) + ') ÷ ' + nf(F.fh, 1), r: nf(W.W, 2) + ' m de large × ' + nf(W.H, 2) + ' m de haut', n: 'Au-delà de 1 m la correction « − f » est négligeable (champ ≈ d × largeur ÷ f).' });
+        return st;
+    }
+    function explainFocal(S, s, Hsub, frac) {
+        const nfc = needFocal(S, s, Hsub, frac), u = nfc.u;
+        return [{ t: 'Hauteur de cadre nécessaire', f: 'hauteur du cadre = hauteur du sujet ÷ part de l\'image occupée', v: nf(Hsub, 2) + ' m ÷ ' + nf(frac, 2), r: nf(nfc.Vf, 2) + ' m' },
+            { t: 'Focale effective verticale', f: 'f_eff = h_capteur × d ÷ (hauteur du cadre + h_capteur)   (lentille mince)', v: nf(u.h, 2) + ' × ' + nf(s * 1000, 0) + ' ÷ (' + nf(nfc.Vf * 1000, 0) + ' + ' + nf(u.h, 2) + ')', r: nf(nfc.fv, 1) + ' mm' },
+            { t: 'Focale de l\'objectif à monter', f: 'f = f_eff ÷ k', v: nf(nfc.fv, 1) + ' ÷ ' + nf(nfc.k, 2), r: nf(nfc.f, 1) + ' mm', n: 'Focale standard la plus proche : ' + nearestPrime(nfc.f) + ' mm.' }];
+    }
+    function explainDist(S, Wm) {
+        const d = distFor(S, Wm), F = d.F;
+        return [{ t: 'Distance pour obtenir ce champ', f: 'd = f_h × (largeur du champ ÷ largeur du capteur + 1)', v: nf(F.fh, 1) + ' mm × (' + nf(Wm * 1000, 0) + ' ÷ ' + nf(F.u.w, 2) + ' + 1)', r: nf(d.s, 2) + ' m' }];
+    }
+    function explainDof(S, s) {
+        const D = dof(S, s), F = D.F, f = F.fv, N = F.Ne, sm = s * 1000;
+        return [{ t: 'Cercle de confusion', f: 'c = diagonale utile ÷ ' + (S.coc || 1500), v: nf(F.u.diag, 2) + ' ÷ ' + (S.coc || 1500), r: nf(D.c * 1000, 1) + ' µm', n: 'Convention : 1500 (standard), 1730 (Zeiss), 3000 (exigeant, 4K+).' },
+            { t: 'Distance hyperfocale', f: 'H = f² ÷ (N × c) + f', v: nf(f, 1) + '² ÷ (' + nf(N, 2) + ' × ' + nf(D.c, 4) + ') + ' + nf(f, 1), r: nf(D.H, 2) + ' m', n: 'Mise au point à H : net de H ÷ 2 à l\'infini.' },
+            { t: 'Limite proche', f: 'd_proche = d × (H − f) ÷ (H + d − 2f)', v: nf(sm, 0) + ' × (' + nf(D.H * 1000, 0) + ' − ' + nf(f, 1) + ') ÷ (' + nf(D.H * 1000, 0) + ' + ' + nf(sm, 0) + ' − ' + nf(2 * f, 1) + ')', r: nf(D.near, 2) + ' m' },
+            { t: 'Limite lointaine', f: 'd_loin = d × (H − f) ÷ (H − d)   (infini si d ≥ H)', v: isFinite(D.far) ? nf(sm, 0) + ' × (' + nf(D.H * 1000, 0) + ' − ' + nf(f, 1) + ') ÷ (' + nf(D.H * 1000, 0) + ' − ' + nf(sm, 0) + ')' : 'd ≥ H : tout l\'arrière-plan est net', r: isFinite(D.far) ? nf(D.far, 2) + ' m' : '∞', n: 'Profondeur de champ totale : ' + (isFinite(D.far) ? nf(D.tot, 2) + ' m (' + nf(D.front, 2) + ' m devant, ' + nf(D.back, 2) + ' m derrière).' : 'infinie vers l\'arrière.') }];
+    }
+    function explainMount(S) {
+        const M = mount(S), st = [];
+        st.push({ t: 'Tirage mécanique des montures', f: 'tirage = distance entre la bague de monture et le capteur', v: (M.L ? M.L.name + ' = ' + nf(M.L.ffd, 2) + ' mm' : '?') + ' · ' + (M.C ? M.C.name + ' = ' + nf(M.C.ffd, 2) + ' mm' : '?'), r: M.same ? 'identiques' : 'différence ' + nf(M.thick, 2) + ' mm' });
+        st.push({ t: 'Adaptation', f: 'épaisseur de bague = tirage objectif − tirage caméra   (doit être > 0)', v: (M.L ? nf(M.L.ffd, 2) : '?') + ' − ' + (M.C ? nf(M.C.ffd, 2) : '?'), r: M.kind === 'ring' ? nf(Math.max(0, M.thick), 2) + ' mm' : M.kind === 'impossible' ? 'impossible' : M.kind === 'optical' ? 'optique ' + nf(M.k, 2) + '×' : '—', n: M.msg });
+        st.push({ t: 'Couverture de l\'image', f: 'cercle image sur le capteur = cercle de l\'objectif × k  ≥  diagonale utile', v: nf(M.cov.d, 1) + ' × ' + nf(M.k, 2) + ' = ' + nf(M.eff, 1) + ' mm  ·  diagonale utile ' + nf(M.u.diag, 2) + ' mm', r: M.coverOk ? 'couvre (marge ' + nf((M.coverRatio - 1) * 100, 0) + ' %)' : 'VIGNETTAGE : manque ' + nf((1 - M.coverRatio) * 100, 0) + ' %', n: M.coverOk ? '' : 'Les coins seront noirs : prenez un objectif plus grand format, un réducteur, ou un mode d\'enregistrement plus petit (recadré).' });
+        return st;
+    }
+    function explainMoire(S) {
+        const M = moire(S), st = [], u = M.u;
+        st.push({ t: 'Pas du motif de l\'écran', f: S.scrType === 'led' ? 'pas = pas du mur LED (distance centre à centre des pixels)' : 'pas = diagonale (mm) ÷ diagonale en pixels', v: S.scrType === 'led' ? nf(S.pitch, 2) + ' mm' : nf(S.diag, 1) + ' × 25,4 ÷ √(' + S.rx + '² + ' + S.ry + '²)', r: nf(M.pitch, 3) + ' mm', n: S.ang ? 'Écran vu sous ' + nf(S.ang, 0) + '° : pas apparent × cos = ' + nf(M.pitch * M.co, 3) + ' mm.' : '' });
+        st.push({ t: 'Grandissement à ' + nf(S.sscr, 2) + ' m', f: 'm = f_eff ÷ (d − f_eff)', v: nf(M.f, 1) + ' ÷ (' + nf(M.sm, 0) + ' − ' + nf(M.f, 1) + ')', r: nf(M.m, 5) });
+        st.push({ t: 'Pas des pixels de l\'écran sur le capteur', f: 'p_image = pas × cos(angle) × m', v: nf(M.pitch, 3) + ' × ' + nf(M.co, 3) + ' × ' + nf(M.m, 5), r: nf(M.pImg * 1000, 2) + ' µm' });
+        st.push({ t: 'Pas des photosites', f: 'p_capteur = largeur du capteur ÷ photosites en largeur', v: nf(S.sw, 2) + ' mm ÷ ' + S.srw, r: nf(M.ps * 1000, 2) + ' µm' });
+        st.push({ t: 'Photosites par pixel d\'écran', f: 'r = p_image ÷ p_capteur   (échantillonnage : il faut r ≥ 2 selon Nyquist)', v: nf(M.pImg * 1000, 2) + ' ÷ ' + nf(M.ps * 1000, 2), r: 'r = ' + nf(M.r, 2), n: 'Nyquist : un motif n\'est restitué sans repliement que s\'il couvre au moins 2 photosites par période. Avec un capteur à filtre de Bayer, rouge et bleu ne sont échantillonnés qu\'un photosite sur deux : pour éviter le moiré de couleur il faut r ≥ 4.' });
+        st.push({ t: 'Niveau de risque', f: 'r ≥ 4 : très faible · 2,5–4 : faible · 2–2,5 : modéré · 1–2 : fort · < 1 : très fort', v: 'r = ' + nf(M.r, 2), r: M.name + (M.chroma ? ' · moiré de couleur possible' : ''), n: M.beat !== Infinity ? 'Repliement : la fréquence « parasite » vaut |1/r − ' + Math.round(M.uf) + '| = ' + nf(M.ua, 3) + ' cycle/photosite, soit des bandes de moiré d\'environ ' + nf(M.beat, 1) + ' photosites (' + nf(M.beat / u.nw * 100, 1) + ' % de la largeur de l\'image).' : '' });
+        st.push({ t: 'Distances maximales de sécurité', f: 'd_max(r) = f_eff × (1 + pas × cos ÷ (r × p_capteur))   (r diminue quand on s\'éloigne)', v: 'pour r = 2 · 3 · 4', r: nf(M.dmin(2), 2) + ' m · ' + nf(M.dmin(3), 2) + ' m · ' + nf(M.dmin(4), 2) + ' m', n: 'Tant que l\'écran est plus près que ces distances (même focale), il est échantillonné avec r ≥ 2 / 3 / 4 ; plus loin, ses pixels deviennent trop petits pour le capteur. À la distance actuelle, un écran de pas ≥ ' + nf(M.pMax(3), 2) + ' mm donne r ≥ 3.' });
+        st.push({ t: 'Flou volontaire de l\'écran', f: 'disque de flou b = f² ÷ (N × (d_net − f)) × |d_écran − d_net| ÷ d_écran', v: nf(M.f, 1) + '² ÷ (' + nf(M.N, 2) + ' × (' + nf(M.sf, 0) + ' − ' + nf(M.f, 1) + ')) × |' + nf(M.sm, 0) + ' − ' + nf(M.sf, 0) + '| ÷ ' + nf(M.sm, 0), r: nf(M.b * 1000, 1) + ' µm (' + nf(M.rb, 2) + ' × le pas image)', n: 'Un écran flou supprime le moiré : atténué si b ≥ ½ pas image, très atténué ≥ 1, invisible ≥ 2. Ici : ' + M.blurOk + '.' });
+        return st;
+    }
+    // ----- lecture d'un texte (fiche technique, saisie, presse-papiers)
+    const normTxt = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+    function matchSensor(text, extra) {
+        const T = normTxt(text + ' ' + (extra || '')), toks = new Set(T.split(' ').filter(t => t.length > 1)); let best = null, bs = 0;
+        CD_SENS.forEach(s => { const n = normTxt(s.name).split(' ').filter(t => t.length > 1); let sc = 0; n.forEach(t => { if (toks.has(t)) sc += /\d/.test(t) ? 2 : 1; }); sc = sc / Math.max(3, n.length) * 10; if (sc > bs) { bs = sc; best = s; } });
+        return bs >= 3.5 ? { sensor: best, score: bs } : null;
+    }
+    function parseText(txt) {
+        const o = {}, t = String(txt || '').replace(/,/g, '.'); let m;
+        if ((m = /(\d{1,2}(?:\.\d+)?)\s*(?:x|×|\*|by)\s*(\d{1,2}(?:\.\d+)?)\s*mm/i.exec(t))) { o.w = +m[1]; o.h = +m[2]; if (o.w < o.h) { const a = o.w; o.w = o.h; o.h = a; } }
+        if ((m = /(\d{3,5})\s*(?:x|×|\*|by)\s*(\d{3,5})(?!\s*mm)/i.exec(t))) { o.rw = +m[1]; o.rh = +m[2]; if (o.rw < o.rh) { const a = o.rw; o.rw = o.rh; o.rh = a; } }
+        if ((m = /(\d{1,2}(?:\.\d+)?)\s*(?:µm|μm|um|micron)/i.exec(t))) o.pitch = +m[1];
+        if ((m = /(\d{1,3}(?:\.\d+)?)\s*(?:mpx|mp|megapix|megapixels?|mégapixels?)/i.exec(t))) o.mp = +m[1];
+        if (/plein\s*format|full[\s-]*frame|\bff\b/i.test(t) && !o.w) { o.w = 36; o.h = 24; o.guess = 'plein format'; }
+        else if (/super\s*35|\bs35\b/i.test(t) && !o.w) { o.w = 24.89; o.h = 18.66; o.guess = 'Super 35'; }
+        else if (/aps-?c/i.test(t) && !o.w) { o.w = 23.5; o.h = 15.6; o.guess = 'APS-C'; }
+        else if (/micro\s*4\/3|\bmft\b|m4\/3/i.test(t) && !o.w) { o.w = 17.3; o.h = 13; o.guess = 'Micro 4/3'; }
+        if (o.w && !o.h && o.rw && o.rh) o.h = o.w * o.rh / o.rw;
+        if (o.pitch && o.w && !o.rw) o.rw = Math.round(o.w * 1000 / o.pitch);
+        if (o.pitch && o.rw && !o.w) { o.w = o.rw * o.pitch / 1000; if (o.rh) o.h = o.rh * o.pitch / 1000; }
+        let mt = matchSensor(t);
+        if (mt && o.w && !o.mp && Math.abs(mt.sensor.w / o.w - 1) > 0.06) mt = null;
+        if (!mt && o.w) { let bd = 0.04, bs = null; CD_SENS.forEach(s => { const d = Math.abs(s.w / o.w - 1) + Math.abs(s.h / o.h - 1) + (o.rw ? Math.abs(s.rw / o.rw - 1) : 0); if (d < bd) { bd = d; bs = s; } }); if (bs) mt = { sensor: bs, score: 5 }; }
+        if (mt) o.match = mt; return o;
+    }
+    // ----- lecture EXIF d'un JPEG (aucune bibliothèque)
+    function readExif(buf) {
+        const v = new DataView(buf); if (v.byteLength < 12 || v.getUint16(0) !== 0xFFD8) return null; let p = 2, ex = null;
+        while (p + 4 < v.byteLength) { const mk = v.getUint16(p); if (mk === 0xFFDA || mk < 0xFF00) break; const len = v.getUint16(p + 2); if (mk === 0xFFE1 && v.getUint32(p + 4) === 0x45786966) { ex = p + 10; break; } p += 2 + len; }
+        if (ex == null) return null; const le = v.getUint16(ex) === 0x4949, g16 = o => v.getUint16(o, le), g32 = o => v.getUint32(o, le), out = {};
+        const SZ = { 1: 1, 2: 1, 3: 2, 4: 4, 5: 8, 7: 1, 9: 4, 10: 8 };
+        const val = (e, tp, n) => {
+            const sz = (SZ[tp] || 1) * n, o = sz > 4 ? ex + g32(e + 8) : e + 8; if (o + sz > v.byteLength) return null;
+            if (tp === 2) { let s = ''; for (let i = 0; i < n - 1; i++) s += String.fromCharCode(v.getUint8(o + i)); return s.trim(); }
+            if (tp === 3) return g16(o); if (tp === 4) return g32(o); if (tp === 1 || tp === 7) return v.getUint8(o);
+            if (tp === 5) { const d = g32(o + 4); return d ? g32(o) / d : null; } if (tp === 10) { const d = v.getInt32(o + 4, le); return d ? v.getInt32(o, le) / d : null; } return null;
+        };
+        const ifd = (off, tags) => { try { const n = g16(ex + off); for (let i = 0; i < n; i++) { const e = ex + off + 2 + i * 12, tg = g16(e), tp = g16(e + 2), c = g32(e + 4); if (tags[tg]) { const x = val(e, tp, c); if (x != null) out[tags[tg]] = x; if (tg === 0x8769) out._exif = g32(e + 8); } } } catch (e) { } };
+        const T0 = { 0x010F: 'make', 0x0110: 'model', 0x0112: 'orient', 0x8769: 'x' }; ifd(g32(ex + 4), T0);
+        if (out._exif != null) ifd(out._exif, { 0x829A: 'exposure', 0x829D: 'fnum', 0x8827: 'iso', 0x9003: 'date', 0x920A: 'focal', 0xA002: 'pw', 0xA003: 'ph', 0xA20E: 'fpx', 0xA20F: 'fpy', 0xA210: 'fpu', 0xA405: 'focal35', 0xA434: 'lens' });
+        delete out._exif; delete out.x; return out;
+    }
+    function sensorFromExif(e) {
+        if (!e) return null; const o = { src: [] }, ar = e.pw && e.ph ? Math.max(e.pw, e.ph) / Math.min(e.pw, e.ph) : 4 / 3;
+        const unit = { 2: 25.4, 3: 10, 4: 1, 5: .001 }[e.fpu] || 25.4;
+        if (e.fpx && e.pw) { o.w = Math.max(e.pw, e.ph || 0) * unit / e.fpx; o.h = o.w / ar; o.rw = Math.max(e.pw, e.ph || 0); o.rh = Math.min(e.pw, e.ph || e.pw); o.src.push('résolution du plan focal'); }
+        else if (e.focal && e.focal35) { const cf = e.focal35 / e.focal, diag = FFD / cf; o.h = diag / Math.hypot(1, ar); o.w = o.h * ar; if (e.pw) { o.rw = Math.max(e.pw, e.ph || 0); o.rh = Math.min(e.pw, e.ph || e.pw); } o.src.push('focale réelle et équivalent 35 mm (recadrage ' + nf(cf, 2) + '×)'); }
+        const mt = matchSensor((e.make || '') + ' ' + (e.model || '')); if (mt) o.match = mt; return o.w || o.match ? o : null;
+    }
+    return { nf, rad, deg, clamp, mountOf, sensOf, kOf, defaults, used, fov, field, needFocal, distFor, shotName, nearestPrime, dof, mount, pitchScreen, moire, explainCadre, explainFocal, explainDist, explainDof, explainMount, explainMoire, matchSensor, parseText, readExif, sensorFromExif, FFD };
+})();
+
+</script>
+<script>
+// =====================================================================
+//  CADRO XIII — visuels dynamiques (SVG et canvas), partagés avec la version mobile
+// =====================================================================
+const CDV = (() => {
+    const nf = CD.nf, E = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const TXT = 'fill="var(--text-muted)" font-size="11"', ACC = 'var(--accent-text)';
+    const nice = x => { const p = Math.pow(10, Math.floor(Math.log10(x))), n = x / p; return (n < 1.5 ? 1 : n < 3.5 ? 2 : n < 7.5 ? 5 : 10) * p; };
+    // vue de dessus : cône de champ, plan du sujet, profondeur de champ
+    function top(o) {
+        const Wv = 600, Hv = 270, cx = 44, cy = Hv / 2, s = o.s, W = o.W, far = isFinite(o.far) ? o.far : Infinity;
+        let xmax = Math.max(s * 1.3, isFinite(far) ? Math.min(far * 1.08, s * 3) : s * 1.6); const k = Math.min((Wv - cx - 30) / xmax, (Hv / 2 - 26) / Math.max(.01, W / 2 * 1.0));
+        xmax = (Wv - cx - 30) / k; const X = d => cx + d * k, hw = Math.tan(CD.rad(o.hfov / 2)), step = nice(xmax / 6);
+        let g = '<svg viewBox="0 0 ' + Wv + ' ' + Hv + '" class="cdv" role="img" aria-label="Vue de dessus du champ">';
+        for (let d = 0; d <= xmax; d += step) g += '<line x1="' + X(d) + '" y1="10" x2="' + X(d) + '" y2="' + (Hv - 22) + '" stroke="var(--border-color)" stroke-dasharray="2 4"/><text x="' + X(d) + '" y="' + (Hv - 8) + '" text-anchor="middle" ' + TXT + '>' + nf(d, d < 10 ? 1 : 0) + ' m</text>';
+        const cone = (d) => [X(d), cy - hw * d * k, X(d), cy + hw * d * k];
+        const e = cone(xmax); const clip = 'cdclip' + Math.round(Math.random() * 1e6);
+        g += '<defs><clipPath id="' + clip + '"><rect x="0" y="0" width="' + Wv + '" height="' + (Hv - 24) + '"/></clipPath></defs><g clip-path="url(#' + clip + ')">';
+        g += '<polygon points="' + cx + ',' + cy + ' ' + e[0] + ',' + e[1] + ' ' + e[2] + ',' + e[3] + '" fill="rgba(var(--accent),.10)"/>';
+        if (o.near != null) { const n0 = Math.max(0, o.near), f1 = isFinite(far) ? Math.min(far, xmax) : xmax; g += '<rect x="' + X(n0) + '" y="6" width="' + Math.max(1, X(f1) - X(n0)) + '" height="' + (Hv - 34) + '" fill="rgba(102,187,106,.20)" stroke="rgba(102,187,106,.6)"/>'; }
+        g += '<line x1="' + cx + '" y1="' + cy + '" x2="' + e[0] + '" y2="' + e[1] + '" stroke="' + ACC + '" stroke-width="1.5"/><line x1="' + cx + '" y1="' + cy + '" x2="' + e[2] + '" y2="' + e[3] + '" stroke="' + ACC + '" stroke-width="1.5"/>';
+        g += '<line x1="' + cx + '" y1="' + cy + '" x2="' + X(xmax) + '" y2="' + cy + '" stroke="var(--text-dim)" stroke-dasharray="5 4"/>';
+        const sp = cone(s); g += '<line x1="' + sp[0] + '" y1="' + sp[1] + '" x2="' + sp[2] + '" y2="' + sp[3] + '" stroke="var(--text-main)" stroke-width="2"/>';
+        if (o.subjW) g += '<rect x="' + (X(s) - 5) + '" y="' + (cy - o.subjW / 2 * k) + '" width="10" height="' + Math.max(3, o.subjW * k) + '" rx="3" fill="#ef5350"/>';
+        g += '</g>';
+        g += '<g transform="translate(' + cx + ',' + cy + ')"><rect x="-34" y="-14" width="26" height="28" rx="3" fill="var(--bg-input)" stroke="' + ACC + '"/><path d="M-8 -9 L8 -16 L8 16 L-8 9 Z" fill="var(--bg-input)" stroke="' + ACC + '"/></g>';
+        const ty = Math.max(14, sp[1] - 8);
+        g += '<text x="' + (X(s) + 6) + '" y="' + ty + '" fill="var(--text-main)" font-size="12" font-weight="700">champ ' + nf(W, 2) + ' m</text>';
+        g += '<text x="' + ((cx + X(s)) / 2) + '" y="' + (cy - 7) + '" text-anchor="middle" fill="' + ACC + '" font-size="12" font-weight="700">' + nf(s, 2) + ' m</text>';
+        g += '<text x="' + (cx + 40) + '" y="' + (cy + 4) + '" ' + TXT + '>' + nf(o.hfov, 1) + '°</text>';
+        if (o.near != null) g += '<text x="' + (X(Math.max(0, o.near)) + 4) + '" y="' + (Hv - 34) + '" fill="#66bb6a" font-size="11">PdC ' + nf(o.near, 2) + ' → ' + (isFinite(far) ? nf(far, 2) + ' m' : '∞') + '</text>';
+        return g + '</svg>';
+    }
+    // vue caméra : cadre au format livré, personnage à l'échelle
+    function frame(o) {
+        const a = o.aspect, Wv = 440, Hv = Math.max(110, Math.min(360, Wv / a)), Wp = Wv, hp = Hv - 8, ppm = hp / o.Hf, cy = Hv / 2, ground = cy + o.camH * ppm, sw = o.Hsub * ppm;
+        let g = '<svg viewBox="0 0 ' + (Wv + 8) + ' ' + (Hv + 8) + '" class="cdv" role="img" aria-label="Cadre vu par la caméra"><defs><clipPath id="cdfr"><rect x="4" y="4" width="' + Wp + '" height="' + hp + '"/></clipPath></defs>';
+        g += '<rect x="4" y="4" width="' + Wp + '" height="' + hp + '" fill="var(--bg-panel-alt)" stroke="' + ACC + '" stroke-width="2"/><g clip-path="url(#cdfr)">';
+        g += '<line x1="4" y1="' + cy + '" x2="' + (Wp + 4) + '" y2="' + cy + '" stroke="var(--text-dim)" stroke-dasharray="6 5"/><rect x="4" y="' + ground + '" width="' + Wp + '" height="' + Math.max(0, hp - ground + 4) + '" fill="rgba(var(--accent),.08)"/><line x1="4" y1="' + ground + '" x2="' + (Wp + 4) + '" y2="' + ground + '" stroke="var(--text-muted)"/>';
+        const px = 4 + Wp / 2, top = ground - sw, head = Math.max(1.5, sw * .065), bodyTop = top + head * 2.1;
+        g += '<g fill="#ef5350" opacity=".85"><circle cx="' + px + '" cy="' + (top + head) + '" r="' + head + '"/><rect x="' + (px - sw * .12) + '" y="' + bodyTop + '" width="' + (sw * .24) + '" height="' + (sw * .36) + '" rx="' + (sw * .06) + '"/><rect x="' + (px - sw * .09) + '" y="' + (bodyTop + sw * .34) + '" width="' + (sw * .07) + '" height="' + (ground - bodyTop - sw * .34) + '"/><rect x="' + (px + sw * .02) + '" y="' + (bodyTop + sw * .34) + '" width="' + (sw * .07) + '" height="' + (ground - bodyTop - sw * .34) + '"/></g>';
+        g += '<rect x="' + (4 + Wp * .05) + '" y="' + (4 + hp * .05) + '" width="' + (Wp * .9) + '" height="' + (hp * .9) + '" fill="none" stroke="var(--text-dim)" stroke-dasharray="3 4"/><rect x="' + (4 + Wp * .1) + '" y="' + (4 + hp * .1) + '" width="' + (Wp * .8) + '" height="' + (hp * .8) + '" fill="none" stroke="var(--text-dim)" stroke-dasharray="3 4" opacity=".6"/>';
+        for (let i = 1; i < 3; i++) g += '<line x1="' + (4 + Wp * i / 3) + '" y1="4" x2="' + (4 + Wp * i / 3) + '" y2="' + (hp + 4) + '" stroke="var(--border-color)"/><line x1="4" y1="' + (4 + hp * i / 3) + '" x2="' + (Wp + 4) + '" y2="' + (4 + hp * i / 3) + '" stroke="var(--border-color)"/>';
+        g += '</g><text x="10" y="' + (Hv - 4) + '" ' + TXT + '>' + nf(o.Wf, 2) + ' m × ' + nf(o.Hf, 2) + ' m · personnage ' + nf(o.Hsub, 2) + ' m · axe à ' + nf(o.camH, 2) + ' m</text></svg>';
+        return g;
+    }
+    // pile des montures : tirage objectif / bague / tirage caméra
+    function mount(M) {
+        const Wv = 600, Hv = 150, L = M.L ? M.L.ffd : 0, C = M.C ? M.C.ffd : 0, sc = 430 / Math.max(L, C, 30), sx = 540, y = 70;
+        const xl = sx - L * sc, xc = sx - C * sc, near = Math.abs(xl - xc) < 110, lx = near ? xl - 6 : xl, la = near ? 'end' : 'middle', cx = near ? xc + 6 : xc, ca = near ? 'start' : 'middle', col = M.ok ? '#66bb6a' : '#ef5350';
+        let g = '<svg viewBox="0 0 ' + Wv + ' ' + Hv + '" class="cdv" role="img" aria-label="Tirages mécaniques">';
+        g += '<rect x="' + (sx - 3) + '" y="' + (y - 28) + '" width="6" height="56" fill="' + ACC + '"/><text x="' + sx + '" y="' + (y + 46) + '" text-anchor="middle" ' + TXT + '>capteur</text>';
+        g += '<line x1="' + xc + '" y1="' + (y - 38) + '" x2="' + xc + '" y2="' + (y + 38) + '" stroke="var(--text-main)" stroke-width="3"/><text x="' + cx + '" y="' + (y - 44) + '" text-anchor="' + ca + '" fill="var(--text-main)" font-size="11" font-weight="700">boîtier ' + E(M.C ? M.C.id : '?') + '</text>';
+        g += '<line x1="' + xc + '" y1="' + (y + 12) + '" x2="' + sx + '" y2="' + (y + 12) + '" stroke="var(--text-main)"/><text x="' + ((xc + sx) / 2) + '" y="' + (y + 26) + '" text-anchor="middle" fill="var(--text-main)" font-size="11">' + nf(C, 2) + ' mm</text>';
+        g += '<line x1="' + xl + '" y1="' + (y - 38) + '" x2="' + xl + '" y2="' + (y + 38) + '" stroke="' + ACC + '" stroke-width="3" stroke-dasharray="5 3"/><text x="' + lx + '" y="' + (y - 44) + '" text-anchor="' + la + '" fill="' + ACC + '" font-size="11" font-weight="700">objectif ' + E(M.L ? M.L.id : '?') + '</text>';
+        g += '<line x1="' + xl + '" y1="' + (y - 14) + '" x2="' + sx + '" y2="' + (y - 14) + '" stroke="' + ACC + '"/><text x="' + ((xl + sx) / 2 - 40) + '" y="' + (y - 18) + '" text-anchor="middle" fill="' + ACC + '" font-size="11">' + nf(L, 2) + ' mm</text>';
+        if (M.kind === 'ring') g += '<rect x="' + Math.min(xl, xc) + '" y="' + (y - 8) + '" width="' + Math.abs(xc - xl) + '" height="20" fill="rgba(102,187,106,.35)" stroke="' + col + '"/><text x="' + ((xl + xc) / 2) + '" y="' + (y + 5) + '" text-anchor="middle" fill="var(--text-main)" font-size="11" font-weight="700">bague ' + nf(Math.max(0, M.thick), 1) + ' mm</text>';
+        else if (M.kind === 'impossible') g += '<rect x="' + Math.min(xl, xc) + '" y="' + (y - 8) + '" width="' + Math.abs(xc - xl) + '" height="20" fill="rgba(239,83,80,.35)" stroke="' + col + '"/><text x="' + ((xl + xc) / 2) + '" y="' + (y + 5) + '" text-anchor="middle" fill="#ef5350" font-size="11" font-weight="700">✕ ' + nf(M.thick, 1) + ' mm</text>';
+        else if (M.kind === 'optical') g += '<rect x="' + (xc - 60) + '" y="' + (y - 20) + '" width="60" height="44" rx="6" fill="rgba(var(--accent),.2)" stroke="' + ACC + '"/><text x="' + (xc - 30) + '" y="' + (y + 4) + '" text-anchor="middle" fill="var(--text-main)" font-size="12" font-weight="700">' + nf(M.k, 2) + '×</text>';
+        return g + '</svg>';
+    }
+    // moiré : photosites par pixel d'écran selon la distance
+    function chart(M, S) {
+        const Wv = 600, Hv = 240, x0 = 46, x1 = 584, y0 = 14, y1 = 206, dmin = 0.5, dmax = Math.max(30, S.sscr * 1.5), ymin = .4, ymax = 40;
+        const X = d => x0 + (Math.log(d) - Math.log(dmin)) / (Math.log(dmax) - Math.log(dmin)) * (x1 - x0), Y = r => y1 - (Math.log(clampR(r)) - Math.log(ymin)) / (Math.log(ymax) - Math.log(ymin)) * (y1 - y0);
+        function clampR(r) { return Math.min(ymax, Math.max(ymin, r)); }
+        let g = '<svg viewBox="0 0 ' + Wv + ' ' + Hv + '" class="cdv" role="img" aria-label="Risque de moiré selon la distance">';
+        const bands = [[ymin, 1, 'rgba(239,83,80,.30)', 'très fort'], [1, 2, 'rgba(239,83,80,.18)', 'fort'], [2, 2.5, 'rgba(255,167,38,.22)', 'modéré'], [2.5, 4, 'rgba(255,235,59,.14)', 'faible'], [4, ymax, 'rgba(102,187,106,.16)', 'très faible']];
+        bands.forEach(b => { g += '<rect x="' + x0 + '" y="' + Y(b[1]) + '" width="' + (x1 - x0) + '" height="' + (Y(b[0]) - Y(b[1])) + '" fill="' + b[2] + '"/><text x="' + (x1 - 4) + '" y="' + (Y(b[1]) + 12) + '" text-anchor="end" ' + TXT + '>' + b[3] + '</text>'; });
+        [1, 2, 4, 10, 20].forEach(r => { g += '<line x1="' + x0 + '" y1="' + Y(r) + '" x2="' + x1 + '" y2="' + Y(r) + '" stroke="var(--border-color)"/><text x="' + (x0 - 4) + '" y="' + (Y(r) + 4) + '" text-anchor="end" ' + TXT + '>' + r + '</text>'; });
+        [1, 2, 5, 10, 20, 30, 50].filter(d => d >= dmin && d <= dmax).forEach(d => { g += '<line x1="' + X(d) + '" y1="' + y0 + '" x2="' + X(d) + '" y2="' + y1 + '" stroke="var(--border-color)" stroke-dasharray="2 4"/><text x="' + X(d) + '" y="' + (y1 + 14) + '" text-anchor="middle" ' + TXT + '>' + d + ' m</text>'; });
+        let pts = ''; for (let i = 0; i <= 80; i++) { const d = dmin * Math.pow(dmax / dmin, i / 80), m = M.f / (d * 1000 - M.f), r = M.pitch * M.co * m / M.ps; pts += X(d) + ',' + Y(r) + ' '; }
+        g += '<polyline points="' + pts + '" fill="none" stroke="' + ACC + '" stroke-width="2.5"/>';
+        g += '<line x1="' + X(S.sscr) + '" y1="' + y0 + '" x2="' + X(S.sscr) + '" y2="' + y1 + '" stroke="var(--text-main)" stroke-dasharray="4 3"/><circle cx="' + X(S.sscr) + '" cy="' + Y(M.r) + '" r="6" fill="var(--text-main)" stroke="' + ACC + '" stroke-width="2"/><text x="' + Math.min(X(S.sscr) + 8, x1 - 70) + '" y="' + (Y(M.r) - 10) + '" fill="var(--text-main)" font-size="12" font-weight="700">r = ' + nf(M.r, 2) + '</text>';
+        g += '<text x="' + x0 + '" y="' + (Hv - 4) + '" ' + TXT + '>distance caméra → écran · r = photosites par pixel d\'écran (échelles logarithmiques)</text>';
+        return g + '</svg>';
+    }
+    // simulation : ce que voit le capteur (fenêtre 200 × 120 photosites, 100 %)
+    function sim(cv, M, S) {
+        const nx = 200, ny = 120; cv.width = nx; cv.height = ny; const ctx = cv.getContext('2d'), img = ctx.createImageData(nx, ny), d = img.data;
+        const px = M.r, py = M.r / Math.max(.05, M.co), roll = CD.rad(S.roll || 0), cr = Math.cos(roll), sr = Math.sin(roll), fill = Math.min(.98, Math.max(.1, S.pfill || .8)), bay = M.bayer, stripes = S.pat === 'stripes';
+        const lit = (x, y) => { const X = x - nx / 2, Y = y - ny / 2, u = (X * cr + Y * sr) / px, v = (-X * sr + Y * cr) / py, fu = u - Math.floor(u), fv = v - Math.floor(v); return fu < fill && (stripes || fv < fill) ? 1 : 0; };
+        const box = (x, y) => { let s = 0; for (let j = 0; j < 3; j++) for (let i = 0; i < 3; i++) s += lit(x + (i + .5) / 3, y + (j + .5) / 3); return s / 9; };
+        for (let y = 0; y < ny; y++) for (let x = 0; x < nx; x++) {
+            let R, G, B;
+            if (bay) { const bx = x & ~1, by = y & ~1; R = box(bx, by); B = box(bx + 1, by + 1); G = (box(bx + 1, by) + box(bx, by + 1)) / 2; } else { R = G = B = box(x, y); }
+            const o = (y * nx + x) * 4; d[o] = R * 255; d[o + 1] = G * 255; d[o + 2] = B * 255; d[o + 3] = 255;
+        }
+        ctx.putImageData(img, 0, 0);
+    }
+    // courbe EXIF / lecture : résumé de capteur en HTML
+    return { top, frame, mount, chart, sim, E };
+})();
+
+</script>
+<script>
+XM.initTheme();
+// =====================================================================
+//  CADRO XIII · mobile — cadre, focale, moiré, viseur optique (caméra du téléphone), lecture d'un capteur par photo
+//  Moteur de calcul et schémas : cadro/calc.js, cadro/data.js, cadro/draw.js (copie exacte du bureau, via deps.txt)
+// =====================================================================
+(function () {
+'use strict';
+const $$ = XM.$$, $ = id => document.getElementById(id), esc = XM.esc, uid = XM.uid, APP = 'cadro';
+const nf = CD.nf, E = esc;
+const NUMK = new Set(['sw', 'sh', 'srw', 'srh', 'aspect', 'recW', 'k', 'f', 'N', 'sq', 's', 'subjH', 'frac', 'wantW', 'camH', 'coc', 'pitch', 'diag', 'rx', 'ry', 'ang', 'sscr', 'sfocus', 'pfill', 'roll']);
+const STRUCT = new Set(['lens', 'sid', 'solve', 'scrType', 'adp', 'preset', 'mode']);
+const clone = o => JSON.parse(JSON.stringify(o));
+const plural = (n, a, b) => n + ' ' + (n > 1 ? (b || a + 's') : a);
+const optH = (list, v) => list.map(o => '<option value="' + E(o[0]) + '"' + (String(o[0]) === String(v) ? ' selected' : '') + '>' + E(o[1]) + '</option>').join('');
+
+// ---------- état ----------
+let D = { S: CD.defaults(), plans: [], my: [], name: 'Mon plan', pfov: 66, base: {} };
+let S = D.S; const UI = { tab: 'cadre', open: {}, cand: [], ocr: '' };
+const allSens = () => D.my.map(m => Object.assign({ cat: 'Mes capteurs' }, m)).concat(CD_SENS);
+function persist() { D.S = S; if (!XM.save(APP, D)) XM.toast('⚠️ Stockage du téléphone plein', 4000); badge(); }
+function badge() {
+    const chg = changes(); const b = $('cd-ret'); if (!b) return; b.hidden = !chg; $('cd-retn').textContent = chg;
+    $('cd-sub').textContent = D.name + ' · ' + (S.name || '');
+}
+function changes() { return newMy().length + chPlans().length; }
+const newMy = () => D.my.filter(m => !D.base['m:' + m.id]);
+const chPlans = () => D.plans.filter(p => D.base['p:' + p.id] !== sig(p));
+const sig = p => JSON.stringify([p.name, p.notes, p.S]);
+
+// ---------- champs ----------
+function num(l, k, o) { o = o || {}; return '<label class="m-field' + (o.cls ? ' ' + o.cls : '') + '"><span>' + l + '</span><span class="cd-u"><input type="number" inputmode="decimal" data-k="' + k + '" value="' + E(S[k]) + '" step="' + (o.step || 'any') + '"' + (o.min != null ? ' min="' + o.min + '"' : '') + '>' + (o.u ? '<em>' + o.u + '</em>' : '') + '</span></label>'; }
+function sel(l, k, opts, o) { o = o || {}; return '<label class="m-field' + (o.cls ? ' ' + o.cls : '') + '"><span>' + l + '</span><select data-k="' + k + '">' + optH(opts, S[k]) + '</select></label>'; }
+function seg(k, opts) { return '<div class="cd-seg">' + opts.map(o => '<button data-seg="' + k + '" data-v="' + o[0] + '" class="' + (String(S[k]) === String(o[0]) ? 'on' : '') + '">' + o[1] + '</button>').join('') + '</div>'; }
+function applySensor(sn) { S.sid = sn.id; S.name = sn.name; S.sw = sn.w; S.sh = sn.h; S.srw = sn.rw; S.srh = sn.rh; S.cfa = sn.cfa || 'bayer'; if (sn.mounts) { const first = String(sn.mounts).split(' ')[0]; if (CD.mountOf(first)) S.cmount = first; } }
+function setK(k, raw) {
+    let v = raw; if (NUMK.has(k)) { v = parseFloat(String(raw).replace(',', '.')); if (!isFinite(v)) return; }
+    if (k === 'lens') { S.lens = raw; const L = CD_LENSES.find(x => x.id === raw); if (L) { S.lmount = L.mount; S.cover = L.cover; if (+S.N < L.t) S.N = L.t; if (L.focals.indexOf(+S.f) < 0) S.f = L.focals.reduce((a, b) => Math.abs(b - S.f) < Math.abs(a - S.f) ? b : a); } }
+    else if (k === 'sid') { const sn = allSens().find(x => x.id === raw); if (sn) applySensor(sn); else S.sid = 'custom'; }
+    else if (k === 'preset') { const p = CD_SCR.find(x => x[0] === raw); if (p) { S.diag = p[1]; S.rx = p[2]; S.ry = p[3]; } S.preset = raw; }
+    else { S[k] = v; if (['sw', 'sh', 'srw', 'srh'].includes(k)) { S.sid = 'custom'; S.name = 'Capteur personnalisé'; } if (k === 'sscr') { if (S.sfocus === S._lastScr || !S.sfocus) S.sfocus = v; S._lastScr = v; } }
+    persist(); if (STRUCT.has(k)) render(UI.tab === "vf"); else upd();
+}
+function Seff() { if (S.solve === 'focal') { const n = CD.needFocal(S, S.s, S.subjH, S.frac); return Object.assign({}, S, { f: n.f }); } return S; }
+function exDetails(id, title, steps, open) {
+    const o = UI.open[id] != null ? UI.open[id] : !!open;
+    return '<details class="ex" data-ex="' + id + '"' + (o ? ' open' : '') + '><summary>🧮 ' + E(title) + '</summary><ol>' + steps.map(s => '<li><b>' + E(s.t) + '</b><div class="fm">' + E(s.f) + '</div><div class="vl">' + E(s.v) + '</div><div class="rs">= ' + E(s.r) + '</div>' + (s.n ? '<small>' + E(s.n) + '</small>' : '') + '</li>').join('') + '</ol></details>';
+}
+
+// ---------- onglet Cadre ----------
+function formCadre() {
+    const u = CD.used(S), sensors = [['custom', '— Personnalisé —']].concat(allSens().map(s => [s.id, (s.cat === 'Mes capteurs' ? '★ ' : '') + s.name]));
+    return '<div class="cd-card"><h3>📷 Caméra</h3>' + sel('Caméra / capteur', 'sid', sensors) +
+        '<details' + (UI.open.sens ? ' open' : '') + ' data-ex="sens"><summary class="cd-hint" style="min-height:30px">Capteur : ' + nf(S.sw, 2) + ' × ' + nf(S.sh, 2) + ' mm · ' + S.srw + ' × ' + S.srh + ' · pas ' + nf(u.p * 1000, 2) + ' µm — modifier</summary><div class="cd-row" style="margin-top:8px">' +
+        num('Largeur', 'sw', { u: 'mm', step: .01 }) + num('Hauteur', 'sh', { u: 'mm', step: .01 }) + num('Photosites L', 'srw', { step: 1 }) + num('Photosites H', 'srh', { step: 1 }) +
+        sel('Filtre couleur', 'cfa', [['bayer', 'Bayer'], ['3ccd', '3 capteurs'], ['mono', 'Monochrome']], { cls: 'full' }) + '</div></details></div>' +
+        '<div class="cd-card"><h3>🎞️ Enregistrement</h3><div class="cd-row">' + sel('Format', 'aspect', CD_ASPECT.map(a => [a[0], a[1]]).concat(CD_ASPECT.some(a => +a[0] === +S.aspect) ? [] : [[S.aspect, nf(S.aspect, 3) + ':1']]), { cls: 'full' }) +
+        sel('Résolution', 'recW', CD_REC.map(a => [a[0], a[1]]).concat(CD_REC.some(a => +a[0] === +S.recW) ? [] : [[S.recW, S.recW + ' px']])) + sel('Anamorphose', 'sq', CD_SQ.concat(CD_SQ.some(a => +a[0] === +S.sq) ? [] : [[S.sq, S.sq + '×']])) +
+        sel('Zone du capteur', 'mode', [['full', 'Capteur entier'], ['window', 'Fenêtre 1:1']], { cls: 'full' }) + '</div></div>' +
+        '<div class="cd-card"><h3>🔭 Optique et monture</h3><div class="cd-row">' + sel('Série d\'objectifs', 'lens', [['', '— libre —']].concat(CD_LENSES.map(l => [l.id, l.name + ' · T' + String(l.t).replace('.', ',')])), { cls: 'full' }) + sel('Objectif', 'lmount', CD_MOUNTS.map(m => [m.id, m.name])) + sel('Caméra', 'cmount', CD_MOUNTS.map(m => [m.id, m.name])) +
+        sel('Adaptateur', 'adp', CD_ADP.map(a => [a.id, a.name]), { cls: 'full' }) + (S.adp === 'custom' ? num('Facteur k', 'k', { step: .01 }) : '') +
+        sel('Couverture objectif', 'cover', CD_COVER.map(c => [c.id, c.name]), { cls: S.adp === 'custom' ? '' : 'full' }) + '</div></div>' +
+        '<div class="cd-card"><h3>📏 Scène</h3>' + seg('solve', [['field', 'Champ'], ['focal', 'Focale ?'], ['dist', 'Distance ?']]) + '<div class="cd-row">' +
+        (S.solve === 'focal' ? '' : num('Focale', 'f', { u: 'mm', step: .1, min: .5 })) + num('Ouverture', 'N', { u: 'f/', step: .1, min: .5 }) +
+        (S.solve === 'dist' ? num('Largeur de champ voulue', 'wantW', { u: 'm', step: .05, min: .01 }) : num('Distance au sujet', 's', { u: 'm', step: .05, min: .1 })) + num('Taille du sujet', 'subjH', { u: 'm', step: .01, min: .05 }) +
+        (S.solve === 'focal' ? num('Part de la hauteur', 'frac', { step: .05, min: .05 }) : '') + num('Hauteur de la caméra', 'camH', { u: 'm', step: .05 }) +
+        sel('Cercle de confusion', 'coc', [[1500, 'd ÷ 1500'], [1730, 'd ÷ 1730'], [3000, 'd ÷ 3000']].concat([1500, 1730, 3000].includes(+S.coc) ? [] : [[S.coc, 'd ÷ ' + S.coc]])) + '</div>' +
+        (S.solve === 'focal' ? '' : '<div class="cd-chips">' + [14, 18, 24, 35, 50, 85, 135, 200].map(f => '<button data-f="' + f + '">' + f + '</button>').join('') + '</div>') + '</div>';
+}
+function outCadre() {
+    const SE = Seff(); let s = S.s; if (S.solve === 'dist') s = CD.distFor(S, S.wantW).s;
+    const F = CD.fov(SE), W = CD.field(SE, s), Dd = CD.dof(SE, s), M = CD.mount(SE), u = F.u, shot = CD.shotName(W.H, S.subjH), nfc = S.solve === 'focal' ? CD.needFocal(S, S.s, S.subjH, S.frac) : null;
+    let h = '';
+    if (S.solve === 'focal') h += '<div class="verdict l0"><div class="big">' + nf(nfc.f, 1) + ' mm</div><div>Focale pour cadrer ' + nf(S.subjH, 2) + ' m sur ' + nf(S.frac * 100, 0) + ' % de la hauteur à ' + nf(S.s, 2) + ' m<small>Focale standard la plus proche : ' + CD.nearestPrime(nfc.f) + ' mm</small></div></div>';
+    if (S.solve === 'dist') h += '<div class="verdict l0"><div class="big">' + nf(s, 2) + ' m</div><div>Distance pour un champ de ' + nf(S.wantW, 2) + ' m de large avec ' + nf(S.f, 1) + ' mm</div></div>';
+    h += '<div class="tiles"><div class="tile"><small>Angle horizontal</small><b>' + nf(F.h, 1) + '°</b><i>vertical ' + nf(F.v, 1) + '° · diag. ' + nf(F.d, 1) + '°</i></div><div class="tile"><small>Équivalent 36×24</small><b>' + nf(F.eq, 0) + ' mm</b><i>recadrage ' + nf(u.cf, 2) + '×</i></div>' +
+        '<div class="tile"><small>Champ à ' + nf(s, 2) + ' m</small><b>' + nf(W.W, 2) + ' m</b><i>× ' + nf(W.H, 2) + ' m de haut</i></div><div class="tile"><small>Taille de plan</small><b style="font-size:15px">' + E(shot) + '</b></div>' +
+        '<div class="tile"><small>Profondeur de champ</small><b>' + (isFinite(Dd.far) ? nf(Dd.far - Dd.near, 2) + ' m' : '∞') + '</b><i>' + nf(Dd.near, 2) + ' → ' + (isFinite(Dd.far) ? nf(Dd.far, 2) : '∞') + ' m</i></div><div class="tile"><small>Ouverture effective</small><b>f/' + nf(F.Ne, 1) + '</b><i>éq. plein format f/' + nf(F.eqN, 1) + '</i></div></div>';
+    h += '<div class="alert ' + (M.ok ? 'ok' : 'bad') + '"><b>' + (M.ok ? '✔ Monture' : '✕ Monture') + '</b> — ' + E(M.msg) + '</div>';
+    h += '<div class="alert ' + (M.coverOk ? 'ok' : 'bad') + '">' + (M.coverOk ? '✔ Couverture : cercle image Ø ' + nf(M.eff, 1) + ' mm ≥ diagonale utile ' + nf(u.diag, 2) + ' mm.' : '✕ Vignettage : cercle image Ø ' + nf(M.eff, 1) + ' mm < diagonale utile ' + nf(u.diag, 2) + ' mm — coins noirs.') + '</div>';
+    if (u.up) h += '<div class="alert warn">⚠ « Fenêtre 1:1 » demande plus de pixels que le capteur : zone limitée au capteur entier.</div>';
+    h += '<figure>' + CDV.top({ hfov: F.h, s, W: W.W, near: Dd.near, far: Dd.far, subjW: .5 }) + '<figcaption>Vue de dessus : champ, plan du sujet, profondeur de champ (vert)</figcaption></figure>';
+    h += '<figure>' + CDV.frame({ aspect: S.aspect, Wf: W.W, Hf: W.H, Hsub: S.subjH, camH: S.camH }) + '<figcaption>Ce que voit la caméra · zones de sécurité 90 % / 80 % · tiers</figcaption></figure>';
+    h += '<figure>' + CDV.mount(M) + '<figcaption>Tirages mécaniques : l\'objectif doit se trouver à son tirage du capteur ; la différence est l\'épaisseur de bague.</figcaption></figure>';
+    h += exDetails('c1', 'Détail du calcul — cadre et angles', CD.explainCadre(SE, s), true);
+    if (S.solve === 'focal') h += exDetails('c2', 'Détail — focale nécessaire', CD.explainFocal(S, S.s, S.subjH, S.frac), true);
+    if (S.solve === 'dist') h += exDetails('c3', 'Détail — distance', CD.explainDist(S, S.wantW), true);
+    h += exDetails('c4', 'Détail — monture, adaptateur, couverture', CD.explainMount(SE), false) + exDetails('c5', 'Détail — profondeur de champ', CD.explainDof(SE, s), false);
+    return h;
+}
+
+// ---------- onglet Moiré ----------
+function formMoire() {
+    const u = CD.used(S), led = S.scrType === 'led';
+    return '<div class="cd-card"><h3>🖥️ Écran filmé</h3>' + seg('scrType', [['led', 'Mur LED'], ['lcd', 'Écran / TV']]) + '<div class="cd-row">' +
+        (led ? num('Pas des pixels (pitch)', 'pitch', { u: 'mm', step: .05, min: .1, cls: 'full' }) + '<div class="cd-chips full">' + CD_LED.map(p => '<button data-pitch="' + p + '" class="' + (+S.pitch === p ? 'on' : '') + '">' + p + '</button>').join('') + '</div>'
+            : sel('Modèle d\'écran', 'preset', [['', '— choisir —']].concat(CD_SCR.map(p => [p[0], p[0]])), { cls: 'full' }) + num('Diagonale', 'diag', { u: '″', step: .1 }) + num('Pixels (larg.)', 'rx', { step: 1 }) + num('Pixels (haut.)', 'ry', { step: 1 })) +
+        num('Angle de prise de vue', 'ang', { u: '°', step: 1, min: 0 }) + num('Rotation caméra / écran', 'roll', { u: '°', step: 1 }) + '</div></div>' +
+        '<div class="cd-card"><h3>📷 Caméra et distances</h3><p class="cd-hint" style="margin:0 0 8px"><b>' + E(S.name) + '</b> · pas des photosites ' + nf(u.p * 1000, 2) + ' µm · ' + (S.cfa === 'bayer' ? 'filtre de Bayer' : S.cfa === '3ccd' ? '3 capteurs' : 'monochrome') + '</p><div class="cd-row">' +
+        num('Focale', 'f', { u: 'mm', step: .1, min: .5 }) + num('Ouverture', 'N', { u: 'f/', step: .1, min: .5 }) + num('Distance caméra → écran', 'sscr', { u: 'm', step: .1, min: .2 }) + num('Mise au point à', 'sfocus', { u: 'm', step: .1, min: .2 }) + '</div></div>';
+}
+function recsMoire(M) {
+    const r = [], c = M.chroma;
+    if (M.lvl >= 2) { r.push('Rapprochez la caméra de l\'écran (ou resserrez le cadre) : pour r ≥ 3 avec ' + nf(S.f, 0) + ' mm, restez à moins de <b>' + nf(M.dmin(3), 2) + ' m</b>.'); r.push('Choisissez un pas d\'écran plus grand : à cette distance, il faudrait au moins <b>' + nf(M.pMax(3), 2) + ' mm</b>.'); }
+    if (M.lvl >= 1 || c) r.push('Un capteur plus défini, ou un mode d\'enregistrement qui utilise tout le capteur, sur-échantillonne mieux l\'écran.');
+    if (M.lvl >= 2) r.push('Défocalisez l\'écran : ouvrez le diaphragme ou mettez le point sur un sujet loin de l\'écran (flou voulu ≈ <b>' + nf(M.pImg * 1000, 0) + ' µm</b> sur le capteur ; actuellement ' + nf(M.b * 1000, 1) + ' µm : ' + M.blurOk + ').');
+    if (M.lvl >= 2) r.push('Un filtre diffuseur léger ou une légère rotation de la caméra autour de l\'axe optique déplacent le moiré sans le supprimer.');
+    if (c && M.lvl < 2) r.push('Capteur à filtre de Bayer : pour supprimer le moiré de couleur, visez r ≥ 4 (distance maximale <b>' + nf(M.dmin(4), 2) + ' m</b>).');
+    if (!r.length) r.push('Rien à corriger : l\'écran est échantillonné avec une large marge (r = ' + nf(M.r, 2) + ').');
+    return r;
+}
+function outMoire() {
+    const M = CD.moire(S), cls = 'l' + M.lvl;
+    let h = '<div class="verdict ' + cls + '"><div class="big">r = ' + nf(M.r, 2) + '</div><div><b>Moiré : ' + M.name.toLowerCase() + '</b>' + (M.chroma ? ' · couleur possible' : '') + '<small>' + nf(M.r, 2) + ' photosites par pixel d\'écran · ' + nf(M.npx, 0) + ' px d\'écran visibles · pas image ' + nf(M.pImg * 1000, 1) + ' µm pour ' + nf(M.ps * 1000, 1) + ' µm</small></div></div>';
+    h += '<figure>' + CDV.chart(M, S) + '<figcaption>Échantillonnage selon la distance (même focale)</figcaption></figure>';
+    h += '<figure><canvas id="moire-sim" class="sim"></canvas><figcaption>Simulation : ce que voit le capteur (200 × 120 photosites) — ' + (M.bayer ? 'avec mosaïque de Bayer' : 'sans mosaïque de couleur') + '</figcaption></figure>';
+    h += '<div class="cd-card"><h3>💡 Que faire ?</h3><ul class="recs">' + recsMoire(M).map(x => '<li>' + x + '</li>').join('') + '</ul></div>';
+    h += '<div class="cd-card"><h3>📏 Distances maximales<small>f = ' + nf(M.f, 0) + ' mm</small></h3><table class="tbl"><tr><th>Objectif</th><th>r min.</th><th>Dist. max.</th><th>Pas min. à ' + nf(S.sscr, 1) + ' m</th></tr>' + [[2, 'Nyquist'], [3, 'Confort'], [4, 'Sans moiré couleur']].map(x => '<tr><td>' + x[1] + '</td><td>' + x[0] + '</td><td><b>' + nf(M.dmin(x[0]), 2) + ' m</b></td><td>' + nf(M.pMax(x[0]), 2) + ' mm</td></tr>').join('') + '</table></div>';
+    h += exDetails('m1', 'Détail du calcul — moiré', CD.explainMoire(S), false);
+    return h;
+}
+
+// ---------- onglet Viseur optique ----------
+const VF = { stream: null, ok: false, pinch: null, tilt: null, vert: false, guides: true, msg: '', raf: 0 };
+const vfTan = () => Math.tan(CD.rad(D.pfov) / 2);
+function vfFrame() {   // rectangle du cadre dans le conteneur, en px d'affichage
+    const box = $('vf-box'); if (!box) return null; const cw = box.clientWidth, ch = box.clientHeight, v = $('vf-video');
+    const vw = v && v.videoWidth || 0, vh = v && v.videoHeight || 0, ratio = vw && vh ? vw / vh : (cw >= ch ? 4 / 3 : 3 / 4);
+    let dw = cw, dh = cw / ratio; if (dh > ch) { dh = ch; dw = ch * ratio; }
+    const long = Math.max(dw, dh), tpp = vfTan() / (long / 2);
+    const SE = Seff(), F = CD.fov(SE), tH = Math.tan(CD.rad(F.h) / 2), tV = Math.tan(CD.rad(F.v) / 2);
+    const hw = (VF.vert ? tV : tH) / tpp, hh = (VF.vert ? tH : tV) / tpp;
+    return { cw, ch, dw, dh, hw, hh, F, SE, big: hw > dw / 2 + 1 || hh > dh / 2 + 1 };
+}
+function vfDraw() {
+    const cv = $('vf-ov'); if (!cv) return; const g = vfFrame(); if (!g) return; const dpr = Math.min(2, window.devicePixelRatio || 1);
+    if (cv.width !== Math.round(g.cw * dpr) || cv.height !== Math.round(g.ch * dpr)) { cv.width = Math.round(g.cw * dpr); cv.height = Math.round(g.ch * dpr); }
+    const c = cv.getContext('2d'); c.setTransform(dpr, 0, 0, dpr, 0, 0); c.clearRect(0, 0, g.cw, g.ch);
+    const cx = g.cw / 2, cy = g.ch / 2, x = cx - g.hw, y = cy - g.hh, w = g.hw * 2, h = g.hh * 2;
+    c.fillStyle = 'rgba(0,0,0,.55)'; c.beginPath(); c.rect(0, 0, g.cw, g.ch); c.rect(x, y, w, h); c.fill('evenodd');
+    c.lineWidth = 2; c.strokeStyle = '#f0b378'; c.strokeRect(x, y, w, h);
+    if (VF.guides) {
+        c.lineWidth = 1; c.strokeStyle = 'rgba(255,255,255,.45)'; c.beginPath();
+        for (let i = 1; i <= 2; i++) { c.moveTo(x + w * i / 3, y); c.lineTo(x + w * i / 3, y + h); c.moveTo(x, y + h * i / 3); c.lineTo(x + w, y + h * i / 3); } c.stroke();
+        c.setLineDash([5, 4]); c.strokeStyle = 'rgba(255,255,255,.55)'; [.9, .8].forEach(k => c.strokeRect(cx - w * k / 2, cy - h * k / 2, w * k, h * k)); c.setLineDash([]);
+        c.strokeStyle = 'rgba(240,179,120,.9)'; c.beginPath(); c.moveTo(cx - 8, cy); c.lineTo(cx + 8, cy); c.moveTo(cx, cy - 8); c.lineTo(cx, cy + 8); c.stroke();
+    }
+    if (VF.tilt && VF.tilt.roll != null) { const r = -VF.tilt.roll * Math.PI / 180, L = Math.min(g.cw, 220) / 2; c.save(); c.translate(cx, cy); c.rotate(r); c.strokeStyle = Math.abs(VF.tilt.roll) < 1.5 ? '#66bb6a' : '#ff7043'; c.lineWidth = 2; c.beginPath(); c.moveTo(-L, 0); c.lineTo(-30, 0); c.moveTo(30, 0); c.lineTo(L, 0); c.stroke(); c.restore(); }
+    const SE = g.SE; const s = S.solve === 'dist' ? CD.distFor(S, S.wantW).s : S.s, W = CD.field(SE, s);
+    const hud = $('vf-hud'); if (hud) hud.innerHTML = '<div><b>' + nf(SE.f, SE.f < 20 ? 1 : 0) + ' mm</b>f/' + nf(S.N * g.F.k, 1) + ' · éq. ' + nf(g.F.eq, 0) + ' mm<br>' + nf(g.F.h, 1) + '° × ' + nf(g.F.v, 1) + '°</div><div style="text-align:right"><b>' + nf(VF.vert ? W.H : W.W, 2) + ' m</b>à ' + nf(s, 2) + ' m<br>' + E(CD.shotName(W.H, S.subjH)) + (VF.tilt && VF.tilt.pitch != null ? '<br>inclin. ' + nf(VF.tilt.pitch, 0) + '°' : '') + '</div>';
+    const msg = $('vf-msg'); let t = VF.msg;
+    if (g.big) t = '⚠ Ce cadre est plus large que l\'image du téléphone (' + nf(D.pfov, 0) + '°) : passez sur l\'ultra grand-angle du téléphone puis recalibrez. ' + t;
+    if (msg) { msg.hidden = !t; msg.textContent = t; }
+    const sl = $('vf-sl'); if (sl && document.activeElement !== sl) sl.value = Math.round(Math.log(Math.max(8, Math.min(600, SE.f)) / 8) / Math.log(600 / 8) * 1000);
+}
+function formViseur() {
+    return '<div class="vf" id="vf-box"><div class="nocam" id="vf-no"></div><video id="vf-video" playsinline muted autoplay></video><canvas id="vf-ov"></canvas><div class="vf-hud" id="vf-hud"></div><div class="vf-msg" id="vf-msg" hidden></div></div>' +
+        '<input type="range" class="cd-rg" id="vf-sl" min="0" max="1000" aria-label="Focale">' +
+        '<div class="cd-chips">' + [14, 18, 24, 35, 50, 85, 135, 200].map(f => '<button data-vf="' + f + '">' + f + '</button>').join('') + '</div>' +
+        '<div class="vf-bar"><button class="m-btn" id="vf-d-" aria-label="Moins loin">− 0,5 m</button><button class="m-btn" id="vf-d+" aria-label="Plus loin">+ 0,5 m</button><button class="m-btn" id="vf-vert">↻ ' + (VF.vert ? 'Paysage' : 'Vertical') + '</button></div>' +
+        '<div class="vf-bar"><button class="m-btn" id="vf-g">▦ Repères</button><button class="m-btn" id="vf-lv">📐 Niveau</button><button class="m-btn" id="vf-snap">📸 Photo</button></div>' +
+        '<div class="cd-card"><h3>🔭 Réglages du viseur</h3><div class="cd-row">' + sel('Caméra', 'sid', [['custom', '— Personnalisé —']].concat(allSens().map(s => [s.id, s.name]))) + sel('Format', 'aspect', CD_ASPECT.map(a => [a[0], a[1]]).concat(CD_ASPECT.some(a => +a[0] === +S.aspect) ? [] : [[S.aspect, nf(S.aspect, 3) + ':1']])) +
+        num('Distance au sujet', 's', { u: 'm', step: .1, min: .1 }) + num('Taille du sujet', 'subjH', { u: 'm', step: .05 }) + sel('Anamorphose', 'sq', CD_SQ.concat(CD_SQ.some(a => +a[0] === +S.sq) ? [] : [[S.sq, S.sq + '×']])) + sel('Adaptateur', 'adp', CD_ADP.map(a => [a.id, a.name])) + '</div></div>' +
+        '<div class="cd-card"><h3>📱 Calibrer le téléphone<small>champ actuel : ' + nf(D.pfov, 1) + '°</small></h3><p class="cd-hint" style="margin:0 0 8px">Le cadre est dessiné à partir de l\'angle de champ de l\'objectif du téléphone (≈ 65–70° sur le grand côté pour l\'objectif principal). Pour l\'affiner : visez un mur et saisissez la largeur vue sur le grand côté de l\'écran et la distance.</p>' +
+        '<div class="cd-row"><label class="m-field"><span>Largeur vue (m)</span><input type="number" inputmode="decimal" id="cal-w" step="any" placeholder="ex. 3"></label><label class="m-field"><span>Distance (m)</span><input type="number" inputmode="decimal" id="cal-d" step="any" placeholder="ex. 2,2"></label></div>' +
+        '<div class="m-actions"><button class="m-btn block" id="cal-go">Calibrer</button><button class="m-btn block" id="cal-def">Valeur par défaut (66°)</button></div></div>' +
+        '<p class="cd-hint">Simulation : lentille rectiligne idéale, sans correction de distorsion ; le viseur n\'est exact que si le téléphone est calibré et utilisé sans zoom numérique.</p>';
+}
+async function vfStart() {
+    vfStop(); const v = $('vf-video'); if (!v) return;
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { VF.msg = 'Caméra indisponible (page non sécurisée ou navigateur) : cadre simulé sur fond neutre.'; vfDraw(); return; }
+    try {
+        const st = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 } }, audio: false });
+        if (UI.tab !== 'vf') { st.getTracks().forEach(t => t.stop()); return; }
+        VF.stream = st; v.srcObject = st; try { await v.play(); } catch (e) { } VF.ok = true; VF.msg = ''; $('vf-no').hidden = true;
+        try { const tr = st.getVideoTracks()[0], cap = tr.getCapabilities && tr.getCapabilities(); if (cap && cap.zoom) tr.applyConstraints({ advanced: [{ zoom: cap.zoom.min || 1 }] }).catch(() => { }); } catch (e) { }
+    } catch (e) { VF.msg = 'Caméra non autorisée ou absente (' + (e.name || 'erreur') + ') : cadre simulé sur fond neutre.'; }
+    vfDraw();
+}
+function vfStop() { if (VF.stream) { VF.stream.getTracks().forEach(t => t.stop()); VF.stream = null; } VF.ok = false; if (VF.raf) { cancelAnimationFrame(VF.raf); VF.raf = 0; } }
+function vfLoop() { vfDraw(); VF.raf = requestAnimationFrame(vfLoop); }
+function vfSetF(f) { f = Math.max(8, Math.min(600, f)); S.f = Math.round(f * 10) / 10; if (S.solve === 'focal') S.solve = 'field'; persist(); vfDraw(); }
+async function vfTilt() {
+    try { if (typeof DeviceOrientationEvent !== 'undefined' && DeviceOrientationEvent.requestPermission) { const r = await DeviceOrientationEvent.requestPermission(); if (r !== 'granted') { XM.toast('Capteur d\'inclinaison refusé'); return; } } } catch (e) { }
+    if (!window.DeviceOrientationEvent) { XM.toast('Pas de capteur d\'inclinaison'); return; }
+    if (!VF.tiltOn) { VF.tiltOn = true; window.addEventListener('deviceorientation', e => { if (e.beta == null) return; const a = ((((screen.orientation && screen.orientation.angle) ?? window.orientation) || 0) + 360) % 360; let roll, pitch; if (a === 0) { roll = e.gamma; pitch = e.beta - 90; } else if (a === 180) { roll = -e.gamma; pitch = -e.beta - 90; } else if (a === 90) { roll = -e.beta; pitch = -(90 - Math.abs(e.gamma)) * (e.gamma < 0 ? 1 : -1); } else { roll = e.beta; pitch = -(90 - Math.abs(e.gamma)) * (e.gamma > 0 ? 1 : -1); } VF.tilt = { roll, pitch }; }); }
+    VF.tilt = VF.tilt || { roll: 0, pitch: null }; XM.toast('📐 Niveau actif : la ligne verte indique l\'horizon');
+}
+// JPEG + segment COM « CADRO » (réglages lisibles par STORYBOARDO XIII)
+function jpegWithMeta(dataUrl, meta) {
+    const b = atob(dataUrl.split(',')[1]), u = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) u[i] = b.charCodeAt(i);
+    const txt = new TextEncoder().encode('CADRO-XIII ' + JSON.stringify(meta)), L = txt.length + 2, seg = new Uint8Array(4 + txt.length);
+    seg[0] = 0xFF; seg[1] = 0xFE; seg[2] = L >> 8; seg[3] = L & 255; seg.set(txt, 4);
+    return new Blob([u.slice(0, 2), seg, u.slice(2)], { type: 'image/jpeg' });
+}
+function vfSnap() {
+    const box = $('vf-box'), v = $('vf-video'), ov = $('vf-ov'); if (!box) return; const g = vfFrame(); if (!g) return; const SE = Seff();
+    const meta = { f: Math.round(SE.f * 10) / 10, N: S.N, s: S.s, sid: S.sid, name: S.name, sw: S.sw, sh: S.sh, srw: S.srw, srh: S.srh, aspect: S.aspect, sq: S.sq, k: CD.kOf(S), hfov: Math.round(g.F.h * 10) / 10, eq: Math.round(g.F.eq), vert: !!VF.vert, at: Date.now() };
+    const dl = (blob, name) => { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); };
+    // 1) le cadre seul, recadré dans l'image du téléphone (pour une case de storyboard)
+    if (VF.ok && v.videoWidth && !g.big) {
+        const cw = g.cw, ch = g.ch, ox = (cw - g.dw) / 2, oy = (ch - g.dh) / 2, k = v.videoWidth / g.dw;
+        const sx = (cw / 2 - g.hw - ox) * k, sy = (ch / 2 - g.hh - oy) * k, sw = g.hw * 2 * k, sh = g.hh * 2 * k, c = document.createElement('canvas');
+        c.width = Math.round(sw); c.height = Math.round(sh); c.getContext('2d').drawImage(v, sx, sy, sw, sh, 0, 0, c.width, c.height);
+        dl(jpegWithMeta(c.toDataURL('image/jpeg', .9), meta), 'cadro_cadre_' + nf(SE.f, 0) + 'mm_' + nf(S.s, 1).replace(',', '-') + 'm.jpg');
+        XM.toast('📸 Cadre enregistré : glissez-le comme fond d\'une case dans STORYBOARDO (focale et distance reprises)', 4500); return;
+    }
+    // 2) sinon : la vue complète avec le cadre dessiné
+    const c = document.createElement('canvas'); c.width = ov.width; c.height = ov.height; const x = c.getContext('2d');
+    x.fillStyle = '#111'; x.fillRect(0, 0, c.width, c.height);
+    if (VF.ok && v.videoWidth) { const r = v.videoWidth / v.videoHeight; let dw = c.width, dh = dw / r; if (dh > c.height) { dh = c.height; dw = dh * r; } x.drawImage(v, (c.width - dw) / 2, (c.height - dh) / 2, dw, dh); }
+    x.drawImage(ov, 0, 0); x.fillStyle = '#fff'; x.font = Math.round(c.width / 26) + 'px sans-serif'; x.shadowColor = '#000'; x.shadowBlur = 4; x.fillText(S.name + ' · ' + nf(SE.f, 1) + ' mm · f/' + nf(S.N, 1) + ' · ' + nf(S.s, 2) + ' m', 12, c.height - 14);
+    dl(jpegWithMeta(c.toDataURL('image/jpeg', .9), meta), 'cadro_viseur_' + nf(SE.f, 0) + 'mm.jpg'); XM.toast(g.big ? '📸 Vue enregistrée (cadre plus large que le téléphone : image complète)' : '📸 Image enregistrée');
+}
+function wireViseur() {
+    const sl = $('vf-sl'), box = $('vf-box');
+    sl.oninput = () => vfSetF(8 * Math.exp(sl.value / 1000 * Math.log(600 / 8)));
+    $$('[data-vf]').forEach(b => b.onclick = () => vfSetF(+b.dataset.vf));
+    $('vf-d-').onclick = () => { S.s = Math.max(.1, Math.round((S.s - .5) * 100) / 100); persist(); render(true); }; $('vf-d+').onclick = () => { S.s = Math.round((S.s + .5) * 100) / 100; persist(); render(true); };
+    $('vf-vert').onclick = () => { VF.vert = !VF.vert; $('vf-vert').innerHTML = '↻ ' + (VF.vert ? 'Paysage' : 'Vertical'); vfDraw(); };
+    $('vf-g').onclick = () => { VF.guides = !VF.guides; vfDraw(); }; $('vf-lv').onclick = vfTilt; $('vf-snap').onclick = vfSnap;
+    $('cal-go').onclick = () => { const w = parseFloat($('cal-w').value.replace(',', '.')), d = parseFloat($('cal-d').value.replace(',', '.')); if (!(w > 0 && d > 0)) { XM.toast('Saisissez la largeur vue et la distance'); return; } const g = vfFrame(); const long = g ? Math.max(g.dw, g.dh) : 1; D.pfov = Math.round(CD.deg(2 * Math.atan(w / 2 / d)) * 10) / 10; persist(); XM.toast('📱 Téléphone calibré : ' + nf(D.pfov, 1) + '°'); render(true); };
+    $('cal-def').onclick = () => { D.pfov = 66; persist(); render(true); };
+    const pts = new Map(); box.onpointerdown = e => { box.setPointerCapture && box.setPointerCapture(e.pointerId); pts.set(e.pointerId, { x: e.clientX, y: e.clientY }); if (pts.size === 2) { const [a, b] = [...pts.values()]; VF.pinch = { d: Math.hypot(a.x - b.x, a.y - b.y), f: Seff().f }; } };
+    box.onpointermove = e => { if (!pts.has(e.pointerId)) return; pts.set(e.pointerId, { x: e.clientX, y: e.clientY }); if (pts.size === 2 && VF.pinch) { const [a, b] = [...pts.values()]; vfSetF(VF.pinch.f * Math.hypot(a.x - b.x, a.y - b.y) / VF.pinch.d); } };
+    box.onpointerup = box.onpointercancel = e => { pts.delete(e.pointerId); if (pts.size < 2) VF.pinch = null; };
+    box.onwheel = e => { e.preventDefault(); vfSetF(Seff().f * (e.deltaY < 0 ? 1.06 : 1 / 1.06)); };
+    const v = $('vf-video'); v.onloadedmetadata = vfDraw; window.onresize = vfDraw;
+    VF.raf = requestAnimationFrame(vfLoop); vfStart();
+}
+
+// ---------- onglet Capteur : lecture par photo / fichier / texte, plans ----------
+function candFromParsed(p, src) {
+    const m = p.match && p.match.sensor, c = { src: [src], name: m ? m.name : (p.guess ? 'Capteur ' + p.guess : 'Capteur lu'), w: p.w, h: p.h, rw: p.rw, rh: p.rh, cfa: m ? m.cfa : 'bayer', match: p.match };
+    if (!c.w && m) { c.w = m.w; c.h = m.h; c.rw = m.rw; c.rh = m.rh; } if (!c.rw && c.w && p.mp) { c.rw = Math.round(Math.sqrt(p.mp * 1e6 * (c.w / (c.h || c.w * .667)))); c.rh = Math.round(p.mp * 1e6 / c.rw); }
+    if (!c.rw && m) { c.rw = m.rw; c.rh = m.rh; } if (!c.rw) c.warn = 'Nombre de photosites non trouvé : saisissez-le (indispensable pour le moiré).'; return c;
+}
+const exName = ex => ((ex.model || '').toLowerCase().indexOf((ex.make || '').toLowerCase().split(' ')[0]) === 0 ? (ex.model || '') : [ex.make, ex.model].filter(Boolean).join(' '));
+async function readPhoto(f) {
+    const out = []; let note = '';
+    try {
+        const buf = await f.arrayBuffer(), ex = CD.readExif(buf), r = CD.sensorFromExif(ex);
+        if (r) out.push({ src: ['EXIF · ' + (exName(ex) || 'photo') + (ex.focal ? ' · ' + nf(ex.focal, 1) + ' mm' : '')].concat(r.src), name: exName(ex) || 'Capteur de la photo', w: r.w, h: r.h, rw: r.rw, rh: r.rh, cfa: 'bayer', match: r.match, warn: 'Taille déduite de la photo : si l\'image est recadrée, c\'est la zone utilisée qui est lue ; les pixels sont ceux de la photo, pas forcément les photosites. Vérifiez avec la fiche de la caméra.' });
+        else if (ex) note = 'L\'EXIF ne contient ni plan focal ni équivalent 35 mm.';
+        else note = 'Pas de données EXIF (capture d\'écran ou photo traitée).';
+    } catch (e) { note = 'Lecture EXIF impossible.'; }
+    if (typeof TextDetector !== 'undefined') {
+        try { const bmp = await createImageBitmap(f), det = new TextDetector(), res = await det.detect(bmp), txt = res.map(r => r.rawValue).join('\n'); UI.ocr = txt; const p = CD.parseText(txt); if (p.w || p.match) out.push(candFromParsed(p, 'texte lu sur la photo')); else if (txt.trim()) note += ' Texte lu sur la photo mais aucune dimension de capteur reconnue.'; } catch (e) { }
+    } else note += ' Lecture de texte sur photo non disponible sur ce navigateur : saisissez ou collez le texte de la fiche.';
+    return { out, note: note.trim() };
+}
+async function importFile(f) {
+    try {
+        const n = f.name.toLowerCase();
+        if (/^image\//.test(f.type) || /\.(jpe?g|heic)$/.test(n)) { XM.toast('Lecture de la photo…', 1500); const r = await readPhoto(f); UI.cand = r.out.concat(UI.cand); UI.note = r.out.length ? '' : r.note; if (r.out.length && r.note) XM.toast(r.note, 4500); render(); return; }
+        const t = await f.text();
+        if (/\.json$/.test(n) || /^\s*[\[{]/.test(t)) { const j = JSON.parse(t), arr = Array.isArray(j) ? j : (j.sensors || [j]); let k = 0; arr.forEach(o => { const w = +(o.w || o.width || o.largeur), h = +(o.h || o.height || o.hauteur); if (w > 0 && h > 0) { UI.cand.unshift({ src: [f.name], name: o.name || o.nom || 'Capteur importé', w, h, rw: +(o.rw || o.resW) || 0, rh: +(o.rh || o.resH) || 0, cfa: o.cfa || 'bayer' }); k++; } }); if (!k) throw new Error('aucun capteur'); render(); XM.toast('📥 ' + plural(k, 'capteur lu', 'capteurs lus')); return; }
+        const p = CD.parseText(t); if (!p.w && !p.match) { XM.toast('⚠️ Aucune dimension de capteur reconnue'); return; } UI.cand.unshift(candFromParsed(p, f.name)); render();
+    } catch (e) { XM.toast('⚠️ Fichier illisible : ' + (e.message || e)); }
+}
+function candHtml(c, i) {
+    return '<div class="cand" data-ci="' + i + '"><b>📷 ' + E(c.name || 'Capteur') + '</b><div class="cd-hint">' + E((c.src || []).join(' · ')) + '</div>' + (c.warn ? '<div class="cd-hint" style="color:var(--warn)">' + E(c.warn) + '</div>' : '') +
+        '<div class="cd-row" style="margin-top:8px"><label class="m-field full"><span>Nom</span><input type="text" data-cf="name" value="' + E(c.name || '') + '"></label>' +
+        ['w:Largeur (mm)', 'h:Hauteur (mm)', 'rw:Photosites L', 'rh:Photosites H'].map(x => { const [k, l] = x.split(':'); return '<label class="m-field"><span>' + l + '</span><input type="number" inputmode="decimal" step="any" data-cf="' + k + '" value="' + E(c[k] == null ? '' : +(+c[k]).toFixed(3)) + '"></label>'; }).join('') + '</div>' +
+        (c.match ? '<div class="cd-hint">Proche dans la base : <a href="#" data-takedb="' + i + '">' + E(c.match.sensor.name) + '</a> (' + nf(c.match.sensor.w, 2) + ' × ' + nf(c.match.sensor.h, 2) + ' mm) — toucher pour reprendre ses valeurs</div>' : '') +
+        '<div class="m-actions" style="margin-top:8px"><button class="m-btn primary block" data-ca="use">▶ Utiliser</button><button class="m-btn block" data-ca="save">➕ Garder</button><button class="m-btn block" data-ca="x">✕</button></div></div>';
+}
+function candUse(c, save) {
+    const w = +c.w, h = +c.h, rw = +c.rw, rh = +c.rh; if (!(w > 0 && h > 0 && rw > 0)) { XM.toast('⚠️ Renseignez la taille et le nombre de photosites'); return false; }
+    const sn = { id: 'c' + uid(), name: c.name || 'Capteur importé', w, h, rw, rh: rh || Math.round(rw * h / w), cfa: c.cfa || 'bayer', mounts: '' };
+    if (save) { D.my.push(sn); XM.toast('📷 « ' + sn.name + ' » ajouté à Mes capteurs'); } applySensor(sn); S.sid = save ? sn.id : 'custom'; S.name = sn.name; persist(); return true;
+}
+const planInfo = p => { const q = Object.assign(CD.defaults(), p.S), SE = q.solve === 'focal' ? Object.assign({}, q, { f: CD.needFocal(q, q.s, q.subjH, q.frac).f }) : q, s = q.solve === 'dist' ? CD.distFor(q, q.wantW).s : q.s, F = CD.fov(SE), W = CD.field(SE, s); return { f: SE.f, N: SE.N * F.k, s, W: W.W, H: W.H, shot: CD.shotName(W.H, q.subjH), cam: q.name }; };
+function formCap() {
+    let h = '<div class="cd-card"><h3>📷 Lire le capteur de la caméra</h3><p class="cd-hint" style="margin:0 0 10px">Photographiez avec la caméra concernée (ou la fiche technique) : la taille du capteur et les photosites sont déduits de l\'<b>EXIF</b> de la photo, et du <b>texte</b> lu sur l\'image quand le navigateur sait le faire.</p>' +
+        '<div class="m-actions"><button class="m-btn primary block" id="b-photo">📷 Prendre une photo</button><button class="m-btn block" id="b-file">🖼️ Photo ou fichier…</button></div>' +
+        (UI.note ? '<p class="cd-hint" style="color:var(--warn)">' + E(UI.note) + '</p>' : '') +
+        '<label class="m-field" style="margin-top:10px"><span>Ou collez le texte de la fiche technique</span><textarea id="cell-text" rows="3" placeholder="Ex. : Capteur CMOS 35,6 × 23,8 mm, 4240 × 2832 photosites, pas de 8,4 µm">' + E(UI.ocr || '') + '</textarea></label><button class="m-btn block" id="b-text">🔎 Analyser le texte</button></div>';
+    h += UI.cand.map(candHtml).join('');
+    h += '<div class="cd-card"><h3>★ Mes capteurs<small>' + plural(D.my.length, 'capteur') + '</small></h3>' + (D.my.length ? D.my.map((m, i) => '<div class="plan"><div class="grow"><b>' + E(m.name) + '</b><small>' + nf(m.w, 2) + ' × ' + nf(m.h, 2) + ' mm · ' + m.rw + ' px · pas ' + nf(m.w / m.rw * 1000, 2) + ' µm</small></div><button class="m-btn sm" data-my="use" data-i="' + i + '">▶</button><button class="m-btn sm" data-my="del" data-i="' + i + '" aria-label="Supprimer">🗑</button></div>').join('') : '<p class="cd-hint">Aucun capteur enregistré.</p>') + '</div>';
+    h += '<div class="cd-card"><h3>📋 Plans<small>' + plural(D.plans.length, 'plan') + '</small></h3><button class="m-btn block" id="b-addplan" style="margin-bottom:8px">➕ Enregistrer le réglage actuel</button>' +
+        (D.plans.length ? D.plans.map((p, i) => { const r = planInfo(p); return '<div class="plan"><div class="grow"><b>' + E(p.name) + '</b><small>' + E(r.cam) + ' · ' + nf(r.f, 1) + ' mm · f/' + nf(r.N, 1) + ' · ' + nf(r.s, 2) + ' m</small><small>champ ' + nf(r.W, 2) + ' × ' + nf(r.H, 2) + ' m · ' + E(r.shot) + '</small><input type="text" data-pn="' + i + '" value="' + E(p.notes || '') + '" placeholder="Notes de tournage" style="margin-top:6px"></div><button class="m-btn sm" data-pl="use" data-i="' + i + '">▶</button><button class="m-btn sm" data-pl="del" data-i="' + i + '" aria-label="Supprimer">🗑</button></div>'; }).join('') : '<p class="cd-hint">Aucun plan.</p>') + '</div>';
+    return h;
+}
+function wireCap() {
+    $('b-photo').onclick = () => $('cd-photo').click(); $('b-file').onclick = () => $('cd-pfile').click();
+    $('b-text').onclick = () => { const t = $('cell-text').value; if (!t.trim()) { XM.toast('Collez d\'abord un texte'); return; } UI.ocr = t; const p = CD.parseText(t); if (!p.w && !p.match) { XM.toast('⚠️ Aucune dimension de capteur reconnue dans ce texte'); return; } UI.cand.unshift(candFromParsed(p, 'texte')); render(); };
+    $('b-addplan').onclick = async () => { const n = await ask('Nom du plan', 'Plan ' + (D.plans.length + 1)); if (n == null) return; D.plans.push({ id: uid(), name: n.trim() || 'Plan', notes: '', ts: Date.now(), S: clone(S) }); persist(); render(); XM.toast('📋 Plan enregistré'); };
+}
+function ask(title, val) {
+    return new Promise(res => {
+        const sh = XM.sheet('<label class="m-field"><span>' + E(title) + '</span><input type="text" id="ask-v" value="' + E(val || '') + '"></label><div class="m-actions"><button class="m-btn block" id="ask-x">Annuler</button><button class="m-btn primary block" id="ask-ok">OK</button></div>', { title });
+        let done = false; const fin = v => { if (!done) { done = true; XM.closeSheet(); res(v); } };
+        sh.querySelector('#ask-ok').onclick = () => fin(sh.querySelector('#ask-v').value); sh.querySelector('#ask-x').onclick = () => fin(null);
+    });
+}
+
+// ---------- rendu ----------
+function render(keepVf) {
+    $$('#cd-tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === UI.tab));
+    const m = $('cd-main'); const sc = window.scrollY;
+    if (UI.tab !== 'vf') { vfStop(); window.onresize = null; }
+    if (UI.tab === 'cadre') m.innerHTML = formCadre() + '<div id="cd-out">' + outCadre() + '</div>';
+    else if (UI.tab === 'moire') { m.innerHTML = formMoire() + '<div id="cd-out">' + outMoire() + '</div>'; CDV.sim($('moire-sim'), CD.moire(S), S); }
+    else if (UI.tab === 'vf') { const fresh = !(keepVf && $('vf-box')); if (fresh) { m.innerHTML = formViseur(); wireViseur(); } else { /* garde le flux vidéo : met à jour les champs seulement */ const cards = m.querySelectorAll('.cd-card'); } vfDraw(); }
+    else m.innerHTML = formCap(), wireCap();
+    if (UI.tab === 'vf' && keepVf) { /* rafraîchit les valeurs des champs sans recréer la vidéo */ $$('#cd-main [data-k]').forEach(el => { if (document.activeElement !== el && S[el.dataset.k] != null) el.value = S[el.dataset.k]; }); }
+    badge(); if (UI.tab !== 'vf') window.scrollTo(0, sc);
+}
+function upd() {
+    const o = $('cd-out'); if (!o) { if (UI.tab === 'vf') vfDraw(); return; }
+    o.innerHTML = UI.tab === 'cadre' ? outCadre() : outMoire(); if (UI.tab === 'moire') CDV.sim($('moire-sim'), CD.moire(S), S);
+    if (UI.tab === 'cadre') { const sm = document.querySelector('[data-ex="sens"] summary'); if (sm) { const u = CD.used(S); sm.textContent = 'Capteur : ' + nf(S.sw, 2) + ' × ' + nf(S.sh, 2) + ' mm · ' + S.srw + ' × ' + S.srh + ' · pas ' + nf(u.p * 1000, 2) + ' µm — modifier'; } }
+}
+
+// ---------- transfert bureau ↔ mobile ----------
+function sendReturn() {
+    XM.send({ app: APP, page: 'cadro.html', title: 'CADRO', kind: 'return', name: D.name, empty: 'Aucun changement à renvoyer',
+        make: () => changes() ? { my: newMy(), plans: chPlans().map(p => ({ id: p.id, name: p.name, notes: p.notes || '', ts: p.ts, S: p.S })) } : null,
+        note: 'Seuls les capteurs et plans créés ou modifiés sur le téléphone sont renvoyés.' });
+}
+function onEnv(env) {
+    if (!env || env.app !== APP || env.kind !== 'project' || !env.data) { XM.toast('⚠️ Ce fichier n\'est pas un envoi CADRO du bureau'); return; }
+    const d = env.data; D.S = S = Object.assign(CD.defaults(), d.S || {}); D.plans = (d.plans || []).map(clone); D.my = (d.my || []).map(clone); D.name = d.name || env.name || 'Mon plan';
+    D.base = {}; D.my.forEach(m => D.base['m:' + m.id] = 1); D.plans.forEach(p => D.base['p:' + p.id] = sig(p));
+    persist(); render(); XM.toast('📥 « ' + D.name + ' » reçu : ' + plural(D.plans.length, 'plan') + ', ' + plural(D.my.length, 'capteur'), 4000);
+}
+function menu() {
+    XM.menu({ app: APP, deskPage: 'cadro.html', onImport: onEnv, sendReturn: changes() ? sendReturn : () => XM.toast('Aucun changement à renvoyer : ajoutez un capteur ou un plan'),
+        items: [{ icon: '🔄', label: 'Réinitialiser le plan', sub: 'Valeurs par défaut (plans et capteurs conservés)', run: async () => { if ((await XM.ask('Réinitialiser ?', 'Le réglage actuel revient aux valeurs par défaut.', ['Annuler', 'Réinitialiser'])) === 1) { S = D.S = CD.defaults(); persist(); render(); } } }] });
+}
+
+// ---------- démarrage ----------
+function boot() {
+    const sv = XM.load(APP); if (sv && sv.S) { D = Object.assign(D, sv); D.base = D.base || {}; S = D.S = Object.assign(CD.defaults(), sv.S); }
+    $('cd-tabs').onclick = e => { const b = e.target.closest('button[data-tab]'); if (!b || b.dataset.tab === UI.tab) return; UI.tab = b.dataset.tab; render(); window.scrollTo(0, 0); };
+    $('cd-menu').onclick = menu; $('cd-ret').onclick = sendReturn;
+    $('cd-photo').onchange = e => { const f = e.target.files[0]; e.target.value = ''; if (f) importFile(f); }; $('cd-pfile').onchange = e => { const f = e.target.files[0]; e.target.value = ''; if (f) importFile(f); };
+    const main = $('cd-main');
+    main.addEventListener('change', e => { const el = e.target; if (el.dataset && el.dataset.k && el.tagName === 'SELECT') setK(el.dataset.k, el.value); else if (el.dataset && el.dataset.k) setK(el.dataset.k, el.value); else if (el.dataset && el.dataset.cf) { const c = UI.cand[+el.closest('[data-ci]').dataset.ci]; c[el.dataset.cf] = el.type === 'number' ? parseFloat(el.value) : el.value; } else if (el.dataset && el.dataset.pn != null) { D.plans[+el.dataset.pn].notes = el.value; persist(); } });
+    main.addEventListener('input', e => { const el = e.target; if (el.dataset && el.dataset.k && el.type === 'number') setK(el.dataset.k, el.value); });
+    main.addEventListener('toggle', e => { const el = e.target; if (el.dataset && el.dataset.ex) UI.open[el.dataset.ex] = el.open; }, true);
+    main.addEventListener('click', e => {
+        const t = e.target.closest('button,a'); if (!t) return;
+        if (t.dataset.seg) { S[t.dataset.seg] = isNaN(+t.dataset.v) ? t.dataset.v : +t.dataset.v; persist(); render(); }
+        else if (t.dataset.f) { setK('f', t.dataset.f); $$('[data-k="f"]').forEach(i => i.value = S.f); }
+        else if (t.dataset.pitch) { setK('pitch', t.dataset.pitch); render(); }
+        else if (t.dataset.takedb) { e.preventDefault(); const c = UI.cand[+t.dataset.takedb], m = c.match.sensor; c.w = m.w; c.h = m.h; c.rw = m.rw; c.rh = m.rh; c.cfa = m.cfa; c.name = m.name; render(); }
+        else if (t.dataset.ca) { const i = +t.closest('[data-ci]').dataset.ci, c = UI.cand[i]; if (t.dataset.ca === 'x') { UI.cand.splice(i, 1); render(); } else if (candUse(c, t.dataset.ca === 'save')) { UI.cand.splice(i, 1); UI.tab = t.dataset.ca === 'use' ? 'cadre' : 'cap'; render(); } }
+        else if (t.dataset.my) { const i = +t.dataset.i, m = D.my[i]; if (t.dataset.my === 'use') { applySensor(m); persist(); UI.tab = 'cadre'; render(); } else { D.my.splice(i, 1); if (S.sid === m.id) S.sid = 'custom'; persist(); render(); } }
+        else if (t.dataset.pl) { const i = +t.dataset.i; if (t.dataset.pl === 'use') { S = D.S = Object.assign(CD.defaults(), clone(D.plans[i].S)); persist(); UI.tab = 'cadre'; render(); XM.toast('Plan chargé'); } else { D.plans.splice(i, 1); persist(); render(); } }
+    });
+    window.addEventListener('pagehide', vfStop);
+    document.addEventListener('visibilitychange', () => { if (document.hidden) vfStop(); else if (UI.tab === 'vf') render(); });
+    XM.fromHash(APP, onEnv); render();
+}
+boot();
+})();
+
+</script>
+</body>
+</html>

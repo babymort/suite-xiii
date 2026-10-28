@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SUITE XIII - DOSSIER · Documents de l'équipe</title>
+<style>
+:root { color-scheme: dark; --ac: #f0b378; }
+* { box-sizing: border-box; }
+body { margin: 0; background: #1d1b19; color: #eee; font: 15px/1.55 "Segoe UI", system-ui, sans-serif; padding: 18px 16px 60px; }
+.wrap { width: min(980px, 100%); margin: 0 auto; }
+.top { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; } .top img { width: 40px; } .top b { letter-spacing: 3px; color: var(--ac); font-size: 13px; } .top a { margin-left: auto; color: #aaa; font-size: 13px; }
+h1 { font-size: 24px; margin: 0 0 2px; } .dim { color: #a9a49c; font-size: 13.5px; }
+.bar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin: 12px 0; }
+select, input { font: inherit; color: #eee; background: #17161a; border: 1px solid #4a463f; border-radius: 8px; padding: 7px 10px; }
+.lay { display: grid; grid-template-columns: 260px 1fr; gap: 16px; align-items: start; }
+.nav { position: sticky; top: 10px; background: #26241f; border: 1px solid #3d3a34; border-radius: 12px; padding: 8px; max-height: 85vh; overflow: auto; }
+.nav h4 { margin: 10px 8px 4px; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: #9a958c; }
+.nav a { display: block; padding: 6px 8px; border-radius: 8px; color: #eee; text-decoration: none; font-size: 13.5px; } .nav a:hover { background: #34312b; } .nav a.on { background: rgba(240,179,120,.18); }
+.nav a i { font-style: normal; background: #42a5f5; color: #0d1b2a; border-radius: 8px; font-size: 10px; font-weight: 700; padding: 1px 6px; margin-left: 4px; }
+.doc { background: #26241f; border: 1px solid #3d3a34; border-radius: 14px; padding: 18px 22px; margin-bottom: 14px; scroll-margin-top: 10px; }
+.doc h2 { margin: 0 0 2px; font-size: 19px; } .doc .meta { color: #9a958c; font-size: 12.5px; margin-bottom: 10px; }
+.txt { background: #fff; color: #222; border-radius: 8px; padding: 14px 18px; } .txt img { max-width: 100%; } .txt table { border-collapse: collapse; } .txt td, .txt th { border: 1px solid #ccc; padding: 3px 6px; }
+.files { display: grid; gap: 10px; margin-top: 10px; } .files img { max-width: 100%; border-radius: 8px; display: block; } .files iframe { width: 100%; height: 70vh; border: 1px solid #444; border-radius: 8px; background: #fff; }
+.fl { display: flex; gap: 8px; align-items: center; } .fl a, .lk a { color: var(--ac); }
+.pill { display: inline-block; font-size: 11px; padding: 1px 7px; border-radius: 8px; border: 1px solid #555; color: #ccc; margin-left: 6px; }
+.empty { text-align: center; padding: 50px 20px; color: #a9a49c; background: #26241f; border-radius: 14px; border: 1px dashed #4a463f; }
+.err { color: #ef9a9a; }
+@media (max-width: 760px) { .lay { grid-template-columns: 1fr; } .nav { position: static; max-height: none; } }
+</style>
+<link rel="icon" type="image/png" href="xiii-icon-192.png">
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><img src="xiii-logo.png" alt=""><b>SUITE XIII</b><a href="drive.html">☁️ Drive</a><a href="index.html" style="margin-left:12px">← Accueil</a></div>
+  <h1>📚 DOSSIER <span style="opacity:.55">›</span> 📂 Documents de l'équipe</h1>
+  <p class="dim" id="sub">Lecture seule : les documents du dossier que le Master a rendus visibles pour vous.</p>
+  <div class="bar" id="bar"></div>
+  <div id="main"><div class="empty">Chargement…</div></div>
+</div>
+<script>
+// =====================================================================
+//  SUITE XIII — XFILES : les gros fichiers (photos, PDF…) vont dans le Drive en vrais fichiers
+//  Dans les données envoyées au ☁️ Drive, chaque image / PDF intégré de plus de ~40 Ko (« data:…;base64,… »)
+//  est déposé une fois comme fichier (PNG, JPG, PDF…) dans le dossier « SUITE XIII — fichiers » du Master,
+//  et remplacé par une courte référence « xiiif:ID|type ». À la réception, la référence redevient le fichier
+//  (copie gardée dans ce navigateur : chaque fichier n'est téléchargé qu'une fois).
+// =====================================================================
+const XFILES = (() => {
+    const RX = /data:([a-z]+\/[\w.+-]+);base64,[A-Za-z0-9+/=]{54000,}/g, RF = /xiiif:([\w-]{10,80})\|([a-z]+\/[\w.+-]+)/g;
+    const MAPK = 'xiii.files.map';
+    const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } };
+    let MAP = J(MAPK, {}); const saveMap = () => { try { localStorage.setItem(MAPK, JSON.stringify(MAP)); } catch (e) { } };
+    const key = s => { let h = 0x811c9dc5; for (let i = 0; i < s.length; i += 7) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; } return s.length.toString(36) + '-' + h.toString(36) + '-' + s.slice(-24).replace(/[^A-Za-z0-9]/g, ''); };
+    // ---------- copie locale (IndexedDB) ----------
+    const db = () => new Promise((res, rej) => { const r = indexedDB.open('xiiiFiles', 1); r.onupgradeneeded = () => r.result.createObjectStore('f'); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
+    async function idb(mode, fn) { const d = await db(); return new Promise((res, rej) => { const t = d.transaction('f', mode), s = t.objectStore('f'), q = fn(s); t.oncomplete = () => res(q && q.result); t.onerror = () => rej(t.error); }); }
+    const cget = id => idb('readonly', s => s.get(id)).catch(() => null), cput = (id, v) => idb('readwrite', s => s.put(v, id)).catch(() => null);
+    // ---------- Drive ----------
+    async function api(a, p) { const c = J('xiii.drive', null); if (!c || !c.url) return { ok: false, err: 'off' }; try { const r = await fetch(c.url, { method: 'POST', body: JSON.stringify(Object.assign({ a }, c.tok ? { tok: c.tok } : { code: c.code, by: (c.me && c.me.name) || 'Master' }, p || {})), redirect: 'follow' }); return await r.json(); } catch (e) { return { ok: false, err: 'net' }; } }
+    const EXT = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp', 'image/gif': 'gif', 'application/pdf': 'pdf', 'image/svg+xml': 'svg', 'audio/mpeg': 'mp3', 'video/mp4': 'mp4' };
+    // dépose dans le Drive les gros fichiers pas encore envoyés (données : { clé: chaîne })
+    async function prepare(data, label) {
+        let n = 0; for (const k of Object.keys(data || {})) { const v = data[k]; if (typeof v !== 'string' || v.length < 54000) continue;
+            for (const m of v.matchAll(RX)) { const s = m[0], h = key(s); if (MAP[h]) continue;
+                const r = await api('file_put', { h, mime: m[1], name: (label || 'fichier') + '-' + h.split('-')[1] + '.' + (EXT[m[1]] || 'bin'), b64: s.slice(s.indexOf(',') + 1) });
+                if (r.ok && r.id) { MAP[h] = r.id; saveMap(); cput(r.id, s); n++; } else return n; } }
+        return n;
+    }
+    // remplace (sans réseau) les fichiers déjà déposés par leur référence
+    function pack(data) { const o = {}; Object.keys(data || {}).forEach(k => { const v = data[k]; o[k] = typeof v === 'string' && v.length >= 54000 ? v.replace(RX, (s, mime) => { const id = MAP[key(s)]; return id ? 'xiiif:' + id + '|' + mime : s; }) : v; }); return o; }
+    // références → fichiers (copie locale, sinon téléchargement depuis le Drive)
+    async function unpack(data) {
+        const ids = new Set(); Object.values(data || {}).forEach(v => { if (typeof v === 'string' && v.indexOf('xiiif:') > -1) for (const m of v.matchAll(RF)) ids.add(m[1] + '|' + m[2]); });
+        if (!ids.size) return data; const got = {};
+        for (const x of ids) { const [id, mime] = x.split('|'); let s = await cget(id);
+            if (!s) { const r = await api('file_get', { id }); if (r.ok && r.b64) { s = 'data:' + (r.mime || mime) + ';base64,' + r.b64; cput(id, s); } }
+            if (s) { got[id] = s; MAP[key(s)] = id; } }
+        saveMap(); const o = {}; Object.keys(data).forEach(k => { const v = data[k]; o[k] = typeof v === 'string' && v.indexOf('xiiif:') > -1 ? v.replace(RF, (t, id) => got[id] || t) : v; }); return o;
+    }
+    return { prepare, pack, unpack, key };
+})();
+
+</script>
+<script>
+const TEAMS = [['production','Production'],['realisation','Réalisation'],['image','Image / caméras'],['son','Son'],['lumiere','Lumière'],['regie','Régie'],['technique','Technique / vidéo'],['deco','Décor / accessoires'],['hmc','Costumes / maquillage'],['post','Post-production'],['artistes','Artistes / talents'],['client','Client / diffuseur']];
+const TN = Object.fromEntries(TEAMS);
+const $ = id => document.getElementById(id), esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } };
+const fmt = ts => ts ? new Date(ts).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) + ' à ' + new Date(ts).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : '—';
+const c = J('xiii.drive', null), admin = c && !c.tok;
+let PUB = null, REV = 0, AS = '', sig = '';
+function clean(html) { // le texte du Master, sans script ni lien dangereux
+    const d = new DOMParser().parseFromString('<div>' + (html || '') + '</div>', 'text/html');
+    d.querySelectorAll('script,style,iframe,object,embed,link,meta,form,input,button').forEach(x => x.remove());
+    d.querySelectorAll('*').forEach(el => [...el.attributes].forEach(a => { if (/^on/i.test(a.name) || (/^(href|src)$/i.test(a.name) && /^\s*javascript:/i.test(a.value))) el.removeAttribute(a.name); }));
+    d.querySelectorAll('a').forEach(a => { a.target = '_blank'; a.rel = 'noopener'; });
+    return d.body.firstChild.innerHTML;
+}
+const visLab = v => v.all ? 'tout le monde' : (v.teams || []).map(t => TN[t] || t).join(', ');
+async function load() {
+    if (!c) { $('main').innerHTML = '<div class="empty">Ce poste n\'est relié à aucun Drive de projet.<br><br><a href="drive.html" style="color:var(--ac)">☁️ Relier ou rejoindre un projet</a></div>'; return; }
+    try {
+        const r = await (await fetch(c.url, { method: 'POST', body: JSON.stringify(Object.assign({ a: 'get', app: 'dossier_pub', since: REV || null }, c.tok ? { tok: c.tok } : { code: c.code })) })).json();
+        if (!r.ok) { $('main').innerHTML = '<div class="empty err">' + esc({ code: 'Accès refusé', expired: 'Lien expiré : demandez-en un nouveau au Master', revoked: 'Accès retiré par le Master', action: 'Le script Google du Master doit être mis à jour (version 4).' }[r.err] || r.err) + '</div>'; return; }
+        if (r.same) return;
+        let dd = r.data || {}; if (typeof XFILES !== 'undefined') { try { dd = await XFILES.unpack(dd); } catch (e) { } }
+        REV = r.rev; PUB = r.rev ? JSON.parse(dd.pub || '{}') : { docs: [] }; render();
+    } catch (e) { if (!PUB) $('main').innerHTML = '<div class="empty err">Drive injoignable (hors connexion ?)</div>'; }
+}
+function render() {
+    const seen = J('xiii.docs.seen', {}), docs = (PUB.docs || []).filter(d => !admin || !AS || (d.vis.all || (d.vis.teams || []).includes(AS)));
+    $('sub').innerHTML = esc(PUB.proj || c.proj || '') + ' · ' + (admin ? 'vous êtes le Master : vous voyez tout ce qui est publié' : 'lecture seule') + (PUB.ts ? ' · mis à jour ' + fmt(PUB.ts) : '');
+    if (admin && !$('as')) $('bar').innerHTML = '<label class="dim">Voir comme : <select id="as"><option value="">Master (tout)</option>' + TEAMS.map(([k, l]) => '<option value="' + k + '">Équipe ' + l + '</option>').join('') + '</select></label>';
+    if ($('as')) $('as').onchange = e => { AS = e.target.value; render(); };
+    if (!docs.length) { $('main').innerHTML = '<div class="empty">Aucun document visible pour l\'instant.<br><small>' + (admin ? 'Dans DOSSIER, ouvrez un élément et réglez « 🔒 Personne » → « 👥 Tout le monde » ou certaines équipes.' : 'Le Master n\'a encore rien partagé avec votre équipe.') + '</small></div>'; return; }
+    const by = {}; docs.forEach(d => (by[d.ch] = by[d.ch] || []).push(d));
+    const key = d => JSON.stringify([d.title, d.text, d.items.map(i => i.name), d.links]).length + ':' + d.title;
+    let nav = '', body = '';
+    Object.entries(by).forEach(([ch, L]) => { nav += '<h4>' + esc(ch) + '</h4>'; L.forEach(d => { const nw = seen[d.id] !== key(d); nav += '<a href="#d-' + esc(d.id) + '">' + esc(d.title) + (nw ? '<i>nouveau</i>' : '') + '</a>';
+        body += '<div class="doc" id="d-' + esc(d.id) + '"><h2>' + esc(d.title) + '</h2><div class="meta">' + esc(ch) + (admin ? '<span class="pill">👥 ' + esc(visLab(d.vis)) + '</span>' : '') + '</div>' +
+            (d.text && d.text.replace(/<[^>]*>/g, '').trim() ? '<div class="txt">' + clean(d.text) + '</div>' : '') +
+            (d.items.length ? '<div class="files">' + d.items.map((it, i) => !it.data ? '<div class="fl">📎 ' + esc(it.name) + ' <span class="dim">' + (it.big ? '(trop lourd pour le partage : plus de 8 Mo)' : '(illisible)') + '</span></div>' : /^data:image\//.test(it.data) ? '<figure style="margin:0"><img src="' + it.data + '" alt=""><figcaption class="dim">' + esc(it.name) + '</figcaption></figure>' : '<div><div class="fl">📄 ' + esc(it.name) + ' · <a data-dl="' + esc(d.id) + '|' + i + '" href="#">⬇️ Télécharger</a></div>' + (/^data:application\/pdf/.test(it.data) ? '<iframe data-pdf="' + esc(d.id) + '|' + i + '"></iframe>' : '') + '</div>').join('') + '</div>' : '') +
+            (d.links.length ? '<div class="lk" style="margin-top:10px">' + d.links.map(l => '🔗 <a href="' + esc(/^https?:/i.test(l.url) ? l.url : '#') + '" target="_blank" rel="noopener">' + esc(l.label || l.url) + '</a>').join('<br>') + '</div>' : '') + '</div>';
+        seen[d.id] = key(d); }); });
+    $('main').innerHTML = '<div class="lay"><nav class="nav">' + nav + '</nav><div>' + body + '</div></div>';
+    if (!admin || !AS) localStorage.setItem('xiii.docs.seen', JSON.stringify(seen));
+    const blobOf = ref => { const [id, i] = ref.split('|'), it = docs.find(d => d.id === id).items[+i]; const b = atob(it.data.split(',')[1]), u = new Uint8Array(b.length); for (let k = 0; k < b.length; k++) u[k] = b.charCodeAt(k); return { it, url: URL.createObjectURL(new Blob([u], { type: it.data.slice(5, it.data.indexOf(';')) })) }; };
+    document.querySelectorAll('[data-pdf]').forEach(f => { f.src = blobOf(f.dataset.pdf).url; });
+    document.querySelectorAll('[data-dl]').forEach(a => a.onclick = e => { e.preventDefault(); const { it, url } = blobOf(a.dataset.dl); const x = document.createElement('a'); x.href = url; x.download = it.name; x.click(); });
+}
+load(); setInterval(() => { if (document.visibilityState === 'visible') load(); }, 30000);
+</script>
+<script>
+// 📱 XIII Équipe : une fois dans l'application, on y reste (l'accueil ramène à l'application, pas au site)
+(function () {
+    if (window.__xinapp) return; window.__xinapp = 1;
+    var page = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
+    try { if (page === 'equipe.html' && (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (window.matchMedia && matchMedia('(display-mode: standalone)').matches))) sessionStorage.setItem('xiii.inapp', '1'); } catch (e) { }
+    function inApp() { try { return sessionStorage.getItem('xiii.inapp') === '1'; } catch (e) { return false; } }
+    if (!inApp()) return;
+    if (page === 'index.html' || page === '') { location.replace('equipe.html'); return; }
+    document.addEventListener('click', function (e) {
+        var a = e.target.closest && e.target.closest('a[href]'); if (!a) return;
+        var u; try { u = new URL(a.getAttribute('href'), location.href); } catch (er) { return; }
+        if (u.origin !== location.origin) return;
+        var f = (u.pathname.split('/').pop() || 'index.html').toLowerCase();
+        if (f === 'index.html' || f === '') { e.preventDefault(); e.stopPropagation(); location.href = 'equipe.html'; return; }
+        if (a.target === '_blank') { a.removeAttribute('target'); }
+    }, true);
+})();
+</script>
+</body>
+</html>

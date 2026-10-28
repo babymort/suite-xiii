@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#222222">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>DOSSIER XIII · Mobile</title>
+<style>
+/* SUITE XIII — socle mobile (partagé par toutes les pages *-m.html) */
+:root { color-scheme: dark; --bg-main:#1e1e1e; --bg-panel:#2d2d2d; --bg-panel-alt:#252525; --bg-header:#1a1a1a; --bg-topbar:#222; --bg-input:#3a3a3a; --bg-menu:#2d2d2d; --border-color:#444; --border-soft:#333; --text-main:#fff; --text-muted:#aaa; --text-dim:#888; --row-bg:#262626; --row-alt:#2a2a2a;
+  --accent:240,179,120; --accent-text:rgb(240,179,120); --btn-bg:rgba(var(--accent),.12); --btn-border:rgba(var(--accent),.35); --blue:#007acc; --danger:#e53935; --warn:#ffa726; --ok:#66bb6a;
+  --sat: env(safe-area-inset-top, 0px); --sab: env(safe-area-inset-bottom, 0px); --sal: env(safe-area-inset-left, 0px); --sar: env(safe-area-inset-right, 0px); }
+body.light-theme { color-scheme: light; --bg-main:#eef0f2; --bg-panel:#fff; --bg-panel-alt:#f5f6f7; --bg-header:#e4e6e8; --bg-topbar:#fff; --bg-input:#e9ebed; --bg-menu:#fff; --border-color:#d5d8db; --border-soft:#ddd; --text-main:#1a1a1a; --text-muted:#555; --text-dim:#777; --row-bg:#fff; --row-alt:#f8f9fa; --accent-text:#b8651f; --ok:#2e7d32; }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html { -webkit-text-size-adjust: 100%; }
+body.xm { margin: 0; min-height: 100dvh; background: var(--bg-main); color: var(--text-main); font-family: 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif; font-size: 15px; line-height: 1.4; overscroll-behavior-y: none; }
+body.xm a { color: var(--accent-text); }
+.xm button { font-family: inherit; }
+/* barre du haut */
+.m-top { position: sticky; top: 0; z-index: 40; display: flex; align-items: center; gap: 8px; padding: calc(8px + var(--sat)) calc(10px + var(--sar)) 8px calc(10px + var(--sal)); background: var(--bg-topbar); border-bottom: 1px solid var(--border-soft); min-height: 56px; }
+.m-top .m-title { flex: 1; min-width: 0; line-height: 1.15; }
+.m-top .m-title b { display: block; font-size: 16px; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.m-top .m-title b i { font-style: normal; color: var(--accent-text); }
+.m-top .m-title small { display: block; font-size: 11.5px; color: var(--text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.m-ibtn { flex: 0 0 auto; width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center; font-size: 20px; border-radius: 12px; border: 1px solid var(--btn-border); background: var(--btn-bg); color: var(--text-main); cursor: pointer; text-decoration: none; padding: 0; }
+.m-ibtn:active { background: rgba(var(--accent), .35); }
+.m-ibtn.plain { border-color: transparent; background: transparent; }
+/* contenu */
+.m-main { padding: 12px calc(14px + var(--sar)) calc(128px + var(--sab)) calc(14px + var(--sal)); max-width: 760px; margin: 0 auto; }
+.m-main.no-tabs { padding-bottom: calc(28px + var(--sab)); }
+.m-sec { font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--text-dim); margin: 18px 4px 8px; }
+.m-card { background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 14px; padding: 14px; margin-bottom: 12px; }
+.m-card > h3 { margin: 0 0 10px; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+.m-card > h3 .grow { flex: 1; }
+.m-card.accent { border-color: rgba(var(--accent), .6); background: linear-gradient(180deg, rgba(var(--accent), .12), var(--bg-panel)); }
+.m-kv { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; font-size: 14px; }
+.m-kv dt { color: var(--text-dim); } .m-kv dd { margin: 0; text-align: right; font-weight: 600; word-break: break-word; }
+.m-row { display: flex; align-items: center; gap: 10px; padding: 11px 0; border-bottom: 1px solid var(--border-soft); } .m-row:last-child { border-bottom: 0; }
+.m-row .grow { flex: 1; min-width: 0; } .m-row small { display: block; color: var(--text-dim); font-size: 12.5px; }
+.m-list { background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 14px; overflow: hidden; margin-bottom: 12px; }
+.m-item { display: flex; align-items: center; gap: 12px; padding: 12px 14px; min-height: 56px; border-bottom: 1px solid var(--border-soft); color: inherit; text-decoration: none; cursor: pointer; background: transparent; width: 100%; text-align: left; border-left: 0; border-right: 0; border-top: 0; font-size: 15px; }
+.m-item:last-child { border-bottom: 0; } .m-item:active { background: rgba(var(--accent), .12); }
+.m-item .ico { font-size: 22px; flex: 0 0 auto; width: 30px; text-align: center; } .m-item .grow { flex: 1; min-width: 0; } .m-item b { display: block; font-weight: 600; } .m-item small { display: block; color: var(--text-dim); font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.m-item .go { color: var(--text-dim); font-size: 18px; }
+.m-chip { display: inline-flex; align-items: center; gap: 5px; padding: 5px 11px; border-radius: 99px; font-size: 13px; background: var(--btn-bg); border: 1px solid var(--btn-border); color: var(--text-main); white-space: nowrap; }
+.m-chips { display: flex; gap: 8px; overflow-x: auto; padding: 2px 0 8px; scrollbar-width: none; } .m-chips::-webkit-scrollbar { display: none; }
+.m-chip.on { background: rgba(var(--accent), .4); border-color: rgba(var(--accent), .95); font-weight: 600; }
+.m-pill { display: inline-block; padding: 2px 9px; border-radius: 99px; font-size: 12px; font-weight: 600; border: 1px solid var(--border-color); background: var(--bg-panel-alt); }
+.m-pill.ok { color: var(--ok); border-color: rgba(102,187,106,.5); } .m-pill.warn { color: var(--warn); border-color: rgba(255,167,38,.5); } .m-pill.danger { color: #ef5350; border-color: rgba(229,57,53,.5); }
+/* boutons */
+.m-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 46px; padding: 10px 18px; font-size: 15px; font-weight: 600; border-radius: 12px; border: 1px solid var(--btn-border); background: var(--btn-bg); color: var(--text-main); cursor: pointer; text-decoration: none; }
+.m-btn:active { background: rgba(var(--accent), .35); }
+.m-btn.primary { background: rgba(var(--accent), .3); border-color: rgba(var(--accent), .9); }
+.m-btn.danger { border-color: rgba(229,57,53,.55); background: rgba(229,57,53,.14); }
+.m-btn.block { display: flex; width: 100%; } .m-btn.sm { min-height: 36px; padding: 6px 12px; font-size: 13.5px; border-radius: 10px; }
+.m-btn:disabled { opacity: .45; }
+.m-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; } .m-actions > * { flex: 1 1 140px; }
+.m-fab { position: fixed; right: calc(16px + var(--sar)); bottom: calc(120px + var(--sab)); z-index: 35; width: 58px; height: 58px; border-radius: 50%; font-size: 26px; border: 1px solid rgba(var(--accent), .95); background: rgba(var(--accent), .92); color: #1a1a1a; box-shadow: 0 6px 18px rgba(0,0,0,.45); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.m-fab.no-tabs { bottom: calc(64px + var(--sab)); }
+/* champs */
+.m-field { display: block; margin-bottom: 12px; } .m-field > span { display: block; font-size: 11.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--text-dim); margin-bottom: 4px; }
+.xm input[type=text], .xm input[type=number], .xm input[type=date], .xm input[type=time], .xm input[type=tel], .xm input[type=email], .xm input[type=search], .xm input[type=url], .xm select, .xm textarea { width: 100%; min-height: 46px; padding: 10px 12px; font-size: 16px; font-family: inherit; border: 1px solid var(--border-color); border-radius: 10px; background: var(--bg-input); color: var(--text-main); appearance: none; -webkit-appearance: none; }
+.xm select { background-image: linear-gradient(45deg, transparent 50%, var(--text-dim) 50%), linear-gradient(135deg, var(--text-dim) 50%, transparent 50%); background-position: calc(100% - 18px) 20px, calc(100% - 13px) 20px; background-size: 5px 5px; background-repeat: no-repeat; padding-right: 32px; }
+.xm textarea { min-height: 90px; resize: vertical; line-height: 1.4; }
+.xm input:focus, .xm select:focus, .xm textarea:focus { outline: none; border-color: rgba(var(--accent), .9); box-shadow: 0 0 0 2px rgba(var(--accent), .25); }
+.xm input[type=checkbox], .xm input[type=radio] { width: 24px; height: 24px; accent-color: rgb(var(--accent)); flex: 0 0 auto; }
+.m-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; } .m-grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.m-seg { display: flex; border: 1px solid var(--btn-border); border-radius: 12px; overflow: hidden; margin-bottom: 12px; } .m-seg button { flex: 1; min-height: 44px; border: 0; border-right: 1px solid var(--btn-border); background: var(--btn-bg); color: var(--text-main); font-size: 14px; font-weight: 600; cursor: pointer; } .m-seg button:last-child { border-right: 0; } .m-seg button.on { background: rgba(var(--accent), .45); }
+.m-progress { height: 8px; border-radius: 99px; background: var(--bg-input); overflow: hidden; } .m-progress > i { display: block; height: 100%; background: rgb(var(--accent)); border-radius: 99px; transition: width .25s; }
+.m-empty { text-align: center; color: var(--text-dim); padding: 34px 18px; font-size: 14px; } .m-empty b { display: block; font-size: 38px; margin-bottom: 8px; }
+.m-hint { font-size: 12.5px; color: var(--text-dim); line-height: 1.45; }
+/* onglets du bas */
+.m-tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; display: flex; background: var(--bg-topbar); border-top: 1px solid var(--border-soft); padding: 4px calc(4px + var(--sar)) calc(48px + var(--sab)) calc(4px + var(--sal)); } /* au-dessus du badge Netlify */
+.m-tabs button { flex: 1; min-width: 0; min-height: 54px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; border: 0; background: transparent; color: var(--text-dim); font-size: 11px; font-weight: 600; cursor: pointer; border-radius: 10px; }
+.m-tabs button .ti { font-size: 21px; line-height: 1; } .m-tabs button.on { color: var(--accent-text); background: rgba(var(--accent), .12); }
+/* fenêtres du bas */
+.m-ov { position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,.62); display: flex; align-items: flex-end; justify-content: center; animation: mfade .15s; }
+.m-sheet { width: 100%; max-width: 640px; max-height: 92dvh; overflow-y: auto; background: var(--bg-menu); border: 1px solid var(--border-color); border-bottom: 0; border-radius: 18px 18px 0 0; padding: 8px 16px calc(18px + var(--sab)); animation: mup .2s; }
+.m-sheet .grab { width: 44px; height: 5px; border-radius: 3px; background: var(--border-color); margin: 4px auto 10px; }
+.m-sheet h2 { font-size: 17px; margin: 4px 0 12px; display: flex; align-items: center; gap: 8px; } .m-sheet h2 .grow { flex: 1; }
+@keyframes mup { from { transform: translateY(40px); opacity: .4; } } @keyframes mfade { from { opacity: 0; } }
+.m-toast { position: fixed; left: 50%; bottom: calc(86px + var(--sab)); transform: translate(-50%, 20px); z-index: 200; max-width: 90vw; padding: 11px 18px; border-radius: 12px; background: #111; color: #fff; border: 1px solid rgba(var(--accent), .6); font-size: 14px; opacity: 0; pointer-events: none; transition: .2s; text-align: center; }
+.m-toast.show { opacity: 1; transform: translate(-50%, 0); }
+.m-qr { background: #fff; border-radius: 12px; padding: 6px; width: min(86vw, 380px); margin: 6px auto; } .m-qr svg { display: block; width: 100%; height: auto; }
+.m-credit { text-align: center; color: var(--text-dim); font-size: 11.5px; margin: 22px 0 6px; }
+@media (min-width: 761px) { body.xm { max-width: 520px; margin: 0 auto; border-left: 1px solid var(--border-soft); border-right: 1px solid var(--border-soft); } .m-tabs { max-width: 520px; left: 50%; transform: translateX(-50%); } }
+@media print { .m-top, .m-tabs, .m-fab { display: none !important; } }
+
+/* DOSSIER XIII mobile */
+.m-tabs button { position: relative; }
+.d-bdg { position: absolute; top: 4px; left: calc(50% + 8px); min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--danger); color: #fff; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+.d-bdg[hidden] { display: none; }
+.d-dot { width: 11px; height: 11px; border-radius: 50%; flex: 0 0 auto; background: var(--text-dim); }
+.d-dot.wip { background: var(--warn); } .d-dot.ready { background: var(--ok); } .d-dot.todo { background: transparent; border: 2px solid var(--text-dim); }
+.d-num { color: var(--text-dim); font-size: 12.5px; font-variant-numeric: tabular-nums; min-width: 26px; }
+.d-cnt { flex: 0 0 auto; min-width: 26px; height: 26px; padding: 0 8px; border-radius: 13px; display: inline-flex; align-items: center; justify-content: center; background: rgba(var(--accent), .22); color: var(--accent-text); font-weight: 700; font-size: 13px; }
+.d-cnt.mine { background: rgba(var(--accent), .5); color: var(--text-main); }
+.d-off { opacity: .5; }
+.d-miss { color: #ef5350; font-weight: 700; }
+.d-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 12px; }
+.d-stat { background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 12px; padding: 8px 4px; text-align: center; font-size: 11px; color: var(--text-dim); line-height: 1.2; }
+.d-stat b { display: block; font-size: 18px; color: var(--text-main); }
+.d-stat.red { border-color: rgba(229,57,53,.7); } .d-stat.red b { color: #ef5350; }
+.d-thumb { flex: 0 0 auto; width: 52px; height: 52px; border-radius: 10px; background: var(--bg-input) center/cover no-repeat; display: flex; align-items: center; justify-content: center; font-size: 24px; border: 1px solid var(--border-soft); overflow: hidden; }
+.d-thumb.lg { width: 64px; height: 64px; }
+.d-sticky { position: sticky; bottom: calc(64px + var(--sab)); z-index: 20; padding: 18px 0 8px; margin-top: 4px; background: linear-gradient(to bottom, transparent, var(--bg-main) 38%); }
+.d-big { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+.d-big button { min-height: 92px; flex-direction: column; gap: 6px; border-radius: 16px; font-size: 14.5px; }
+.d-big button .bi { font-size: 30px; line-height: 1; }
+.d-big button small { font-weight: 400; font-size: 11.5px; color: var(--text-dim); }
+.d-draft { background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 14px; padding: 12px; margin-bottom: 10px; }
+.d-draft .top { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 10px; }
+.d-draft .top .grow { flex: 1; min-width: 0; }
+.d-draft .meta { font-size: 12px; color: var(--text-dim); margin-top: 3px; }
+.d-sug { font-size: 11.5px; margin-top: 4px; color: var(--accent-text); } .d-sug.man { color: var(--text-dim); } .d-sug.none { color: var(--warn); }
+.d-x { flex: 0 0 auto; width: 36px; height: 36px; border-radius: 10px; border: 1px solid var(--border-color); background: transparent; color: var(--text-muted); font-size: 16px; cursor: pointer; }
+.d-back { display: flex; align-items: center; gap: 8px; min-height: 44px; border: 0; background: transparent; color: var(--accent-text); font-size: 15px; font-weight: 600; padding: 0; cursor: pointer; margin-bottom: 4px; }
+.d-text { background: var(--bg-panel-alt); border: 1px solid var(--border-soft); border-radius: 10px; padding: 10px 12px; font-size: 14px; line-height: 1.5; max-height: 260px; overflow: auto; }
+.d-text h2, .d-text h3 { font-size: 15px; margin: 8px 0 4px; } .d-text p { margin: 4px 0; } .d-text ul, .d-text ol { margin: 4px 0; padding-left: 20px; } .d-text table { border-collapse: collapse; font-size: 12.5px; } .d-text td, .d-text th { border: 1px solid var(--border-soft); padding: 2px 6px; }
+.d-links a { display: block; padding: 8px 0; border-bottom: 1px solid var(--border-soft); word-break: break-all; font-size: 14px; } .d-links a:last-child { border: 0; }
+/* visionneuse */
+.d-view { position: fixed; inset: 0; z-index: 120; background: var(--bg-main); display: flex; flex-direction: column; }
+.d-view .vt { display: flex; align-items: center; gap: 8px; padding: calc(8px + var(--sat)) 10px 8px; background: var(--bg-topbar); border-bottom: 1px solid var(--border-soft); }
+.d-view .vt .t { flex: 1; min-width: 0; line-height: 1.2; } .d-view .vt .t b { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 15px; } .d-view .vt .t small { color: var(--text-dim); font-size: 12px; }
+.d-view .vb { flex: 1; overflow: auto; -webkit-overflow-scrolling: touch; padding: 12px; display: flex; flex-direction: column; align-items: center; }
+.d-view .vb img.pv { max-width: 100%; height: auto; border-radius: 6px; background: #fff; touch-action: pinch-zoom pan-x pan-y; }
+.d-view .vb iframe { width: 100%; flex: 1; min-height: 60vh; border: 1px solid var(--border-color); border-radius: 8px; background: #fff; }
+.d-view .vb pre { width: 100%; white-space: pre-wrap; word-break: break-word; font-family: inherit; font-size: 15px; line-height: 1.5; margin: 0; background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 12px; padding: 14px; }
+.d-view .vb .d-text { width: 100%; max-height: none; }
+.d-view .vf { padding: 10px 12px calc(10px + var(--sab)); border-top: 1px solid var(--border-soft); background: var(--bg-topbar); }
+.d-view .vf .m-actions { margin-top: 0; }
+.d-view .vf .fld { margin-bottom: 8px; }
+/* scanner */
+.d-scan { position: fixed; inset: 0; z-index: 110; background: var(--bg-main); display: flex; flex-direction: column; }
+.d-scan .vb { flex: 1; overflow: auto; padding: 12px; }
+.d-pages { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.d-pg { position: relative; aspect-ratio: 3/4; background: var(--bg-panel) center/cover no-repeat; border: 1px solid var(--border-color); border-radius: 10px; }
+.d-pg b { position: absolute; left: 6px; top: 6px; background: rgba(0,0,0,.7); color: #fff; font-size: 12px; padding: 1px 7px; border-radius: 8px; }
+.d-pg button { position: absolute; right: 4px; top: 4px; width: 32px; height: 32px; border-radius: 50%; border: 0; background: rgba(0,0,0,.7); color: #fff; font-size: 14px; }
+.d-chk { display: flex; align-items: center; gap: 10px; min-height: 44px; font-size: 14.5px; }
+.d-pill-mine { font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 99px; background: rgba(var(--accent), .35); margin-left: 6px; vertical-align: 2px; }
+[hidden] { display: none !important; }
+
+.d-big.compact { grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.d-big.compact button { min-height: 62px; padding: 6px 2px; font-size: 12.5px; gap: 2px; border-radius: 14px; }
+.d-big.compact button .bi { font-size: 24px; } .d-big.compact button small { display: none; }
+
+</style>
+<link rel="icon" type="image/png" href="xiii-icon-192.png">
+</head>
+<body class="xm">
+<header class="m-top">
+  <a class="m-ibtn plain" href="index.html" aria-label="Accueil SUITE XIII">‹</a>
+  <div class="m-title"><b>DOSSIER <i>XIII</i></b><small id="d-sub">Pièces et sommaire</small></div>
+  <button class="m-ibtn" id="d-menu" aria-label="Menu">⋯</button>
+</header>
+<main class="m-main" id="d-main"></main>
+<nav class="m-tabs" id="d-tabs">
+  <button data-t="sum" class="on"><span class="ti">📑</span>Sommaire</button>
+  <button data-t="add"><span class="ti">➕</span>Ajouter<span class="d-bdg" id="b-add" hidden></span></button>
+  <button data-t="mine"><span class="ti">📂</span>Mes ajouts<span class="d-bdg" id="b-mine" hidden></span></button>
+</nav>
+<input type="file" id="in-cam" accept="image/*" capture="environment" hidden>
+<input type="file" id="in-scan" accept="image/*" capture="environment" hidden>
+<input type="file" id="in-file" multiple hidden>
+
+<script>
+// =====================================================================
+//  XQR : générateur de QR code (mode octets, niveaux L/M/Q/H, versions 1 à 40) — sans dépendance
+//  XQR.make(texte, 'L') → { size, ver, get(x, y) } ou null si trop long ; XQR.svg(texte, opts) → chaîne SVG ou null
+// =====================================================================
+const XQR = (() => {
+    const ECC = [[-1, 7, 10, 15, 20, 26, 18, 20, 24, 30, 18, 20, 24, 26, 30, 22, 24, 28, 30, 28, 28, 28, 28, 30, 30, 26, 28, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30],
+        [-1, 10, 16, 26, 18, 24, 16, 18, 22, 22, 26, 30, 22, 22, 24, 24, 28, 28, 26, 26, 26, 26, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28],
+        [-1, 13, 22, 18, 26, 18, 24, 18, 22, 20, 24, 28, 26, 24, 20, 30, 24, 28, 28, 26, 30, 28, 30, 30, 30, 30, 28, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30],
+        [-1, 17, 28, 22, 16, 22, 28, 26, 26, 24, 28, 24, 28, 22, 24, 24, 30, 28, 28, 26, 28, 30, 24, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30]];
+    const BLK = [[-1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 4, 4, 4, 4, 4, 6, 6, 6, 6, 7, 8, 8, 9, 9, 10, 12, 12, 12, 13, 14, 15, 16, 17, 18, 19, 19, 20, 21, 22, 24, 25],
+        [-1, 1, 1, 1, 2, 2, 4, 4, 4, 5, 5, 5, 8, 9, 9, 10, 10, 11, 13, 14, 16, 17, 17, 18, 20, 21, 23, 25, 26, 28, 29, 31, 33, 35, 37, 38, 40, 43, 45, 47, 49],
+        [-1, 1, 1, 2, 2, 4, 4, 6, 6, 8, 8, 8, 10, 12, 16, 12, 17, 16, 18, 21, 20, 23, 23, 25, 27, 29, 34, 34, 35, 38, 40, 43, 45, 48, 51, 53, 56, 59, 62, 65, 68],
+        [-1, 1, 1, 2, 4, 4, 4, 5, 6, 8, 8, 11, 11, 16, 16, 18, 16, 19, 21, 25, 25, 25, 34, 30, 32, 35, 37, 40, 42, 45, 48, 51, 54, 57, 60, 63, 66, 70, 74, 77, 81]];
+    const ECL = { L: [0, 1], M: [1, 0], Q: [2, 3], H: [3, 2] };
+    const raw = v => { let r = (16 * v + 128) * v + 64; if (v >= 2) { const n = Math.floor(v / 7) + 2; r -= (25 * n - 10) * n - 55; if (v >= 7) r -= 36; } return r; };
+    const dataCw = (v, e) => Math.floor(raw(v) / 8) - ECC[e][v] * BLK[e][v];
+    const bit = (x, i) => ((x >>> i) & 1) !== 0;
+    const mul = (x, y) => { let z = 0; for (let i = 7; i >= 0; i--) { z = (z << 1) ^ ((z >>> 7) * 0x11D); z ^= ((y >>> i) & 1) * x; } return z; };
+    const rsDiv = d => { const r = new Array(d - 1).fill(0); r.push(1); let root = 1; for (let i = 0; i < d; i++) { for (let j = 0; j < r.length; j++) { r[j] = mul(r[j], root); if (j + 1 < r.length) r[j] ^= r[j + 1]; } root = mul(root, 2); } return r; };
+    const rsRem = (data, div) => { const r = div.map(() => 0); data.forEach(b => { const f = b ^ r.shift(); r.push(0); div.forEach((c, i) => { r[i] ^= mul(c, f); }); }); return r; };
+    function make(text, level) {
+        const e = (ECL[level || 'L'] || ECL.L)[0], bytes = Array.from(new TextEncoder().encode(String(text)));
+        let ver = 0; for (let v = 1; v <= 40; v++) { const cc = v <= 9 ? 8 : 16; if (4 + cc + 8 * bytes.length <= dataCw(v, e) * 8) { ver = v; break; } }
+        if (!ver) return null;
+        const bits = []; const put = (val, n) => { for (let i = n - 1; i >= 0; i--) bits.push((val >>> i) & 1); };
+        put(4, 4); put(bytes.length, ver <= 9 ? 8 : 16); bytes.forEach(b => put(b, 8));
+        const cap = dataCw(ver, e) * 8; put(0, Math.min(4, cap - bits.length)); put(0, (8 - bits.length % 8) % 8);
+        for (let p = 0xEC; bits.length < cap; p ^= 0xEC ^ 0x11) put(p, 8);
+        const data = []; for (let i = 0; i < bits.length; i += 8) { let b = 0; for (let j = 0; j < 8; j++) b = (b << 1) | bits[i + j]; data.push(b); }
+        // blocs + correction d'erreur
+        const nb = BLK[e][ver], el = ECC[e][ver], rc = Math.floor(raw(ver) / 8), ns = nb - rc % nb, sl = Math.floor(rc / nb), div = rsDiv(el), blocks = [];
+        for (let i = 0, k = 0; i < nb; i++) { const dl = sl - el + (i < ns ? 0 : 1), dat = data.slice(k, k + dl); k += dl; const ecc = rsRem(dat, div); if (i < ns) dat.push(0); blocks.push(dat.concat(ecc)); }
+        const all = []; for (let i = 0; i < blocks[0].length; i++) blocks.forEach((b, j) => { if (i !== sl - el || j >= ns) all.push(b[i]); });
+        const size = ver * 4 + 17, M = Array.from({ length: size }, () => new Array(size).fill(false)), F = Array.from({ length: size }, () => new Array(size).fill(false));
+        const setF = (x, y, d) => { M[y][x] = d; F[y][x] = true; };
+        for (let i = 0; i < size; i++) { setF(6, i, i % 2 === 0); setF(i, 6, i % 2 === 0); }
+        const finder = (x, y) => { for (let dy = -4; dy <= 4; dy++) for (let dx = -4; dx <= 4; dx++) { const d = Math.max(Math.abs(dx), Math.abs(dy)), xx = x + dx, yy = y + dy; if (xx >= 0 && xx < size && yy >= 0 && yy < size) setF(xx, yy, d !== 2 && d !== 4); } };
+        finder(3, 3); finder(size - 4, 3); finder(3, size - 4);
+        let ap = []; if (ver > 1) { const n = Math.floor(ver / 7) + 2, st = ver === 32 ? 26 : Math.ceil((ver * 4 + 4) / (n * 2 - 2)) * 2; ap = [6]; for (let p = size - 7; ap.length < n; p -= st) ap.splice(1, 0, p); }
+        ap.forEach((x, i) => ap.forEach((y, j) => { if ((i === 0 && j === 0) || (i === 0 && j === ap.length - 1) || (i === ap.length - 1 && j === 0)) return; for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++) setF(x + dx, y + dy, Math.max(Math.abs(dx), Math.abs(dy)) !== 1); }));
+        const fmt = mask => {
+            const d = (ECL[level || 'L'][1] << 3) | mask; let r = d; for (let i = 0; i < 10; i++) r = (r << 1) ^ ((r >>> 9) * 0x537); const b = ((d << 10) | r) ^ 0x5412;
+            for (let i = 0; i <= 5; i++) setF(8, i, bit(b, i)); setF(8, 7, bit(b, 6)); setF(8, 8, bit(b, 7)); setF(7, 8, bit(b, 8)); for (let i = 9; i < 15; i++) setF(14 - i, 8, bit(b, i));
+            for (let i = 0; i < 8; i++) setF(size - 1 - i, 8, bit(b, i)); for (let i = 8; i < 15; i++) setF(8, size - 15 + i, bit(b, i)); setF(8, size - 8, true);
+        };
+        fmt(0);
+        if (ver >= 7) { let r = ver; for (let i = 0; i < 12; i++) r = (r << 1) ^ ((r >>> 11) * 0x1F25); const b = (ver << 12) | r; for (let i = 0; i < 18; i++) { const c = bit(b, i), a = size - 11 + i % 3, d = Math.floor(i / 3); setF(a, d, c); setF(d, a, c); } }
+        for (let i = 0, right = size - 1; right >= 1; right -= 2) { if (right === 6) right = 5; for (let vert = 0; vert < size; vert++) for (let j = 0; j < 2; j++) { const x = right - j, up = ((right + 1) & 2) === 0, y = up ? size - 1 - vert : vert; if (!F[y][x] && i < all.length * 8) { M[y][x] = bit(all[i >>> 3], 7 - (i & 7)); i++; } } }
+        const inv = (m, x, y) => [(x + y) % 2 === 0, y % 2 === 0, x % 3 === 0, (x + y) % 3 === 0, (Math.floor(x / 3) + Math.floor(y / 2)) % 2 === 0, x * y % 2 + x * y % 3 === 0, (x * y % 2 + x * y % 3) % 2 === 0, ((x + y) % 2 + x * y % 3) % 2 === 0][m];
+        const apply = m => { for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) if (!F[y][x] && inv(m, x, y)) M[y][x] = !M[y][x]; };
+        const penalty = () => {
+            let p = 0, dark = 0;
+            for (let y = 0; y < size; y++) { let run = 1; for (let x = 1; x < size; x++) { if (M[y][x] === M[y][x - 1]) { run++; if (run === 5) p += 3; else if (run > 5) p++; } else run = 1; } }
+            for (let x = 0; x < size; x++) { let run = 1; for (let y = 1; y < size; y++) { if (M[y][x] === M[y - 1][x]) { run++; if (run === 5) p += 3; else if (run > 5) p++; } else run = 1; } }
+            for (let y = 0; y < size - 1; y++) for (let x = 0; x < size - 1; x++) { const c = M[y][x]; if (c === M[y][x + 1] && c === M[y + 1][x] && c === M[y + 1][x + 1]) p += 3; }
+            for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) if (M[y][x]) dark++;
+            p += Math.floor(Math.abs(dark * 20 - size * size * 10) / (size * size)) * 10; return p;
+        };
+        let best = 0, bp = Infinity; for (let m = 0; m < 8; m++) { apply(m); fmt(m); const p = penalty(); if (p < bp) { bp = p; best = m; } apply(m); }
+        apply(best); fmt(best);
+        return { size, ver, get: (x, y) => x >= 0 && y >= 0 && x < size && y < size && M[y][x] };
+    }
+    function svg(text, o) {
+        o = o || {}; const q = make(text, o.ecl || 'L'); if (!q) return null; const b = o.border == null ? 4 : o.border, n = q.size + 2 * b; let d = '';
+        for (let y = 0; y < q.size; y++) { let x = 0; while (x < q.size) { if (q.get(x, y)) { let w = 1; while (x + w < q.size && q.get(x + w, y)) w++; d += 'M' + (x + b) + ',' + (y + b) + 'h' + w + 'v1h-' + w + 'z'; x += w; } else x++; } }
+        return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + n + ' ' + n + '" shape-rendering="crispEdges" role="img" aria-label="QR code"><rect width="' + n + '" height="' + n + '" fill="' + (o.light || '#fff') + '"/><path d="' + d + '" fill="' + (o.dark || '#000') + '"/></svg>';
+    }
+    return { make, svg, capacity: (level) => { const e = (ECL[level || 'L'] || ECL.L)[0]; return dataCw(40, e) - 3; } };
+})();
+if (typeof module !== 'undefined') module.exports = XQR;
+
+// =====================================================================
+//  XM : socle mobile SUITE XIII (pages *-m.html) + panneau « 📱 Mobile » des outils bureau
+//  Enveloppe d'échange : { format:'xiii-mobile', v:1, app, kind:'project'|'return', name, ts, data }
+//  Transfert : lien (#mx=… compressé), QR code (si assez court) ou fichier .xiii-m.json
+// =====================================================================
+const XM = (() => {
+    const FORMAT = 'xiii-mobile', QR_MAX = 1800;
+    const $ = (s, r) => (r || document).querySelector(s), $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+    const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const uid = () => Math.random().toString(36).slice(2, 10);
+    const safe = s => String(s || 'projet').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^\w-]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 40) || 'projet';
+    const isPhone = () => { try { return matchMedia('(max-width:700px)').matches && matchMedia('(pointer:coarse)').matches; } catch (e) { return false; } };
+    // ---------- encodage ----------
+    const b64u = u8 => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
+    const unb64u = t => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
+    async function pipe(u8, Ctor, fmt) { const st = new Blob([u8]).stream().pipeThrough(new Ctor(fmt)); return new Uint8Array(await new Response(st).arrayBuffer()); }
+    async function pack(obj) {
+        const u8 = new TextEncoder().encode(JSON.stringify(obj));
+        if (typeof CompressionStream !== 'undefined') { try { return 'z' + b64u(await pipe(u8, CompressionStream, 'deflate-raw')); } catch (e) { } }
+        return 'r' + b64u(u8);
+    }
+    async function unpack(s) {
+        s = String(s || '').trim(); if (!s) throw new Error('Lien vide');
+        let u8 = unb64u(s.slice(1)); if (s[0] === 'z') u8 = await pipe(u8, DecompressionStream, 'deflate-raw'); else if (s[0] !== 'r') throw new Error('Lien non reconnu');
+        return JSON.parse(new TextDecoder().decode(u8));
+    }
+    const baseUrl = page => { const u = new URL(page || location.pathname.split('/').pop(), location.href); u.hash = ''; u.search = ''; return u.href; };
+    const envelope = (app, kind, name, data) => ({ format: FORMAT, v: 1, app, kind: kind || 'project', name: name || '', ts: Date.now(), data });
+    async function link(page, env) { return baseUrl(page) + '#mx=' + await pack(env); }
+    function checkEnv(env, app) {
+        if (!env || env.format !== FORMAT) throw new Error('Ce fichier n\'est pas un envoi SUITE XIII mobile');
+        if (app && env.app !== app) throw new Error('Cet envoi est destiné à « ' + env.app + ' », pas à « ' + app + ' »');
+        return env;
+    }
+    // ---------- stockage local (une enveloppe par application) ----------
+    const mem = {};
+    const load = app => { try { return JSON.parse(localStorage.getItem('xiii.m.' + app)); } catch (e) { return mem[app] || null; } };
+    const save = (app, obj) => { mem[app] = obj; try { localStorage.setItem('xiii.m.' + app, JSON.stringify(obj)); return true; } catch (e) { return false; } };
+    const drop = app => { delete mem[app]; try { localStorage.removeItem('xiii.m.' + app); } catch (e) { } };
+    // ---------- interface ----------
+    let toastT;
+    function toast(msg, ms) { let t = $('.m-toast'); if (!t) { t = document.createElement('div'); t.className = 'm-toast'; document.body.appendChild(t); } t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), ms || 2600); }
+    function sheet(html, o) {
+        o = o || {}; closeSheet(); const ov = document.createElement('div'); ov.className = 'm-ov'; ov.id = 'm-ov';
+        ov.innerHTML = '<div class="m-sheet" role="dialog"><div class="grab"></div>' + (o.title ? '<h2><span class="grow">' + o.title + '</span><button class="m-ibtn plain" data-x aria-label="Fermer">✕</button></h2>' : '') + html + '</div>';
+        ov.addEventListener('mousedown', e => { if (e.target === ov) closeSheet(); }); ov.addEventListener('touchstart', e => { if (e.target === ov) closeSheet(); }, { passive: true });
+        document.body.appendChild(ov); const x = $('[data-x]', ov); if (x) x.onclick = closeSheet; ov._onClose = o.onClose; return ov.querySelector('.m-sheet');
+    }
+    function closeSheet() { const ov = $('#m-ov'); if (ov) { ov.remove(); if (ov._onClose) try { ov._onClose(); } catch (e) { } } }
+    // choix : renvoie l'index du bouton (ou -1 si fermé)
+    function ask(title, text, buttons) {
+        return new Promise(res => {
+            const s = sheet('<p style="margin:0 0 14px;color:var(--text-muted)">' + text + '</p><div class="m-actions" style="margin-top:0">' + (buttons || ['OK']).map((b, i) => '<button class="m-btn ' + (i === 0 ? 'primary' : '') + (b.danger ? ' danger' : '') + '" data-i="' + i + '">' + esc(b.label || b) + '</button>').join('') + '</div>', { title: esc(title), onClose: () => res(-1) });
+            $$('[data-i]', s).forEach(b => b.onclick = () => { const ov = $('#m-ov'); if (ov) ov._onClose = null; closeSheet(); res(+b.dataset.i); });
+        });
+    }
+    function download(name, content, mime) { const b = content instanceof Blob ? content : new Blob([content], { type: mime || 'application/json' }), a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { a.remove(); URL.revokeObjectURL(a.href); }, 1500); }
+    async function copy(text) { try { await navigator.clipboard.writeText(text); return true; } catch (e) { const t = document.createElement('textarea'); t.value = text; t.style.cssText = 'position:fixed;opacity:0'; document.body.appendChild(t); t.select(); let ok = false; try { ok = document.execCommand('copy'); } catch (e2) { } t.remove(); return ok; } }
+    function pickFile(accept, cb) { const i = document.createElement('input'); i.type = 'file'; i.accept = accept || '.json,application/json'; i.style.display = 'none'; i.onchange = async () => { const f = i.files[0]; i.remove(); if (f) cb(f); }; document.body.appendChild(i); i.click(); }
+    async function readEnvFile(f, app) { return checkEnv(JSON.parse(await f.text()), app); }
+    // ---------- fenêtre d'envoi : QR + lien + fichier (bureau et mobile) ----------
+    //  cfg = { app, page, title, kind, name, make: () => data | null, note, empty }
+    async function send(cfg) {
+        const data = cfg.make(); if (data == null) { toast(cfg.empty || 'Rien à envoyer'); return; }
+        const env = envelope(cfg.app, cfg.kind || 'project', cfg.name ? (typeof cfg.name === 'function' ? cfg.name() : cfg.name) : '', data);
+        const url = await link(cfg.page, env), json = JSON.stringify(env), qr = url.length <= QR_MAX ? XQR.svg(url, { ecl: 'L', border: 2 }) : null, mob = document.body.classList.contains('xm');
+        const fname = cfg.file || ((cfg.title || cfg.app) + '_' + safe(env.name) + '.xiii-m.json').replace(/\s+/g, '_');
+        const body = (qr ? '<div class="m-qr">' + qr + '</div><p class="m-hint" style="text-align:center;margin:4px 0 12px">Scannez ce code avec l\'appareil photo' + (cfg.kind === 'return' ? ' de l\'ordinateur' : ' du téléphone') + '.' + (url.length > 1100 ? ' Code dense : affichez-le en grand.' : '') + '</p>'
+            : '<div class="m-card" style="margin-top:0"><b>Trop volumineux pour un QR code</b><p class="m-hint" style="margin:6px 0 0">' + (url.length < 8000 ? 'Utilisez le lien (message, mail, AirDrop…) ou le fichier ci-dessous.' : 'Utilisez le fichier ci-dessous (AirDrop, mail, cloud…) : le lien serait trop long.') + '</p></div>') +
+            '<div class="m-actions" style="margin-top:0">' + (url.length < 8000 ? '<button class="m-btn" id="xm-copy">🔗 Copier le lien</button>' : '') + ((navigator.share && mob) ? '<button class="m-btn" id="xm-share">📤 Partager…</button>' : '') + '<button class="m-btn primary" id="xm-file">⬇️ Fichier</button></div>' +
+            (cfg.note ? '<p class="m-hint" style="margin:12px 2px 0">' + cfg.note + '</p>' : '') + '<p class="m-hint" style="margin:8px 2px 0">' + (json.length / 1024 < 10 ? Math.max(1, Math.round(json.length / 102.4) / 10) : Math.round(json.length / 1024)) + ' Ko · le projet n\'est pas envoyé sur Internet : tout est dans le lien ou le fichier.</p>';
+        const s = host(body, '📱 ' + esc(cfg.heading || (cfg.kind === 'return' ? 'Renvoyer au bureau' : 'Envoyer vers le mobile')), mob);
+        const q = id => $(id, s.ov || s);
+        const c = q('#xm-copy'); if (c) c.onclick = async () => toast(await copy(url) ? '🔗 Lien copié' : '⚠️ Copie impossible : utilisez le fichier');
+        const sh = q('#xm-share'); if (sh) sh.onclick = async () => { try { await navigator.share({ title: cfg.title || cfg.app, text: cfg.title || cfg.app, url }); } catch (e) { } };
+        q('#xm-file').onclick = () => { download(fname, json, 'application/json'); toast('⬇️ Fichier enregistré'); };
+    }
+    // fenêtre : feuille du bas sur mobile, boîte centrée sur le bureau (styles en ligne : aucun CSS requis)
+    function host(html, title, mob) {
+        if (mob) { const s = sheet(html, { title }); s.ov = s.parentNode; return s; }
+        const old = document.getElementById('xm-d-ov'); if (old) old.remove();
+        const ov = document.createElement('div'); ov.id = 'xm-d-ov'; ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:10060;display:flex;align-items:center;justify-content:center;';
+        ov.innerHTML = '<div style="background:var(--bg-menu,#2d2d2d);color:var(--text-main,#fff);width:520px;max-width:94vw;max-height:90vh;overflow-y:auto;border-radius:10px;border:1px solid var(--border-color,#444);padding:20px;box-shadow:0 4px 18px rgba(0,0,0,.5);font-size:13.5px;font-family:inherit;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;border-bottom:1px solid var(--border-color,#444);padding-bottom:8px;"><b style="font-size:15px;">' + title + '</b><span data-x style="cursor:pointer;font-weight:bold;color:var(--text-muted,#aaa);padding:0 4px;">✕</span></div><div class="xm-d">' + html + '</div></div>';
+        ov.addEventListener('mousedown', e => { if (e.target === ov) ov.remove(); }); document.body.appendChild(ov); $('[data-x]', ov).onclick = () => ov.remove();
+        const s = $('.xm-d', ov); s.ov = ov; if (!document.getElementById('xm-d-css')) { const st = document.createElement('style'); st.id = 'xm-d-css'; st.textContent = '#xm-d-ov .m-qr{background:#fff;border-radius:10px;padding:6px;width:min(100%,340px);margin:6px auto}#xm-d-ov .m-qr svg{display:block;width:100%;height:auto}#xm-d-ov .m-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}#xm-d-ov .m-actions>*{flex:1 1 130px}#xm-d-ov .m-btn{padding:9px 12px;font-size:13.5px;border-radius:8px;border:1px solid var(--btn-border,rgba(240,179,120,.35));background:var(--btn-bg,rgba(240,179,120,.12));color:inherit;cursor:pointer;font-weight:600}#xm-d-ov .m-btn.primary{border-color:rgba(240,179,120,.85);background:rgba(240,179,120,.28)}#xm-d-ov .m-hint{font-size:12px;color:var(--text-dim,#888);line-height:1.45}#xm-d-ov .m-card{border:1px solid var(--border-color,#444);border-radius:8px;padding:10px 12px;background:var(--bg-panel-alt,#252525);margin:10px 0}#xm-d-ov .m-sec{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-dim,#888);margin:16px 2px 6px}'; document.head.appendChild(st); }
+        return s;
+    }
+    // ---------- réception : lien (#mx=…), fichier ou lien collé ----------
+    async function fromHash(app, onEnv) {
+        const m = /[#&]mx=([\w-]+)/.exec(location.hash || ''); if (!m) return false;
+        try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { }
+        try { const env = checkEnv(await unpack(m[1]), app); await onEnv(env, 'link'); } catch (e) { toast('⚠️ ' + (e.message || 'Lien illisible'), 4500); }
+        return true;
+    }
+    function importFile(app, onEnv) { pickFile('.json,application/json', async f => { try { await onEnv(await readEnvFile(f, app), 'file'); } catch (e) { toast('⚠️ ' + (e.message || 'Fichier illisible'), 4500); } }); }
+    async function importLink(app, onEnv) {
+        const mob = document.body.classList.contains('xm');
+        const s = host('<label class="m-field" style="display:block;margin-bottom:10px"><span class="m-hint">Collez le lien reçu</span><textarea id="xm-paste" rows="4" style="width:100%;box-sizing:border-box;font-size:16px;padding:10px;border-radius:8px;border:1px solid var(--border-color,#444);background:var(--bg-input,#3a3a3a);color:inherit"></textarea></label><div class="m-actions"><button class="m-btn primary" id="xm-pgo">Importer</button></div>', '🔗 Importer un lien', mob);
+        $('#xm-pgo', s.ov || s).onclick = async () => { const v = $('#xm-paste', s.ov || s).value, m = /mx=([\w-]+)/.exec(v) || [0, v.trim()]; try { const env = checkEnv(await unpack(m[1]), app); if (s.ov) s.ov.remove(); closeSheet(); await onEnv(env, 'link'); } catch (e) { toast('⚠️ ' + (e.message || 'Lien illisible'), 4500); } };
+    }
+    // ---------- panneau « 📱 Mobile » des outils bureau ----------
+    //  cfg = { app, page, title, name:()=>'', make:()=>data|null, apply:async(env)=>message, note }
+    function desktopPanel(cfg) {
+        const s = host('<p class="m-hint" style="margin:0 0 10px">Emportez ce projet sur le téléphone : ouvrez la <b>version mobile</b> de ' + esc(cfg.title) + ' en scannant un QR code, en ouvrant un lien ou en important un fichier.</p>' +
+            '<div class="m-actions" style="margin-top:0"><button class="m-btn primary" id="xm-go">📱 Envoyer vers le mobile</button><button class="m-btn" id="xm-open">↗ Ouvrir la version mobile ici</button></div>' +
+            (cfg.apply ? '<div class="m-sec">Récupérer ce qui a été fait sur le mobile</div><div class="m-actions" style="margin-top:0"><button class="m-btn" id="xm-ifile">📂 Importer un fichier</button><button class="m-btn" id="xm-ilink">🔗 Coller un lien</button></div><p class="m-hint" style="margin:8px 2px 0">' + (cfg.returnNote || 'Sur le mobile, « Renvoyer au bureau » produit le fichier ou le lien à importer ici.') + '</p>' : ''), '📱 Version mobile — ' + esc(cfg.title), false);
+        const q = id => $(id, s.ov);
+        q('#xm-go').onclick = () => { s.ov.remove(); send({ app: cfg.app, page: cfg.page, title: cfg.title, name: cfg.name, make: cfg.make, note: cfg.note, empty: cfg.empty }); };
+        q('#xm-open').onclick = async () => { const d = cfg.make(); if (d == null) { toast(cfg.empty || 'Rien à envoyer'); return; } s.ov.remove(); window.open(await link(cfg.page, envelope(cfg.app, 'project', typeof cfg.name === 'function' ? cfg.name() : cfg.name, d)), '_blank'); };
+        if (cfg.apply) { const ap = async env => { s.ov && s.ov.remove(); const m = await cfg.apply(env); if (m) toast(m, 5000); }; q('#xm-ifile').onclick = () => importFile(cfg.app, ap); q('#xm-ilink').onclick = () => { s.ov.remove(); importLink(cfg.app, async env => { const m = await cfg.apply(env); if (m) toast(m, 5000); }); }; }
+    }
+    // retour par lien sur le bureau (#mx=… de type return)
+    function desktopBoot(cfg) { return fromHash(cfg.app, async env => { if (env.kind === 'return' && cfg.apply) { const m = await cfg.apply(env); if (m) toast(m, 5000); } }); }
+    // ---------- thème, en-tête et menu des pages mobiles ----------
+    function initTheme() { let p = {}; try { p = JSON.parse(localStorage.getItem('hubXIII.prefs')) || {}; } catch (e) { } document.body.classList.add('xm'); document.body.classList.toggle('light-theme', p.theme === 'light'); const m = document.querySelector('meta[name=theme-color]'); if (m) m.content = p.theme === 'light' ? '#ffffff' : '#222222'; }
+    function toggleTheme() { let p = {}; try { p = JSON.parse(localStorage.getItem('hubXIII.prefs')) || {}; } catch (e) { } p.theme = p.theme === 'light' ? 'dark' : 'light'; try { localStorage.setItem('hubXIII.prefs', JSON.stringify(p)); } catch (e) { } initTheme(); }
+    //  menu standard ⋯ : cfg = { app, deskPage, items:[{icon,label,sub,run}] , onImport(env, via) , sendReturn() }
+    function menu(cfg) {
+        const items = (cfg.items || []).concat([
+            cfg.onImport ? { icon: '📂', label: 'Importer un fichier', sub: 'Envoi du bureau (.xiii-m.json)', run: () => importFile(cfg.app, cfg.onImport) } : null,
+            cfg.onImport ? { icon: '🔗', label: 'Coller un lien', sub: 'Lien ou QR reçu du bureau', run: () => importLink(cfg.app, cfg.onImport) } : null,
+            cfg.sendReturn ? { icon: '📤', label: 'Renvoyer au bureau', sub: 'QR code, lien ou fichier', run: cfg.sendReturn } : null,
+            { icon: '🌓', label: 'Thème clair / sombre', run: toggleTheme },
+            cfg.deskPage ? { icon: '🖥️', label: 'Version bureau', sub: 'Interface complète', run: () => { try { sessionStorage.setItem('xiiiDesk', '1'); } catch (e) { } location.href = cfg.deskPage + '?desktop=1'; } } : null,
+            { icon: '🏠', label: 'Accueil SUITE XIII', run: () => { location.href = 'index.html'; } }].filter(Boolean));
+        const s = sheet('<div class="m-list" style="margin:0">' + items.map((it, i) => '<button class="m-item" data-i="' + i + '"><span class="ico">' + it.icon + '</span><span class="grow"><b>' + esc(it.label) + '</b>' + (it.sub ? '<small>' + esc(it.sub) + '</small>' : '') + '</span></button>').join('') + '</div><p class="m-credit">Application développée par Matthieu Lamotte</p>', { title: 'Menu' });
+        $$('[data-i]', s).forEach(b => b.onclick = () => { closeSheet(); setTimeout(() => items[+b.dataset.i].run(), 60); });
+    }
+    return { FORMAT, $, $$, esc, uid, safe, isPhone, pack, unpack, link, envelope, checkEnv, load, save, drop, toast, sheet, closeSheet, ask, download, copy, pickFile, readEnvFile, send, host, fromHash, importFile, importLink, desktopPanel, desktopBoot, initTheme, toggleTheme, menu };
+})();
+// 🏠 retour à l'accueil SUITE XIII : même bouton en tête de chaque version mobile
+(function () {
+    const add = () => { const top = document.querySelector('.m-top'); if (!top || top.querySelector('.xm-home')) return; const a = document.createElement('a'); a.className = 'm-ibtn plain xm-home'; a.href = 'index.html'; a.title = 'Accueil SUITE XIII'; a.setAttribute('aria-label', 'Accueil'); a.textContent = '🏠'; a.style.cssText = 'text-decoration:none;font-size:17px;display:inline-flex;align-items:center;justify-content:center'; top.insertBefore(a, top.firstChild); };
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', add); else add();
+})();
+
+// 📱 XIII Équipe : une fois dans l'application, on y reste (l'accueil ramène à l'application, pas au site)
+(function () {
+    if (window.__xinapp) return; window.__xinapp = 1;
+    var page = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
+    try { if (page === 'equipe.html' && (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (window.matchMedia && matchMedia('(display-mode: standalone)').matches))) sessionStorage.setItem('xiii.inapp', '1'); } catch (e) { }
+    function inApp() { try { return sessionStorage.getItem('xiii.inapp') === '1'; } catch (e) { return false; } }
+    if (!inApp()) return;
+    if (page === 'index.html' || page === '') { location.replace('equipe.html'); return; }
+    document.addEventListener('click', function (e) {
+        var a = e.target.closest && e.target.closest('a[href]'); if (!a) return;
+        var u; try { u = new URL(a.getAttribute('href'), location.href); } catch (er) { return; }
+        if (u.origin !== location.origin) return;
+        var f = (u.pathname.split('/').pop() || 'index.html').toLowerCase();
+        if (f === 'index.html' || f === '') { e.preventDefault(); e.stopPropagation(); location.href = 'equipe.html'; return; }
+        if (a.target === '_blank') { a.removeAttribute('target'); }
+    }, true);
+})();
+
+</script>
+<script>
+// Généré depuis dossier.html (TEMPLATES) : sections et mots-clés de classement automatique
+const DOSS_TPL={"tv":{"label":"Dossier de production TV","short":"Production TV","icon":"📺","ch":[{"t":"Présentation du projet","g":0,"s":[{"t":"Présentation détaillée du concept de l'émission","k":["concept","presentation","pitch","format","bible"],"r":1},{"t":"Note d'intention de réalisation","k":["intention realisation","note realisation","intention real"],"r":1},{"t":"Note d'intention de production","k":["intention production","note production","intention prod"],"r":1}]},{"t":"Organisation & budget","g":0,"s":[{"t":"Planning de production (prépa – tournage)","k":["planning","retroplanning","retro planning","calendrier","gantt","plan de travail"],"r":1},{"t":"Budget réel de production","k":["budget","devis","couts","cout","depenses","recettes"],"r":1},{"t":"Feuilles de service","k":["feuille de service","call sheet","callsheet","convocation"],"off":1},{"t":"Attestation d'assurance (responsabilité civile)","k":["assurance","responsabilite civile","attestation rc"],"off":1}]},{"t":"Émissions","g":0,"s":[{"t":"Conducteurs détaillés des émissions","k":["conducteur","conducteurs","rundown","deroule"],"r":1},{"t":"Éléments de traitement, réalisation et éléments graphiques","k":["traitement","habillage","graphique","graphisme","charte","generique","synthe","infographie","logo"],"r":1},{"t":"Éléments vidéo (liens)","k":["video","teaser","pilote","bande annonce","lien"]}]},{"t":"Équipe & contrats","g":0,"s":[{"t":"Liste technique de l'équipe","k":["liste technique","liste equipe","contacts equipe"],"r":1,"tm":1},{"t":"Fiches de renseignements & contrats d'engagement (par fonction)","k":["fiche de renseignement","fiche renseignement","renseignements","contrat","engagement","cddu","dpae","lettre d engagement"],"r":1,"pp":1,"c":["technicien","production","animateur","artiste","auteur"]}]},{"t":"Autorisations","g":0,"s":[{"t":"Autorisation de tournage du lieu","k":["autorisation de tournage","autorisation tournage","convention","lieu","mairie","arrete"],"r":1},{"t":"Autorisations de droit à l'image (animateur et invités)","k":["droit a l image","droit image","droits image","cession","autorisation image"],"r":1,"pp":1,"c":["animateur","invite","artiste"]}]},{"t":"Technique & plateau","g":0,"s":[{"t":"Plan du décor","k":["decor","scenographie","plan decor","plateau"],"r":1},{"t":"Synoptique de l'installation son","k":["synoptique son","synoptique audio","chaine son","audio","son"],"r":1},{"t":"Plan lumière de l'installation plateau","k":["plan lumiere","plan de feu","lumiere","eclairage","implantation lumiere"],"r":1},{"t":"Liste du matériel & colisage","k":["materiel","colisage","liste materiel","packing"],"off":1}]}]},"fiction":{"label":"Dossier de production fiction","short":"Production fiction","icon":"🎞️","ch":[{"t":"Documents généraux","g":0,"s":[{"t":"Fiche technique","k":["fiche technique"],"r":1},{"t":"Note de synthèse individuelle (3 pages maximum)","k":["note de synthese","synthese"],"r":1}]},{"t":"Le sujet","g":0,"s":[{"t":"Synopsis","k":["synopsis"],"r":1},{"t":"Scénario","k":["scenario","script","continuite dialoguee"],"r":1},{"t":"Note d'intention auteur-réalisateur","k":["note d intention","intention"],"r":1},{"t":"Storyboard / Découpage","k":["storyboard","story board","decoupage","decoupage technique"],"r":1},{"t":"Pré-minutage scénario","k":["pre minutage","preminutage","minutage"],"r":1}]},{"t":"Juridique (ayants droit)","g":1,"s":[{"t":"Fiche de renseignements auteur-scénariste","k":["renseignements auteur scenariste","fiche auteur scenariste"],"r":1},{"t":"Contrat d'auteur-scénariste","k":["contrat auteur scenariste","contrat scenariste"],"r":1},{"t":"Fiche de renseignements auteur-réalisateur","k":["renseignements auteur realisateur","fiche auteur realisateur","fiche realisateur"],"r":1},{"t":"Contrat auteur-réalisateur","k":["contrat auteur realisateur"],"r":1},{"t":"Contrat réalisateur technicien","k":["contrat realisateur technicien","realisateur technicien"],"r":1},{"t":"DPAE (réalisateur)","k":["dpae realisateur"],"r":1},{"t":"Contrat auteur-compositeur musique originale","k":["compositeur","musique originale","contrat compositeur"],"r":1},{"t":"Droits de synchronisation — éditeur œuvre musicale","k":["synchronisation editeur","droits de synchro editeur","editeur musical"],"r":1},{"t":"Droits de synchronisation — producteur œuvre musicale","k":["synchronisation producteur","producteur phonographique","master"],"r":1},{"t":"Droits de reproduction divers (œuvres d’art…)","k":["droits de reproduction","reproduction","oeuvre d art","oeuvres d art"],"r":1},{"t":"Fiches de renseignements artistes-interprètes","k":["renseignements artiste","fiche comedien","fiche artiste","fiche musicien"],"r":1,"pp":1,"c":["artiste"]},{"t":"Contrats d'engagement artistes-interprètes","k":["contrat artiste","contrat comedien","engagement artiste","contrat musicien"],"r":1,"pp":1,"c":["artiste"]},{"t":"DPAE (artistes-interprètes)","k":["dpae artiste","dpae comedien"],"r":1,"pp":1,"c":["artiste"]},{"t":"Cessions de droits à l'image (rôles, figurants, silhouettes)","k":["droit a l image","droit image","cession","figurant","silhouette"],"r":1,"pp":1,"c":["artiste","invite"]},{"t":"Fiche de renseignements auteur-graphiste","k":["graphiste","renseignements graphiste"],"r":1,"pp":1,"c":["auteur"]},{"t":"Contrat d'auteur-graphiste","k":["contrat graphiste"],"r":1,"pp":1,"c":["auteur"]}]},{"t":"Équipe technique","g":1,"s":[{"t":"Fiches de renseignements techniciens","k":["renseignements technicien","fiche technicien","fiche de renseignement"],"r":1,"pp":1,"c":["technicien","production"]},{"t":"DPAE (techniciens)","k":["dpae"],"r":1,"pp":1,"c":["technicien","production"]},{"t":"Lettres d'engagement","k":["lettre d engagement","lettre engagement","engagement"],"r":1,"pp":1,"c":["technicien","production"]},{"t":"Feuilles quotidiennes d'émargement","k":["emargement","feuille d emargement","feuilles quotidiennes"],"r":1},{"t":"Accords de travail à titre gracieux (techniciens)","k":["titre gracieux","benevole","gracieux"],"pp":1,"c":["technicien","production"]}]},{"t":"Organisation","g":0,"s":[{"t":"Planning de production","k":["planning","retroplanning","calendrier"],"r":1},{"t":"Mails de recherches décors","k":["mail","mails","recherche decor","recherches decors"],"r":1},{"t":"Feuilles de repérages","k":["reperage","reperages","repérages"],"r":1},{"t":"Autorisations et conventions de tournage","k":["autorisation de tournage","convention de tournage","autorisation tournage","convention"],"r":1},{"t":"Annonces casting","k":["annonce casting","annonces casting","appel a casting"],"r":1},{"t":"Fiches de casting","k":["fiche casting","fiches casting","casting"],"r":1},{"t":"Tableau de suivi des contacts","k":["suivi des contacts","suivi contacts","contacts"],"r":1},{"t":"Dépouillement","k":["depouillement"],"r":1},{"t":"Plan de travail","k":["plan de travail","pdt"],"r":1},{"t":"Feuilles de service","k":["feuille de service","feuilles de service","call sheet","callsheet"],"r":1},{"t":"Bible de tournage","k":["bible"],"r":1},{"t":"Liste artistique","k":["liste artistique"],"r":1,"tm":1},{"t":"Attestation responsabilité civile","k":["responsabilite civile","attestation rc","assurance"],"r":1}]},{"t":"Dossier financier","g":0,"s":[{"t":"Devis estimatif (détaillé et récapitulatif)","k":["devis","budget","estimatif"],"r":1},{"t":"Plan de financement prévisionnel","k":["plan de financement","financement"],"r":1}]},{"t":"Chaîne de droits","g":0,"s":[{"t":"Générique","k":["generique","credits"],"r":1},{"t":"Relevé des musiques","k":["releve des musiques","musiques","cue sheet","cuesheet"],"r":1},{"t":"Relevé des droits d'auteurs","k":["droits d auteur","droits auteurs","releve des droits"],"r":1},{"t":"Relevé des artistes-interprètes","k":["releve des artistes","artistes interpretes"],"r":1},{"t":"Relevé des photos et œuvres d’art","k":["releve des photos","photos","oeuvres d art"],"r":1}]}]},"artistique":{"label":"Dossier artistique (fiction)","short":"Dossier artistique","icon":"🎭","ch":[{"t":"Dossier artistique","g":0,"s":[{"t":"Résumé bref du film","k":["resume","logline","pitch"],"r":1},{"t":"Scénario du film","k":["scenario","script","continuite dialoguee"],"r":1},{"t":"Note d’intention de réalisation","k":["note d intention","intention","note de realisation"],"r":1},{"t":"Éléments artistiques complémentaires","k":["moodboard","mood board","casting","references","reference musicale","inspiration"],"r":1},{"t":"Note de production","k":["note de production","note production"],"r":1},{"t":"CV du réalisateur","k":["cv realisateur","cv","biographie","filmographie"],"r":1},{"t":"CV de la production","k":["cv production","presentation production","societe de production"],"r":1}]}]},"tech":{"label":"Dossier technique TV","short":"Technique TV","icon":"🎛️","ch":[{"t":"Intentions","g":0,"s":[{"t":"Note d'intention","k":["note d intention","intention"],"r":1},{"t":"Note de réalisation","k":["note de realisation","realisation"],"r":1},{"t":"Moodboard","k":["moodboard","mood board","inspiration","references"],"r":1},{"t":"Présentation de la DA du groupe (concert)","k":["direction artistique","da groupe","groupe","artiste","charte"]}]},{"t":"Plateau & installation","g":0,"s":[{"t":"Plans de feu (un par plateau)","k":["plan de feu","plans de feu","lumiere","eclairage","patch"],"r":1},{"t":"Plan au sol","k":["plan au sol","implantation","plan sol","plan camera"],"r":1},{"t":"Synoptique de l'installation de diffusion vidéo","k":["synoptique video","synoptique","chaine video","diffusion","regie"],"r":1},{"t":"Synoptique de l'installation son","k":["synoptique son","synoptique audio","audio"],"off":1}]},{"t":"Tournages","g":0,"s":[{"t":"DTAP & logbook — tournage de reportage","k":["dtap reportage","logbook reportage","reportage"],"r":1},{"t":"DTAP & logbook — tournage d'émission","k":["dtap emission","logbook emission","emission","dtap","logbook"],"r":1},{"t":"Conducteur","k":["conducteur","rundown"],"off":1},{"t":"Liste technique de l'équipe","k":["liste technique"],"tm":1,"off":1},{"t":"Liste du matériel & colisage","k":["materiel","colisage","liste materiel"],"off":1}]}]}};
+
+</script>
+<script>
+XM.initTheme();
+// =====================================================================
+//  DOSSIER XIII — version mobile : visualiser le dossier, ajouter des pièces, renvoyer au bureau
+//  Stockage local : IndexedDB « dossierXIIIm » (pièces ajoutées + sommaire reçu). Aucun serveur.
+// =====================================================================
+(() => {
+const $ = XM.$, $$ = XM.$$, esc = XM.esc, uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-3);
+const APP = 'dossier', MAXPX = 1600, JPEGQ = 0.82, QR_BYTES = 350 * 1024;
+const pad2 = n => String(n).padStart(2, '0');
+const todayISO = () => { const d = new Date(); return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()); };
+const frDate = iso => { if (!iso) return ''; const [y, m, d] = iso.split('-'); return d + '/' + m + '/' + y; };
+const fold = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+const fmtSize = b => b >= 1048576 ? (b / 1048576).toFixed(1).replace('.', ',') + ' Mo' : Math.max(1, Math.round(b / 1024)) + ' Ko';
+const plural = (n, s, p) => n + ' ' + (n > 1 ? (p || s + 's') : s);
+const ST = { todo: 'À faire', wip: 'En cours', ready: 'Prêt' };
+const CATS = { technicien: 'Technicien·ne', production: 'Production', artiste: 'Artiste-interprète', auteur: 'Auteur·rice', animateur: 'Animateur·rice', invite: 'Invité·e', autre: 'Autre' };
+const KIND_ICON = { pdf: '📄', image: '🖼️', docx: '📝', sheet: '📊', text: '🗒️', other: '📎', xdoc: '🔗' };
+const KIND_LABEL = { pdf: 'PDF', image: 'Image', docx: 'Word', sheet: 'Tableur', text: 'Texte', other: 'Fichier', xdoc: 'Document Suite XIII' };
+
+// ---------- type de fichier (même règle que le bureau) ----------
+function fileKind(name, mime) {
+    const e = ((String(name).match(/\.([a-z0-9]+)$/i) || [])[1] || '').toLowerCase(); mime = mime || '';
+    if (e === 'pdf' || mime === 'application/pdf') return 'pdf';
+    if (/^image\//.test(mime) || ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg', 'heic', 'heif', 'avif'].includes(e)) return 'image';
+    if (e === 'docx') return 'docx';
+    if (['xlsx', 'xls', 'xlsm', 'ods', 'csv', 'tsv', 'numbers'].includes(e)) return e === 'numbers' ? 'other' : 'sheet';
+    if (['txt', 'md'].includes(e)) return 'text';
+    return 'other';
+}
+
+// ---------- classement automatique : mêmes règles que DOSSIER XIII bureau ----------
+const STOP = new Set(['de', 'du', 'des', 'la', 'le', 'les', 'et', 'd', 'l', 'a', 'au', 'aux', 'en', 'un', 'une', 'pour', 'par', 'sur', 'avec', 'the', 'of', 'v1', 'v2', 'v3', 'final', 'def', 'version', 'copie', 'copy', 'scan', 'img', 'dsc', 'pdf', 'doc', 'docx']);
+const normName = name => ' ' + fold(String(name).replace(/\.[a-z0-9]{2,5}$/i, '')).replace(/[^a-z0-9]+/g, ' ').replace(/\s+/g, ' ').trim() + ' ';
+function classify(name) {
+    const n = normName(name); let best = null, bestScore = 0;
+    allSecs().forEach(({ ch, s }) => {
+        let score = 0;
+        (s.k || []).forEach(k => { const kk = ' ' + fold(k).replace(/[^a-z0-9]+/g, ' ').trim() + ' '; if (kk.trim() && n.includes(kk)) score += 10 + kk.length * 2; });
+        fold(s.t).replace(/[^a-z0-9]+/g, ' ').split(' ').filter(w => w.length >= 4 && !STOP.has(w)).forEach(w => { const sg = w.replace(/s$/, ''); if (n.includes(' ' + w + ' ') || n.includes(' ' + sg + ' ') || n.includes(' ' + sg + 's ')) score += 3 + Math.round(w.length / 2); });
+        if (ch.x || s.x) score *= 0.6;
+        if (score > bestScore) { bestScore = score; best = s; }
+    });
+    const person = guessPerson(n);
+    return { secId: bestScore >= 14 ? best.id : '', personId: person ? person.i : '', score: bestScore };
+}
+function guessPerson(normalized) {
+    let hit = null, len = 0;
+    ((S.proj && S.proj.team) || []).forEach(m => {
+        const parts = fold(m.n).replace(/[^a-z0-9]+/g, ' ').trim().split(' ').filter(w => w.length >= 3), last = parts[parts.length - 1];
+        if (last && normalized.includes(' ' + last + ' ') && last.length > len) { hit = m; len = last.length; }
+    });
+    return hit;
+}
+
+// ---------- état ----------
+const S = { tab: 'sum', proj: null, items: [], sec: null, q: '', flt: 'all', target: '', ready: false };
+const allSecs = () => { const o = []; if (S.proj) S.proj.ch.forEach(ch => ch.s.forEach(s => o.push({ ch, s }))); return o; };
+const findSec = id => { for (const ch of (S.proj ? S.proj.ch : [])) { const s = ch.s.find(x => x.id === id); if (s) return { ch, s }; } return null; };
+const secByTitle = t => { const f = fold(t).trim(); return f ? (allSecs().find(({ s }) => fold(s.t).trim() === f) || null) : null; };
+const mineOf = id => S.items.filter(i => !i.draft && i.secId === id);
+
+// ---------- IndexedDB ----------
+const IDB = {
+    db: null, ok: false, mem: { items: new Map(), meta: new Map() },
+    open() {
+        return new Promise(res => {
+            let r; try { r = indexedDB.open('dossierXIIIm', 1); } catch (e) { res(false); return; }
+            r.onupgradeneeded = () => { const d = r.result; ['items', 'meta'].forEach(n => { if (!d.objectStoreNames.contains(n)) d.createObjectStore(n); }); };
+            r.onsuccess = () => { this.db = r.result; this.ok = true; res(true); }; r.onerror = () => res(false); r.onblocked = () => res(false);
+        });
+    },
+    _tx(s, mode, fn) {
+        return new Promise((res, rej) => { const t = this.db.transaction(s, mode); let out; const q = fn(t.objectStore(s)); if (q && 'onsuccess' in q) q.onsuccess = () => { out = q.result; }; t.oncomplete = () => res(out); t.onerror = t.onabort = () => rej(t.error); });
+    },
+    get(s, k) { return this.ok ? this._tx(s, 'readonly', st => st.get(k)) : Promise.resolve(this.mem[s].get(k)); },
+    put(s, k, v) { return this.ok ? this._tx(s, 'readwrite', st => st.put(v, k)) : Promise.resolve(this.mem[s].set(k, v)); },
+    del(s, k) { return this.ok ? this._tx(s, 'readwrite', st => st.delete(k)) : Promise.resolve(this.mem[s].delete(k)); },
+    all(s) { return this.ok ? this._tx(s, 'readonly', st => st.getAll()) : Promise.resolve([...this.mem[s].values()]); }
+};
+const saveT = {};
+function saveItem(it, now) {
+    it.secTitle = secLabel(it.secId) || '';
+    const go = () => IDB.put('items', it.id, it).catch(() => XM.toast('⚠️ Enregistrement local impossible (espace plein ?)', 4000));
+    if (now) return go();
+    clearTimeout(saveT[it.id]); saveT[it.id] = setTimeout(go, 350);
+}
+const saveProj = () => IDB.put('meta', 'project', S.proj).catch(() => { });
+function refreshBadges() {
+    const d = S.items.filter(i => i.draft).length, m = S.items.filter(i => !i.draft).length;
+    const a = $('#b-add'), b = $('#b-mine'); a.hidden = !d; a.textContent = d; b.hidden = !m; b.textContent = m;
+}
+
+// ---------- images : compression ≤ 1600 px JPEG, vignette, PDF de scan ----------
+async function decodeImage(file) {
+    if (window.createImageBitmap) {
+        try { return await createImageBitmap(file, { imageOrientation: 'from-image' }); } catch (e) { }
+        try { return await createImageBitmap(file); } catch (e) { }
+    }
+    return new Promise((res, rej) => { const u = URL.createObjectURL(file), im = new Image(); im.onload = () => { res(im); setTimeout(() => URL.revokeObjectURL(u), 4000); }; im.onerror = () => { URL.revokeObjectURL(u); rej(new Error('decode')); }; im.src = u; });
+}
+const toBlob = (cv, q) => new Promise(res => cv.toBlob(b => res(b), 'image/jpeg', q));
+async function compressImage(file, opts) {
+    opts = opts || {};
+    const im = await decodeImage(file), w0 = im.width || im.naturalWidth, h0 = im.height || im.naturalHeight;
+    const k = Math.min(1, MAXPX / Math.max(w0, h0)), w = Math.max(1, Math.round(w0 * k)), h = Math.max(1, Math.round(h0 * k));
+    const cv = document.createElement('canvas'); cv.width = w; cv.height = h; const cx = cv.getContext('2d');
+    cx.fillStyle = '#fff'; cx.fillRect(0, 0, w, h); cx.drawImage(im, 0, 0, w, h);
+    if (opts.bw) { // « document » : niveaux de gris + contraste
+        const d = cx.getImageData(0, 0, w, h), p = d.data;
+        for (let i = 0; i < p.length; i += 4) { let g = 0.299 * p[i] + 0.587 * p[i + 1] + 0.114 * p[i + 2]; g = Math.max(0, Math.min(255, (g - 128) * 1.45 + 128 + 14)); p[i] = p[i + 1] = p[i + 2] = g; }
+        cx.putImageData(d, 0, 0);
+    }
+    const blob = await toBlob(cv, JPEGQ);
+    const tk = Math.min(1, 160 / Math.max(w, h)), tc = document.createElement('canvas'); tc.width = Math.max(1, Math.round(w * tk)); tc.height = Math.max(1, Math.round(h * tk));
+    tc.getContext('2d').drawImage(cv, 0, 0, tc.width, tc.height);
+    if (im.close) try { im.close(); } catch (e) { }
+    return { blob, w, h, thumb: tc.toDataURL('image/jpeg', 0.6) };
+}
+// PDF minimal : une page par image JPEG (A4, portrait ou paysage selon l'image)
+async function jpegsToPdf(pages) {
+    const enc = new TextEncoder(), parts = [], offs = []; let off = 0;
+    const push = x => { const u = typeof x === 'string' ? enc.encode(x) : x; parts.push(u); off += u.length; };
+    const bin = (...b) => new Uint8Array(b);
+    push('%PDF-1.4\n'); push(bin(0x25, 0xE2, 0xE3, 0xCF, 0xD3, 0x0A));
+    const n = pages.length, kids = pages.map((_, i) => (3 + i * 3) + ' 0 R').join(' ');
+    const obj = (id, body) => { offs[id] = off; push(id + ' 0 obj\n'); push(body); push('\nendobj\n'); };
+    obj(1, '<< /Type /Catalog /Pages 2 0 R >>'); obj(2, '<< /Type /Pages /Kids [' + kids + '] /Count ' + n + ' >>');
+    for (let i = 0; i < n; i++) {
+        const p = pages[i], land = p.w > p.h, PW = land ? 841.89 : 595.28, PH = land ? 595.28 : 841.89, M = 14;
+        const sc = Math.min((PW - 2 * M) / p.w, (PH - 2 * M) / p.h), W = p.w * sc, H = p.h * sc, X = (PW - W) / 2, Y = (PH - H) / 2;
+        const jpg = new Uint8Array(await p.blob.arrayBuffer()), cs = 'q ' + W.toFixed(2) + ' 0 0 ' + H.toFixed(2) + ' ' + X.toFixed(2) + ' ' + Y.toFixed(2) + ' cm /Im0 Do Q', pid = 3 + i * 3;
+        obj(pid, '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ' + PW + ' ' + PH + '] /Resources << /XObject << /Im0 ' + (pid + 2) + ' 0 R >> >> /Contents ' + (pid + 1) + ' 0 R >>');
+        obj(pid + 1, '<< /Length ' + cs.length + ' >>\nstream\n' + cs + '\nendstream');
+        offs[pid + 2] = off; push((pid + 2) + ' 0 obj\n<< /Type /XObject /Subtype /Image /Width ' + p.w + ' /Height ' + p.h + ' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ' + jpg.length + ' >>\nstream\n'); push(jpg); push('\nendstream\nendobj\n');
+    }
+    const total = 3 + n * 3, xr = off; let x = 'xref\n0 ' + total + '\n0000000000 65535 f \n';
+    for (let i = 1; i < total; i++) x += String(offs[i]).padStart(10, '0') + ' 00000 n \n';
+    push(x + 'trailer\n<< /Size ' + total + ' /Root 1 0 R >>\nstartxref\n' + xr + '\n%%EOF\n');
+    return new Blob(parts, { type: 'application/pdf' });
+}
+
+// ---------- utilitaires ----------
+const safeFile = s => String(s || 'piece').replace(/[\\/:*?"<>|\u0000-\u001f]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 80) || 'piece';
+const extOf = n => ((String(n).match(/\.([a-z0-9]{1,5})$/i) || [])[1] || '').toLowerCase();
+const baseName = n => String(n).replace(/\.[a-z0-9]{2,5}$/i, '').replace(/_+/g, ' ').trim();
+const nowTitle = p => p + ' ' + pad2(new Date().getDate()) + '/' + pad2(new Date().getMonth() + 1) + ' ' + pad2(new Date().getHours()) + 'h' + pad2(new Date().getMinutes());
+const itemFileName = it => { const e = it.kind === 'text' ? 'txt' : it.kind === 'image' ? 'jpg' : (extOf(it.name) || (it.kind === 'pdf' ? 'pdf' : 'bin')); return safeFile(it.title) + '.' + e; };
+const secLabel = id => { const f = id && findSec(id); return f ? f.s.t : ''; };
+const personName = id => { const m = id && S.proj && S.proj.team.find(t => t.i === id); return m ? m.n : ''; };
+const b64 = blob => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result).split(',')[1] || ''); r.onerror = rej; r.readAsDataURL(blob); });
+const unb64 = (s, type) => { const bin = atob(s), u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return new Blob([u], { type: type || '' }); };
+const okImg = u => /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(String(u || ''));
+function cleanHtml(html) {
+    const doc = new DOMParser().parseFromString('<body>' + String(html || '') + '</body>', 'text/html'), out = document.createElement('div');
+    const ok = { P: 1, H2: 1, H3: 1, UL: 1, OL: 1, LI: 1, B: 1, I: 1, BR: 1, TABLE: 1, TR: 1, TD: 1, TH: 1, TBODY: 1, THEAD: 1 };
+    const walk = (src, dst) => src.childNodes.forEach(n => {
+        if (n.nodeType === 3) { dst.appendChild(document.createTextNode(n.nodeValue)); return; }
+        if (n.nodeType !== 1) return;
+        if (!ok[n.tagName]) { if (!/^(SCRIPT|STYLE|IFRAME|OBJECT|EMBED)$/.test(n.tagName)) walk(n, dst); return; }
+        const el = document.createElement(n.tagName.toLowerCase()); if (n.tagName !== 'BR') walk(n, el); dst.appendChild(el);
+    });
+    walk(doc.body, out); return out.innerHTML;
+}
+const urls = new Map();
+const blobUrl = it => { if (!urls.has(it.id)) urls.set(it.id, URL.createObjectURL(it.blob)); return urls.get(it.id); };
+const dropUrl = id => { if (urls.has(id)) { URL.revokeObjectURL(urls.get(id)); urls.delete(id); } };
+const secOptions = sel => '<option value="">📥 À classer plus tard (au bureau)</option>' + S.proj.ch.map(ch => '<optgroup label="' + esc((ch.nu ? ch.nu + '. ' : '') + ch.t) + '">' + ch.s.map(s => '<option value="' + esc(s.id) + '"' + (s.id === sel ? ' selected' : '') + '>' + esc((s.nu ? s.nu + ' ' : '') + s.t) + '</option>').join('') + '</optgroup>').join('');
+function personOptions(sel, cats) {
+    const list = S.proj.team.slice().sort((a, b) => ((cats || []).includes(b.c) ? 1 : 0) - ((cats || []).includes(a.c) ? 1 : 0));
+    return '<option value="">— Personne non attribuée</option>' + list.map(m => '<option value="' + esc(m.i) + '"' + (m.i === sel ? ' selected' : '') + '>' + esc(m.n || '(sans nom)') + (m.r ? ' — ' + esc(m.r) : '') + '</option>').join('');
+}
+
+// =====================================================================
+//  PIÈCES AJOUTÉES (brouillons à valider → pièces)
+// =====================================================================
+function newItem(o) {
+    return Object.assign({ id: uid(), title: '', secId: '', personId: '', date: todayISO(), kind: 'other', name: '', mime: '', size: 0, blob: null, thumb: '', pages: 0, text: '', ts: Date.now(), draft: true, sent: 0, auto: true }, o);
+}
+function applyGuess(it, nameForClass) {
+    const g = classify(nameForClass);
+    it.secId = g.secId; const f = it.secId && findSec(it.secId);
+    it.personId = f && f.s.pp ? g.personId : '';
+}
+const GENERIC = /^(img|dsc|dscn|pxl|image|photo|picture|scan|capture|screenshot|signal|whatsapp image)[-_ ]?[\d\- _.a-z]*$/i;
+async function addFiles(files, opts) {
+    opts = opts || {}; files = [...files]; if (!files.length) return;
+    XM.toast('⏳ Préparation de ' + plural(files.length, 'pièce') + '…', 20000);
+    let n = 0, fail = 0;
+    for (const file of files) {
+        try {
+            const kind = fileKind(file.name, file.type); let it;
+            if (kind === 'image' && file.type !== 'image/svg+xml') {
+                let c; try { c = await compressImage(file); } catch (e) { c = null; }
+                if (!c) { it = newItem({ kind: 'other', name: file.name, mime: file.type, blob: file, size: file.size, title: baseName(file.name) }); }
+                else {
+                    const generic = opts.camera || GENERIC.test(baseName(file.name).replace(/\s+/g, '-'));
+                    it = newItem({ kind: 'image', name: baseName(file.name) + '.jpg', mime: 'image/jpeg', blob: c.blob, size: c.blob.size, thumb: c.thumb, w: c.w, h: c.h, title: generic ? nowTitle('Photo') : baseName(file.name) });
+                }
+            } else it = newItem({ kind, name: file.name, mime: file.type, blob: file, size: file.size, title: baseName(file.name) || 'Document' });
+            if (S.target) { it.secId = S.target; it.auto = false; const f = findSec(S.target); if (f && f.s.pp) it.personId = (guessPerson(normName(file.name)) || {}).i || ''; }
+            else applyGuess(it, it.kind === 'image' && /^Photo \d/.test(it.title) ? it.title : file.name);
+            S.items.push(it); await saveItem(it, true); n++;
+        } catch (e) { fail++; }
+    }
+    refreshBadges(); setTab('add');
+    XM.toast(n ? '📥 ' + plural(n, 'pièce') + ' à valider' + (fail ? ' · ' + fail + ' en échec' : '') : '⚠️ Fichier illisible', 3200);
+}
+async function addNote() {
+    const it = newItem({ kind: 'text', name: 'note.txt', mime: 'text/plain', title: nowTitle('Note') });
+    if (S.target) { it.secId = S.target; it.auto = false; }
+    S.items.push(it); await saveItem(it, true); refreshBadges(); setTab('add');
+    setTimeout(() => { const t = $('.d-draft[data-id="' + it.id + '"] textarea'); if (t) { t.focus(); t.scrollIntoView({ block: 'center' }); } }, 120);
+}
+function sugText(it) {
+    if (!it.secId && it.auto) return ['none', 'Aucune suggestion : choisissez un élément ou laissez « À classer »'];
+    if (it.auto) return ['', '✨ Suggestion automatique d\'après le titre'];
+    return ['man', it.secId ? 'Choisi par vous' : 'À classer au bureau'];
+}
+function fieldsHtml(it) {
+    const f = it.secId && findSec(it.secId), pp = !!(f && f.s.pp && S.proj.team.length);
+    return (it.kind === 'text' ? '<label class="m-field"><span>Texte de la note</span><textarea data-f="text" rows="5" placeholder="Écrivez ou dictez avec le 🎤 du clavier…">' + esc(it.text || '') + '</textarea></label>' : '') +
+        '<label class="m-field"><span>Titre</span><input type="text" data-f="title" value="' + esc(it.title) + '" autocomplete="off" enterkeyhint="done"></label>' +
+        '<label class="m-field"><span>Catégorie (élément du dossier)</span><select data-f="sec">' + secOptions(it.secId) + '</select><div class="d-sug" data-sug></div></label>' +
+        '<div class="m-grid2"><label class="m-field"><span>Date</span><input type="date" data-f="date" value="' + esc(it.date) + '"></label><label class="m-field" data-pp' + (pp ? '' : ' hidden') + '><span>Personne</span><select data-f="person">' + (pp ? personOptions(it.personId, f.s.c) : '') + '</select></label></div>';
+}
+function bindFields(root, it, onChange) {
+    const q = k => root.querySelector('[data-f=' + k + ']');
+    const sync = () => {
+        const f = it.secId && findSec(it.secId), pp = !!(f && f.s.pp && S.proj.team.length), box = root.querySelector('[data-pp]'), sel = q('person');
+        box.hidden = !pp; box.parentNode.firstElementChild.style.gridColumn = pp ? '' : '1 / -1';
+        if (pp) { sel.innerHTML = personOptions(it.personId, f.s.c); sel.value = it.personId || ''; } else it.personId = '';
+        const [cls, txt] = sugText(it), sg = root.querySelector('[data-sug]'); sg.className = 'd-sug ' + cls; sg.textContent = txt;
+        q('sec').value = it.secId || '';
+    };
+    q('title').oninput = e => {
+        it.title = e.target.value;
+        if (it.auto) { const keep = it.personId; applyGuess(it, it.title); if (!it.personId) it.personId = keep && findSec(it.secId) && findSec(it.secId).s.pp ? keep : ''; sync(); }
+        saveItem(it); onChange && onChange('title');
+    };
+    q('sec').onchange = e => { it.secId = e.target.value; it.auto = false; const f = it.secId && findSec(it.secId); if (f && f.s.pp && !it.personId) it.personId = (guessPerson(normName(it.title)) || {}).i || ''; sync(); saveItem(it); onChange && onChange('sec'); };
+    q('date').onchange = e => { it.date = e.target.value || todayISO(); saveItem(it); onChange && onChange('date'); };
+    q('person').onchange = e => { it.personId = e.target.value; saveItem(it); };
+    if (q('text')) q('text').oninput = e => { it.text = e.target.value; it.size = new Blob([it.text]).size; saveItem(it); onChange && onChange('text'); };
+    sync();
+}
+function thumbHtml(it, cls) {
+    if (it.thumb) return '<div class="d-thumb ' + (cls || '') + '" style="background-image:url(\'' + it.thumb + '\')"></div>';
+    return '<div class="d-thumb ' + (cls || '') + '">' + (KIND_ICON[it.kind] || '📎') + '</div>';
+}
+function itemMetaLine(it, noKind) {
+    const b = noKind ? [fmtSize(it.size || 0)] : [KIND_LABEL[it.kind] || 'Fichier', fmtSize(it.size || 0)];
+    if (it.kind === 'pdf' && it.pages) b.push(plural(it.pages, 'page'));
+    if (it.kind === 'image' && it.w) b.push(it.w + '×' + it.h);
+    return b.join(' · ');
+}
+async function removeItem(it) {
+    S.items = S.items.filter(x => x !== it); dropUrl(it.id); clearTimeout(saveT[it.id]);
+    try { await IDB.del('items', it.id); } catch (e) { } refreshBadges();
+}
+
+// =====================================================================
+//  SCANNER (plusieurs pages en série)
+// =====================================================================
+let scan = null;
+function openScan() {
+    scan = { pages: [], bw: true, pdf: true };
+    const ov = document.createElement('div'); ov.className = 'd-scan'; ov.id = 'd-scan';
+    ov.innerHTML = '<div class="vt" style="display:flex;align-items:center;gap:8px;padding:calc(8px + var(--sat)) 10px 8px;background:var(--bg-topbar);border-bottom:1px solid var(--border-soft)"><button class="m-ibtn plain" id="sc-x" aria-label="Annuler">✕</button><div style="flex:1"><b>Scanner un document</b><div class="m-hint" id="sc-n">Aucune page</div></div></div>' +
+        '<div class="vb"><div class="d-pages" id="sc-pages"></div><div class="m-empty" id="sc-empty"><b>🗂️</b>Photographiez la première page, puis ajoutez les suivantes les unes après les autres.</div>' +
+        '<div class="m-card" style="margin-top:14px"><label class="d-chk"><input type="checkbox" id="sc-bw" checked> Noir et blanc contrasté (documents)</label><label class="d-chk"><input type="checkbox" id="sc-pdf" checked> Assembler en un seul PDF</label></div></div>' +
+        '<div class="vf" style="padding:10px 12px calc(10px + var(--sab));border-top:1px solid var(--border-soft);background:var(--bg-topbar)"><div class="m-actions" style="margin-top:0"><button class="m-btn primary" id="sc-cam">📷 <span id="sc-cam-l">Photographier la page 1</span></button><button class="m-btn" id="sc-ok" disabled>✅ Terminer</button></div></div>';
+    document.body.appendChild(ov);
+    $('#sc-x').onclick = async () => { if (scan.pages.length && (await XM.ask('Abandonner le scan ?', plural(scan.pages.length, 'page') + ' non enregistrée' + (scan.pages.length > 1 ? 's' : '') + '.', [{ label: 'Abandonner', danger: true }, 'Continuer'])) !== 0) return; closeScan(); };
+    $('#sc-bw').onchange = e => { scan.bw = e.target.checked; }; $('#sc-pdf').onchange = e => { scan.pdf = e.target.checked; };
+    $('#sc-cam').onclick = () => $('#in-scan').click();
+    $('#sc-ok').onclick = finishScan; drawScan();
+}
+function closeScan() { const o = $('#d-scan'); if (o) o.remove(); scan = null; }
+function drawScan() {
+    if (!scan) return; const g = $('#sc-pages'); g.innerHTML = '';
+    scan.pages.forEach((p, i) => { const d = document.createElement('div'); d.className = 'd-pg'; d.style.backgroundImage = 'url("' + p.thumb + '")'; d.innerHTML = '<b>' + (i + 1) + '</b><button aria-label="Retirer la page ' + (i + 1) + '">✕</button>'; d.querySelector('button').onclick = () => { scan.pages.splice(i, 1); drawScan(); }; g.appendChild(d); });
+    $('#sc-empty').hidden = scan.pages.length > 0; $('#sc-n').textContent = scan.pages.length ? plural(scan.pages.length, 'page') + ' · ' + fmtSize(scan.pages.reduce((a, p) => a + p.blob.size, 0)) : 'Aucune page';
+    $('#sc-cam-l').textContent = scan.pages.length ? 'Page suivante (' + (scan.pages.length + 1) + ')' : 'Photographier la page 1'; $('#sc-ok').disabled = !scan.pages.length;
+}
+async function scanPage(file) {
+    if (!scan || !file) return;
+    try { XM.toast('⏳ Traitement de la page…', 8000); const c = await compressImage(file, { bw: scan.bw }); scan.pages.push(c); drawScan(); XM.toast('📄 Page ' + scan.pages.length + ' ajoutée', 1500); }
+    catch (e) { XM.toast('⚠️ Photo illisible, recommencez', 3000); }
+}
+async function finishScan() {
+    if (!scan || !scan.pages.length) return;
+    const pages = scan.pages, asPdf = scan.pdf; XM.toast('⏳ Assemblage…', 8000); const made = [];
+    try {
+        if (asPdf) {
+            const blob = await jpegsToPdf(pages), t = nowTitle('Scan');
+            const it = newItem({ kind: 'pdf', name: t + '.pdf', mime: 'application/pdf', blob, size: blob.size, thumb: pages[0].thumb, pages: pages.length, title: t });
+            made.push(it);
+        } else pages.forEach((p, i) => made.push(newItem({ kind: 'image', name: 'scan.jpg', mime: 'image/jpeg', blob: p.blob, size: p.blob.size, thumb: p.thumb, w: p.w, h: p.h, title: nowTitle('Scan') + ' p' + (i + 1) })));
+        for (const it of made) { if (S.target) { it.secId = S.target; it.auto = false; } else applyGuess(it, it.title); S.items.push(it); await saveItem(it, true); }
+    } catch (e) { XM.toast('⚠️ Assemblage impossible', 3000); return; }
+    closeScan(); refreshBadges(); setTab('add'); XM.toast('📥 Scan de ' + plural(pages.length, 'page') + ' à valider', 3000);
+}
+
+// =====================================================================
+//  PROJET REÇU DU BUREAU / DOSSIER SANS BUREAU / EXEMPLE
+// =====================================================================
+// mots-clés par défaut d'un élément (modèles du bureau) : le bureau ne les envoie que s'ils ont été personnalisés
+function defKeys(title, type) {
+    const t = fold(title).trim();
+    for (const ty of [type].concat(Object.keys(DOSS_TPL).filter(x => x !== type))) { const T = DOSS_TPL[ty]; if (!T) continue; for (const c of T.ch) for (const s of c.s) if (fold(s.t).trim() === t) return s.k.slice(); }
+    return [];
+}
+function normalizeProject(d, env) {
+    const A = x => Array.isArray(x) ? x : [], T = x => String(x == null ? '' : x);
+    const P = { pid: T(d.pid), name: T(d.name || (env && env.name) || 'Dossier'), type: T(d.type), typeLabel: T(d.typeLabel || (DOSS_TPL[d.type] || {}).label), recv: (env && env.ts) || Date.now(), mode: d.mode === 'preview' ? 'preview' : 'light', standalone: !!d.standalone, example: !!d.example, author: T(d.author) };
+    const CC = { t: 'technicien', p: 'production', a: 'artiste', u: 'auteur', m: 'animateur', i: 'invite', o: 'autre' };
+    const cats = c => typeof c === 'string' ? c.split('').map(x => CC[x] || 'autre') : A(c).map(T);
+    P.ch = A(d.ch).map((c, ci) => ({ id: T(c.id || 'c' + ci), t: T(c.t || 'Partie'), nu: T(c.nu), x: c.x ? 1 : 0, g: c.g ? 1 : 0, s: A(c.s).map((s, si) => ({
+        id: T(s.id || 'c' + ci + 's' + si), t: T(s.t || 'Élément'), nu: T(s.nu), k: Array.isArray(s.k) ? s.k.map(T) : defKeys(T(s.t), P.type), x: s.x ? 1 : 0, st: ST[s.st] ? s.st : 'todo', r: s.r ? 1 : 0, pp: s.pp ? 1 : 0, c: cats(s.c), tm: s.tm ? 1 : 0, ms: s.ms ? 1 : 0,
+        tx: T(s.tx), w: +s.w || 0, html: T(s.html), lk: A(s.lk).slice(0, 12).map(l => ({ l: T(l.l), u: T(l.u) })),
+        its: A(s.its).map(i => normDeskItem(i)) })) }));
+    P.team = A(d.team).map((m, ix) => Array.isArray(m) ? { i: 'p' + ix, n: T(m[0]), r: T(m[1]), c: CC[m[2]] || 'autre' } : { i: T(m.i || 'p' + ix), n: T(m.n), r: T(m.r), c: T(m.c) });
+    P.ch.forEach(c => c.s.forEach(s => s.its.forEach(i => { if (typeof i.pe === 'number') i.pe = 'p' + i.pe; })));
+    P.inbox = A(d.inbox).map(i => normDeskItem(i));
+    return P;
+}
+function normDeskItem(i) {
+    const T = x => String(x == null ? '' : x);
+    return { id: T(i.id), n: T(i.n), lb: T(i.lb), kd: KIND_ICON[i.kd] ? i.kd : 'other', sz: +i.sz || 0, pg: +i.pg || 0, pe: i.pe == null ? '' : (typeof i.pe === 'number' ? i.pe : T(i.pe)), th: okImg(i.th) ? i.th : '', pv: okImg(i.pv) ? i.pv : '', pd: /^[A-Za-z0-9+/=]+$/.test(T(i.pd)) ? T(i.pd) : '', tx: T(i.tx) };
+}
+async function setProject(d, env) {
+    const P = normalizeProject(d, env);
+    if (!P.ch.length) throw new Error('Sommaire vide');
+    S.proj = P; S.sec = null; S.q = '';
+    // les pièces déjà ajoutées gardent leur catégorie si elle existe encore dans le nouveau sommaire, sinon : même titre, sinon classement auto
+    for (const it of S.items) {
+        const bySecTitle = it.secTitle && secByTitle(it.secTitle);
+        if (bySecTitle) it.secId = bySecTitle.s.id;
+        else if (it.secId && !it.secTitle && findSec(it.secId)) { /* sans titre mémorisé : on garde */ }
+        else if (it.secId) { if (it.auto) applyGuess(it, it.title); else it.secId = ''; }
+        if (it.personId && !P.team.some(m => m.i === it.personId)) it.personId = '';
+        saveItem(it, true);
+    }
+    await saveProj(); setTab('sum'); updateSub();
+    return P;
+}
+function projectFromTpl(type, opts) {
+    opts = opts || {}; const T = DOSS_TPL[type]; let ci = 0, flat = 0; const mode = { tv: 'dot', fiction: 'dash', artistique: 'flat', tech: 'dot' }[type] || 'dot';
+    const ch = T.ch.map((c, i) => {
+        const secs = c.s; const included = secs.filter(s => !s.off); const hasInc = included.length > 0; if (hasInc) ci++; let n = 0;
+        return { id: type + '-' + i, t: c.t, nu: hasInc ? String(ci) : '', g: c.g, s: secs.map((s, j) => { let nu = ''; if (!s.off) { n++; flat++; nu = mode === 'flat' ? String(flat) : ci + (mode === 'dash' ? '-' : '.') + n; }
+            return { id: type + '-' + i + '-' + j, t: s.t, nu, k: s.k, x: s.off ? 1 : 0, st: 'todo', r: s.r ? 1 : 0, pp: s.pp ? 1 : 0, c: s.c || [], tm: s.tm ? 1 : 0, ms: s.r && !s.off && !s.tm ? 1 : 0, tx: '', html: '', lk: [], its: [] }; }) };
+    });
+    return { pid: '', name: opts.name || T.short, type, typeLabel: T.label, standalone: true, example: !!opts.example, ch, team: [], inbox: [] };
+}
+function exampleProject() {
+    const d = projectFromTpl('tv', { name: 'Les Coulisses du Live', example: true });
+    const F = t => d.ch.flatMap(c => c.s).find(s => s.t.indexOf(t) === 0);
+    const tn = (txt, bg) => { const cv = document.createElement('canvas'); cv.width = 120; cv.height = 90; const x = cv.getContext('2d'), g = x.createLinearGradient(0, 0, 120, 90); g.addColorStop(0, bg); g.addColorStop(1, '#222'); x.fillStyle = g; x.fillRect(0, 0, 120, 90); x.fillStyle = '#fff'; x.font = 'bold 14px sans-serif'; x.textAlign = 'center'; x.fillText(txt, 60, 50); return cv.toDataURL('image/jpeg', 0.6); };
+    delete d.standalone; d.mode = 'preview';
+    d.team = [['t1', 'Camille Martin', 'Réalisatrice', 'technicien'], ['t2', 'Hugo Bernard', 'Directeur de production', 'production'], ['t3', 'Léa Dubois', 'Cheffe opératrice', 'technicien'], ['t4', 'Karim Haddad', 'Ingénieur du son', 'technicien'], ['t5', 'Nora Lemaire', 'Animatrice', 'animateur'], ['t6', 'Tom Rivière', 'Invité (artiste)', 'invite']].map(([i, n, r, c]) => ({ i, n, r, c }));
+    let s = F('Présentation détaillée'); s.st = 'wip'; s.html = '<h2>Le concept</h2><p><b>Les Coulisses du Live</b> emmène le téléspectateur de l\'autre côté de la scène, pendant les dernières heures qui précèdent un concert.</p><ul><li>6 épisodes de 26 min</li><li>Un artiste par épisode</li></ul>'; s.tx = 'Le concept — Les Coulisses du Live emmène le téléspectateur…';
+    s.its = [{ id: 'e1', n: 'concept_emission.pdf', kd: 'pdf', sz: 184000, pg: 4 }, { id: 'e2', n: 'moodboard.jpg', lb: 'Moodboard', kd: 'image', sz: 420000, th: tn('Moodboard', '#7e57c2'), pv: tn('Moodboard', '#7e57c2') }]; s.ms = 0;
+    s = F('Note d\'intention de réalisation'); s.st = 'ready'; s.its = [{ id: 'e3', n: 'note_realisation.docx', kd: 'docx', sz: 38000 }]; s.ms = 0;
+    s = F('Budget réel'); s.st = 'ready'; s.its = [{ id: 'e4', n: 'budget_emission.xlsx', kd: 'sheet', sz: 52000 }]; s.ms = 0;
+    s = F('Éléments vidéo'); s.st = 'ready'; s.lk = [{ l: 'Teaser (1 min)', u: 'https://vimeo.com/000000000' }, { l: 'Pilote complet', u: 'https://example.com/pilote' }];
+    s = F('Autorisation de tournage'); s.st = 'wip'; s.its = [{ id: 'e5', n: 'convention_mairie.pdf', kd: 'pdf', sz: 96000, pg: 2 }]; s.ms = 0;
+    s = F('Autorisations de droit'); s.pp = 1; s.its = [{ id: 'e6', n: 'droit_image_Rivière.pdf', kd: 'pdf', sz: 61000, pg: 1, pe: 't6' }];
+    s = F('Plan du décor'); s.its = [{ id: 'e7', n: 'plan_plateau.png', kd: 'image', sz: 310000, th: tn('Plan', '#00897b'), pv: tn('Plan du plateau', '#00897b') }]; s.st = 'wip'; s.ms = 0;
+    d.inbox = [{ id: 'e8', n: 'scan_0231.pdf', kd: 'pdf', sz: 120000, pg: 1 }];
+    return d;
+}
+function updateSub() { $('#d-sub').textContent = S.proj ? S.proj.name + (S.proj.example ? ' · exemple' : '') : 'Pièces et sommaire'; }
+
+// =====================================================================
+//  VISIONNEUSE
+// =====================================================================
+function closeViewer() { const v = $('#d-view'); if (v) v.remove(); }
+function openViewer(o) {
+    closeViewer();
+    const own = o.it, d = o.d, ov = document.createElement('div'); ov.className = 'd-view'; ov.id = 'd-view';
+    const title = own ? own.title : (d.lb || d.n), kind = own ? own.kind : d.kd;
+    const sub = own ? [itemMetaLine(own), frDate(own.date), secLabel(own.secId), personName(own.personId)].filter(Boolean).join(' · ')
+        : [KIND_LABEL[d.kd], d.sz ? fmtSize(d.sz) : '', d.pg ? plural(d.pg, 'page') : '', personName(d.pe)].filter(Boolean).join(' · ');
+    let body = '', foot = '';
+    if (own) {
+        if (own.kind === 'image') body = '<img class="pv" alt="" src="' + blobUrl(own) + '">';
+        else if (own.kind === 'pdf') body = '<iframe title="PDF" src="' + blobUrl(own) + '"></iframe><a class="m-btn block" style="margin-top:10px" target="_blank" rel="noopener" href="' + blobUrl(own) + '">↗ Ouvrir le PDF en plein écran</a>';
+        else if (own.kind === 'text') body = '<pre>' + esc(own.text || '(note vide)') + '</pre>';
+        else body = '<div class="m-empty"><b>' + (KIND_ICON[own.kind] || '📎') + '</b>Aperçu indisponible pour ce format.<br>Le fichier sera importé tel quel dans le dossier du bureau.</div>';
+        foot = '<div class="m-actions"><button class="m-btn" id="v-edit">✏️ Modifier</button><button class="m-btn" id="v-save">⬇️ Enregistrer</button><button class="m-btn danger" id="v-del">🗑 Supprimer</button></div>';
+    } else {
+        if (d.pv) body = '<img class="pv" alt="" src="' + d.pv + '">';
+        else if (d.pd) { const u = URL.createObjectURL(unb64(d.pd, 'application/pdf')); ov._u = u; body = '<iframe title="PDF" src="' + u + '"></iframe><a class="m-btn block" style="margin-top:10px" target="_blank" rel="noopener" href="' + u + '">↗ Ouvrir le PDF en plein écran</a>'; }
+        else if (d.tx) body = '<pre>' + esc(d.tx) + '</pre>';
+        else if (d.th) body = '<img class="pv" alt="" style="width:60%;image-rendering:auto" src="' + d.th + '"><p class="m-hint" style="margin-top:10px">Simple vignette : l\'original est dans le dossier du bureau.</p>';
+        else body = '<div class="m-empty"><b>' + (KIND_ICON[d.kd] || '📎') + '</b>Aucun aperçu n\'a été envoyé pour cette pièce.<br><span class="m-hint">Sur le bureau, 📱 → « Avec aperçus » envoie vignettes, petites images et PDF légers.</span></div>';
+    }
+    ov.innerHTML = '<div class="vt"><button class="m-ibtn plain" id="v-x" aria-label="Fermer">‹</button><div class="t"><b>' + esc(title) + '</b><small>' + esc(sub) + '</small></div></div><div class="vb">' + body + '</div>' + (foot ? '<div class="vf">' + foot + '</div>' : '');
+    document.body.appendChild(ov);
+    const close = () => { if (ov._u) URL.revokeObjectURL(ov._u); closeViewer(); };
+    $('#v-x', ov).onclick = close;
+    if (own) {
+        $('#v-edit', ov).onclick = () => editSheet(own, () => { close(); openViewer(o); render(); });
+        $('#v-save', ov).onclick = () => XM.download(itemFileName(own), own.kind === 'text' ? new Blob([own.text || ''], { type: 'text/plain;charset=utf-8' }) : own.blob);
+        $('#v-del', ov).onclick = async () => { if ((await XM.ask('Supprimer cette pièce ?', '« ' + esc(own.title) + ' » sera effacée de ce téléphone.', [{ label: 'Supprimer', danger: true }, 'Annuler'])) === 0) { await removeItem(own); close(); render(); } };
+    }
+}
+function editSheet(it, done) {
+    const s = XM.sheet('<div id="ed-f">' + fieldsHtml(it) + '</div><div class="m-actions"><button class="m-btn primary" id="ed-ok">Enregistrer</button></div>', { title: 'Modifier la pièce' });
+    bindFields($('#ed-f', s), it);
+    $('#ed-ok', s).onclick = async () => { await saveItem(it, true); XM.closeSheet(); done && done(); };
+}
+
+// =====================================================================
+//  ÉCRANS
+// =====================================================================
+const main = () => $('#d-main');
+function setTab(t) { S.tab = t; if (t !== 'sum') S.sec = null; render(); window.scrollTo(0, 0); }
+function render() {
+    $$('#d-tabs button').forEach(b => b.classList.toggle('on', b.dataset.t === S.tab)); refreshBadges(); updateSub();
+    if (S.tab === 'add') renderAdd(); else if (S.tab === 'mine') renderMine(); else renderSum();
+}
+function renderHome() {
+    main().innerHTML = '<div class="m-card accent"><h3>📑 Votre dossier de production dans la poche</h3><p style="margin:0 0 8px">Consultez le sommaire de votre dossier, puis <b>ajoutez des pièces</b> au fil de l\'eau : photos, scans de plusieurs pages, fichiers, notes. Elles seront classées automatiquement et renvoyées au bureau.</p></div>' +
+        '<div class="m-sec">Recevoir le dossier du bureau</div><div class="m-card"><ol style="margin:0 0 10px;padding-left:20px;font-size:14px;line-height:1.55"><li>Sur l\'ordinateur, dans DOSSIER XIII, touchez <b>📱</b> puis « Envoyer vers le mobile ».</li><li>Scannez le <b>QR code</b> avec l\'appareil photo du téléphone, ou…</li><li>…collez le lien reçu, ou importez le fichier.</li></ol><div class="m-actions" style="margin-top:0"><button class="m-btn" id="h-link">🔗 Coller un lien</button><button class="m-btn" id="h-file">📂 Importer un fichier</button></div></div>' +
+        '<div class="m-sec">Ou commencer ici</div><div class="m-list"><button class="m-item" id="h-new"><span class="ico">🆕</span><span class="grow"><b>Commencer sans dossier</b><small>Choisir un type de dossier standard</small></span><span class="go">›</span></button><button class="m-item" id="h-ex"><span class="ico">🎬</span><span class="grow"><b>Essayer avec un exemple</b><small>« Les Coulisses du Live » — dossier de production TV</small></span><span class="go">›</span></button></div>';
+    $('#h-link').onclick = () => XM.importLink(APP, onEnv); $('#h-file').onclick = () => XM.importFile(APP, onEnv);
+    $('#h-new').onclick = () => { const s = XM.sheet('<p class="m-hint" style="margin-top:0">Le sommaire standard sert au classement automatique. Au retour sur le bureau, les pièces sont rangées dans les éléments du même nom.</p><div class="m-list" style="margin:0">' + Object.keys(DOSS_TPL).map(k => '<button class="m-item" data-k="' + k + '"><span class="ico">' + DOSS_TPL[k].icon + '</span><span class="grow"><b>' + esc(DOSS_TPL[k].label) + '</b><small>' + plural(DOSS_TPL[k].ch.reduce((a, c) => a + c.s.length, 0), 'élément') + '</small></span></button>').join('') + '</div>', { title: 'Type de dossier' }); $$('[data-k]', s).forEach(b => b.onclick = async () => { XM.closeSheet(); await setProject(projectFromTpl(b.dataset.k), { ts: Date.now() }); XM.toast('📑 Sommaire standard chargé'); }); };
+    $('#h-ex').onclick = async () => { await setProject(exampleProject(), { ts: Date.now() }); XM.toast('🎬 Exemple chargé'); };
+}
+const secCount = s => s.its.length + mineOf(s.id).length;
+function stats() {
+    let inc = 0, docs = 0, miss = 0; const P = S.proj;
+    P.ch.forEach(c => c.s.forEach(s => { if (!c.x && !s.x) { inc++; if (s.ms && !mineOf(s.id).length) miss++; } docs += secCount(s); }));
+    const inbox = P.inbox.length + S.items.filter(i => !i.draft && !i.secId).length;
+    return { inc, docs, miss, inbox };
+}
+function renderSum() {
+    if (!S.proj) return renderHome();
+    if (S.sec) return renderSection(S.sec);
+    const P = S.proj, st = stats();
+    main().innerHTML = '<div class="d-stats"><div class="d-stat"><b>' + st.inc + '</b>éléments</div><div class="d-stat"><b>' + st.docs + '</b>pièces</div><div class="d-stat ' + (st.miss ? 'red' : '') + '"><b>' + st.miss + '</b>manquant' + (st.miss > 1 ? 's' : '') + '</div><div class="d-stat"><b>' + st.inbox + '</b>à classer</div></div>' +
+        (P.standalone ? '<div class="m-card"><span class="m-hint">Sommaire standard (sans dossier du bureau). Pour voir l\'état réel de votre dossier, envoyez-le depuis le bureau avec 📱.</span></div>' : (P.mode === 'light' ? '' : '')) +
+        '<input type="search" id="d-q" placeholder="Rechercher un élément ou une pièce…" value="' + esc(S.q) + '" enterkeyhint="search" style="margin-bottom:10px">' +
+        '<div class="m-chips" id="d-flt">' + [['all', 'Tout'], ['miss', 'Manquants'], ['docs', 'Avec pièces'], ['mine', 'Mes ajouts']].map(([k, l]) => '<button class="m-chip' + (S.flt === k ? ' on' : '') + '" data-f="' + k + '">' + l + '</button>').join('') + '</div><div id="d-list"></div>';
+    $('#d-q').oninput = e => { S.q = e.target.value; drawSumList(); };
+    $$('#d-flt .m-chip').forEach(b => b.onclick = () => { S.flt = b.dataset.f; $$('#d-flt .m-chip').forEach(x => x.classList.toggle('on', x === b)); drawSumList(); });
+    drawSumList();
+}
+function secRow(c, s) {
+    const n = secCount(s), mine = mineOf(s.id).length, miss = s.ms && !c.x && !s.x && !mine;
+    const sub = [plural(n, 'pièce'), s.x || c.x ? 'non rendu' : ST[s.st], s.r ? 'obligatoire' : ''].filter(Boolean).join(' · ');
+    return '<button class="m-item' + (c.x || s.x ? ' d-off' : '') + '" data-s="' + esc(s.id) + '"><span class="d-dot ' + s.st + '"></span><span class="d-num">' + esc(c.x || s.x ? '—' : s.nu) + '</span><span class="grow"><b>' + esc(s.t) + '</b><small style="white-space:normal">' + esc(sub) + '</small></span>' + (miss ? '<span class="d-miss" title="Obligatoire : aucune pièce">!</span>' : '') + (n ? '<span class="d-cnt' + (mine ? ' mine' : '') + '">' + n + '</span>' : '') + '<span class="go">›</span></button>';
+}
+function drawSumList() {
+    const P = S.proj, box = $('#d-list'), q = fold(S.q.trim()); let html = '';
+    const inboxN = P.inbox.length + S.items.filter(i => !i.draft && !i.secId).length;
+    if (!q && S.flt === 'all' && inboxN) html += '<div class="m-list"><button class="m-item" data-s="__inbox"><span class="ico">📥</span><span class="grow"><b>À classer</b><small>Pièces sans destination</small></span><span class="d-cnt">' + inboxN + '</span><span class="go">›</span></button></div>';
+    const itemHits = [];
+    P.ch.forEach((c, ci) => {
+        const rows = [];
+        c.s.forEach(s => {
+            const mine = mineOf(s.id), n = secCount(s);
+            if (S.flt === 'miss' && !(s.ms && !c.x && !s.x && !mine.length)) return;
+            if (S.flt === 'docs' && !n) return;
+            if (S.flt === 'mine' && !mine.length) return;
+            if (q) {
+                const hitSec = fold(s.t).includes(q) || fold(c.t).includes(q);
+                const hits = s.its.filter(i => fold(i.lb + ' ' + i.n).includes(q)).map(i => ({ d: i, s })).concat(mine.filter(i => fold(i.title + ' ' + i.name).includes(q)).map(i => ({ it: i, s })));
+                hits.forEach(h => itemHits.push(h));
+                if (!hitSec) return;
+            }
+            rows.push(secRow(c, s));
+        });
+        if (rows.length) html += '<div class="m-sec">' + esc((c.nu ? c.nu.padStart(2, '0') + ' · ' : '') + c.t) + (c.x ? ' (non rendue)' : '') + '</div><div class="m-list">' + rows.join('') + '</div>';
+    });
+    if (q) {
+        P.inbox.filter(i => fold(i.lb + ' ' + i.n).includes(q)).forEach(d => itemHits.push({ d, s: null }));
+        S.items.filter(i => !i.draft && !i.secId && fold(i.title + ' ' + i.name).includes(q)).forEach(it => itemHits.push({ it, s: null }));
+        if (itemHits.length) html += '<div class="m-sec">Pièces trouvées</div><div class="m-list">' + itemHits.map((h, i) => { const t = h.it ? h.it.title : (h.d.lb || h.d.n); return '<button class="m-item" data-h="' + i + '"><span class="ico">' + (KIND_ICON[h.it ? h.it.kind : h.d.kd] || '📎') + '</span><span class="grow"><b>' + esc(t) + '</b><small>' + esc(h.s ? h.s.t : 'À classer') + (h.it ? ' · ajouté ici' : '') + '</small></span><span class="go">›</span></button>'; }).join('') + '</div>';
+    }
+    box.innerHTML = html || '<div class="m-empty"><b>🔍</b>' + (q ? 'Aucun résultat pour « ' + esc(S.q) + ' »' : S.flt === 'miss' ? 'Aucun élément obligatoire manquant 🎉' : S.flt === 'mine' ? 'Vous n\'avez encore rien ajouté.' : 'Rien à afficher') + '</div>';
+    $$('[data-s]', box).forEach(b => b.onclick = () => { S.sec = b.dataset.s; renderSection(S.sec); window.scrollTo(0, 0); });
+    $$('[data-h]', box).forEach(b => b.onclick = () => { const h = itemHits[+b.dataset.h]; openViewer(h.it ? { it: h.it } : { d: h.d }); });
+}
+function renderSection(id) {
+    const P = S.proj; let c, s, desk, mine, title;
+    if (id === '__inbox') { title = '📥 À classer'; desk = P.inbox; mine = S.items.filter(i => !i.draft && !i.secId); }
+    else { const f = findSec(id); if (!f) { S.sec = null; return renderSum(); } c = f.ch; s = f.s; title = s.t; desk = s.its; mine = mineOf(id); }
+    const lk = s ? s.lk.filter(l => /^https?:\/\//i.test(l.u)) : [];
+    main().innerHTML = '<button class="d-back" id="d-bk">‹ Sommaire</button>' +
+        '<div class="m-card accent"><h3><span class="grow">' + (s ? '<span class="d-num" style="margin-right:6px">' + esc(c.x || s.x ? '' : s.nu) + '</span>' : '') + esc(title) + '</span></h3>' +
+        (s ? '<div class="m-chips" style="padding:0"><span class="m-pill ' + (s.st === 'ready' ? 'ok' : s.st === 'wip' ? 'warn' : '') + '">' + ST[s.st] + '</span>' + (s.r ? '<span class="m-pill">Obligatoire</span>' : '') + (c.x || s.x ? '<span class="m-pill danger">Non rendu</span>' : '') + (s.pp ? '<span class="m-pill">👤 Par personne</span>' : '') + (s.ms && !desk.length && !mine.length && !c.x && !s.x ? '<span class="m-pill danger">Manquant</span>' : '') + '</div><div class="m-hint" style="margin-top:8px">' + esc(c.t) + '</div>' : '<div class="m-hint">Pièces importées sans destination reconnue : rangez-les depuis le bureau (« À classer »).</div>') + '</div>' +
+        (s && s.html ? '<div class="m-sec">Texte</div><div class="d-text">' + cleanHtml(s.html) + '</div>' : '') +
+        (s && !s.html && (s.w || s.tx) ? '<div class="m-sec">Texte</div><div class="m-card"><span class="m-hint">✍️ ' + (s.w ? 'Texte rédigé (' + plural(s.w, 'mot') + ') dans le dossier du bureau.' : esc(s.tx) + '…') + ' Pour le lire ici : sur le bureau, 📱 → « Avec aperçus ».</span></div>' : '') +
+        (lk.length ? '<div class="m-sec">Liens</div><div class="m-card d-links">' + lk.map(l => '<a href="' + esc(l.u) + '" target="_blank" rel="noopener"><b>' + esc(l.l || 'Lien') + '</b><br><small style="color:var(--text-dim)">' + esc(l.u) + '</small></a>').join('') + '</div>' : '') +
+        '<div class="m-sec">Pièces (' + (desk.length + mine.length) + ')</div>' +
+        ((desk.length + mine.length) ? '<div class="m-list" id="d-pieces"></div>' : '<div class="m-empty"><b>📎</b>Aucune pièce pour le moment.</div>') +
+        (s ? '<button class="m-btn primary block" id="d-here" style="margin-top:6px">➕ Ajouter une pièce ici</button>' : '');
+    $('#d-bk').onclick = () => { S.sec = null; renderSum(); window.scrollTo(0, 0); };
+    const box = $('#d-pieces');
+    if (box) {
+        desk.forEach(d => { const b = document.createElement('button'); b.className = 'm-item'; b.innerHTML = '<div class="d-thumb"' + (d.th ? ' style="background-image:url(\'' + d.th + '\')"' : '') + '>' + (d.th ? '' : KIND_ICON[d.kd]) + '</div><span class="grow"><b>' + esc(d.lb || d.n) + '</b><small>' + esc([KIND_LABEL[d.kd], d.sz ? fmtSize(d.sz) : '', d.pg ? plural(d.pg, 'page') : '', personName(d.pe)].filter(Boolean).join(' · ')) + '</small></span><span class="go">›</span>'; b.onclick = () => openViewer({ d }); box.appendChild(b); });
+        mine.forEach(it => { const b = document.createElement('button'); b.className = 'm-item'; b.innerHTML = thumbHtml(it) + '<span class="grow"><b>' + esc(it.title) + '<span class="d-pill-mine">📱 ajouté ici</span></b><small>' + esc([itemMetaLine(it), frDate(it.date), personName(it.personId)].filter(Boolean).join(' · ')) + '</small></span><span class="go">›</span>'; b.onclick = () => openViewer({ it }); box.appendChild(b); });
+    }
+    if ($('#d-here')) $('#d-here').onclick = () => addMenu(id);
+}
+function addMenu(secId) {
+    const s = XM.sheet('<div class="m-list" style="margin:0"><button class="m-item" data-a="cam"><span class="ico">📷</span><span class="grow"><b>Prendre une photo</b></span></button><button class="m-item" data-a="scan"><span class="ico">🗂️</span><span class="grow"><b>Scanner plusieurs pages</b><small>Un seul PDF</small></span></button><button class="m-item" data-a="file"><span class="ico">🖼️</span><span class="grow"><b>Choisir un fichier</b><small>Image, PDF, document…</small></span></button><button class="m-item" data-a="note"><span class="ico">✍️</span><span class="grow"><b>Écrire une note</b></span></button></div>', { title: secId ? 'Ajouter dans « ' + esc(secLabel(secId)) + ' »' : 'Ajouter' });
+    $$('[data-a]', s).forEach(b => b.onclick = () => { XM.closeSheet(); S.target = secId || ''; act(b.dataset.a); });
+}
+function act(a) { if (a === 'cam') $('#in-cam').click(); else if (a === 'file') $('#in-file').click(); else if (a === 'scan') openScan(); else if (a === 'note') addNote(); }
+
+function renderAdd() {
+    if (!S.proj) { main().innerHTML = '<div class="m-empty"><b>📑</b>Chargez d\'abord un dossier (ou commencez sans dossier) depuis l\'onglet Sommaire.</div><button class="m-btn primary block" id="a-go">Aller au sommaire</button>'; $('#a-go').onclick = () => setTab('sum'); return; }
+    const drafts = S.items.filter(i => i.draft);
+    main().innerHTML = (S.target ? '<div class="m-card" style="display:flex;align-items:center;gap:10px;padding:10px 14px"><span class="grow" style="flex:1;min-width:0">Destination : <b>' + esc(secLabel(S.target)) + '</b></span><button class="m-btn sm" id="a-untarget">Changer</button></div>' : '') +
+        '<div class="d-big' + (drafts.length ? ' compact' : '') + '"><button class="m-btn primary" data-a="cam"><span class="bi">📷</span>Photo<small>Appareil photo</small></button><button class="m-btn" data-a="scan"><span class="bi">🗂️</span>Scanner<small>Plusieurs pages → PDF</small></button><button class="m-btn" data-a="file"><span class="bi">🖼️</span>Fichier<small>Image, PDF, document</small></button><button class="m-btn" data-a="note"><span class="bi">✍️</span>Note<small>Texte ou dictée 🎤</small></button></div>' +
+        '<div id="a-drafts"></div>';
+    $$('.d-big [data-a]').forEach(b => b.onclick = () => act(b.dataset.a));
+    if ($('#a-untarget')) $('#a-untarget').onclick = () => { S.target = ''; renderAdd(); };
+    const box = $('#a-drafts');
+    if (!drafts.length) { box.innerHTML = '<div class="m-empty"><b>📥</b>Rien à valider.<br><span class="m-hint">Chaque ajout reçoit un titre, une catégorie suggérée d\'après ce titre (comme dans le bureau) et une date. Sur le clavier, touchez 🎤 pour dicter.</span></div>'; return; }
+    box.innerHTML = '<div class="m-sec">À valider (' + drafts.length + ')</div>';
+    drafts.forEach(it => box.appendChild(draftCard(it)));
+    const sb = document.createElement('div'); sb.className = 'd-sticky'; sb.innerHTML = '<button class="m-btn primary block" id="a-ok">✅ Ajouter ' + (drafts.length > 1 ? 'les ' + drafts.length + ' pièces' : 'la pièce') + ' au dossier</button>'; box.appendChild(sb);
+    $('#a-ok').onclick = validateDrafts;
+}
+function draftCard(it) {
+    const c = document.createElement('div'); c.className = 'd-draft'; c.dataset.id = it.id;
+    c.innerHTML = '<div class="top">' + thumbHtml(it, 'lg') + '<div class="grow"><b>' + esc(KIND_LABEL[it.kind] || 'Fichier') + '</b><div class="meta">' + esc(itemMetaLine(it, true)) + '</div></div><button class="d-x" aria-label="Retirer cette pièce">🗑</button></div><div class="fields">' + fieldsHtml(it) + '</div>';
+    bindFields(c.querySelector('.fields'), it, k => { if (k === 'text') c.querySelector('.meta').textContent = itemMetaLine(it, true); });
+    c.querySelector('.d-thumb').onclick = () => openViewer({ it });
+    c.querySelector('.d-x').onclick = async () => { if ((await XM.ask('Retirer cette pièce ?', '« ' + esc(it.title) + ' » ne sera pas ajoutée.', [{ label: 'Retirer', danger: true }, 'Garder'])) === 0) { await removeItem(it); renderAdd(); } };
+    return c;
+}
+async function validateDrafts() {
+    const drafts = S.items.filter(i => i.draft), empty = drafts.filter(i => i.kind === 'text' && !String(i.text).trim());
+    if (empty.length) { XM.toast('✍️ Une note est vide : écrivez-la ou retirez-la'); const t = $('.d-draft[data-id="' + empty[0].id + '"] textarea'); if (t) t.focus(); return; }
+    for (const it of drafts) { it.draft = false; it.ts = Date.now(); if (!String(it.title).trim()) it.title = nowTitle(KIND_LABEL[it.kind] || 'Pièce'); const f = it.secId && findSec(it.secId); it.secTitle = f ? f.s.t : ''; await saveItem(it, true); }
+    S.target = ''; XM.toast('✅ ' + plural(drafts.length, 'pièce') + ' ajoutée' + (drafts.length > 1 ? 's' : '') + ' au dossier', 3000); render();
+}
+function renderMine() {
+    const list = S.items.filter(i => !i.draft).sort((a, b) => b.ts - a.ts);
+    if (!list.length) { main().innerHTML = '<div class="m-empty"><b>📂</b>Vous n\'avez pas encore ajouté de pièce.<br><span class="m-hint">Ce que vous ajoutez reste sur ce téléphone jusqu\'au renvoi au bureau.</span></div><button class="m-btn primary block" id="m-go">➕ Ajouter une pièce</button>'; $('#m-go').onclick = () => setTab('add'); return; }
+    const unsent = list.filter(i => !i.sent), size = unsent.reduce((a, i) => a + (i.size || 0), 0);
+    main().innerHTML = '<div class="m-card accent"><h3>📤 À renvoyer au bureau</h3><dl class="m-kv"><dt>Pièces ajoutées</dt><dd>' + list.length + '</dd><dt>Pas encore renvoyées</dt><dd>' + unsent.length + ' · ' + fmtSize(size) + '</dd></dl><button class="m-btn primary block" id="m-send" style="margin-top:12px">📤 Renvoyer au bureau</button><p class="m-hint" style="margin:8px 0 0">' + (size > QR_BYTES ? 'Volume important : l\'envoi se fera par fichier (AirDrop, mail, cloud…).' : 'Petit volume : QR code, lien ou fichier.') + '</p></div><div class="m-sec">Mes ajouts</div><div class="m-list" id="m-list"></div>';
+    const box = $('#m-list');
+    list.forEach(it => { const b = document.createElement('button'); b.className = 'm-item'; b.innerHTML = thumbHtml(it) + '<span class="grow"><b>' + esc(it.title) + '</b><small>' + esc([secLabel(it.secId) || 'À classer', frDate(it.date), fmtSize(it.size || 0)].filter(Boolean).join(' · ')) + '</small></span>' + (it.sent ? '<span class="m-pill ok">Renvoyé</span>' : '') + '<span class="go">›</span>'; b.onclick = () => openViewer({ it }); box.appendChild(b); });
+    $('#m-send').onclick = () => sendReturn(false);
+}
+
+// =====================================================================
+//  RETOUR AU BUREAU (kind:'return')
+// =====================================================================
+async function buildReturn(list) {
+    const items = [];
+    for (const it of list) {
+        const f = it.secId && findSec(it.secId), blob = it.kind === 'text' ? new Blob([it.text || ''], { type: 'text/plain;charset=utf-8' }) : it.blob;
+        items.push({ mid: it.id, title: it.title, sec: it.secId || '', st: f ? f.s.t : (it.secTitle || ''), pe: it.personId || '', pn: personName(it.personId), dt: it.date, kd: it.kind, nm: itemFileName(it), mt: it.kind === 'text' ? 'text/plain' : (it.mime || ''), sz: blob.size, pg: it.pages || 0, b: await b64(blob) });
+    }
+    return { v: 1, pid: S.proj ? S.proj.pid : '', pname: S.proj ? S.proj.name : '', ptype: S.proj ? S.proj.type : '', items };
+}
+async function sendReturn(all) {
+    const done = S.items.filter(i => !i.draft);
+    if (!done.length) { XM.toast('Aucune pièce à renvoyer'); return; }
+    let list = done.filter(i => all || !i.sent);
+    if (!list.length) { if ((await XM.ask('Tout est déjà renvoyé', 'Toutes vos pièces ont déjà été préparées pour le bureau. Les renvoyer quand même ? (le bureau ignore les doublons)', ['Tout renvoyer', 'Annuler'])) !== 0) return; list = done; }
+    XM.toast('⏳ Préparation de ' + plural(list.length, 'pièce') + '…', 30000);
+    let data; try { data = await buildReturn(list); } catch (e) { XM.toast('⚠️ Préparation impossible', 4000); return; }
+    const bytes = list.reduce((a, i) => a + (i.size || 0), 0), pname = S.proj ? S.proj.name : 'dossier', fname = 'DOSSIER_XIII_retour_' + XM.safe(pname) + '_' + todayISO() + '.xiii-m.json';
+    const mark = async () => { for (const it of list) { it.sent = Date.now(); await saveItem(it, true); } if (S.tab === 'mine') render(); };
+    if (bytes <= QR_BYTES) {
+        await XM.send({ app: APP, page: 'dossier.html', title: 'DOSSIER XIII', kind: 'return', name: pname, make: () => data, file: fname, note: plural(list.length, 'pièce') + ' à importer dans DOSSIER XIII : elles seront rangées dans les catégories choisies, comme si vous les aviez déposées.' });
+        mark(); return;
+    }
+    const env = XM.envelope(APP, 'return', pname, data), blob = new Blob([JSON.stringify(env)], { type: 'application/json' }), file = new File([blob], fname, { type: 'application/json' });
+    const canShare = !!(navigator.canShare && navigator.canShare({ files: [file] }));
+    XM.closeSheet(); XM.toast('', 1);
+    const s = XM.sheet('<div class="m-card" style="margin-top:0"><b>Volume important : envoi par fichier</b><p class="m-hint" style="margin:6px 0 0">' + plural(list.length, 'pièce') + ' · ' + fmtSize(blob.size) + '. Un QR code ou un lien ne peuvent pas contenir autant de données : enregistrez le fichier puis envoyez-le à l\'ordinateur (AirDrop, mail, cloud…). Sur le bureau : DOSSIER XIII → 📱 → Importer un fichier.</p></div><div class="m-actions" style="margin-top:0">' + (canShare ? '<button class="m-btn" id="bs-share">📤 Partager…</button>' : '') + '<button class="m-btn primary" id="bs-file">⬇️ Enregistrer le fichier</button></div>', { title: '📱 Renvoyer au bureau' });
+    $('#bs-file', s).onclick = () => { XM.download(fname, blob, 'application/json'); XM.toast('⬇️ Fichier enregistré'); mark(); };
+    if (canShare) $('#bs-share', s).onclick = async () => { try { await navigator.share({ files: [file], title: 'DOSSIER XIII' }); mark(); } catch (e) { } };
+}
+
+// =====================================================================
+//  DÉMARRAGE
+// =====================================================================
+async function onEnv(env, via) {
+    if (env.kind === 'return') { XM.toast('Cet envoi est un retour destiné à DOSSIER XIII sur l\'ordinateur : importez-le là-bas (📱 → Importer).', 6000); return; }
+    const P = await setProject(env.data || {}, env);
+    XM.toast('📑 Dossier « ' + P.name + ' » reçu · ' + plural(P.ch.reduce((a, c) => a + c.s.length, 0), 'élément'), 3500);
+}
+function openMenu() {
+    XM.menu({ app: APP, deskPage: 'dossier.html', onImport: onEnv, sendReturn: () => sendReturn(false),
+        items: [
+            S.proj ? { icon: '🗑️', label: 'Retirer le dossier chargé', sub: 'Garde vos pièces ajoutées', run: async () => { if ((await XM.ask('Retirer le dossier ?', 'Le sommaire reçu sera effacé de ce téléphone. Vos pièces ajoutées sont conservées.', [{ label: 'Retirer', danger: true }, 'Annuler'])) === 0) { S.proj = null; S.sec = null; await IDB.del('meta', 'project'); setTab('sum'); } } } : null,
+            S.items.some(i => i.sent) ? { icon: '🧹', label: 'Supprimer les pièces déjà renvoyées', sub: 'Libère de la place sur le téléphone', run: async () => { const l = S.items.filter(i => i.sent && !i.draft); if ((await XM.ask('Supprimer ' + plural(l.length, 'pièce') + ' ?', 'Elles ont déjà été préparées pour le bureau. Vérifiez qu\'elles y sont avant de les effacer d\'ici.', [{ label: 'Supprimer', danger: true }, 'Annuler'])) === 0) { for (const it of l) await removeItem(it); render(); } } } : null
+        ].filter(Boolean) });
+}
+async function init() {
+    await IDB.open();
+    try { S.proj = (await IDB.get('meta', 'project')) || null; } catch (e) { S.proj = null; }
+    if (S.proj && !Array.isArray(S.proj.ch)) S.proj = null;
+    try { S.items = ((await IDB.all('items')) || []).filter(Boolean).sort((a, b) => a.ts - b.ts); } catch (e) { S.items = []; }
+    $$('#d-tabs button').forEach(b => b.onclick = () => { S.target = ''; setTab(b.dataset.t); });
+    $('#d-menu').onclick = openMenu;
+    $('#in-cam').onchange = e => { const f = [...e.target.files]; e.target.value = ''; addFiles(f, { camera: true }); };
+    $('#in-file').onchange = e => { const f = [...e.target.files]; e.target.value = ''; addFiles(f); };
+    $('#in-scan').onchange = e => { const f = e.target.files[0]; e.target.value = ''; scanPage(f); };
+    render();
+    await XM.fromHash(APP, onEnv);
+    window.__dm = { S, classify, jpegsToPdf, compressImage }; // aide aux tests
+}
+init();
+})();
+
+</script>
+</body>
+</html>

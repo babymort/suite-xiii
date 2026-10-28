@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Projet — SUITE XIII</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;800&family=IBM+Plex+Sans:wght@400;600&display=swap">
+<style>
+:root{--bg:#141312;--panel:#1d1b19;--line:#33302c;--fg:#f2ede6;--dim:#a39b91;--acc:#f0b378;color-scheme:dark}
+@media (prefers-color-scheme:light){:root{--bg:#f6f3ef;--panel:#fff;--line:#e2dcd4;--fg:#1d1b19;--dim:#6d675f;--acc:#b8651f;color-scheme:light}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.55 "IBM Plex Sans",system-ui,sans-serif}
+.hero{padding:clamp(40px,8vw,90px) 20px 40px;max-width:1000px;margin:0 auto}
+.hero .k{font:600 12px "IBM Plex Sans";letter-spacing:.16em;text-transform:uppercase;color:var(--acc)}
+.hero h1{font:800 clamp(34px,7vw,72px)/1.02 Archivo,sans-serif;margin:12px 0 16px;letter-spacing:-.01em;text-wrap:balance}
+.hero .logo{max-height:70px;max-width:220px;margin-bottom:18px;display:block}
+.facts{display:flex;flex-wrap:wrap;gap:10px 28px;color:var(--dim);font-size:15px}.facts b{color:var(--fg);font-weight:600;display:block;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}.facts span{color:var(--fg)}
+main{max-width:1000px;margin:0 auto;padding:0 20px 70px}
+h2{font:800 14px Archivo,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);margin:30px 0 12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+a.t{display:block;text-decoration:none;color:var(--fg);background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;transition:border-color .15s,transform .15s}
+a.t:hover{border-color:var(--acc);transform:translateY(-2px)}
+a.t .i{font-size:28px}a.t b{display:block;font:800 17px Archivo,sans-serif;margin-top:8px}a.t small{color:var(--dim);font-size:13px}
+.note{color:var(--dim);font-size:13px;margin-top:30px;border-top:1px solid var(--line);padding-top:14px}
+.empty{color:var(--dim);padding:30px 0}
+</style>
+<link rel="icon" type="image/png" href="xiii-icon-192.png">
+</head>
+<body>
+<section class="hero" id="h"><div class="k">Chargement…</div></section>
+<main id="m"></main>
+<script>
+// =====================================================================
+//  SUITE XIII — 🎬 page vitrine client (lien / QR créé dans 👥 Équipe › 📲 Liens & QR › Vitrine client)
+//  Le client (secteur « Client », lecture seule) voit la fiche du projet et les outils choisis par le Master,
+//  chacun s'ouvrant en lecture seule. Rien n'est modifiable.
+// =====================================================================
+const NAMES = { melango: 'MELANGO', matos: 'MATOS', catalogue: 'CATALOGUE', backupo: 'BACKUPO', callsheeto: 'CALL SHEETO', casto: 'CASTO', conduco: 'CONDUCO', decoup: 'DECOUP', deviso: 'DEVISO', graphico: 'GRAPHICO', lumo: 'LUMO', moodo: 'MOODO', packingo: 'PACKINGO', planno: 'PLANNO', plano: 'PLANO', posto: 'POSTO', repero: 'REPERO', ressourco: 'RESSOURCO', runo: 'RUNO', scripto: 'SCRIPTO', sono: 'SONO', soustitro: 'SOUSTITRO', storyboardo: 'STORYBOARDO', syno: 'SYNO', transporto: 'TRANSPORTO' };
+const ICONS = {"backupo": "💽", "cadro": "🎯", "calendrier": "🗓️", "callsheeto": "📋", "casto": "🎭", "catalogue": "🗃️", "conduco": "🎬", "controle": "✅", "decoup": "✂️", "deviso": "💶", "dossier": "📚", "graphico": "🎛️", "importo": "📥", "jour": "🎥", "lumo": "💡", "matos": "📦", "moodo": "🎨", "packingo": "🧳", "planno": "📅", "plano": "📐", "posto": "🎞️", "repero": "📍", "ressourco": "📑", "runo": "🔴", "scripto": "📝", "sono": "🎚️", "soustitro": "💬", "storyboardo": "🖼️", "syno": "🔀", "transporto": "🚐"};
+const DESC = { callsheeto: 'Feuilles de service', planno: 'Planning de production', calendrier: 'Toutes les dates du projet', deviso: 'Devis et budget', dossier: 'Dossier de production', moodo: 'Intentions et références visuelles', repero: 'Lieux de tournage', storyboardo: 'Storyboard', decoup: 'Découpage technique', scripto: 'Suivi du tournage', posto: 'Versions et livrables', casto: 'Casting', plano: 'Plan d\'implantation', syno: 'Synoptique technique', conduco: 'Conducteur', transporto: 'Logistique' };
+const $ = id => document.getElementById(id), esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } };
+const fr = s => s ? new Date(s + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
+(async () => {
+    const c = J('xiii.drive', null), s = J('xiii.projets', null), f = s && s.list ? s.list.find(x => x && x.id === ((c && c.pid) || s.active)) : null;
+    if (!c || !c.url) { $('h').innerHTML = '<div class="k">SUITE XIII</div><h1>Lien incomplet</h1><p class="facts">Ouvrez le lien ou le QR code reçu de la production.</p>'; return; }
+    const title = (f && f.title) || c.proj || 'Projet';
+    document.title = title + ' — SUITE XIII';
+    const facts = [['Dates', f && f.debut ? fr(f.debut) + (f.fin && f.fin !== f.debut ? ' → ' + fr(f.fin) : '') : ''], ['Lieu', f && (f.lieu || f.adresse)], ['Production', f && f.production], ['Réalisation', f && f.realisation], ['Diffusion', f && f.diffusion], ['Durée', f && f.duree]].filter(x => x[1]);
+    $('h').innerHTML = (f && f.logo ? '<img class="logo" src="' + esc(f.logo) + '" alt="">' : '') + '<div class="k">' + esc((f && (f.genre || f.client)) || 'Projet') + '</div><h1>' + esc(title) + '</h1><div class="facts">' + facts.map(x => '<div><b>' + x[0] + '</b><span>' + esc(x[1]) + '</span></div>').join('') + '</div>';
+    let r = {}; try { const q = await fetch(c.url, { method: 'POST', body: JSON.stringify({ a: 'ping', tok: c.tok, code: c.tok ? undefined : c.code }), redirect: 'follow' }); r = await q.json(); } catch (e) { r = { ok: false, err: 'net' }; }
+    if (!r.ok) { $('m').innerHTML = '<p class="empty">' + (r.err === 'revoked' || r.err === 'expired' ? 'Cet accès n\'est plus actif : contactez la production.' : 'Impossible de joindre le projet pour le moment.') + '</p>'; return; }
+    const A = Object.keys(r.apps || {}).filter(a => NAMES[a] && !/_/.test(a)).sort((a, b) => (r.apps[b].ts || 0) - (r.apps[a].ts || 0));
+    $('m').innerHTML = '<h2>Le projet en détail</h2>' + (A.length ? '<div class="grid">' + A.map(a => { const m = [0, ICONS[a] || '📄', String(NAMES[a])]; return '<a class="t" href="' + a + '.html"><span class="i">' + m[1] + '</span><b>' + esc(m[2]) + '</b><small>' + esc(DESC[a] || '') + (r.apps[a].ts ? ' · mis à jour le ' + new Date(r.apps[a].ts).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) : '') + '</small></a>'; }).join('') + '</div>' : '<p class="empty">La production n\'a encore rien partagé.</p>') +
+        '<p class="note">Consultation en lecture seule, toujours à jour. ' + (c.master ? 'Partagé par ' + esc(c.master) + ' · ' : '') + 'SUITE XIII</p>';
+})();
+</script>
+</body>
+</html>
