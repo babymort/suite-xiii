@@ -12346,26 +12346,33 @@ const XWAIT = (() => {
 
 // =====================================================================
 //  SUITE XIII — XSPACE : espacement régulier des boutons (Phase O)
-//  Repère les boutons collés côte à côte (écart < 3 px) et leur ajoute un léger espace (6 px),
-//  dans tous les outils, y compris quand les barres changent. Les groupes volontairement soudés
-//  (onglets, sélecteurs segmentés) ne sont pas touchés.
+//  Repère les commandes collées côte à côte (boutons, listes, champs, onglets : écart < 4 px) et leur ajoute
+//  un léger espace de 6 px, dans tous les outils, y compris quand les barres changent. Seules les commandes
+//  d'un même groupe soudé (onglets entre eux, sélecteur segmenté) restent collées.
 // =====================================================================
-(function () {
-    const SKIP = 'nav,[role=tablist],.tabs,.seg,.segmented,.btn-group,.xs-seg,#xh-nav,#tb,.ctx-menu,.dp-vers';
+const XSPACE = (() => {
+    const GROUP = 'nav,[role=tablist],.tabs,.seg,.segmented,.xs-seg,#xh-nav,#tb,.ctx-menu,.dp-vers,[id*=tabs],[class*=tabs]';
+    const SEL = 'button,.btn,select,input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=hidden]),.tab';
     function fix() {
-        const bs = [...document.querySelectorAll('button,.btn,select')].filter(b => !b.closest(SKIP) && b.offsetParent);
-        const R = bs.map(b => b.getBoundingClientRect());
+        const bs = [...document.querySelectorAll(SEL)].filter(b => b.offsetParent && !b.closest('#xsplash'));
+        const R = bs.map(b => b.getBoundingClientRect()); let n = 0;
         for (let i = 0; i < bs.length; i++) {
-            const a = R[i]; if (a.width < 4) continue;
+            const a = R[i]; if (a.width < 4 || a.height < 12) continue;
             for (let j = 0; j < bs.length; j++) {
-                if (i === j || bs[j].dataset.xsp) continue; const d = R[j];
-                if (Math.abs(a.top - d.top) < 3 && Math.abs(a.height - d.height) < 8) { const g = d.left - a.right; if (g > -1 && g < 2.5 && !bs[i].contains(bs[j]) && !bs[j].contains(bs[i])) { bs[j].style.marginLeft = (parseFloat(getComputedStyle(bs[j]).marginLeft) || 0) + 6 + 'px'; bs[j].dataset.xsp = '1'; } }
+                if (i === j) continue; const d = R[j];
+                if (Math.abs((a.top + a.bottom) - (d.top + d.bottom)) > 10 || Math.abs(a.height - d.height) > 14) continue;
+                const g = d.left - a.right; if (g <= -1 || g >= 4) continue;
+                if (bs[i].contains(bs[j]) || bs[j].contains(bs[i])) continue;
+                const gi = bs[i].closest(GROUP), gj = bs[j].closest(GROUP); if (gi && gi === gj) continue;
+                const cur = parseFloat(getComputedStyle(bs[j]).marginLeft) || 0; bs[j].style.setProperty('margin-left', (cur + 6 - Math.max(0, g)) + 'px', 'important'); R[j] = bs[j].getBoundingClientRect(); n++;
             }
         }
+        return n;
     }
     let t = null; const go = () => { clearTimeout(t); t = setTimeout(fix, 250); };
-    const start = () => { fix(); new MutationObserver(go).observe(document.body, { childList: true, subtree: true }); addEventListener('resize', go); };
+    const start = () => { fix(); [800, 2000, 4000, 8000].forEach(ms => setTimeout(fix, ms)); new MutationObserver(go).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['hidden', 'class'] }); addEventListener('resize', go); };
     if (typeof XBOOT !== 'undefined') XBOOT.ready(start, 3500); else addEventListener('load', () => setTimeout(start, 600));
+    return { fix };
 })();
 
 // =====================================================================
