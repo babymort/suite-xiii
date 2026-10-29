@@ -1490,7 +1490,7 @@ var XRED = (function () {
         sec.innerHTML = '<div class="phase-head"><span class="phase-num">📌</span><span class="phase-name">Outils épinglés</span><span class="phase-hint">Clic droit sur un outil pour l\'épingler ou le retirer</span></div><div class="grid g3"></div>';
         const g = sec.querySelector('.grid'); L.forEach(a => { const c = a.cloneNode(true); c.removeAttribute('id'); c.querySelectorAll('[id]').forEach(x => x.removeAttribute('id')); c.style.display = ''; c.classList.remove('xbr-p'); g.appendChild(c);
             // logo personnalisé (logos/<outil>.png) au survol, comme sur la carte d'origine
-            const big = c.querySelector('.card-big'); if (big && !big.querySelector('img')) { let tried = false; c.addEventListener('mouseenter', () => { if (tried) return; tried = true; const im = new Image(); im.alt = ''; im.onload = () => { big.innerHTML = ''; big.appendChild(im); }; im.src = 'logos/' + appOf(c) + '.png'; }); } });
+            const big = c.querySelector('.card-big'); if (big && !big.querySelector('img')) { let tried = false; c.addEventListener('mouseenter', () => { if (tried) return; tried = true; const im = new Image(); im.alt = ''; im.onload = () => { big.innerHTML = ''; big.appendChild(im); }; im.src = 'logos/' + appOf(c) + '.png?v=3'; }); } });
     }
     function pinMenu(e, a) {
         e.preventDefault(); document.querySelectorAll('#xpin-m').forEach(x => x.remove());
