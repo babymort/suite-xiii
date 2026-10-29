@@ -62,7 +62,12 @@ input,select{border-radius:12px;background:var(--glass2);border-color:var(--glin
 #tb{position:fixed!important;left:12px!important;right:12px!important;bottom:calc(12px + env(safe-area-inset-bottom))!important;padding:8px!important;border-radius:24px;background:rgba(22,20,18,.72)!important;border:1px solid var(--gline)!important;backdrop-filter:blur(22px) saturate(1.4);-webkit-backdrop-filter:blur(22px) saturate(1.4);box-shadow:0 18px 40px rgba(0,0,0,.45),0 0 30px rgba(240,180,41,.08)}
 @media (prefers-color-scheme:light){#tb{background:rgba(255,255,255,.82)!important}}
 #tb button{border-radius:16px!important;padding:6px 2px!important;z-index:1}#tb .ind{position:absolute;top:8px;bottom:8px;border-radius:16px;background:linear-gradient(135deg,rgba(240,180,41,.28),rgba(240,180,41,.08));box-shadow:0 0 0 1px rgba(240,180,41,.4) inset,0 0 20px var(--glow);transition:left .42s cubic-bezier(.65,0,.25,1.15),width .42s cubic-bezier(.65,0,.25,1.15)}
+
+/* Phase U : terrain — grandes cibles tactiles, bandeau hors réseau */
+button,.btn{min-height:48px}.tool{min-height:112px}#tb button{min-height:52px}
+#off{position:fixed;left:12px;right:12px;top:calc(env(safe-area-inset-top) + 64px);z-index:40;display:none;align-items:center;gap:10px;padding:10px 14px;border-radius:16px;background:rgba(60,40,10,.92);border:1px solid #ffb74d;color:#ffe0b2;font:600 14px/1.35 system-ui;box-shadow:0 10px 30px rgba(0,0,0,.4);backdrop-filter:blur(12px)}#off.on{display:flex}
 </style>
+<link rel="icon" type="image/png" href="xiii-icon-192.png">
 </head>
 <body><div id="xsplash" style="position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:#121110;transition:opacity .3s"><div style="width:84px;height:84px"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><filter id="g" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter><linearGradient id="o" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffcf5c"/><stop offset="1" stop-color="#e8960f"/></linearGradient></defs><g filter="url(#g)" fill="url(#o)"><rect x="-6" y="-31" width="12" height="62" rx="1.5"><animateTransform attributeName="transform" type="translate" dur="1.8s" repeatCount="indefinite" calcMode="spline" keyTimes="0;.15;.45;.6;.9;1" keySplines=".6 0 .2 1;.6 0 .2 1;.6 0 .2 1;.6 0 .2 1;.6 0 .2 1" values="30 50;30 50;50 50;50 50;30 50;30 50" additive="sum"/><animateTransform attributeName="transform" type="rotate" dur="1.8s" repeatCount="indefinite" calcMode="spline" keyTimes="0;.15;.45;.6;.9;1" keySplines=".6 0 .2 1;.6 0 .2 1;.6 0 .2 1;.6 0 .2 1;.6 0 .2 1" values="0;0;-27;-27;0;0" additive="sum"/></rect><rect x="-6" y="-31" width="12" height="62" rx="1.5"><animateTransform attributeName="transform" type="translate" dur="1.8s" repeatCount="indefinite" values="50 50" additive="sum"/><animateTransform attributeName="transform" type="scale" dur="1.8s" repeatCount="indefinite" calcMode="spline" keyTimes="0;.15;.45;.6;.9;1" keySplines=".6 0 .2 1;.6 0 .2 1;.6 0 .2 1;.6 0 .2 1;.6 0 .2 1" values="1 1;1 1;0 .2;0 .2;1 1;1 1" additive="sum"/></rect><rect x="-6" y="-31" width="12" height="62" rx="1.5"><animateTransform attributeName="transform" type="translate" dur="1.8s" repeatCount="indefinite" calcMode="spline" keyTimes="0;.15;.45;.6;.9;1" keySplines=".6 0 .2 1;.6 0 .2 1;.6 0 .2 1;.6 0 .2 1;.6 0 .2 1" values="70 50;70 50;50 50;50 50;70 50;70 50" additive="sum"/><animateTransform attributeName="transform" type="rotate" dur="1.8s" repeatCount="indefinite" calcMode="spline" keyTimes="0;.15;.45;.6;.9;1" keySplines=".6 0 .2 1;.6 0 .2 1;.6 0 .2 1;.6 0 .2 1;.6 0 .2 1" values="0;0;27;27;0;0" additive="sum"/></rect></g></svg></div><div style="font:700 13px/1 Segoe UI,system-ui,sans-serif;letter-spacing:.32em;color:#f0b378">ÉQUIPE</div></div><script>addEventListener("load",function(){setTimeout(function(){var x=document.getElementById("xsplash");if(x){x.style.opacity=0;setTimeout(function(){x.remove()},320)}},450)})</script>
 <div class="w">
@@ -535,6 +540,16 @@ function bindInstall() { const b = $('in'); if (b) b.onclick = async () => { BIP
 (function () { const o = parse(location.href); if (o) PEND = o; })();
 render(); if (ME) perms(); swReg();
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && !PEND && ME) render(); });
+</script>
+
+<script>
+// Phase U : bandeau hors réseau + petit retour vibrant au toucher (terrain, gants)
+(function () {
+    const b = document.createElement('div'); b.id = 'off'; document.body.appendChild(b);
+    const upd = () => { const q = (() => { try { return (JSON.parse(localStorage.getItem('xiii.app.depq')) || []).length; } catch (e) { return 0; } })(); b.innerHTML = '<span style="font-size:22px">📴</span><span>Hors réseau' + (q ? ' · ' + q + ' envoi(s) en attente' : '') + '<br><small style="font-weight:400;opacity:.85">Vos actions partiront toutes seules au retour du réseau.</small></span>'; b.classList.toggle('on', navigator.onLine === false); };
+    addEventListener('online', () => { upd(); try { toast('📶 Réseau retrouvé'); } catch (e) { } }); addEventListener('offline', upd); setInterval(upd, 15000); upd();
+    document.addEventListener('click', e => { if (e.target.closest('button,a.tool,.btn,[data-t]') && navigator.vibrate) try { navigator.vibrate(8); } catch (er) { } }, true);
+})();
 </script>
 <script>
 // =====================================================================

@@ -4036,6 +4036,11 @@ const XFIND = (() => {
         out.sort((x, y) => y.score - x.score);
         return out.slice(0, W.length ? 14 : 8);
     }
+    // ⚡ actions des autres outils : chaque outil mémorise ses commandes quand on l'ouvre ; on peut ensuite les lancer de partout
+    const KC = 'xiii.cmds';
+    function saveCmds() { if (!APP || APP === 'index') return; const W = []; const seen = new Set(); document.querySelectorAll('#toolbar button, #top-bar button, .btn-group button, #xb-hold button, button[title]').forEach(b => { if (b.closest('#xf-ov,#xb-menu,#xs-ov,#xs-gear') || !b.getAttribute('onclick') && !b.title) return; const lab = ((b.querySelector('.btn-label') || {}).textContent || b.textContent || '').replace(/\s+/g, ' ').trim(), tip = b.title || '', t = (lab && lab.length > 2 && !/^\W+$/.test(lab) ? lab : tip.split(/ : | — /)[0]).trim(); if (!t || t.length > 60 || seen.has(t)) return; seen.add(t); W.push([t, tip.slice(0, 120), ((b.querySelector('.btn-icon') || {}).textContent || '▸').trim()]); }); try { const A = JSON.parse(localStorage.getItem(KC) || '{}'); A[APP] = W.slice(0, 80); localStorage.setItem(KC, JSON.stringify(A)); } catch (e) { } }
+    function remote(q) { const W = fold(q).split(/\s+/).filter(Boolean); if (!W.length) return []; let A = {}; try { A = JSON.parse(localStorage.getItem(KC) || '{}'); } catch (e) { } const out = []; Object.keys(A).forEach(app => { if (app === APP) return; const t = T(app); (A[app] || []).forEach(c => { const f = fold(c[0] + ' ' + c[1] + ' ' + (t ? t[2] : app)); if (W.every(w => f.indexOf(w) > -1 || (SYN[w] || []).some(x => f.indexOf(x) > -1))) out.push({ kind: 'rcmd', app, label: c[0], sub: (t ? t[2] : app.toUpperCase()) + (c[1] && c[1] !== c[0] ? ' · ' + c[1] : ''), icon: c[2] }); }); }); return out.slice(0, 8); }
+    function runPending() { const m = /[#&]xfa=([^&]+)/.exec(location.hash); if (!m) return; const lab = decodeURIComponent(m[1]); try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { } const go = (n) => { const b = [...document.querySelectorAll('button')].find(b => { const l = ((b.querySelector('.btn-label') || {}).textContent || b.textContent || '').replace(/\s+/g, ' ').trim(); return l === lab || (b.title || '').split(/ : | — /)[0].trim() === lab; }); if (b) b.click(); else if (n < 8) setTimeout(() => go(n + 1), 600); }; setTimeout(() => go(0), 1200); }
     function tools(q) { const W = fold(q).split(/\s+/).filter(Boolean); return TOOLS.filter(t => t[0] !== APP && (!W.length || W.every(w => fold(t[2] + ' ' + t[3]).indexOf(w) > -1))).map(t => ({ kind: 'tool', id: t[0], label: t[2], sub: t[3], icon: t[1] })); }
     // ---------- interface ----------
     let ov = null, items = [], sel = 0, FT = '';
@@ -4064,6 +4069,7 @@ const XFIND = (() => {
         const mark = s => { let e = esc(s); fold(q).split(/\s+/).filter(Boolean).forEach(w => { const f = fold(s), i = f.indexOf(w); if (i > -1) { const raw = s.slice(i, i + w.length); e = e.replace(esc(raw), '<mark>' + esc(raw) + '</mark>'); } }); return e; };
         if (q.trim().length >= 2) sec('Dans vos projets', D, x => { const t = T(x.app) || [x.app, x.app === 'book' ? '📇' : x.app === 'fiche' ? '🎬' : '📄', x.app === 'book' ? 'ANNUAIRE' : x.app === 'fiche' ? 'FICHE PROJET' : x.app.toUpperCase()]; return '<span class="xf-ic">' + (x.ty ? TY[x.ty][0] : t[1]) + '</span><span class="xf-tx"><b>' + mark(x.snip) + '</b><small>' + (x.ty ? t[1] + ' ' : '') + esc(t[2]) + (x.name && x.name !== x.text ? ' · ' + esc(String(x.name).slice(0, 60)) : '') + (LABELS[x.path] ? ' · ' + LABELS[x.path] : '') + '</small></span><span class="xf-go">↵</span>'; });
         sec('Commandes de cette page', C, x => '<span class="xf-ic">' + esc(x.icon) + '</span><span class="xf-tx"><b>' + mark(x.label) + '</b>' + (x.sub ? '<small>' + esc(x.sub) + '</small>' : '') + '</span>');
+        if (!FT) sec('⚡ Actions dans les autres outils', remote(q), x => '<span class="xf-ic">' + esc(x.icon) + '</span><span class="xf-tx"><b>' + mark(x.label) + '</b><small>' + esc(x.sub) + '</small></span><span class="xf-go">↗</span>');
         sec('Outils', Tl.slice(0, q ? 8 : 18), x => '<span class="xf-ic">' + x.icon + '</span><span class="xf-tx"><b>' + mark(x.label) + '</b><small>' + esc(x.sub) + '</small></span><span class="xf-go">↗</span>');
         if (!items.length) h = '<div class="xf-empty">' + (IDX ? 'Aucun résultat pour « ' + esc(q) + ' ».' : 'Indexation en cours…') + '</div>';
         const r = ov.querySelector('.xf-res'); r.innerHTML = h; r.querySelectorAll('.xf-it').forEach(el => { el.onmousemove = () => { if (sel !== +el.dataset.i) { sel = +el.dataset.i; hl(); } }; el.onclick = e => go(items[+el.dataset.i], e.ctrlKey || e.metaKey); }); hl();
@@ -4072,6 +4078,7 @@ const XFIND = (() => {
     function go(x, newTab) {
         if (!x) return; const q = ov ? ov.querySelector('input').value : '';
         if (x.kind === 'cmd') { close(); setTimeout(() => x.el.click(), 30); return; }
+        if (x.kind === 'rcmd') { close(); const u = x.app + '.html#xfa=' + encodeURIComponent(x.label); if (newTab) window.open(u, '_blank'); else location.href = u; return; }
         let page, find = '';
         if (x.kind === 'tool') page = x.id + '.html';
         else { const app = x.app === 'book' || x.app === 'fiche' ? (APP || 'index') : x.app; page = app + '.html'; find = x.text.length < 120 ? x.text : q; }
@@ -4090,7 +4097,7 @@ const XFIND = (() => {
         const css = document.createElement('style'); css.textContent = '#xf-ov{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:2147483500;display:flex;justify-content:center;align-items:flex-start;padding-top:10vh;font:14px "Segoe UI",system-ui,sans-serif}.xf-box{width:min(680px,94vw);background:#232327;color:#eee;border:1px solid #444;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,.6);overflow:hidden}.xf-in{display:flex;gap:10px;align-items:center;padding:12px 14px;border-bottom:1px solid #3a3a3f}.xf-in input{flex:1;background:transparent!important;border:0!important;outline:0!important;color:#fff!important;font-size:17px!important;padding:4px 0!important;box-shadow:none!important}.xf-in kbd,.xf-ft b{font:11px monospace;background:#333;border:1px solid #555;border-radius:4px;padding:1px 5px;color:#ccc}.xf-res{max-height:58vh;overflow:auto;padding:6px}.xf-h{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#888;margin:8px 8px 4px}.xf-it{display:flex;gap:10px;align-items:center;padding:7px 10px;border-radius:7px;cursor:pointer}.xf-it.on{background:rgba(240,179,120,.18)}.xf-ic{width:24px;text-align:center;font-size:16px}.xf-tx{flex:1;min-width:0}.xf-tx b{display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.xf-tx small{display:block;color:#999;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.xf-tx mark{background:rgba(240,179,120,.45);color:inherit;border-radius:2px}.xf-go{color:#888}.xf-empty{padding:24px;text-align:center;color:#999}.xf-ft{display:flex;justify-content:space-between;gap:10px;padding:8px 14px;border-top:1px solid #3a3a3f;color:#888;font-size:11.5px}.xf-ty{display:flex;gap:6px;padding:8px 12px 2px}.xf-ty button{font:inherit;font-size:12px;color:#ddd;background:#2c2c31;border:1px solid #45454b;border-radius:14px;padding:2px 10px;cursor:pointer}.xf-ty button.on{background:rgba(240,179,120,.25);border-color:rgba(240,179,120,.75);color:#fff}.xf-flash{outline:3px solid rgb(240,179,120)!important;transition:outline .3s}';
         document.head.appendChild(css);
         const addBtn = () => { if (document.getElementById('xf-btn') || APP === 'index') return; const host = document.getElementById('xb-file') || document.getElementById('xd-dash') || document.getElementById('top-bar'); if (!host) return; const b = document.createElement('button'); b.id = 'xf-btn'; b.title = '🔎 Rechercher dans tout le projet : personnes, lieux, matériel, textes de tous les outils (Ctrl+K / ⌘K)'; b.innerHTML = '<span class="btn-icon">🔎</span><span class="btn-label">Rechercher</span>'; b.onclick = () => open(); host.insertBefore(b, host.firstChild); };
-        XBOOT.ready(addBtn, 2800);
+        XBOOT.ready(addBtn, 2800); XBOOT.ready(() => setTimeout(saveCmds, 2500), 3000); runPending();
         const h = /[#&]xfind=([^&]+)/.exec(location.hash);
         if (h) { const s = decodeURIComponent(h[1]); try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { } const run = () => setTimeout(() => highlight(s), 1500); if (document.readyState === 'complete') run(); else window.addEventListener('load', run); }
     }
@@ -4779,6 +4786,59 @@ const XSPACE = (() => {
     if (typeof XBOOT !== 'undefined') XBOOT.ready(start, 3500); else addEventListener('load', () => setTimeout(start, 600));
     return { fix };
 })();
+
+// =====================================================================
+//  SUITE XIII — XUX : confort et direction artistique communs (Phase U)
+//  • Barres d'outils Glassglow dans tous les outils (verre, boutons arrondis, lueur orange) — thèmes sombre et clair,
+//    les habillages rétro (Win 2000, Terminal…) restent intacts.
+//  • Touche « ? » : fiche des raccourcis de l'outil ouvert + taille du texte + contraste renforcé.
+//  • Focus clavier visible partout.
+// =====================================================================
+const XUX = (() => {
+    const SK = ['w2k', 'xp', 'cyber', 'rainbow', 'mac9', 'term', 'sepia', 'regie', 'soleil', 'gb'].map(k => ':not(.x' + k + ')').join('');
+    const D = 'body' + SK + ':not(.light-theme)', L = 'body' + SK + '.light-theme';
+    const KF = 'xiii.ux.fs', KC = 'xiii.ux.hc';
+    const J = (k, d) => { try { const v = localStorage.getItem(k); return v == null ? d : v; } catch (e) { return d; } };
+    function css() {
+        const st = document.createElement('style'); st.id = 'xux-css'; st.textContent =
+            D + ' #top-bar,' + D + ' #toolbar{background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.015)),rgba(16,15,14,.82)!important;backdrop-filter:blur(16px) saturate(1.3);-webkit-backdrop-filter:blur(16px) saturate(1.3);border-bottom:1px solid rgba(255,255,255,.07)!important;box-shadow:0 1px 0 rgba(240,180,41,.06),0 8px 24px rgba(0,0,0,.25)}' +
+            D + ' #top-bar button,' + D + ' #toolbar button,' + D + ' #top-bar select,' + D + ' #toolbar select{border-radius:11px!important;background:rgba(255,255,255,.05)!important;border:1px solid rgba(255,255,255,.1)!important;transition:background .15s,border-color .15s,box-shadow .2s,transform .1s}' +
+            D + ' #top-bar button:hover,' + D + ' #toolbar button:hover{background:rgba(240,180,41,.14)!important;border-color:rgba(240,180,41,.55)!important;box-shadow:0 0 14px rgba(240,180,41,.18)}' +
+            D + ' #top-bar button:active,' + D + ' #toolbar button:active{transform:scale(.96)}' +
+            D + ' #top-bar .btn-active,' + D + ' #toolbar .btn-active,' + D + ' #top-bar button.active,' + D + ' #toolbar button.active{background:linear-gradient(135deg,rgba(240,180,41,.32),rgba(240,180,41,.12))!important;border-color:rgba(240,180,41,.75)!important;box-shadow:0 0 16px rgba(240,180,41,.25),0 0 0 1px rgba(240,180,41,.3) inset}' +
+            L + ' #top-bar,' + L + ' #toolbar{background:linear-gradient(180deg,rgba(255,255,255,.85),rgba(255,255,255,.7))!important;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid rgba(60,40,10,.1)!important;box-shadow:0 6px 20px rgba(60,40,10,.06)}' +
+            L + ' #top-bar button,' + L + ' #toolbar button{border-radius:11px!important;transition:background .15s,border-color .15s,box-shadow .2s}' + L + ' #top-bar button:hover,' + L + ' #toolbar button:hover{border-color:rgba(201,133,0,.6)!important;box-shadow:0 0 12px rgba(240,180,41,.2)}' +
+            ':focus-visible{outline:2px solid #f0b429!important;outline-offset:2px}' +
+            'html.xux-hc body{filter:contrast(1.12)}html.xux-hc .hint,html.xux-hc small{opacity:1!important}' +
+            '#xux-ov{position:fixed;inset:0;z-index:2147483400;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:16px;font:14px/1.5 "Segoe UI",system-ui,sans-serif}#xux-ov>div{width:min(640px,100%);max-height:86vh;overflow:auto;background:var(--bg-menu,#232327);color:var(--text-main,#eee);border:1px solid rgba(240,180,41,.45);border-radius:16px;padding:18px 20px;box-shadow:0 20px 60px rgba(0,0,0,.5),0 0 30px rgba(240,180,41,.08)}#xux-ov h3{margin:0 0 10px;font-size:17px}#xux-ov h4{margin:14px 0 6px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;opacity:.7}#xux-ov .r{display:flex;justify-content:space-between;gap:14px;padding:5px 0;border-top:1px solid rgba(127,127,127,.18)}#xux-ov kbd{font:600 12px ui-monospace,Consolas,monospace;background:rgba(240,180,41,.14);border:1px solid rgba(240,180,41,.45);border-radius:6px;padding:2px 7px;white-space:nowrap}#xux-ov .seg{display:flex;gap:6px;flex-wrap:wrap}#xux-ov .seg button{font:inherit;font-size:13px;padding:6px 12px;border-radius:10px;cursor:pointer;background:rgba(255,255,255,.06);border:1px solid rgba(127,127,127,.35);color:inherit}#xux-ov .seg button.on{background:rgba(240,180,41,.28);border-color:#f0b429}';
+        document.head.appendChild(st);
+    }
+    function applyPrefs() { const z = +J(KF, '100') || 100; document.body.style.zoom = z === 100 ? '' : (z / 100); document.documentElement.classList.toggle('xux-hc', J(KC, '0') === '1'); }
+    function shortcuts() {
+        const out = [], seen = new Set(), add = (k, t) => { const key = k + t; if (seen.has(key)) return; seen.add(key); out.push([k, t]); };
+        document.querySelectorAll('[title]').forEach(el => { const t = el.getAttribute('title') || '', m = t.match(/\(((?:Ctrl|⌘|Maj|Shift|Alt|Suppr|Échap|Espace|Entrée|F\d+|[A-Z0-9?+←→↑↓])(?:[ +][^)]{0,18})?)\)/); if (!m) return; const lab = ((el.querySelector && el.querySelector('.btn-label') || {}).textContent || t.replace(m[0], '').split(/ : | — /)[0]).replace(/\s+/g, ' ').trim(); if (lab) add(m[1].replace(/Ctrl/g, 'Ctrl'), lab.slice(0, 60)); });
+        return out;
+    }
+    function open() {
+        if (document.getElementById('xux-ov')) return; const S = shortcuts(), z = +J(KF, '100') || 100, hc = J(KC, '0') === '1';
+        const o = document.createElement('div'); o.id = 'xux-ov';
+        o.innerHTML = '<div><h3>⌨️ Raccourcis et confort</h3><h4>Partout dans la suite</h4>' + [['Ctrl K', 'Rechercher, ou lancer une action de n\'importe quel outil'], ['?', 'Cette fiche'], ['Ctrl S', 'Enregistrer (dans la plupart des outils)'], ['Ctrl Z / Ctrl Y', 'Annuler / rétablir (outils équipés)'], ['Échap', 'Fermer une fenêtre']].map(r => '<div class="r"><span>' + r[1] + '</span><kbd>' + r[0] + '</kbd></div>').join('') +
+            (S.length ? '<h4>Dans cet outil</h4>' + S.slice(0, 40).map(r => '<div class="r"><span>' + r[1].replace(/[<>&]/g, '') + '</span><kbd>' + r[0].replace(/[<>&]/g, '') + '</kbd></div>').join('') : '') +
+            '<h4>Taille du texte</h4><div class="seg" data-g="fs">' + [90, 100, 112, 125, 140].map(v => '<button data-v="' + v + '" class="' + (v === z ? 'on' : '') + '">' + v + ' %</button>').join('') + '</div><h4>Contraste</h4><div class="seg" data-g="hc"><button data-v="0" class="' + (hc ? '' : 'on') + '">Normal</button><button data-v="1" class="' + (hc ? 'on' : '') + '">Renforcé</button></div><p style="opacity:.6;font-size:12px;margin:12px 0 0">Taille du texte et contraste valent pour toute la suite, sur cet appareil.</p><div style="text-align:right;margin-top:10px"><button data-x style="font:inherit;padding:7px 16px;border-radius:10px;cursor:pointer;background:rgba(240,180,41,.2);border:1px solid #f0b429;color:inherit">Fermer</button></div></div>';
+        document.body.appendChild(o);
+        o.onclick = e => { if (e.target === o || e.target.closest('[data-x]')) { o.remove(); return; } const b = e.target.closest('[data-v]'); if (!b) return; const g = b.parentNode.dataset.g; try { localStorage.setItem(g === 'fs' ? KF : KC, b.dataset.v); } catch (er) { } b.parentNode.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); applyPrefs(); };
+    }
+    function init(app) {
+        css(); const go = () => applyPrefs(); if (document.body) go(); else addEventListener('DOMContentLoaded', go);
+        addEventListener('storage', e => { if (e.key === KF || e.key === KC) applyPrefs(); });
+        document.addEventListener('keydown', e => { if (e.key !== '?' || e.ctrlKey || e.metaKey || e.altKey) return; const t = e.target; if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return; e.preventDefault(); const o = document.getElementById('xux-ov'); if (o) o.remove(); else open(); }, true);
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') { const o = document.getElementById('xux-ov'); if (o) o.remove(); } });
+        window.XSET_HELP = (window.XSET_HELP || []).concat([{ icon: '⌨️', label: 'Raccourcis et confort', sub: 'Touche « ? » : raccourcis, taille du texte, contraste', run: open }]);
+    }
+    return { init, open };
+})();
+
+XUX.init('scripto');
 
 // =====================================================================
 //  SUITE XIII — XENC : suivi des conversions ENCODO depuis tous les outils
