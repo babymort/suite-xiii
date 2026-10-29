@@ -9972,6 +9972,108 @@ const XOFF = (() => {
 })();
 
 XOFF.init('dossier');
+
+// =====================================================================
+//  DOSSIER XIII — 📽️ Présentation 16/9 : PowerPoint (.pptx) et Canva
+//  Le dossier devient une présentation : couverture, sommaire, une diapositive d'intercalaire par partie,
+//  une ou plusieurs diapositives par rubrique (texte découpé, images en grand ou en grille), charte du dossier reprise.
+//  Canva : la présentation .pptx s'importe telle quelle (chaque diapositive reste modifiable).
+//  Boutons dans la fenêtre du dossier généré, à côté de « Télécharger ».
+// =====================================================================
+const XSLIDES = (() => {
+    const LIB = ['https://cdnjs.cloudflare.com/ajax/libs/pptxgenjs/3.12.0/pptxgen.bundle.js', 'https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js'];
+    function lib() {
+        if (window.PptxGenJS) return Promise.resolve(window.PptxGenJS);
+        return new Promise((ok, ko) => { let i = 0; const next = () => { if (i >= LIB.length) return ko(new Error('Module PowerPoint indisponible (connexion internet requise).')); const s = document.createElement('script'); s.src = LIB[i++]; s.onload = () => window.PptxGenJS ? ok(window.PptxGenJS) : next(); s.onerror = () => { s.remove(); next(); }; document.head.appendChild(s); }; next(); });
+    }
+    const baseName = n => String(n).replace(/\.[a-z0-9]{2,5}$/i, '').replace(/[_]+/g, ' ');
+    const hx = c => String(c || '#000000').replace('#', '').slice(0, 6).toUpperCase();
+    const plain = h => { const d = document.createElement('div'); d.innerHTML = String(h || '').replace(/<\/(p|div|h\d|li)>/gi, '\n').replace(/<br\s*\/?>/gi, '\n').replace(/<li[^>]*>/gi, '• '); return (d.textContent || '').replace(/\n{3,}/g, '\n\n').trim(); };
+    function chunks(t, max) { const out = []; let cur = ''; t.split(/\n/).forEach(par => { while (par.length > max) { const k = par.lastIndexOf(' ', max) > max * 0.5 ? par.lastIndexOf(' ', max) : max; if (cur) { out.push(cur); cur = ''; } out.push(par.slice(0, k)); par = par.slice(k).trim(); } if ((cur + '\n' + par).length > max && cur) { out.push(cur); cur = par; } else cur = cur ? cur + '\n' + par : par; }); if (cur.trim()) out.push(cur); return out; }
+    async function dataOf(fileId) { try { const rec = await DB.get('files', fileId); if (!rec) return null; const url = await new Promise(r => { const f = new FileReader(); f.onload = () => r(f.result); f.readAsDataURL(rec.blob); }); const im = await new Promise(r => { const i = new Image(); i.onload = () => r(i); i.onerror = () => r(null); i.src = url; }); return im ? { url, w: im.naturalWidth, h: im.naturalHeight } : null; } catch (e) { return null; } }
+    function fit(im, x, y, w, h) { const k = Math.min(w / im.w, h / im.h), W = im.w * k, H = im.h * k; return { data: im.url, x: x + (w - W) / 2, y: y + (h - H) / 2, w: W, h: H }; }
+    async function build(p, onStep) {
+        const PG = await lib(), pp = new PG(), th = themeOf(p), cv = p.cover, d = p.design, font = d.serif ? 'Georgia' : 'Arial';
+        pp.layout = 'LAYOUT_16x9'; pp.title = cv.title || p.name; pp.author = cv.production || ''; pp.company = 'DOSSIER XIII';
+        const W = 10, H = 5.625, M = 0.5, ACC = hx(th.accent), INK = '1C1C1F', MUT = '6B6B73', COV = hx(th.cover), CT = hx(th.text);
+        const step = (t, f) => onStep && onStep(t, f);
+        const head = (s, title, num) => {
+            s.background = { color: 'FFFFFF' };
+            s.addShape(pp.ShapeType.rect, { x: 0, y: 0, w: 0.12, h: H, fill: { color: ACC }, line: { color: ACC } });
+            s.addText((num ? num + '  ' : '') + title, { x: M, y: 0.25, w: W - 2 * M, h: 0.65, fontFace: font, fontSize: 22, bold: true, color: INK, fit: 'shrink', valign: 'bottom' });
+            s.addShape(pp.ShapeType.line, { x: M, y: 0.95, w: 1.2, h: 0, line: { color: ACC, width: 2 } });
+            if (d.headers !== false) s.addText((cv.title || p.name).toUpperCase(), { x: M, y: H - 0.4, w: W - 2 * M, h: 0.3, fontFace: 'Arial', fontSize: 8, color: MUT, charSpacing: 2 });
+        };
+        // couverture
+        step('Couverture', 0.02);
+        let s = pp.addSlide(); s.background = { color: COV };
+        const vis = cv.visual ? await dataOf(cv.visual) : null, logo = cv.logo ? await dataOf(cv.logo) : null;
+        if (vis) { s.addImage(Object.assign(fit(vis, W * 0.5, 0, W * 0.5, H), {})); s.addShape(pp.ShapeType.rect, { x: 0, y: 0, w: W * 0.52, h: H, fill: { color: COV }, line: { color: COV } }); }
+        if (logo) s.addImage(fit(logo, M, 0.45, 1.6, 0.8));
+        s.addText(cv.title || p.name, { x: M, y: 1.6, w: (vis ? W * 0.5 : W) - 2 * M, h: 1.3, fontFace: font, fontSize: 36, bold: true, color: CT, valign: 'bottom' });
+        s.addShape(pp.ShapeType.line, { x: M, y: 3.0, w: 1.4, h: 0, line: { color: ACC, width: 3 } });
+        s.addText([cv.subtitle, cv.mention].filter(Boolean).join('\n'), { x: M, y: 3.1, w: (vis ? W * 0.5 : W) - 2 * M, h: 0.8, fontFace: font, fontSize: 16, color: ACC, valign: 'top' });
+        const info = [['Production', cv.production], ['Réalisation', cv.realisation], ['Producteur', cv.producteur], ['Diffuseur', cv.diffuseur], ['Durée', cv.duree], ['Dates', cv.dates], ['Lieu', cv.lieu]].filter(r => r[1]);
+        if (info.length) s.addText(info.map(r => r[0] + ' : ' + r[1]).join('\n'), { x: M, y: 3.95, w: (vis ? W * 0.5 : W) - 2 * M, h: 1.2, fontFace: 'Arial', fontSize: 10, color: CT, valign: 'top' });
+        if (cv.version) s.addText(cv.version, { x: M, y: H - 0.4, w: 4, h: 0.3, fontFace: 'Arial', fontSize: 8, color: CT, transparency: 40 });
+        // plan
+        const nums = typeof numberingMap === 'function' ? (() => { try { return numberingMap(p) || {}; } catch (e) { return {}; } })() : {};
+        const plan = p.chapters.filter(ch => ch.included).map(ch => ({ ch, secs: ch.sections.filter(x => x.included && !(d.skipEmpty && !plain(x.text) && !x.items.length)) })).filter(c => c.secs.length);
+        if (d.toc !== false && plan.length) {
+            s = pp.addSlide(); head(s, 'Sommaire');
+            const L = []; plan.forEach(c => { L.push({ text: c.ch.title, options: { bold: true, color: ACC, fontSize: 13, breakLine: true } }); c.secs.forEach(x => L.push({ text: '    ' + ((nums[x.id] || '') + ' ' + x.title).trim(), options: { color: INK, fontSize: 11, breakLine: true } })); });
+            s.addText(L, { x: M, y: 1.15, w: W - 2 * M, h: H - 1.7, fontFace: font, valign: 'top', fit: 'shrink' });
+        }
+        let n = 0; const tot = plan.reduce((a, c) => a + c.secs.length, 0) || 1;
+        for (const c of plan) {
+            if (d.dividers !== false) { s = pp.addSlide(); s.background = { color: hx(th.divider) }; s.addShape(pp.ShapeType.rect, { x: M, y: 2.35, w: 0.12, h: 0.9, fill: { color: ACC }, line: { color: ACC } }); s.addText(c.ch.title, { x: M + 0.35, y: 2.2, w: W - 2 * M, h: 1.2, fontFace: font, fontSize: 34, bold: true, color: hx(th.dText) }); }
+            for (const x of c.secs) {
+                step('Rubrique : ' + x.title, 0.05 + 0.9 * (n++ / tot));
+                const num = nums[x.id] || '', txt = plain(x.text), imgs = x.items.filter(i => i.kind === 'image'), docs = x.items.filter(i => i.kind !== 'image');
+                const parts = txt ? chunks(txt, imgs.length ? 650 : 1300) : [];
+                const first = imgs.length && parts.length <= 1 ? await dataOf(imgs[0].fileId) : null;
+                if (parts.length || (!imgs.length)) {
+                    (parts.length ? parts : ['']).forEach((t, k) => {
+                        s = pp.addSlide(); head(s, x.title + (k ? ' (suite)' : ''), num);
+                        const wT = first && k === 0 ? W * 0.5 - M : W - 2 * M;
+                        if (t) s.addText(t, { x: M, y: 1.15, w: wT, h: H - 1.7, fontFace: font, fontSize: 14, color: INK, valign: 'top', fit: 'shrink', paraSpaceAfter: 6 });
+                        if (first && k === 0) s.addImage(fit(first, W * 0.5 + 0.1, 1.15, W * 0.5 - M - 0.1, H - 1.7));
+                        if (!t && docs.length && k === 0) s.addText(docs.map(i => '📎 ' + (i.label || i.name)).join('\n'), { x: M, y: 1.15, w: W - 2 * M, h: H - 1.7, fontFace: 'Arial', fontSize: 13, color: MUT, valign: 'top' });
+                    });
+                }
+                const rest = first ? imgs.slice(1) : imgs, per = x.imgLayout === 'grid' ? 4 : x.imgLayout === 'two' ? 2 : 1;
+                for (let i = 0; i < rest.length; i += per) {
+                    s = pp.addSlide(); head(s, x.title, num); const grp = rest.slice(i, i + per), cols = per === 4 ? 2 : per, rows = per === 4 ? 2 : 1, cw = (W - 2 * M - (cols - 1) * 0.2) / cols, ch = (H - 1.75 - (rows - 1) * 0.2) / rows;
+                    for (let j = 0; j < grp.length; j++) { const im = await dataOf(grp[j].fileId); if (!im) continue; const cx = M + (j % cols) * (cw + 0.2), cy = 1.15 + Math.floor(j / cols) * (ch + 0.2); s.addImage(fit(im, cx, cy, cw, ch - (per === 1 ? 0.3 : 0))); if (per === 1 && (grp[j].label || grp[j].name)) s.addText(grp[j].label || baseName(grp[j].name), { x: M, y: H - 0.75, w: W - 2 * M, h: 0.3, fontFace: 'Arial', fontSize: 10, italic: true, color: MUT, align: 'center' }); }
+                }
+                if (docs.length && (parts.length || imgs.length)) { s.addNotes('Documents joints à cette rubrique : ' + docs.map(i => i.label || i.name).join(', ')); }
+            }
+        }
+        step('Écriture du fichier', 0.97);
+        return pp;
+    }
+    const fname = p => safeName(p.cover.title || p.name) + '_presentation_16-9_' + todayISO() + '.pptx';
+    async function run(canva) {
+        const o = modal('<h3>📽️ Présentation 16/9</h3><div id="xsl-t" style="font-size:13px;">Préparation…</div><div class="gen-bar"><div id="xsl-b"></div></div>', 'wide'); o.dataset.lock = '1';
+        try {
+            const pp = await build(P, (t, f) => { const a = document.getElementById('xsl-t'), b = document.getElementById('xsl-b'); if (a) a.textContent = t; if (b) b.style.width = Math.round(f * 100) + '%'; });
+            const blob = await pp.write({ outputType: 'blob' }); delete o.dataset.lock; closeModal(); download(blob, fname(P));
+            if (canva) { window.open('https://www.canva.com/', '_blank', 'noopener'); toast('🎨 Dans Canva : « Créer un design » › « Importer un fichier », puis choisissez le .pptx téléchargé : chaque diapositive reste modifiable.', 9000); }
+            else toast('📽️ Présentation PowerPoint 16/9 téléchargée (s\'ouvre aussi dans Keynote et Google Slides).', 5000);
+        } catch (e) { console.error(e); delete o.dataset.lock; closeModal(); toast('⚠️ ' + (e && e.message || e), 6000); }
+    }
+    function hook() {
+        new MutationObserver(() => {
+            const dv = document.querySelector('.dp-vers'); if (dv && !document.getElementById('xsl-ch')) { const r = document.createElement('div'); r.id = 'xsl-ch'; r.style.cssText = 'display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:10px 0 0'; r.innerHTML = '<span class="hint" style="margin-right:4px">Ou en présentation 16/9 :</span><button data-x="0">📽️ PowerPoint</button><button data-x="1">🎨 Vers Canva</button>'; r.querySelectorAll('button').forEach(b => b.onclick = () => { closeModal(); run(b.dataset.x === '1'); }); dv.after(r); }
+            const dl = document.getElementById('gen-dl'); if (!dl || document.getElementById('xsl-pp')) return;
+            const a = document.createElement('button'); a.id = 'xsl-pp'; a.textContent = '📽️ PowerPoint 16/9'; a.title = 'Le dossier en présentation .pptx 16/9 (une rubrique = une ou plusieurs diapositives, charte reprise)'; a.onclick = () => { closeModal(); run(false); };
+            const b = document.createElement('button'); b.id = 'xsl-cv'; b.textContent = '🎨 Vers Canva'; b.title = 'Présentation 16/9 à importer dans Canva (chaque diapositive reste modifiable)'; b.onclick = () => { closeModal(); run(true); };
+            dl.before(a, b); }).observe(document.body, { childList: true, subtree: true });
+    }
+    return { build, run, hook };
+})();
+XSLIDES.hook();
+
 </script>
 <!-- SUITE XIII:SETTINGS:END -->
 </body>
