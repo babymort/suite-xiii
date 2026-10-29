@@ -3141,6 +3141,47 @@ const XProj = (() => {
 })();
 
 // ---------- PLANO XIII → DOSSIER XIII ----------
+
+// ---------- 📚 Dossier complet PLANO (tous les plans ou l'onglet en cours) : plans + patch lumière + matériel ----------
+async function planImage() {
+    const ex = buildExportSVG(); if (!ex) return null;
+    const img = new Image(), clean = sv => String(sv).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F￾￿]/g, '').replace(/&(?!(?:[a-zA-Z][a-zA-Z0-9]*|#\d+|#x[0-9a-fA-F]+);)/g, '&amp;'), noExt = sv => sv.replace(/<image\b[^>]*?(?:href|xlink:href)="(?!data:)[^"]*"[^>]*?(?:\/>|>\s*<\/image>)/g, '');
+    const load = sv => new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(sv); });
+    try { await load(clean(ex.svg)); } catch (e) { await load(noExt(clean(ex.svg))); }
+    const k = ex.W * ex.H * 2.25 < 40e6 ? 1.5 : 1, c = document.createElement('canvas'); c.width = Math.round(ex.W * k); c.height = Math.round(ex.H * k);
+    const g = c.getContext('2d'); g.fillStyle = TH().bg; g.fillRect(0, 0, c.width, c.height); g.drawImage(img, 0, 0, c.width, c.height);
+    return { url: c.toDataURL('image/jpeg', 0.9), W: ex.W, H: ex.H };
+}
+async function exportDossierPDF(onlyActive) {
+    if (!window.jspdf) throw new Error('jsPDF indisponible');
+    const start = P.active, idx = onlyActive ? [P.active] : P.tabs.map((t, i) => i);
+    const pdf = new window.jspdf.jsPDF({ orientation: 'l', unit: 'pt', format: 'a4' }), PW = 842, PH = 595, M = 36;
+    const head = (t, sub) => { pdf.setFillColor(30, 30, 30); pdf.rect(0, 0, PW, 46, 'F'); pdf.setTextColor(240, 179, 120); pdf.setFont('helvetica', 'bold'); pdf.setFontSize(15); pdf.text(t.replace(/[^\u0000-\u00ff]/g, ''), M, 29); if (sub) { pdf.setTextColor(200); pdf.setFont('helvetica', 'normal'); pdf.setFontSize(9); pdf.text(sub, PW - M, 29, { align: 'right' }); } pdf.setTextColor(25); };
+    const table = (y, cols, rows) => { const W = cols.map(c => c[1]); let x = M; pdf.setFont('helvetica', 'bold'); pdf.setFontSize(8.5); pdf.setFillColor(240, 179, 120); pdf.rect(M, y - 11, PW - 2 * M, 16, 'F'); cols.forEach((c, i) => { pdf.text(c[0], x + 4, y); x += W[i]; }); y += 16; pdf.setFont('helvetica', 'normal');
+        rows.forEach((r, n) => { if (y > PH - M) { pdf.addPage(); head('Suite'); y = 80; } if (n % 2) { pdf.setFillColor(246, 246, 246); pdf.rect(M, y - 11, PW - 2 * M, 15, 'F'); } x = M; r.forEach((v, i) => { pdf.text(String(v == null ? '' : v).slice(0, Math.floor(W[i] / 4.6)), x + 4, y); x += W[i]; }); y += 15; }); return y + 14; };
+    const proj = P.name || 'Projet', date = new Date().toLocaleDateString('fr-FR');
+    // couverture
+    pdf.setFillColor(30, 30, 30); pdf.rect(0, 0, PW, PH, 'F'); pdf.setTextColor(255); pdf.setFont('helvetica', 'bold'); pdf.setFontSize(30); pdf.text(onlyActive ? P.tabs[start].name : proj, M + 10, 230);
+    pdf.setDrawColor(240, 179, 120); pdf.setLineWidth(3); pdf.line(M + 10, 248, M + 110, 248); pdf.setTextColor(240, 179, 120); pdf.setFontSize(14); pdf.text('Dossier complet PLANO XIII' + (onlyActive ? ' — onglet « ' + P.tabs[start].name + ' »' : ''), M + 10, 272);
+    pdf.setTextColor(210); pdf.setFont('helvetica', 'normal'); pdf.setFontSize(10); pdf.text([onlyActive ? proj : idx.length + ' plan(s) : ' + idx.map(i => P.tabs[i].name).join(', '), date], M + 10, 296);
+    try {
+        for (const i of idx) {
+            if (P.active !== i) { switchTab(i); await new Promise(r => setTimeout(r, 180)); }
+            const t = P.tabs[i], im = await planImage();
+            pdf.addPage(); head('Plan — ' + t.name, proj + ' · ' + date);
+            if (im) { const k = Math.min((PW - 2 * M) / im.W, (PH - 46 - 2 * M) / im.H), w = im.W * k, h = im.H * k; pdf.addImage(im.url, 'JPEG', (PW - w) / 2, 46 + M + (PH - 46 - 2 * M - h) / 2, w, h); }
+            else { pdf.setFontSize(11); pdf.text('Plan vide.', M, 90); }
+            const codes = lightCodes(), L = t.items.filter(x => x.kind === 'light'), O = t.items.filter(x => x.kind === 'obj');
+            pdf.addPage(); head('Patch lumière et matériel — ' + t.name, proj + ' · ' + date); let y = 76;
+            if (L.length) { const tot = L.reduce((a, x) => a + (+x.L.power || 0), 0); pdf.setFont('helvetica', 'bold'); pdf.setFontSize(11); pdf.text('Projecteurs : ' + L.length + '  -  ' + (tot / 1000).toFixed(1).replace('.', ',') + ' kW  -  env. ' + Math.ceil(tot / 230) + ' A', M, y); y += 20;
+                y = table(y, [['Code', 60], ['Projecteur', 250], ['Puissance', 80], ['Température', 90], ['Angle', 60], ['Univers', 60], ['Adresse DMX', 80], ['Gélatine', 90]], L.map(x => [codes[x.id], x.name, (x.L.power || '') + ' W', x.L.gel ? '-' : x.L.kelvin + ' K', x.L.angle + ' deg', x.L.univ, x.L.dmx, x.L.gel ? x.L.gelColor : ''])); }
+            const G = {}; O.forEach(x => { G[x.name] = (G[x.name] || 0) + 1; }); L.forEach(x => { G[x.name] = (G[x.name] || 0) + 1; });
+            const rows = Object.keys(G).sort((a, b) => a.localeCompare(b, 'fr')).map(k => [G[k], k]);
+            if (rows.length) { pdf.setFont('helvetica', 'bold'); pdf.setFontSize(11); pdf.text('Matériel du plan', M, y); y += 20; table(y, [['Qté', 60], ['Élément', 710]], rows); }
+        }
+    } finally { if (P.active !== start) switchTab(start); }
+    await saveFile(fileBase() + (onlyActive ? '' : ' - tous les plans') + ' - dossier complet.pdf', pdf.output('blob'));
+}
 function openSendToDossier() {
     const t = tab(), name = t.name || 'Plan';
     const f = name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
@@ -3150,7 +3191,9 @@ function openSendToDossier() {
     if (/(sol|implantation|camera|cadre)/.test(f)) kw.push('plan au sol');
     xiiiSendToDossier({ app: 'PLANO XIII', from: 'plano', project: (P.name ? P.name + ' — ' : '') + name, choices: [
         { label: 'Plan « ' + name + ' »', sub: 'PDF avec cartouche et légende, identique à « Créer Rendu ». Pour un autre plan, affichez son onglet puis renvoyez.', title: 'Plan — ' + name, keywords: kw, key: 'plano:tab:' + t.id,
-          make: () => { const sel = $('export-format'), prev = sel.value; sel.value = 'pdf'; return xiiiCapture(() => exportVisual()).finally(() => { sel.value = prev; }); } }
+          make: () => { const sel = $('export-format'), prev = sel.value; sel.value = 'pdf'; return xiiiCapture(() => exportVisual()).finally(() => { sel.value = prev; }); } },
+        { label: 'Dossier complet de l’onglet « ' + name + ' »', sub: 'Plan, patch lumière (codes, puissances, DMX) et liste du matériel de l’onglet affiché, en un PDF.', title: 'Dossier plan — ' + name, keywords: kw, key: 'plano:dossier:' + t.id, make: () => xiiiCapture(() => exportDossierPDF(true), 300000) },
+        { label: 'Dossier complet (tous les plans)', sub: 'Tous les onglets : chaque plan suivi de son patch lumière et de sa liste de matériel.', title: 'Dossier PLANO XIII', keywords: ['plan'], key: 'plano:dossier', make: () => xiiiCapture(() => exportDossierPDF(false), 300000) }
     ] });
 }
 

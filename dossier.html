@@ -3545,7 +3545,7 @@ async function startGenerate() {
         const blob = new Blob([res.bytes], { type: 'application/pdf' });
         if (lastPdfUrl) URL.revokeObjectURL(lastPdfUrl);
         lastPdfUrl = URL.createObjectURL(blob);
-        const fname = safeName((P.cover.title || P.name)) + '_' + safeName(TEMPLATES[P.type].short) + '_' + todayISO() + '.pdf';
+        const fname = safeName((P.cover.title || P.name)) + '_' + safeName(TEMPLATES[P.type].short) + '_' + ({ client: 'Client', tech: 'Technique' }[window.XDOSS_VERS] || 'Full') + '_' + todayISO() + '.pdf';
         delete o.dataset.lock; closeModal();
         modal('<h3>📕 ' + esc(P.cover.title || P.name) + ' — ' + plural(res.pages, 'page') + ' · ' + fmtSize(blob.size) + '<span class="close-x" onclick="closeModal()">✕</span></h3>' +
             (res.warnings.length ? '<div class="alerts" style="margin-bottom:10px;">' + [...new Set(res.warnings)].map(w => '<div class="alert">⚠️ ' + esc(w) + '</div>').join('') + '</div>' : '') +
@@ -3806,7 +3806,7 @@ function openSendTeamToRessourco() {
         if (choice === 'again') return startGenerate();
         if (!choice) return;
         if (choice.up && S.length) { await refresh(S); }
-        VERS = choice.v; try { await _gen.apply(this, arguments); } finally { VERS = ''; }
+        VERS = choice.v; window.XDOSS_VERS = choice.v; try { await _gen.apply(this, arguments); } finally { VERS = ''; window.XDOSS_VERS = ''; }
         addShare(choice.v);
     };
     // ---------- partage ----------

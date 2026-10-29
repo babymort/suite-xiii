@@ -6560,7 +6560,7 @@
             const ipRows = []; const cableRows = [];
             let totalNodes = 0, totalCables = 0;
 
-            projectsData.forEach(proj => {
+            reportTabs().forEach(proj => {
                 const nodes = proj.nodes || []; const conns = proj.connections || [];
                 totalNodes += nodes.length; totalCables += conns.length;
 
@@ -6596,7 +6596,7 @@
 
         function buildFullReportDiagnostics() {
             const dupResults = []; const unconnectedResults = [];
-            projectsData.forEach(proj => {
+            reportTabs().forEach(proj => {
                 const nodes = proj.nodes || []; const conns = proj.connections || [];
                 const ipMap = {};
                 nodes.forEach(n => { const ip = (n.ip || '').trim(); if (!ip) return; if (!ipMap[ip]) ipMap[ip] = []; ipMap[ip].push(n.title); });
@@ -6695,7 +6695,7 @@
             pdf.text(`Généré le ${new Date().toLocaleDateString('fr-FR')} à ${new Date().toLocaleTimeString('fr-FR')}`, pageW / 2, y, { align: 'center' }); y += 16;
 
             pdf.setFontSize(10.5); pdf.setTextColor(180, 200, 220);
-            pdf.text(`${projectsData.length} onglet(s)  •  ${reportData.totalNodes} équipement(s)  •  ${reportData.totalCables} câble(s)`, pageW / 2, y, { align: 'center' });
+            pdf.text(`${reportTabs().length} onglet(s)  •  ${reportData.totalNodes} équipement(s)  •  ${reportData.totalCables} câble(s)`, pageW / 2, y, { align: 'center' });
 
             pdf.setFontSize(9); pdf.setTextColor(140, 140, 140);
             pdf.text('Application développée par Matthieu Lamotte', pageW / 2, pageH - 15, { align: 'center' });
@@ -6853,7 +6853,7 @@
                 const reportData = buildFullReportData();
                 drawReportCoverPage(pdf, pageW, pageH, reportData);
 
-                for (const proj of projectsData) {
+                for (const proj of reportTabs()) {
                     loaderSub.innerText = `Rendu du synoptique "${proj.name}"...`;
                     activeTabId = proj.id;
                     loadTabContent(proj.id, false);
@@ -8259,6 +8259,8 @@ const XProj = (() => {
 })();
 
 // ---------- SYNO XIII → DOSSIER XIII ----------
+let REPORT_ONLY = null; // onglet seul pour le rapport complet (envoi vers DOSSIER)
+function reportTabs() { return REPORT_ONLY ? projectsData.filter(p => p.id === REPORT_ONLY) : projectsData; }
 function openSendToDossier() {
     try { closeCableEditor(); } catch (e) { }
     saveCurrentTabState();
@@ -8268,7 +8270,8 @@ function openSendToDossier() {
     const asPdf = run => { const sel = document.getElementById('export-format'), prev = sel.value; sel.value = 'pdf'; return xiiiCapture(() => run()).finally(() => { sel.value = prev; }); };
     xiiiSendToDossier({ app: 'SYNO XIII', from: 'syno', project: name, choices: [
         { label: 'Synoptique de l’onglet « ' + name + ' »', sub: 'PDF du synoptique affiché, identique à « Créer Rendu ».', title: 'Synoptique — ' + name, keywords: kw, key: 'syno:tab:' + activeTabId, make: () => asPdf(() => exportVisual()) },
-        { label: 'Rapport technique complet', sub: 'Tous les onglets, liste matériel, adressage IP et diagnostic (PDF multipage).', title: 'Rapport technique SYNO XIII', keywords: ['synoptique'], key: 'syno:report', make: () => xiiiCapture(() => generateFullReport(), 300000) }
+        { label: 'Rapport technique complet', sub: 'Tous les onglets, liste matériel, adressage IP et diagnostic (PDF multipage).', title: 'Rapport technique SYNO XIII', keywords: ['synoptique'], key: 'syno:report', make: () => xiiiCapture(() => generateFullReport(), 300000) },
+        { label: 'Rapport complet de l’onglet « ' + name + ' »', sub: 'Comme le rapport complet (synoptique, liste matériel, adressage IP, diagnostic), mais seulement pour l’onglet affiché.', title: 'Rapport technique — ' + name, keywords: kw, key: 'syno:report:' + activeTabId, make: () => { REPORT_ONLY = activeTabId; return xiiiCapture(() => generateFullReport(), 300000).finally(() => { REPORT_ONLY = null; }); } }
     ] });
 }
 
