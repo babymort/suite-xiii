@@ -4326,7 +4326,7 @@ const XTIPS = (() => {
     function hooks() {
         // 1. première ouverture de l'outil : bienvenue courte (au lieu de la visite imposée)
         const tourBtn = typeof XTOUR !== 'undefined' ? [['🧭 Visite guidée', () => { try { XTOUR.start(); } catch (e) { } }]] : null;
-        if (APP === 'index') { tip('open.index', '.xpj-btn', 'Bienvenue dans SUITE XIII', 'Pour démarrer : 🎬 <b>Projet XIII</b> › ＋ <b>Nouveau projet</b> répond à quelques questions et prépare les outils pour vous, avec un ordre de travail.'); return; }
+        if (APP === 'index') return; // pas de bulle d'astuce sur l'accueil (supprimée à la demande)
         if (typeof XTOUR === 'undefined') tip('open.' + APP, null, 'Bienvenue dans ' + NAME(), 'Des astuces apparaîtront au fil de votre travail, au moment où elles servent. La visite guidée complète reste dans ⚙️ › Aide.', tourBtn);
         // 2. outils communs (une seule fois pour toute la suite)
         setTimeout(() => tip('common.file', '#xb-file', 'Toujours au même endroit', 'Dans tous les outils : 💾 enregistrer, 📂 ouvrir, ⬇️ exporter le projet, 🖨️ <b>Exporter ▾</b> pour les PDF et tableaux, 📤 <b>Vers Suite XIII</b> pour envoyer à DOSSIER et aux autres outils.'), 2500);
