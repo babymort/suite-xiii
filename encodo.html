@@ -677,6 +677,15 @@ async function cachedBlobURL(url, type) {
     return URL.createObjectURL(new Blob([await r.arrayBuffer()], { type }));
 }
 function loadScript(src) { return new Promise((ok, ko) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = () => { s.remove(); ko(new Error('script ' + src)); }; document.head.appendChild(s); }); }
+async function loadCore(cdn, mt, fl) {
+    if (!window.FFmpegWASM) await loadScript(cdn + '@ffmpeg/ffmpeg@' + FF_VER + '/dist/umd/ffmpeg.js');
+    const core = cdn + '@ffmpeg/core' + mt + '@' + CORE_VER + '/dist/' + fl + '/', ff = new FFmpegWASM.FFmpeg();
+    ff.on('log', ({ message }) => onLog(message)); ff.on('progress', o => { LASTLOG = Date.now(); if (PROG) PROG(o); });
+    const opt = { classWorkerURL: await cachedBlobURL(cdn + '@ffmpeg/ffmpeg@' + FF_VER + '/dist/umd/814.ffmpeg.js', 'text/javascript'), coreURL: await cachedBlobURL(core + 'ffmpeg-core.js', 'text/javascript'), wasmURL: await cachedBlobURL(core + 'ffmpeg-core.wasm', 'application/wasm') };
+    if (mt) opt.workerURL = await cachedBlobURL(core + 'ffmpeg-core.worker.js', 'text/javascript');
+    await Promise.race([ff.load(opt), new Promise((_, ko) => setTimeout(() => ko(new Error('délai dépassé')), 90000))]);
+    return ff;
+}
 function engine() {
     if (FF) return Promise.resolve(FF); if (FFP) return FFP;
     FFP = (async () => {
@@ -687,13 +696,7 @@ function engine() {
         CDNS.forEach(cdn => { if (wantMT) tries.push([cdn, '-mt', 'esm']); tries.push([cdn, '', 'esm'], [cdn, '', 'umd']); });
         for (const [cdn, mt, fl] of tries) {
             try {
-                if (!window.FFmpegWASM) await loadScript(cdn + '@ffmpeg/ffmpeg@' + FF_VER + '/dist/umd/ffmpeg.js');
-                const core = cdn + '@ffmpeg/core' + mt + '@' + CORE_VER + '/dist/' + fl + '/';
-                const ff = new FFmpegWASM.FFmpeg();
-                ff.on('log', ({ message }) => onLog(message)); ff.on('progress', o => { LASTLOG = Date.now(); if (PROG) PROG(o); });
-                const opt = { classWorkerURL: await cachedBlobURL(cdn + '@ffmpeg/ffmpeg@' + FF_VER + '/dist/umd/814.ffmpeg.js', 'text/javascript'), coreURL: await cachedBlobURL(core + 'ffmpeg-core.js', 'text/javascript'), wasmURL: await cachedBlobURL(core + 'ffmpeg-core.wasm', 'application/wasm') };
-                if (mt) opt.workerURL = await cachedBlobURL(core + 'ffmpeg-core.worker.js', 'text/javascript');
-                await Promise.race([ff.load(opt), new Promise((_, ko) => setTimeout(() => ko(new Error('délai dépassé')), 90000))]);
+                const ff = await loadCore(cdn, mt, fl);
                 FF = ff; FF_MT = !!mt; eng('🟢 moteur prêt' + (mt ? ' · multicœur' : ''), 'ok'); onLog('ENCODO : moteur ' + (mt ? 'multicœur' : 'monocœur') + ' ' + fl + ' chargé depuis ' + cdn); return ff;
             } catch (e) { last = e; console.warn('ENCODO moteur', cdn, mt, fl, e); onLog('ENCODO : échec ' + (mt || 'st') + ' ' + fl + ' (' + (e && e.message || e) + ')'); }
         }
@@ -703,6 +706,34 @@ function engine() {
 }
 function resetEngine() { try { FF && FF.terminate(); } catch (e) { } FF = null; FFP = null; eng('⚪ moteur arrêté'); }
 let LOGCB = null;
+// multicœur : nombre de fils limité (au-delà de la réserve de fils du moteur, l'encodeur attend indéfiniment)
+function withThreads(a) { if (!FF_MT) return a; const T = String(prefs.mtThreads || 2), i = a.indexOf('-i'); const b = a.slice(); b.splice(i + 2, 0, '-threads', T, '-filter_threads', '1'); b.splice(i, 0, '-threads', T); return b; }
+// ---------- 🩺 diagnostic du multicœur ----------
+async function diagMT() {
+    const R = [], say = (ok, t) => { R.push((ok === true ? '✅ ' : ok === false ? '❌ ' : 'ℹ️ ') + t); show(); };
+    const ov = document.createElement('div'); ov.style.cssText = 'position:fixed;inset:0;z-index:10060;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;padding:16px';
+    ov.innerHTML = '<div style="background:var(--bg-panel);color:var(--text-main);border:1px solid var(--border-color);border-radius:14px;padding:18px;width:min(560px,100%);font:14px/1.5 \'Segoe UI\',sans-serif"><b style="font-size:16px">🩺 Diagnostic du moteur multicœur</b><div id="dg-r" style="margin:12px 0;white-space:pre-wrap;font-size:13px"></div><div style="text-align:right"><button id="dg-x" disabled>Fermer</button></div></div>';
+    document.body.appendChild(ov); const show = () => { ov.querySelector('#dg-r').textContent = R.join('\n'); };
+    const cores = navigator.hardwareConcurrency || 2;
+    say(self.crossOriginIsolated, 'Page isolée (en-têtes de sécurité COOP / COEP) : ' + (self.crossOriginIsolated ? 'oui' : 'non'));
+    say(typeof SharedArrayBuffer !== 'undefined', 'Mémoire partagée disponible : ' + (typeof SharedArrayBuffer !== 'undefined' ? 'oui' : 'non'));
+    say(null, 'Cœurs du processeur : ' + cores);
+    const W = 320, H = 240, N = 40, yuv = new Uint8Array(W * H * 1.5 * N); for (let i = 0; i < yuv.length; i++) yuv[i] = (i * 31 + (i >> 9)) & 255;
+    const test = async (ff, T, mt) => { await ff.writeFile('d.yuv', yuv); const a = ['-hide_banner', '-f', 'rawvideo', '-pix_fmt', 'yuv420p', '-s', W + 'x' + H, '-r', '25', '-i', 'd.yuv', ...(T ? ['-threads', String(T)] : []), '-c:v', 'libx264', '-preset', 'ultrafast', '-f', 'null', '-']; const t0 = performance.now(); const rc = await Promise.race([ff.exec(a), new Promise(r => setTimeout(() => r('timeout'), 20000))]); return rc === 'timeout' ? null : rc ? false : Math.round(performance.now() - t0); };
+    let st = null, best = null;
+    try { say(null, 'Test monocœur…'); const f1 = await loadCore(CDNS[0], '', 'esm'); st = await test(f1, 0, false); f1.terminate(); say(st != null && st !== false, 'Monocœur : ' + (st ? st + ' ms' : 'échec')); } catch (e) { say(false, 'Monocœur : ' + (e.message || e)); }
+    if (self.crossOriginIsolated && typeof SharedArrayBuffer !== 'undefined') {
+        for (const T of [...new Set([1, 2, 4, Math.min(8, cores)])]) {
+            let ff = null;
+            try { ff = await loadCore(CDNS[0], '-mt', 'esm'); const ms = await test(ff, T, true); say(!!ms, 'Multicœur ' + T + ' fil(s) : ' + (ms ? ms + ' ms' : ms === null ? 'bloqué (plus de 20 s)' : 'échec')); if (ms && (!best || ms < best.ms)) best = { T, ms }; }
+            catch (e) { say(false, 'Multicœur ' + T + ' fil(s) : ' + (e.message || e)); }
+            try { ff && ff.terminate(); } catch (e) { }
+        }
+    } else say(false, 'Multicœur impossible : la page n\'est pas isolée (navigateur non compatible ou en-têtes absents).');
+    if (best && (!st || best.ms < st * 0.9)) { prefs.mt = true; prefs.mtThreads = best.T; NO_MT = false; try { XSET.set('mt', true); XSET.set('mtThreads', String(best.T)); } catch (e) { } savePrefs(); resetEngine(); say(true, 'Multicœur activé avec ' + best.T + ' fil(s) (' + (st ? Math.round(st / best.ms * 10) / 10 + ' × plus rapide' : 'fonctionnel') + ').'); }
+    else { prefs.mt = false; try { XSET.set('mt', false); } catch (e) { } savePrefs(); resetEngine(); say(null, best ? 'Le multicœur fonctionne mais n\'est pas plus rapide ici : monocœur conservé.' : 'Monocœur conservé.'); }
+    onLog('ENCODO diagnostic : ' + R.join(' | ')); const x = ov.querySelector('#dg-x'); x.disabled = false; x.onclick = () => ov.remove();
+}
 let LASTLOG = 0, PROG = null;
 async function execW(ff, args, ms) { LASTLOG = Date.now(); let dog = null; const watch = new Promise((_, ko) => { dog = setInterval(() => { if (Date.now() - LASTLOG > ms) { clearInterval(dog); ko(new Error(FF_MT ? 'BLOQUE_MT' : 'Le moteur ne répond plus (aucune activité)')); } }, 1000); }); try { return await Promise.race([ff.exec(args), watch]); } finally { clearInterval(dog); } }
 function onLog(m) { LASTLOG = Date.now(); LOG.push(m); if (LOG.length > 400) LOG.splice(0, LOG.length - 400); if (LOGCB) LOGCB(m); const L = $('log'); if (L && SEL && CUR && CUR.id === SEL) { L.textContent = LOG.slice(-80).join('\n'); L.scrollTop = L.scrollHeight; } }
@@ -822,7 +853,7 @@ async function convAV(it, cat) {
             PROG = o => { if (D && o && o.time > 0) { const s = o.time / 1e6; it.pct = Math.max(it.pct, Math.min(99, ((p + Math.min(1, s / D)) / np) * 100)); tickRow(it); } else if (o && o.progress > 0 && o.progress <= 1) { it.pct = Math.max(it.pct, Math.min(99, ((p + o.progress) / np) * 100)); tickRow(it); } };
             it.stage = np > 1 ? 'passe ' + (p + 1) + '/' + np + '…' : 'encodage…'; tickRow(it); LASTLOG = Date.now(); let dog = null;
             const watch = new Promise((_, ko) => { dog = setInterval(() => { if (Date.now() - LASTLOG > (FF_MT ? 25000 : 120000)) { clearInterval(dog); ko(new Error(FF_MT ? 'BLOQUE_MT' : 'Le moteur ne répond plus (aucune activité depuis 2 min)')); } }, 2000); });
-            let rc; try { rc = await Promise.race([ff.exec(B.passes[p]), watch]); } finally { clearInterval(dog); LOGCB = null; PROG = null; }
+            let rc; try { rc = await Promise.race([ff.exec(withThreads(B.passes[p])), watch]); } finally { clearInterval(dog); LOGCB = null; PROG = null; }
             if (rc !== 0 && rc !== undefined) throw new Error('FFmpeg a échoué (code ' + rc + ') : ' + (LOG.slice(-6).filter(l => /error|invalid|unknown|not|fail/i.test(l)).pop() || LOG.slice(-1)[0] || 'voir le journal'));
         }
         const data = await ff.readFile(B.out); const mime = B.ext === 'png' ? 'image/png' : B.ext === 'gif' ? 'image/gif' : (cat === 'audio' ? 'audio/' : 'video/') + ({ mov: 'quicktime', mkv: 'x-matroska', m4a: 'mp4', mp3: 'mpeg', ts: 'mp2t', mpg: 'mpeg' }[B.ext] || B.ext);
@@ -912,10 +943,10 @@ function savePreset() { const n = prompt('Nom du préréglage :', ''); if (!n) r
 function delPreset() { const v = prefs.preset[prefs.cat]; if (!v.startsWith('u:')) return; try { localStorage.setItem(KEY_USER, JSON.stringify(userPresets().filter(p => 'u:' + p.id !== v))); } catch (e) { } prefs.preset[prefs.cat] = PRESETS[prefs.cat][0][0]; savePrefs(); fillPresets(); renderSide(); toast('Préréglage supprimé'); }
 function render() { renderQueue(); renderSide(); }
 function statusTxt(it) { if (it.status === 'run' && !it.pct && it.stage) return '⏳ ' + it.stage; if (it.status === 'run') { const el = (Date.now() - (it.t0 || Date.now())) / 1000, rest = it.pct > 2 ? el * (100 - it.pct) / it.pct : 0; return '⏳ ' + Math.round(it.pct) + ' %' + (it.speed ? ' · ×' + it.speed.toFixed(2) : '') + (rest > 1 ? ' · reste ≈ ' + fmtDur(rest) : ''); } if (it.status === 'done') return '✅ Converti' + (it.outs.length ? ' · ' + (it.outs.length > 1 ? it.outs.length + ' fichiers · ' : '') + fmtSize(it.outs.reduce((a, o) => a + o.blob.size, 0)) : ''); if (it.status === 'err') return '⚠️ ' + it.err; return fits(it) ? 'En attente' : '— ignoré dans cette catégorie'; }
-function tickRow(it) { const r = document.querySelector('.qi[data-id="' + it.id + '"]'); if (!r) return; const b = r.querySelector('.pb i'); if (b) b.style.width = it.pct + '%'; const s = r.querySelector('.st'); if (s) s.textContent = statusTxt(it); stats(); }
+function tickRow(it) { pub(); const r = document.querySelector('.qi[data-id="' + it.id + '"]'); if (!r) return; const b = r.querySelector('.pb i'); if (b) b.style.width = it.pct + '%'; const s = r.querySelector('.st'); if (s) s.textContent = statusTxt(it); stats(); }
 function renderQueue() {
-    const c = $('content'); stats();
-    if (!Q.length) { c.innerHTML = '<div class="drop" id="drop"><div class="big">📥</div><b>Glissez vos fichiers ici</b>ou cliquez pour les choisir<br><br><span class="hint">Vidéos (MP4, MOV, MKV, MXF, AVI, WebM…), sons (WAV, MP3, AAC, FLAC…), images (PNG, JPEG, WebP, HEIC, TIFF…) et PDF.<br>Tout est converti sur votre ordinateur : rien n\'est envoyé sur internet.</span></div>'; $('drop').onclick = () => $('files-in').click(); return; }
+    const c = $('content'); stats(); pub(true);
+    if (!Q.length) { c.innerHTML = '<div class="drop" id="drop"><div class="big">📥</div><b>Glissez vos fichiers ici</b>ou cliquez pour les choisir<br><br><span class="hint">Vidéos (MP4, MOV, MKV, MXF, AVI, WebM…), sons (WAV, MP3, AAC, FLAC…), images (PNG, JPEG, WebP, HEIC, TIFF…) et PDF.<br>Tout est converti sur votre ordinateur : rien n\'est envoyé sur internet.<br>🔄 La conversion continue si vous passez dans un autre outil : suivez-la avec l\'onglet du bord droit (gardez cette page ouverte).</span></div>'; $('drop').onclick = () => $('files-in').click(); return; }
     c.innerHTML = '<div class="q">' + Q.map(it => { const inf = it.info, meta = [KIND_ICO[it.kind] + ' ' + (extOf(it.name) || '?').toUpperCase(), fmtSize(it.size), inf.dur ? fmtDur(inf.dur) : '', inf.w ? inf.w + ' × ' + inf.h : '', inf.vc || '', inf.fps ? inf.fps + ' i/s' : '', fits(it) && estimate(it, prefs.cat) ? '→ ' + estimate(it, prefs.cat) : ''].filter(Boolean).join(' · ');
         return '<div class="qi' + (it.id === SEL ? ' sel' : '') + '" data-id="' + it.id + '" style="' + (fits(it) ? '' : 'opacity:.5') + '"><div class="th" style="' + (it.thumb ? 'background-image:url(' + it.thumb + ')' : '') + '">' + (it.thumb ? '' : KIND_ICO[it.kind]) + '</div><div><div class="nm">' + esc(it.name) + '</div><div class="mt">' + esc(meta) + '</div><div class="pb"><i style="width:' + it.pct + '%"></i></div><div class="st ' + ({ run: 'run', done: 'ok', err: 'err' }[it.status] || '') + '">' + esc(statusTxt(it)) + '</div></div><div class="ac">' + (it.status === 'done' || it.status === 'err' ? '<button data-re="' + it.id + '" title="Reconvertir avec les réglages actuels">🔁</button>' : '') + '<button data-rm="' + it.id + '" title="Retirer de la file">✕</button></div>' + (it.outs.length ? '<div class="outs">' + it.outs.slice(0, 40).map((o, i) => '<a href="#" data-dl="' + it.id + ':' + i + '">⬇️ ' + esc(o.name) + ' · ' + fmtSize(o.blob.size) + '</a>').join('') + (it.outs.length > 40 ? '<span class="hint">+ ' + (it.outs.length - 40) + ' (Tout télécharger)</span>' : '') + '</div>' : '') + '</div>'; }).join('') + '</div><p class="hint" style="margin-top:14px">➕ Glissez d\'autres fichiers à tout moment. Les réglages à droite s\'appliquent à toute la file.</p>';
     c.querySelectorAll('.qi').forEach(r => r.onclick = e => { if (e.target.closest('button,a')) return; SEL = r.dataset.id; renderQueue(); renderSide(); });
@@ -976,6 +1007,13 @@ function renderSide() {
     s.innerHTML = h;
     s.querySelectorAll('[data-k]').forEach(el => { const k = el.dataset.k, ev = el.type === 'range' ? 'input' : 'change'; el.addEventListener(ev, () => { let v = el.type === 'checkbox' ? el.checked : el.type === 'number' || el.type === 'range' ? +el.value : el.value; CFG[cat][k] = v; if (k === 'vcodec') { const V = VCODECS[v]; CFG[cat].prof = V.prof ? V.prof[v === 'prores' ? 2 : 1][0] : ''; if (!V.cont.includes(CFG[cat].cont)) CFG[cat].cont = V.cont[0]; if (V.cont[0] !== 'gif' && !(AUD_OK[CFG[cat].cont] || []).includes(CFG[cat].acodec)) CFG[cat].acodec = AUD_OK[CFG[cat].cont][0]; } if (k === 'cont' && !(AUD_OK[v] || []).includes(CFG[cat].acodec)) CFG[cat].acodec = AUD_OK[v][0]; if (el.type === 'range') { const sh = s.querySelector('[data-show="' + k + '"]'); if (sh) sh.textContent = k === 'q' && cat === 'video' ? qShow(v) : v + (cat !== 'video' ? ' %' : ''); } savePrefs(); if (el.type !== 'range' && el.type !== 'text' || ['vcodec', 'rc', 'res', 'crop', 'acodec', 'fmt', 'op', 'cont'].includes(k)) { renderSide(); renderQueue(); } }); if (el.type === 'range') el.addEventListener('change', () => renderQueue()); });
 }
+// ---------- 🔄 suivi depuis les autres outils (onglet du bord droit) ----------
+let BC = null, pubT = 0;
+function pub(force) { if (!force && Date.now() - pubT < 900) return; pubT = Date.now(); const files = Q.flatMap(x => (x.outs || []).map((o, i) => ({ name: o.name, k: x.id + ':' + i }))); const st = { at: Date.now(), run: RUN, n: Q.filter(fits).length, done: Q.filter(x => x.status === 'done').length, cur: CUR ? { name: CUR.name, pct: CUR.pct, txt: statusTxt(CUR).replace(/^⏳ /, '') } : null, files }; try { localStorage.setItem('xiii.encodo.job', JSON.stringify(st)); } catch (e) { } try { BC && BC.postMessage({ t: 'job', s: st }); } catch (e) { } }
+function dlKey(k) { const [id, i] = String(k).split(':'), it = Q.find(x => x.id === id); if (it && it.outs[+i]) dl(it.outs[+i]); }
+try { BC = new BroadcastChannel('xiii-encodo'); BC.onmessage = e => { if (e.data && e.data.t === 'dl') dlKey(e.data.k); }; } catch (e) { }
+addEventListener('storage', e => { if (e.key === 'xiii.encodo.req') { try { const r = JSON.parse(e.newValue); if (r && r.t === 'dl' && Date.now() - r.at < 5000) dlKey(r.k); } catch (er) { } } });
+setInterval(() => { if (RUN) pub(true); }, 3000);
 // ---------- démarrage ----------
 function init() {
     loadPrefs(); $('preset').onchange = e => applyPreset(e.target.value);
@@ -984,6 +1022,7 @@ function init() {
     addEventListener('paste', e => { const f = [...(e.clipboardData && e.clipboardData.files || [])]; if (f.length) addFiles(f); });
     addEventListener('keydown', e => { if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); runQueue(); } });
     addEventListener('beforeunload', e => { if (RUN || Q.some(x => x.outs.length)) { e.preventDefault(); e.returnValue = ''; } });
+    window.name = 'xiii-encodo'; $('en-eng').style.cursor = 'pointer'; $('en-eng').title = 'Moteur de conversion — cliquer pour le diagnostic du multicœur'; $('en-eng').onclick = () => { if (RUN) toast('Attendez la fin de la conversion'); else diagMT(); };
     setCat(prefs.cat, true); render();
     if (self.crossOriginIsolated) eng('⚪ moteur prêt à charger · multicœur possible');
 }
@@ -1832,7 +1871,7 @@ var XRED = (function () {
 (function () {
     if (typeof XSET === 'undefined' || typeof prefs === 'undefined' || typeof CFG === 'undefined') return;
     function apply(S, keys) {
-        prefs.suffix = S.suffix != null ? S.suffix : '_encodo'; prefs.keepName = !!S.keepName; prefs.autoDl = !!S.autoDl; prefs.mt = S.mt === true;
+        prefs.suffix = S.suffix != null ? S.suffix : '_encodo'; prefs.keepName = !!S.keepName; prefs.autoDl = !!S.autoDl; prefs.mt = S.mt === true; prefs.mtThreads = +S.mtThreads || prefs.mtThreads || 2;
         if (!keys && S.cat && !localStorage.getItem('encodoXIII.prefs')) setCat(S.cat, true);
         try { savePrefs(); renderQueue(); } catch (e) { }
     }
@@ -1846,8 +1885,8 @@ var XRED = (function () {
                 { k: 'autoDl', label: 'Télécharger automatiquement chaque fichier converti', type: 'toggle', def: false },
                 { k: 'cat', label: 'Catégorie à l\'ouverture', type: 'select', options: [['video', 'Vidéo'], ['audio', 'Audio'], ['image', 'Image'], ['doc', 'PDF']], def: 'video' }] },
             { id: 'eng', icon: '🧠', title: 'Moteur', desc: 'FFmpeg en WebAssembly, téléchargé une fois (≈ 30 Mo) puis gardé en cache.', fields: [
-                { k: 'mt', label: 'Multicœur (expérimental, plus rapide mais peut se bloquer)', type: 'toggle', def: false }],
-              actions: [{ label: '🗑️ Vider le cache du moteur', run: async () => { try { await caches.delete('encodo-xiii-v1'); resetEngine(); toast('Cache du moteur vidé'); } catch (e) { } } },
+                { k: 'mt', label: 'Multicœur (lancez d\'abord le diagnostic)', type: 'toggle', def: false }, { k: 'mtThreads', label: 'Nombre de fils en multicœur', type: 'select', options: [['1', '1'], ['2', '2'], ['4', '4'], ['8', '8']], def: '2' }],
+              actions: [{ label: '🩺 Diagnostic du multicœur', run: ({ close }) => { close && close(); diagMT(); } }, { label: '🗑️ Vider le cache du moteur', run: async () => { try { await caches.delete('encodo-xiii-v1'); resetEngine(); toast('Cache du moteur vidé'); } catch (e) { } } },
                         { label: '🗑️ Supprimer mes préréglages', danger: true, run: () => { localStorage.removeItem('encodoXIII.presets'); fillPresets(); toast('Préréglages supprimés'); } }] }
         ],
         apply
@@ -3418,6 +3457,49 @@ const XSPACE = (() => {
     if (typeof XBOOT !== 'undefined') XBOOT.ready(start, 3500); else addEventListener('load', () => setTimeout(start, 600));
     return { fix };
 })();
+
+// =====================================================================
+//  SUITE XIII — XENC : suivi des conversions ENCODO depuis tous les outils
+//  Pendant qu'ENCODO convertit (dans son onglet / sa fenêtre), un petit onglet apparaît sur le bord droit
+//  de l'écran, sous le panier : fichier en cours, pourcentage, temps restant, fichiers terminés à télécharger.
+// =====================================================================
+const XENC = (() => {
+    const K = 'xiii.encodo.job', esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    let S = null, open = false, bc = null;
+    const get = () => { try { return JSON.parse(localStorage.getItem(K)); } catch (e) { return null; } };
+    function css() { if (document.getElementById('xenc-css')) return; const st = document.createElement('style'); st.id = 'xenc-css'; st.textContent =
+        '#xenc-tab{position:fixed;right:0;top:calc(46% + 70px);z-index:10100;writing-mode:vertical-rl;padding:10px 5px;border-radius:10px 0 0 10px;border:1px solid rgba(240,179,120,.6);border-right:0;background:var(--bg-menu,#232327);color:#fff;cursor:pointer;font:600 12px "Segoe UI",sans-serif;box-shadow:-4px 4px 16px rgba(0,0,0,.4);display:flex;gap:6px;align-items:center}#xenc-tab b{color:#f0b378}#xenc-tab.done b{color:#81c784}' +
+        '#xenc-p{position:fixed;right:34px;top:calc(46% + 20px);z-index:10101;width:320px;max-width:calc(100vw - 50px);background:var(--bg-menu,#232327);color:var(--text-main,#eee);border:1px solid rgba(240,179,120,.6);border-radius:14px;padding:14px;box-shadow:-8px 10px 30px rgba(0,0,0,.5);font:13px/1.45 "Segoe UI",system-ui,sans-serif}' +
+        '#xenc-p .bar{height:7px;border-radius:4px;background:rgba(127,127,127,.25);overflow:hidden;margin:8px 0}#xenc-p .bar i{display:block;height:100%;background:linear-gradient(90deg,#ffcf5c,#f0a429)}#xenc-p .f{display:flex;gap:8px;align-items:center;padding:4px 0;border-top:1px solid rgba(127,127,127,.2)}#xenc-p .f span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}#xenc-p button{font:inherit;font-size:12px;padding:4px 9px;border-radius:8px;cursor:pointer;background:rgba(240,179,120,.15);border:1px solid rgba(240,179,120,.5);color:inherit}#xenc-p small{color:var(--text-dim,#999)}';
+        document.head.appendChild(st); }
+    function draw() {
+        const live = S && Date.now() - (S.at || 0) < 15000, recent = S && S.files && S.files.length && Date.now() - (S.at || 0) < 30 * 60000;
+        let t = document.getElementById('xenc-tab'), p = document.getElementById('xenc-p');
+        if (!S || !(live && S.run) && !recent) { if (t) t.remove(); if (p) p.remove(); return; }
+        css(); const run = live && S.run, pct = S.cur ? Math.round(S.cur.pct || 0) : 100;
+        if (!t) { t = document.createElement('div'); t.id = 'xenc-tab'; t.title = 'Conversions ENCODO'; t.onclick = () => { open = !open; draw(); }; document.body.appendChild(t); }
+        t.className = run ? '' : 'done'; t.innerHTML = '🔄 <b>' + (run ? pct + ' %' : '✓ ' + S.files.length) + '</b>';
+        if (!open) { if (p) p.remove(); return; }
+        if (!p) { p = document.createElement('div'); p.id = 'xenc-p'; document.body.appendChild(p); }
+        p.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center"><b>🔄 ENCODO</b><button data-x>✕</button></div>' +
+            (run && S.cur ? '<div style="margin-top:8px"><div style="font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(S.cur.name) + '</div><div class="bar" style="display:block"><i style="width:' + pct + '%"></i></div><small>' + esc(S.cur.txt || '') + ' · ' + S.done + ' / ' + S.n + ' fichier(s)</small></div>' : S.run && !live ? '<p><small>⚠️ ENCODO ne répond plus : sa page a peut-être été fermée.</small></p>' : '<p><small>✅ Conversions terminées.</small></p>') +
+            (S.files.length ? '<div style="margin-top:8px">' + S.files.slice(-8).map(f => '<div class="f"><span title="' + esc(f.name) + '">' + esc(f.name) + '</span><button data-dl="' + esc(f.k) + '">⬇️</button></div>').join('') + '</div>' : '') +
+            '<div style="margin-top:10px;text-align:right"><button data-o>Ouvrir ENCODO ↗</button></div>';
+        p.querySelector('[data-x]').onclick = () => { open = false; draw(); };
+        p.querySelector('[data-o]').onclick = () => { const w = window.open('encodo.html', 'xiii-encodo'); try { w && w.focus(); } catch (e) { } };
+        p.querySelectorAll('[data-dl]').forEach(b => b.onclick = () => { if (bc) bc.postMessage({ t: 'dl', k: b.dataset.dl }); else { try { localStorage.setItem('xiii.encodo.req', JSON.stringify({ t: 'dl', k: b.dataset.dl, at: Date.now() })); } catch (e) { } } });
+    }
+    function init(app) {
+        if (app === 'encodo') return; S = get();
+        try { bc = new BroadcastChannel('xiii-encodo'); bc.onmessage = e => { if (e.data && e.data.t === 'job') { S = e.data.s; draw(); } }; } catch (e) { }
+        addEventListener('storage', e => { if (e.key === K) { S = get(); draw(); } });
+        setInterval(() => { S = get() || S; draw(); }, 5000);
+        const go = () => draw(); if (typeof XBOOT !== 'undefined') XBOOT.ready(go, 3000); else addEventListener('load', go);
+    }
+    return { init };
+})();
+
+XENC.init('encodo');
 
 // =====================================================================
 //  SUITE XIII — XERR : 🩺 journal des erreurs (anonyme)

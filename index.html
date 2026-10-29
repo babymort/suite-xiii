@@ -3114,6 +3114,49 @@ const XSPACE = (() => {
 })();
 
 // =====================================================================
+//  SUITE XIII — XENC : suivi des conversions ENCODO depuis tous les outils
+//  Pendant qu'ENCODO convertit (dans son onglet / sa fenêtre), un petit onglet apparaît sur le bord droit
+//  de l'écran, sous le panier : fichier en cours, pourcentage, temps restant, fichiers terminés à télécharger.
+// =====================================================================
+const XENC = (() => {
+    const K = 'xiii.encodo.job', esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    let S = null, open = false, bc = null;
+    const get = () => { try { return JSON.parse(localStorage.getItem(K)); } catch (e) { return null; } };
+    function css() { if (document.getElementById('xenc-css')) return; const st = document.createElement('style'); st.id = 'xenc-css'; st.textContent =
+        '#xenc-tab{position:fixed;right:0;top:calc(46% + 70px);z-index:10100;writing-mode:vertical-rl;padding:10px 5px;border-radius:10px 0 0 10px;border:1px solid rgba(240,179,120,.6);border-right:0;background:var(--bg-menu,#232327);color:#fff;cursor:pointer;font:600 12px "Segoe UI",sans-serif;box-shadow:-4px 4px 16px rgba(0,0,0,.4);display:flex;gap:6px;align-items:center}#xenc-tab b{color:#f0b378}#xenc-tab.done b{color:#81c784}' +
+        '#xenc-p{position:fixed;right:34px;top:calc(46% + 20px);z-index:10101;width:320px;max-width:calc(100vw - 50px);background:var(--bg-menu,#232327);color:var(--text-main,#eee);border:1px solid rgba(240,179,120,.6);border-radius:14px;padding:14px;box-shadow:-8px 10px 30px rgba(0,0,0,.5);font:13px/1.45 "Segoe UI",system-ui,sans-serif}' +
+        '#xenc-p .bar{height:7px;border-radius:4px;background:rgba(127,127,127,.25);overflow:hidden;margin:8px 0}#xenc-p .bar i{display:block;height:100%;background:linear-gradient(90deg,#ffcf5c,#f0a429)}#xenc-p .f{display:flex;gap:8px;align-items:center;padding:4px 0;border-top:1px solid rgba(127,127,127,.2)}#xenc-p .f span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}#xenc-p button{font:inherit;font-size:12px;padding:4px 9px;border-radius:8px;cursor:pointer;background:rgba(240,179,120,.15);border:1px solid rgba(240,179,120,.5);color:inherit}#xenc-p small{color:var(--text-dim,#999)}';
+        document.head.appendChild(st); }
+    function draw() {
+        const live = S && Date.now() - (S.at || 0) < 15000, recent = S && S.files && S.files.length && Date.now() - (S.at || 0) < 30 * 60000;
+        let t = document.getElementById('xenc-tab'), p = document.getElementById('xenc-p');
+        if (!S || !(live && S.run) && !recent) { if (t) t.remove(); if (p) p.remove(); return; }
+        css(); const run = live && S.run, pct = S.cur ? Math.round(S.cur.pct || 0) : 100;
+        if (!t) { t = document.createElement('div'); t.id = 'xenc-tab'; t.title = 'Conversions ENCODO'; t.onclick = () => { open = !open; draw(); }; document.body.appendChild(t); }
+        t.className = run ? '' : 'done'; t.innerHTML = '🔄 <b>' + (run ? pct + ' %' : '✓ ' + S.files.length) + '</b>';
+        if (!open) { if (p) p.remove(); return; }
+        if (!p) { p = document.createElement('div'); p.id = 'xenc-p'; document.body.appendChild(p); }
+        p.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center"><b>🔄 ENCODO</b><button data-x>✕</button></div>' +
+            (run && S.cur ? '<div style="margin-top:8px"><div style="font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(S.cur.name) + '</div><div class="bar" style="display:block"><i style="width:' + pct + '%"></i></div><small>' + esc(S.cur.txt || '') + ' · ' + S.done + ' / ' + S.n + ' fichier(s)</small></div>' : S.run && !live ? '<p><small>⚠️ ENCODO ne répond plus : sa page a peut-être été fermée.</small></p>' : '<p><small>✅ Conversions terminées.</small></p>') +
+            (S.files.length ? '<div style="margin-top:8px">' + S.files.slice(-8).map(f => '<div class="f"><span title="' + esc(f.name) + '">' + esc(f.name) + '</span><button data-dl="' + esc(f.k) + '">⬇️</button></div>').join('') + '</div>' : '') +
+            '<div style="margin-top:10px;text-align:right"><button data-o>Ouvrir ENCODO ↗</button></div>';
+        p.querySelector('[data-x]').onclick = () => { open = false; draw(); };
+        p.querySelector('[data-o]').onclick = () => { const w = window.open('encodo.html', 'xiii-encodo'); try { w && w.focus(); } catch (e) { } };
+        p.querySelectorAll('[data-dl]').forEach(b => b.onclick = () => { if (bc) bc.postMessage({ t: 'dl', k: b.dataset.dl }); else { try { localStorage.setItem('xiii.encodo.req', JSON.stringify({ t: 'dl', k: b.dataset.dl, at: Date.now() })); } catch (e) { } } });
+    }
+    function init(app) {
+        if (app === 'encodo') return; S = get();
+        try { bc = new BroadcastChannel('xiii-encodo'); bc.onmessage = e => { if (e.data && e.data.t === 'job') { S = e.data.s; draw(); } }; } catch (e) { }
+        addEventListener('storage', e => { if (e.key === K) { S = get(); draw(); } });
+        setInterval(() => { S = get() || S; draw(); }, 5000);
+        const go = () => draw(); if (typeof XBOOT !== 'undefined') XBOOT.ready(go, 3000); else addEventListener('load', go);
+    }
+    return { init };
+})();
+
+XENC.init('index');
+
+// =====================================================================
 //  SUITE XIII — XERR : 🩺 journal des erreurs (anonyme)
 //  Les erreurs JavaScript rencontrées par les utilisateurs sont envoyées, sans aucune donnée de projet ni
 //  identité : outil, message tronqué, fichier:ligne, navigateur (court), beta / public. 5 au plus par page,
