@@ -3637,6 +3637,30 @@ const XWAIT = (() => {
 })();
 
 // =====================================================================
+//  SUITE XIII — XSPACE : espacement régulier des boutons (Phase O)
+//  Repère les boutons collés côte à côte (écart < 3 px) et leur ajoute un léger espace (6 px),
+//  dans tous les outils, y compris quand les barres changent. Les groupes volontairement soudés
+//  (onglets, sélecteurs segmentés) ne sont pas touchés.
+// =====================================================================
+(function () {
+    const SKIP = 'nav,[role=tablist],.tabs,.seg,.segmented,.btn-group,.xs-seg,#xh-nav,#tb,.ctx-menu,.dp-vers';
+    function fix() {
+        const bs = [...document.querySelectorAll('button,.btn,select')].filter(b => !b.closest(SKIP) && b.offsetParent);
+        const R = bs.map(b => b.getBoundingClientRect());
+        for (let i = 0; i < bs.length; i++) {
+            const a = R[i]; if (a.width < 4) continue;
+            for (let j = 0; j < bs.length; j++) {
+                if (i === j || bs[j].dataset.xsp) continue; const d = R[j];
+                if (Math.abs(a.top - d.top) < 3 && Math.abs(a.height - d.height) < 8) { const g = d.left - a.right; if (g > -1 && g < 2.5 && !bs[i].contains(bs[j]) && !bs[j].contains(bs[i])) { bs[j].style.marginLeft = (parseFloat(getComputedStyle(bs[j]).marginLeft) || 0) + 6 + 'px'; bs[j].dataset.xsp = '1'; } }
+            }
+        }
+    }
+    let t = null; const go = () => { clearTimeout(t); t = setTimeout(fix, 250); };
+    const start = () => { fix(); new MutationObserver(go).observe(document.body, { childList: true, subtree: true }); addEventListener('resize', go); };
+    if (typeof XBOOT !== 'undefined') XBOOT.ready(start, 3500); else addEventListener('load', () => setTimeout(start, 600));
+})();
+
+// =====================================================================
 //  SUITE XIII — XERR : 🩺 journal des erreurs (anonyme)
 //  Les erreurs JavaScript rencontrées par les utilisateurs sont envoyées, sans aucune donnée de projet ni
 //  identité : outil, message tronqué, fichier:ligne, navigateur (court), beta / public. 5 au plus par page,
