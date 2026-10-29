@@ -776,8 +776,8 @@ function newTab(name) { return { id: uid(), name, items: [], view: { x: 300, y: 
 function newProject() {
     return {
         name: '', author: '', tabs: [newTab('Plan 1')], active: 0,
-        settings: { snap: true, snapStep: 5, labelSize: 16, showPower: true, showKelvin: true, showDmx: false },
-        layers: { grid: true, bg: true, zones: true, walls: true, beams: true, fov: true, labels: true, annot: true, legend: true, minimap: true }
+        settings: { snap: true, snapStep: 5, labelSize: 16, showPower: true, showKelvin: true, showDmx: false, bounces: 2 },
+        layers: { grid: true, bg: true, zones: true, walls: true, beams: true, bounce: true, fov: true, labels: true, annot: true, legend: true, minimap: true }
     };
 }
 const tab = () => P.tabs[P.active];
@@ -852,6 +852,82 @@ function beamSVG(it) {
         s += `<line x1="0" y1="${fx(y0)}" x2="0" y2="${fx(y0 - L)}" stroke="${sc}" stroke-opacity="${fx(0.45 * Math.max(0.35, k))}" stroke-width="1" stroke-dasharray="2 6" vector-effect="non-scaling-stroke"/>`;
     }
     return `<g transform="translate(${fx(it.x)} ${fx(it.y)}) rotate(${fx(it.rot || 0)})">${s}</g>`;
+}
+
+// ---------- ✨ Lumière indirecte : rebonds des faisceaux sur les surfaces ----------
+// Chaque mur (et chaque objet réfléchissant : réflecteur, toile, poly…) a une réflexion (0 à 1) et une diffusion
+// (0 = miroir, 1 = mat). Des rayons partent de chaque projecteur ; à chaque surface touchée, une lueur douce
+// (couleur du projecteur teintée par la surface) apparaît côté éclairé, et un rayon réfléchi repart (P.settings.bounces rebonds).
+const REFL_RX = /r[ée]flect|toile|diffus|frost|polys|poly\b|borniol|butterfly|skylite|bounce|drapeau/i;
+function reflDefault(it) { return it.kind === 'wall' ? 0.3 : (REFL_RX.test((it.name || '') + ' ' + ((libById(it.ref) || {}).name || '')) ? 0.8 : 0); }
+function reflSurfaces(arr) {
+    const S = [];
+    for (const it of arr) {
+        if (it.kind === 'wall' && P.layers.walls) {
+            const r = Math.max(0, it.refl ?? reflDefault(it)); const pts = it.pts, n = pts.length;
+            for (let i = 0; i < (it.closed ? n : n - 1); i++) { const a = pts[i], b = pts[(i + 1) % n]; S.push({ id: it.id + ':' + i, a, b, r, d: it.diff ?? 0.7, col: it.color || '#b4b4b4', off: (it.thick || 0) / 2 }); }
+        } else if (it.kind === 'obj') {
+            const r = it.refl ?? reflDefault(it); if (r <= 0) continue;
+            const c = [[-1, -1], [1, -1], [1, 1], [-1, 1]].map(([x, y]) => { const [wx, wy] = rot(x * it.w / 2, y * it.h / 2, it.rot || 0); return [it.x + wx, it.y + wy]; });
+            for (let i = 0; i < 4; i++) S.push({ id: it.id + ':' + i, a: c[i], b: c[(i + 1) % 4], r, d: it.diff ?? 0.9, col: it.color || '#ffffff', off: 0, own: it.id });
+        }
+    }
+    return S;
+}
+function rayHit(ox, oy, dx, dy, S, skip) {
+    let best = null;
+    for (const s of S) {
+        if (s.id === skip) continue;
+        const ex = s.b[0] - s.a[0], ey = s.b[1] - s.a[1], den = dx * ey - dy * ex; if (Math.abs(den) < 1e-9) continue;
+        const qx = s.a[0] - ox, qy = s.a[1] - oy, t = (qx * ey - qy * ex) / den, u = (qx * dy - qy * dx) / den;
+        if (t > 0.5 && u >= 0 && u <= 1 && (!best || t < best.t)) best = { t, u, s };
+    }
+    return best;
+}
+// faisceau direct arrêté par les murs et les surfaces (polygone en coordonnées du plan, ou null si rien ne l'arrête)
+function beamClip(it, S) {
+    const Lp = it.L, L = Math.max(10, Lp.throw), a = clamp(Lp.angle, 1, 360), full = a >= 359, y0 = beamOrigin(it, a), [ox0, oy0] = rot(0, y0, it.rot || 0);
+    const ox = it.x + ox0, oy = it.y + oy0, A = full ? 360 : Math.min(359, a * 1.4), N = Math.round(clamp(A / 0.75, 24, 480)); let hit = false; const pts = full ? [] : [[ox, oy]];
+    for (let i = 0; i <= N - (full ? 1 : 0); i++) {
+        const t = full ? (i / N) * 360 : -A / 2 + A * i / N, [dx, dy] = rot(Math.sin(t * DEG), -Math.cos(t * DEG), it.rot || 0);
+        const h = rayHit(ox, oy, dx, dy, S.filter(s => s.own !== it.id), null), d = h && h.t < L * 1.05 ? (hit = true, h.t) : L * 1.08;
+        pts.push([ox + dx * d, oy + dy * d]);
+    }
+    return hit ? pts : null;
+}
+function mixHex(a, b, k) { const A = hexToRgb(a), B = hexToRgb(b); return rgbToHex(A[0] + (B[0] - A[0]) * k, A[1] + (B[1] - A[1]) * k, A[2] + (B[2] - A[2]) * k); }
+function indirectSVG(arr) {
+    const S = reflSurfaces(arr); if (!S.length) return '';
+    const NB = clamp(P.settings.bounces ?? 2, 1, 3), G = new Map();
+    for (const it of arr) {
+        if (it.kind !== 'light' || !it.L.show) continue;
+        const Lp = it.L, k = clamp(Lp.intensity, 0, 100) / 100, L = Math.max(10, Lp.throw), a = clamp(Lp.angle, 1, 360); if (k <= 0) continue;
+        const col = lightColor(it), y0 = beamOrigin(it, a), [ox0, oy0] = rot(0, y0, it.rot || 0), N = Math.round(clamp(a / 1.5, 16, 140));
+        for (let i = 0; i < N; i++) {
+            const t = a >= 359 ? (i / N) * 360 : -a / 2 + a * (i + 0.5) / N, [dx0, dy0] = rot(Math.sin(t * DEG), -Math.cos(t * DEG), it.rot || 0);
+            let ox = it.x + ox0, oy = it.y + oy0, dx = dx0, dy = dy0, rem = L, e = k, skip = null, c = col;
+            for (let b = 0; b < NB && rem > 5 && e > 0.02; b++) {
+                const h = rayHit(ox, oy, dx, dy, S, skip); if (!h || h.t >= rem || h.s.own === it.id) break;
+                if (h.s.r <= 0) break; const s = h.s, hx = ox + dx * h.t, hy = oy + dy * h.t, ex = s.b[0] - s.a[0], ey = s.b[1] - s.a[1], len = Math.hypot(ex, ey) || 1;
+                let nx = -ey / len, ny = ex / len; if (nx * dx + ny * dy > 0) { nx = -nx; ny = -ny; }
+                const recv = e * (1 - h.t / rem) * (b ? 1 : 0.85), out = recv * s.r, cc = mixHex(c, s.col, 0.3), key = s.id + '|' + it.id + '|' + b + '|' + (nx > 0 ? 1 : 0) + (ny > 0 ? 1 : 0);
+                let g = G.get(key); if (!g) G.set(key, g = { s, nx, ny, ux: ex / len, uy: ey / len, n: 0, e: 0, rem: 0, u0: 1e9, u1: -1e9, col: cc });
+                const pu = (hx - s.a[0]) * g.ux + (hy - s.a[1]) * g.uy; g.n++; g.e += out; g.rem += (rem - h.t); g.u0 = Math.min(g.u0, pu); g.u1 = Math.max(g.u1, pu);
+                // rayon réfléchi : miroir mélangé à la normale selon la diffusion
+                const dn = dx * nx + dy * ny; let rx = dx - 2 * dn * nx, ry = dy - 2 * dn * ny; rx = rx * (1 - s.d) + nx * s.d; ry = ry * (1 - s.d) + ny * s.d; const rl = Math.hypot(rx, ry) || 1;
+                ox = hx; oy = hy; dx = rx / rl; dy = ry / rl; rem = (rem - h.t) * s.r * (1 - 0.4 * s.d); e = out; skip = s.id; c = cc;
+            }
+        }
+    }
+    let out = '', gi = 0;
+    for (const g of G.values()) {
+        const s = g.s, eA = g.e / g.n, cover = Math.min(1, g.n / 6), op = clamp(eA * 4.5 * (0.55 + 0.45 * cover), 0, 0.85); if (op < 0.025) continue;
+        const remA = g.rem / g.n, R = Math.max(40, remA * (0.25 + 0.5 * s.r) * (0.5 + 0.5 * s.d)), span = Math.max(0, g.u1 - g.u0);
+        const um = (g.u0 + g.u1) / 2, cx = s.a[0] + g.ux * um + g.nx * s.off, cy = s.a[1] + g.uy * um + g.ny * s.off;
+        const ax = span / 2 + R * (0.35 + 0.5 * s.d), by = R * (0.55 + 0.45 * s.d), id = 'ind' + (gi++);
+        out += `<g transform="matrix(${fx(g.ux * ax)} ${fx(g.uy * ax)} ${fx(g.nx * by)} ${fx(g.ny * by)} ${fx(cx)} ${fx(cy)})"><defs><radialGradient id="${id}" gradientUnits="userSpaceOnUse" cx="0" cy="0" r="1"><stop offset="0" stop-color="${g.col}" stop-opacity="${fx(op)}"/><stop offset="0.5" stop-color="${g.col}" stop-opacity="${fx(op * 0.55)}"/><stop offset="1" stop-color="${g.col}" stop-opacity="0"/></radialGradient></defs><path d="M -1 0 A 1 1 0 0 0 1 0 Z" fill="url(#${id})"/></g>`;
+    }
+    return out;
 }
 function fovSVG(it, th) {
     const f = it.fov, L = Math.max(10, f.len), a = clamp(f.angle, 1, 179), y0 = -it.h / 2;
@@ -977,7 +1053,7 @@ function labelSVG(it, th, codes) {
 }
 
 function buildContent(th, exportMode) {
-    const Ly = P.layers, arr = items(), codes = lightCodes();
+    const Ly = P.layers, arr = items(), codes = lightCodes(); let BSURF = null;
     let bg = '', floors = '', beams = '', fovs = '', walls = '', objs = '', annot = '', labels = '', wdec = '';
     for (const it of arr) {
         switch (it.kind) {
@@ -987,10 +1063,11 @@ function buildContent(th, exportMode) {
             case 'dim': if (Ly.annot) annot += dimSVG(it, th); break;
             case 'arrow': if (Ly.annot) annot += arrowSVG(it, th); break;
             case 'text': if (Ly.annot) annot += textSVG(it, th); break;
-            case 'light': if (Ly.beams && it.L.show) beams += beamSVG(it); objs += objSVG(it, th); if (Ly.labels) labels += labelSVG(it, th, codes); break;
+            case 'light': if (Ly.beams && it.L.show) { let bs = beamSVG(it); if (Ly.bounce !== false) { try { const S = BSURF || (BSURF = reflSurfaces(arr)), cp = beamClip(it, S); if (cp) bs = `<clipPath id="bc${it.id}"><polygon points="${cp.map(q => fx(q[0]) + ',' + fx(q[1])).join(' ')}"/></clipPath><g clip-path="url(#bc${it.id})">${bs}</g>`; } catch (e) { } } beams += bs; } objs += objSVG(it, th); if (Ly.labels) labels += labelSVG(it, th, codes); break;
             default: if (Ly.fov && it.fov && it.fov.show) fovs += fovSVG(it, th); objs += objSVG(it, th); if (Ly.labels) labels += labelSVG(it, th, codes);
         }
     }
+    if (Ly.beams && Ly.bounce !== false) { try { beams = indirectSVG(arr) + beams; } catch (e) { console.warn('indirect', e); } }
     return bg + `<g>${floors}</g>` + `<g style="mix-blend-mode:${th.blend}" pointer-events="none">${beams}</g>` + `<g pointer-events="none">${fovs}</g>` + `<g>${walls}</g>` + `<g>${wdec}</g>` + `<g>${objs}</g>` + `<g>${annot}</g>` + `<g>${labels}</g>`;
 }
 
@@ -1749,16 +1826,17 @@ function singlePanel(it) {
     const title = it.kind === 'light' ? `${codes[it.id]} · ${it.name}` : (it.kind === 'obj' ? (it.label || it.name) : it.kind === 'wall' ? (it.label || (it.closed ? 'Pièce' : 'Mur')) : it.kind === 'text' ? it.text : (it.label || KIND_LABEL[it.kind]));
     let h = `<div class="pp-head"><span class="pp-kind" style="background:${chipCol}">${KIND_LABEL[it.kind]}</span><h3>${esc(title)}</h3><span class="close-x" data-act="close" title="Fermer">✕</span></div>`;
     const colorSec = (label, auto) => F.sec(label, F.palette(auto) + (auto ? '' : `<div style="margin-top:8px;">${F.color('Personnalisée', 'color')}</div>`));
+    if ((it.kind === 'wall' || it.kind === 'obj') && it.refl == null) { it.refl = reflDefault(it); it.diff = it.kind === 'wall' ? 0.7 : 0.9; }
     switch (it.kind) {
         case 'obj':
             h += F.sec('Élément', F.txt('Nom', 'name') + F.txt('Étiquette', 'label', 'ex : Invité 1', 'pp-label') + F.check('Afficher l\'étiquette sur le plan', 'showLabel'));
-            h += posSection(it); if (it.fov) h += fovSection(); h += colorSec('Couleur'); break;
+            h += posSection(it); if (it.fov) h += fovSection(); h += F.sec('✨ Lumière indirecte', F.range('Réflexion', 'refl', 0, 1, 0.05) + F.range('Diffusion', 'diff', 0, 1, 0.05) + `<p class="pp-note">Réflexion : part de lumière renvoyée (0 = absorbe tout, 1 = renvoie tout). Diffusion : 0 = miroir, 1 = surface mate qui étale la lumière. Calque ✨ et nombre de rebonds dans le menu des calques.</p>`); h += colorSec('Couleur'); break;
         case 'light':
             h += lightSections(it, codes) + posSection(it) + colorSec('Couleur du corps'); break;
         case 'zone':
             h += F.sec('Zone', F.txt('Nom', 'label', 'ex : Régie', 'pp-label') + F.range('Opacité', 'opacity', 0, 0.6, 0.02)) + posSection(it) + colorSec('Couleur'); break;
         case 'wall':
-            h += F.sec(it.closed ? 'Pièce' : 'Mur', F.txt('Nom', 'label', it.closed ? 'ex : Plateau A' : 'ex : Mur nord', 'pp-label') + F.num('Épaisseur', 'thick', 'cm', 1, 1) + F.check('Afficher les longueurs', 'showLen') + F.check('Contour fermé', 'closed') + (it.closed ? F.check('Afficher la surface', 'showArea') + F.check('Colorer le sol', 'fill') + F.color('Sol', 'fillColor') : '') + `<p class="pp-note" data-out="wallinfo"></p><p class="pp-note">Glissez les poignées carrées pour déplacer chaque angle (Maj = angle droit).</p>`) + colorSec('Couleur du mur', true); break;
+            h += F.sec(it.closed ? 'Pièce' : 'Mur', F.txt('Nom', 'label', it.closed ? 'ex : Plateau A' : 'ex : Mur nord', 'pp-label') + F.num('Épaisseur', 'thick', 'cm', 1, 1) + F.check('Afficher les longueurs', 'showLen') + F.check('Contour fermé', 'closed') + (it.closed ? F.check('Afficher la surface', 'showArea') + F.check('Colorer le sol', 'fill') + F.color('Sol', 'fillColor') : '') + `<p class="pp-note" data-out="wallinfo"></p><p class="pp-note">Glissez les poignées carrées pour déplacer chaque angle (Maj = angle droit).</p>`) + F.sec('✨ Lumière indirecte', F.range('Réflexion', 'refl', 0, 1, 0.05) + F.range('Diffusion', 'diff', 0, 1, 0.05) + `<p class="pp-note">Réflexion : part de lumière renvoyée (0 = absorbe tout, 1 = renvoie tout). Diffusion : 0 = miroir, 1 = surface mate qui étale la lumière. Calque ✨ et nombre de rebonds dans le menu des calques.</p>`) + colorSec('Couleur du mur', true); break;
         case 'dim':
             h += F.sec('Cote', F.txt('Libellé', 'label', 'optionnel', 'pp-label') + F.num('Décalage', 'off', 'cm', 5) + `<p class="pp-note" data-out="dimlen"></p>`) + colorSec('Couleur', true); break;
         case 'arrow':
@@ -1916,10 +1994,10 @@ function toggleMenu(id, e) {
     m.style.top = (id === 'settings-menu' ? r.top - mr.height - 8 : r.bottom + 8) + 'px';
     btn.classList.add('active');
 }
-const LAYERS = [['grid', '▦', 'Grille'], ['bg', '🗺️', 'Fond de plan'], ['zones', '🔲', 'Zones & sols'], ['walls', '🧱', 'Murs & pièces'], ['beams', '💡', 'Faisceaux lumière'], ['fov', '🎥', 'Champs caméra'], ['labels', '🏷️', 'Étiquettes'], ['annot', '📏', 'Cotes, textes & mouvements'], ['legend', '📋', 'Légende projecteurs'], ['minimap', '🧭', 'Minimap']];
+const LAYERS = [['grid', '▦', 'Grille'], ['bg', '🗺️', 'Fond de plan'], ['zones', '🔲', 'Zones & sols'], ['walls', '🧱', 'Murs & pièces'], ['beams', '💡', 'Faisceaux lumière'], ['bounce', '✨', 'Lumière indirecte (rebonds)'], ['fov', '🎥', 'Champs caméra'], ['labels', '🏷️', 'Étiquettes'], ['annot', '📏', 'Cotes, textes & mouvements'], ['legend', '📋', 'Légende projecteurs'], ['minimap', '🧭', 'Minimap']];
 function buildLayersMenu() {
-    $('layers-menu').innerHTML = `<div class="ctx-title">Calques du plan</div>` + LAYERS.map(([k, ic, n]) => `<div class="ctx-item${P.layers[k] ? '' : ' dimmed'}" data-l="${k}"><span>${ic}</span><span style="flex:1">${n}</span><span>${P.layers[k] ? '👁️' : '—'}</span></div>`).join('');
-    $('layers-menu').onclick = ev => { const a = ev.target.closest('[data-l]'); if (a) { toggleLayer(a.dataset.l); buildLayersMenu(); } };
+    $('layers-menu').innerHTML = `<div class="ctx-title">Calques du plan</div>` + LAYERS.map(([k, ic, n]) => `<div class="ctx-item${P.layers[k] ? '' : ' dimmed'}" data-l="${k}"><span>${ic}</span><span style="flex:1">${n}</span><span>${P.layers[k] ? '👁️' : '—'}</span></div>`).join('') + `<div class="ctx-item" data-bn="1" title="Nombre de rebonds de la lumière indirecte (clic pour changer)"><span>🔁</span><span style="flex:1">Rebonds de lumière</span><span>${P.settings.bounces ?? 2}</span></div>`;
+    $('layers-menu').onclick = ev => { if (ev.target.closest('[data-bn]')) { P.settings.bounces = (P.settings.bounces ?? 2) % 3 + 1; render(); autosave(); buildLayersMenu(); return; } const a = ev.target.closest('[data-l]'); if (a) { toggleLayer(a.dataset.l); buildLayersMenu(); } };
 }
 function toggleLayer(k) { P.layers[k] = !P.layers[k]; applyLayerUI(); render(); autosave(); }
 function applyLayerUI() { document.body.classList.toggle('hide-minimap', !P.layers.minimap); $('legend-btn').classList.toggle('btn-active', !!P.layers.legend); }
