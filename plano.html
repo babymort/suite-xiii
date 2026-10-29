@@ -913,8 +913,8 @@ function indirectSVG(arr) {
                 const recv = e * (1 - h.t / rem) * (b ? 1 : 0.85), out = recv * s.r, cc = mixHex(c, s.col, 0.3), key = s.id + '|' + it.id + '|' + b + '|' + (nx > 0 ? 1 : 0) + (ny > 0 ? 1 : 0);
                 let g = G.get(key); if (!g) G.set(key, g = { s, nx, ny, ux: ex / len, uy: ey / len, n: 0, e: 0, rem: 0, u0: 1e9, u1: -1e9, col: cc, segs: [] });
                 const pu = (hx - s.a[0]) * g.ux + (hy - s.a[1]) * g.uy; g.n++; g.e += out; g.rem += (rem - h.t); g.u0 = Math.min(g.u0, pu); g.u1 = Math.max(g.u1, pu);
-                // rayon réfléchi : miroir mélangé à la normale selon la diffusion
-                const dn = dx * nx + dy * ny; let rx = dx - 2 * dn * nx, ry = dy - 2 * dn * ny; rx = rx * (1 - s.d) + nx * s.d; ry = ry * (1 - s.d) + ny * s.d; const rl = Math.hypot(rx, ry) || 1;
+                // rayon réfléchi : toujours l'angle miroir (angle de sortie = angle d'arrivée) ; la diffusion ne joue que sur l'intensité, la portée et la lueur
+                const dn = dx * nx + dy * ny; let rx = dx - 2 * dn * nx, ry = dy - 2 * dn * ny; const rl = Math.hypot(rx, ry) || 1;
                 ox = hx; oy = hy; dx = rx / rl; dy = ry / rl; rem = (rem - h.t) * (0.3 + 0.7 * s.r) * (1 - 0.5 * s.d); e = out; skip = s.id; c = cc;
                 // faisceau réfléchi visible : jusqu'à la prochaine surface ou la fin de la portée restante
                 const h2 = rayHit(ox, oy, dx, dy, S, skip), d2 = h2 && h2.t < rem ? h2.t : rem; g.segs.push([i, ox, oy, ox + dx * d2, oy + dy * d2]);
