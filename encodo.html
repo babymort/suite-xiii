@@ -632,7 +632,7 @@ const PRESETS = {
     doc: [['pdf2png', '🖼️ PDF → images PNG', { op: 'pdf2img', fmt: 'png' }], ['pdf2jpg', '📷 PDF → images JPEG', { op: 'pdf2img', fmt: 'jpg' }], ['img2pdf', '📄 Images → un PDF', { op: 'img2pdf' }], ['merge', '📚 Assembler des PDF', { op: 'merge' }], ['compress', '🗜️ Compresser un PDF (pages en JPEG)', { op: 'compress' }]]
 };
 const I0 = { fmt: 'png', q: 85, mw: 0, mh: 0, maxkb: 0, bg: '#ffffff' }, D0 = { op: 'pdf2img', fmt: 'png', dpi: 150, q: 85, pages: '', page: 'fit' };
-let prefs = { cat: 'video', preset: { video: 'h264', audio: 'wav24', image: 'png', doc: 'pdf2png' }, mt: true, autoDl: false, suffix: '_encodo', keepName: false };
+let prefs = { cat: 'video', preset: { video: 'h264', audio: 'wav24', image: 'png', doc: 'pdf2png' }, mt: false, autoDl: false, suffix: '_encodo', keepName: false };
 let CFG = { video: Object.assign({}, V0), audio: Object.assign({}, V0, { acodec: 'pcm24', ar: '48000' }), image: Object.assign({}, I0), doc: Object.assign({}, D0) };
 function loadPrefs() { try { const o = JSON.parse(localStorage.getItem(KEY_PREFS)); if (o) { Object.assign(prefs, o.prefs || {}); ['video', 'audio', 'image', 'doc'].forEach(k => { if (o.cfg && o.cfg[k]) Object.assign(CFG[k], o.cfg[k]); }); } } catch (e) { } }
 function savePrefs() { try { localStorage.setItem(KEY_PREFS, JSON.stringify({ prefs, cfg: CFG })); } catch (e) { } }
@@ -681,7 +681,7 @@ function engine() {
     if (FF) return Promise.resolve(FF); if (FFP) return FFP;
     FFP = (async () => {
         eng('⏳ chargement du moteur…', 'busy'); let last = null;
-        const wantMT = !NO_MT && prefs.mt !== false && self.crossOriginIsolated && typeof SharedArrayBuffer !== 'undefined';
+        const wantMT = !NO_MT && prefs.mt === true && self.crossOriginIsolated && typeof SharedArrayBuffer !== 'undefined';
         // le worker de FFmpeg est un module : le cœur doit être la version ESM (export par défaut) ; essais multicœur puis monocœur, puis UMD
         const tries = [];
         CDNS.forEach(cdn => { if (wantMT) tries.push([cdn, '-mt', 'esm']); tries.push([cdn, '', 'esm'], [cdn, '', 'umd']); });
@@ -704,9 +704,10 @@ function engine() {
 function resetEngine() { try { FF && FF.terminate(); } catch (e) { } FF = null; FFP = null; eng('⚪ moteur arrêté'); }
 let LOGCB = null;
 let LASTLOG = 0, PROG = null;
+async function execW(ff, args, ms) { LASTLOG = Date.now(); let dog = null; const watch = new Promise((_, ko) => { dog = setInterval(() => { if (Date.now() - LASTLOG > ms) { clearInterval(dog); ko(new Error(FF_MT ? 'BLOQUE_MT' : 'Le moteur ne répond plus (aucune activité)')); } }, 1000); }); try { return await Promise.race([ff.exec(args), watch]); } finally { clearInterval(dog); } }
 function onLog(m) { LASTLOG = Date.now(); LOG.push(m); if (LOG.length > 400) LOG.splice(0, LOG.length - 400); if (LOGCB) LOGCB(m); const L = $('log'); if (L && SEL && CUR && CUR.id === SEL) { L.textContent = LOG.slice(-80).join('\n'); L.scrollTop = L.scrollHeight; } }
 async function ffProbe(it, inName) {
-    const out = []; LOGCB = m => out.push(m); try { await FF.exec(['-hide_banner', '-i', inName]); } catch (e) { } LOGCB = null;
+    const out = []; LOGCB = m => out.push(m); try { await execW(FF, ['-hide_banner', '-i', inName], 20000); } catch (e) { LOGCB = null; if (e && e.message === 'BLOQUE_MT') throw e; } LOGCB = null;
     const t = out.join('\n'), d = t.match(/Duration: (\d+):(\d+):([\d.]+)/), v = t.match(/Video: ([^,\n]+)[^\n]*?, (\d{2,5})x(\d{2,5})/), fr = t.match(/([\d.]+) fps/), a = t.match(/Audio: ([^,\n]+)/);
     if (d) it.info.dur = +d[1] * 3600 + +d[2] * 60 + +d[3]; if (v) { it.info.vc = v[1].split(' ')[0]; it.info.w = +v[2]; it.info.h = +v[3]; } if (fr) it.info.fps = +fr[1]; if (a) it.info.ac = a[1].split(' ')[0];
 }
@@ -811,15 +812,15 @@ async function convAV(it, cat) {
     if (it.kind !== 'video' && it.kind !== 'audio') throw new Error('Ce fichier n\'est ni une vidéo ni un son');
     if (cat === 'video' && it.kind === 'audio' && !CFG.video.frame) throw new Error('Fichier audio : choisissez la catégorie Audio');
     const ff = await engine(), inN = 'in.' + (extOf(it.name) || 'bin');
-    await ff.writeFile(inN, new Uint8Array(await it.file.arrayBuffer()));
+    it.stage = 'chargement du fichier dans le moteur…'; tickRow(it); await ff.writeFile(inN, new Uint8Array(await it.file.arrayBuffer()));
     try {
-        if (!it.info.dur || !it.info.vc) await ffProbe(it, inN);
+        it.stage = 'analyse du fichier…'; tickRow(it); if (!it.info.dur) await ffProbe(it, inN);
         const B = build(it, cat), D = outDur(it, CFG[cat]) || it.info.dur || 0, np = B.passes.length;
         for (let p = 0; p < np; p++) {
             if (STOP) throw new Error('arrêt');
             LOGCB = m => { const t = m.match(/time=(-?\d+):(\d+):([\d.]+)/), sp = m.match(/speed=\s*([\d.]+)x/); if (t && D) { const s = +t[1] * 3600 + +t[2] * 60 + +t[3]; it.pct = Math.max(0, Math.min(99, ((p + Math.min(1, s / D)) / np) * 100)); it.speed = sp ? +sp[1] : it.speed; tickRow(it); } };
             PROG = o => { if (D && o && o.time > 0) { const s = o.time / 1e6; it.pct = Math.max(it.pct, Math.min(99, ((p + Math.min(1, s / D)) / np) * 100)); tickRow(it); } else if (o && o.progress > 0 && o.progress <= 1) { it.pct = Math.max(it.pct, Math.min(99, ((p + o.progress) / np) * 100)); tickRow(it); } };
-            LASTLOG = Date.now(); let dog = null;
+            it.stage = np > 1 ? 'passe ' + (p + 1) + '/' + np + '…' : 'encodage…'; tickRow(it); LASTLOG = Date.now(); let dog = null;
             const watch = new Promise((_, ko) => { dog = setInterval(() => { if (Date.now() - LASTLOG > (FF_MT ? 25000 : 120000)) { clearInterval(dog); ko(new Error(FF_MT ? 'BLOQUE_MT' : 'Le moteur ne répond plus (aucune activité depuis 2 min)')); } }, 2000); });
             let rc; try { rc = await Promise.race([ff.exec(B.passes[p]), watch]); } finally { clearInterval(dog); LOGCB = null; PROG = null; }
             if (rc !== 0 && rc !== undefined) throw new Error('FFmpeg a échoué (code ' + rc + ') : ' + (LOG.slice(-6).filter(l => /error|invalid|unknown|not|fail/i.test(l)).pop() || LOG.slice(-1)[0] || 'voir le journal'));
@@ -910,7 +911,7 @@ function applyPreset(v) {
 function savePreset() { const n = prompt('Nom du préréglage :', ''); if (!n) return; const L = userPresets(), id = uid(); L.push({ id, cat: prefs.cat, name: n.trim(), cfg: JSON.parse(JSON.stringify(CFG[prefs.cat])) }); try { localStorage.setItem(KEY_USER, JSON.stringify(L)); } catch (e) { } prefs.preset[prefs.cat] = 'u:' + id; savePrefs(); fillPresets(); toast('⭐ Préréglage « ' + n + ' » enregistré'); }
 function delPreset() { const v = prefs.preset[prefs.cat]; if (!v.startsWith('u:')) return; try { localStorage.setItem(KEY_USER, JSON.stringify(userPresets().filter(p => 'u:' + p.id !== v))); } catch (e) { } prefs.preset[prefs.cat] = PRESETS[prefs.cat][0][0]; savePrefs(); fillPresets(); renderSide(); toast('Préréglage supprimé'); }
 function render() { renderQueue(); renderSide(); }
-function statusTxt(it) { if (it.status === 'run') { const el = (Date.now() - (it.t0 || Date.now())) / 1000, rest = it.pct > 2 ? el * (100 - it.pct) / it.pct : 0; return '⏳ ' + Math.round(it.pct) + ' %' + (it.speed ? ' · ×' + it.speed.toFixed(2) : '') + (rest > 1 ? ' · reste ≈ ' + fmtDur(rest) : ''); } if (it.status === 'done') return '✅ Converti' + (it.outs.length ? ' · ' + (it.outs.length > 1 ? it.outs.length + ' fichiers · ' : '') + fmtSize(it.outs.reduce((a, o) => a + o.blob.size, 0)) : ''); if (it.status === 'err') return '⚠️ ' + it.err; return fits(it) ? 'En attente' : '— ignoré dans cette catégorie'; }
+function statusTxt(it) { if (it.status === 'run' && !it.pct && it.stage) return '⏳ ' + it.stage; if (it.status === 'run') { const el = (Date.now() - (it.t0 || Date.now())) / 1000, rest = it.pct > 2 ? el * (100 - it.pct) / it.pct : 0; return '⏳ ' + Math.round(it.pct) + ' %' + (it.speed ? ' · ×' + it.speed.toFixed(2) : '') + (rest > 1 ? ' · reste ≈ ' + fmtDur(rest) : ''); } if (it.status === 'done') return '✅ Converti' + (it.outs.length ? ' · ' + (it.outs.length > 1 ? it.outs.length + ' fichiers · ' : '') + fmtSize(it.outs.reduce((a, o) => a + o.blob.size, 0)) : ''); if (it.status === 'err') return '⚠️ ' + it.err; return fits(it) ? 'En attente' : '— ignoré dans cette catégorie'; }
 function tickRow(it) { const r = document.querySelector('.qi[data-id="' + it.id + '"]'); if (!r) return; const b = r.querySelector('.pb i'); if (b) b.style.width = it.pct + '%'; const s = r.querySelector('.st'); if (s) s.textContent = statusTxt(it); stats(); }
 function renderQueue() {
     const c = $('content'); stats();
@@ -1831,7 +1832,7 @@ var XRED = (function () {
 (function () {
     if (typeof XSET === 'undefined' || typeof prefs === 'undefined' || typeof CFG === 'undefined') return;
     function apply(S, keys) {
-        prefs.suffix = S.suffix != null ? S.suffix : '_encodo'; prefs.keepName = !!S.keepName; prefs.autoDl = !!S.autoDl; prefs.mt = S.mt !== false;
+        prefs.suffix = S.suffix != null ? S.suffix : '_encodo'; prefs.keepName = !!S.keepName; prefs.autoDl = !!S.autoDl; prefs.mt = S.mt === true;
         if (!keys && S.cat && !localStorage.getItem('encodoXIII.prefs')) setCat(S.cat, true);
         try { savePrefs(); renderQueue(); } catch (e) { }
     }
@@ -1845,7 +1846,7 @@ var XRED = (function () {
                 { k: 'autoDl', label: 'Télécharger automatiquement chaque fichier converti', type: 'toggle', def: false },
                 { k: 'cat', label: 'Catégorie à l\'ouverture', type: 'select', options: [['video', 'Vidéo'], ['audio', 'Audio'], ['image', 'Image'], ['doc', 'PDF']], def: 'video' }] },
             { id: 'eng', icon: '🧠', title: 'Moteur', desc: 'FFmpeg en WebAssembly, téléchargé une fois (≈ 30 Mo) puis gardé en cache.', fields: [
-                { k: 'mt', label: 'Utiliser tous les cœurs du processeur (si le navigateur le permet)', type: 'toggle', def: true }],
+                { k: 'mt', label: 'Multicœur (expérimental, plus rapide mais peut se bloquer)', type: 'toggle', def: false }],
               actions: [{ label: '🗑️ Vider le cache du moteur', run: async () => { try { await caches.delete('encodo-xiii-v1'); resetEngine(); toast('Cache du moteur vidé'); } catch (e) { } } },
                         { label: '🗑️ Supprimer mes préréglages', danger: true, run: () => { localStorage.removeItem('encodoXIII.presets'); fillPresets(); toast('Préréglages supprimés'); } }] }
         ],
