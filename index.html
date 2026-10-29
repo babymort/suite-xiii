@@ -493,6 +493,16 @@ footer { border-top: 1px solid var(--border-soft); background: var(--bg-topbar);
     <section class="phase final-phase">
         <div class="phase-head"><span class="phase-num">04</span><span class="phase-name">Livrer</span><span class="phase-hint">Tout le projet, rassemblé en un seul dossier</span></div>
         <div class="grid">
+            <a class="card" href="encodo.html" style="--dc:#9575cd">
+                <div class="card-top">
+                    <div class="card-icon">🔄</div>
+                    <div><div class="card-name">ENCODO <span>XIII</span></div><div class="card-role">Convertisseur de fichiers</div></div>
+                    <span class="card-ver">v1.0</span>
+                </div>
+                <p class="card-desc">Convertissez vidéos, sons, images et PDF sans rien installer : codec, conteneur, débit, taille maximale, résolution, coupe, normalisation du son.</p>
+                <div class="chips"><span class="chip">H.264 · H.265 · ProRes · DNxHR</span><span class="chip">Taille max</span><span class="chip">Audio EBU R128</span><span class="chip">PDF ↔ images</span></div>
+                <div class="card-foot"><span class="open">Ouvrir <span class="arr">→</span></span></div>
+            </a>
             <a class="card wide final" href="dossier.html" style="--dc:#f06292" data-key="9">
                 <div class="card-top">
                     <div class="card-icon">📚</div>
@@ -5885,7 +5895,7 @@ body.xh #xb-master,body.xh #xacc-chip,body.xh #xau-chip{left:232px}
  body.xh .phase .grid{grid-template-columns:repeat(2,1fr)!important}body.xh a.card{min-height:200px;padding:16px 12px 14px 16px!important}body.xh a.card .card-icon.xh-ico{width:120px!important;height:46px!important}
 }
 @media print{#xh-nav{display:none}body.xh main{padding:0}}`;
-    const CAT = { art: ['🎨 Artistique', '#ba68c8', 'moodo storyboardo decoup scripto casto'], prod: ['📋 Production', '#ffb74d', 'planno calendrier callsheeto transporto deviso ressourco controle importo dossier repero'], mono: ['🎥 Monocam', '#4fc3f7', 'cadro'], multi: ['📡 Multicam & direct', '#ef5350', 'syno plano conduco graphico melango runo'], tech: ['🔧 Technique', '#81c784', 'sono lumo matos catalogue packingo'], post: ['✂️ Montage & post', '#9575cd', 'posto soustitro backupo'] };
+    const CAT = { art: ['🎨 Artistique', '#ba68c8', 'moodo storyboardo decoup scripto casto'], prod: ['📋 Production', '#ffb74d', 'planno calendrier callsheeto transporto deviso ressourco controle importo dossier repero'], mono: ['🎥 Monocam', '#4fc3f7', 'cadro'], multi: ['📡 Multicam & direct', '#ef5350', 'syno plano conduco graphico melango runo'], tech: ['🔧 Technique', '#81c784', 'sono lumo matos catalogue packingo'], post: ['✂️ Montage & post', '#9575cd', 'posto soustitro backupo encodo'] };
     const catOf = app => Object.keys(CAT).find(k => CAT[k][2].split(' ').indexOf(app) > -1);
     function appOf(a) { return ((a.getAttribute('href') || '').split(/[?#]/)[0].split('/').pop() || '').replace(/\.html$/, ''); }
     function tag() {

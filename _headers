@@ -16,3 +16,9 @@
   Cache-Control: public, max-age=3600
 /data/*
   Cache-Control: public, max-age=300
+/encodo.html
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Embedder-Policy: credentialless
+/encodo
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Embedder-Policy: credentialless
