@@ -457,7 +457,6 @@ body.dragging #content::after{content:'Déposez vos fichiers';position:absolute;
 @media (max-width:900px){#workspace{flex-direction:column}#side{width:auto;border-left:0;border-top:1px solid var(--border-color)}.en-pl select{min-width:0}}
 .fld .hint,.sec .hint{text-transform:none!important;letter-spacing:0!important}
 </style>
-<link rel="icon" type="image/png" href="xiii-icon-192.png">
 </head>
 <body>
 <div id="top-bar">
@@ -682,16 +681,21 @@ function engine() {
     if (FF) return Promise.resolve(FF); if (FFP) return FFP;
     FFP = (async () => {
         eng('⏳ chargement du moteur…', 'busy'); let last = null;
-        for (const cdn of CDNS) {
+        const wantMT = prefs.mt !== false && self.crossOriginIsolated && typeof SharedArrayBuffer !== 'undefined';
+        // le worker de FFmpeg est un module : le cœur doit être la version ESM (export par défaut) ; essais multicœur puis monocœur, puis UMD
+        const tries = [];
+        CDNS.forEach(cdn => { if (wantMT) tries.push([cdn, '-mt', 'esm']); tries.push([cdn, '', 'esm'], [cdn, '', 'umd']); });
+        for (const [cdn, mt, fl] of tries) {
             try {
                 if (!window.FFmpegWASM) await loadScript(cdn + '@ffmpeg/ffmpeg@' + FF_VER + '/dist/umd/ffmpeg.js');
-                const mt = prefs.mt !== false && self.crossOriginIsolated && typeof SharedArrayBuffer !== 'undefined', core = cdn + '@ffmpeg/core' + (mt ? '-mt' : '') + '@' + CORE_VER + '/dist/umd/';
+                const core = cdn + '@ffmpeg/core' + mt + '@' + CORE_VER + '/dist/' + fl + '/';
                 const ff = new FFmpegWASM.FFmpeg();
                 ff.on('log', ({ message }) => onLog(message));
                 const opt = { classWorkerURL: await cachedBlobURL(cdn + '@ffmpeg/ffmpeg@' + FF_VER + '/dist/umd/814.ffmpeg.js', 'text/javascript'), coreURL: await cachedBlobURL(core + 'ffmpeg-core.js', 'text/javascript'), wasmURL: await cachedBlobURL(core + 'ffmpeg-core.wasm', 'application/wasm') };
                 if (mt) opt.workerURL = await cachedBlobURL(core + 'ffmpeg-core.worker.js', 'text/javascript');
-                await ff.load(opt); FF = ff; FF_MT = mt; eng('🟢 moteur prêt' + (mt ? ' · multicœur' : ''), 'ok'); return ff;
-            } catch (e) { last = e; console.warn('ENCODO moteur', cdn, e); }
+                await Promise.race([ff.load(opt), new Promise((_, ko) => setTimeout(() => ko(new Error('délai dépassé')), 90000))]);
+                FF = ff; FF_MT = !!mt; eng('🟢 moteur prêt' + (mt ? ' · multicœur' : ''), 'ok'); onLog('ENCODO : moteur ' + (mt ? 'multicœur' : 'monocœur') + ' ' + fl + ' chargé depuis ' + cdn); return ff;
+            } catch (e) { last = e; console.warn('ENCODO moteur', cdn, mt, fl, e); onLog('ENCODO : échec ' + (mt || 'st') + ' ' + fl + ' (' + (e && e.message || e) + ')'); }
         }
         FFP = null; eng('🔴 moteur indisponible', 'err'); throw new Error('Moteur de conversion indisponible (connexion internet nécessaire au premier chargement) : ' + (last && last.message || last));
     })();
