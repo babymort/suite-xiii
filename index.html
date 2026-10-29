@@ -5898,11 +5898,11 @@ body.xh #xb-master,body.xh #xacc-chip,body.xh #xau-chip{left:232px}
         document.querySelectorAll('[data-xh]').forEach(e => e.classList.toggle('xh-on', e.dataset.xh === t));
         document.querySelectorAll('#xh-nav [data-t]').forEach(b => b.classList.toggle('on', b.dataset.t === t));
         const N = document.getElementById('xh-nav'), on = N && N.querySelector('button.on'); if (N && on) { let I = document.getElementById('xh-ind'); if (!I) { I = document.createElement('div'); I.id = 'xh-ind'; N.prepend(I); N.classList.add('xh-ind'); } if (on.offsetHeight) { I.style.top = on.offsetTop + 'px'; I.style.height = on.offsetHeight + 'px'; } else requestAnimationFrame(place); }
-        if (!quiet) { const el = t === 'dash' ? null : document.querySelector('[data-xh="' + t + '"]'); LOCK = Date.now(); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); else window.scrollTo({ top: 0, behavior: 'smooth' }); }
+        if (!quiet) { const el = t === 'dash' ? null : document.querySelector('[data-xh="' + t + '"]'); LOCK = 1; clearTimeout(IDLE); IDLE = setTimeout(() => { LOCK = 0; }, 1500); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); else window.scrollTo({ top: 0, behavior: 'smooth' }); }
     }
-    let LOCK = 0;
+    let LOCK = 0, IDLE = null;
     function spy() {
-        if (Date.now() - LOCK < 900) return; const y = innerHeight * 0.3; let best = 'dash';
+        if (LOCK) { clearTimeout(IDLE); IDLE = setTimeout(() => { LOCK = 0; }, 200); return; } const y = innerHeight * 0.3; let best = 'dash';
         TABS.forEach(x => { if (x[0] === 'dash') return; const el = document.querySelector('[data-xh="' + x[0] + '"]'); if (el && el.getBoundingClientRect().top < y) best = x[0]; });
         if (innerHeight + scrollY >= document.documentElement.scrollHeight - 4) { const last = TABS[TABS.length - 1]; if (last) best = last[0]; }
         if (best !== cur) show(best, true);
