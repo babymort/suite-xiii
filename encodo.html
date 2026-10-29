@@ -707,7 +707,7 @@ function engine() {
 function resetEngine() { try { FF && FF.terminate(); } catch (e) { } FF = null; FFP = null; eng('⚪ moteur arrêté'); }
 let LOGCB = null;
 // multicœur : nombre de fils limité (au-delà de la réserve de fils du moteur, l'encodeur attend indéfiniment)
-function withThreads(a) { if (!FF_MT) return a; const T = String(prefs.mtThreads || 2), i = a.indexOf('-i'); const b = a.slice(); b.splice(i + 2, 0, '-threads', T, '-filter_threads', '1'); b.splice(i, 0, '-threads', T); return b; }
+function withThreads(a) { if (!FF_MT) return a; const T = String(prefs.mtThreads || 2), i = a.indexOf('-i'); const b = a.slice(); b.splice(i + 2, 0, '-threads', T, '-filter_threads', '1'); b.splice(i, 0, '-threads', '1'); return b; }
 // ---------- 🩺 diagnostic du multicœur ----------
 async function diagMT() {
     const R = [], say = (ok, t) => { R.push((ok === true ? '✅ ' : ok === false ? '❌ ' : 'ℹ️ ') + t); show(); };
@@ -830,7 +830,7 @@ async function runQueue() {
     for (const it of todo) {
         if (STOP) break; CUR = it; it.status = 'run'; it.pct = 0; it.err = ''; it.outs = []; it.t0 = Date.now(); renderQueue();
         try {
-            if (cat === 'image') await convImage(it); else if (cat === 'doc') await convPdf(it); else { try { await convAV(it, cat); } catch (e) { if (!(e && e.message === 'BLOQUE_MT')) throw e; onLog('ENCODO : moteur multicœur bloqué, passage en monocœur'); toast('⚙️ Moteur multicœur bloqué : nouvel essai en monocœur', 5000); resetEngine(); NO_MT = true; it.pct = 0; await convAV(it, cat); } }
+            if (cat === 'image') await convImage(it); else if (cat === 'doc') await convPdf(it); else { try { await convAV(it, cat); } catch (e) { if (!FF_MT || STOP) throw e; onLog('ENCODO : erreur en multicœur (' + (e && e.message) + ') ' + String(e && e.stack || '').split('\n').slice(0, 3).join(' | ') + ' → passage en monocœur'); toast('⚙️ Souci du moteur multicœur : nouvel essai en monocœur', 5000); resetEngine(); NO_MT = true; it.pct = 0; await convAV(it, cat); } }
             it.status = 'done'; it.pct = 100; if (prefs.autoDl) it.outs.forEach(dl);
         } catch (e) { console.warn('ENCODO', e); it.status = STOP ? 'wait' : 'err'; it.err = STOP ? '' : (e && e.message || String(e)); }
         renderQueue();
