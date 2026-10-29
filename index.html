@@ -583,7 +583,7 @@ document.addEventListener('keydown', e => {
         if (c.querySelector('.card-big')) return; const ic = c.querySelector('.card-icon'); if (!ic) return;
         const b = document.createElement('span'); b.className = 'card-big'; b.setAttribute('aria-hidden', 'true'); const e = document.createElement('span'); e.textContent = ic.textContent.trim(); b.appendChild(e); c.appendChild(b);
         const tool = (c.getAttribute('href').split(/[?#]/)[0].split('/').pop() || '').replace(/\.html?$/i, ''); let tried = false;
-        c.addEventListener('mouseenter', () => { if (tried) return; tried = true; const im = new Image(); im.alt = ''; im.onload = () => { b.innerHTML = ''; b.appendChild(im); }; im.src = 'logos/' + tool + '.png'; });
+        c.addEventListener('mouseenter', () => { if (tried) return; tried = true; const im = new Image(); im.alt = ''; im.onload = () => { b.innerHTML = ''; b.appendChild(im); }; im.src = 'logos/' + tool + '.png?v=3'; });
     });
 })();
 </script>
