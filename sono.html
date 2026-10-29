@@ -5445,6 +5445,7 @@ const XDASH = (() => {
         const ss = y.sunset[0] ? new Date(y.sunset[0]) : null, gh = ss ? new Date(ss - 3600e3).toTimeString().slice(0, 5) : '—';
         b.innerHTML = '<div class="xd-cd"><b>' + ico + ' ' + Math.round(y.temperature_2m_max[0]) + '°</b><span>min ' + Math.round(y.temperature_2m_min[0]) + '° · pluie ' + (y.precipitation_probability_max[0] ?? '—') + ' %<br>vent ' + Math.round(y.wind_speed_10m_max[0]) + ' km/h</span></div><div class="xd-m">🌅 ' + hm(y.sunrise[0]) + ' · 🌇 ' + hm(y.sunset[0]) + ' · ✨ heure dorée dès ' + gh + '</div><div class="xd-m" style="font-size:11.5px">' + esc(n) + ' · ' + fr(d) + '</div>';
     }
+    const KEEP = {};
     function render() {
         const f = fiche(); let c = document.getElementById('xd-dash');
         const anchor = document.getElementById('xg-card') || (document.getElementById('ui-proj') && document.getElementById('ui-proj').closest('.title-row'));
@@ -5454,8 +5455,10 @@ const XDASH = (() => {
         if (!C.zone) { c.remove(); return; } // 🧩 zone de widgets : active par défaut (onglet Dashboard de l'accueil) ; le Master peut la masquer dans ⚙️ Paramètres › Affichage
         const U = me(), ord = U.order || C.order, uoff = U.off ? new Set(U.off) : off; // 👤 choix personnels (galerie ＋), sinon ceux du Master
         const html = ord.filter(k => CARDS[k] && !uoff.has(k)).map(k => card(k, C, f, M)).join('');
+        ['xd-onl', 'xd-docs', 'xd-team', 'xd-wx', 'xd-drv'].forEach(id => { const o = document.getElementById(id); if (o && !/Chargement…/.test(o.textContent)) KEEP[id] = o.innerHTML; }); // garde le dernier contenu : pas de « Chargement… » qui change la taille
         c.innerHTML = '<div class="xd-hd"><b>🧩 Widgets</b><button id="xd-plus" title="Ajouter, retirer, réordonner les widgets">＋</button></div>' + (html ? '<div class="xd-g">' + html + '</div>' : '<p class="xd-e" style="margin:4px 2px">Aucun widget affiché : touchez ＋ pour en ajouter.</p>');
         document.getElementById('xd-plus').onclick = gallery;
+        Object.keys(KEEP).forEach(id => { const o = document.getElementById(id); if (o) o.innerHTML = KEEP[id]; });
         const SZ = U.size || {}; c.querySelectorAll('.xd-g > .xd-c[data-card]').forEach(el => { const n = SZ[el.dataset.card] || 1; el.classList.add('xd-s' + n); });
         c.querySelectorAll('[data-g]').forEach(b => b.onclick = e => { e.stopPropagation(); pop(b.dataset.g, b.closest('.xd-c')); });
         c.querySelectorAll('[data-add]').forEach(b => b.onclick = () => save(C2 => { C2.off = C2.off.filter(x => x !== b.dataset.add); }));
