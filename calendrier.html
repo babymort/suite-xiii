@@ -3123,7 +3123,7 @@ XUX.init('calendrier');
 (function () {
     let shell = null; try { shell = window.parent !== window && window.parent.__xtshell ? window.parent : null; } catch (e) { }
     window.xiiiOpenTab = (url, bg) => { if (shell) { shell.postMessage({ xtab: { open: url, bg } }, location.origin); return true; } location.href = 'espace.html?open=' + encodeURIComponent(url); return true; };
-    if (!shell) return;
+    if (!shell) { const pg = location.pathname.split('/').pop() || 'index.html'; if (/^(index\.html)?$/.test(pg) && window.top === window && !location.search && !location.hash) location.replace('espace.html'); return; }
     document.documentElement.classList.add('xtab-in');
     const tool = u => { try { const x = new URL(u, location.href); return x.origin === location.origin && /\/[\w-]+\.html$/.test(x.pathname) && !/^(espace)\.html$/.test(x.pathname.split('/').pop()) ? x.pathname.split('/').pop() + x.search + x.hash : null; } catch (e) { return null; } };
     document.addEventListener('click', e => { if (e.defaultPrevented || e.button !== 0) return; const a = e.target.closest && e.target.closest('a[href]'); if (!a || a.hasAttribute('download')) return; const u = tool(a.getAttribute('href')); if (!u) return; const here = location.pathname.split('/').pop(); if (u.split(/[?#]/)[0] === here) return; e.preventDefault(); shell.postMessage({ xtab: { open: u, bg: e.ctrlKey || e.metaKey } }, location.origin); }, true);
