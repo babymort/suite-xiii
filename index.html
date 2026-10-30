@@ -1501,10 +1501,10 @@ var XRED = (function () {
         e.preventDefault(); document.querySelectorAll('#xpin-m').forEach(x => x.remove());
         const h = appOf(a), href = a.getAttribute('href'), on = pins().map(x => String(x).replace(/\.html$/, '')).indexOf(h) > -1, m = document.createElement('div'); m.id = 'xpin-m';
         m.style.cssText = 'position:fixed;z-index:10400;left:' + Math.min(e.clientX, innerWidth - 230) + 'px;top:' + Math.min(e.clientY, innerHeight - 110) + 'px';
-        m.innerHTML = '<button data-a="pin">' + (on ? '📌 Retirer des outils épinglés' : '📌 Épingler en haut de l\'accueil') + '</button><button data-a="open">↗ Ouvrir</button><button data-a="tab">⧉ Ouvrir dans un nouvel onglet</button>';
+        m.innerHTML = '<button data-a="pin">' + (on ? '📌 Retirer des outils épinglés' : '📌 Épingler en haut de l\'accueil') + '</button><button data-a="open">↗ Ouvrir</button><button data-a="xt">⧉ Ouvrir dans l\'espace onglets</button><button data-a="tab">↗ Ouvrir dans un nouvel onglet du navigateur</button>';
         document.body.appendChild(m);
         m.querySelector('[data-a=pin]').onclick = () => { const P = pins().map(x => String(x).replace(/\.html$/, '')).filter(x => x !== h); if (!on) P.push(h); try { localStorage.setItem(KP, JSON.stringify(P)); } catch (er) { } m.remove(); pinDraw(); if (!on) { const s = document.getElementById('xpin'); if (s) s.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); } };
-        m.querySelector('[data-a=open]').onclick = () => { location.href = href; }; m.querySelector('[data-a=tab]').onclick = () => { m.remove(); open(href, '_blank'); };
+        m.querySelector('[data-a=open]').onclick = () => { location.href = href; }; m.querySelector('[data-a=tab]').onclick = () => { m.remove(); open(href, '_blank'); }; m.querySelector('[data-a=xt]').onclick = () => { m.remove(); if (window.xiiiOpenTab) xiiiOpenTab(href); };
         setTimeout(() => document.addEventListener('click', function off() { m.remove(); document.removeEventListener('click', off); }), 0);
     }
     document.addEventListener('contextmenu', e => { const a = e.target.closest && e.target.closest('a.card'); if (a) pinMenu(e, a); });
@@ -3174,6 +3174,20 @@ const XUX = (() => {
 })();
 
 XUX.init('index');
+
+// =====================================================================
+//  XTABS — côté outil : dans l'Espace onglets (espace.html), les liens vers un autre outil s'ouvrent en onglet
+// =====================================================================
+(function () {
+    let shell = null; try { shell = window.parent !== window && window.parent.__xtshell ? window.parent : null; } catch (e) { }
+    window.xiiiOpenTab = (url, bg) => { if (shell) { shell.postMessage({ xtab: { open: url, bg } }, location.origin); return true; } location.href = 'espace.html?open=' + encodeURIComponent(url); return true; };
+    if (!shell) return;
+    document.documentElement.classList.add('xtab-in');
+    const tool = u => { try { const x = new URL(u, location.href); return x.origin === location.origin && /\/[\w-]+\.html$/.test(x.pathname) && !/^(espace)\.html$/.test(x.pathname.split('/').pop()) ? x.pathname.split('/').pop() + x.search + x.hash : null; } catch (e) { return null; } };
+    document.addEventListener('click', e => { if (e.defaultPrevented || e.button !== 0) return; const a = e.target.closest && e.target.closest('a[href]'); if (!a || a.hasAttribute('download')) return; const u = tool(a.getAttribute('href')); if (!u) return; const here = location.pathname.split('/').pop(); if (u.split(/[?#]/)[0] === here) return; e.preventDefault(); shell.postMessage({ xtab: { open: u, bg: e.ctrlKey || e.metaKey } }, location.origin); }, true);
+    const o0 = window.open; window.open = function (u, n) { const t = u && tool(u); if (t) { shell.postMessage({ xtab: { open: t } }, location.origin); return window; } return o0.apply(window, arguments); };
+})();
+
 
 // =====================================================================
 //  SUITE XIII — XENC : suivi des conversions ENCODO depuis tous les outils
@@ -5609,7 +5623,7 @@ const XGATE = (() => {
         if (APP !== 'dossier' && !XLINKS.from(APP).some(x => x[1] === 'dossier') && findBtn('dossier')) XLINKS.L.push([APP, 'dossier', 'Document de l\'outil (PDF) → rubrique adaptée du dossier de production.']);
         const outs = XLINKS.from(APP).slice().sort((a, b) => (b[1] === 'dossier') - (a[1] === 'dossier')), ins = XLINKS.to(APP).filter(x => !outs.some(y => y[1] === x[0])); if (fn('xiiiFromMatos') && !ins.some(x => x[0] === 'matos')) ins.unshift(['matos', APP, 'Matériel du projet de MATOS (lignes cochées) → importé ici.']); if (APP === 'matos') ['plano', 'syno', 'lumo', 'sono', 'packingo'].forEach(a => { if (!ins.some(x => x[0] === a)) ins.push([a, 'matos', 'Matériel de ' + ((T[a] || [])[1] || a) + ' → « Matériel du projet » (ouvre l\'outil et renvoie sa liste ici).']); });
         const row = (a, d, dir) => { const t = T[a] || ['🧩', a, '']; const b = dir === 'out' ? findBtn(a) : null;
-            return '<button class="xgt-t" data-a="' + a + '" data-dir="' + dir + '" data-d="' + E(d) + '" data-b="' + (b ? 1 : 0) + '"><span class="i">' + t[0] + '</span><span><b>' + E(t[1]) + '</b><small>' + E(t[2]) + '</small></span><span class="go">' + (dir === 'out' ? (b || can(APP + '>' + a) ? 'Envoyer →' : 'Ouvrir ↗') : (a === 'matos' && fn('xiiiFromMatos')) || APP === 'matos' ? '← Importer' : '← reçoit') + '</span></button>'; };
+            return '<button class="xgt-t" data-a="' + a + '" data-dir="' + dir + '" data-d="' + E(d) + '" data-b="' + (b ? 1 : 0) + '"><span class="i">' + t[0] + '</span><span><b>' + E(t[1]) + '</b><small>' + E(t[2]) + '</small></span><span class="go">' + (dir === 'out' ? (b || can(APP + '>' + a) ? 'Envoyer →' : 'Ouvrir ↗') : (a === 'matos' && fn('xiiiFromMatos')) || (APP === 'matos' && a !== 'catalogue') ? '← Importer' : '← reçoit') + '</span></button>'; };
         const o = document.createElement('div'); o.id = 'xgt-ov';
         o.innerHTML = '<div class="xgt-w" role="dialog" aria-label="Vers Suite XIII"><div class="xgt-h"><b>📤 Vers Suite XIII — depuis ' + E(me[1]) + '</b><button class="xgt-x" aria-label="Fermer">✕</button></div>' +
             '<div class="xgt-b"><svg class="xgt-s"><defs><marker id="xgt-ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="xgt-mk"/></marker></defs><path class="xgt-p" d=""/></svg>' +
@@ -5630,7 +5644,7 @@ const XGATE = (() => {
             const t = XLINKS.T[el.dataset.a] || ['', el.dataset.a];
             D.innerHTML = '<b>' + (out ? E(me[1]) + ' → ' + E(t[1]) : E(t[1]) + ' → ' + E(me[1])) + '</b> · ' + E(el.dataset.d) + '<br><small>' + (out ? (el.dataset.b === '1' || can(APP + '>' + el.dataset.a) ? 'Cliquez pour lancer l\'envoi.' : 'Cliquez pour ouvrir ' + E(t[1]) + ' : la passerelle s\'y trouve (import, 🧺 panier ou Drive du projet).') : 'Passerelle à lancer depuis ' + E(t[1]) + ' (cliquez pour l\'ouvrir).') + '</small>';
         };
-        o.querySelectorAll('.xgt-t').forEach(el => { el.onmouseenter = () => link(el); el.onfocus = () => link(el); el.onclick = () => el.dataset.dir === 'out' ? go(el.dataset.a) : (APP === 'matos' ? (close(), location.href = el.dataset.a + '.html#xtomatos') : el.dataset.a === 'matos' && fn('xiiiFromMatos') ? (close(), fn('xiiiFromMatos')()) : (location.href = el.dataset.a + '.html')); });
+        o.querySelectorAll('.xgt-t').forEach(el => { el.onmouseenter = () => link(el); el.onfocus = () => link(el); el.onclick = () => el.dataset.dir === 'out' ? go(el.dataset.a) : (APP === 'matos' && el.dataset.a !== 'catalogue' ? (close(), location.href = el.dataset.a + '.html#xtomatos') : el.dataset.a === 'matos' && fn('xiiiFromMatos') ? (close(), fn('xiiiFromMatos')()) : (location.href = el.dataset.a + '.html')); });
         o.querySelector('.xgt-r').addEventListener('scroll', () => { const h = o.querySelector('.xgt-t.h'); if (h) link(h); });
         o.querySelector('.xgt-x').onclick = close; o.addEventListener('mousedown', e => { if (e.target === o) close(); });
         o.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
@@ -6119,7 +6133,7 @@ const XSTART = (() => {
     }
     function quick(c) {
         const P = J('xiii.pins', []).map(x => String(x).replace(/\.html$/, '')), R0 = J('xiii.recent', {}) || {}, R = (Array.isArray(R0) ? R0.map(x => x.app || x) : Object.keys(R0).sort((a, b) => (R0[b] || 0) - (R0[a] || 0))).map(x => String(x).replace(/\.html$/, '')).filter(x => P.indexOf(x) < 0).slice(0, 6);
-        const T = L => '<div class="ql">' + L.map(h => '<a href="' + esc(h) + '.html"><img src="logos/' + esc(h) + '.png?v=3" alt="" onerror="this.style.display=\'none\'">' + esc(nm(h)) + '</a>').join('') + '</div>';
+        const T = L => '<div class="ql">' + L.map(h => '<a href="' + esc(h) + '.html" title="Ctrl+clic : ouvrir en onglet de l\'espace"><img src="logos/' + esc(h) + '.png?v=3" alt="" onerror="this.style.display=\'none\'">' + esc(nm(h)) + '</a>').join('') + '</div>';
         c.innerHTML = '<h4>📌 Épinglés</h4>' + (P.length ? T(P) : '<p class="e">Clic droit sur un outil de l\'accueil pour l\'épingler.</p>') + (R.length ? '<h4>🕘 Récents</h4>' + T(R) : '');
     }
     function widgets(c) {
@@ -6136,8 +6150,8 @@ const XSTART = (() => {
         if (document.getElementById('xst-b')) return;
         const st = document.createElement('style'); st.textContent = CSS; document.head.appendChild(st);
         const b = document.createElement('button'); b.id = 'xst-b'; b.innerHTML = '⊞ Démarrer <i></i>'; b.title = 'Notifications, chat, lancement rapide, widgets'; b.onclick = () => toggle(); document.body.appendChild(b);
-        const p = document.createElement('aside'); p.id = 'xst'; p.innerHTML = '<div class="xst-h"><b>Demarrer</b><button class="xst-x" title="Fermer">✕</button></div><nav><span class="ind"></span>' + TABS.map(t => '<button data-k="' + t[0] + '">' + t[1] + '</button>').join('') + '</nav><div class="xst-c"></div>'; document.body.appendChild(p);
-        p.querySelector('.xst-x').onclick = () => toggle(false); p.querySelectorAll('nav button').forEach(x => x.onclick = () => show(x.dataset.k));
+        const p = document.createElement('aside'); p.id = 'xst'; p.innerHTML = '<div class="xst-h"><b>Demarrer</b><span style="display:flex;gap:6px"><button class="xst-x" id="xst-tabs" title="Espace onglets : plusieurs outils dans une seule fenêtre" style="font-size:13px;font-weight:700;border:1px solid var(--xh-line,rgba(255,255,255,.15));border-radius:999px;padding:5px 12px">⧉ Onglets</button><button class="xst-x" id="xst-close" title="Fermer">✕</button></span></div><nav><span class="ind"></span>' + TABS.map(t => '<button data-k="' + t[0] + '">' + t[1] + '</button>').join('') + '</nav><div class="xst-c"></div>'; document.body.appendChild(p);
+        p.querySelector('#xst-close').onclick = () => toggle(false); p.querySelector('#xst-tabs').onclick = () => { toggle(false); if (window.parent !== window) return; location.href = 'espace.html'; }; p.querySelectorAll('nav button').forEach(x => x.onclick = () => show(x.dataset.k));
         addEventListener('keydown', e => { if (e.key === 'Escape' && p.classList.contains('on')) toggle(false); });
         document.addEventListener('pointerdown', e => { if (p.classList.contains('on') && !p.contains(e.target) && e.target !== b && !b.contains(e.target)) toggle(false); });
         api('msg_list').then(r => { if (r.ok) { unread = (r.msgs || []).filter(m => !m.lu).length; badge(); } });

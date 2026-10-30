@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SUITE XIII — Espace onglets</title>
+<link rel="icon" href="logos/index.png">
+<style>
+@font-face{font-family:Astoria;src:url(fonts/astoria.woff) format("woff");font-display:swap}
+:root{--bg:#0e0e12;--glass:rgba(26,26,34,.72);--line:rgba(255,255,255,.10);--txt:#f2f2f2;--dim:#a9a9b3;--acc:#f0b429;--acc2:#ff8a3d}
+@media (prefers-color-scheme:light){:root:not([data-theme=dark]){--bg:#f4efe6;--glass:rgba(255,255,255,.72);--line:rgba(0,0,0,.10);--txt:#1d1a16;--dim:#6d675e}}
+*{box-sizing:border-box}html,body{margin:0;height:100%;background:var(--bg);color:var(--txt);font:14px "Segoe UI",system-ui,sans-serif;overflow:hidden}
+#bar{position:relative;z-index:5;display:flex;align-items:center;gap:6px;height:52px;padding:6px 10px;background:var(--glass);border-bottom:1px solid var(--line);backdrop-filter:blur(22px) saturate(1.4);-webkit-backdrop-filter:blur(22px) saturate(1.4);box-shadow:0 10px 40px rgba(0,0,0,.35),0 0 40px rgba(240,180,41,.06)}
+#home{all:unset;cursor:pointer;display:flex;align-items:center;padding:0 10px 0 4px;height:40px;border-right:1px solid var(--line);margin-right:4px}#home img{height:30px;filter:drop-shadow(0 0 8px rgba(240,180,41,.35))}
+#tabs{position:relative;flex:1;display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;height:40px;align-items:center}#tabs::-webkit-scrollbar{display:none}
+#ind{position:absolute;top:2px;height:36px;border-radius:999px;background:linear-gradient(135deg,var(--acc),var(--acc2));box-shadow:0 0 18px rgba(240,180,41,.5),0 0 2px rgba(255,255,255,.4) inset;transition:left .38s cubic-bezier(.2,.8,.2,1),width .38s cubic-bezier(.2,.8,.2,1);pointer-events:none;z-index:0}
+.t{all:unset;position:relative;z-index:1;flex:0 0 auto;display:flex;align-items:center;gap:8px;height:36px;padding:0 8px 0 12px;border-radius:999px;cursor:pointer;color:var(--dim);font-weight:600;white-space:nowrap;max-width:220px;transition:color .2s,background .2s}
+.t:hover{background:rgba(255,255,255,.06);color:var(--txt)}.t.on{color:#1a1206}.t.on:hover{background:none}
+.t img{width:22px;height:22px;object-fit:contain;border-radius:5px}.t span{overflow:hidden;text-overflow:ellipsis}
+.t .x{all:unset;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;opacity:.55}.t .x:hover{opacity:1;background:rgba(0,0,0,.2)}
+.t i{position:absolute;top:5px;right:6px;width:8px;height:8px;border-radius:50%;background:#4caf50;box-shadow:0 0 8px #4caf50;display:none}.t.busy i{display:block}
+.t.drag{opacity:.4}
+#add{all:unset;cursor:pointer;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--txt);border:1px solid var(--line)}#add:hover{border-color:var(--acc)}
+#pick{position:absolute;top:54px;right:10px;z-index:9;width:min(560px,94vw);max-height:70vh;overflow:auto;display:none;grid-template-columns:repeat(4,1fr);gap:8px;padding:14px;border-radius:20px;background:var(--glass);border:1px solid var(--line);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);box-shadow:0 20px 60px rgba(0,0,0,.45)}#pick.on{display:grid}
+#pick button{all:unset;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 4px;border-radius:14px;border:1px solid var(--line);font-size:11px;font-weight:700;text-align:center}#pick button:hover{border-color:var(--acc)}#pick img{width:38px;height:38px;object-fit:contain}
+#pick input{grid-column:1/-1;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:rgba(0,0,0,.2);color:inherit;font:inherit}
+#stage{position:absolute;inset:52px 0 0 0}#stage iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:var(--bg);visibility:hidden}#stage iframe.on{visibility:visible}
+#empty{position:absolute;inset:52px 0 0;display:none;align-items:center;justify-content:center;flex-direction:column;gap:8px;color:var(--dim)}#empty b{font:40px Astoria,serif;color:var(--acc)}
+</style></head><body>
+<div id="bar"><button id="home" title="Accueil SUITE XIII"><img src="logos/index.png" alt="" onerror="this.replaceWith(document.createTextNode('XIII'))"></button><div id="tabs"><span id="ind"></span></div><button id="add" title="Ouvrir un outil dans un nouvel onglet">＋</button></div>
+<div id="pick"></div>
+<div id="stage"></div><div id="empty"><b>Espace onglets</b><span>＋ pour ouvrir un outil</span></div>
+<script>
+window.__xtshell = 1;
+const T = { index: 'Accueil', moodo: 'MOODO', storyboardo: 'STORYBOARDO', decoup: 'DECOUP', scripto: 'SCRIPTO', casto: 'CASTO', planno: 'PLANNO', calendrier: 'CALENDRIER', callsheeto: 'CALL SHEETO', transporto: 'TRANSPORTO', deviso: 'DEVISO', ressourco: 'RESSOURCO', controle: 'CONTROLE', dossier: 'DOSSIER', repero: 'REPERO', cadro: 'CADRO', syno: 'SYNO', plano: 'PLANO', conduco: 'CONDUCO', graphico: 'GRAPHICO', melango: 'MELANGO', runo: 'RUNO', sono: 'SONO', lumo: 'LUMO', matos: 'MATOS', packingo: 'PACKINGO', posto: 'POSTO', soustitro: 'SOUSTITRO', backupo: 'BACKUPO', encodo: 'ENCODO' };
+const $ = id => document.getElementById(id), K = 'xiii.tabs';
+const appOf = u => (String(u).split(/[?#]/)[0].split('/').pop() || 'index').replace(/\.html$/, '') || 'index';
+let S = (() => { try { return JSON.parse(localStorage.getItem(K)) || null; } catch (e) { return null; } })() || { list: [], act: null };
+const save = () => { try { localStorage.setItem(K, JSON.stringify({ list: S.list.map(t => ({ id: t.id, url: t.url })), act: S.act })); } catch (e) { } };
+const uid = () => Math.random().toString(36).slice(2, 9);
+function frame(t) { let f = $('f-' + t.id); if (!f) { f = document.createElement('iframe'); f.id = 'f-' + t.id; f.src = t.url; f.setAttribute('allow', 'clipboard-read; clipboard-write; camera; microphone; fullscreen; display-capture'); f.onload = () => hook(t, f); $('stage').appendChild(f); } return f; }
+function hook(t, f) { try { const w = f.contentWindow; t.url = w.location.pathname.split('/').pop() + w.location.search; save(); draw();
+    w.addEventListener('keydown', key, true); } catch (e) { } }
+function draw() {
+    const box = $('tabs'); box.querySelectorAll('.t').forEach(x => x.remove());
+    S.list.forEach((t, k) => { const a = appOf(t.url), b = document.createElement('button'); b.className = 't' + (t.id === S.act ? ' on' : ''); b.dataset.id = t.id; b.draggable = true; b.title = (T[a] || a.toUpperCase()) + (k < 9 ? ' (Alt+' + (k + 1) + ')' : '');
+        b.innerHTML = '<img src="logos/' + a + '.png?v=3" alt="" onerror="this.style.visibility=\'hidden\'"><span>' + (T[a] || a.toUpperCase()) + '</span><button class="x" title="Fermer (clic molette)">✕</button><i></i>';
+        b.onclick = e => { if (e.target.classList.contains('x')) { e.stopPropagation(); close(t.id); } else show(t.id); };
+        b.onauxclick = e => { if (e.button === 1) { e.preventDefault(); close(t.id); } };
+        b.ondragstart = e => { e.dataTransfer.setData('text/xt', t.id); b.classList.add('drag'); }; b.ondragend = () => b.classList.remove('drag');
+        b.ondragover = e => e.preventDefault(); b.ondrop = e => { e.preventDefault(); const from = e.dataTransfer.getData('text/xt'); if (!from || from === t.id) return; const i = S.list.findIndex(x => x.id === from), it = S.list.splice(i, 1)[0], r = b.getBoundingClientRect(); let j = S.list.findIndex(x => x.id === t.id); if (e.clientX > r.left + r.width / 2) j++; S.list.splice(j, 0, it); save(); draw(); };
+        box.appendChild(b); });
+    $('empty').style.display = S.list.length ? 'none' : 'flex'; busy(); requestAnimationFrame(place);
+}
+function place() { const b = $('tabs').querySelector('.t.on'), i = $('ind'); if (!b) { i.style.width = 0; return; } i.style.left = b.offsetLeft + 'px'; i.style.width = b.offsetWidth + 'px'; b.scrollIntoView({ block: 'nearest', inline: 'nearest' }); }
+function show(id) { const t = S.list.find(x => x.id === id); if (!t) return; S.act = id; save(); const f = frame(t); document.querySelectorAll('#stage iframe').forEach(x => x.classList.toggle('on', x === f)); draw(); try { f.contentWindow.focus(); } catch (e) { } document.title = (T[appOf(t.url)] || 'SUITE') + ' — SUITE XIII'; }
+function open(url, bg) { const a = appOf(url), ex = S.list.find(x => appOf(x.url) === a && !/#/.test(url)); if (ex && a !== 'index') { if (!bg) show(ex.id); return; } const t = { id: uid(), url }; const i = S.list.findIndex(x => x.id === S.act); S.list.splice(i + 1, 0, t); save(); if (bg) { frame(t); draw(); } else show(t.id); }
+function close(id) { const i = S.list.findIndex(x => x.id === id); if (i < 0) return; S.list.splice(i, 1); const f = $('f-' + id); if (f) f.remove(); if (S.act === id) { const n = S.list[i] || S.list[i - 1]; S.act = n ? n.id : null; save(); if (n) show(n.id); else draw(); } else { save(); draw(); } }
+function step(d) { const i = S.list.findIndex(x => x.id === S.act); if (S.list.length) show(S.list[(i + d + S.list.length) % S.list.length].id); }
+function key(e) { if ((e.ctrlKey && e.key === 'Tab')) { e.preventDefault(); step(e.shiftKey ? -1 : 1); }
+    else if (e.altKey && /^[1-9]$/.test(e.key)) { const t = S.list[+e.key - 1]; if (t) { e.preventDefault(); show(t.id); } }
+    else if (e.altKey && (e.key === 'ArrowRight' || e.key === 'ArrowLeft')) { e.preventDefault(); step(e.key === 'ArrowRight' ? 1 : -1); }
+    else if (e.altKey && e.key.toLowerCase() === 'w') { e.preventDefault(); if (S.act) close(S.act); } }
+addEventListener('keydown', key, true);
+function busy() { let j = null; try { j = JSON.parse(localStorage.getItem('xiii.encodo.job')); } catch (e) { } const on = j && j.name && !j.done && Date.now() - (j.ts || Date.now()) < 6e5; document.querySelectorAll('.t').forEach(b => { const t = S.list.find(x => x.id === b.dataset.id); b.classList.toggle('busy', !!(on && t && appOf(t.url) === 'encodo')); }); }
+setInterval(busy, 3000); addEventListener('storage', e => { if (e.key === 'xiii.encodo.job') busy(); });
+addEventListener('message', e => { if (e.origin !== location.origin || !e.data || !e.data.xtab) return; const d = e.data.xtab; if (d.open) open(d.open, d.bg); if (d.close && S.act) close(S.act); });
+// sélecteur d'outil
+function pick() { const p = $('pick'); if (p.classList.toggle('on')) { p.innerHTML = '<input placeholder="Rechercher un outil…">' + Object.keys(T).map(a => '<button data-a="' + a + '"><img src="logos/' + a + '.png?v=3" alt="" onerror="this.style.visibility=\'hidden\'">' + T[a] + '</button>').join(''); const q = p.querySelector('input'); q.focus(); q.oninput = () => p.querySelectorAll('button').forEach(b => b.style.display = b.textContent.toLowerCase().includes(q.value.toLowerCase()) ? '' : 'none'); q.onkeydown = e => { if (e.key === 'Enter') { const b = [...p.querySelectorAll('button')].find(b => b.style.display !== 'none'); if (b) b.click(); } if (e.key === 'Escape') p.classList.remove('on'); }; p.querySelectorAll('button').forEach(b => b.onclick = () => { p.classList.remove('on'); open(b.dataset.a + '.html'); }); } }
+$('add').onclick = pick; $('home').onclick = () => open('index.html');
+document.addEventListener('pointerdown', e => { if (!e.target.closest('#pick,#add')) $('pick').classList.remove('on'); });
+addEventListener('resize', place);
+// démarrage : ?open=outil.html ajoute un onglet ; onglets rouverts tels quels
+const q = new URLSearchParams(location.search).get('open');
+if (!S.list.length) S.list.push({ id: uid(), url: 'index.html' });
+if (q && /^[\w-]+\.html([?#].*)?$/.test(q)) { history.replaceState(null, '', location.pathname); open(q); } else show((S.list.find(x => x.id === S.act) || S.list[0]).id);
+</script></body></html>
