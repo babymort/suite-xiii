@@ -4351,7 +4351,7 @@ const CD = (() => {
             }
             if (it.fov && (it.cat === 'CAM' || /cadreur/i.test(it.ref || ''))) {
                 const eye = Math.min(H, 160);
-                cams.push({ it, eye, name: it.label || it.name });
+                cams.push({ it, eye, name: it.label || it.name, grp });
                 if (st.fov && it.fov.show !== false) {
                     const a = (it.fov.angle || 50) * D / 2, L = it.fov.len || 500, vh = Math.atan(Math.tan(a) / 1.7778);
                     const o = new T.Vector3(0, eye, 0), c = [[-1, -1], [1, -1], [1, 1], [-1, 1]].map(([sx, sy]) => new T.Vector3(Math.tan(a) * L * sx, eye + Math.tan(vh) * L * sy, -L));
@@ -4416,13 +4416,13 @@ const CD = (() => {
             else { cam.fov = 50; cam.position.set(orbit.tx + orbit.r * Math.sin(orbit.ph) * Math.sin(orbit.th), orbit.ty + orbit.r * Math.cos(orbit.ph), orbit.tz + orbit.r * Math.sin(orbit.ph) * Math.cos(orbit.th)); cam.lookAt(orbit.tx, orbit.ty, orbit.tz); }
             cam.updateProjectionMatrix();
         };
-        function draw() { cancelAnimationFrame(raf); raf = requestAnimationFrame(() => { place(); ren.setClearColor(0x000000); ren.clear(); ren.render(S.sc, cam); }); }
+        function draw() { cancelAnimationFrame(raf); raf = requestAnimationFrame(() => { place(); ren.setClearColor(0x000000); ren.clear(); const hid = pov && pov.grp; if (hid) hid.visible = false; ren.render(S.sc, cam); if (hid) hid.visible = true; }); }
         redraw = draw;
         const rebuild = () => { S = buildScene(T); if (PRO) PRO.attach(S, ren, T); if (orbit.r === 1) { orbit.tx = S.cx; orbit.tz = S.cz; orbit.r = S.span * 1.25; } const v = ov.querySelector('#p3-v'), cur = v.value; v.innerHTML = '<option value="">🌐 Vue libre</option>' + S.cams.map((c, i) => '<option value="' + i + '">🎥 Depuis ' + E(c.name) + '</option>').join(''); v.value = S.cams[+cur] ? cur : ''; pov = v.value ? S.cams[+v.value] : null; fit(); };
         const wh = ov.querySelector('#p3-wh'); wh.value = st.wallH; wh.onchange = () => { st.wallH = Math.max(50, +wh.value || 300); saveProject(false); rebuild(); };
         [['p3-be', 'beams'], ['p3-fo', 'fov'], ['p3-la', 'labels'], ['p3-re', 'real']].forEach(([id, k]) => { const c = ov.querySelector('#' + id); c.checked = st[k] !== false; c.onchange = () => { st[k] = c.checked; saveProject(false); rebuild(); }; });
         ov.querySelector('#p3-v').onchange = e => { pov = e.target.value ? S.cams[+e.target.value] : null; fit(); };
-        ov.querySelector('#p3-png').onclick = async () => { place(); ren.render(S.sc, cam); const blob = await new Promise(r => ren.domElement.toBlob(r, 'image/png')); saveFile(fileBase() + ' - 3D.png', blob); };
+        ov.querySelector('#p3-png').onclick = async () => { place(); const hid = pov && pov.grp; if (hid) hid.visible = false; ren.render(S.sc, cam); if (hid) hid.visible = true; const blob = await new Promise(r => ren.domElement.toBlob(r, 'image/png')); saveFile(fileBase() + ' - 3D.png', blob); };
         // contrôles souris / tactile
         const el = ren.domElement; let d = null; const pts = new Map();
         el.addEventListener('contextmenu', e => e.preventDefault());
@@ -4440,7 +4440,9 @@ const CD = (() => {
         const up = e => { pts.delete(e.pointerId); if (!pts.size) d = null; }; el.addEventListener('pointerup', up); el.addEventListener('pointercancel', up);
         el.addEventListener('wheel', e => { e.preventDefault(); if (pov) { pov = null; ov.querySelector('#p3-v').value = ''; fit(); } orbit.r = Math.max(50, orbit.r * Math.exp(e.deltaY * 0.001)); draw(); }, { passive: false });
         window.addEventListener('resize', fit); PL3D.dbg = { orbit, draw, fit, get ren() { return ren; }, get S() { return S; }, cam, setPov: p => { pov = p; fit(); } };
-        if (PRO) PRO.ui(ov, st, () => { rebuild(); draw(); }, { reconfig: () => { PRO.configure(ren, T); fit(); PRO.attach(S, ren, T); }, draw });
+        const reopen = () => { close(); setTimeout(open3D, 60); };
+        if (PRO) PRO.ui(ov, st, () => { rebuild(); draw(); }, { reconfig: () => { PRO.configure(ren, T); fit(); PRO.attach(S, ren, T); }, draw, reopen });
+        else if (window.PL3D && PL3D.pro) { const bar = ov.querySelector('.p3-bar'), sp = bar && bar.querySelector('.p3-sp'); if (sp && !bar.querySelector('#p3-real')) { sp.insertAdjacentHTML('beforebegin', '<button id="p3-real" title="Revenir au rendu réaliste (matières, lumières physiques, modèles détaillés)">✨ Rendu réaliste</button>'); bar.querySelector('#p3-real').onclick = () => { st.classic = false; try { saveProject(false); } catch (e) { } reopen(); }; } }
         const sel = typeof panelRef === 'function' ? panelRef() : null;
         rebuild(); if (sel && S.cams.find(c => c.it === sel)) { ov.querySelector('#p3-v').value = String(S.cams.findIndex(c => c.it === sel)); pov = S.cams.find(c => c.it === sel); fit(); }
     }
@@ -4840,7 +4842,7 @@ const CD = (() => {
             const bb = new T.Box3().setFromObject(grp); top = isFinite(bb.max.y) ? bb.max.y : PL.height(it);
             if (it.kind === 'light' && c.lightInfo) { const li = c.lightInfo; addLight(T, K, S, it, li, shadowSet.has(it.id), lightSet.has(it.id), st, q, REAL, grp); }
             if (it.fov && (it.cat === 'CAM' || /cadreur/i.test(it.ref || ''))) {
-                const eye = c.eye || Math.min(top - 8, 170); cams.push({ it, eye, name: it.label || it.name });
+                const eye = c.eye || Math.min(top - 8, 170); cams.push({ it, eye, name: it.label || it.name, grp });
                 if (st.fov && it.fov.show !== false) {
                     const a = (it.fov.angle || 50) * D / 2, Ln = it.fov.len || 500, vh = Math.atan(Math.tan(a) / 1.7778), o = new T.Vector3(0, eye, 0), cc = [[-1, -1], [1, -1], [1, 1], [-1, 1]].map(([sx, sy]) => new T.Vector3(Math.tan(a) * Ln * sx, eye + Math.tan(vh) * Ln * sy, -Ln)), pts = [];
                     cc.forEach((v, i) => { pts.push(o, v, v, cc[(i + 1) % 4]); });
@@ -4932,7 +4934,8 @@ const CD = (() => {
             '<label title="Brume de scène : rend les faisceaux visibles">🌫️ <input type="range" id="p3-hz" min="0" max="1" step="0.05" style="width:70px"></label>' +
             '<label>Sol <select id="p3-fl">' + opts({ beton: 'Béton', parquet: 'Parquet', noir: 'Tapis noir', blanc: 'Blanc', herbe: 'Herbe' }, st.floor || 'beton') + '</select></label>' +
             '<label title="Qualité du rendu : ombres, résolution">Qualité <select id="p3-q"><option value="1">Rapide</option><option value="2">Standard</option><option value="3">Max</option></select></label>' +
-            '<label><input type="checkbox" id="p3-gr"> Grille</label>';
+            '<label><input type="checkbox" id="p3-gr"> Grille</label>' +
+            '<label title="Classique : rendu simplifié, plus léger pour les ordinateurs peu puissants">Rendu <select id="p3-rd"><option value="pro">Réaliste</option><option value="classic">Classique</option></select></label>';
         const anchor = bar.querySelector('#p3-re') ? bar.querySelector('#p3-re').parentElement : bar.querySelector('.p3-sp');
         anchor.insertAdjacentHTML('beforebegin', html);
         const $ = id => bar.querySelector('#' + id);
@@ -4945,6 +4948,7 @@ const CD = (() => {
         $('p3-ev').oninput = e => { st.ev = +e.target.value; hooks.reconfig(); hooks.draw(); };
         $('p3-ev').onchange = save;
         $('p3-hz').onchange = e => { st.haze = +e.target.value; save(); rebuild(); };
+        $('p3-rd').onchange = e => { st.classic = e.target.value === 'classic'; save(); if (hooks.reopen) hooks.reopen(); };
     };
 })();
 
@@ -6484,6 +6488,30 @@ const CD = (() => {
         place.slice(0, n).forEach(p => cs(c, B, p[0], p[1], p[2], { col })); B.done(); c.nat = 0;
     }
     pro.reg('m-banquet-8', c => tableSet(c, 8, 0, 0, true)); pro.reg('m-reunion', c => tableSet(c, 10, 330, 110, false));
+
+    // ======================= FORMES : marquages au sol (gaffer, repères) =======================
+    function decal(c, shape, o) {
+        const T = c.T, K = c.K, B = K.B(c.g); o = o || {}; const col = c.it.color || '#f2c230', m = K.std('fm' + col, col, .55, 0, { transparent: !!o.op, opacity: o.op || 1 });
+        B.add(m, new T.ExtrudeGeometry(shape, { depth: o.th || .6, bevelEnabled: false, curveSegments: 24 }), 0, o.th || .6, 0, PI / 2, 0, 0); B.done();
+        c.g.children.forEach(x => { x.castShadow = false; }); c.nat = 0;
+    }
+    const SH = T => ({
+        rect(w, d) { const s = new T.Shape(); s.moveTo(-w / 2, -d / 2); s.lineTo(w / 2, -d / 2); s.lineTo(w / 2, d / 2); s.lineTo(-w / 2, d / 2); s.closePath(); return s; },
+        ell(w, d) { const s = new T.Shape(); s.absellipse(0, 0, w / 2, d / 2, 0, PI * 2, false, 0); return s; },
+        poly(pts) { const s = new T.Shape(); pts.forEach((p, i) => i ? s.lineTo(p[0], p[1]) : s.moveTo(p[0], p[1])); s.closePath(); return s; }
+    });
+    pro.reg(['f-rect', 'f-carre'], c => decal(c, SH(c.T).rect(c.w, c.d), { op: .85 }));
+    pro.reg('f-cercle', c => decal(c, SH(c.T).ell(c.w, c.d), { op: .85 }));
+    pro.reg('f-triangle', c => decal(c, SH(c.T).poly([[0, c.d / 2], [c.w / 2, -c.d / 2], [-c.w / 2, -c.d / 2]]), { op: .85 }));
+    pro.reg('f-etoile', c => { const p = []; for (let i = 0; i < 10; i++) { const r = i % 2 ? c.w * .2 : c.w / 2, a = i * PI / 5; p.push([Math.sin(a) * r, Math.cos(a) * r]); } decal(c, SH(c.T).poly(p)); });
+    pro.reg('f-fleche', c => { const w = c.w, d = c.d, hw = w * .22, hd = Math.min(d * .3, w * 1.1); decal(c, SH(c.T).poly([[-hw, d / 2], [hw, d / 2], [hw, -d / 2 + hd], [w / 2, -d / 2 + hd], [0, -d / 2], [-w / 2, -d / 2 + hd], [-hw, -d / 2 + hd]])); });
+    pro.reg('f-ligne', c => decal(c, SH(c.T).rect(c.w, Math.max(4, c.d))));
+    pro.reg('f-contour', c => { const T = c.T, K = c.K, B = K.B(c.g), col = c.it.color || '#f2c230', m = K.std('fm' + col, col, .55, 0), w = c.w, d = c.d, t = 5, dash = 18, gap = 10;
+        const run = (x0, z0, x1, z1) => { const L = Math.hypot(x1 - x0, z1 - z0), ux = (x1 - x0) / L, uz = (z1 - z0) / L; for (let s = 0; s < L; s += dash + gap) { const e = Math.min(L, s + dash), mx = x0 + ux * (s + e) / 2, mz = z0 + uz * (s + e) / 2; B.box(m, ux ? e - s : t, .5, uz ? e - s : t, mx, .3, mz); } };
+        run(-w / 2, -d / 2, w / 2, -d / 2); run(w / 2, -d / 2, w / 2, d / 2); run(w / 2, d / 2, -w / 2, d / 2); run(-w / 2, d / 2, -w / 2, -d / 2); B.done(); c.g.children.forEach(x => x.castShadow = false); c.nat = 0; });
+    pro.reg('f-pastille', c => { const T = c.T, K = c.K, B = K.B(c.g), col = c.it.color || '#f2c230', txt = String(c.it.label || c.it.num || '1').slice(0, 3);
+        const tex = K.texOf(K.canvas(128, 128, (g, W, H) => { g.fillStyle = col; g.beginPath(); g.arc(64, 64, 62, 0, 6.3); g.fill(); g.lineWidth = 5; g.strokeStyle = '#111'; g.stroke(); g.fillStyle = '#111'; g.font = 'bold ' + (txt.length > 2 ? 46 : 64) + 'px sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(txt, 64, 68); }), [1, 1], true);
+        B.add(new T.MeshStandardMaterial({ map: tex, transparent: true, roughness: .6 }), K.geo('pl', () => new T.PlaneGeometry(1, 1)), 0, .5, 0, -PI / 2, 0, 0, c.w, c.d, 1); B.done(); c.g.children.forEach(x => x.castShadow = false); c.nat = 0; });
 })();
 
 // =====================================================================
@@ -6646,7 +6674,7 @@ const CD = (() => {
             const c = t.role === 'pvw' ? src.find(x => x.it.id === m.pvw) || src[1] : t.role === 'pgm' ? src.find(x => x.it.id === m.pgm) || src[0] : src[n++];
             map.push(c || null); if (!c) return;
             const g = 2 * k, x = t.x * k + g, y = t.y * k + g, w = t.w * k - 2 * g, h = t.h * k - 2 * g;
-            ren.setViewport(x, H - y - h, w, h); ren.setScissor(x, H - y - h, w, h); pose(cam, c, T); ren.render(S.sc, cam);
+            ren.setViewport(x, H - y - h, w, h); ren.setScissor(x, H - y - h, w, h); pose(cam, c, T); if (c.grp) c.grp.visible = false; ren.render(S.sc, cam); if (c.grp) c.grp.visible = true;
         });
         ren.setScissorTest(false); return { L, map };
     }
@@ -6714,7 +6742,7 @@ const CD = (() => {
         function draw() {
             cancelAnimationFrame(raf); raf = requestAnimationFrame(() => {
                 if (solo) { // une seule source en plein cadre
-                    const c = S.cams.find(x => x.it.id === solo); ren.setScissorTest(false); ren.setViewport(0, 0, W, H); ren.setClearColor(0); ren.clear(); pose(cam, c, T); ren.render(S.sc, cam);
+                    const c = S.cams.find(x => x.it.id === solo); ren.setScissorTest(false); ren.setViewport(0, 0, W, H); ren.setClearColor(0); ren.clear(); pose(cam, c, T); if (c.grp) c.grp.visible = false; ren.render(S.sc, cam); if (c.grp) c.grp.visible = true;
                     R = { L: [{ x: 0, y: 0, w: 1920, h: 1080, solo: 1 }], map: [c] };
                 } else R = renderInto(ren, T, S, cam, W, H);
                 const g = ov2.getContext('2d'), pr = ov2.width / W; g.setTransform(pr, 0, 0, pr, 0, 0); overlay(g, R.L, R.map, W, H, sel);
