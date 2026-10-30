@@ -6409,7 +6409,7 @@ const XGATE = (() => {
     ['syno', 'plano', 'packingo', 'lumo', 'sono', 'deviso'].forEach(a => { SPECIAL['matos>' + a] = () => { if (typeof PM === 'undefined') return false; PM.sendTo(a); return true; }; });
     ['syno', 'plano', 'packingo', 'lumo', 'sono'].forEach(a => { SPECIAL[a + '>matos'] = () => { const F = fn('xiiiToMatos'); return F ? F() : false; }; });
     if (window.XPASS) Object.keys(XPASS.R).forEach(k => { SPECIAL[k] = () => XPASS.send(k); }); // passerelles saison 4 (boîte de réception)
-    const can = k => SPECIAL[k] && (window.XPASS && XPASS.has(k) || k !== 'soustitro>graphico' || fn('setView')) && (!/>deviso$/.test(k) || fn(k === 'callsheeto>deviso' ? 'openSendCrewToDeviso' : 'openMaterialExport'));
+    const can = k => SPECIAL[k] && (window.XPASS && XPASS.has(k) || k !== 'soustitro>graphico' || fn('setView')) && (!/>deviso$/.test(k) || k === 'matos>deviso' || fn(k === 'callsheeto>deviso' ? 'openSendCrewToDeviso' : 'openMaterialExport'));
     const nameRx = a => new RegExp('\\b' + XLINKS.T[a][1].replace(/ /g, '\\s?').replace('Ô', '[OÔ]') + '\\b', 'i');
     function findBtn(to) {
         const rx = nameRx(to);
@@ -6431,9 +6431,9 @@ const XGATE = (() => {
     function open() {
         close(); const T = XLINKS.T, me = T[APP] || ['🧩', APP.toUpperCase(), ''];
         if (APP !== 'dossier' && !XLINKS.from(APP).some(x => x[1] === 'dossier') && findBtn('dossier')) XLINKS.L.push([APP, 'dossier', 'Document de l\'outil (PDF) → rubrique adaptée du dossier de production.']);
-        const outs = XLINKS.from(APP).slice().sort((a, b) => (b[1] === 'dossier') - (a[1] === 'dossier')), ins = XLINKS.to(APP).filter(x => !outs.some(y => y[1] === x[0]));
+        const outs = XLINKS.from(APP).slice().sort((a, b) => (b[1] === 'dossier') - (a[1] === 'dossier')), ins = XLINKS.to(APP).filter(x => !outs.some(y => y[1] === x[0])); if (fn('xiiiFromMatos') && !ins.some(x => x[0] === 'matos')) ins.unshift(['matos', APP, 'Matériel du projet de MATOS (lignes cochées) → importé ici.']); if (APP === 'matos') ['plano', 'syno', 'lumo', 'sono', 'packingo'].forEach(a => { if (!ins.some(x => x[0] === a)) ins.push([a, 'matos', 'Matériel de ' + ((T[a] || [])[1] || a) + ' → « Matériel du projet » (ouvre l\'outil et renvoie sa liste ici).']); });
         const row = (a, d, dir) => { const t = T[a] || ['🧩', a, '']; const b = dir === 'out' ? findBtn(a) : null;
-            return '<button class="xgt-t" data-a="' + a + '" data-dir="' + dir + '" data-d="' + E(d) + '" data-b="' + (b ? 1 : 0) + '"><span class="i">' + t[0] + '</span><span><b>' + E(t[1]) + '</b><small>' + E(t[2]) + '</small></span><span class="go">' + (dir === 'out' ? (b || can(APP + '>' + a) ? 'Envoyer →' : 'Ouvrir ↗') : a === 'matos' && fn('xiiiFromMatos') ? '← Importer' : '← reçoit') + '</span></button>'; };
+            return '<button class="xgt-t" data-a="' + a + '" data-dir="' + dir + '" data-d="' + E(d) + '" data-b="' + (b ? 1 : 0) + '"><span class="i">' + t[0] + '</span><span><b>' + E(t[1]) + '</b><small>' + E(t[2]) + '</small></span><span class="go">' + (dir === 'out' ? (b || can(APP + '>' + a) ? 'Envoyer →' : 'Ouvrir ↗') : (a === 'matos' && fn('xiiiFromMatos')) || APP === 'matos' ? '← Importer' : '← reçoit') + '</span></button>'; };
         const o = document.createElement('div'); o.id = 'xgt-ov';
         o.innerHTML = '<div class="xgt-w" role="dialog" aria-label="Vers Suite XIII"><div class="xgt-h"><b>📤 Vers Suite XIII — depuis ' + E(me[1]) + '</b><button class="xgt-x" aria-label="Fermer">✕</button></div>' +
             '<div class="xgt-b"><svg class="xgt-s"><defs><marker id="xgt-ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="xgt-mk"/></marker></defs><path class="xgt-p" d=""/></svg>' +
@@ -6454,7 +6454,7 @@ const XGATE = (() => {
             const t = XLINKS.T[el.dataset.a] || ['', el.dataset.a];
             D.innerHTML = '<b>' + (out ? E(me[1]) + ' → ' + E(t[1]) : E(t[1]) + ' → ' + E(me[1])) + '</b> · ' + E(el.dataset.d) + '<br><small>' + (out ? (el.dataset.b === '1' || can(APP + '>' + el.dataset.a) ? 'Cliquez pour lancer l\'envoi.' : 'Cliquez pour ouvrir ' + E(t[1]) + ' : la passerelle s\'y trouve (import, 🧺 panier ou Drive du projet).') : 'Passerelle à lancer depuis ' + E(t[1]) + ' (cliquez pour l\'ouvrir).') + '</small>';
         };
-        o.querySelectorAll('.xgt-t').forEach(el => { el.onmouseenter = () => link(el); el.onfocus = () => link(el); el.onclick = () => el.dataset.dir === 'out' ? go(el.dataset.a) : (el.dataset.a === 'matos' && fn('xiiiFromMatos') ? (close(), fn('xiiiFromMatos')()) : (location.href = el.dataset.a + '.html')); });
+        o.querySelectorAll('.xgt-t').forEach(el => { el.onmouseenter = () => link(el); el.onfocus = () => link(el); el.onclick = () => el.dataset.dir === 'out' ? go(el.dataset.a) : (APP === 'matos' ? (close(), location.href = el.dataset.a + '.html#xtomatos') : el.dataset.a === 'matos' && fn('xiiiFromMatos') ? (close(), fn('xiiiFromMatos')()) : (location.href = el.dataset.a + '.html')); });
         o.querySelector('.xgt-r').addEventListener('scroll', () => { const h = o.querySelector('.xgt-t.h'); if (h) link(h); });
         o.querySelector('.xgt-x').onclick = close; o.addEventListener('mousedown', e => { if (e.target === o) close(); });
         o.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
