@@ -473,7 +473,6 @@ body.dragging #content::after{content:'Déposez vos fichiers';position:absolute;
 #pe-pr textarea{width:100%;box-sizing:border-box;color:var(--text-main);font:13px 'Segoe UI'}#pe-pr .row2 button{font-size:12px}
 .pe-dlg{position:absolute;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:5}.pe-dlg>div{background:var(--bg-panel);border:1px solid var(--border-color);border-radius:14px;padding:16px;width:min(760px,94vw);display:flex;flex-direction:column;gap:10px}.pe-dlg textarea{height:55vh;width:100%;box-sizing:border-box;font:12.5px/1.5 ui-monospace,Consolas,monospace;color:var(--text-main)}
 </style>
-<link rel="icon" type="image/png" href="xiii-icon-192.png">
 </head>
 <body>
 <div id="top-bar">
@@ -559,6 +558,126 @@ const XIII = (() => {
     const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     return { put, get, del, all, chan, offer, toFileBlob, fromObject, id, safe, dl, esc };
 })();
+
+
+// ---------- Envoi d'un document vers DOSSIER XIII (fenêtre commune) ----------
+// cfg = { app, from, project, choices: [{ id, label, sub, title, keywords, key, make: async () => ({ blob, name, type }) | ({ html }) }] }
+function xiiiSendToDossier(cfg) {
+    const E = XIII.esc;
+    const old = document.getElementById('xiii-send'); if (old) old.remove();
+    const o = document.createElement('div'); o.id = 'xiii-send';
+    o.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:10050;display:flex;align-items:center;justify-content:center;';
+    o.innerHTML = '<div style="background:var(--bg-menu,#2d2d2d);color:var(--text-main,#fff);width:560px;max-width:94vw;max-height:88vh;overflow-y:auto;border-radius:8px;border:1px solid var(--border-color,#444);padding:20px;box-shadow:0 4px 15px rgba(0,0,0,.5);font-size:13px;">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;border-bottom:1px solid var(--border-color,#444);padding-bottom:8px;"><b style="font-size:15px;">📚 Envoyer à DOSSIER XIII</b><span id="xs-x" style="cursor:pointer;font-weight:bold;color:var(--text-muted,#aaa);padding:0 4px;">✕</span></div>' +
+        '<div style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px;">' + cfg.choices.map((c, i) =>
+            '<label style="display:flex;gap:9px;align-items:flex-start;cursor:pointer;padding:8px 10px;border:1px solid var(--border-color,#444);border-radius:6px;background:var(--bg-panel-alt,#252525);"><input type="radio" name="xs-c" value="' + i + '"' + (i === 0 ? ' checked' : '') + ' style="margin-top:2px;"><span><b>' + E(c.label) + '</b>' + (c.sub ? '<br><span style="color:var(--text-dim,#888);font-size:11.5px;">' + E(c.sub) + '</span>' : '') + '</span></label>').join('') + '</div>' +
+        '<div style="display:flex;gap:8px;flex-wrap:wrap;"><button id="xs-send" style="flex:2;padding:10px;font-size:13.5px;border-color:rgba(var(--accent,240,179,120),.85);background:rgba(var(--accent,240,179,120),.28);">📚 Envoyer à DOSSIER XIII</button>' +
+        '<button id="xs-file" style="flex:1;padding:10px;" title="Fichier .xiii.json à déposer dans DOSSIER XIII (à transmettre, archiver, ou si les outils ne sont pas ouverts sur le même site)">⬇️ Fichier Suite XIII</button></div>' +
+        '<div id="xs-st" style="display:none;margin-top:12px;padding:10px 12px;border-radius:6px;border:1px solid var(--border-color,#444);background:var(--bg-panel-alt,#252525);line-height:1.5;"></div>' +
+        '<p style="font-size:11px;color:var(--text-dim,#888);margin:12px 0 0;line-height:1.45;">Le document arrive dans DOSSIER XIII, qui propose la rubrique adaptée. S\'il a déjà été envoyé, la nouvelle version remplace l\'ancienne : renvoyez-le à chaque modification pour garder le dossier à jour.</p></div>';
+    document.body.appendChild(o);
+    const close = () => o.remove();
+    o.addEventListener('mousedown', e => { if (e.target === o) close(); });
+    document.getElementById('xs-x').onclick = close;
+    const st = (html) => { const s = document.getElementById('xs-st'); if (!s) return; s.style.display = 'block'; s.innerHTML = html; };
+    const busy = b => { ['xs-send', 'xs-file'].forEach(id => { const el = document.getElementById(id); if (el) el.disabled = b; }); };
+    const choice = () => cfg.choices[+((o.querySelector('input[name=xs-c]:checked') || {}).value || 0)];
+    async function build() {
+        const c = choice();
+        const r = await c.make();
+        if (!r || (!r.blob && !r.html)) throw new Error('Aucun document produit');
+        return {
+            format: 'xiii-link', version: 1, kind: 'document', id: XIII.id(), from: cfg.from, app: cfg.app, ts: Date.now(), created: new Date().toISOString(),
+            project: { name: cfg.project || '' }, title: c.title, target: { title: c.title, keywords: c.keywords || [] }, key: c.key || '',
+            file: r.blob ? { name: r.name || (XIII.safe(c.title) + '.pdf'), type: r.type || r.blob.type || 'application/pdf', blob: r.blob } : null,
+            html: r.html || null
+        };
+    }
+    document.getElementById('xs-send').onclick = async () => {
+        const t0 = Date.now(); busy(true); st('⏳ Préparation du document…');
+        try {
+            const p = await build(); p.to = 'dossier';
+            await XIII.put(p);
+            const ack = await XIII.offer('dossier', p.id);
+            if (ack) { st('✅ <b>Reçu par DOSSIER XIII</b>, déjà ouvert dans un autre onglet : choisissez-y la rubrique.'); busy(false); return; }
+            const url = 'dossier.html#xlink=' + p.id;
+            const w = Date.now() - t0 < 4000 ? window.open(url, '_blank') : null;
+            if (w) st('✅ <b>Envoyé.</b> DOSSIER XIII s\'est ouvert dans un nouvel onglet pour le ranger.');
+            else st('✅ <b>Document prêt.</b> <button id="xs-open" style="margin-left:8px;">📚 Ouvrir DOSSIER XIII</button><br><span style="font-size:11.5px;color:var(--text-dim,#888);">Il vous attend aussi dans « 📥 À classer » de DOSSIER XIII.</span>');
+            const b = document.getElementById('xs-open'); if (b) b.onclick = () => { window.open(url, '_blank'); close(); };
+        } catch (e) {
+            st('⚠️ ' + E(e && e.message ? e.message : 'Envoi impossible') + (e && /IndexedDB|quota/i.test(String(e.message || e.name)) ? '<br>Utilisez « Fichier Suite XIII » puis déposez-le dans DOSSIER XIII.' : ''));
+        }
+        busy(false);
+    };
+    document.getElementById('xs-file').onclick = async () => {
+        busy(true); st('⏳ Préparation du fichier…');
+        try {
+            const p = await build();
+            XIII.dl(await XIII.toFileBlob(p), XIII.safe(p.title) + '.xiii.json');
+            st('⬇️ <b>Fichier Suite XIII téléchargé.</b> Déposez-le n\'importe où dans DOSSIER XIII : il sera rangé dans la bonne rubrique.');
+        } catch (e) { st('⚠️ ' + E(e && e.message ? e.message : 'Export impossible')); }
+        busy(false);
+    };
+}
+// Récupère le fichier qu'un export existant de l'outil enregistre (au lieu de le télécharger)
+function xiiiCapture(run, ms) {
+    return new Promise((res, rej) => {
+        const orig = window.saveFile; let done = false, t = null;
+        const fin = (fn, v) => { if (done) return; done = true; window.saveFile = orig; clearTimeout(t); fn(v); };
+        t = setTimeout(() => fin(rej, new Error('Le rendu n\'a pas abouti')), ms || 120000);
+        window.saveFile = async (name, data, type) => {
+            const blob = data instanceof Blob ? data : new Blob([data], { type: type || 'application/octet-stream' });
+            fin(res, { name, blob, type: blob.type || type || '' }); return true;
+        };
+        Promise.resolve().then(run).then(() => setTimeout(() => fin(rej, new Error('Aucun document produit (contenu vide ?)')), 600)).catch(e => fin(rej, e));
+    });
+}
+// Rapport imprimable de la suite (bandeau, chiffres clés, sections, tableaux) → HTML simple pour DOSSIER XIII
+function xiiiReportToHtml(html) {
+    const E = XIII.esc, T = el => (el ? el.textContent : '').replace(/\s+/g, ' ').trim();
+    const root = document.createElement('div'); root.innerHTML = html;
+    root.querySelectorAll('.no-print, .rep-switch, .sh-sign, .sign, script, style, button, select, input, svg').forEach(e => e.remove());
+    const out = [];
+    const hero = root.querySelector('.sh-hero');
+    if (hero) {
+        const prod = hero.querySelector('.sh-prod'), brand = hero.querySelector('.sh-brand'), day = hero.querySelector('.sh-day');
+        if (brand) out.push('<p><b>' + E(T(brand)) + '</b></p>');
+        const band = hero.querySelector('.sh-band');
+        if (band) { const extra = [...band.querySelectorAll(':scope > div > div')].filter(d => d !== brand && d !== prod).map(T).filter(Boolean); if (extra.length) out.push('<p>' + E(extra.join(' · ')) + '</p>'); }
+        if (day && T(day)) out.push('<p>' + E([T(day.querySelector('b')), T(day.querySelector('span'))].filter(Boolean).join(' · ')) + '</p>');
+        const keys = [...hero.querySelectorAll('.sh-key')];
+        if (keys.length) out.push('<table><tr>' + keys.map(k => '<th>' + E(T(k.querySelector('span'))) + '</th>').join('') + '</tr><tr>' + keys.map(k => '<td>' + E(T(k.querySelector('b'))) + '</td>').join('') + '</tr></table>');
+        const sub = [...hero.querySelectorAll('.sh-sub > span')].map(T).filter(Boolean);
+        if (sub.length) out.push('<p>' + E(sub.join('   ·   ')) + '</p>');
+    }
+    const table = tbl => {
+        const head = [...tbl.querySelectorAll('thead tr th')].map(T);
+        const parts = []; let rows = [];
+        const flush = () => { if (rows.length) parts.push('<table>' + (head.length ? '<tr>' + head.map(h => '<th>' + E(h) + '</th>').join('') + '</tr>' : '') + rows.join('') + '</table>'); rows = []; };
+        tbl.querySelectorAll('tbody tr, :scope > tr').forEach(tr => {
+            if (tr.classList.contains('case-h')) { flush(); parts.push('<p><b>' + E(T(tr)) + '</b></p>'); return; }
+            const cells = [...tr.children].map(T);
+            if (cells.length === 1 && head.length > 1) { rows.push('<tr><td>' + E(cells[0]) + '</td>' + '<td></td>'.repeat(head.length - 1) + '</tr>'); return; }
+            rows.push('<tr>' + cells.map(c => '<td>' + E(c) + '</td>').join('') + '</tr>');
+        });
+        flush();
+        return parts.join('');
+    };
+    root.querySelectorAll('.sh-sec').forEach(sec => {
+        const h = sec.querySelector('h3'); if (h) out.push('<h3>' + E(T(h)) + '</h3>');
+        const body = sec.querySelector('.sh-body') || sec;
+        body.childNodes.forEach(n => {
+            if (n.nodeType === 3) { const t = n.nodeValue.replace(/\s+/g, ' ').trim(); if (t) out.push('<p>' + E(t) + '</p>'); return; }
+            if (n.nodeType !== 1 || n === h) return;
+            if (n.tagName === 'TABLE') out.push(table(n));
+            else if (n.tagName === 'UL' || n.tagName === 'OL') out.push('<ul>' + [...n.querySelectorAll('li')].map(li => '<li>' + E(T(li)) + '</li>').join('') + '</ul>');
+            else { const tb = n.querySelector('table'); if (tb) out.push(table(tb)); else if (T(n)) out.push('<p>' + E(T(n)) + '</p>'); }
+        });
+    });
+    const foot = root.querySelector('.sh-foot'); if (foot && T(foot)) out.push('<p><i>' + E(T(foot)) + '</i></p>');
+    return out.join('\n');
+}
 
 // =====================================================================
 //  ENCODO XIII — convertisseur tous formats dans le navigateur (dans l'esprit de Shutter Encoder / Format Factory)
@@ -966,11 +1085,13 @@ function renderQueue() {
     const c = $('content'); stats(); pub(true);
     if (!Q.length) { c.innerHTML = '<div class="drop" id="drop"><div class="big">📥</div><b>Glissez vos fichiers ici</b>ou cliquez pour les choisir<br><br><span class="hint">Vidéos (MP4, MOV, MKV, MXF, AVI, WebM…), sons (WAV, MP3, AAC, FLAC…), images (PNG, JPEG, WebP, HEIC, TIFF…) et PDF.<br>Tout est converti sur votre ordinateur : rien n\'est envoyé sur internet.<br>🔄 La conversion continue si vous passez dans un autre outil : suivez-la avec l\'onglet du bord droit (gardez cette page ouverte).</span></div>'; $('drop').onclick = () => $('files-in').click(); return; }
     c.innerHTML = '<div class="q">' + Q.map(it => { const inf = it.info, meta = [KIND_ICO[it.kind] + ' ' + (extOf(it.name) || '?').toUpperCase(), fmtSize(it.size), inf.dur ? fmtDur(inf.dur) : '', inf.w ? inf.w + ' × ' + inf.h : '', inf.vc || '', inf.fps ? inf.fps + ' i/s' : '', fits(it) && estimate(it, prefs.cat) ? '→ ' + estimate(it, prefs.cat) : ''].filter(Boolean).join(' · ');
-        return '<div class="qi' + (it.id === SEL ? ' sel' : '') + '" data-id="' + it.id + '" style="' + (fits(it) ? '' : 'opacity:.5') + '"><div class="th" style="' + (it.thumb ? 'background-image:url(' + it.thumb + ')' : '') + '">' + (it.thumb ? '' : KIND_ICO[it.kind]) + '</div><div><div class="nm">' + esc(it.name) + '</div><div class="mt">' + esc(meta) + '</div><div class="pb"><i style="width:' + it.pct + '%"></i></div><div class="st ' + ({ run: 'run', done: 'ok', err: 'err' }[it.status] || '') + '">' + esc(statusTxt(it)) + '</div></div><div class="ac">' + (it.kind === 'pdf' ? '<button data-ed="' + it.id + '" title="Modifier ce PDF (pages, blocs, texte)">✏️</button>' : '') + (it.status === 'done' || it.status === 'err' ? '<button data-re="' + it.id + '" title="Reconvertir avec les réglages actuels">🔁</button>' : '') + '<button data-rm="' + it.id + '" title="Retirer de la file">✕</button></div>' + (it.outs.length ? '<div class="outs">' + it.outs.slice(0, 40).map((o, i) => '<a href="#" data-dl="' + it.id + ':' + i + '">⬇️ ' + esc(o.name) + ' · ' + fmtSize(o.blob.size) + '</a>').join('') + (it.outs.length > 40 ? '<span class="hint">+ ' + (it.outs.length - 40) + ' (Tout télécharger)</span>' : '') + '</div>' : '') + '</div>'; }).join('') + '</div><p class="hint" style="margin-top:14px">➕ Glissez d\'autres fichiers à tout moment. Les réglages à droite s\'appliquent à toute la file.</p>';
+        return '<div class="qi' + (it.id === SEL ? ' sel' : '') + '" data-id="' + it.id + '" style="' + (fits(it) ? '' : 'opacity:.5') + '"><div class="th" style="' + (it.thumb ? 'background-image:url(' + it.thumb + ')' : '') + '">' + (it.thumb ? '' : KIND_ICO[it.kind]) + '</div><div><div class="nm">' + esc(it.name) + '</div><div class="mt">' + esc(meta) + '</div><div class="pb"><i style="width:' + it.pct + '%"></i></div><div class="st ' + ({ run: 'run', done: 'ok', err: 'err' }[it.status] || '') + '">' + esc(statusTxt(it)) + '</div></div><div class="ac">' + (it.kind === 'pdf' ? '<button data-ed="' + it.id + '" title="Modifier ce PDF (pages, blocs, texte)">✏️</button>' : '') + (it.status === 'done' || it.status === 'err' ? '<button data-re="' + it.id + '" title="Reconvertir avec les réglages actuels">🔁</button>' : '') + '<button data-rm="' + it.id + '" title="Retirer de la file">✕</button></div>' + (it.outs.length ? '<div class="outs">' + it.outs.slice(0, 40).map((o, i) => '<a href="#" data-dl="' + it.id + ':' + i + '">⬇️ ' + esc(o.name) + ' · ' + fmtSize(o.blob.size) + '</a>' + (/^(video|image|audio)\//.test(o.blob.type) ? '<a href="#" data-cmp="' + it.id + ':' + i + '" title="Comparer la source et le résultat">👁️ Avant / après</a>' : '') + '<a href="#" data-dos="' + it.id + ':' + i + '" title="Envoyer ce fichier dans DOSSIER XIII">📚 Vers DOSSIER</a>').join('') + (it.outs.length > 40 ? '<span class="hint">+ ' + (it.outs.length - 40) + ' (Tout télécharger)</span>' : '') + '</div>' : '') + '</div>'; }).join('') + '</div><p class="hint" style="margin-top:14px">➕ Glissez d\'autres fichiers à tout moment. Les réglages à droite s\'appliquent à toute la file.</p>';
     c.querySelectorAll('.qi').forEach(r => r.onclick = e => { if (e.target.closest('button,a')) return; SEL = r.dataset.id; renderQueue(); renderSide(); });
     c.querySelectorAll('[data-ed]').forEach(b => b.onclick = () => openPdfEditor(b.dataset.ed));
     c.querySelectorAll('[data-rm]').forEach(b => b.onclick = () => removeItem(b.dataset.rm));
     c.querySelectorAll('[data-re]').forEach(b => b.onclick = () => { const it = Q.find(x => x.id === b.dataset.re); it.status = 'wait'; it.pct = 0; it.outs = []; renderQueue(); runQueue(); });
+    c.querySelectorAll('[data-cmp]').forEach(a => a.onclick = e => { e.preventDefault(); const [id, i] = a.dataset.cmp.split(':'), it = Q.find(x => x.id === id); compare(it, it.outs[+i]); });
+    c.querySelectorAll('[data-dos]').forEach(a => a.onclick = e => { e.preventDefault(); const [id, i] = a.dataset.dos.split(':'), it = Q.find(x => x.id === id), o = it.outs[+i]; if (typeof xiiiSendToDossier !== 'function') return toast('Passerelle DOSSIER indisponible'); xiiiSendToDossier({ app: 'ENCODO XIII', from: 'encodo', project: baseName(o.name), choices: [{ label: o.name, sub: 'Fichier converti par ENCODO (' + fmtSize(o.blob.size) + ')', title: baseName(o.name), keywords: [extOf(o.name), it.kind], key: 'encodo:' + o.name, make: async () => ({ name: o.name, blob: o.blob, type: o.blob.type }) }] }); });
     c.querySelectorAll('[data-dl]').forEach(a => a.onclick = e => { e.preventDefault(); const [id, i] = a.dataset.dl.split(':'); dl(Q.find(x => x.id === id).outs[+i]); });
 }
 function stats() { const s = $('en-stats'); if (!s) return; const n = Q.length, d = Q.filter(x => x.status === 'done').length, t = Q.reduce((a, x) => a + (x.size || 0), 0); s.innerHTML = n ? '<span><b>' + n + '</b> fichier(s) · ' + fmtSize(t) + '</span><span><b>' + d + '</b> converti(s)</span>' : '<span>File vide</span>'; }
@@ -1025,6 +1146,15 @@ function renderSide() {
     h += '<p class="hint" style="margin-top:12px">🔒 Conversion 100 % locale. Le moteur vidéo (≈ 30 Mo) se télécharge à la première conversion vidéo / audio puis reste en cache. Fichiers jusqu\'à ≈ 1,5 Go selon la mémoire du navigateur.</p>';
     s.innerHTML = h;
     s.querySelectorAll('[data-k]').forEach(el => { const k = el.dataset.k, ev = el.type === 'range' ? 'input' : 'change'; el.addEventListener(ev, () => { let v = el.type === 'checkbox' ? el.checked : el.type === 'number' || el.type === 'range' ? +el.value : el.value; CFG[cat][k] = v; if (k === 'vcodec') { const V = VCODECS[v]; CFG[cat].prof = V.prof ? V.prof[v === 'prores' ? 2 : 1][0] : ''; if (!V.cont.includes(CFG[cat].cont)) CFG[cat].cont = V.cont[0]; if (V.cont[0] !== 'gif' && !(AUD_OK[CFG[cat].cont] || []).includes(CFG[cat].acodec)) CFG[cat].acodec = AUD_OK[CFG[cat].cont][0]; } if (k === 'cont' && !(AUD_OK[v] || []).includes(CFG[cat].acodec)) CFG[cat].acodec = AUD_OK[v][0]; if (el.type === 'range') { const sh = s.querySelector('[data-show="' + k + '"]'); if (sh) sh.textContent = k === 'q' && cat === 'video' ? qShow(v) : v + (cat !== 'video' ? ' %' : ''); } savePrefs(); if (el.type !== 'range' && el.type !== 'text' || ['vcodec', 'rc', 'res', 'crop', 'acodec', 'fmt', 'op', 'cont'].includes(k)) { renderSide(); renderQueue(); } }); if (el.type === 'range') el.addEventListener('change', () => renderQueue()); });
+}
+// ---------- 👁️ comparaison avant / après ----------
+function compare(it, o) {
+    const a = URL.createObjectURL(it.file), b = URL.createObjectURL(o.blob), vid = /^video|^audio/.test(o.blob.type) && it.kind !== 'image', tag = /^audio/.test(o.blob.type) ? 'audio' : 'video';
+    const el = (u, lab, sz) => '<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:6px"><b style="font-size:13px">' + lab + ' · ' + fmtSize(sz) + '</b>' + (vid ? '<' + tag + ' src="' + u + '" controls muted playsinline style="width:100%;max-height:62vh;background:#000;border-radius:10px"></' + tag + '>' : '<div style="overflow:auto;max-height:66vh;background:#111;border-radius:10px"><img src="' + u + '" style="display:block;max-width:100%"></div>') + '</div>';
+    const ov = document.createElement('div'); ov.style.cssText = 'position:fixed;inset:0;z-index:10120;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;padding:16px';
+    ov.innerHTML = '<div style="background:var(--bg-panel);border:1px solid var(--border-color);border-radius:14px;padding:16px;width:min(1400px,100%);display:flex;flex-direction:column;gap:10px"><div style="display:flex;align-items:center;gap:10px"><b>👁️ Avant / après</b><span class="hint" style="flex:1">' + (vid ? 'Lecture synchronisée : lancez ou déplacez l\'une, l\'autre suit.' : '') + '</span><button data-x>✕ Fermer</button></div><div style="display:flex;gap:14px">' + el(a, 'Source', it.size) + el(b, 'Résultat', o.blob.size) + '</div></div>';
+    document.body.appendChild(ov); const close = () => { ov.remove(); URL.revokeObjectURL(a); URL.revokeObjectURL(b); }; ov.querySelector('[data-x]').onclick = close; ov.onclick = e => { if (e.target === ov) close(); };
+    if (vid) { const [m1, m2] = ov.querySelectorAll(tag); let lock = false; const sync = (x, y) => { ['play', 'pause', 'seeked', 'ratechange'].forEach(ev => x.addEventListener(ev, () => { if (lock) return; lock = true; if (Math.abs(y.currentTime - x.currentTime) > 0.08) y.currentTime = x.currentTime; y.playbackRate = x.playbackRate; if (ev === 'play') y.play().catch(() => { }); if (ev === 'pause') y.pause(); setTimeout(() => lock = false, 50); })); }; sync(m1, m2); sync(m2, m1); }
 }
 // ---------- 🔄 suivi depuis les autres outils (onglet du bord droit) ----------
 let BC = null, pubT = 0;
@@ -3727,6 +3857,7 @@ const XUX = (() => {
             D + ' #top-bar .btn-active,' + D + ' #toolbar .btn-active,' + D + ' #top-bar button.active,' + D + ' #toolbar button.active{background:linear-gradient(135deg,rgba(240,180,41,.32),rgba(240,180,41,.12))!important;border-color:rgba(240,180,41,.75)!important;box-shadow:0 0 16px rgba(240,180,41,.25),0 0 0 1px rgba(240,180,41,.3) inset}' +
             L + ' #top-bar,' + L + ' #toolbar{background:linear-gradient(180deg,rgba(255,255,255,.85),rgba(255,255,255,.7))!important;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid rgba(60,40,10,.1)!important;box-shadow:0 6px 20px rgba(60,40,10,.06)}' +
             L + ' #top-bar button,' + L + ' #toolbar button{border-radius:11px!important;transition:background .15s,border-color .15s,box-shadow .2s}' + L + ' #top-bar button:hover,' + L + ' #toolbar button:hover{border-color:rgba(201,133,0,.6)!important;box-shadow:0 0 12px rgba(240,180,41,.2)}' +
+            'body.xux-pres #top-bar,body.xux-pres #toolbar,body.xux-pres #xs-gear,body.xux-pres #xbug-btn,body.xux-pres #xt-tab,body.xux-pres #xenc-tab,body.xux-pres .xs-credit,body.xux-pres #xb-master,body.xux-pres #xacc-chip,body.xux-pres #xau-chip,body.xux-pres #xh-nav,body.xux-pres .beta-banner,body.xux-pres [id*=panel]:not(#xux-pill),body.xux-pres #side,body.xux-pres #xf-btn{display:none!important}body.xux-pres #xux-pill{display:flex}body.xux-pres .xux-hid{display:none!important}#xux-pill{display:none;position:fixed;top:12px;right:12px;z-index:2147483300;align-items:center;gap:8px;padding:7px 14px;border-radius:99px;background:rgba(20,18,16,.75);border:1px solid rgba(240,180,41,.5);color:#f3ede6;font:600 12.5px "Segoe UI",sans-serif;cursor:pointer;backdrop-filter:blur(10px);opacity:.35;transition:opacity .2s}#xux-pill:hover{opacity:1}' +
             ':focus-visible{outline:2px solid #f0b429!important;outline-offset:2px}' +
             'html.xux-hc body{filter:contrast(1.12)}html.xux-hc .hint,html.xux-hc small{opacity:1!important}' +
             '#xux-ov{position:fixed;inset:0;z-index:2147483400;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:16px;font:14px/1.5 "Segoe UI",system-ui,sans-serif}#xux-ov>div{width:min(640px,100%);max-height:86vh;overflow:auto;background:var(--bg-menu,#232327);color:var(--text-main,#eee);border:1px solid rgba(240,180,41,.45);border-radius:16px;padding:18px 20px;box-shadow:0 20px 60px rgba(0,0,0,.5),0 0 30px rgba(240,180,41,.08)}#xux-ov h3{margin:0 0 10px;font-size:17px}#xux-ov h4{margin:14px 0 6px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;opacity:.7}#xux-ov .r{display:flex;justify-content:space-between;gap:14px;padding:5px 0;border-top:1px solid rgba(127,127,127,.18)}#xux-ov kbd{font:600 12px ui-monospace,Consolas,monospace;background:rgba(240,180,41,.14);border:1px solid rgba(240,180,41,.45);border-radius:6px;padding:2px 7px;white-space:nowrap}#xux-ov .seg{display:flex;gap:6px;flex-wrap:wrap}#xux-ov .seg button{font:inherit;font-size:13px;padding:6px 12px;border-radius:10px;cursor:pointer;background:rgba(255,255,255,.06);border:1px solid rgba(127,127,127,.35);color:inherit}#xux-ov .seg button.on{background:rgba(240,180,41,.28);border-color:#f0b429}';
@@ -3741,20 +3872,21 @@ const XUX = (() => {
     function open() {
         if (document.getElementById('xux-ov')) return; const S = shortcuts(), z = +J(KF, '100') || 100, hc = J(KC, '0') === '1';
         const o = document.createElement('div'); o.id = 'xux-ov';
-        o.innerHTML = '<div><h3>⌨️ Raccourcis et confort</h3><h4>Partout dans la suite</h4>' + [['Ctrl K', 'Rechercher, ou lancer une action de n\'importe quel outil'], ['?', 'Cette fiche'], ['Ctrl S', 'Enregistrer (dans la plupart des outils)'], ['Ctrl Z / Ctrl Y', 'Annuler / rétablir (outils équipés)'], ['Échap', 'Fermer une fenêtre']].map(r => '<div class="r"><span>' + r[1] + '</span><kbd>' + r[0] + '</kbd></div>').join('') +
+        o.innerHTML = '<div><h3>⌨️ Raccourcis et confort</h3><h4>Partout dans la suite</h4>' + [['Ctrl K', 'Rechercher, ou lancer une action de n\'importe quel outil'], ['Ctrl Maj P', 'Présentation client (masque les boutons d\'édition)'], ['?', 'Cette fiche'], ['Ctrl S', 'Enregistrer (dans la plupart des outils)'], ['Ctrl Z / Ctrl Y', 'Annuler / rétablir (outils équipés)'], ['Échap', 'Fermer une fenêtre']].map(r => '<div class="r"><span>' + r[1] + '</span><kbd>' + r[0] + '</kbd></div>').join('') +
             (S.length ? '<h4>Dans cet outil</h4>' + S.slice(0, 40).map(r => '<div class="r"><span>' + r[1].replace(/[<>&]/g, '') + '</span><kbd>' + r[0].replace(/[<>&]/g, '') + '</kbd></div>').join('') : '') +
             '<h4>Taille du texte</h4><div class="seg" data-g="fs">' + [90, 100, 112, 125, 140].map(v => '<button data-v="' + v + '" class="' + (v === z ? 'on' : '') + '">' + v + ' %</button>').join('') + '</div><h4>Contraste</h4><div class="seg" data-g="hc"><button data-v="0" class="' + (hc ? '' : 'on') + '">Normal</button><button data-v="1" class="' + (hc ? 'on' : '') + '">Renforcé</button></div><p style="opacity:.6;font-size:12px;margin:12px 0 0">Taille du texte et contraste valent pour toute la suite, sur cet appareil.</p><div style="text-align:right;margin-top:10px"><button data-x style="font:inherit;padding:7px 16px;border-radius:10px;cursor:pointer;background:rgba(240,180,41,.2);border:1px solid #f0b429;color:inherit">Fermer</button></div></div>';
         document.body.appendChild(o);
         o.onclick = e => { if (e.target === o || e.target.closest('[data-x]')) { o.remove(); return; } const b = e.target.closest('[data-v]'); if (!b) return; const g = b.parentNode.dataset.g; try { localStorage.setItem(g === 'fs' ? KF : KC, b.dataset.v); } catch (er) { } b.parentNode.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); applyPrefs(); };
     }
+    function present(on) { const b = document.body; on = on == null ? !b.classList.contains('xux-pres') : on; b.classList.toggle('xux-pres', on); if (on) { [...document.querySelectorAll('body *')].forEach(el => { if (el.id === 'xux-pill' || el.closest('#xux-pill')) return; const cs = getComputedStyle(el); if ((cs.position !== 'fixed' && cs.position !== 'absolute' && cs.position !== 'sticky') || cs.display === 'none') return; const r = el.getBoundingClientRect(); if (r.width * r.height > innerWidth * innerHeight * 0.3) return; if (el.matches('button,input,select') || el.querySelector('button,input,select')) el.classList.add('xux-hid'); }); } else document.querySelectorAll('.xux-hid').forEach(el => el.classList.remove('xux-hid')); let p = document.getElementById('xux-pill'); if (!p) { p = document.createElement('div'); p.id = 'xux-pill'; p.innerHTML = '🎬 Présentation client · <u>quitter</u> (Échap)'; p.onclick = () => present(false); document.body.appendChild(p); } try { dispatchEvent(new Event('resize')); } catch (e) { } }
     function init(app) {
         css(); const go = () => applyPrefs(); if (document.body) go(); else addEventListener('DOMContentLoaded', go);
         addEventListener('storage', e => { if (e.key === KF || e.key === KC) applyPrefs(); });
         document.addEventListener('keydown', e => { if (e.key !== '?' || e.ctrlKey || e.metaKey || e.altKey) return; const t = e.target; if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return; e.preventDefault(); const o = document.getElementById('xux-ov'); if (o) o.remove(); else open(); }, true);
-        document.addEventListener('keydown', e => { if (e.key === 'Escape') { const o = document.getElementById('xux-ov'); if (o) o.remove(); } });
-        window.XSET_HELP = (window.XSET_HELP || []).concat([{ icon: '⌨️', label: 'Raccourcis et confort', sub: 'Touche « ? » : raccourcis, taille du texte, contraste', run: open }]);
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') { const o = document.getElementById('xux-ov'); if (o) o.remove(); else if (document.body.classList.contains('xux-pres')) present(false); } if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'P' || e.key === 'p')) { e.preventDefault(); present(); } });
+        window.XSET_HELP = (window.XSET_HELP || []).concat([{ icon: '⌨️', label: 'Raccourcis et confort', sub: 'Touche « ? » : raccourcis, taille du texte, contraste', run: open }, { icon: '🎬', label: 'Présentation client', sub: 'Masque tous les boutons d\'édition (Ctrl+Maj+P, Échap pour quitter)', run: () => present(true) }]);
     }
-    return { init, open };
+    return { init, open, present };
 })();
 
 XUX.init('encodo');
