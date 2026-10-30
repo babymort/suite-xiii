@@ -7873,6 +7873,395 @@ var SYNODB = (() => {
 //  Dans SYNO, PLANO, LUMO, SONO, PACKINGO, DEVISO (et CADRO en consultation) : bouton « 🗃️ Catalogue » pour
 //  insérer un équipement en un clic (SYNO : nœud avec ses vrais ports, LUMO : projecteur avec sa puissance, …).
 // =====================================================================
+/*XIMG:START*/
+// =====================================================================
+//  SUITE XIII — XIMG : 🖼️ images des appareils du catalogue
+//  1) illustration dessinée (SVG) pour CHAQUE appareil, selon son type (caméra épaule, PTZ, mélangeur, micro…)
+//  2) vraie photo libre de droits (Wikimedia Commons / Openverse), cherchée depuis le navigateur, avec crédit
+//  3) photo perso (prioritaire, partagée avec le catalogue)
+//  Priorité : photo perso > photo libre trouvée > illustration.
+// =====================================================================
+const XIMG = (() => {
+    if (window.XIMG) return window.XIMG;
+    const fold = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+    const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    // ---------- couleurs ----------
+    const hx = h => { h = h.replace('#', ''); if (h.length === 3) h = h.split('').map(c => c + c).join(''); return [0, 2, 4].map(i => parseInt(h.substr(i, 2), 16)); };
+    const sh = (h, k) => '#' + hx(h).map(v => Math.max(0, Math.min(255, Math.round(k > 0 ? v + (255 - v) * k : v * (1 + k))))).map(v => v.toString(16).padStart(2, '0')).join('');
+    const BR = { // [corps, accent, texte]
+        sony: ['#2a2b2e', '#c9ccd1', 'SONY'], canon: ['#1f1f21', '#c8102e', 'Canon'], panasonic: ['#2b2d31', '#1c5aa6', 'Panasonic'], arri: ['#33373c', '#3d8fd1', 'ARRI'], red: ['#1a1a1b', '#d5001c', 'RED'],
+        blackmagic: ['#34363b', '#e8e8e8', 'Blackmagic'], aja: ['#2c2f34', '#e4002b', 'AJA'], atomos: ['#2b2b2d', '#f28c28', 'ATOMOS'], smallhd: ['#26282b', '#e33b2e', 'SmallHD'], teradek: ['#2a2c2f', '#e1251b', 'teradek'],
+        hollyland: ['#2c2d30', '#2a7de1', 'Hollyland'], dji: ['#2a2b2d', '#8a8f96', 'DJI'], shure: ['#202022', '#b7bcc2', 'SHURE'], sennheiser: ['#1d1e20', '#1e88c7', 'SENNHEISER'], rode: ['#1e1e20', '#c9c9c9', 'RØDE'],
+        dpa: ['#202022', '#9aa0a6', 'DPA'], neumann: ['#b9bcc0', '#2a2a2a', 'NEUMANN'], yamaha: ['#2a2c30', '#7a3eb1', 'YAMAHA'], 'allen & heath': ['#2b2d31', '#e5322d', 'ALLEN&HEATH'], midas: ['#2c2e33', '#c99a2e', 'MIDAS'],
+        behringer: ['#2a2c30', '#e3c32b', 'BEHRINGER'], focusrite: ['#b3121b', '#2a2a2a', 'Focusrite'], rme: ['#3a3d42', '#2b6fb6', 'RME'], motu: ['#2b2b2d', '#c0c0c0', 'MOTU'], 'universal audio': ['#2a2a2c', '#c0c0c0', 'UA'],
+        'clear-com': ['#2a2c30', '#e2001a', 'Clear-Com'], riedel: ['#2a2c30', '#e30613', 'RIEDEL'], 'green-go': ['#2a2c30', '#3fae49', 'GREEN-GO'], aputure: ['#2a2a2b', '#e46d1f', 'aputure'], astera: ['#27282b', '#3ab5a6', 'ASTERA'],
+        'ma lighting': ['#2a2b2e', '#f2a900', 'grandMA3'], grandma: ['#2a2b2e', '#f2a900', 'grandMA3'], chamsys: ['#2a2b2e', '#2bb3e6', 'ChamSys'], etc: ['#2a2b2e', '#c0c0c0', 'ETC'], netgear: ['#33363b', '#7b51d3', 'NETGEAR'],
+        cisco: ['#3a3d42', '#1ba0d7', 'CISCO'], ubiquiti: ['#e9ebee', '#1f6fd6', 'UniFi'], apple: ['#c8cbcf', '#8a8f96', ''], magewell: ['#2b2d31', '#e30613', 'Magewell'], kiloview: ['#2b2d31', '#1f8fe0', 'Kiloview'],
+        liveu: ['#202224', '#e2231a', 'LiveU'], aviwest: ['#202224', '#e86a1c', 'AVIWEST'], tvu: ['#202224', '#1f8fe0', 'TVU'], kramer: ['#2a2c30', '#0095da', 'KRAMER'], extron: ['#2a2c30', '#0b6fb8', 'Extron'],
+        ross: ['#2a2c30', '#00a1e0', 'ROSS'], 'grass valley': ['#2a2c30', '#7ab929', 'GRASS VALLEY'], vizrt: ['#2a2c30', '#e5007d', 'Vizrt'], newtek: ['#2a2c30', '#e5007d', 'NewTek'], evs: ['#2a2c30', '#00a0df', 'EVS'],
+        decimator: ['#2a2c30', '#e8a21a', 'DECIMATOR'], tvlogic: ['#2a2c30', '#3a7bd5', 'TVLogic'], barco: ['#dfe2e6', '#1d1d1b', 'BARCO'], epson: ['#e8eaed', '#1d4ea3', 'EPSON'], novastar: ['#2a2c30', '#e60012', 'NOVASTAR'],
+        brompton: ['#2a2c30', '#e1251b', 'BROMPTON'], tektronix: ['#2a2c30', '#1f6fd6', 'Tektronix'], phabrix: ['#2a2c30', '#e95d0f', 'PHABRIX'], leader: ['#2a2c30', '#1f6fd6', 'LEADER'], tentacle: ['#2b2d30', '#34b3e4', 'TENTACLE'],
+        ambient: ['#2b2d30', '#e30613', 'ambient'], deity: ['#2b2d30', '#e30613', 'Deity'], enttec: ['#2a2c30', '#1f8fe0', 'ENTTEC'], lumenradio: ['#2a2c30', '#7ab929', 'LumenRadio'], obsidian: ['#2a2b2e', '#7b51d3', 'Obsidian'],
+        starlink: ['#e9ebee', '#1a1a1a', 'STARLINK'], peplink: ['#2a2c30', '#f7941d', 'Peplink'], luminex: ['#2a2c30', '#00a99d', 'Luminex'], eartec: ['#2a2c30', '#e30613', 'Eartec'], birddog: ['#2a2c30', '#f5a623', 'BirdDog'],
+        vaxis: ['#2a2c30', '#e30613', 'VAXIS'], accsoon: ['#2a2c30', '#e30613', 'Accsoon'], casparcg: ['#2a2c30', '#e30613', 'CasparCG'], 'simply live': ['#2a2c30', '#00a0df', 'Simply Live'], evertz: ['#2a2c30', '#1f6fd6', 'evertz'],
+        jvc: ['#2a2c30', '#c0c0c0', 'JVC'], fujinon: ['#1d1e20', '#c9ccd1', 'FUJINON'], angenieux: ['#1d1e20', '#c9ccd1', 'Angénieux'], zeiss: ['#1d1e20', '#1f6fd6', 'ZEISS'], cooke: ['#1d1e20', '#c9a24b', 'Cooke'], sigma: ['#1d1e20', '#c9ccd1', 'SIGMA'],
+        sachtler: ['#2a2c30', '#e30613', 'sachtler'], vinten: ['#2a2c30', '#e30613', 'Vinten'], 'l-acoustics': ['#202022', '#c0c0c0', 'L-ACOUSTICS'], 'd&b': ['#202022', '#c0c0c0', 'd&b'], robe: ['#202022', '#c0c0c0', 'ROBE'],
+        generique: ['#2e3036', '#f0b378', ''], 'générique': ['#2e3036', '#f0b378', '']
+    };
+    const brandOf = it => { const b = fold(it.brand || ''); let k = Object.keys(BR).find(x => b === x || b.startsWith(x)); if (!k) { const n = fold((it.brand || '') + ' ' + (it.model || '')); k = Object.keys(BR).find(x => x.length > 3 && n.includes(x)); } return BR[k] || ['#2e3036', '#f0b378', (it.brand || '').length <= 12 ? String(it.brand || '').toUpperCase() : '']; };
+    // ---------- primitives SVG (repère 200 × 140) ----------
+    let C = null; // contexte de dessin : couleurs
+    const P = (d, f, s, w) => '<path d="' + d + '" fill="' + (f || 'none') + '"' + (s ? ' stroke="' + s + '" stroke-width="' + (w || 1) + '"' : '') + ' stroke-linejoin="round"/>';
+    const Rc = (x, y, w, h, r, f, s, sw) => '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" rx="' + (r || 0) + '" fill="' + f + '"' + (s ? ' stroke="' + s + '" stroke-width="' + (sw || 1) + '"' : '') + '/>';
+    const Ci = (x, y, r, f, s, sw) => '<circle cx="' + x + '" cy="' + y + '" r="' + r + '" fill="' + f + '"' + (s ? ' stroke="' + s + '" stroke-width="' + (sw || 1) + '"' : '') + '/>';
+    const El = (x, y, rx, ry, f, s) => '<ellipse cx="' + x + '" cy="' + y + '" rx="' + rx + '" ry="' + ry + '" fill="' + f + '"' + (s ? ' stroke="' + s + '"' : '') + '/>';
+    const Tx = (x, y, t, sz, f, an, wt) => t ? '<text x="' + x + '" y="' + y + '" font-family="Arial,Helvetica,sans-serif" font-size="' + sz + '" font-weight="' + (wt || 700) + '" fill="' + f + '" text-anchor="' + (an || 'middle') + '" letter-spacing=".3">' + esc(t) + '</text>' : '';
+    const L = (x1, y1, x2, y2, s, w, cap) => '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" stroke="' + s + '" stroke-width="' + (w || 1) + '" stroke-linecap="' + (cap || 'round') + '"/>';
+    const shadow = (cx, cy, rx) => El(cx, cy, rx, rx * 0.12, 'rgba(0,0,0,.28)');
+    // bloc en volume : face avant + dessus + côté droit (profondeur d)
+    function block(x, y, w, h, d, base, r) {
+        const f = base || C.b, dy = d * 0.55;
+        return P('M' + x + ' ' + y + 'l' + d + ' ' + (-dy) + 'h' + w + 'l' + (-d) + ' ' + dy + 'z', sh(f, 0.28)) +
+            P('M' + (x + w) + ' ' + y + 'l' + d + ' ' + (-dy) + 'v' + h + 'l' + (-d) + ' ' + dy + 'z', sh(f, -0.35)) +
+            Rc(x, y, w, h, r || 0, 'url(#gb' + (base ? 'x' + f.slice(1) : '') + ')', 'rgba(0,0,0,.45)', 0.8);
+    }
+    const lensFront = (x, y, r) => Ci(x, y, r, '#151617', '#000', 1) + Ci(x, y, r * 0.8, '#2b2d30') + Ci(x, y, r * 0.62, 'url(#gg)') + Ci(x - r * 0.2, y - r * 0.22, r * 0.16, 'rgba(255,255,255,.55)') + Ci(x + r * 0.18, y + r * 0.16, r * 0.07, 'rgba(255,255,255,.3)');
+    const bnc = (x, y, s) => Ci(x, y, 3.2 * (s || 1), '#c9ced4', '#5b6066', 0.6) + Ci(x, y, 1.3 * (s || 1), '#2b2b2b');
+    const hdmi = (x, y) => P('M' + (x - 4) + ' ' + (y - 2) + 'h8l-1 4h-6z', '#111', '#888', 0.5);
+    const rj = (x, y) => Rc(x - 3, y - 3, 6, 6, 0.6, '#111', '#888', 0.5) + Rc(x - 1.5, y + 1, 3, 1.4, 0, '#9a9a9a');
+    const xlr = (x, y, s) => Ci(x, y, 4.2 * (s || 1), '#c9ced4', '#5b6066', 0.6) + Ci(x, y, 3 * (s || 1), '#1a1a1a') + [[-1, -1], [1, -1], [0, 1.2]].map(([a, b]) => Ci(x + a * (s || 1), y + b * (s || 1), 0.55, '#ddd')).join('');
+    const led = (x, y, c) => Ci(x, y, 1.6, c || '#3ddc84') + Ci(x - 0.4, y - 0.4, 0.6, 'rgba(255,255,255,.8)');
+    const knob = (x, y, r) => Ci(x, y, r, '#1b1b1c', '#000', 0.6) + Ci(x, y, r * 0.75, '#3a3c40') + L(x, y, x, y - r * 0.7, '#e8e8e8', 0.9);
+    const screen = (x, y, w, h, kind) => {
+        let s = Rc(x, y, w, h, 1.5, 'url(#gs)', '#000', 0.8);
+        if (kind === 'bars') { const cs = ['#c0c0c0', '#c0c000', '#00c0c0', '#00c000', '#c000c0', '#c00000', '#0000c0']; cs.forEach((c, i) => { s += Rc(x + 2 + i * (w - 4) / 7, y + 2, (w - 4) / 7, h * 0.66, 0, c); }); }
+        else if (kind === 'wave') { s += P('M' + (x + 3) + ' ' + (y + h * 0.7) + Array.from({ length: 12 }, (_, i) => ' L' + (x + 3 + i * (w - 6) / 11) + ' ' + (y + h * (0.3 + 0.35 * Math.abs(Math.sin(i * 1.3))))).join(''), 'none', '#4ef18a', 0.9); }
+        else if (kind === 'multi') { for (let i = 0; i < 4; i++) s += Rc(x + 2 + (i % 2) * (w / 2 - 1), y + 2 + Math.floor(i / 2) * (h / 2 - 1), w / 2 - 3, h / 2 - 3, 0.5, ['#3a6ea5', '#7a9a4a', '#a5703a', '#6a4aa5'][i], null); }
+        else if (kind === 'ui') { s += Rc(x + 2, y + 2, w * 0.4, h - 4, 0.5, '#24476e') + Rc(x + w * 0.45, y + 2, w * 0.5, h * 0.3, 0.5, '#2f5f39') + Rc(x + w * 0.45, y + h * 0.4, w * 0.5, h * 0.5, 0.5, '#5a3a2a'); }
+        else if (kind === 'img') { s += P('M' + (x + 1) + ' ' + (y + h - 1) + 'l' + (w * 0.3) + ' ' + (-h * 0.45) + 'l' + (w * 0.2) + ' ' + (h * 0.25) + 'l' + (w * 0.2) + ' ' + (-h * 0.3) + 'l' + (w * 0.28) + ' ' + (h * 0.5) + 'z', 'rgba(120,170,220,.55)') + Ci(x + w * 0.75, y + h * 0.3, h * 0.12, 'rgba(255,220,140,.8)'); }
+        return s + P('M' + (x + 1) + ' ' + (y + 1) + 'h' + (w * 0.5) + 'l' + (-w * 0.25) + ' ' + (h - 2) + 'h' + (-w * 0.25) + 'z', 'rgba(255,255,255,.06)');
+    };
+    const label = (x, y, sz, an) => Tx(x, y, C.t, sz || 6, C.a === '#e8e8e8' ? '#e8e8e8' : sh(C.a, 0.15), an);
+    const btns = (x, y, cols, rows, w, h, gap, colors) => { let s = ''; for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) { const col = colors ? colors[(r * cols + c) % colors.length] : '#d9dbde'; s += Rc(x + c * (w + gap), y + r * (h + gap), w, h, 1.2, col, 'rgba(0,0,0,.5)', 0.5); } return s; };
+    // ---------- dessins par type ----------
+    const D = {
+        cam_cine() { return shadow(105, 128, 70) + block(62, 52, 72, 60, 22) + block(70, 34, 40, 10, 10, '#232427') + Rc(84, 22, 8, 14, 1, '#1d1e20') + Rc(100, 22, 8, 14, 1, '#1d1e20') + Rc(80, 18, 32, 6, 3, '#1d1e20') +
+            block(34, 64, 30, 38, 10, '#1b1c1e') + El(34, 83, 7, 19, '#111') + lensFront(34, 83, 17) + Rc(46, 63, 3, 40, 0, '#3a3c40') + Rc(52, 63, 3, 40, 0, '#3a3c40') +
+            Rc(118, 62, 10, 14, 1, '#111') + bnc(123, 84) + bnc(123, 94) + Ci(73, 60, 2, C.a) + label(98, 104, 7) + block(136, 30, 30, 20, 6, '#1c1d1f') + screen(138, 33, 26, 15, 'img'); },
+        cam_eng() { return shadow(102, 126, 80) + block(50, 58, 104, 44, 20) + block(22, 66, 30, 30, 10, '#1b1c1e') + lensFront(22, 81, 15) + Rc(30, 64, 3, 34, 0, '#3a3c40') + Rc(38, 64, 3, 34, 0, '#3a3c40') +
+            Rc(66, 30, 70, 8, 4, '#1d1e20') + Rc(74, 36, 6, 22, 1, '#1d1e20') + Rc(122, 36, 6, 22, 1, '#1d1e20') + block(46, 40, 28, 14, 6, '#18191b') + El(46, 47, 4, 7, '#0e0f10') +
+            Rc(150, 70, 12, 26, 3, '#18191b') + P('M154 102 q20 10 10 22 h-30 q8-8 6-20z', '#202124') + btns(90, 74, 4, 2, 6, 4, 2, ['#5a5d63']) + Ci(84, 92, 3, '#c33') + label(118, 70, 7); },
+        cam_box() { return shadow(100, 126, 60) + block(70, 50, 64, 58, 18) + Rc(76, 36, 46, 8, 4, '#1d1e20') + Rc(82, 42, 6, 10, 1, '#1d1e20') + Rc(110, 42, 6, 10, 1, '#1d1e20') + block(44, 62, 28, 34, 8, '#1b1c1e') + lensFront(44, 79, 16) + Rc(54, 60, 3, 38, 0, '#3a3c40') + label(102, 102, 6) + bnc(124, 88) + screen(90, 60, 30, 20, 'img'); },
+        cam_hybrid() { return shadow(100, 124, 58) + P('M58 62 h84 q8 0 8 8 v40 q0 8 -8 8 h-84 q-8 0 -8 -8 v-40 q0 -8 8 -8z', 'url(#gb)', 'rgba(0,0,0,.5)') + P('M84 62 l6 -16 h22 l6 16z', sh(C.b, 0.1), 'rgba(0,0,0,.5)') +
+            P('M50 70 q-8 6 -6 30 q2 16 10 18 h14 v-48z', sh(C.b, -0.2)) + Ci(101, 92, 28, '#151617', '#000') + Ci(101, 92, 23, '#2b2d30') + Ci(101, 92, 18, 'url(#gg)') + Ci(95, 86, 4, 'rgba(255,255,255,.5)') + Rc(124, 54, 10, 6, 2, '#18191b') + Ci(132, 66, 3, C.a) + label(101, 58, 6); },
+        cam_studio() { return shadow(104, 130, 84) + block(64, 46, 70, 54, 18) + block(18, 52, 48, 44, 12, '#1d1e20') + lensFront(18, 74, 18) + Rc(28, 50, 4, 48, 0, '#3a3c40') + Rc(40, 50, 4, 48, 0, '#3a3c40') +
+            block(92, 16, 54, 34, 10, '#1b1c1e') + screen(95, 20, 48, 26, 'img') + Rc(136, 58, 16, 30, 2, '#18191b') + L(150, 100, 150, 130, '#3a3c40', 6) + L(120, 130, 180, 130, '#3a3c40', 5) + label(98, 94, 7) + Ci(76, 56, 2.5, '#e33'); },
+        ptz() { return shadow(100, 128, 46) + P('M66 122 h68 l-6 -16 h-56z', 'url(#gb)', 'rgba(0,0,0,.4)') + Rc(76, 98, 48, 10, 3, sh(C.b, -0.15)) + P('M70 98 v-46 h10 v46z', sh(C.b, -0.05), 'rgba(0,0,0,.4)') + P('M120 98 v-46 h10 v46z', sh(C.b, -0.25), 'rgba(0,0,0,.4)') +
+            Rc(78, 42, 44, 50, 18, 'url(#gb)', 'rgba(0,0,0,.45)') + lensFront(100, 66, 15) + led(116, 50, '#e33') + label(100, 117, 6); },
+        action() { return shadow(100, 118, 34) + block(70, 58, 56, 50, 12) + lensFront(108, 82, 14) + Rc(76, 64, 18, 12, 2, 'url(#gs)') + Ci(84, 52, 4, '#c33') + label(86, 104, 5); },
+        drone() { const arm = (x, y) => L(100, 72, x, y, '#2a2b2d', 6) + El(x, y - 4, 26, 3, 'rgba(160,170,180,.45)') + Rc(x - 5, y - 4, 10, 8, 3, '#1d1e20'); return shadow(100, 124, 70) + arm(38, 50) + arm(162, 50) + arm(48, 102) + arm(152, 102) + Rc(80, 58, 40, 30, 10, 'url(#gb)', 'rgba(0,0,0,.4)') + Ci(100, 98, 9, '#1b1c1e') + lensFront(100, 100, 6) + label(100, 76, 5); },
+        lens() { return shadow(100, 126, 70) + Rc(40, 48, 120, 56, 6, '#18191a', '#000') + [56, 80, 104, 128].map((x, i) => Rc(x, 46, i % 2 ? 14 : 18, 60, 2, i % 2 ? '#2a2c30' : '#222326') + Array.from({ length: 6 }, (_, k) => L(x + 2 + k * 2.6, 48, x + 2 + k * 2.6, 104, 'rgba(255,255,255,.08)', 0.8)).join('')).join('') +
+            El(160, 76, 8, 30, '#0f1011', '#000') + El(40, 76, 6, 26, '#2a2c30') + Rc(52, 62, 3, 28, 0, C.a) + Tx(115, 72, C.t || 'LENS', 6, '#d9d9d9') + Tx(115, 84, 'f/2.8', 5, '#9a9a9a'); },
+        mixer_small() { return shadow(100, 118, 82) + P('M24 92 l12 -36 h128 l12 36z', 'url(#gb)', 'rgba(0,0,0,.45)') + P('M24 92 h152 v10 h-152z', sh(C.b, -0.35)) + btns(46, 64, 4, 1, 12, 7, 5, ['#e9eaec']) + btns(46, 76, 4, 1, 12, 7, 5, ['#e9eaec']) + btns(120, 64, 3, 2, 10, 7, 4, ['#5a5d63']) + Rc(116, 82, 30, 4, 1, '#c33') + label(100, 98, 5) + [40, 56, 72, 88].map(x => hdmi(x, 105)).join(''); },
+        mixer_panel() { let s = shadow(100, 128, 92) + P('M10 104 l18 -54 h144 l18 54z', 'url(#gb)', 'rgba(0,0,0,.45)') + P('M10 104 h180 v12 h-180z', sh(C.b, -0.35));
+            s += btns(34, 62, 10, 1, 8, 6, 3, ['#d9dbde']) + btns(32, 72, 10, 1, 8, 6, 3, ['#3ddc84', '#d9dbde', '#d9dbde', '#d9dbde', '#d9dbde', '#d9dbde', '#d9dbde', '#d9dbde', '#d9dbde', '#d9dbde']) + btns(30, 82, 10, 1, 8, 6, 3, ['#ff4d4d', '#d9dbde', '#d9dbde', '#d9dbde', '#d9dbde', '#d9dbde', '#d9dbde', '#d9dbde', '#d9dbde', '#d9dbde']) + btns(28, 92, 10, 1, 8, 6, 3, ['#ffd24d']);
+            return s + Rc(150, 64, 10, 32, 2, '#18191b') + Rc(151, 70, 8, 6, 1, '#d9dbde') + L(155, 58, 155, 74, '#bbb', 2) + Rc(132, 58, 14, 8, 1, 'url(#gs)') + label(100, 112, 6); },
+        rack() { let s = shadow(100, 112, 90) + block(16, 54, 160, 36, 10) + Rc(10, 54, 8, 36, 1, sh(C.b, 0.1), 'rgba(0,0,0,.4)') + Rc(174, 54, 8, 36, 1, sh(C.b, -0.1), 'rgba(0,0,0,.4)') + Ci(14, 60, 1.5, '#777') + Ci(14, 84, 1.5, '#777') + Ci(178, 60, 1.5, '#777') + Ci(178, 84, 1.5, '#777');
+            return s + screen(26, 60, 34, 22, C.scr || 'bars') + btns(68, 62, 4, 2, 7, 6, 3, ['#5a5d63', '#5a5d63', '#3ddc84', '#5a5d63']) + Rc(110, 62, 30, 4, 1, '#111') + led(150, 64) + led(156, 64, '#ffb300') + knob(164, 76, 5) + label(120, 84, 6); },
+        rack_ports() { let s = shadow(100, 112, 90) + block(16, 50, 160, 40, 10) + Rc(10, 50, 8, 40, 1, sh(C.b, 0.1)) + Rc(174, 50, 8, 40, 1, sh(C.b, -0.1));
+            for (let r = 0; r < 2; r++) for (let i = 0; i < 16; i++) s += (C.port === 'rj' ? rj(30 + i * 8.6, 62 + r * 14) : C.port === 'xlr' ? (i < 12 ? xlr(30 + i * 11.4, 62 + r * 14, 0.9) : '') : bnc(30 + i * 8.6, 62 + r * 14, 0.9));
+            return s + led(166, 58) + led(166, 64, '#ffb300') + label(150, 86, 6); },
+        minibox() { return shadow(100, 116, 54) + block(56, 60, 82, 46, 16) + bnc(66, 72) + bnc(66, 92) + hdmi(126, 74) + hdmi(126, 92) + led(96, 70) + led(102, 70, '#3a9df0') + label(97, 98, 6) + Tx(97, 86, (C.model || '').slice(0, 16), 4.5, '#9a9a9a', 'middle', 400); },
+        card() { return shadow(100, 112, 80) + Rc(30, 52, 132, 46, 2, '#1f5e3a', '#0e2f1c') + Array.from({ length: 10 }, (_, i) => Rc(44 + i * 10, 98, 7, 8, 0, '#d4a640')).join('') + Rc(60, 60, 34, 26, 2, '#111') + Rc(100, 62, 20, 20, 1, '#222') + Rc(150, 46, 16, 58, 1, '#b8bcc2', '#666') + bnc(158, 58) + bnc(158, 72) + bnc(158, 86) + label(76, 76, 5); },
+        dongle() { return shadow(100, 112, 46) + block(66, 62, 64, 34, 10) + L(130, 78, 168, 70, '#1a1a1a', 4) + Rc(166, 64, 12, 10, 2, '#888') + bnc(76, 79) + hdmi(118, 79) + label(97, 90, 5) + led(98, 70); },
+        mon_field() { return shadow(100, 124, 70) + block(36, 34, 128, 78, 10) + screen(44, 40, 112, 64, 'img') + Rc(36, 26, 128, 10, 2, sh(C.b, -0.2)) + btns(56, 106, 6, 1, 10, 3, 6, ['#5a5d63']) + label(100, 120, 5) + Rc(94, 112, 12, 10, 1, '#1a1a1a'); },
+        mon_desk() { return shadow(100, 130, 70) + P('M92 112 l-24 16 h64 l-24 -16z', sh(C.b, -0.1)) + Rc(94, 100, 12, 14, 1, sh(C.b, -0.2)) + block(22, 22, 156, 82, 8) + screen(28, 27, 144, 72, C.scr || 'multi') + label(100, 103, 5); },
+        projector() { return shadow(100, 120, 76) + block(30, 56, 132, 52, 20, C.b) + lensFront(64, 82, 18) + Array.from({ length: 6 }, (_, i) => L(118 + i * 6, 64, 118 + i * 6, 100, 'rgba(0,0,0,.35)', 2)).join('') + label(96, 102, 6) + Rc(150, 44, 12, 6, 2, '#1a1a1a') + P('M46 82 L-10 40 L-10 124z', 'rgba(255,248,210,.12)'); },
+        ledwall() { let s = shadow(100, 128, 84); for (let r = 0; r < 3; r++) for (let c = 0; c < 4; c++) s += Rc(22 + c * 39, 20 + r * 34, 38, 33, 1, '#0f1012', '#2a2a2a'); return s + P('M22 20 h156 v102 h-156z', 'url(#gled)') + P('M22 120 h156 v8 h-156z', sh(C.b, -0.2)) + label(100, 136, 5); },
+        ledproc() { return D.rack.call(this); },
+        tx() { return shadow(100, 120, 52) + L(70, 60, 62, 18, '#1a1a1a', 4) + L(130, 60, 138, 18, '#1a1a1a', 4) + Ci(62, 18, 3, '#2a2a2a') + Ci(138, 18, 3, '#2a2a2a') + block(56, 56, 86, 54, 14) + screen(68, 66, 34, 18, 'ui') + bnc(122, 72) + hdmi(122, 88) + led(70, 98) + label(98, 104, 6); },
+        backpack() { return shadow(100, 128, 56) + Rc(54, 30, 92, 94, 16, 'url(#gb)', 'rgba(0,0,0,.45)') + Rc(64, 40, 72, 40, 6, sh(C.b, -0.2)) + screen(74, 46, 52, 26, 'ui') + Array.from({ length: 6 }, (_, i) => L(60 + i * 16, 30, 56 + i * 16, 8, '#1a1a1a', 3)).join('') + label(100, 104, 7) + Rc(70, 88, 60, 6, 2, C.a); },
+        console_audio() { let s = shadow(100, 128, 94) + P('M8 110 l22 -64 h140 l22 64z', 'url(#gb)', 'rgba(0,0,0,.45)') + P('M8 110 h184 v12 h-184z', sh(C.b, -0.35)) + P('M44 46 l4 -24 h104 l4 24z', sh(C.b, -0.15));
+            s += screen(66, 25, 68, 18, 'ui');
+            for (let i = 0; i < 16; i++) { const x = 30 + i * 9; s += L(x + 2, 74, x - 1, 104, '#0c0c0d', 1.6) + Rc(x - 3 + (i % 3), 82 + (i * 7) % 16, 7, 5, 1, i % 4 ? '#d9dbde' : C.a) + Ci(x + 3, 60, 2.2, '#1b1b1c', '#666', 0.4) + Ci(x + 4, 68, 1.6, ['#e33', '#3ddc84', '#ffb300'][i % 3]); }
+            return s + label(100, 118, 6); },
+        interface() { return shadow(100, 116, 60) + block(42, 62, 116, 42, 12) + xlr(60, 82, 1.2) + xlr(84, 82, 1.2) + knob(112, 78, 7) + knob(134, 78, 7) + knob(148, 94, 4) + led(60, 70) + led(84, 70) + label(100, 100, 6); },
+        mic_hand() { return shadow(100, 126, 26) + P('M86 54 l10 66 h8 l10 -66z', '#1d1e20', '#000', 0.6) + Ci(100, 40, 22, 'url(#gmesh)', '#666', 1) + P('M78 46 h44', 'none', '#888', 2) + L(97, 70, 97, 116, 'rgba(255,255,255,.12)', 2) + Tx(100, 92, C.t, 4, '#bbb'); },
+        mic_shotgun() { return shadow(100, 112, 80) + Rc(20, 64, 160, 14, 7, 'url(#gmet)', '#555', 0.6) + Array.from({ length: 18 }, (_, i) => Rc(30 + i * 5, 66, 2, 10, 1, 'rgba(0,0,0,.45)')).join('') + Rc(150, 63, 30, 16, 4, '#2a2b2d') + xlr(184, 71, 0.8) + Tx(140, 74, C.t, 4.5, '#333'); },
+        mic_lav() { return shadow(100, 112, 40) + P('M60 90 C 90 40, 120 120, 160 60', 'none', '#111', 2.4) + Rc(52, 82, 16, 12, 5, '#1a1a1a') + Ci(60, 88, 4, '#333') + Rc(150, 54, 18, 12, 3, '#202022') + Rc(118, 92, 46, 28, 5, 'url(#gb)', 'rgba(0,0,0,.4)') + label(141, 109, 4.5); },
+        mic_studio() { return shadow(100, 128, 40) + Rc(88, 92, 24, 34, 4, '#cfd2d6', '#777') + Rc(78, 22, 44, 76, 22, 'url(#gmesh)', '#666') + Rc(78, 58, 44, 6, 0, '#c9ccd1') + Tx(100, 116, C.t, 4.5, '#333'); },
+        receiver() { let s = shadow(100, 116, 80) + L(42, 56, 34, 14, '#1a1a1a', 4) + L(158, 56, 166, 14, '#1a1a1a', 4) + block(26, 54, 150, 38, 10) + screen(40, 62, 46, 22, 'wave'); for (let i = 0; i < 4; i++) s += led(100 + i * 12, 66, i % 2 ? '#3ddc84' : '#3a9df0') + Rc(96 + i * 12, 74, 8, 8, 1.5, '#5a5d63'); return s + knob(158, 72, 6) + label(130, 88, 6); },
+        bodypack() { return shadow(100, 124, 32) + L(86, 34, 80, 6, '#1a1a1a', 3) + Rc(70, 32, 60, 88, 10, 'url(#gb)', 'rgba(0,0,0,.45)') + screen(80, 44, 40, 20, 'ui') + Rc(80, 72, 40, 8, 2, C.a) + Ci(116, 98, 5, '#1b1b1c', '#555') + label(100, 112, 5.5); },
+        headset() { return shadow(100, 126, 50) + P('M54 82 Q54 22 100 22 Q146 22 146 82', 'none', '#202124', 7) + Rc(40, 70, 26, 40, 10, 'url(#gb)', 'rgba(0,0,0,.4)') + Rc(134, 70, 26, 40, 10, 'url(#gb)', 'rgba(0,0,0,.4)') + P('M52 104 Q60 126 100 122', 'none', '#202124', 3) + Ci(102, 122, 4, '#1a1a1a'); },
+        speaker() { return shadow(100, 130, 48) + block(58, 18, 80, 108, 14) + Ci(98, 92, 26, '#111', '#000') + Ci(98, 92, 20, '#2a2b2d') + Ci(98, 92, 7, '#3a3c40') + Rc(78, 34, 40, 18, 6, '#111') + Rc(82, 38, 32, 10, 4, '#222') + label(98, 122, 5.5); },
+        net_switch() { C.port = 'rj'; return D.rack_ports(); },
+        router() { return shadow(100, 118, 56) + L(70, 66, 60, 20, '#1a1a1a', 4) + L(100, 64, 100, 16, '#1a1a1a', 4) + L(130, 66, 140, 20, '#1a1a1a', 4) + block(46, 64, 108, 40, 12) + Array.from({ length: 5 }, (_, i) => led(64 + i * 10, 78, i < 3 ? '#3ddc84' : '#3a9df0')).join('') + rj(120, 86) + rj(132, 86) + label(98, 98, 6); },
+        dish() { return shadow(100, 128, 40) + L(100, 120, 100, 92, '#bbb', 5) + P('M60 92 L140 92 L150 28 L50 28z', '#f2f3f5', '#999', 1) + P('M60 92 L140 92 L150 28 L50 28z', 'url(#gsh)') + Tx(100, 64, C.t, 6, '#333'); },
+        laptop() { return shadow(100, 124, 80) + P('M36 26 h128 v74 h-128z', '#2a2b2e', '#111', 1.4) + screen(42, 31, 116, 64, 'ui') + P('M22 102 h156 l-10 14 h-136z', C.b === '#2e3036' ? '#c8cbcf' : sh(C.b, 0.1), '#666', 0.8) + Rc(86, 106, 28, 4, 2, 'rgba(0,0,0,.25)'); },
+        desktop() { return shadow(100, 120, 50) + block(58, 56, 84, 56, 16, '#c8cbcf') + Array.from({ length: 30 }, (_, i) => Ci(72 + (i % 10) * 6, 98 + Math.floor(i / 10) * 4, 1, 'rgba(0,0,0,.35)')).join('') + Ci(132, 66, 2, '#fff') + Tx(100, 80, C.t, 5, '#555'); },
+        tablet() { return shadow(100, 126, 56) + Rc(44, 18, 112, 104, 10, '#1d1e20', '#000') + screen(52, 26, 96, 88, 'ui'); },
+        phone() { return shadow(100, 128, 30) + Rc(76, 12, 48, 114, 9, '#1d1e20', '#000') + screen(80, 18, 40, 100, 'img') + Rc(94, 15, 12, 3, 1.5, '#000'); },
+        pc_tower() { return shadow(100, 128, 46) + block(66, 22, 60, 102, 22) + Array.from({ length: 12 }, (_, i) => L(74, 32 + i * 5, 118, 32 + i * 5, 'rgba(0,0,0,.35)', 1.5)).join('') + Ci(96, 106, 4, '#3a9df0') + label(96, 118, 5); },
+        server() { C.scr = 'ui'; return D.rack(); },
+        timecode() { return shadow(100, 112, 34) + block(70, 62, 56, 40, 10) + screen(78, 70, 40, 16, 'ui') + Tx(98, 82, '10:24:13:07', 5, '#4ef18a') + led(84, 94, '#e33') + label(98, 99, 5); },
+        scope() { C.scr = 'wave'; return D.rack(); },
+        light_console() { let s = shadow(100, 128, 94) + P('M8 112 l20 -48 h144 l20 48z', 'url(#gb)', 'rgba(0,0,0,.45)') + P('M8 112 h184 v10 h-184z', sh(C.b, -0.35)) + block(30, 22, 60, 38, 8, '#1b1c1e') + block(108, 22, 60, 38, 8, '#1b1c1e') + screen(33, 25, 54, 32, 'ui') + screen(111, 25, 54, 32, 'ui');
+            for (let i = 0; i < 10; i++) { const x = 34 + i * 10; s += L(x, 76, x - 2, 104, '#0c0c0d', 1.6) + Rc(x - 4, 86 + (i * 5) % 12, 7, 5, 1, '#d9dbde'); } return s + btns(136, 72, 4, 3, 7, 6, 3, ['#5a5d63', C.a]) + label(100, 120, 6); },
+        led_panel() { return shadow(100, 128, 66) + P('M44 116 L56 76 M156 116 L144 76', 'none', '#2a2b2d', 5) + Rc(30, 20, 140, 72, 6, 'url(#gb)', 'rgba(0,0,0,.5)') + Rc(36, 26, 128, 60, 3, 'url(#gwarm)') + Array.from({ length: 6 }, (_, i) => L(36 + i * 21.3, 26, 36 + i * 21.3, 86, 'rgba(255,255,255,.25)', 0.6)).join('') + label(100, 99, 5) + L(100, 92, 100, 124, '#2a2b2d', 5); },
+        fresnel() { return shadow(100, 128, 50) + P('M64 116 L78 84 M136 116 L122 84', 'none', '#2a2b2d', 5) + P('M58 40 h84 v56 h-84z', 'url(#gb)', 'rgba(0,0,0,.5)') + Ci(100, 68, 26, '#1a1a1a') + Ci(100, 68, 22, 'url(#gwarm)') + [8, 14, 19].map(r => Ci(100, 68, r, 'none', 'rgba(255,255,255,.35)', 0.8)).join('') + P('M50 36 l12 8 v48 l-12 8z', '#151515') + P('M150 36 l-12 8 v48 l12 8z', '#151515') + Rc(56, 30, 88, 6, 1, '#151515') + label(100, 108, 5); },
+        cob() { return shadow(100, 128, 60) + P('M74 120 L84 96 M126 120 L116 96', 'none', '#2a2b2d', 5) + P('M48 30 L82 56 V86 L48 112z', '#c9ccd1', '#777') + P('M48 30 L82 56 V86 L48 112z', 'url(#gsh)') + Rc(80, 50, 60, 42, 6, 'url(#gb)', 'rgba(0,0,0,.5)') + Ci(84, 71, 10, 'url(#gwarm)') + Array.from({ length: 6 }, (_, i) => L(98 + i * 7, 56, 98 + i * 7, 86, 'rgba(0,0,0,.35)', 2)).join('') + label(112, 102, 5); },
+        tube() { return shadow(100, 112, 90) + Rc(10, 62, 180, 16, 8, 'url(#gwarm)', 'rgba(0,0,0,.4)') + Rc(10, 62, 14, 16, 6, '#202022') + Rc(176, 62, 14, 16, 6, '#202022') + Rc(10, 62, 180, 6, 3, 'rgba(255,255,255,.35)') + label(100, 96, 6); },
+        movinghead() { return shadow(100, 130, 46) + Rc(66, 104, 68, 22, 4, 'url(#gb)', 'rgba(0,0,0,.4)') + P('M68 104 v-50 h12 v50z M120 104 v-50 h12 v50z', sh(C.b, -0.1)) + Rc(76, 34, 48, 58, 14, 'url(#gb)', 'rgba(0,0,0,.45)') + Ci(100, 60, 16, 'url(#gwarm)') + label(100, 119, 5); },
+        par() { return shadow(100, 126, 46) + P('M64 118 L78 92 M136 118 L122 92', 'none', '#2a2b2d', 5) + Rc(62, 40, 76, 58, 10, 'url(#gb)', 'rgba(0,0,0,.45)') + Ci(100, 69, 24, '#151515') + Array.from({ length: 12 }, (_, i) => Ci(100 + Math.cos(i * 0.52) * 14, 69 + Math.sin(i * 0.52) * 14, 3, ['#ff5555', '#55ff88', '#5588ff'][i % 3])).join('') + Ci(100, 69, 4, '#fff'); },
+        dmx_node() { return D.minibox(); },
+        ups() { return shadow(100, 128, 40) + block(70, 22, 54, 102, 16) + screen(80, 34, 34, 16, 'ui') + Ci(97, 64, 6, '#1b1b1c', '#3ddc84', 1.2) + label(97, 112, 5); },
+        powerstrip() { return shadow(100, 108, 90) + block(16, 74, 168, 22, 8, '#e6e6e4') + Array.from({ length: 6 }, (_, i) => Ci(36 + i * 22, 85, 6, '#d2d2d0', '#999') + Ci(33 + i * 22, 85, 1, '#333') + Ci(39 + i * 22, 85, 1, '#333')).join('') + Rc(166, 78, 10, 14, 2, '#e33') + P('M16 85 C 0 85, 6 120, 30 118', 'none', '#111', 3); },
+        cabinet() { return shadow(100, 130, 44) + block(66, 14, 64, 112, 14, '#8e9399') + Rc(72, 20, 52, 100, 2, 'rgba(0,0,0,.08)', 'rgba(0,0,0,.4)') + Rc(118, 60, 4, 18, 1, '#222') + P('M90 40 l8 -10 l-3 9 h6 l-8 10 l3 -9z', '#ffcc00', '#222', 0.6) + Array.from({ length: 4 }, (_, i) => Ci(84 + i * 10, 104, 4, ['#e33', '#1d6fd6', '#1d6fd6', '#e8e8e8'][i], '#333')).join(''); },
+        generator() { return shadow(100, 128, 92) + block(14, 52, 160, 68, 16, '#d9a21b') + Array.from({ length: 10 }, (_, i) => L(106 + i * 6, 62, 106 + i * 6, 108, 'rgba(0,0,0,.4)', 2)).join('') + Rc(30, 64, 46, 30, 2, '#1d1e20') + screen(34, 68, 22, 10, 'ui') + Ci(66, 86, 3, '#e33') + Rc(150, 30, 10, 22, 2, '#555') + Tx(54, 108, C.t, 6, '#1d1e20'); },
+        battery() { return shadow(100, 120, 50) + block(58, 46, 80, 66, 14) + Rc(70, 58, 56, 10, 2, '#111') + Array.from({ length: 4 }, (_, i) => Rc(74 + i * 13, 61, 10, 4, 1, i < 3 ? '#3ddc84' : '#333')).join('') + Rc(70, 90, 16, 8, 1, '#111') + label(98, 84, 6); },
+        tripod() { return shadow(100, 130, 70) + L(100, 64, 44, 128, '#2a2b2d', 5) + L(100, 64, 156, 128, '#2a2b2d', 5) + L(100, 64, 104, 130, '#2a2b2d', 5) + L(72, 98, 128, 98, '#555', 2) + Rc(80, 40, 40, 26, 6, 'url(#gb)', 'rgba(0,0,0,.4)') + L(116, 50, 170, 66, '#1d1e20', 5) + Rc(76, 30, 48, 10, 2, '#333') + label(100, 58, 5); },
+        gimbal() { return shadow(100, 128, 40) + Rc(92, 84, 16, 40, 6, '#1d1e20') + P('M100 84 V40 H140 V66', 'none', '#2a2b2d', 7) + P('M60 66 H140', 'none', '#2a2b2d', 6) + Rc(76, 52, 46, 28, 4, '#18191b') + lensFront(70, 66, 9) + label(100, 120, 4.5); },
+        dolly() { return shadow(100, 126, 90) + L(10, 118, 190, 118, '#999', 3) + L(10, 124, 190, 124, '#999', 3) + block(40, 84, 120, 26, 12) + [56, 144].map(x => Ci(x, 114, 8, '#1b1b1c', '#666')).join('') + Rc(92, 40, 16, 46, 3, sh(C.b, -0.1)) + Rc(70, 30, 60, 12, 3, '#2a2b2d') + label(100, 102, 6); },
+        jib() { return shadow(100, 130, 70) + L(100, 70, 60, 128, '#2a2b2d', 5) + L(100, 70, 140, 128, '#2a2b2d', 5) + L(30, 80, 186, 40, '#3a3c40', 7) + Rc(16, 72, 22, 22, 3, '#555') + Rc(176, 30, 20, 18, 3, '#1b1c1e') + lensFront(176, 39, 6); },
+        truck() { return shadow(100, 126, 92) + block(14, 40, 120, 66, 10, '#e8eaed') + P('M134 60 h34 l18 22 v24 h-52z', '#dfe2e6', '#888') + P('M140 64 h24 l12 16 h-36z', 'url(#gs)') + [40, 70, 160].map(x => Ci(x, 112, 11, '#1b1b1c', '#555') + Ci(x, 112, 4, '#888')).join('') + Rc(14, 84, 120, 6, 0, C.a); },
+        flightcase() { return shadow(100, 126, 80) + block(26, 40, 140, 80, 18, '#2b2b2d') + Rc(26, 76, 140, 4, 0, '#9aa0a6') + [[26, 40], [158, 40], [26, 112], [158, 112]].map(([x, y]) => Rc(x - 2, y - 2, 12, 12, 2, '#aab0b6')).join('') + Rc(84, 50, 24, 8, 3, '#aab0b6') + Rc(80, 88, 32, 10, 2, '#aab0b6'); },
+        drive() { return shadow(100, 116, 60) + block(44, 34, 110, 76, 14) + Array.from({ length: 4 }, (_, i) => Rc(54 + i * 24, 44, 20, 56, 2, sh(C.b, -0.25)) + led(64 + i * 24, 92)).join('') + label(99, 106, 5); },
+        memcard() { return shadow(100, 112, 40) + P('M70 30 h50 l10 10 v66 h-60z', '#1d1e20', '#000') + Rc(76, 40, 48, 26, 2, C.a) + Tx(100, 86, C.t || 'CFexpress', 5, '#ddd') + Array.from({ length: 6 }, (_, i) => Rc(78 + i * 7, 98, 4, 6, 0, '#d4a640')).join(''); },
+        generic() { return shadow(100, 116, 64) + block(46, 54, 104, 54, 16) + screen(58, 64, 38, 20, 'ui') + bnc(112, 70) + bnc(126, 70) + rj(112, 90) + hdmi(128, 90) + led(64, 96) + label(98, 104, 6); }
+    };
+    // ---------- type d'un appareil ----------
+    const RULES = [
+        ['mixer_panel', /pupitre|skaarhoj/], ['rack', /\(ccu\)|hxcu|hdcu|ak-ucu/], ['receiver', /solidcom c1|freespeak.*(base|transceiver)|bolero antenne|eartec.*base/], ['minibox', /switch hdmi|hdmi switch|selecteur|splitter hdmi|distributeur/], ['dongle', /cam link|hd60|cle de capture|usb capture/], ['mon_field', /pix-e/],
+        ['drone', /\bdrone|mavic|inspire|matrice\b/], ['action', /webcam|gopro|hero ?\d|osmo pocket|insta360|action ?cam/], ['ptz', /\bptz\b|aw-u?e\d|aw-he|brc-|srg-|cr-n\d|birddog p|fr7|tourelle|robotis/],
+        ['cam_studio', /hdc-|hxc-|ldx|ak-uc|camera studio|camera plateau|chaine plateau|studio camera|ursa broadcast/], ['mixer_panel', /camera control panel|\brcp\b|control panel|advanced panel|master control|panneau de controle/],
+        ['cam_eng', /pxw-z[2-9]|cx\d{3}|hc-x|z750|z280|z190|xf\d{3}|cx350|cx4000|hc550|epaule|pmw-|amira|fs7|xdcam|camescope/], ['cam_hybrid', /\ba7|a7s|fx3|fx30|eos r\d|r5 ?c|lumix|gh\d|s1h|pocket|bmpcc|hybride|appareil photo/],
+        ['cam_cine', /alexa|venice|burano|raptor|komodo|monstro|gemini|helium|c300|c400|c500|c700|c70|c80|c50|fx9|fx6|fx2\b|ursa|pyxis|eva1|varicam|ronin 4d|phantom|ember|mavo|z cam|camera cinema|cinema/],
+        ['lens', /optique|objectif|zoom |prime|fujinon|angenieux|cooke|zeiss|sigma|summilux|summicron|signature|\bmk \d|premista|cabrio|cn-e|cj\d|uj\d|ua\d|ha\d|xa\d|lens/],
+        ['mixer_small', /atem mini|atem sdi\b|atem sdi |v-1hd|v-8hd|roland v-|go stream|mini extreme/], ['mixer_panel', /atem (television|production|constellation|2 m|1 m|4 m|tv )|switcher|melangeur|carbonite|xvs|kayenne|av-hs|av-hlc|av-uhs|tricaster|se-\d{3,4}/],
+        ['pc_tower', /pc |ordinateur|station vmix|workstation/], ['card', /decklink|pcie|pro capture|carte/], ['dongle', /usb capture|ultrastudio|usb ?3|eco capture/], ['minibox', /micro converter|mini converter|teranex mini|bidirectional|convertisseur|converter|extendeur|extender|deport|hdbaset|tp-580|demultiplex|multiplex/],
+        ['ledproc', /novastar|brompton|processeur led|tessera|mctrl|vx\d{3,4}/], ['ledwall', /mur led|led wall|cabinet|black pearl|roe |dalle/], ['projector', /projecteur video|videoprojecteur|vidéoprojecteur|pt-r|udx|eb-p|eb-l|barco hdx|laser\b/],
+        ['rack_ports', /videohub|kumo|matrice|router|grille|nk-3g|vs-\d\dh|dxp|patch/], ['rack', /hyperdeck (studio|extreme)|ki pro|smartview|smartscope|multiview|dmon|\be2\b|\bs3\b|aquilon|ultimatte|3play|xt-via|vibox|casparcg|serveur|disguise|resolume|qlab/],
+        ['mon_field', /video assist|ninja|shogun|shinobi|indie|cine 7|smallhd|703|1303|moniteur 5|moniteur 7|lvm-0|field|hyperdeck shuttle/], ['mon_desk', /moniteur|monitor|lvm|lum-|pvm|bvm|lmd|ecran|tv\b|television|multiviewer/],
+        ['backpack', /liveu|lu\d{3}|aviwest|pro460|tvu|sac|bonding/], ['tx', /bolt|teradek|hollyland|mars|pyro|vaxis|cineview|transmission|emetteur video|recepteur video|hf video|sdr|vislink|web presenter|streaming (en|de)coder|vidiu|prism|kiloview|ultra encode|pro convert|encodeur|decodeur|ndi/],
+        ['rack_ports_xlr', /stagebox|rio\d|dl\d\d|s16|sd8|rednet|tio|ar2412/], ['console_audio', /\b(tf|ql|cl|dm|sq|qu|cq)-?\d|dlive|avantis|\bwing\b|x32|m32|\bsi |\bsd\d|quantum|rivage|\bvista\b|\bmg\d|m7cl|console|table de mixage|mixage audio/], ['interface', /scarlett|babyface|fireface|motu m|apollo|umc|interface|rodecaster|zoom h|zoom f|mixpre|sound devices|enregistreur audio|scorpio|zaxcom/],
+        ['receiver', /ulxd4|qlxd4|slxd4|ad4|em 6000|ew.*recepteur|ew-dx em|recepteur hf|recepteur|receiver|psm|iem|axient/], ['bodypack', /ulxd1|qlxd1|slxd1|ad1|emetteur ceinture|beltpack|boitier ceinture|hbp|rs-7|bodypack|smwb|ceinture/],
+        ['mic_shotgun', /canon|mkh|mke 600|ntg|416|cmit|shotgun|perche/], ['mic_lav', /cravate|4060|4061|6060|cos-11|lavalier|serre-tete|4088|countryman|e6\b/], ['mic_studio', /u87|u 87|km ?184|kms|tlm|c414|neumann/], ['mic_hand', /sm58|sm7|beta|micro main|handheld|e835|ad2|sm\d\d|micro/],
+        ['headset', /casque|headset|talkback|ear monitor|mdr/], ['receiver', /freespeak.*base|base ii|bolero antenne|antenne|transceiver|solidcom.*base|eartec.*base|hub/], ['rack', /hms-|ms-70|artist|matrice intercom|mcx|station|interface 4 fils/],
+        ['dish', /starlink/], ['router', /routeur|router|4g|5g|peplink|wifi|point d.acces|balance/], ['net_switch', /switch|netgear|catalyst|unifi|gigacore|m4250|gs308/],
+        ['laptop', /macbook|portable|laptop/], ['desktop', /mac studio|mac mini/], ['tablet', /tablette|ipad/], ['phone', /smartphone|iphone/],
+        ['timecode', /tentacle|lockit|tc-1|timecode/], ['scope', /spg|gen10|5601|oscillo|prism\b|qx 12g|analyseur|mire|sync generator|generateur/],
+        ['light_console', /grandma|ma3|ma2|magicq|mq\d|ion xe|eos|obsidian|nx1|console lumiere|jands/], ['dmx_node', /ode mk|dmx usb|splitter|node|crmx|art7|art-net|artnet/],
+        ['movinghead', /lyre|moving|bmfl|viper|megapointe|pointe|spiider|esprite|forte|perseo|diablo|sharpy|mac |maverick|robin|ledbeam|aura/], ['tube', /tube|titan|helios|pavotube|infinibar|quasar|astera ax|batten/],
+        ['cob', /ls ?\d{3,4}|storm|amaran|nova|forza|m600|cob|evoke|vortex|orbiter|electro storm/], ['fresnel', /fresnel|hmi|m18|m40|m90|m8\b|joker|alpha|tungstene|mandarine|blonde|true blue|arrimax|luxarc|10k|dino|maxi.?brute|t2\b/],
+        ['led_panel', /skypanel|panel|gemini|litemat|kino|celeb|freestyle|sl1|titan x2|astra|led panel|panneau led|projecteur led/], ['par', /par ?\d|par led|cycliode|blinder|molefay|source four|decoupe|poursuite|cyrano/],
+        ['ups', /onduleur|ups/], ['powerstrip', /multiprise|distribution secteur|\bp17\b.*distribution/], ['cabinet', /armoire|tableau elec/], ['generator', /groupe|kva|generat/], ['battery', /batterie|v-mount|vmount|ecoflow|bluetti|chargeur/],
+        ['tripod', /trepied|tete |tripod|sachtler|vinten|oconnor|cartoni|piedestal|manfrotto/], ['gimbal', /ronin|gimbal|movi|rs ?\d|stabilisateur|steadicam|easyrig/], ['dolly', /dolly|panther|peewee|fisher|travelling|slider|rail/], ['jib', /grue|jib|technocrane|techno|polecam|russian arm|bras/],
+        ['truck', /camion|fourgon|utilitaire|car regie|master|vehicule|loge/], ['flightcase', /flight|malle|peli|caisse/], ['memcard', /cfexpress|carte memoire|sd card|cfast|ssd/], ['drive', /raid|thunderbay|disque|nas|stockage/],
+        ['speaker', /enceinte|kara|k2\b|x12|x8\b|x15|ks28|sb18|v8\b|y10|e8\b|t10|leopard|ps15|geo|hdl|art 7|dxr|k12|ks118|prx|eon|l1 pro|sub\b|retour|wedge/]
+    ];
+    const CATK = { cam: 'cam_cine', opt: 'lens', mach: 'tripod', hfv: 'tx', mon: 'mon_desk', led: 'ledwall', lum: 'led_panel', son: 'mic_hand', com: 'bodypack', vid: 'rack', rec: 'drive', nrj: 'battery', cab: 'minibox', veh: 'truck', div: 'flightcase',
+        mix: 'mixer_panel', ptz: 'ptz', ccu: 'rack', conv: 'minibox', rtr: 'rack_ports', cap: 'card', disp: 'ledwall', str: 'tx', hf: 'tx', ext: 'minibox', aud: 'console_audio', aio: 'interface', mic: 'mic_hand', icm: 'bodypack', net: 'net_switch', pc: 'pc_tower', sync: 'scope', dmx: 'dmx_node', pwr: 'ups' };
+    const G = s2 => s2.split(' ');
+    const AV = 'mixer_small mixer_panel card dongle minibox rack_ports rack mon_field mon_desk tx backpack laptop desktop tablet phone pc_tower timecode scope router dish net_switch drive memcard ledproc generic';
+    const ALLOW = { cam: 'drone action ptz cam_studio mixer_panel rack minibox cam_eng cam_hybrid cam_cine lens', ptz: 'ptz mixer_panel', ccu: 'cam_studio mixer_panel rack minibox', opt: 'lens', mach: 'tripod gimbal dolly jib mon_desk',
+        hfv: 'backpack tx minibox rack router dish', hf: 'backpack tx', str: 'backpack tx minibox rack router pc_tower laptop', mon: 'projector ledproc ledwall mon_field mon_desk rack rack_ports tx', disp: 'projector ledproc ledwall mon_desk rack', led: 'ledproc ledwall projector rack',
+        lum: 'light_console dmx_node movinghead tube cob fresnel led_panel par jib', dmx: 'light_console dmx_node movinghead tube cob fresnel led_panel par',
+        son: 'console_audio rack_ports_xlr interface receiver bodypack mic_shotgun mic_lav mic_studio speaker headset mic_hand rack', aud: 'console_audio rack', aio: 'rack_ports_xlr interface console_audio rack speaker', mic: 'receiver bodypack mic_shotgun mic_lav mic_studio mic_hand headset',
+        com: 'headset receiver bodypack rack tx interface', icm: 'headset receiver bodypack rack tx interface', nrj: 'ups powerstrip cabinet generator battery', pwr: 'ups powerstrip cabinet generator battery', veh: 'truck', div: 'flightcase memcard drive truck generic',
+        vid: AV, mix: AV, rtr: AV, rec: AV, cap: AV, sync: AV, pc: AV, net: AV, conv: AV, ext: AV, cab: AV };
+    function kindOf(it) {
+        if (it.kind && D[it.kind]) return it.kind;
+        const f = a => ' ' + fold(a.filter(Boolean).join(' ')).replace(/[«»"]/g, '') + ' ', cat = it.c || it.cat, al = ALLOW[cat] ? new Set(G(ALLOW[cat])) : null;
+        for (const n of [f([it.brand, it.model, it.name, it.n]), f([it.tags, it.notes])]) for (const [k, re] of RULES) if ((!al || al.has(k)) && re.test(n)) return k;
+        return CATK[cat] || 'generic';
+    }
+    const defs = () => '<defs><linearGradient id="gb" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + sh(C.b, 0.22) + '"/><stop offset=".55" stop-color="' + C.b + '"/><stop offset="1" stop-color="' + sh(C.b, -0.3) + '"/></linearGradient>' +
+        '<radialGradient id="gg" cx=".4" cy=".35" r=".75"><stop offset="0" stop-color="#7fa3d6"/><stop offset=".45" stop-color="#26385a"/><stop offset="1" stop-color="#05070c"/></radialGradient>' +
+        '<linearGradient id="gs" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1d2c47"/><stop offset="1" stop-color="#090d16"/></linearGradient>' +
+        '<linearGradient id="gmet" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#eef0f3"/><stop offset=".5" stop-color="#a7adb4"/><stop offset="1" stop-color="#6c727a"/></linearGradient>' +
+        '<radialGradient id="gmesh" cx=".4" cy=".35" r=".8"><stop offset="0" stop-color="#e2e5e9"/><stop offset=".6" stop-color="#8b9198"/><stop offset="1" stop-color="#4b5056"/></radialGradient>' +
+        '<radialGradient id="gwarm" cx=".5" cy=".5" r=".6"><stop offset="0" stop-color="#ffffff"/><stop offset=".55" stop-color="#fff2cf"/><stop offset="1" stop-color="#f4c56a"/></radialGradient>' +
+        '<linearGradient id="gsh" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="rgba(255,255,255,.5)"/><stop offset="1" stop-color="rgba(0,0,0,.25)"/></linearGradient>' +
+        '<linearGradient id="gled" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="rgba(255,60,120,.55)"/><stop offset=".5" stop-color="rgba(255,170,40,.45)"/><stop offset="1" stop-color="rgba(40,140,255,.55)"/></linearGradient>' +
+        (C.extra || []).map(f => '<linearGradient id="gbx' + f.slice(1) + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + sh(f, 0.22) + '"/><stop offset=".55" stop-color="' + f + '"/><stop offset="1" stop-color="' + sh(f, -0.3) + '"/></linearGradient>').join('') + '</defs>';
+    const cache = new Map();
+    function svg(it, kind) {
+        it = it || {}; const k = kind || kindOf(it), key = k + '|' + fold(it.brand) + '|' + fold(it.model || it.name || it.n);
+        if (cache.has(key)) return cache.get(key);
+        const [b, a, t] = brandOf(it); C = { b, a, t, model: it.model || it.n || '', extra: [] };
+        let body = (k === 'rack_ports_xlr' ? (C.port = 'xlr', D.rack_ports()) : (D[k] || D.generic)());
+        const ex = new Set(); body.replace(/url\(#gbx([0-9a-f]{6})\)/g, (m, h) => ex.add('#' + h)); C.extra = [...ex];
+        const s = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 140" width="200" height="140">' + defs() + body + '</svg>';
+        const url = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(s); cache.set(key, url); return url;
+    }
+    const KINDS = Object.keys(D).concat(['rack_ports_xlr']);
+
+    // =================================================================
+    //  PHOTOS : perso (catalogue partagé) > libre trouvée (cache local IndexedDB) > illustration
+    // =================================================================
+    const key = it => fold([it.brand, it.model || it.name || it.n].filter(Boolean).join(' ')).replace(/\(.*?\)/g, ' ').replace(/[^a-z0-9]+/g, ' ').trim();
+    let dbp = null;
+    const idb = () => dbp || (dbp = new Promise((ok, ko) => { try { const r = indexedDB.open('xiii-img', 1); r.onupgradeneeded = () => r.result.createObjectStore('p'); r.onsuccess = () => ok(r.result); r.onerror = () => ko(r.error); } catch (e) { ko(e); } }));
+    const iget = k => idb().then(d => new Promise(ok => { try { const q = d.transaction('p').objectStore('p').get(k); q.onsuccess = () => ok(q.result || null); q.onerror = () => ok(null); } catch (e) { ok(null); } })).catch(() => null);
+    const iput = (k, v) => idb().then(d => new Promise(ok => { try { const t = d.transaction('p', 'readwrite'); t.objectStore('p').put(v, k); t.oncomplete = () => ok(true); t.onerror = () => ok(false); } catch (e) { ok(false); } })).catch(() => false);
+    const idel = k => idb().then(d => new Promise(ok => { try { const t = d.transaction('p', 'readwrite'); t.objectStore('p').delete(k); t.oncomplete = () => ok(true); } catch (e) { ok(false); } })).catch(() => false);
+    // photo perso : rangée dans le catalogue commun (partagé par le Drive du projet)
+    const CK = 'xiii.catalogue';
+    const userMap = () => { try { const v = JSON.parse(localStorage.getItem(CK)); return (v && v.imgs) || {}; } catch (e) { return {}; } };
+    function setUser(it, dataUrl) { try { const v = JSON.parse(localStorage.getItem(CK)) || { v: 1, items: [] }; v.imgs = v.imgs || {}; if (dataUrl) v.imgs[key(it)] = dataUrl; else delete v.imgs[key(it)]; v.upd = Date.now(); localStorage.setItem(CK, JSON.stringify(v)); emit(it); return true; } catch (e) { return false; } }
+    const mem = new Map(); // clé → { src, credit, page, lic, kind }
+    function emit(it) { mem.delete(key(it)); try { window.dispatchEvent(new CustomEvent('ximg', { detail: { key: key(it) } })); } catch (e) { } }
+    // meilleure image connue tout de suite (synchrone) : perso > libre déjà en mémoire > illustration
+    function src(it) { const k = key(it), u = userMap()[k]; if (u) return u; const m = mem.get(k); return m && m.src ? m.src : svg(it); }
+    // meilleure image (asynchrone) : charge le cache libre si besoin
+    async function best(it) {
+        const k = key(it), u = userMap()[k]; if (u) return { src: u, kind: 'user' };
+        if (mem.has(k)) { const m = mem.get(k); return m.src ? m : { src: svg(it), kind: 'draw' }; }
+        const r = await iget(k); mem.set(k, r && r.src ? Object.assign({ kind: 'free' }, r) : {}); return r && r.src ? Object.assign({ kind: 'free' }, r) : { src: svg(it), kind: 'draw' };
+    }
+    // ---------- recherche de photos libres ----------
+    const strip = s => String(s || '').replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+    const toks = it => { const m = fold(it.model || it.name || '').replace(/\(.*?\)/g, ' '), b = fold(it.brand || ''); const T = m.split(/[^a-z0-9]+/).filter(x => x.length > 1); return { b: b === 'generique' || b === 'générique' ? '' : b.split(/[^a-z0-9]+/)[0], strong: T.filter(x => /\d/.test(x) && /[a-z]/.test(x) || x.length >= 4 && !/^(pour|avec|sans|camera|cable|kit|emetteur|recepteur|base|station|serie|focales|pack)$/.test(x)), all: T }; };
+    function score(it, title) {
+        const t = fold(title).replace(/[_\-.]+/g, ' '), tc = t.replace(/\s+/g, ''), K = toks(it); if (!K.strong.length) return 0;
+        let s = 0; K.strong.forEach(x => { if (t.includes(x) || tc.includes(x)) s += /\d/.test(x) ? 3 : 1.5; else s -= /\d/.test(x) ? 3 : 0.5; });
+        if (K.b && t.includes(K.b)) s += 1.5; if (/logo|diagram|schema|screenshot|capture d|chart|map|icon|svg$|manual|box art/.test(t)) s -= 4; return s;
+    }
+    async function jget(u) { const r = await fetch(u, { headers: { Accept: 'application/json' } }); if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); }
+    async function searchCommons(q) {
+        const u = 'https://commons.wikimedia.org/w/api.php?origin=*&format=json&action=query&generator=search&gsrnamespace=6&gsrlimit=12&prop=imageinfo&iiprop=url|extmetadata|mime&iiurlwidth=480&gsrsearch=' + encodeURIComponent(q + ' filetype:bitmap');
+        const j = await jget(u), P2 = (j.query && j.query.pages) || {};
+        return Object.values(P2).map(p => { const ii = (p.imageinfo || [])[0] || {}, md = ii.extmetadata || {}; return { title: p.title.replace(/^File:|^Fichier:/, '').replace(/\.\w+$/, ''), thumb: ii.thumburl || ii.url, page: ii.descriptionurl, by: strip(md.Artist && md.Artist.value), lic: strip(md.LicenseShortName && md.LicenseShortName.value), src: 'Wikimedia Commons', mime: ii.mime }; }).filter(x => x.thumb && /jpe?g|png|webp/.test(x.mime || 'jpeg'));
+    }
+    async function searchOpenverse(q) {
+        const j = await jget('https://api.openverse.org/v1/images/?page_size=12&mature=false&q=' + encodeURIComponent(q));
+        return (j.results || []).map(r => ({ title: r.title || '', thumb: r.thumbnail || r.url, page: r.foreign_landing_url, by: r.creator || '', lic: (r.license || '').toUpperCase() + (r.license_version ? ' ' + r.license_version : ''), src: r.source ? 'Openverse (' + r.source + ')' : 'Openverse' }));
+    }
+    async function search(it) {
+        const q = [it.brand && !/^g[ée]n[ée]rique$/i.test(it.brand) ? it.brand : '', String(it.model || it.name || it.n || '').replace(/\(.*?\)/g, '')].join(' ').replace(/\s+/g, ' ').trim(); if (!q) return [];
+        const R = []; for (const f of [searchCommons, searchOpenverse]) { try { (await f(q)).forEach(x => R.push(x)); } catch (e) { } }
+        const seen = new Set(); return R.filter(x => { const k = x.thumb; if (seen.has(k)) return false; seen.add(k); return true; }).map(x => Object.assign(x, { score: score(it, x.title) })).sort((a, b) => b.score - a.score);
+    }
+    // télécharge une vignette et la réduit (≤ 480 px, JPEG) → data URL utilisable partout (SYNO, PDF…)
+    function shrink(url, max, q) {
+        return new Promise((ok, ko) => { const im = new Image(); im.crossOrigin = 'anonymous'; im.onload = () => { try { const k = Math.min(1, (max || 480) / Math.max(im.naturalWidth, im.naturalHeight)), cv = document.createElement('canvas'); cv.width = Math.round(im.naturalWidth * k); cv.height = Math.round(im.naturalHeight * k); const g = cv.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, cv.width, cv.height); g.drawImage(im, 0, 0, cv.width, cv.height); ok(cv.toDataURL('image/jpeg', q || 0.82)); } catch (e) { ko(e); } }; im.onerror = () => ko(new Error('image')); im.src = url; });
+    }
+    async function adopt(it, c) { const d = await shrink(c.thumb, 480); const v = { src: d, by: c.by || '', lic: c.lic || '', page: c.page || '', from: c.src || '', title: c.title || '', at: Date.now() }; await iput(key(it), v); mem.set(key(it), Object.assign({ kind: 'free' }, v)); emit(it); return v; }
+    async function forget(it) { await iput(key(it), { none: 1, manual: 1, at: Date.now() }); mem.set(key(it), {}); emit(it); }
+    // recherche automatique : adopte la meilleure photo si elle correspond clairement au modèle
+    async function auto(it) {
+        const k = key(it); if (!k || userMap()[k]) return 'user'; const r = await iget(k);
+        if (r && (r.src || r.manual || (r.none && Date.now() - r.at < 60 * 864e5))) return r.src ? 'free' : 'none';
+        const L = await search(it), b = L[0];
+        if (b && b.score >= 3) { try { await adopt(it, b); return 'found'; } catch (e) { } }
+        await iput(k, { none: 1, at: Date.now() }); mem.set(k, {}); return 'none';
+    }
+    const autoOn = () => { try { return localStorage.getItem('xiii.img.auto') !== '0'; } catch (e) { return true; } };
+    let Q = [], running = false, done = 0;
+    async function pump() { if (running) return; running = true; while (Q.length && autoOn() && navigator.onLine !== false) { const it = Q.shift(); try { const r = await auto(it); if (r === 'found') done++; } catch (e) { } await new Promise(r => setTimeout(r, 1200)); } running = false; }
+    function queue(items, front) { const ks = new Set(Q.map(key)); (items || []).forEach(it => { const k = key(it); if (k && !ks.has(k)) { ks.add(k); front ? Q.unshift(it) : Q.push(it); } }); pump(); }
+    const tag = (it, cls, w) => '<img class="' + (cls || 'ximg') + '" src="' + src(it) + '" alt="" loading="lazy" data-xk="' + esc(key(it)) + '"' + (w ? ' width="' + w + '"' : '') + '>';
+    // met à jour les vignettes affichées quand une meilleure image arrive
+    function refresh(root) { (root || document).querySelectorAll('img[data-xk]').forEach(async im => { if (im.__x) return; im.__x = 1; const it = im.__it; if (!it) return; const b = await best(it); if (b.src !== im.getAttribute('src')) im.src = b.src; if (b.kind === 'free') im.title = 'Photo : ' + (b.by || 'auteur inconnu') + ' · ' + (b.lic || '') + ' · ' + (b.from || ''); }); }
+    window.addEventListener('ximg', e => { document.querySelectorAll('img[data-xk="' + e.detail.key + '"]').forEach(async im => { if (!im.__it) return; const b = await best(im.__it); im.src = b.src; }); });
+    const api = { svg, kindOf, KINDS, src, best, key, search, adopt, forget, auto, queue, setUser, shrink, tag, refresh, userMap, brandOf, get pending() { return Q.length; }, get found() { return done; }, autoOn };
+    window.XIMG = api; return api;
+})();
+// ---------------------------------------------------------------------
+//  XIMG — interface : vignettes dans les outils, gestionnaire de photo, insertion SYNO
+// ---------------------------------------------------------------------
+(function () {
+    if (window.__ximgUI) return; window.__ximgUI = 1;
+    const X = XIMG, esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const css = document.createElement('style');
+    css.textContent = '.ximg-t{width:54px;height:38px;object-fit:contain;flex:none;border-radius:6px;background:linear-gradient(#3a3b40,#2a2b2f);cursor:zoom-in;margin-right:2px}.light-theme .ximg-t{background:linear-gradient(#f2f2f4,#dcdde1)}.ximg-db{float:left;width:46px;height:32px;margin:1px 7px 0 0}.ximg-tbl{width:64px;height:45px;float:left;margin-right:8px}' +
+        '#ximg-ov{position:fixed;inset:0;z-index:10260;background:rgba(0,0,0,.6);display:flex;align-items:flex-start;justify-content:center;padding:5vh 14px;font:13.5px/1.4 "Segoe UI",system-ui,sans-serif}#ximg-ov .xb{width:min(860px,100%);max-height:88vh;overflow:auto;background:var(--bg-menu,#232327);color:var(--text-main,#eee);border:1px solid rgba(240,179,120,.6);border-radius:14px;padding:16px 18px;box-shadow:0 18px 50px rgba(0,0,0,.6)}' +
+        '#ximg-ov h3{margin:0 0 10px;display:flex;gap:10px;align-items:center}#ximg-ov h3 span{margin-left:auto;cursor:pointer;opacity:.7}#ximg-ov .xcur{display:flex;gap:14px;align-items:center;flex-wrap:wrap}#ximg-ov .xcur img{width:260px;max-width:100%;aspect-ratio:10/7;object-fit:contain;background:linear-gradient(#3a3b40,#24252a);border-radius:10px}' +
+        '#ximg-ov .xcr{font-size:12px;color:var(--text-dim,#aaa)}#ximg-ov .xbt{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}#ximg-ov button{font:inherit;font-size:12.5px;color:inherit;background:rgba(240,179,120,.16);border:1px solid rgba(240,179,120,.55);border-radius:8px;padding:6px 10px;cursor:pointer}' +
+        '#ximg-ov .xg{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-top:12px}#ximg-ov .xc{border:1px solid var(--border-color,#444);border-radius:9px;padding:5px;cursor:pointer;font-size:11px;background:rgba(255,255,255,.03)}#ximg-ov .xc:hover{border-color:#f0b378}#ximg-ov .xc img{width:100%;height:96px;object-fit:contain;background:#fff;border-radius:6px}#ximg-ov .xc b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#ximg-ov .ok{color:#66bb6a}#ximg-ov .ko{color:#ef9a5a}';
+    document.head.appendChild(css);
+    const thumb = (it, cls) => { const im = document.createElement('img'); im.className = 'ximg-t ' + (cls || ''); im.alt = ''; im.loading = 'lazy'; im.src = X.src(it); im.dataset.xk = X.key(it); im.__it = it; im.title = '🖼️ Image de l\'appareil (cliquer pour changer)'; im.onclick = e => { e.stopPropagation(); e.preventDefault(); manager(it); }; X.best(it).then(b => { if (b.src !== im.src) im.src = b.src; if (b.kind === 'free') im.title = 'Photo : ' + (b.by || 'auteur inconnu') + ' · ' + (b.lic || '') + ' · ' + (b.from || '') + ' — cliquer pour changer'; else if (b.kind === 'user') im.title = 'Votre photo — cliquer pour changer'; }); return im; };
+    X.thumb = thumb;
+    // ---------- gestionnaire de photo d'un appareil ----------
+    async function manager(it) {
+        let o = document.getElementById('ximg-ov'); if (o) o.remove(); o = document.createElement('div'); o.id = 'ximg-ov'; document.body.appendChild(o);
+        const name = [it.brand, it.model || it.name || it.n].filter(Boolean).join(' ');
+        const draw = async (msg) => {
+            const b = await X.best(it), kindL = { user: '📷 Votre photo (partagée avec le catalogue)', free: '🌐 Photo libre de droits', draw: '✏️ Illustration SUITE XIII' }[b.kind];
+            o.innerHTML = '<div class="xb"><h3>🖼️ ' + esc(name) + '<span>✕</span></h3><div class="xcur"><img src="' + b.src + '" alt=""><div><b>' + kindL + '</b>' + (b.kind === 'free' ? '<div class="xcr">' + esc(b.title || '') + '<br>Auteur : ' + esc(b.by || 'non indiqué') + ' · Licence : ' + esc(b.lic || '?') + '<br>Source : ' + (b.page ? '<a href="' + esc(b.page) + '" target="_blank" rel="noopener">' + esc(b.from || 'voir la page') + '</a>' : esc(b.from || '')) + '</div>' : b.kind === 'draw' ? '<div class="xcr">Dessin automatique selon le type d\'appareil. Cherchez une vraie photo libre de droits ou ajoutez la vôtre.</div>' : '') +
+                '<div class="xbt"><button data-a="find">🔎 Chercher une photo libre</button><button data-a="file">📷 Ma photo…</button>' + (b.kind === 'user' ? '<button data-a="unuser">🗑 Retirer ma photo</button>' : '') + (b.kind === 'free' ? '<button data-a="draw">✏️ Garder le dessin</button>' : '') + '</div>' + (msg ? '<div class="xcr" style="margin-top:8px">' + msg + '</div>' : '') + '</div></div><div class="xg"></div><p class="xcr" style="margin-top:10px">Photos libres : Wikimedia Commons et Openverse (licences Creative Commons / domaine public), recherchées depuis votre navigateur avec le seul nom de l\'appareil ; le crédit est conservé. Votre photo est réduite (≈ 30 Ko) et rangée dans le 🗃️ catalogue, partagé avec l\'équipe.</p><input type="file" accept="image/*" hidden></div>';
+            o.querySelector('h3 span').onclick = () => o.remove();
+            o.querySelector('[data-a=find]').onclick = find;
+            o.querySelector('[data-a=file]').onclick = () => o.querySelector('input[type=file]').click();
+            o.querySelector('input[type=file]').onchange = async e => { const f = e.target.files[0]; if (!f) return; const u = URL.createObjectURL(f); try { const d = await X.shrink(u, 400, 0.78); if (!X.setUser(it, d)) { draw('⚠️ Stockage du navigateur plein : photo non enregistrée.'); return; } draw('✓ Photo enregistrée'); } catch (x) { draw('⚠️ Image illisible'); } URL.revokeObjectURL(u); };
+            const un = o.querySelector('[data-a=unuser]'); if (un) un.onclick = () => { X.setUser(it, null); draw('Photo retirée'); };
+            const dr = o.querySelector('[data-a=draw]'); if (dr) dr.onclick = async () => { await X.forget(it); draw('Le dessin sera utilisé (la recherche automatique ne reprendra pas cette photo).'); };
+        };
+        const find = async () => {
+            const g = o.querySelector('.xg'); g.innerHTML = '<p class="xcr">Recherche en cours…</p>'; let L = [];
+            try { L = await X.search(it); } catch (e) { }
+            if (!L.length) { g.innerHTML = '<p class="xcr">Aucune photo libre trouvée pour ce modèle (ou pas de connexion). Ajoutez votre propre photo avec « 📷 Ma photo… ».</p>'; return; }
+            g.innerHTML = L.slice(0, 20).map((c, i) => '<div class="xc" data-i="' + i + '"><img src="' + esc(c.thumb) + '" alt="" loading="lazy" referrerpolicy="no-referrer"><b title="' + esc(c.title) + '">' + esc(c.title) + '</b><span class="' + (c.score >= 3 ? 'ok' : 'ko') + '">' + (c.score >= 3 ? '✓ correspond au modèle' : '≈ à vérifier') + '</span><br>' + esc((c.by || '').slice(0, 40)) + ' · ' + esc(c.lic || '') + '</div>').join('');
+            g.querySelectorAll('.xc').forEach(d => d.onclick = async () => { const c = L[+d.dataset.i]; d.style.opacity = .5; try { await X.adopt(it, c); draw('✓ Photo retenue (' + esc(c.lic || '') + ')'); } catch (e) { d.style.opacity = 1; d.insertAdjacentHTML('beforeend', '<br><span class="ko">⚠️ téléchargement refusé par le site : choisissez-en une autre</span>'); } });
+        };
+        o.addEventListener('mousedown', e => { if (e.target === o) o.remove(); });
+        draw();
+    }
+    X.manager = manager;
+    // ---------- recherche automatique en tâche de fond (appareils affichés) ----------
+    let seen = []; const later = items => { seen = seen.concat(items).slice(-400); clearTimeout(later.t); later.t = setTimeout(() => { if (X.autoOn()) X.queue(seen.splice(0)); }, 2500); };
+    X.later = later;
+    // ---------- sélecteur 🗃️ Catalogue (tous les outils) ----------
+    let raf = 0; const obs = new MutationObserver(() => { if (raf) return; raf = requestAnimationFrame(() => { raf = 0; scan(); }); });
+    function scan() {
+        const ov = document.getElementById('xcat-ov');
+        if (ov && typeof XCAT !== 'undefined') { const all = XCAT.all(), add = []; ov.querySelectorAll('.xcat-it:not([data-xi])').forEach(r => { r.dataset.xi = 1; const it = all.find(x => x.id === r.dataset.id); if (!it) return; const c = r.querySelector('.xcat-c'); const im = thumb(it); if (c) c.replaceWith(im); else r.prepend(im); add.push(it); }); if (add.length) later(add.slice(0, 40)); }
+        // SYNO : base d'équipements
+        const ll = document.getElementById('lib-list'); if (ll && typeof SYNODB !== 'undefined') { const add = []; ll.querySelectorAll('.db-item[data-db]:not([data-xi])').forEach(d => { d.dataset.xi = 1; const e = SYNODB.LIST.find(x => x.id === d.dataset.db); if (!e) return; const it = { brand: e.b, model: e.m, c: e.c, tags: '' }; d.prepend(thumb(it, 'ximg-db')); add.push(it); }); if (add.length) later(add.slice(0, 40)); }
+        // DEVISO : bibliothèque
+        const dl = document.getElementById('lib-list'); if (dl && typeof refOf === 'function' && typeof CATALOG !== 'undefined') { const add = []; dl.querySelectorAll('.lib-item:not([data-xi])').forEach(d => { d.dataset.xi = 1; const m = /addEqRef\('([^']+)'\)/.exec(d.getAttribute('onclick') || ''); const r = m && refOf(m[1]); if (!r || /^(g-|cab-|inc-)/.test(r.id)) return; const it = { n: r.n, model: r.n.replace(/^Série /, ''), brand: '', c: r.c }; const im = thumb(it, 'ximg-db'); im.style.height = '30px'; d.prepend(im); add.push(it); }); if (add.length) later(add.slice(0, 30)); }
+        // Catalogue : tableau
+        const ct = document.querySelector('table.ct-t'); if (ct && typeof XCAT !== 'undefined') { const all = XCAT.all(), add = []; ct.querySelectorAll('tr[data-id]:not([data-xi])').forEach(tr => { tr.dataset.xi = 1; const it = all.find(x => x.id === tr.dataset.id), td = tr.querySelector('td.nm'); if (!it || !td) return; td.prepend(thumb(it, 'ximg-tbl')); add.push(it); }); if (add.length) later(add.slice(0, 60)); }
+    }
+    const start = () => obs.observe(document.body, { childList: true, subtree: true });
+    if (document.body) start(); else document.addEventListener('DOMContentLoaded', start);
+    // ---------- SYNO : l'image arrive avec l'appareil inséré ----------
+    function hookSyno() {
+        if (typeof window.createNodeFromData !== 'function' || window.createNodeFromData.__x) return;
+        const orig = window.createNodeFromData;
+        const wrap = function (d) {
+            const it = X.next; X.next = null;
+            if (it && d && !d.img) d.img = X.src(it);
+            const r = orig.apply(this, arguments);
+            if (it && d) X.best(it).then(b => { const n = document.getElementById(d.id), im = n && n.querySelector('.node-img'); if (!im || b.src === im.getAttribute('src') || !/^data:/.test(b.src)) return; im.src = b.src; n.querySelector('.node-image-container').style.display = 'block'; try { const fit = () => { ensureNodeFits(n); updateCables(); saveState(); }; if (im.complete) fit(); else im.onload = fit; } catch (e) { } });
+            return r;
+        };
+        wrap.__x = 1; window.createNodeFromData = wrap;
+        if (typeof XCAT !== 'undefined' && XCAT.ADD && XCAT.ADD.syno && !XCAT.ADD.syno.__x) { const run = XCAT.ADD.syno.run; XCAT.ADD.syno.run = function (it) { X.next = it; try { return run.apply(this, arguments); } finally { X.next = null; } }; XCAT.ADD.syno.__x = 1; }
+        const ll = document.getElementById('lib-list');
+        if (ll && typeof SYNODB !== 'undefined') ll.addEventListener('click', ev => { const b = ev.target.closest('[data-act="ins"]'), d = ev.target.closest('[data-db]'); if (!b || !d) return; const e = SYNODB.LIST.find(x => x.id === d.dataset.db); if (e) { X.next = { brand: e.b, model: e.m, c: e.c }; setTimeout(() => { X.next = null; }, 0); } }, true);
+    }
+    // ---------- catalogue : les photos perso ne sont jamais écrasées par un enregistrement ----------
+    function hookCat() { if (typeof XCAT === 'undefined' || XCAT.save.__x) return; const sv = XCAT.save; XCAT.save = function (db) { try { const cur = JSON.parse(localStorage.getItem(XCAT.K)); if (cur && cur.imgs) db.imgs = cur.imgs; } catch (e) { } return sv.apply(this, arguments); }; XCAT.save.__x = 1; }
+    const boot = () => { hookCat(); hookSyno(); catalogueTools(); scan(); };
+    // ---------- page Catalogue : photos de tout le catalogue ----------
+    function catalogueTools() {
+        if (!/catalogue\.html/.test(location.pathname) || document.getElementById('ximg-all')) return; const bar = document.getElementById('ct-stats'); if (!bar || typeof XCAT === 'undefined') return;
+        const b = document.createElement('button'); b.id = 'ximg-all'; b.textContent = '🖼️ Photos'; b.title = 'Chercher des photos libres de droits pour tout le catalogue'; b.style.cssText = 'margin-left:10px;font:inherit;font-size:12px;color:inherit;background:rgba(240,179,120,.16);border:1px solid rgba(240,179,120,.55);border-radius:8px;padding:3px 9px;cursor:pointer';
+        bar.after(b);
+        b.onclick = () => { let o = document.getElementById('ximg-ov'); if (o) o.remove(); o = document.createElement('div'); o.id = 'ximg-ov'; document.body.appendChild(o); const all = XCAT.all();
+            const paint = () => { o.innerHTML = '<div class="xb"><h3>🖼️ Images du catalogue<span>✕</span></h3><p>Chaque appareil a déjà une <b>illustration</b> selon son type. Ce bouton cherche en plus une <b>vraie photo libre de droits</b> (Wikimedia Commons, Openverse) pour chacun des ' + all.length + ' appareils, depuis votre navigateur, une à une (≈ 1 s par appareil). Une photo n\'est retenue que si son titre correspond clairement au modèle ; sinon le dessin reste. Cliquez ensuite une vignette pour choisir une autre photo ou mettre la vôtre.</p>' +
+                '<label style="display:block;margin:8px 0"><input type="checkbox" id="ximg-auto"' + (X.autoOn() ? ' checked' : '') + '> Rechercher automatiquement les photos des appareils affichés dans les outils</label>' +
+                '<div class="xbt"><button id="ximg-go">🔎 Lancer pour tout le catalogue</button></div><p class="xcr" id="ximg-st">' + (X.pending ? X.pending + ' appareil(s) en file · ' + X.found + ' photo(s) trouvée(s)' : '') + '</p></div>';
+                o.querySelector('h3 span').onclick = () => { o.remove(); clearInterval(t); }; o.querySelector('#ximg-auto').onchange = e => { try { localStorage.setItem('xiii.img.auto', e.target.checked ? '1' : '0'); } catch (x) { } };
+                o.querySelector('#ximg-go').onclick = () => { try { localStorage.setItem('xiii.img.auto', '1'); } catch (x) { } X.queue(all); }; };
+            paint(); const t = setInterval(() => { const s = document.getElementById('ximg-st'); if (!s) { clearInterval(t); return; } s.textContent = X.pending ? '⏳ ' + X.pending + ' appareil(s) restant(s) · ' + X.found + ' photo(s) trouvée(s) dans cette session' : (X.found ? '✓ Terminé : ' + X.found + ' photo(s) trouvée(s).' : ''); }, 1000); };
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => setTimeout(boot, 300)); else setTimeout(boot, 300);
+    setTimeout(boot, 2500);
+})();
+
+/*XIMG:END*/
 const XCAT = (() => {
     const K = 'xiii.catalogue';
     const CATS = [['cam', 'Caméras', '🎥'], ['opt', 'Optiques', '🔭'], ['mach', 'Machinerie & stabilisation', '🎞️'], ['hfv', 'Transmission & HF vidéo', '📡'], ['mon', 'Moniteurs & projection', '🖥️'], ['led', 'Murs LED', '🟦'], ['lum', 'Lumière', '💡'], ['son', 'Son', '🎚️'], ['com', 'Intercom', '🎧'], ['vid', 'Régie vidéo & streaming', '🎛️'], ['rec', 'Enregistrement & stockage', '💾'], ['nrj', 'Énergie', '⚡'], ['cab', 'Câblage & convertisseurs', '🔌'], ['veh', 'Transport & véhicules', '🚚'], ['div', 'Divers', '📦']];
