@@ -6552,6 +6552,101 @@ XUX.init('ludo');
 
 
 // =====================================================================
+//  SUITE XIII — XCONF : confort commun (Phase AB)
+//  • « Reprendre » : chaque outil note sa dernière ouverture dans le projet XIII en cours (xiii.resume)
+//  • 📁 Fichiers récents : chaque PDF / Excel / image téléchargé depuis un outil est gardé (20 derniers) pour Démarrer › Fichiers
+//  • 📝 Brouillons : un texte en cours de frappe est gardé ; après un plantage, proposition de le restaurer
+//  • 🎬 Mode tournage : gros boutons, contraste élevé, écran toujours allumé (commun à tous les outils)
+//  • ⌨️ Raccourcis personnalisés : une combinaison de touches → un bouton de l'outil ; fiche imprimable (touche « ? »)
+// =====================================================================
+const XCONF = (() => {
+    let APP = '';
+    const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } };
+    const W = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { } };
+    const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const toastX = m => { try { if (typeof toast === 'function') return toast(m); } catch (e) { } };
+    // ---------- reprendre ----------
+    function resume() { if (!APP || APP === 'index' || /-m$/.test(APP)) return; const L = J('xiii.resume', []).filter(x => x && x.app !== APP); L.unshift({ app: APP, url: location.pathname.split('/').pop() + location.search, at: Date.now() }); W('xiii.resume', L.slice(0, 10)); }
+    // ---------- fichiers récents (IndexedDB du projet) ----------
+    const DB = 'xiiiRecentFiles', MAXF = 20, MAXB = 25e6;
+    function db() { return new Promise((ok, ko) => { const r = indexedDB.open(DB, 1); r.onupgradeneeded = () => r.result.createObjectStore('f', { keyPath: 'id' }); r.onsuccess = () => ok(r.result); r.onerror = () => ko(r.error); }); }
+    async function list() { try { const d = await db(); return await new Promise(ok => { const q = d.transaction('f').objectStore('f').getAll(); q.onsuccess = () => ok((q.result || []).sort((a, b) => b.at - a.at)); q.onerror = () => ok([]); }); } catch (e) { return []; } }
+    async function put(rec) { try { const d = await db(), old = await list(), tx = d.transaction('f', 'readwrite'), st = tx.objectStore('f'); old.filter(x => x.name === rec.name && x.app === rec.app).forEach(x => st.delete(x.id)); st.put(rec); old.filter(x => !(x.name === rec.name && x.app === rec.app)).slice(MAXF - 1).forEach(x => st.delete(x.id)); try { window.dispatchEvent(new CustomEvent('xiii-files')); localStorage.setItem('xiii.files.ping', String(Date.now())); } catch (e) { } } catch (e) { } }
+    async function remove(id) { try { const d = await db(); d.transaction('f', 'readwrite').objectStore('f').delete(id); } catch (e) { } }
+    let lastCap = '';
+    function capture(a) { try { const href = a.href || '', name = a.getAttribute('download') || ''; if (!name || !/^(blob:|data:)/.test(href)) return; const k = href + '|' + name; if (k === lastCap) return; lastCap = k; setTimeout(() => { if (lastCap === k) lastCap = ''; }, 1500);
+        fetch(href).then(r => r.blob()).then(b => { if (!b || b.size > MAXB || b.size < 20) return; put({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), name, app: APP, at: Date.now(), size: b.size, type: b.type || '', blob: b }); }).catch(() => { }); } catch (e) { } }
+    function hookDownloads() {
+        const A = HTMLAnchorElement.prototype, c0 = A.click, d0 = A.dispatchEvent;
+        A.click = function () { if (this.hasAttribute('download')) capture(this); return c0.apply(this, arguments); };
+        A.dispatchEvent = function (e) { if (e && e.type === 'click' && this.hasAttribute && this.hasAttribute('download')) capture(this); return d0.apply(this, arguments); };
+        document.addEventListener('click', e => { const a = e.target && e.target.closest && e.target.closest('a[download]'); if (a) capture(a); }, true);
+    }
+    // ---------- brouillons ----------
+    const DK = () => 'xiii.draft.' + APP;
+    const fieldOf = el => el && el.id && !/^x[a-z]{1,4}-/.test(el.id) && (el.tagName === 'TEXTAREA' || el.isContentEditable || (el.tagName === 'INPUT' && /^(text|search|)$/.test(el.type || ''))) ? el : null;
+    const valOf = el => el.isContentEditable ? el.innerHTML : el.value;
+    function drafts() {
+        let tm = 0; const pend = {};
+        document.addEventListener('input', e => { const el = fieldOf(e.target); if (!el) return; const v = valOf(el); if (String(v).length < 12) return; pend[el.id] = { v, at: Date.now(), lab: (el.getAttribute('aria-label') || el.placeholder || (el.labels && el.labels[0] && el.labels[0].textContent) || el.id).slice(0, 60) }; clearTimeout(tm); tm = setTimeout(() => { const D = J(DK(), {}); Object.assign(D, pend); W(DK(), D); }, 700); }, true);
+        document.addEventListener('focusout', e => { const el = fieldOf(e.target); if (!el) return; setTimeout(() => { delete pend[el.id]; const D = J(DK(), {}); if (D[el.id]) { delete D[el.id]; W(DK(), D); } }, 900); }, true);
+        setTimeout(() => { const D = J(DK(), {}), ids = Object.keys(D); if (!ids.length) return; const todo = ids.filter(id => { const el = document.getElementById(id); return el && D[id] && Date.now() - D[id].at < 7 * 864e5 && String(valOf(el)) !== String(D[id].v); });
+            if (!todo.length) { W(DK(), {}); return; }
+            const b = document.createElement('div'); b.id = 'xcf-draft'; b.innerHTML = '<b>📝 Brouillon récupéré</b><span>' + todo.length + ' texte' + (todo.length > 1 ? 's' : '') + ' en cours de frappe n\'' + (todo.length > 1 ? 'ont' : 'a') + ' pas été enregistré' + (todo.length > 1 ? 's' : '') + ' (' + esc(todo.map(id => '« ' + D[id].lab + ' »').join(', ')) + ', ' + new Date(D[todo[0]].at).toLocaleString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) + ').</span><button data-a="y">Restaurer</button><button data-a="n">Ignorer</button>';
+            document.body.appendChild(b); b.onclick = e => { const a = e.target.dataset && e.target.dataset.a; if (!a) return; if (a === 'y') todo.forEach(id => { const el = document.getElementById(id); if (!el) return; if (el.isContentEditable) el.innerHTML = D[id].v; else el.value = D[id].v; el.dispatchEvent(new Event('input', { bubbles: true })); el.dispatchEvent(new Event('change', { bubbles: true })); }); W(DK(), {}); b.remove(); if (a === 'y') toastX('📝 Brouillon restauré'); };
+        }, 2500);
+    }
+    // ---------- mode tournage ----------
+    const KS = 'xiii.ux.shoot'; let wl = null;
+    const shootOn = () => J(KS, 0) === 1;
+    async function lock(on) { try { if (on && 'wakeLock' in navigator && document.visibilityState === 'visible') { if (!wl) { wl = await navigator.wakeLock.request('screen'); wl.addEventListener('release', () => { wl = null; }); } } else if (!on && wl) { wl.release(); wl = null; } } catch (e) { } }
+    function applyShoot() { const on = shootOn(); document.documentElement.classList.toggle('xshoot', on); lock(on); }
+    function shoot(on) { on = on == null ? !shootOn() : !!on; W(KS, on ? 1 : 0); applyShoot(); toastX(on ? '🎬 Mode tournage : gros boutons, contraste élevé, écran toujours allumé' : '🎬 Mode tournage désactivé'); return on; }
+    // ---------- raccourcis personnalisés ----------
+    const KK = () => 'xiii.ux.keys.' + APP;
+    const combo = e => { const k = e.key.length === 1 ? e.key.toUpperCase() : e.key; if (/^(Control|Shift|Alt|Meta)$/.test(k)) return ''; return [e.ctrlKey || e.metaKey ? 'Ctrl' : '', e.altKey ? 'Alt' : '', e.shiftKey ? 'Maj' : '', k === ' ' ? 'Espace' : k].filter(Boolean).join('+'); };
+    const labOf = b => { const l = ((b.querySelector('.btn-label') || {}).textContent || b.textContent || '').replace(/\s+/g, ' ').trim(); return (l && l.length > 1 && !/^\W+$/.test(l) ? l : (b.title || '').split(/ : | — | \(/)[0]).trim().slice(0, 60); };
+    function commands() { const seen = new Set(), out = []; document.querySelectorAll('#toolbar button, #top-bar button, .btn-group button, header button, [data-view], button[title]').forEach(b => { if (b.closest('#xux-ov,#xf-ov,#xst,#xs-ov,#xcf-draft') || b.disabled) return; const l = labOf(b); if (!l || seen.has(l)) return; seen.add(l); out.push([l, b]); }); return out; }
+    function keys() { document.addEventListener('keydown', e => { const t = e.target; if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return; const K = J(KK(), {}), c = combo(e); if (!c || !K[c]) return; const hit = commands().find(x => x[0] === K[c]); if (!hit) { toastX('⌨️ « ' + K[c] + ' » est introuvable sur cette vue'); return; } e.preventDefault(); e.stopPropagation(); hit[1].click(); }, true); }
+    function printSheet() {
+        const K = J(KK(), {}), gl = [['Ctrl+K', 'Rechercher, ouvrir un outil, changer d\'onglet ou de projet'], ['?', 'Fiche des raccourcis et du confort'], ['Ctrl+Z / Ctrl+Y', 'Annuler / rétablir'], ['Ctrl+S', 'Enregistrer'], ['Ctrl+Maj+P', 'Présentation client'], ['Ctrl+Tab', 'Onglet suivant (espace onglets)'], ['Alt+1…9', 'Aller à l\'onglet n°'], ['Alt+W', 'Fermer l\'onglet'], ['Alt+Maj+T', 'Rouvrir le dernier onglet fermé']];
+        const rows = (L, t) => '<h2>' + t + '</h2><table>' + L.map(r => '<tr><td><kbd>' + esc(r[0]) + '</kbd></td><td>' + esc(r[1]) + '</td></tr>').join('') + '</table>';
+        const own = Object.keys(K).map(k => [k, K[k]]), tool = [...document.querySelectorAll('#xux-ov .r')].map(r => [(r.querySelector('kbd') || {}).textContent || '', (r.querySelector('span') || {}).textContent || '']).filter(r => r[0]);
+        const w = window.open('', '_blank'); if (!w) { toastX('Autorisez les fenêtres pour imprimer'); return; }
+        w.document.write('<!doctype html><meta charset="utf-8"><title>Raccourcis ' + esc(APP.toUpperCase()) + ' XIII</title><style>body{font:13px "Segoe UI",sans-serif;color:#111;margin:28px}h1{font-size:20px;margin:0 0 4px}p{color:#666;margin:0 0 14px}h2{font-size:14px;margin:18px 0 6px;border-bottom:2px solid #f0b429;padding-bottom:3px}table{width:100%;border-collapse:collapse}td{padding:5px 6px;border-bottom:1px solid #ddd}td:first-child{width:150px}kbd{font:600 12px Consolas,monospace;background:#f3f1ee;border:1px solid #ccc;border-radius:5px;padding:2px 6px}</style><h1>⌨️ Raccourcis — ' + esc(APP.toUpperCase()) + ' XIII</h1><p>SUITE XIII · ' + new Date().toLocaleDateString('fr-FR') + '</p>' + rows(gl, 'Partout dans la suite') + (tool.length ? rows(tool, 'Dans cet outil') : '') + (own.length ? rows(own, 'Mes raccourcis') : '') + '<script>setTimeout(()=>print(),300)<\/script>');
+        w.document.close();
+    }
+    function sheetExtra(o) {
+        if (!o || o.querySelector('.xcf-x')) return; const box = o.firstElementChild || o, K = J(KK(), {});
+        const d = document.createElement('div'); d.className = 'xcf-x';
+        d.innerHTML = '<h4>🎬 Mode tournage</h4><div class="seg" data-g="xcf-shoot"><button data-s="0" class="' + (shootOn() ? '' : 'on') + '">Normal</button><button data-s="1" class="' + (shootOn() ? 'on' : '') + '">Tournage — gros boutons, contraste, écran allumé</button></div>' +
+            '<h4>⌨️ Mes raccourcis dans cet outil</h4><div class="xcf-k">' + (Object.keys(K).length ? Object.keys(K).map(k => '<div class="r"><span>' + esc(K[k]) + '</span><kbd>' + esc(k) + '</kbd><button data-del="' + esc(k) + '" title="Retirer">✕</button></div>').join('') : '<p style="opacity:.6;margin:4px 0">Aucun pour l\'instant.</p>') + '</div>' +
+            '<div class="xcf-add"><select><option value="">Choisir un bouton de l\'outil…</option>' + commands().map(c => '<option>' + esc(c[0]) + '</option>').join('') + '</select><input readonly placeholder="Puis tapez la combinaison…"><button data-add>＋ Ajouter</button></div>' +
+            '<div style="margin-top:12px"><button data-print>🖨️ Imprimer la fiche des raccourcis</button></div>';
+        box.appendChild(d); let cur = '';
+        const inp = d.querySelector('.xcf-add input'); inp.onkeydown = e => { e.preventDefault(); e.stopPropagation(); const c = combo(e); if (c) { cur = c; inp.value = c; } };
+        d.onclick = e => { const t = e.target;
+            if (t.dataset.s != null) { shoot(t.dataset.s === '1'); d.querySelectorAll('[data-s]').forEach(x => x.classList.toggle('on', x === t)); }
+            else if (t.dataset.del) { const k = J(KK(), {}); delete k[t.dataset.del]; W(KK(), k); d.remove(); sheetExtra(o); }
+            else if (t.hasAttribute('data-add')) { const c = d.querySelector('.xcf-add select').value; if (!c || !cur) { toastX('Choisissez un bouton puis tapez une combinaison'); return; } if (/^(Ctrl\+[KZYSCVXAP]|\?|Échap|Escape)$/.test(cur)) { toastX('« ' + cur + ' » est déjà utilisé par la suite'); return; } const k = J(KK(), {}); k[cur] = c; W(KK(), k); d.remove(); sheetExtra(o); }
+            else if (t.hasAttribute('data-print')) printSheet(); };
+    }
+    const CSS = 'html.xshoot{font-size:118%}html.xshoot body{filter:contrast(1.12) saturate(1.05)}html.xshoot button:not(.x):not(.xst-x){min-height:44px!important;min-width:44px;font-size:max(15px,1em)!important}html.xshoot input,html.xshoot select{min-height:40px;font-size:15px!important}' +
+        '#xcf-draft{position:fixed;left:16px;bottom:16px;z-index:2147483000;max-width:min(560px,92vw);display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;padding:12px 14px;border-radius:14px;background:rgba(30,26,22,.92);color:#f2f2f2;border:1px solid rgba(240,180,41,.5);box-shadow:0 12px 40px rgba(0,0,0,.5),0 0 24px rgba(240,180,41,.18);backdrop-filter:blur(16px);font:13px "Segoe UI",system-ui,sans-serif}#xcf-draft span{flex:1 1 100%;opacity:.85}#xcf-draft button{cursor:pointer;padding:7px 14px;border-radius:999px;border:1px solid rgba(240,180,41,.6);background:rgba(240,180,41,.18);color:inherit;font-weight:700}#xcf-draft button[data-a=n]{background:none;border-color:rgba(255,255,255,.25)}' +
+        '.xcf-k .r{display:flex;align-items:center;gap:8px}.xcf-k .r span{flex:1}.xcf-k .r button{all:unset;cursor:pointer;opacity:.6;padding:0 4px}.xcf-add{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}.xcf-add select{flex:1 1 180px}.xcf-add input{width:150px}';
+    function init(app) {
+        APP = app; const st = document.createElement('style'); st.textContent = CSS; (document.head || document.documentElement).appendChild(st);
+        applyShoot(); addEventListener('storage', e => { if (e.key === KS) applyShoot(); }); document.addEventListener('visibilitychange', () => { if (shootOn()) lock(true); });
+        hookDownloads(); keys();
+        const go = () => { resume(); drafts(); new MutationObserver(m => { const o = document.getElementById('xux-ov'); if (o) sheetExtra(o); }).observe(document.body, { childList: true }); };
+        if (document.body) go(); else addEventListener('DOMContentLoaded', go);
+    }
+    return { init, list, remove, shoot, shootOn, printSheet };
+})();
+
+XCONF.init('ludo');
+
+// =====================================================================
 //  SUITE XIII — XENC : suivi des conversions ENCODO depuis tous les outils
 //  Pendant qu'ENCODO convertit (dans son onglet / sa fenêtre), un petit onglet apparaît sur le bord droit
 //  de l'écran, sous le panier : fichier en cours, pourcentage, temps restant, fichiers terminés à télécharger.

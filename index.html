@@ -3321,6 +3321,101 @@ XUX.init('index');
 
 
 // =====================================================================
+//  SUITE XIII — XCONF : confort commun (Phase AB)
+//  • « Reprendre » : chaque outil note sa dernière ouverture dans le projet XIII en cours (xiii.resume)
+//  • 📁 Fichiers récents : chaque PDF / Excel / image téléchargé depuis un outil est gardé (20 derniers) pour Démarrer › Fichiers
+//  • 📝 Brouillons : un texte en cours de frappe est gardé ; après un plantage, proposition de le restaurer
+//  • 🎬 Mode tournage : gros boutons, contraste élevé, écran toujours allumé (commun à tous les outils)
+//  • ⌨️ Raccourcis personnalisés : une combinaison de touches → un bouton de l'outil ; fiche imprimable (touche « ? »)
+// =====================================================================
+const XCONF = (() => {
+    let APP = '';
+    const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } };
+    const W = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { } };
+    const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const toastX = m => { try { if (typeof toast === 'function') return toast(m); } catch (e) { } };
+    // ---------- reprendre ----------
+    function resume() { if (!APP || APP === 'index' || /-m$/.test(APP)) return; const L = J('xiii.resume', []).filter(x => x && x.app !== APP); L.unshift({ app: APP, url: location.pathname.split('/').pop() + location.search, at: Date.now() }); W('xiii.resume', L.slice(0, 10)); }
+    // ---------- fichiers récents (IndexedDB du projet) ----------
+    const DB = 'xiiiRecentFiles', MAXF = 20, MAXB = 25e6;
+    function db() { return new Promise((ok, ko) => { const r = indexedDB.open(DB, 1); r.onupgradeneeded = () => r.result.createObjectStore('f', { keyPath: 'id' }); r.onsuccess = () => ok(r.result); r.onerror = () => ko(r.error); }); }
+    async function list() { try { const d = await db(); return await new Promise(ok => { const q = d.transaction('f').objectStore('f').getAll(); q.onsuccess = () => ok((q.result || []).sort((a, b) => b.at - a.at)); q.onerror = () => ok([]); }); } catch (e) { return []; } }
+    async function put(rec) { try { const d = await db(), old = await list(), tx = d.transaction('f', 'readwrite'), st = tx.objectStore('f'); old.filter(x => x.name === rec.name && x.app === rec.app).forEach(x => st.delete(x.id)); st.put(rec); old.filter(x => !(x.name === rec.name && x.app === rec.app)).slice(MAXF - 1).forEach(x => st.delete(x.id)); try { window.dispatchEvent(new CustomEvent('xiii-files')); localStorage.setItem('xiii.files.ping', String(Date.now())); } catch (e) { } } catch (e) { } }
+    async function remove(id) { try { const d = await db(); d.transaction('f', 'readwrite').objectStore('f').delete(id); } catch (e) { } }
+    let lastCap = '';
+    function capture(a) { try { const href = a.href || '', name = a.getAttribute('download') || ''; if (!name || !/^(blob:|data:)/.test(href)) return; const k = href + '|' + name; if (k === lastCap) return; lastCap = k; setTimeout(() => { if (lastCap === k) lastCap = ''; }, 1500);
+        fetch(href).then(r => r.blob()).then(b => { if (!b || b.size > MAXB || b.size < 20) return; put({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), name, app: APP, at: Date.now(), size: b.size, type: b.type || '', blob: b }); }).catch(() => { }); } catch (e) { } }
+    function hookDownloads() {
+        const A = HTMLAnchorElement.prototype, c0 = A.click, d0 = A.dispatchEvent;
+        A.click = function () { if (this.hasAttribute('download')) capture(this); return c0.apply(this, arguments); };
+        A.dispatchEvent = function (e) { if (e && e.type === 'click' && this.hasAttribute && this.hasAttribute('download')) capture(this); return d0.apply(this, arguments); };
+        document.addEventListener('click', e => { const a = e.target && e.target.closest && e.target.closest('a[download]'); if (a) capture(a); }, true);
+    }
+    // ---------- brouillons ----------
+    const DK = () => 'xiii.draft.' + APP;
+    const fieldOf = el => el && el.id && !/^x[a-z]{1,4}-/.test(el.id) && (el.tagName === 'TEXTAREA' || el.isContentEditable || (el.tagName === 'INPUT' && /^(text|search|)$/.test(el.type || ''))) ? el : null;
+    const valOf = el => el.isContentEditable ? el.innerHTML : el.value;
+    function drafts() {
+        let tm = 0; const pend = {};
+        document.addEventListener('input', e => { const el = fieldOf(e.target); if (!el) return; const v = valOf(el); if (String(v).length < 12) return; pend[el.id] = { v, at: Date.now(), lab: (el.getAttribute('aria-label') || el.placeholder || (el.labels && el.labels[0] && el.labels[0].textContent) || el.id).slice(0, 60) }; clearTimeout(tm); tm = setTimeout(() => { const D = J(DK(), {}); Object.assign(D, pend); W(DK(), D); }, 700); }, true);
+        document.addEventListener('focusout', e => { const el = fieldOf(e.target); if (!el) return; setTimeout(() => { delete pend[el.id]; const D = J(DK(), {}); if (D[el.id]) { delete D[el.id]; W(DK(), D); } }, 900); }, true);
+        setTimeout(() => { const D = J(DK(), {}), ids = Object.keys(D); if (!ids.length) return; const todo = ids.filter(id => { const el = document.getElementById(id); return el && D[id] && Date.now() - D[id].at < 7 * 864e5 && String(valOf(el)) !== String(D[id].v); });
+            if (!todo.length) { W(DK(), {}); return; }
+            const b = document.createElement('div'); b.id = 'xcf-draft'; b.innerHTML = '<b>📝 Brouillon récupéré</b><span>' + todo.length + ' texte' + (todo.length > 1 ? 's' : '') + ' en cours de frappe n\'' + (todo.length > 1 ? 'ont' : 'a') + ' pas été enregistré' + (todo.length > 1 ? 's' : '') + ' (' + esc(todo.map(id => '« ' + D[id].lab + ' »').join(', ')) + ', ' + new Date(D[todo[0]].at).toLocaleString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) + ').</span><button data-a="y">Restaurer</button><button data-a="n">Ignorer</button>';
+            document.body.appendChild(b); b.onclick = e => { const a = e.target.dataset && e.target.dataset.a; if (!a) return; if (a === 'y') todo.forEach(id => { const el = document.getElementById(id); if (!el) return; if (el.isContentEditable) el.innerHTML = D[id].v; else el.value = D[id].v; el.dispatchEvent(new Event('input', { bubbles: true })); el.dispatchEvent(new Event('change', { bubbles: true })); }); W(DK(), {}); b.remove(); if (a === 'y') toastX('📝 Brouillon restauré'); };
+        }, 2500);
+    }
+    // ---------- mode tournage ----------
+    const KS = 'xiii.ux.shoot'; let wl = null;
+    const shootOn = () => J(KS, 0) === 1;
+    async function lock(on) { try { if (on && 'wakeLock' in navigator && document.visibilityState === 'visible') { if (!wl) { wl = await navigator.wakeLock.request('screen'); wl.addEventListener('release', () => { wl = null; }); } } else if (!on && wl) { wl.release(); wl = null; } } catch (e) { } }
+    function applyShoot() { const on = shootOn(); document.documentElement.classList.toggle('xshoot', on); lock(on); }
+    function shoot(on) { on = on == null ? !shootOn() : !!on; W(KS, on ? 1 : 0); applyShoot(); toastX(on ? '🎬 Mode tournage : gros boutons, contraste élevé, écran toujours allumé' : '🎬 Mode tournage désactivé'); return on; }
+    // ---------- raccourcis personnalisés ----------
+    const KK = () => 'xiii.ux.keys.' + APP;
+    const combo = e => { const k = e.key.length === 1 ? e.key.toUpperCase() : e.key; if (/^(Control|Shift|Alt|Meta)$/.test(k)) return ''; return [e.ctrlKey || e.metaKey ? 'Ctrl' : '', e.altKey ? 'Alt' : '', e.shiftKey ? 'Maj' : '', k === ' ' ? 'Espace' : k].filter(Boolean).join('+'); };
+    const labOf = b => { const l = ((b.querySelector('.btn-label') || {}).textContent || b.textContent || '').replace(/\s+/g, ' ').trim(); return (l && l.length > 1 && !/^\W+$/.test(l) ? l : (b.title || '').split(/ : | — | \(/)[0]).trim().slice(0, 60); };
+    function commands() { const seen = new Set(), out = []; document.querySelectorAll('#toolbar button, #top-bar button, .btn-group button, header button, [data-view], button[title]').forEach(b => { if (b.closest('#xux-ov,#xf-ov,#xst,#xs-ov,#xcf-draft') || b.disabled) return; const l = labOf(b); if (!l || seen.has(l)) return; seen.add(l); out.push([l, b]); }); return out; }
+    function keys() { document.addEventListener('keydown', e => { const t = e.target; if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return; const K = J(KK(), {}), c = combo(e); if (!c || !K[c]) return; const hit = commands().find(x => x[0] === K[c]); if (!hit) { toastX('⌨️ « ' + K[c] + ' » est introuvable sur cette vue'); return; } e.preventDefault(); e.stopPropagation(); hit[1].click(); }, true); }
+    function printSheet() {
+        const K = J(KK(), {}), gl = [['Ctrl+K', 'Rechercher, ouvrir un outil, changer d\'onglet ou de projet'], ['?', 'Fiche des raccourcis et du confort'], ['Ctrl+Z / Ctrl+Y', 'Annuler / rétablir'], ['Ctrl+S', 'Enregistrer'], ['Ctrl+Maj+P', 'Présentation client'], ['Ctrl+Tab', 'Onglet suivant (espace onglets)'], ['Alt+1…9', 'Aller à l\'onglet n°'], ['Alt+W', 'Fermer l\'onglet'], ['Alt+Maj+T', 'Rouvrir le dernier onglet fermé']];
+        const rows = (L, t) => '<h2>' + t + '</h2><table>' + L.map(r => '<tr><td><kbd>' + esc(r[0]) + '</kbd></td><td>' + esc(r[1]) + '</td></tr>').join('') + '</table>';
+        const own = Object.keys(K).map(k => [k, K[k]]), tool = [...document.querySelectorAll('#xux-ov .r')].map(r => [(r.querySelector('kbd') || {}).textContent || '', (r.querySelector('span') || {}).textContent || '']).filter(r => r[0]);
+        const w = window.open('', '_blank'); if (!w) { toastX('Autorisez les fenêtres pour imprimer'); return; }
+        w.document.write('<!doctype html><meta charset="utf-8"><title>Raccourcis ' + esc(APP.toUpperCase()) + ' XIII</title><style>body{font:13px "Segoe UI",sans-serif;color:#111;margin:28px}h1{font-size:20px;margin:0 0 4px}p{color:#666;margin:0 0 14px}h2{font-size:14px;margin:18px 0 6px;border-bottom:2px solid #f0b429;padding-bottom:3px}table{width:100%;border-collapse:collapse}td{padding:5px 6px;border-bottom:1px solid #ddd}td:first-child{width:150px}kbd{font:600 12px Consolas,monospace;background:#f3f1ee;border:1px solid #ccc;border-radius:5px;padding:2px 6px}</style><h1>⌨️ Raccourcis — ' + esc(APP.toUpperCase()) + ' XIII</h1><p>SUITE XIII · ' + new Date().toLocaleDateString('fr-FR') + '</p>' + rows(gl, 'Partout dans la suite') + (tool.length ? rows(tool, 'Dans cet outil') : '') + (own.length ? rows(own, 'Mes raccourcis') : '') + '<script>setTimeout(()=>print(),300)<\/script>');
+        w.document.close();
+    }
+    function sheetExtra(o) {
+        if (!o || o.querySelector('.xcf-x')) return; const box = o.firstElementChild || o, K = J(KK(), {});
+        const d = document.createElement('div'); d.className = 'xcf-x';
+        d.innerHTML = '<h4>🎬 Mode tournage</h4><div class="seg" data-g="xcf-shoot"><button data-s="0" class="' + (shootOn() ? '' : 'on') + '">Normal</button><button data-s="1" class="' + (shootOn() ? 'on' : '') + '">Tournage — gros boutons, contraste, écran allumé</button></div>' +
+            '<h4>⌨️ Mes raccourcis dans cet outil</h4><div class="xcf-k">' + (Object.keys(K).length ? Object.keys(K).map(k => '<div class="r"><span>' + esc(K[k]) + '</span><kbd>' + esc(k) + '</kbd><button data-del="' + esc(k) + '" title="Retirer">✕</button></div>').join('') : '<p style="opacity:.6;margin:4px 0">Aucun pour l\'instant.</p>') + '</div>' +
+            '<div class="xcf-add"><select><option value="">Choisir un bouton de l\'outil…</option>' + commands().map(c => '<option>' + esc(c[0]) + '</option>').join('') + '</select><input readonly placeholder="Puis tapez la combinaison…"><button data-add>＋ Ajouter</button></div>' +
+            '<div style="margin-top:12px"><button data-print>🖨️ Imprimer la fiche des raccourcis</button></div>';
+        box.appendChild(d); let cur = '';
+        const inp = d.querySelector('.xcf-add input'); inp.onkeydown = e => { e.preventDefault(); e.stopPropagation(); const c = combo(e); if (c) { cur = c; inp.value = c; } };
+        d.onclick = e => { const t = e.target;
+            if (t.dataset.s != null) { shoot(t.dataset.s === '1'); d.querySelectorAll('[data-s]').forEach(x => x.classList.toggle('on', x === t)); }
+            else if (t.dataset.del) { const k = J(KK(), {}); delete k[t.dataset.del]; W(KK(), k); d.remove(); sheetExtra(o); }
+            else if (t.hasAttribute('data-add')) { const c = d.querySelector('.xcf-add select').value; if (!c || !cur) { toastX('Choisissez un bouton puis tapez une combinaison'); return; } if (/^(Ctrl\+[KZYSCVXAP]|\?|Échap|Escape)$/.test(cur)) { toastX('« ' + cur + ' » est déjà utilisé par la suite'); return; } const k = J(KK(), {}); k[cur] = c; W(KK(), k); d.remove(); sheetExtra(o); }
+            else if (t.hasAttribute('data-print')) printSheet(); };
+    }
+    const CSS = 'html.xshoot{font-size:118%}html.xshoot body{filter:contrast(1.12) saturate(1.05)}html.xshoot button:not(.x):not(.xst-x){min-height:44px!important;min-width:44px;font-size:max(15px,1em)!important}html.xshoot input,html.xshoot select{min-height:40px;font-size:15px!important}' +
+        '#xcf-draft{position:fixed;left:16px;bottom:16px;z-index:2147483000;max-width:min(560px,92vw);display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;padding:12px 14px;border-radius:14px;background:rgba(30,26,22,.92);color:#f2f2f2;border:1px solid rgba(240,180,41,.5);box-shadow:0 12px 40px rgba(0,0,0,.5),0 0 24px rgba(240,180,41,.18);backdrop-filter:blur(16px);font:13px "Segoe UI",system-ui,sans-serif}#xcf-draft span{flex:1 1 100%;opacity:.85}#xcf-draft button{cursor:pointer;padding:7px 14px;border-radius:999px;border:1px solid rgba(240,180,41,.6);background:rgba(240,180,41,.18);color:inherit;font-weight:700}#xcf-draft button[data-a=n]{background:none;border-color:rgba(255,255,255,.25)}' +
+        '.xcf-k .r{display:flex;align-items:center;gap:8px}.xcf-k .r span{flex:1}.xcf-k .r button{all:unset;cursor:pointer;opacity:.6;padding:0 4px}.xcf-add{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}.xcf-add select{flex:1 1 180px}.xcf-add input{width:150px}';
+    function init(app) {
+        APP = app; const st = document.createElement('style'); st.textContent = CSS; (document.head || document.documentElement).appendChild(st);
+        applyShoot(); addEventListener('storage', e => { if (e.key === KS) applyShoot(); }); document.addEventListener('visibilitychange', () => { if (shootOn()) lock(true); });
+        hookDownloads(); keys();
+        const go = () => { resume(); drafts(); new MutationObserver(m => { const o = document.getElementById('xux-ov'); if (o) sheetExtra(o); }).observe(document.body, { childList: true }); };
+        if (document.body) go(); else addEventListener('DOMContentLoaded', go);
+    }
+    return { init, list, remove, shoot, shootOn, printSheet };
+})();
+
+XCONF.init('index');
+
+// =====================================================================
 //  SUITE XIII — XENC : suivi des conversions ENCODO depuis tous les outils
 //  Pendant qu'ENCODO convertit (dans son onglet / sa fenêtre), un petit onglet apparaît sur le bord droit
 //  de l'écran, sous le panier : fichier en cours, pourcentage, temps restant, fichiers terminés à télécharger.
@@ -6235,10 +6330,11 @@ const XSTART = (() => {
     async function api(a, p) { const c = J('xiii.drive', null); if (!c || !c.url) return { ok: false, err: 'off' }; try { const r = await fetch(c.url, { method: 'POST', body: JSON.stringify(Object.assign({ a }, c.tok ? { tok: c.tok } : { code: c.code, by: (c.me && c.me.name) || 'Master' }, p || {})), redirect: 'follow' }); return await r.json(); } catch (e) { return { ok: false, err: 'net' }; } }
     const dt = ts => new Date(ts).toLocaleString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
     const nm = h => { const a = document.querySelector('a.card[href^="' + h + '"]'); return a ? (a.querySelector('.card-title,h3,b') || a).textContent.trim().split('\n')[0] : h.toUpperCase(); };
-    const CSS = `#xst-b{position:fixed;top:14px;right:18px;z-index:9060;display:flex;align-items:center;gap:8px;padding:10px 18px;border-radius:999px;cursor:pointer;font:700 14px "Segoe UI",system-ui,sans-serif;color:var(--xh-txt,#fff);background:var(--xh-glass,rgba(20,20,28,.7));border:1px solid var(--xh-line,rgba(255,255,255,.12));backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:0 8px 26px rgba(0,0,0,.35),0 0 24px rgba(240,180,41,.12)}#xst-b:hover{border-color:#f0b429}#xst-b i{font-style:normal;min-width:18px;height:18px;border-radius:9px;background:#ef5350;color:#fff;font-size:11px;display:none;align-items:center;justify-content:center;padding:0 4px}#xst-b i.on{display:inline-flex}
+    const CSS = `.xst-shoot{all:unset;box-sizing:border-box;cursor:pointer;width:100%;padding:11px 14px;border-radius:14px;border:1px solid var(--xh-line,rgba(255,255,255,.15));margin-bottom:6px;font-weight:600}.xst-shoot.on{border-color:#f0b429;background:rgba(240,180,41,.16);box-shadow:0 0 16px rgba(240,180,41,.25)}.xst-ev{display:grid;grid-template-columns:22px 1fr;gap:0 8px;padding:8px 10px;margin:4px 0;border-radius:12px;text-decoration:none;color:inherit;border-left:3px solid var(--c);background:rgba(255,255,255,.04)}.xst-ev:hover{background:rgba(255,160,70,.10)}.xst-ev small{grid-column:2;color:var(--xh-dim,#aaa);font-size:11px}.xst-ev b{font-weight:600;font-size:13px}.xst-more{display:block;margin-top:10px;text-align:center;padding:9px;border-radius:999px;border:1px solid var(--xh-line,rgba(255,255,255,.15));color:inherit;text-decoration:none}.xst-f{display:flex;align-items:center;gap:8px;padding:8px 6px;border-bottom:1px solid var(--xh-line,rgba(255,255,255,.08))}.xst-f .i{font-size:20px}.xst-f .t{flex:1;min-width:0}.xst-f b{display:block;font-weight:600;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.xst-f small{color:var(--xh-dim,#aaa);font-size:11px}.xst-f button{all:unset;cursor:pointer;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center}.xst-f button:hover{background:rgba(255,160,70,.18)}
+#xst-b{position:fixed;top:14px;right:18px;z-index:9060;display:flex;align-items:center;gap:8px;padding:10px 18px;border-radius:999px;cursor:pointer;font:700 14px "Segoe UI",system-ui,sans-serif;color:var(--xh-txt,#fff);background:var(--xh-glass,rgba(20,20,28,.7));border:1px solid var(--xh-line,rgba(255,255,255,.12));backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:0 8px 26px rgba(0,0,0,.35),0 0 24px rgba(240,180,41,.12)}#xst-b:hover{border-color:#f0b429}#xst-b i{font-style:normal;min-width:18px;height:18px;border-radius:9px;background:#ef5350;color:#fff;font-size:11px;display:none;align-items:center;justify-content:center;padding:0 4px}#xst-b i.on{display:inline-flex}
 #xst{position:fixed;right:0;top:0;bottom:0;width:340px;max-width:92vw;z-index:9070;display:flex;flex-direction:column;gap:6px;padding:16px 14px;border-radius:26px 0 0 26px;background:var(--xh-glass,rgba(20,20,28,.85));border:1px solid var(--xh-line,rgba(255,255,255,.12));backdrop-filter:blur(22px) saturate(1.4);-webkit-backdrop-filter:blur(22px) saturate(1.4);box-shadow:0 20px 60px rgba(0,0,0,.45),0 0 40px rgba(240,180,41,.07);transform:translateX(105%);transition:transform .35s cubic-bezier(.2,.8,.2,1);color:var(--xh-txt,#eee);font:14px "Segoe UI",system-ui,sans-serif}#xst.on{transform:none}body:has(#xst.on) #xst-b{opacity:0;pointer-events:none}
 #xst .xst-h{display:flex;align-items:center;justify-content:space-between;padding:0 4px 10px;border-bottom:1px solid var(--xh-line,rgba(255,255,255,.12))}#xst .xst-h b{font:22px Astoria,serif;letter-spacing:.04em}#xst .xst-x{all:unset;cursor:pointer;font-size:18px;padding:4px 8px;border-radius:8px}
-#xst nav{display:flex;gap:4px;position:relative;padding:6px 0}#xst nav{flex-wrap:nowrap;gap:2px}#xst nav button{all:unset;flex:1 1 auto;white-space:nowrap;font-size:11px!important;padding:9px 6px!important;text-align:center;padding:9px 4px;border-radius:999px;cursor:pointer;font:600 12px "Segoe UI",system-ui;color:var(--xh-dim,#aaa);position:relative;z-index:1}#xst nav button.on{color:#1a1206}#xst nav .ind{position:absolute;top:6px;bottom:6px;border-radius:999px;background:linear-gradient(135deg,#f0b429,#ff8a3d);box-shadow:0 0 18px rgba(240,180,41,.45);transition:left .3s cubic-bezier(.2,.8,.2,1),width .3s}
+#xst nav{display:flex;gap:4px;position:relative;padding:6px 0}#xst nav{display:grid!important;grid-template-columns:repeat(4,1fr);gap:3px!important}#xst nav .ind{bottom:auto!important;transition:left .3s cubic-bezier(.2,.8,.2,1),top .3s,width .3s!important}#xst nav button{padding:8px 2px!important}#xst nav button{all:unset;flex:1 1 auto;white-space:nowrap;font-size:11px!important;padding:9px 6px!important;text-align:center;padding:9px 4px;border-radius:999px;cursor:pointer;font:600 12px "Segoe UI",system-ui;color:var(--xh-dim,#aaa);position:relative;z-index:1}#xst nav button.on{color:#1a1206}#xst nav .ind{position:absolute;top:6px;bottom:6px;border-radius:999px;background:linear-gradient(135deg,#f0b429,#ff8a3d);box-shadow:0 0 18px rgba(240,180,41,.45);transition:left .3s cubic-bezier(.2,.8,.2,1),width .3s}
 #xst .xst-c{flex:1;overflow:auto;display:flex;flex-direction:column;gap:8px;padding:4px 2px}#xst .r{display:flex;flex-direction:column;gap:3px;padding:10px 12px;border-radius:14px;background:rgba(255,255,255,.05);border:1px solid var(--xh-line,rgba(255,255,255,.1));color:inherit;text-decoration:none}#xst a.r:hover{border-color:#f0b429}#xst .r small{opacity:.65;font-size:11px}#xst .r.new{border-color:rgba(239,83,80,.6)}#xst .e{opacity:.6;text-align:center;padding:20px 0}
 #xst .ch{display:flex;gap:6px}#xst .ch input{flex:1;padding:10px 12px;border-radius:12px;border:1px solid var(--xh-line,rgba(255,255,255,.15));background:rgba(0,0,0,.25);color:inherit}#xst .ch button{all:unset;cursor:pointer;padding:10px 14px;border-radius:12px;background:#f0b429;color:#1a1206;font-weight:700}
 #xst .ql{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}#xst .ql a{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 4px;border-radius:14px;background:rgba(255,255,255,.05);border:1px solid var(--xh-line,rgba(255,255,255,.1));color:inherit;text-decoration:none;font-size:11px;font-weight:600;text-align:center}#xst .ql a:hover{border-color:#f0b429}#xst .ql img{width:40px;height:40px;object-fit:contain}#xst h4{margin:8px 4px 2px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;opacity:.6}
@@ -6271,13 +6367,31 @@ const XSTART = (() => {
     function widgets(c) {
         const d = document.getElementById('xd-dash');
         c.innerHTML = '<p class="e" style="padding:6px 0">Aperçu des widgets de l\'accueil</p>';
-        if (d) { const k = d.cloneNode(true); k.removeAttribute('id'); k.querySelectorAll('[id]').forEach(x => x.removeAttribute('id')); k.querySelectorAll('.xd-rs,button').forEach(x => x.remove()); k.style.cssText = 'display:flex;flex-direction:column;gap:8px;min-height:0;zoom:.85'; c.appendChild(k); }
+        if (d) { const k = d.cloneNode(true); k.removeAttribute('id'); k.querySelectorAll('[id]').forEach(x => x.removeAttribute('id')); k.querySelectorAll('.xd-rs,button').forEach(x => x.remove()); k.style.cssText = 'display:flex;flex-direction:column;gap:8px;min-height:0;zoom:.85'; c.appendChild(k); c.querySelector('p').textContent = 'Widgets de l\'accueil — glisser pour réorganiser (même ordre sur l\'accueil)';
+            const g = k.querySelector('.xd-g'); if (g) { const save = () => { const vis = [...g.children].map(w => w.dataset.card).filter(Boolean); let U = {}; try { U = JSON.parse(localStorage.getItem('xiii.dash.me')) || {}; } catch (e) { } const prev = U.order || []; U.order = vis.concat(prev.filter(x => vis.indexOf(x) < 0)); try { localStorage.setItem('xiii.dash.me', JSON.stringify(U)); } catch (e) { } try { if (typeof XDASH !== 'undefined') XDASH.render(); } catch (e) { } };
+            [...g.children].forEach(w => { if (!w.dataset.card) return; w.draggable = true; w.style.cursor = 'grab'; w.ondragstart = e => { e.dataTransfer.setData('text/xw', w.dataset.card); w.style.opacity = '.4'; }; w.ondragend = () => { w.style.opacity = ''; }; w.ondragover = e => e.preventDefault(); w.ondrop = e => { e.preventDefault(); const f = g.querySelector('[data-card="' + e.dataTransfer.getData('text/xw') + '"]'); if (!f || f === w) return; const r = w.getBoundingClientRect(); if (e.clientY > r.top + r.height / 2) w.after(f); else w.before(f); save(); }; }); } }
         else c.innerHTML += '<p class="e">Widgets désactivés (Réglages).</p>';
     }
-    function outils(c) { const tb = document.getElementById('top-bar'); c.innerHTML = '<p class="e" style="padding:4px 0 8px">Recherche, Drive, équipe, installation, projet et thème</p>'; if (tb) { c.appendChild(tb); tb.querySelectorAll('*').forEach(e => e.style.removeProperty('margin-left')); } else c.innerHTML += '<p class="e">Barre indisponible.</p>'; }
+    function agenda(c) {
+        if (typeof XCALEV === 'undefined') { c.innerHTML = '<p class="e">Agenda indisponible ici.</p>'; return; }
+        const pad = n => String(n).padStart(2, '0'), iso = d => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()), t0 = iso(new Date()), lim = iso(new Date(Date.now() + 45 * 864e5));
+        let E = []; try { E = XCALEV.events().filter(e => e.d1 >= t0 && e.d0 <= lim); } catch (e) { }
+        if (!E.length) { c.innerHTML = '<p class="e">Aucune échéance dans les 45 prochains jours (PLANNO, CALL SHEETO, CONDUCO, REPERO, MATOS, DEVISO, POSTO…).</p><a class="xst-more" href="calendrier.html">📅 Ouvrir CALENDRIER</a>'; return; }
+        const S = XCALEV.SRC || {}, day = s => { const d = new Date(s + 'T12:00'), n = Math.round((d - new Date(t0 + 'T12:00')) / 864e5); return n === 0 ? 'Aujourd\'hui' : n === 1 ? 'Demain' : d.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' }); };
+        let h = '', last = ''; E.slice(0, 40).forEach(e => { const d = e.d0 < t0 ? t0 : e.d0; if (d !== last) { h += '<h4>' + esc(day(d)) + '</h4>'; last = d; } const s = S[e.src] || ['•', e.src, '#f0b429']; h += '<a class="xst-ev" href="' + esc(e.src) + '.html" style="--c:' + esc(s[2]) + '"><span>' + esc(s[0]) + '</span><b>' + esc(e.title) + '</b><small>' + esc([e.time, s[1], e.d1 !== e.d0 ? '→ ' + new Date(e.d1 + 'T12:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) : '', e.det].filter(Boolean).join(' · ')) + '</small></a>'; });
+        c.innerHTML = h + '<a class="xst-more" href="calendrier.html">📅 Tout le calendrier</a>';
+    }
+    async function files(c) {
+        c.innerHTML = '<p class="e">Chargement…</p>'; const L = typeof XCONF !== 'undefined' ? await XCONF.list() : []; if (tab !== 'files' || !c.isConnected) return;
+        if (!L.length) { c.innerHTML = '<p class="e">Les PDF, Excel et images exportés depuis les outils de ce projet apparaîtront ici (20 derniers), à retélécharger en un clic.</p>'; return; }
+        const ic = n => /\.pdf$/i.test(n) ? '📕' : /\.(xlsx?|csv)$/i.test(n) ? '📗' : /\.(png|jpe?g|svg|webp)$/i.test(n) ? '🖼️' : /\.(docx?|odt)$/i.test(n) ? '📘' : /\.(zip|xiii)$/i.test(n) ? '🗜️' : '📄', sz = b => b > 1e6 ? (b / 1e6).toFixed(1) + ' Mo' : Math.max(1, Math.round(b / 1e3)) + ' Ko';
+        c.innerHTML = '<p class="e" style="padding:4px 0 8px">Derniers fichiers générés dans ce projet</p>' + L.map(f => '<div class="xst-f" data-id="' + esc(f.id) + '"><span class="i">' + ic(f.name) + '</span><span class="t"><b>' + esc(f.name) + '</b><small>' + esc((f.app || '').toUpperCase() + ' · ' + dt(f.at) + ' · ' + sz(f.size)) + '</small></span><button data-dl title="Télécharger">⬇</button><button data-rm title="Retirer de la liste">✕</button></div>').join('');
+        c.querySelectorAll('.xst-f').forEach(r => { const f = L.find(x => x.id === r.dataset.id); r.querySelector('[data-dl]').onclick = () => { const a = document.createElement('a'); a.href = URL.createObjectURL(f.blob); a.download = f.name; document.body.appendChild(a); HTMLAnchorElement.prototype.click.call(a); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 4000); }; r.querySelector('[data-rm]').onclick = () => { XCONF.remove(f.id); r.remove(); }; });
+    }
+    function outils(c) { const tb = document.getElementById('top-bar'), so = typeof XCONF !== 'undefined' && XCONF.shootOn(); c.innerHTML = '<button class="xst-shoot' + (so ? ' on' : '') + '" title="Gros boutons, contraste élevé, écran toujours allumé — dans tous les outils">🎬 Mode tournage : <b>' + (so ? 'activé' : 'désactivé') + '</b></button><p class="e" style="padding:4px 0 8px">Recherche, Drive, équipe, installation, projet et thème</p>'; const sb = c.querySelector('.xst-shoot'); sb.onclick = () => { if (typeof XCONF === 'undefined') return; const on = XCONF.shoot(); sb.classList.toggle('on', on); sb.querySelector('b').textContent = on ? 'activé' : 'désactivé'; }; if (tb) { c.appendChild(tb); tb.querySelectorAll('*').forEach(e => e.style.removeProperty('margin-left')); } else c.innerHTML += '<p class="e">Barre indisponible.</p>'; }
     function park() { const tb = document.getElementById('top-bar'), h = document.getElementById('xst-hold'); if (tb && h && tb.parentNode !== h) h.appendChild(tb); }
-    const TABS = [['outils', '🧰 Outils', outils], ['notif', '🔔 Notifs', notif], ['chat', '💬 Chat', chat], ['quick', '🚀 Lancer', quick], ['wid', '🧩 Widgets', widgets]];
-    function show(k) { tab = k; try { localStorage.setItem('xiii.start.tab', JSON.stringify(k)); } catch (e) { } const p = document.getElementById('xst'); p.querySelectorAll('nav button').forEach(b => b.classList.toggle('on', b.dataset.k === k)); const b = p.querySelector('nav button.on'), ind = p.querySelector('nav .ind'); if (b) { ind.style.left = b.offsetLeft + 'px'; ind.style.width = b.offsetWidth + 'px'; } park(); (TABS.find(t => t[0] === k) || TABS[0])[2](p.querySelector('.xst-c')); }
+    const TABS = [['outils', '🧰 Outils', outils], ['notif', '🔔 Notifs', notif], ['chat', '💬 Chat', chat], ['agenda', '📅 Agenda', agenda], ['files', '📁 Fichiers', files], ['quick', '🚀 Lancer', quick], ['wid', '🧩 Widgets', widgets]];
+    function show(k) { tab = k; try { localStorage.setItem('xiii.start.tab', JSON.stringify(k)); } catch (e) { } const p = document.getElementById('xst'); p.querySelectorAll('nav button').forEach(b => b.classList.toggle('on', b.dataset.k === k)); const b = p.querySelector('nav button.on'), ind = p.querySelector('nav .ind'); if (b) { ind.style.left = b.offsetLeft + 'px'; ind.style.width = b.offsetWidth + 'px'; ind.style.top = b.offsetTop + 'px'; ind.style.height = b.offsetHeight + 'px'; } park(); (TABS.find(t => t[0] === k) || TABS[0])[2](p.querySelector('.xst-c')); }
     function badge() { const i = document.querySelector('#xst-b i'); if (i) { i.textContent = unread; i.classList.toggle('on', unread > 0); } }
     function toggle(on) { const p = document.getElementById('xst'); on = on ?? !p.classList.contains('on'); p.classList.toggle('on', on); if (on) requestAnimationFrame(() => show(tab)); }
     function init() {
@@ -6293,7 +6407,54 @@ const XSTART = (() => {
     return { init, toggle, show };
 })();
 
-XBOOT.ready(() => { try { XHOME.init(); XSTART.init(); } catch (e) { console.warn('XHOME', e); } }, 3200);
+// =====================================================================
+//  SUITE XIII — XADAPT : accueil adaptatif + « Reprendre là où j'en étais » (Phase AB)
+//  • phase du projet d'après la fiche (début / fin du tournage) : préparation, tournage, post-production
+//  • les tuiles utiles à la phase passent en tête de leur catégorie (★) ; bandeau « Phase » avec ces outils
+//  • carte « Reprendre » : les derniers outils ouverts dans ce projet, à rouvrir d'un clic (ou tous d'un coup)
+// =====================================================================
+const XADAPT = (() => {
+    const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } };
+    const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const REC = {
+        prepa: ['dossier', 'deviso', 'planno', 'decoup', 'casto', 'repero', 'plano', 'matos', 'ressourco', 'callsheeto'],
+        tournage: ['callsheeto', 'conduco', 'runo', 'scripto', 'backupo', 'packingo', 'transporto', 'graphico', 'jour'],
+        post: ['posto', 'encodo', 'soustitro', 'backupo', 'deviso', 'controle', 'dossier']
+    };
+    const LAB = { prepa: ['🧭', 'Préparation'], tournage: ['🎬', 'Tournage'], post: ['🎞️', 'Post-production'], none: ['🧩', 'Sans dates'] };
+    function phase() {
+        const P = J('xiii.projets', null), f = P && P.list && P.list.find(x => x && x.id === P.active); if (!f || !f.debut) return { k: 'none', f };
+        const d = s => new Date(s + 'T12:00'), t = new Date(), a = d(f.debut), b = d(f.fin || f.debut), n = Math.round((a - t) / 864e5), m = Math.round((t - b) / 864e5);
+        if (t < a) return { k: 'prepa', f, txt: n <= 1 ? (n === 1 ? 'tournage demain' : 'tournage aujourd\'hui') : 'J-' + n + ' avant le tournage' };
+        if (m <= 0) return { k: 'tournage', f, txt: 'jour ' + (Math.round((t - a) / 864e5) + 1) + ' / ' + (Math.round((b - a) / 864e5) + 1) };
+        return { k: 'post', f, txt: 'tournage terminé il y a ' + m + ' j' };
+    }
+    const NM = { callsheeto: 'CALL SHEETO', storyboardo: 'STORYBOARD', index: 'ACCUEIL' }, name = a => NM[a] || a.toUpperCase();
+    const ago = t => { const m = Math.round((Date.now() - t) / 6e4); return m < 1 ? 'à l\'instant' : m < 60 ? 'il y a ' + m + ' min' : m < 1440 ? 'il y a ' + Math.round(m / 60) + ' h' : 'il y a ' + Math.round(m / 1440) + ' j'; };
+    const openT = (u, bg) => { if (typeof xiiiOpenTab === 'function' && window.parent !== window) xiiiOpenTab(u, bg); else location.href = u; };
+    function draw() {
+        const ph = phase(), R = (REC[ph.k] || []);
+        document.querySelectorAll('a.card').forEach(c => { const a = (c.getAttribute('href') || '').replace(/\.html.*$/, ''), on = R.indexOf(a) > -1; c.classList.toggle('xad-rec', on); c.style.order = on ? String(-20 + R.indexOf(a)) : ''; c.title = on ? (c.title.replace(/ ★.*$/, '') + ' ★ conseillé en ' + LAB[ph.k][1].toLowerCase()) : c.title.replace(/ ★.*$/, ''); });
+        const anchor = document.getElementById('xd-dash') || document.getElementById('xpin'); if (!anchor) return;
+        let box = document.getElementById('xad'); if (!box) { box = document.createElement('div'); box.id = 'xad'; } if (box.nextSibling !== anchor) anchor.parentNode.insertBefore(box, anchor);
+        const RS = J('xiii.resume', []).filter(x => x && x.app && document.querySelector('a.card[href^="' + x.app + '.html"]')).slice(0, 5);
+        const tile = (a, sub, u) => '<button data-u="' + esc(u || a + '.html') + '" title="' + esc(name(a)) + '"><img src="logos/' + esc(a) + '.png?v=3" alt="" onerror="this.style.display=\'none\'"><span><b>' + esc(name(a)) + '</b>' + (sub ? '<small>' + esc(sub) + '</small>' : '') + '</span></button>';
+        const h = (RS.length ? '<div class="xad-c"><h4>↻ Reprendre là où j\'en étais' + (RS.length > 1 ? '<a data-all>Tout rouvrir</a>' : '') + '</h4><div class="xad-l">' + RS.map(x => tile(x.app, ago(x.at), x.url)).join('') + '</div></div>' : '') +
+            (ph.k !== 'none' ? '<div class="xad-c"><h4>' + LAB[ph.k][0] + ' Phase : ' + LAB[ph.k][1] + ' <small>' + esc(ph.txt || '') + '</small></h4><div class="xad-l">' + R.filter(a => document.querySelector('a.card[href^="' + a + '.html"]')).slice(0, 7).map(a => tile(a)).join('') + '</div></div>' : '');
+        if (box.dataset.h === h) return; box.dataset.h = h; box.innerHTML = h; box.style.display = h ? '' : 'none';
+        box.querySelectorAll('[data-u]').forEach(b => b.onclick = e => openT(b.dataset.u, e.ctrlKey || e.metaKey));
+        const all = box.querySelector('[data-all]'); if (all) all.onclick = () => RS.slice().reverse().forEach((x, i) => openT(x.url, i < RS.length - 1));
+    }
+    const CSS = '#xad .xad-c{background:linear-gradient(145deg,rgba(255,255,255,.035),rgba(255,255,255,.01))!important}#xad .xad-l button{all:unset!important;cursor:pointer!important;display:flex!important;align-items:center!important;gap:8px!important;padding:6px 14px 6px 8px!important;border-radius:999px!important;border:1px solid rgba(255,255,255,.12)!important;background:rgba(255,255,255,.04)!important;font:12px "Segoe UI",system-ui,sans-serif!important;color:inherit!important;box-shadow:none!important;min-height:0!important}#xad .xad-l button:hover{border-color:rgba(240,180,41,.6)!important;box-shadow:0 0 14px rgba(240,180,41,.2)!important}#xad .xad-l img{width:24px!important;height:24px!important;object-fit:contain}#xad{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;margin:0 auto 18px;max-width:1200px}.xad-c{padding:12px 16px;border-radius:18px;background:linear-gradient(145deg,rgba(255,255,255,.035),rgba(255,255,255,.01));border:1px solid rgba(255,255,255,.07);border-top-color:rgba(240,180,41,.35);box-shadow:0 0 26px rgba(240,180,41,.05)}' +
+        '.xad-c h4{margin:0 0 10px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;opacity:.85;display:flex;align-items:center;gap:8px}.xad-c h4 small{text-transform:none;letter-spacing:0;opacity:.7;font-weight:400}.xad-c h4 a{margin-left:auto;cursor:pointer;text-transform:none;letter-spacing:0;color:#f0b429;font-weight:700}' +
+        '.xad-l{display:flex;flex-wrap:wrap;gap:8px}.xad-l button{all:unset;cursor:pointer;display:flex;align-items:center;gap:8px;padding:7px 12px 7px 8px;border-radius:999px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.03);font-size:12px}.xad-l button:hover{border-color:rgba(240,180,41,.55);box-shadow:0 0 14px rgba(240,180,41,.18)}.xad-l img{width:22px;height:22px;object-fit:contain}.xad-l b{display:block;font-weight:700}.xad-l small{display:block;opacity:.6;font-size:10px}' +
+        'a.card.xad-rec{box-shadow:0 0 0 1px rgba(240,180,41,.45),0 0 22px rgba(240,180,41,.14)!important}a.card.xad-rec::after{content:"★";position:absolute;top:8px;right:10px;color:#f0b429;font-size:13px;text-shadow:0 0 8px rgba(240,180,41,.6)}a.card{position:relative}' +
+        ':root:not([data-theme=dark]) .xad-c{background:rgba(255,255,255,.6);border-color:rgba(0,0,0,.08)}';
+    function init() { const s = document.createElement('style'); s.textContent = CSS; document.head.appendChild(s); [800, 2600].forEach(t => setTimeout(draw, t)); setInterval(draw, 60000); addEventListener('storage', e => { if (/^(xiii\.(projets|resume))$/.test(e.key || '')) draw(); }); }
+    return { init, draw, phase };
+})();
+
+XBOOT.ready(() => { try { XHOME.init(); XSTART.init(); XADAPT.init(); } catch (e) { console.warn('XHOME', e); } }, 3200);
 </script>
 <!-- SUITE XIII:SETTINGS:END -->
 </body>
