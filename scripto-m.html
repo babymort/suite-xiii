@@ -2,167 +2,12 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<!-- SUITE XIII:WS:START --><script>// =====================================================================
-//  SUITE XIII — XWS : plusieurs « Projets XIII » en parallèle, chacun cloisonné
-//  • chargé en tout premier dans <head> de chaque page (avant tout code d'outil)
-//  • chaque projet XIII a ses propres données : localStorage, IndexedDB et canaux de diffusion
-//    sont préfixés « xws.<id>. » (le projet d'origine « main » garde les clés historiques, sans préfixe)
-//  • donc Drive, équipe, compte, fiche projet, données de chaque outil… séparés par projet
-//  • restent communs à tous les projets : réglages d'affichage, bibliothèques, catalogues, IA, onglets…
-//  • projet de la page : cadre de l'espace onglets (data-ws) › page parente › window.name › session › dernier utilisé
-//  • registre commun « xiii.ws » = { list:[{ id, name, color }], cur }
-// =====================================================================
-(function () {
-    if (window.XWS) return;
-    var LS; try { LS = window.localStorage; } catch (e) { return; } if (!LS || typeof Proxy === 'undefined') return;
-    var REG = 'xiii.ws', SK = 'xiii.ws.cur', SP = Storage.prototype;
-    var gi = SP.getItem, si = SP.setItem, ri = SP.removeItem, ki = SP.key;
-    var COLORS = ['#f0b429', '#4fc3f7', '#81c784', '#e57373', '#ba68c8', '#ff8a3d', '#4db6ac', '#f06292', '#9575cd', '#d4e157'];
-    // clés communes à tous les projets (préférences, bibliothèques, catalogues, IA, onglets…)
-    var G = /^(xiii\.(ws|tabs|theme|a11y|anim\.|tour2?\.|tips\.|pins|recent|start\.|pwa\.|ai$|ai\.|ux\.|bar\.|boot\.|settings\.|home\.|docs\.seen|news\.|ib\.no|inapp|catalogue|data\.|lib\.|annuaire|encodo\.|errlog|cmds|ndi\.|tally\.|gif\.)|[a-zA-Z]+XIII\.(prefs|library|lib|templates|kits|poses|parts|models|presets|base|parc|moi|xlfields|emetteur|comptes|inventory|libMigrated)$|encodoXIII|synoptique_(?!projects|snapshots)|theme$)/;
-    var rg = function (k) { return gi.call(LS, k); }, rs = function (k, v) { si.call(LS, k, v); }, rr = function (k) { ri.call(LS, k); };
-    function rkeys() { var a = [], n = LS.length; for (var i = 0; i < n; i++) a.push(ki.call(LS, i)); return a; }
-    function J(s) { try { return JSON.parse(s); } catch (e) { return null; } }
-    function reg() {
-        var r = J(rg(REG));
-        if (!r || !Array.isArray(r.list) || !r.list.length) {
-            var p = J(rg('xiii.projets')), f = p && Array.isArray(p.list) ? p.list.find(function (x) { return x && x.id === p.active; }) : null;
-            r = { list: [{ id: 'main', name: (f && f.title) || 'Projet XIII', color: COLORS[0], created: Date.now() }], cur: 'main' };
-            try { rs(REG, JSON.stringify(r)); } catch (e) { }
-        }
-        return r;
-    }
-    function put(r) { try { rs(REG, JSON.stringify(r)); } catch (e) { } }
-    function pick() {
-        try { var fe = window.frameElement; if (fe && fe.dataset && fe.dataset.ws) return fe.dataset.ws; } catch (e) { }
-        try { if (window.parent !== window && window.parent.XWS) return window.parent.XWS.id; } catch (e) { }
-        var m = /^xws:([\w-]+)$/.exec(window.name || ''); if (m) return m[1];
-        try { var s = sessionStorage.getItem(SK); if (s) return s; } catch (e) { }
-        return reg().cur || 'main';
-    }
-    var R = reg(), id = pick();
-    if (!R.list.some(function (w) { return w.id === id; })) id = 'main';
-    var inShell = false; try { inShell = !!(window.frameElement && window.frameElement.dataset && window.frameElement.dataset.ws); } catch (e) { }
-    try { if (window.top === window) sessionStorage.setItem(SK, id); } catch (e) { }
-    var P = id === 'main' ? '' : 'xws.' + id + '.';
-    var map = function (k) { k = String(k); return (!P || G.test(k)) ? k : P + k; };
-    var mine = function (rk) { if (rk.indexOf('xws.') === 0) return (P && rk.indexOf(P) === 0) ? rk.slice(P.length) : null; return (!P || G.test(rk)) ? rk : null; };
-    var keys = function () { var a = rkeys(), o = []; for (var i = 0; i < a.length; i++) { var k = mine(a[i]); if (k != null) o.push(k); } return o; };
-    function syncName(v) { // le nom du projet XIII suit le titre de sa fiche projet active
-        var p = J(v), f = p && Array.isArray(p.list) ? p.list.find(function (x) { return x && x.id === p.active; }) : null;
-        if (!f || !f.title) return; var r = reg(), w = r.list.find(function (x) { return x.id === id; });
-        if (w && w.name !== f.title) { w.name = f.title; put(r); }
-    }
-    var PX;
-    // méthodes posées sur Storage.prototype : les surcouches ajoutées ensuite par la suite (sauvegarde auto, lecture seule…)
-    // s'empilent dessus et voient toujours les clés « logiques » avec this === localStorage
-    SP.getItem = function (k) { return this === PX ? gi.call(LS, map(k)) : gi.call(this, k); };
-    SP.setItem = function (k, v) { if (this !== PX) return si.call(this, k, v); si.call(LS, map(k), v); if (String(k) === 'xiii.projets') { try { syncName(String(v)); } catch (e) { } } };
-    SP.removeItem = function (k) { return this === PX ? ri.call(LS, map(k)) : ri.call(this, k); };
-    SP.key = function (i) { if (this !== PX) return ki.call(this, i); var a = keys(); return i >= 0 && i < a.length ? a[i] : null; };
-    var cl = SP.clear; SP.clear = function () { if (this !== PX) return cl.call(this); keys().forEach(function (k) { if (k !== REG && k !== 'xiii.tabs') rr(map(k)); }); };
-    var isProto = function (p) { return typeof p === 'symbol' || p in SP; };
-    PX = new Proxy(LS, {
-        get: function (t, p) { if (p === 'length') return keys().length; if (isProto(p)) { var v = SP[p] !== undefined ? SP[p] : Reflect.get(t, p); return (typeof v === 'function' && typeof p === 'symbol') ? v.bind(t) : v; } var x = gi.call(LS, map(p)); return x === null ? undefined : x; },
-        set: function (t, p, v) { if (isProto(p)) return Reflect.set(t, p, v); SP.setItem.call(PX, p, v); return true; },
-        has: function (t, p) { if (isProto(p)) return Reflect.has(t, p); return gi.call(LS, map(p)) !== null; },
-        deleteProperty: function (t, p) { if (typeof p === 'string') SP.removeItem.call(PX, p); return true; },
-        ownKeys: function () { return keys(); },
-        getOwnPropertyDescriptor: function (t, p) { if (typeof p !== 'string') return undefined; var v = gi.call(LS, map(p)); return v === null ? undefined : { value: v, writable: true, enumerable: true, configurable: true }; },
-        defineProperty: function (t, p, d) { if (typeof p === 'string' && d && 'value' in d) SP.setItem.call(PX, p, d.value); return true; }
-    });
-    try { Object.defineProperty(window, 'localStorage', { configurable: true, enumerable: true, get: function () { return PX; } }); } catch (e) { }
-    // événements « storage » : seulement ceux du projet de la page, avec la clé logique
-    var ae = window.addEventListener, re = window.removeEventListener, WM = new WeakMap();
-    function tr(e) { if (!e || !e.isTrusted || e.key == null || e.storageArea !== LS) return e; var k = mine(e.key); if (k == null) return null; if (k === e.key) return e; try { return new StorageEvent('storage', { key: k, oldValue: e.oldValue, newValue: e.newValue, url: e.url }); } catch (x) { return e; } }
-    function wrap(f) { var w = WM.get(f); if (!w) { w = function (e) { var x = tr(e); if (!x) return; return typeof f === 'function' ? f.call(this, x) : f.handleEvent(x); }; WM.set(f, w); } return w; }
-    window.addEventListener = function (t, f, o) { if (t === 'storage' && f) return ae.call(this || window, t, wrap(f), o); return ae.apply(this || window, arguments); };
-    window.removeEventListener = function (t, f, o) { if (t === 'storage' && f && WM.has(f)) return re.call(this || window, t, WM.get(f), o); return re.apply(this || window, arguments); };
-    var osf = null; try { Object.defineProperty(window, 'onstorage', { configurable: true, get: function () { return osf; }, set: function (f) { if (osf) window.removeEventListener('storage', osf); osf = typeof f === 'function' ? f : null; if (osf) window.addEventListener('storage', osf); } }); } catch (e) { }
-    // IndexedDB : bases propres au projet
-    var F = null; try { F = window.indexedDB; } catch (e) { }
-    var dd = F && F.deleteDatabase, dbs = F && F.databases;
-    if (F) {
-        var op = F.open;
-        var mineDB = function (n) { n = String(n || ''); if (n.indexOf('xws.') === 0) return (P && n.indexOf(P) === 0) ? n.slice(P.length) : null; return P ? null : n; };
-        if (P) { F.open = function (n, v) { return (arguments.length > 1 && v !== undefined) ? op.call(F, P + n, v) : op.call(F, P + n); }; F.deleteDatabase = function (n) { return dd.call(F, P + n); }; }
-        if (dbs) F.databases = function () { return dbs.call(F).then(function (a) { return a.map(function (d) { var n = mineDB(d.name); return n == null ? null : { name: n, version: d.version }; }).filter(Boolean); }); };
-    }
-    // canaux de diffusion entre onglets : propres au projet (sauf la file ENCODO, commune)
-    if (P && window.BroadcastChannel) { var BC = window.BroadcastChannel, W = function (n) { return new BC(/^xiii-encodo/.test(String(n)) ? n : P + n); }; W.prototype = BC.prototype; window.BroadcastChannel = W; }
-    // clés qui appartiennent à un outil (hors préférences et bibliothèques communes)
-    var APPS = /^(moodo|storyboardo|decoup|scripto|casto|planno|calendrier|callsheeto|transporto|deviso|ressourco|controle|importo|dossier|repero|cadro|syno|plano|conduco|graphico|melango|runo|sono|lumo|matos|catalogue|packingo|posto|soustitro|backupo|encodo|direct|ludo|jour|index|hub)$/i;
-    function own(app, k) {
-        if (!k || G.test(k) || /^xiii\.(projets|pass|link|share|files|dash|pcfg|drive|m\.|teamtab|cslive|meteo|resume|draft|inbox|app\.cfg|deleg|acc|wsbak|charte|outbox|start|undo\.|resume)/.test(k)) {
-            var m0 = /^xiii\.(undo|notes|memo)\.([a-z]+)/.exec(k); return !!(m0 && m0[2] === app && !G.test(k));
-        }
-        if (/^synoptique_/.test(k)) return app === 'syno';
-        var m = /^([a-z]+?)XIII[._]/i.exec(k); if (m) return m[1].toLowerCase() === app;
-        m = /^xiii\.([a-z]+)[._]/.exec(k); if (m) { if (m[1] === app) return true; m = /^xiii\.[a-z]+\.([a-z]+)/.exec(k); return !!(m && m[1] === app); }
-        m = /^([a-z]+)[._-]/i.exec(k); if (m && APPS.test(m[1])) return m[1].toLowerCase() === app;
-        return false;
-    }
-    var px = function (i) { return !i || i === 'main' ? '' : 'xws.' + i + '.'; };
-    var lg = function (k, p) { if (p) return k.indexOf(p) === 0 ? k.slice(p.length) : null; return k.indexOf('xws.') === 0 ? null : k; };
-    function copyDB(n, from, to) { return new Promise(function (res) { if (!F) return res(0);
-        var a = op.call(F, from + n); a.onerror = function () { res(0); }; a.onsuccess = function () { var A = a.result, st = [].slice.call(A.objectStoreNames); if (!st.length) { A.close(); return res(0); }
-            dd.call(F, to + n).onsuccess = go; function go() { var b = op.call(F, to + n, A.version); b.onupgradeneeded = function () { var B = b.result, t = a.result.transaction(st, 'readonly'); st.forEach(function (s) { var o = t.objectStore(s), d = B.createObjectStore(s, { keyPath: o.keyPath, autoIncrement: o.autoIncrement }); [].slice.call(o.indexNames).forEach(function (x) { var ix = o.index(x); d.createIndex(x, ix.keyPath, { unique: ix.unique, multiEntry: ix.multiEntry }); }); }); };
-                b.onerror = function () { A.close(); res(0); };
-                b.onsuccess = function () { var B = b.result, n2 = 0, t = A.transaction(st, 'readonly'), w = B.transaction(st, 'readwrite'), left = st.length;
-                    st.forEach(function (s) { var o = t.objectStore(s), d = w.objectStore(s), kp = o.keyPath; o.openCursor().onsuccess = function (e) { var c = e.target.result; if (!c) { return; } try { if (kp == null) d.put(c.value, c.key); else d.put(c.value); n2++; } catch (x) { } c.continue(); }; });
-                    w.oncomplete = function () { A.close(); B.close(); res(n2); }; w.onerror = function () { A.close(); B.close(); res(n2); }; }; } }; }); }
-    function copyTool(app, to) {
-        var tp = px(to); if (tp === P) return Promise.resolve({ keys: 0, dbs: 0, same: 1 });
-        var src = window.XWS.toolKeys(app), old = window.XWS.toolKeys(app, to), bak = { at: Date.now(), keys: {} };
-        old.forEach(function (k) { bak.keys[k] = rg(tp + k); });
-        if (old.length) { try { rs(tp + 'xiii.wsbak.' + app, JSON.stringify(bak)); } catch (e) { } }
-        old.forEach(function (k) { rr(tp + k); }); var n = 0;
-        try { src.forEach(function (k) { rs(tp + k, rg(P + k)); n++; }); }
-        catch (e) { src.forEach(function (k) { rr(tp + k); }); for (var k in bak.keys) { try { rs(tp + k, bak.keys[k]); } catch (x) { } } return Promise.reject(new Error('Stockage du navigateur plein')); }
-        var rx = new RegExp('^' + app + 'XIII', 'i');
-        var L = dbs ? dbs.call(F).then(function (a) { return a.map(function (d) { return lg(d.name || '', P); }).filter(function (x) { return x && rx.test(x); }); }).catch(function () { return []; }) : Promise.resolve([]);
-        return L.then(function (names) { return Promise.all(names.map(function (x) { return copyDB(x, P, tp); })).then(function (r) { return { keys: n, dbs: names.length, recs: r.reduce(function (a, b) { return a + b; }, 0), replaced: old.length }; }); });
-    }
-    var find = function (i) { return reg().list.find(function (w) { return w.id === i; }) || null; };
-    window.XWS = {
-        id: id, prefix: P, colors: COLORS, shell: inShell,
-        list: function () { return reg().list; },
-        meta: function (i) { return find(i || id); },
-        color: function (i) { var w = find(i || id); return (w && w.color) || COLORS[0]; },
-        set: function (i, o) { var r = reg(), w = r.list.find(function (x) { return x.id === i; }); if (!w) return; for (var k in o) w[k] = o[k]; put(r); try { window.dispatchEvent(new CustomEvent('xiii-ws')); } catch (e) { } },
-        create: function (o) { o = o || {}; var r = reg(), used = r.list.map(function (w) { return w.color; }); var c = COLORS.find(function (x) { return used.indexOf(x) < 0; }) || COLORS[r.list.length % COLORS.length];
-            var w = { id: 'w' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), name: o.name || 'Nouveau projet', color: o.color || c, created: Date.now(), fresh: 1 }; r.list.push(w); put(r); return w; },
-        // basculer CETTE page (ou cet onglet) sur un autre projet XIII
-        go: function (i) { var r = reg(); if (!r.list.some(function (w) { return w.id === i; })) return; r.cur = i; put(r);
-            if (inShell) { try { window.top.postMessage({ xtab: { ws: i } }, location.origin); return; } catch (e) { } }
-            try { sessionStorage.setItem(SK, i); } catch (e) { } if (window.name === '' || /^xws:/.test(window.name)) window.name = 'xws:' + i; location.reload(); },
-        // supprimer définitivement un projet XIII (jamais le projet d'origine)
-        remove: function (i) { if (!i || i === 'main') return false; var p = 'xws.' + i + '.'; rkeys().forEach(function (k) { if (k.indexOf(p) === 0) rr(k); });
-            if (dbs) dbs.call(F).then(function (a) { a.forEach(function (d) { if (d.name && d.name.indexOf(p) === 0) dd.call(F, d.name); }); }).catch(function () { });
-            var r = reg(); r.list = r.list.filter(function (w) { return w.id !== i; }); if (r.cur === i) r.cur = 'main'; put(r); return true; },
-        // ---- copier les données d'un outil vers le même outil d'un autre projet XIII ----
-        own: own,
-        toolKeys: function (app, i) { var p = i === undefined ? P : (i === 'main' ? '' : 'xws.' + i + '.'); return rkeys().map(function (k) { return lg(k, p); }).filter(function (k) { return k != null && own(app, k); }); },
-        copyTool: function (app, to) { return copyTool(app, to); },
-        hasBackup: function (app, to) { return !!rg(px(to) + 'xiii.wsbak.' + app); },
-        restoreTool: function (app, to) { var tp = px(to), b = J(rg(tp + 'xiii.wsbak.' + app)); if (!b) return false; this.toolKeys(app, to).forEach(function (k) { rr(tp + k); }); for (var k in b.keys) { try { rs(tp + k, b.keys[k]); } catch (e) { } } rr(tp + 'xiii.wsbak.' + app); return true; },
-        // lire une clé d'un autre projet (ex. sa fiche) sans basculer
-        peek: function (i, k) { return rg((i === 'main' ? '' : 'xws.' + i + '.') + k); }
-    };
-    // hors espace onglets : fin liseré de la couleur du projet en haut de la page (quand il y a plusieurs projets)
-    if (!inShell && window.top === window && R.list.length > 1) {
-        var bar = function () { if (!document.body || document.getElementById('xws-line')) return; var d = document.createElement('div'); d.id = 'xws-line'; d.title = 'Projet XIII : ' + ((find(id) || {}).name || ''); d.style.cssText = 'position:fixed;left:0;right:0;top:0;height:3px;z-index:2147483646;pointer-events:none;background:' + window.XWS.color(); document.body.appendChild(d); };
-        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bar); else bar();
-    }
-})();
-</script><!-- SUITE XIII:WS:END -->
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#222222">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>SCRIPTO
-Rapport ' + E(DAY().label) + ' XIII · Mobile</title>
+<title>SCRIPTO XIII · Mobile</title>
 <style>
 /* SUITE XIII — socle mobile (partagé par toutes les pages *-m.html) */
 :root { color-scheme: dark; --bg-main:#1e1e1e; --bg-panel:#2d2d2d; --bg-panel-alt:#252525; --bg-header:#1a1a1a; --bg-topbar:#222; --bg-input:#3a3a3a; --bg-menu:#2d2d2d; --border-color:#444; --border-soft:#333; --text-main:#fff; --text-muted:#aaa; --text-dim:#888; --row-bg:#262626; --row-alt:#2a2a2a;
@@ -288,14 +133,13 @@ body.xm a { color: var(--accent-text); }
 @media (max-width: 1099px) { .sc-split .sc-2c { grid-template-columns: 1fr; } }
 
 </style>
-<link rel="icon" type="image/png" href="xiii-icon-192.png">
 </head>
 <body class="xm">
 <header class="m-top">
   <button class="m-ibtn plain" id="sc-back" aria-label="Retour à la liste">‹</button>
   <div class="m-title"><b>SCRIPTO <i>XIII</i></b><small id="sc-sub">Script de tournage</small></div>
   <button class="m-ibtn" id="sc-clapb" aria-label="Mode Clap" title="CLAP !" style="font-weight:800;font-size:12px;letter-spacing:.04em;width:auto;padding:0 10px;background:rgba(240,179,120,.25);border-color:rgb(240,179,120)">CLAP</button>
-  <button class="m-ibtn" id="sc-take" aria-label="Nouvelle prise" title="Nouvelle prise">🎞️</button>
+  <button class="m-ibtn" id="sc-tcb" aria-label="TC caméra et marqueurs" title="⏱️ TC caméra & marqueurs">⏱️</button><button class="m-ibtn" id="sc-take" aria-label="Nouvelle prise" title="Nouvelle prise">🎞️</button>
   <button class="m-ibtn" id="sc-menu" aria-label="Menu">⋯</button>
 </header>
 <main class="m-main no-tabs" id="sc-main"></main>
@@ -566,6 +410,7 @@ function scNormalize(p) {
     P.days.forEach(d => { d.id = d.id || scUid(); d.label = d.label || 'J'; d.notes = d.notes || ''; });
     if (!P.days.length) P.days.push(scBlankDay(P));
     P.shots.forEach(s => { Object.keys(scBlankShot({ shots: [] }, '')).forEach(k => { if (s[k] == null) s[k] = Array.isArray(scBlankShot({ shots: [] }, '')[k]) ? [] : ''; }); if (!s.status) s.status = 'todo'; if (!P.days.find(d => d.id === s.day)) s.day = P.days[0].id; s.takes.forEach(t => { t.id = t.id || scUid(); }); s.photos = s.photos.filter(x => x && x.id); });
+    if (!Array.isArray(P.marks)) P.marks = []; P.marks = P.marks.filter(m => m && m.id);
     P.cur = P.cur || {}; if (!P.days.find(d => d.id === P.cur.day)) P.cur.day = P.days[P.days.length - 1].id;
     if (!P.shots.find(s => s.id === P.cur.shot)) P.cur.shot = (P.shots.filter(s => s.day === P.cur.day).slice(-1)[0] || {}).id || '';
     return P;
@@ -591,6 +436,8 @@ function scMerge(base, inc) {
         const photos = o.photos.slice(); s.photos.forEach(ph => { if (!photos.find(x => x.id === ph.id)) photos.push(ph); });
         if ((s.mod || 0) > (o.mod || 0)) { Object.assign(o, s); upd++; } o.takes = takes; o.photos = photos;
     });
+    out.marks = out.marks || []; (inc.marks || []).forEach(m => { const o = out.marks.find(x => x.id === m.id); if (!o) { out.marks.push(m); added++; } else if ((m.mod || 0) > (o.mod || 0)) Object.assign(o, m); });
+    if (inc.tc && (!out.tc || (inc.tc.at || 0) > (out.tc.at || 0))) out.tc = inc.tc;
     ['name', 'client', 'author'].forEach(k => { if (!out[k] && inc[k]) out[k] = inc[k]; });
     return { P: scNormalize(out), added, upd };
 }
@@ -637,7 +484,7 @@ function scImgStore(dbName) {
         async put(id, data) { MEM.set(id, data); try { await tx('readwrite', s => s.put(data, id)); } catch (e) { } },
         async del(id) { MEM.delete(id); try { await tx('readwrite', s => s.delete(id)); } catch (e) { } },
         async load() { try { const d = await db(); await new Promise(res => { const c = d.transaction('imgs', 'readonly').objectStore('imgs').openCursor(); c.onsuccess = () => { const k = c.result; if (k) { MEM.set(k.key, k.value); k.continue(); } else res(); }; c.onerror = () => res(); }); } catch (e) { } },
-        async gc(P) { const u = new Set(); P.shots.forEach(s => s.photos.forEach(p => u.add(p.id))); for (const k of Array.from(MEM.keys())) if (!u.has(k)) await this.del(k); }
+        async gc(P) { const u = new Set(); P.shots.forEach(s => s.photos.forEach(p => u.add(p.id))); (P.marks || []).forEach(m => { if (m.photo) u.add(m.photo); }); for (const k of Array.from(MEM.keys())) if (!u.has(k)) await this.del(k); }
     };
 }
 // =====================================================================
@@ -710,6 +557,196 @@ function scClapOpen(ctx) {
     try { SC_AC = SC_AC || new (window.AudioContext || window.webkitAudioContext)(); SC_AC.resume(); } catch (e) { }
     draw();
 }
+
+</script>
+<script>
+// =====================================================================
+//  SCRIPTO XIII — ⏱️ TC CAMÉRA & MARQUEURS
+//  1) Calage : la caméra du téléphone filme le viseur de la caméra (cadre orange), lit le TC (OCR)
+//     ou on le saisit ; l'appli cale alors son horloge sur le TC caméra (free run).
+//  2) Marqueurs : un appui = un marqueur au TC caméra (catégorie, commentaire, photo, plan en cours).
+//  3) Résumé PDF + envoi au SCRIPTO du projet.
+//  ctx = { P(), save(), imgPut(id, data), imgGet(id), light(), send() | null, compress(data) }
+// =====================================================================
+const SCTC = (() => {
+    const pad = n => String(n).padStart(2, '0');
+    const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const uid = () => Math.random().toString(36).slice(2, 10);
+    // cadences : [libellé, base (images par seconde nominales), diviseur, drop frame]
+    const FPS = [['23.976', 24, 1001], ['24', 24, 1000], ['25', 25, 1000], ['29.97 DF', 30, 1001, 1], ['29.97 NDF', 30, 1001], ['30', 30, 1000], ['50', 50, 1000], ['59.94 DF', 60, 1001, 1], ['60', 60, 1000]];
+    const fpsOf = k => FPS.find(f => f[0] === k) || FPS[2];
+    const rate = f => f[1] * 1000 / f[2]; // images par seconde réelles
+    const DAYF = f => f[1] * 86400; // images nominales par 24 h (TC)
+    // images ↔ TC (drop frame : 29.97 / 59.94)
+    function toTC(n, f) {
+        const b = f[1]; n = ((Math.round(n) % DAYF(f)) + DAYF(f)) % DAYF(f);
+        if (f[3]) { const d = b === 30 ? 2 : 4, per10 = b * 600 - d * 9, D = Math.floor(n / per10), M = n % per10; n += d * 9 * D + (M > d ? d * Math.floor((M - d) / (b * 60 - d)) : 0); }
+        const ff = n % b, s = Math.floor(n / b) % 60, m = Math.floor(n / b / 60) % 60, h = Math.floor(n / b / 3600) % 24;
+        return pad(h) + ':' + pad(m) + ':' + pad(s) + (f[3] ? ';' : ':') + pad(ff);
+    }
+    function fromTC(h, m, s, ff, f) {
+        const b = f[1]; let n = ((h * 60 + m) * 60 + s) * b + ff;
+        if (f[3]) { const d = b === 30 ? 2 : 4, tm = h * 60 + m; n -= d * (tm - Math.floor(tm / 10)); }
+        return n;
+    }
+    function parseTC(txt, f) {
+        let t = String(txt || '').toUpperCase().replace(/[OQD]/g, '0').replace(/[IL|!]/g, '1').replace(/S/g, '5').replace(/B/g, '8').replace(/Z/g, '2').replace(/G/g, '6');
+        const m = /(\d{1,2})\s*[:;.,'’·]?\s*(\d{2})\s*[:;.,'’·]?\s*(\d{2})\s*[:;.,'’·]?\s*(\d{2})/.exec(t) || (t.replace(/\D/g, '').length === 8 ? /(\d{2})(\d{2})(\d{2})(\d{2})/.exec(t.replace(/\D/g, '')) : null);
+        if (!m) return null; const [h, mi, s, ff] = m.slice(1).map(Number);
+        if (h > 23 || mi > 59 || s > 59 || ff >= f[1]) return null; return { h, m: mi, s, ff };
+    }
+    // TC caméra à l'instant t (ms) d'après le calage
+    const tcAt = (cal, t) => { const f = fpsOf(cal.fps); return cal.f + (t - cal.tw) / 1000 * rate(f); };
+    const CATS = [['repere', 'Repère', '#ef5350'], ['garder', 'À garder', '#43a047'], ['drole', 'Drôle', '#ab47bc'], ['top', 'Excellent', '#f9a825'], ['cle', 'Moment clé', '#26a69a'], ['emotion', 'Émotion', '#a1887f'], ['pb', 'Problème', '#ff7043'], ['son', 'Son', '#42a5f5']];
+    const catOf = k => CATS.find(c => c[0] === k) || CATS[0];
+
+    // ---------- OCR ----------
+    let tessP = null;
+    const TESS = ['https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/5.0.5/tesseract.min.js', 'https://cdn.jsdelivr.net/npm/tesseract.js@5.0.5/dist/tesseract.min.js'];
+    function loadScript(u) { return new Promise((ok, ko) => { const s = document.createElement('script'); s.src = u; s.onload = ok; s.onerror = ko; document.head.appendChild(s); }); }
+    function tess() {
+        return tessP || (tessP = (async () => {
+            if (!window.Tesseract) { let ok = false; for (const u of TESS) { try { await loadScript(u); ok = true; break; } catch (e) { } } if (!ok) throw new Error('Lecture automatique indisponible hors ligne'); }
+            const w = await Tesseract.createWorker('eng'); await w.setParameters({ tessedit_char_whitelist: '0123456789:;.', tessedit_pageseg_mode: '7' }); return w;
+        })().catch(e => { tessP = null; throw e; }));
+    }
+    // prépare l'image : niveaux de gris, contraste, seuil (Otsu), agrandissement, texte noir sur blanc
+    function prep(src, invert) {
+        const k = Math.max(1, 900 / src.width), c = document.createElement('canvas'); c.width = Math.round(src.width * k); c.height = Math.round(src.height * k);
+        const g = c.getContext('2d'); g.imageSmoothingEnabled = true; g.drawImage(src, 0, 0, c.width, c.height);
+        const d = g.getImageData(0, 0, c.width, c.height), p = d.data, hist = new Array(256).fill(0), N = p.length / 4;
+        for (let i = 0; i < p.length; i += 4) { const y = Math.round(0.3 * p[i] + 0.59 * p[i + 1] + 0.11 * p[i + 2]); p[i] = y; hist[y]++; }
+        let sum = 0; for (let i = 0; i < 256; i++) sum += i * hist[i]; let sB = 0, wB = 0, best = 0, th = 128;
+        for (let i = 0; i < 256; i++) { wB += hist[i]; if (!wB) continue; const wF = N - wB; if (!wF) break; sB += i * hist[i]; const mB = sB / wB, mF = (sum - sB) / wF, v = wB * wF * (mB - mF) * (mB - mF); if (v > best) { best = v; th = i; } }
+        let bright = 0; for (let i = 0; i < p.length; i += 4) if (p[i] > th) bright++;
+        const inv = invert != null ? invert : bright < N / 2; // texte clair sur fond sombre (viseur) → on inverse
+        for (let i = 0; i < p.length; i += 4) { let v = p[i] > th ? 255 : 0; if (inv) v = 255 - v; p[i] = p[i + 1] = p[i + 2] = v; }
+        g.putImageData(d, 0, 0); return c;
+    }
+    async function ocr(crop, f) {
+        const tries = [];
+        if ('TextDetector' in window) { try { const r = await new window.TextDetector().detect(crop); tries.push(r.map(x => x.rawValue).join(' ')); const t = parseTC(tries[0], f); if (t) return { tc: t, raw: tries[0], how: 'détecteur du téléphone' }; } catch (e) { } }
+        const w = await tess();
+        for (const inv of [null, true, false]) { const c = prep(crop, inv); const r = await w.recognize(c); const raw = (r.data && r.data.text || '').trim(); tries.push(raw); const t = parseTC(raw, f); if (t) return { tc: t, raw, how: 'lecture automatique' }; }
+        return { tc: null, raw: tries.filter(Boolean).join(' / ') };
+    }
+
+    // ---------- interface ----------
+    let ctx = null, ov = null, stream = null, raf = 0, zoom = 1, mode = 'cal', editId = '';
+    const P = () => ctx.P(), cal = () => P().tc, $ = s => ov.querySelector(s);
+    const css = `#sctc{position:fixed;inset:0;z-index:10400;background:#0d0d0f;color:#f2ede6;font:15px/1.35 -apple-system,"Segoe UI",Roboto,sans-serif;display:flex;flex-direction:column;overflow:hidden}
+#sctc *{box-sizing:border-box}#sctc button{font:inherit;color:inherit;background:#26262b;border:1px solid #3a3a42;border-radius:12px;padding:10px 14px;cursor:pointer;min-height:44px}#sctc button.pr{background:#f0b378;color:#1d1b19;border-color:#f0b378;font-weight:700}#sctc button.dg{background:#3a1d1d;border-color:#7a2f2f}
+#sctc .tb{display:flex;gap:8px;align-items:center;padding:max(10px,env(safe-area-inset-top)) 12px 8px;background:#151518;border-bottom:1px solid #2a2a30}#sctc .tb b{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#sctc .tb select{flex:none;width:auto;max-width:130px}#sctc select,#sctc input,#sctc textarea{font:16px inherit;color:inherit;background:#1d1d22;border:1px solid #3a3a42;border-radius:10px;padding:8px 10px}
+#sctc .cam{position:relative;flex:1;overflow:hidden;background:#000}#sctc video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform-origin:50% 50%}
+#sctc .box{position:absolute;left:8%;right:8%;top:41%;height:18%;border:3px solid #ff8a1e;border-radius:12px;box-shadow:0 0 0 2000px rgba(0,0,0,.42)}#sctc .box i{position:absolute;left:0;right:0;top:-30px;text-align:center;font-style:normal;font-weight:700;color:#ffb36b;text-shadow:0 1px 3px #000}
+#sctc .hint{position:absolute;left:12px;right:12px;bottom:12px;text-align:center;background:rgba(0,0,0,.6);border-radius:12px;padding:8px 10px;font-size:13px}#sctc .zm{position:absolute;right:10px;top:12%;bottom:30%;writing-mode:vertical-lr;direction:rtl;width:34px}
+#sctc .bar{display:flex;gap:8px;flex-wrap:wrap;padding:10px 12px max(12px,env(safe-area-inset-bottom));background:#151518;border-top:1px solid #2a2a30}#sctc .bar>*{flex:1 1 auto}
+#sctc .clock{text-align:center;padding:12px 10px 6px}#sctc .clock .tc{font:700 46px/1 ui-monospace,Menlo,Consolas,monospace;letter-spacing:.02em}#sctc .clock .tc em{font-style:normal;color:#ff6b5e}#sctc .clock small{display:block;color:#a39b91;margin-top:6px;font-size:12.5px}
+#sctc .cats{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:6px 12px}#sctc .cats button{border-width:2px;font-weight:700;min-height:56px;display:flex;align-items:center;gap:8px;justify-content:center}#sctc .cats button i{width:12px;height:12px;border-radius:3px;display:inline-block}
+#sctc .list{flex:1;overflow:auto;padding:4px 12px 12px}#sctc .mk{display:flex;gap:10px;align-items:flex-start;padding:9px 6px;border-bottom:1px solid #26262b}#sctc .mk .t{font:700 14px ui-monospace,Menlo,monospace;min-width:104px}#sctc .mk .c{font-size:11px;border-radius:6px;padding:1px 6px;color:#111;font-weight:700}
+#sctc .mk .n{flex:1;min-width:0;font-size:13.5px;color:#d8d2c8;word-break:break-word}#sctc .mk img{width:54px;height:40px;object-fit:cover;border-radius:6px}#sctc .ed{background:#18181c;border:1px solid #f0b378;border-radius:12px;padding:10px;margin:8px 0}#sctc .ed textarea{width:100%;min-height:64px}
+#sctc .res{position:absolute;left:12px;right:12px;bottom:60px;background:rgba(18,18,22,.95);border:1px solid #f0b378;border-radius:14px;padding:12px;text-align:center}#sctc .res .tc{font:700 34px ui-monospace,Menlo,monospace}#sctc .nud{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:8px 0}#sctc .nud button{min-width:52px;padding:8px}
+#sctc .mute{color:#a39b91;font-size:12.5px}`;
+    function open(c) {
+        ctx = c; const p = P(); p.marks = p.marks || [];
+        if (!document.getElementById('sctc-css')) { const s = document.createElement('style'); s.id = 'sctc-css'; s.textContent = css; document.head.appendChild(s); }
+        ov = document.createElement('div'); ov.id = 'sctc'; document.body.appendChild(ov);
+        mode = cal() && cal().tw ? 'mark' : 'cal'; draw();
+    }
+    function close() { stopCam(); cancelAnimationFrame(raf); if (ov) ov.remove(); ov = null; try { ctx.onClose && ctx.onClose(); } catch (e) { } }
+    async function startCam() {
+        stopCam(); const v = $('video'); if (!v) return;
+        try { stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 }, height: { ideal: 1080 } }, audio: false }); v.srcObject = stream; await v.play(); }
+        catch (e) { $('.hint').innerHTML = '⚠️ Caméra inaccessible (' + esc(e.name || e.message) + '). Autorisez la caméra, ou utilisez « ⌨️ Saisir le TC ».'; }
+    }
+    function stopCam() { if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; } }
+    const fpsSel = () => '<select id="tc-fps" title="Cadence de la caméra">' + FPS.map(f => '<option' + ((cal() && cal().fps || ctx.fps || '25') === f[0] ? ' selected' : '') + '>' + f[0] + '</option>').join('') + '</select>';
+    function draw() {
+        cancelAnimationFrame(raf);
+        if (mode === 'cal') {
+            ov.innerHTML = '<div class="tb"><button id="tc-x">✕</button><b>⏱️ Caler le TC caméra</b>' + fpsSel() + '</div><div class="cam"><video playsinline muted></video><div class="box"><i>Cadrez le TC du viseur ici</i></div><input class="zm" type="range" min="1" max="4" step="0.05" value="' + zoom + '" title="Zoom"><div class="hint">La caméra doit être en <b>TC free run</b>. Approchez le téléphone du viseur, remplissez le cadre orange avec le timecode, tenez immobile puis « Lire le TC ».</div></div>' +
+                '<div class="bar"><button class="pr" id="tc-read">📸 Lire le TC</button><button id="tc-man">⌨️ Saisir le TC</button>' + (cal() && cal().tw ? '<button id="tc-back">↩︎ Garder le calage</button>' : '') + '</div>';
+            $('#tc-x').onclick = close; $('#tc-read').onclick = read; $('#tc-man').onclick = manual; const bk = $('#tc-back'); if (bk) bk.onclick = () => { mode = 'mark'; stopCam(); draw(); };
+            const z = $('.zm'); z.oninput = () => { zoom = +z.value; $('video').style.transform = 'scale(' + zoom + ')'; }; $('video').style.transform = 'scale(' + zoom + ')';
+            startCam(); return;
+        }
+        stopCam(); const c = cal(), f = fpsOf(c.fps), ago = Math.round((Date.now() - c.at) / 60000);
+        ov.innerHTML = '<div class="tb"><button id="tc-x">✕</button><b>⏱️ Marqueurs TC</b><button id="tc-re" title="Recaler sur la caméra">🎯 Recaler</button></div>' +
+            '<div class="clock"><div class="tc" id="tc-now">--:--:--:--</div><small>' + esc(c.fps) + ' i/s · calé ' + (c.src === 'ocr' ? 'par lecture du viseur' : 'à la main') + (ago < 1 ? ' à l\'instant' : ' il y a ' + (ago < 120 ? ago + ' min' : Math.round(ago / 60) + ' h')) + (ago > 240 ? ' · <b style="color:#ffb36b">recalez si la caméra a été éteinte</b>' : '') + '</small><div class="nud"><button data-n="-25">−1 s</button><button data-n="-1">−1 i</button><button data-n="1">+1 i</button><button data-n="25">+1 s</button></div></div>' +
+            '<div class="cats">' + CATS.map(k => '<button data-cat="' + k[0] + '" style="border-color:' + k[2] + ';background:' + k[2] + '22"><i style="background:' + k[2] + '"></i>' + k[1] + '</button>').join('') + '</div>' +
+            '<div class="list" id="tc-list"></div><div class="bar"><button id="tc-pdf">📄 Résumé PDF</button>' + (ctx.send ? '<button class="pr" id="tc-send">📤 Envoyer à SCRIPTO</button>' : '<button class="pr" id="tc-ok">✓ Terminé</button>') + '</div><input type="file" id="tc-ph" accept="image/*" capture="environment" hidden>';
+        $('#tc-x').onclick = close; $('#tc-re').onclick = () => { mode = 'cal'; draw(); };
+        ov.querySelectorAll('[data-n]').forEach(b => b.onclick = () => { const k = +b.dataset.n, f2 = fpsOf(cal().fps); cal().f += k === 25 || k === -25 ? Math.sign(k) * f2[1] : k; ctx.save(); });
+        ov.querySelectorAll('[data-cat]').forEach(b => b.onclick = () => addMark(b.dataset.cat));
+        $('#tc-pdf').onclick = report; if ($('#tc-send')) $('#tc-send').onclick = () => { ctx.save(); ctx.send(); }; if ($('#tc-ok')) $('#tc-ok').onclick = close;
+        $('#tc-ph').onchange = photo; list();
+        const tick = () => { const el = document.getElementById('tc-now'); if (!el) return; const s = toTC(Math.floor(tcAt(cal(), Date.now())), f); el.innerHTML = s.slice(0, 9) + '<em>' + s.slice(9) + '</em>'; raf = requestAnimationFrame(tick); }; tick();
+    }
+    // capture de la zone orange → OCR
+    async function read() {
+        const v = $('video'), f = fpsOf($('#tc-fps').value); if (!v || !v.videoWidth) { toast2('Caméra pas prête'); return; }
+        const tw = Date.now(), b = $('.box').getBoundingClientRect(), r = v.getBoundingClientRect();
+        // correspondance écran → pixels vidéo (object-fit: cover + zoom numérique)
+        const sc = Math.max(r.width / v.videoWidth, r.height / v.videoHeight) * zoom, ox = r.left + r.width / 2 - v.videoWidth * sc / 2, oy = r.top + r.height / 2 - v.videoHeight * sc / 2;
+        const sx = (b.left - ox) / sc, sy = (b.top - oy) / sc, sw = b.width / sc, sh = b.height / sc, cv = document.createElement('canvas'); cv.width = Math.max(1, Math.round(sw)); cv.height = Math.max(1, Math.round(sh));
+        cv.getContext('2d').drawImage(v, sx, sy, sw, sh, 0, 0, cv.width, cv.height);
+        result('<div class="mute">Lecture du timecode…</div>');
+        try { const o = await ocr(cv, f); if (o.tc) confirm(o.tc, f, tw, 'ocr', o.how); else result('<div>Timecode illisible' + (o.raw ? ' (lu : « ' + esc(o.raw.slice(0, 40)) + ' »)' : '') + '.</div><div class="mute">Rapprochez-vous, évitez les reflets, remplissez le cadre, ou saisissez le TC.</div><div class="nud"><button id="r-man">⌨️ Saisir le TC</button><button id="r-ok">OK</button></div>', () => { $('#r-man').onclick = manual; $('#r-ok').onclick = () => result(''); }); }
+        catch (e) { result('<div>⚠️ ' + esc(e.message) + '</div><div class="mute">Saisissez le TC affiché par la caméra : il sera pris à l\'instant où vous appuyez sur « Top ».</div><div class="nud"><button class="pr" id="r-man">⌨️ Saisir le TC</button></div>', () => { $('#r-man').onclick = manual; }); }
+    }
+    function result(html, bind) { let r = ov.querySelector('.res'); if (!html) { if (r) r.remove(); return; } if (!r) { r = document.createElement('div'); r.className = 'res'; ($('.cam') || ov).appendChild(r); } r.innerHTML = html; if (bind) bind(); }
+    function confirm(t, f, tw, src, how) {
+        let n = fromTC(t.h, t.m, t.s, t.ff, f);
+        const show = () => toTC(n, f);
+        result('<div class="mute">TC lu ' + (how ? '(' + esc(how) + ')' : '') + '</div><div class="tc" id="r-tc">' + show() + '</div><div class="nud"><button data-k="-' + f[1] + '">−1 s</button><button data-k="-1">−1 i</button><button data-k="1">+1 i</button><button data-k="' + f[1] + '">+1 s</button></div><div class="nud"><button id="r-no">Relire</button><button class="pr" id="r-yes">✓ Caler sur ce TC</button></div>', () => {
+            ov.querySelectorAll('.res [data-k]').forEach(b => b.onclick = () => { n += +b.dataset.k; $('#r-tc').textContent = show(); });
+            $('#r-no').onclick = () => result(''); $('#r-yes').onclick = () => setCal(n, f, tw, src);
+        });
+    }
+    function manual() {
+        const f = fpsOf($('#tc-fps') ? $('#tc-fps').value : (cal() && cal().fps) || '25');
+        result('<div class="mute">Tapez le TC de la caméra un peu en avance, puis appuyez sur « Top » quand la caméra l\'affiche.</div><input id="r-in" inputmode="numeric" placeholder="HH:MM:SS:II" style="width:100%;text-align:center;font:700 26px ui-monospace,Menlo,monospace;margin:8px 0"><div class="nud"><button id="r-c">Annuler</button><button class="pr" id="r-top">⏱️ Top</button></div>', () => {
+            const i = $('#r-in'); i.focus(); i.oninput = () => { const d = i.value.replace(/\D/g, '').slice(0, 8); i.value = d.replace(/(\d{2})(?=\d)/g, '$1:'); };
+            $('#r-c').onclick = () => result(''); $('#r-top').onclick = () => { const tw = Date.now(), t = parseTC(i.value, f); if (!t) { i.style.borderColor = '#ef5350'; return; } confirm(t, f, tw, 'manuel', 'saisi à la main'); };
+        });
+    }
+    function setCal(n, f, tw, src) { P().tc = { fps: f[0], f: n, tw, at: Date.now(), src }; ctx.fps = f[0]; ctx.save(); mode = 'mark'; toast2('⏱️ Calé sur ' + toTC(n, f) + ' — le TC défile avec la caméra'); draw(); }
+    function addMark(cat) {
+        const c = cal(), f = fpsOf(c.fps), n = Math.floor(tcAt(c, Date.now())), p = P();
+        const m = { id: uid(), tc: toTC(n, f), f: n, fps: c.fps, at: Date.now(), cat, note: '', photo: '', shot: (p.cur && p.cur.shot) || '', day: (p.cur && p.cur.day) || '', mod: Date.now() };
+        p.marks.push(m); editId = m.id; ctx.save(); try { navigator.vibrate && navigator.vibrate(40); } catch (e) { } list();
+    }
+    function shotLabel(id) { const s = (P().shots || []).find(x => x.id === id); return s ? 'S' + (s.seq || '?') + ' · P' + (s.plan || '?') : ''; }
+    function list() {
+        const L = P().marks.slice().sort((a, b) => b.at - a.at), el = $('#tc-list'); if (!el) return;
+        el.innerHTML = L.length ? L.map(m => { const k = catOf(m.cat), ph = m.photo ? ctx.imgGet(m.photo) : '';
+            const row = '<div class="mk" data-m="' + m.id + '"><span class="t">' + esc(m.tc) + '</span><div class="n"><span class="c" style="background:' + k[2] + '">' + esc(k[1]) + '</span> ' + (shotLabel(m.shot) ? '<span class="mute">' + esc(shotLabel(m.shot)) + '</span> ' : '') + '<br>' + (esc(m.note) || '<span class="mute">toucher pour commenter</span>') + '</div>' + (ph ? '<img src="' + ph + '" alt="">' : '') + '</div>';
+            return m.id === editId ? row + '<div class="ed" data-e="' + m.id + '"><textarea placeholder="Commentaire (ce qui se passe, réplique, problème…)">' + esc(m.note) + '</textarea><div class="nud" style="justify-content:flex-start"><select data-k>' + CATS.map(c => '<option value="' + c[0] + '"' + (c[0] === m.cat ? ' selected' : '') + '>' + c[1] + '</option>').join('') + '</select><button data-ph>📷 Photo</button><button class="dg" data-del>🗑</button><button class="pr" data-done>OK</button></div></div>' : row; }).join('') : '<p class="mute" style="text-align:center;margin-top:18px">Touchez une catégorie pour poser un marqueur au TC caméra.</p>';
+        el.querySelectorAll('[data-m]').forEach(d => d.onclick = () => { editId = editId === d.dataset.m ? '' : d.dataset.m; list(); });
+        const ed = el.querySelector('.ed'); if (ed) { const m = P().marks.find(x => x.id === ed.dataset.e), ta = ed.querySelector('textarea');
+            ta.oninput = () => { m.note = ta.value; m.mod = Date.now(); ctx.save(); }; ed.querySelector('[data-k]').onchange = e => { m.cat = e.target.value; m.mod = Date.now(); ctx.save(); list(); };
+            ed.querySelector('[data-ph]').onclick = () => $('#tc-ph').click(); ed.querySelector('[data-del]').onclick = () => { P().marks = P().marks.filter(x => x !== m); editId = ''; ctx.save(); list(); };
+            ed.querySelector('[data-done]').onclick = () => { editId = ''; list(); }; }
+    }
+    async function photo(e) {
+        const fl = e.target.files[0]; e.target.value = ''; const m = P().marks.find(x => x.id === editId); if (!fl || !m) return;
+        const raw = await new Promise(r => { const fr = new FileReader(); fr.onload = () => r(fr.result); fr.readAsDataURL(fl); });
+        const d = ctx.compress ? await ctx.compress(raw) : raw, id = 'mk' + uid(); await ctx.imgPut(id, d); m.photo = id; m.mod = Date.now(); ctx.save(); list();
+    }
+    function toast2(t) { try { (window.XM && XM.toast ? XM.toast : window.toast)(t, 3500); } catch (e) { } }
+    // ---------- résumé PDF (impression → « Enregistrer au format PDF ») ----------
+    function reportHtml() {
+        const p = P(), c = cal() || {}, L = p.marks.slice().sort((a, b) => a.f - b.f || a.at - b.at), day = (p.days || []).find(d => d.id === (p.cur && p.cur.day)) || {};
+        const cnt = CATS.map(k => [k, L.filter(m => m.cat === k[0]).length]).filter(x => x[1]);
+        return '<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Marqueurs TC — ' + esc(p.name || 'Script') + '</title><style>@page{size:A4;margin:12mm}body{font:11px Helvetica,Arial,sans-serif;color:#1b1b1b;margin:0}h1{font-size:18px;margin:0 0 2px}.s{color:#666;margin-bottom:10px}.k{display:inline-block;border-radius:4px;padding:1px 6px;color:#111;font-weight:700;font-size:10px;margin:0 4px 4px 0}table{width:100%;border-collapse:collapse}th{text-align:left;font-size:9.5px;text-transform:uppercase;color:#666;border-bottom:1.5px solid #222;padding:4px}td{border-bottom:1px solid #ddd;padding:6px 4px;vertical-align:top}td.tc{font:700 12px Menlo,Consolas,monospace;white-space:nowrap}img{width:110px;border-radius:4px}.ft{margin-top:12px;color:#888;font-size:9px}</style></head><body>' +
+            '<h1>⏱️ Marqueurs TC — ' + esc(p.name || 'Script') + '</h1><div class="s">' + esc([day.label, day.date ? new Date(day.date + 'T12:00').toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) : '', c.fps ? c.fps + ' i/s' : '', c.at ? 'TC calé ' + (c.src === 'ocr' ? 'par lecture du viseur' : 'à la main') + ' le ' + new Date(c.at).toLocaleString('fr-FR') : ''].filter(Boolean).join(' · ')) + ' · ' + L.length + ' marqueur(s)</div>' +
+            '<div>' + cnt.map(([k, n]) => '<span class="k" style="background:' + k[2] + '">' + esc(k[1]) + ' · ' + n + '</span>').join('') + '</div>' +
+            '<table><tr><th>TC caméra</th><th>Catégorie</th><th>Plan</th><th>Commentaire</th><th>Photo</th></tr>' + L.map(m => { const k = catOf(m.cat), ph = m.photo ? ctx.imgGet(m.photo) : ''; return '<tr><td class="tc">' + esc(m.tc) + '</td><td><span class="k" style="background:' + k[2] + '">' + esc(k[1]) + '</span></td><td>' + esc(shotLabel(m.shot)) + '</td><td>' + esc(m.note).replace(/\n/g, '<br>') + '</td><td>' + (ph ? '<img src="' + ph + '">' : '') + '</td></tr>'; }).join('') + '</table>' +
+            '<div class="ft">SCRIPTO XIII · TC caméra en free run, recalculé depuis l\'horloge du téléphone · ' + new Date().toLocaleString('fr-FR') + '</div><script>setTimeout(function(){print()},400)<\/script></body></html>';
+    }
+    function report() { if (!P().marks.length) { toast2('Aucun marqueur'); return; } const w = window.open('', '_blank'); if (!w) { toast2('Autorisez les fenêtres pour le PDF'); return; } w.document.write(reportHtml()); w.document.close(); toast2('📄 Choisissez « Enregistrer au format PDF »'); }
+    return { open, close, toTC, fromTC, parseTC, FPS, fpsOf, CATS, reportHtml, tcAt };
+})();
 
 </script>
 <script>
@@ -826,7 +863,7 @@ function editProject() {
     const s = XM.sheet('<label class="m-field"><span>Titre de la production</span><input type="text" id="ep-n" value="' + E(P.name) + '" placeholder="NUIT BLANCHE — court métrage"></label><label class="m-field"><span>Production</span><input type="text" id="ep-c" value="' + E(P.client) + '"></label><label class="m-field"><span>Réalisation</span><input type="text" id="ep-r" value="' + E(P.director || '') + '"></label><label class="m-field"><span>Scripte</span><input type="text" id="ep-a" value="' + E(P.author) + '"></label><div class="m-actions"><button class="m-btn primary" id="ep-ok">OK</button></div>', { title: '🎬 Production' });
     Q('#ep-ok', s).onclick = () => { P.name = Q('#ep-n', s).value.trim(); P.client = Q('#ep-c', s).value.trim(); P.director = Q('#ep-r', s).value.trim(); P.author = Q('#ep-a', s).value.trim(); touch(); XM.closeSheet(); render(); };
 }
-function imgsOf(p) { const o = {}; p.shots.forEach(s => s.photos.forEach(ph => { const d = IMG.get(ph.id); if (d) o[ph.id] = d; })); return o; }
+function imgsOf(p) { const o = {}; p.shots.forEach(s => s.photos.forEach(ph => { const d = IMG.get(ph.id); if (d) o[ph.id] = d; })); (p.marks || []).forEach(mk => { const d = mk.photo && IMG.get(mk.photo); if (d) o[mk.photo] = d; }); return o; }
 function sendReturn() {
     if (!P) { XM.toast('Aucun script'); return; }
     XM.send({ app: APPN, page: 'scripto.html', title: 'SCRIPTO', kind: 'return', name: P.name || 'Script tablette', make: () => ({ project: JSON.parse(JSON.stringify(P)), imgs: imgsOf(P) }),
@@ -865,6 +902,7 @@ function clapSettings() {
     Q('#cs-ok', s).onclick = () => { try { localStorage.setItem(CLAPK, JSON.stringify({ ms: Math.max(100, Math.min(3000, +Q('#cs-ms', s).value || 500)), log: Q('#cs-log', s).checked })); } catch (e) { } XM.closeSheet(); XM.toast('🎬 Réglages du clap enregistrés'); };
 }
 Q('#sc-clapb').onclick = openClap;
+Q('#sc-tcb').onclick = () => { if (!P) { XM.toast('Ouvrez ou créez d\'abord un script'); return; } SCTC.open({ P: () => P, save: () => persist(), imgPut: (id, d) => IMG.put(id, d), imgGet: id => IMG.get(id), compress: d => scCompress(d, 1000, 0.75), send: () => sendReturn(), onClose: () => render() }); };
 Q('#sc-cam').onchange = e => { const f = Array.from(e.target.files); e.target.value = ''; addPhotos(f); };
 Q('#sc-gal').onchange = e => { const f = Array.from(e.target.files); e.target.value = ''; addPhotos(f); };
 Q('#sc-menu').onclick = () => XM.menu({ app: APPN, deskPage: 'scripto.html', onImport: onEnv, sendReturn: P ? sendReturn : null, items: P ? [

@@ -10769,7 +10769,25 @@ const XSLIDES = (() => {
     const hx = c => String(c || '#000000').replace('#', '').slice(0, 6).toUpperCase();
     const plain = h => { const d = document.createElement('div'); d.innerHTML = String(h || '').replace(/<\/(p|div|h\d|li)>/gi, '\n').replace(/<br\s*\/?>/gi, '\n').replace(/<li[^>]*>/gi, '• '); return (d.textContent || '').replace(/\n{3,}/g, '\n\n').trim(); };
     function chunks(t, max) { const out = []; let cur = ''; t.split(/\n/).forEach(par => { while (par.length > max) { const k = par.lastIndexOf(' ', max) > max * 0.5 ? par.lastIndexOf(' ', max) : max; if (cur) { out.push(cur); cur = ''; } out.push(par.slice(0, k)); par = par.slice(k).trim(); } if ((cur + '\n' + par).length > max && cur) { out.push(cur); cur = par; } else cur = cur ? cur + '\n' + par : par; }); if (cur.trim()) out.push(cur); return out; }
-    async function dataOf(fileId) { try { const rec = await DB.get('files', fileId); if (!rec) return null; const url = await new Promise(r => { const f = new FileReader(); f.onload = () => r(f.result); f.readAsDataURL(rec.blob); }); const im = await new Promise(r => { const i = new Image(); i.onload = () => r(i); i.onerror = () => r(null); i.src = url; }); return im ? { url, w: im.naturalWidth, h: im.naturalHeight } : null; } catch (e) { return null; } }
+    // image d'une pièce jointe, prête pour PowerPoint : PNG / JPEG uniquement (SVG, WebP… convertis), ≤ 3000 px
+    const toImg = url => new Promise(r => { const i = new Image(); i.onload = () => r(i); i.onerror = () => r(null); i.src = url; });
+    async function dataOf(fileId) {
+        try { const rec = await DB.get('files', fileId); if (!rec) return null; const blob = rec.blob, type = (blob && blob.type) || '';
+            const url = await new Promise(r => { const f = new FileReader(); f.onload = () => r(f.result); f.readAsDataURL(blob); }); const im = await toImg(url); if (!im) return null;
+            let w = im.naturalWidth || 1200, h = im.naturalHeight || 800; const ok = /image\/(png|jpe?g|gif)/i.test(type), big = Math.max(w, h) > 3000;
+            if (ok && !big) return { url, w, h };
+            const k = Math.min(1, 3000 / Math.max(w, h)) * (/svg/i.test(type) && Math.max(w, h) < 1600 ? 2 : 1), cv = document.createElement('canvas'); cv.width = Math.round(w * k); cv.height = Math.round(h * k); const g = cv.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, cv.width, cv.height); g.drawImage(im, 0, 0, cv.width, cv.height);
+            return { url: /jpe?g/i.test(type) ? cv.toDataURL('image/jpeg', 0.9) : cv.toDataURL('image/png'), w: cv.width, h: cv.height };
+        } catch (e) { return null; } }
+    // PDF (plan au sol, synoptique, fiche…) → une image haute définition par page, rendue dans le navigateur (pdf.js)
+    const PDFJS = ['https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.min.mjs', 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.0.379/build/pdf.min.mjs'];
+    let pdfP = null;
+    function pdfLib() { return pdfP || (pdfP = (async () => { for (const u of PDFJS) { try { const m = await import(u); m.GlobalWorkerOptions.workerSrc = u.replace('pdf.min.mjs', 'pdf.worker.min.mjs'); return m; } catch (e) { } } pdfP = null; throw new Error('Lecteur PDF indisponible (connexion internet requise)'); })()); }
+    async function pdfPages(fileId, max, targetW) {
+        const rec = await DB.get('files', fileId); if (!rec) return []; const lib = await pdfLib(), doc = await lib.getDocument({ data: new Uint8Array(await rec.blob.arrayBuffer()) }).promise, out = [];
+        for (let i = 1; i <= Math.min(doc.numPages, max || 30); i++) { const pg = await doc.getPage(i), v0 = pg.getViewport({ scale: 1 }), sc = Math.min(4, (targetW || 2400) / Math.max(v0.width, v0.height)), v = pg.getViewport({ scale: sc }), cv = document.createElement('canvas'); cv.width = Math.round(v.width); cv.height = Math.round(v.height); const g = cv.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, cv.width, cv.height); await pg.render({ canvasContext: g, viewport: v }).promise; out.push({ url: cv.toDataURL('image/jpeg', 0.9), w: cv.width, h: cv.height, n: doc.numPages }); pg.cleanup(); }
+        try { doc.destroy(); } catch (e) { } return out;
+    }
     function fit(im, x, y, w, h) { const k = Math.min(w / im.w, h / im.h), W = im.w * k, H = im.h * k; return { data: im.url, x: x + (w - W) / 2, y: y + (h - H) / 2, w: W, h: H }; }
     async function build(p, onStep) {
         const PG = await lib(), pp = new PG(), th = themeOf(p), cv = p.cover, d = p.design, font = d.serif ? 'Georgia' : 'Arial';
@@ -10808,10 +10826,10 @@ const XSLIDES = (() => {
             if (d.dividers !== false) { s = pp.addSlide(); s.background = { color: hx(th.divider) }; s.addShape(pp.ShapeType.rect, { x: M, y: 2.35, w: 0.12, h: 0.9, fill: { color: ACC }, line: { color: ACC } }); s.addText(c.ch.title, { x: M + 0.35, y: 2.2, w: W - 2 * M, h: 1.2, fontFace: font, fontSize: 34, bold: true, color: hx(th.dText) }); }
             for (const x of c.secs) {
                 step('Rubrique : ' + x.title, 0.05 + 0.9 * (n++ / tot));
-                const num = nums[x.id] || '', txt = plain(x.text), imgs = x.items.filter(i => i.kind === 'image'), docs = x.items.filter(i => i.kind !== 'image');
+                const num = nums[x.id] || '', txt = plain(x.text), imgs = x.items.filter(i => i.kind === 'image'), pdfs = d.pptPdf === false ? [] : x.items.filter(i => i.kind === 'pdf'), docs = x.items.filter(i => i.kind !== 'image' && !pdfs.includes(i));
                 const parts = txt ? chunks(txt, imgs.length ? 650 : 1300) : [];
-                const first = imgs.length && parts.length <= 1 ? await dataOf(imgs[0].fileId) : null;
-                if (parts.length || (!imgs.length)) {
+                const first = imgs.length && parts.length === 1 ? await dataOf(imgs[0].fileId) : null; // image à côté du texte seulement s'il y a un texte (sinon elle a sa propre diapositive)
+                if (parts.length || (!imgs.length && !pdfs.length)) {
                     (parts.length ? parts : ['']).forEach((t, k) => {
                         s = pp.addSlide(); head(s, x.title + (k ? ' (suite)' : ''), num);
                         const wT = first && k === 0 ? W * 0.5 - M : W - 2 * M;
@@ -10824,6 +10842,12 @@ const XSLIDES = (() => {
                 for (let i = 0; i < rest.length; i += per) {
                     s = pp.addSlide(); head(s, x.title, num); const grp = rest.slice(i, i + per), cols = per === 4 ? 2 : per, rows = per === 4 ? 2 : 1, cw = (W - 2 * M - (cols - 1) * 0.2) / cols, ch = (H - 1.75 - (rows - 1) * 0.2) / rows;
                     for (let j = 0; j < grp.length; j++) { const im = await dataOf(grp[j].fileId); if (!im) continue; const cx = M + (j % cols) * (cw + 0.2), cy = 1.15 + Math.floor(j / cols) * (ch + 0.2); s.addImage(fit(im, cx, cy, cw, ch - (per === 1 ? 0.3 : 0))); if (per === 1 && (grp[j].label || grp[j].name)) s.addText(grp[j].label || baseName(grp[j].name), { x: M, y: H - 0.75, w: W - 2 * M, h: 0.3, fontFace: 'Arial', fontSize: 10, italic: true, color: MUT, align: 'center' }); }
+                }
+                for (const f of pdfs) {
+                    step('Rubrique : ' + x.title + ' — ' + (f.label || baseName(f.name)), 0.05 + 0.9 * (n / tot)); let pages = [];
+                    try { pages = await pdfPages(f.fileId, 30, 2400); } catch (e) { s = pp.addSlide(); head(s, x.title, num); s.addText('📎 ' + (f.label || f.name) + '\n(' + e.message + ')', { x: M, y: 1.15, w: W - 2 * M, h: 1, fontFace: 'Arial', fontSize: 13, color: MUT }); continue; }
+                    pages.forEach((im, k) => { s = pp.addSlide(); head(s, x.title, num); s.addImage(fit(im, M, 1.08, W - 2 * M, H - 1.6)); s.addText((f.label || baseName(f.name)) + (im.n > 1 ? ' — page ' + (k + 1) + ' / ' + im.n : ''), { x: W - M - 4.5, y: 0.72, w: 4.5, h: 0.25, fontFace: 'Arial', fontSize: 9, italic: true, color: MUT, align: 'right' }); });
+                    if (pages.length && pages[0].n > pages.length) s.addNotes((f.label || f.name) + ' : ' + pages[0].n + ' pages, les ' + pages.length + ' premières sont dans la présentation.');
                 }
                 if (docs.length && (parts.length || imgs.length)) { s.addNotes('Documents joints à cette rubrique : ' + docs.map(i => i.label || i.name).join(', ')); }
             }
