@@ -1681,7 +1681,7 @@ const PM = (() => {
         const z = await JSZip.loadAsync(await r.arrayBuffer()); const f = 'xl/worksheets/sheet1.xml'; let x = await z.file(f).async('string');
         if (D.d0) x = setCell(x, 'C6', serial(D.d0)); if (D.d1) x = setCell(x, 'C8', serial(D.d1)); else x = setCell(x, 'C8', null); if (D.d2) x = setCell(x, 'C11', serial(D.d2)); else x = setCell(x, 'C11', null);
         x = setCell(x, 'C9', D.h1 ? tser(D.h1) : null); x = setCell(x, 'C12', D.h2 ? tser(D.h2) : null);
-        x = setCell(x, 'H6', D.nom || null); x = setCell(x, 'H7', D.tel || null); x = setCell(x, 'G18', D.proj || null); x = setCell(x, 'H11', D.site || null); x = setCell(x, 'G11', 'SITE DE LIVRAISON :');
+        x = setCell(x, 'H6', D.nom || null); x = setCell(x, 'H7', D.tel || null); x = setCell(x, 'G18', D.proj || null); x = setCell(x, 'H11', D.site || null); x = setCell(x, 'G11', 'SITE DE LIVRAISON :'); x = setCell(x, 'G36', null);
         // champs libres : G8, G9 puis G12, G13 ; au-delà, regroupés en G13
         const slots = [8, 9, 12, 13], F = D.fields.slice(); const extra = F.splice(3);
         if (extra.length && F[3]) { } F.forEach((fl, k) => { const rw = slots[k]; x = setCell(x, 'G' + rw, fl.lab.toUpperCase().replace(/\s*:?\s*$/, ' :'), '8'); x = setCell(x, 'H' + rw, fl.val || null, '26'); if (rw > 9) x = setCell(x, 'I' + rw, null, '26'); });
@@ -1702,7 +1702,9 @@ const PM = (() => {
         z.file(f, x);
         return z.generateAsync({ type: 'blob', mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
     }
-    return { html, bind, buildXlsx, guess, add, cur, GRP };
+    function hashImport() { const m = location.hash.match(/pmimp=([\w-]+)/); if (!m) return; const d = (J('xiii.link.outbox', []) || []).find(x => x && x.id === m[1]); history.replaceState(null, '', location.pathname + location.search); if (!d) return;
+        (d.items || []).forEach(it => add(it.name, +it.qty || 1, guess(it.fam || it.cat, (it.category || '') + ' ' + it.name), (d.app || d.from || '').replace(/ XIII$/, ''))); dirty(); setView('proj'); toast('📥 ' + (d.items || []).length + ' ligne(s) reçue(s) de ' + (d.app || d.from || '').toUpperCase(), 5000); }
+    return { hashImport, toDossier, html, bind, buildXlsx, guess, add, cur, GRP };
 })();
 
 // =====================================================================
@@ -1917,7 +1919,8 @@ function loadExample() {
 }
 addEventListener('keydown', e => { if (e.target.matches('input,textarea,select') || e.ctrlKey || e.metaKey || e.altKey) { if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') { e.preventDefault(); saveAll(true); } return; } if (e.key === '6') setView('proj'); else if (e.key === '1') setView('parc'); else if (e.key === '2') setView('resa'); else if (e.key === '3') setView('plan'); else if (e.key === '4') setView('scan'); if (e.key === '5') setView('cat'); else if (e.key === 'Escape') closeModal(); });
 addEventListener('storage', e => { if (e.key === KEY) { load(); render(); } });
-load(); applyTheme(); setView(/[?&]v=cat/.test(location.search) ? 'cat' : /[?&]v=proj/.test(location.search) ? 'proj' : (prefs.view || 'parc'));
+function openSendToDossier() { PM.toDossier(); }
+load(); applyTheme(); setTimeout(() => PM.hashImport(), 600); setView(/[?&]v=cat/.test(location.search) ? 'cat' : /[?&]v=proj/.test(location.search) ? 'proj' : (prefs.view || 'parc'));
 function renderAll() { render(); }
 
 // ---------- 🧳 retour par caisse : scanner le QR d'une étiquette PACKINGO → tout son contenu revient d'un coup ----------
@@ -6984,6 +6987,7 @@ var XLINKS = window.XLINKS || (() => {
         ['matos', 'callsheeto', 'Matériel réservé pour la journée → feuille de service.'], ['repero', 'plano', 'Plan de masse / photo aérienne du lieu → fond de plan.'],
         ['conduco', 'soustitro', 'Textes du prompteur → sous-titres préparés du direct.'], ['backupo', 'posto', 'Cartes déchargées et vérifiées → prises disponibles au dérushage.'],
         ['scripto', 'callsheeto', 'Plans non tournés → reportés sur la journée suivante.'],
+        ['syno', 'matos', 'Équipements du synoptique → « Matériel du projet » (demande de prêt, location).'], ['plano', 'matos', 'Matériel du plan → « Matériel du projet » de MATOS.'], ['packingo', 'matos', 'Contenu des caisses → « Matériel du projet » de MATOS.'], ['lumo', 'matos', 'Projecteurs du plan de feu → « Matériel du projet » de MATOS.'], ['sono', 'matos', 'Micros, pieds et HF → « Matériel du projet » de MATOS.'], ['matos', 'dossier', 'Matériel du projet → rubrique technique du dossier.'],
         ['importo', 'planno', 'Planning importé (Excel, Movie Magic…).'], ['importo', 'callsheeto', 'Feuilles de service PDF importées.'], ['importo', 'deviso', 'Devis loueurs PDF importés.'], ['importo', 'casto', 'Listes de talents importées.'],
     ];
     ['callsheeto', 'casto', 'conduco', 'decoup', 'deviso', 'lumo', 'moodo', 'packingo', 'planno', 'plano', 'posto', 'repero', 'ressourco', 'runo', 'scripto', 'sono', 'soustitro', 'storyboardo', 'syno', 'transporto', 'backupo']
@@ -7010,6 +7014,7 @@ const XGATE = (() => {
         'plano>deviso': thenClick('openMaterialExport', '#xpk-deviso'),
         'syno>deviso': thenClick('openMaterialExport', '#xpk-deviso')
     };
+    ['syno', 'plano', 'packingo', 'lumo', 'sono'].forEach(a => { SPECIAL[a + '>matos'] = () => { const F = fn('xiiiToMatos'); return F ? F() : false; }; });
     if (window.XPASS) Object.keys(XPASS.R).forEach(k => { SPECIAL[k] = () => XPASS.send(k); }); // passerelles saison 4 (boîte de réception)
     const can = k => SPECIAL[k] && (window.XPASS && XPASS.has(k) || k !== 'soustitro>graphico' || fn('setView')) && (!/>deviso$/.test(k) || fn(k === 'callsheeto>deviso' ? 'openSendCrewToDeviso' : 'openMaterialExport'));
     const nameRx = a => new RegExp('\\b' + XLINKS.T[a][1].replace(/ /g, '\\s?').replace('Ô', '[OÔ]') + '\\b', 'i');

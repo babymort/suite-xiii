@@ -8486,6 +8486,7 @@ var XLINKS = window.XLINKS || (() => {
         ['matos', 'callsheeto', 'Matériel réservé pour la journée → feuille de service.'], ['repero', 'plano', 'Plan de masse / photo aérienne du lieu → fond de plan.'],
         ['conduco', 'soustitro', 'Textes du prompteur → sous-titres préparés du direct.'], ['backupo', 'posto', 'Cartes déchargées et vérifiées → prises disponibles au dérushage.'],
         ['scripto', 'callsheeto', 'Plans non tournés → reportés sur la journée suivante.'],
+        ['syno', 'matos', 'Équipements du synoptique → « Matériel du projet » (demande de prêt, location).'], ['plano', 'matos', 'Matériel du plan → « Matériel du projet » de MATOS.'], ['packingo', 'matos', 'Contenu des caisses → « Matériel du projet » de MATOS.'], ['lumo', 'matos', 'Projecteurs du plan de feu → « Matériel du projet » de MATOS.'], ['sono', 'matos', 'Micros, pieds et HF → « Matériel du projet » de MATOS.'], ['matos', 'dossier', 'Matériel du projet → rubrique technique du dossier.'],
         ['importo', 'planno', 'Planning importé (Excel, Movie Magic…).'], ['importo', 'callsheeto', 'Feuilles de service PDF importées.'], ['importo', 'deviso', 'Devis loueurs PDF importés.'], ['importo', 'casto', 'Listes de talents importées.'],
     ];
     ['callsheeto', 'casto', 'conduco', 'decoup', 'deviso', 'lumo', 'moodo', 'packingo', 'planno', 'plano', 'posto', 'repero', 'ressourco', 'runo', 'scripto', 'sono', 'soustitro', 'storyboardo', 'syno', 'transporto', 'backupo']
@@ -8512,6 +8513,7 @@ const XGATE = (() => {
         'plano>deviso': thenClick('openMaterialExport', '#xpk-deviso'),
         'syno>deviso': thenClick('openMaterialExport', '#xpk-deviso')
     };
+    ['syno', 'plano', 'packingo', 'lumo', 'sono'].forEach(a => { SPECIAL[a + '>matos'] = () => { const F = fn('xiiiToMatos'); return F ? F() : false; }; });
     if (window.XPASS) Object.keys(XPASS.R).forEach(k => { SPECIAL[k] = () => XPASS.send(k); }); // passerelles saison 4 (boîte de réception)
     const can = k => SPECIAL[k] && (window.XPASS && XPASS.has(k) || k !== 'soustitro>graphico' || fn('setView')) && (!/>deviso$/.test(k) || fn(k === 'callsheeto>deviso' ? 'openSendCrewToDeviso' : 'openMaterialExport'));
     const nameRx = a => new RegExp('\\b' + XLINKS.T[a][1].replace(/ /g, '\\s?').replace('Ô', '[OÔ]') + '\\b', 'i');
@@ -8599,6 +8601,60 @@ const XGATE = (() => {
 })();
 
 XGATE.init('packingo');
+
+// =====================================================================
+//  → MATOS XIII : envoi du matériel d'un outil vers « 🎬 Matériel du projet » de MATOS
+//  SYNO / PLANO (fenêtre « Liste du matériel »), PACKINGO / CONDUCO / CALL SHEETO (fenêtre « → DEVISO »), LUMO, SONO.
+// =====================================================================
+(function () {
+    const APP = (location.pathname.split('/').pop() || '').replace(/\.html$/, '');
+    function put(d) {
+        if (!d || !(d.items || []).length) { try { toast('Aucun matériel à envoyer'); } catch (e) { } return false; }
+        d = Object.assign({}, d, { format: 'xiii-link', version: 1, kind: 'equipment', id: Math.random().toString(36).slice(2) + Date.now().toString(36), from: d.from || APP, to: 'matos', ts: Date.now() });
+        try { let box = JSON.parse(localStorage.getItem('xiii.link.outbox')) || []; box = box.filter(x => x && Date.now() - (x.ts || 0) < 7 * 864e5 && !(x.to === 'matos' && x.from === d.from)).slice(-8); box.push(d); localStorage.setItem('xiii.link.outbox', JSON.stringify(box)); }
+        catch (e) { try { toast('⚠️ Envoi impossible (stockage plein)'); } catch (x) { } return false; }
+        const w = window.open('matos.html?v=proj#pmimp=' + d.id, '_blank'); if (!w) try { toast('Liste prête : ouvrez MATOS → 🎬 Matériel du projet → 📥 Autres outils', 6000); } catch (e) { }
+        return true;
+    }
+    const BTN = 'width:100%;padding:10px;margin-bottom:8px;font-size:13.5px;';
+    const mkBtn = (id, run) => { const b = document.createElement('button'); b.id = id; b.style.cssText = BTN; b.innerHTML = '📦 Envoyer vers MATOS XIII —&nbsp;<span style="font-weight:normal">matériel du projet</span>'; b.onclick = run; return b; };
+    // SYNO / PLANO : bouton dans la fenêtre « Liste du matériel »
+    if (typeof openMaterialExport === 'function') {
+        const o0 = openMaterialExport;
+        openMaterialExport = function () { const r = o0.apply(this, arguments);
+            setTimeout(() => {
+                const ms = document.getElementById('xlink-modal'), mp = document.getElementById('xpk-modal');
+                if (ms && !document.getElementById('xl-matos') && typeof xiiiCollectMaterial === 'function') { const sc = () => { const x = ms.querySelector('input[name=xl-scope]:checked'); return x ? x.value : 'current'; };
+                    const ref = document.getElementById('xl-deviso') || ms.querySelector('button'); const b = mkBtn('xl-matos', () => { if (put(xiiiCollectMaterial(sc()))) ms.remove(); }); ref ? ref.parentNode.insertBefore(b, ref.nextSibling) : ms.appendChild(b); }
+                if (mp && !document.getElementById('xpk-matos') && typeof xpkCollect === 'function') { const sc = () => { const x = mp.querySelector('input[name=xpk-s]:checked'); return x ? x.value : 'current'; };
+                    const ref = document.getElementById('xpk-pack'); const b = mkBtn('xpk-matos', () => { const g = id => (document.getElementById(id) || {}).checked; if (put(xpkCollect(sc(), { acc: g('xpk-acc'), cables: g('xpk-cab'), decor: g('xpk-dec') }))) mp.remove(); }); ref.parentNode.insertBefore(b, ref.nextSibling); }
+            }, 30); return r; };
+    }
+    // PACKINGO / CONDUCO / CALL SHEETO : bouton dans la fenêtre d'envoi commune
+    if (typeof xiiiToDeviso === 'function') {
+        const t0 = xiiiToDeviso;
+        xiiiToDeviso = function (cfg) { const r = t0.apply(this, arguments);
+            const add = () => { const o = document.getElementById('xd-send'), go = o && o.querySelector('#xd-go'); if (!go || o.querySelector('#xd-matos')) return; const d0 = (() => { try { return cfg.make(); } catch (e) { return null; } })(); if (!d0 || !(d0.items || []).length) return;
+                go.parentNode.parentNode.insertBefore(mkBtn('xd-matos', () => { if (put(cfg.make())) o.remove(); }), go.parentNode); };
+            add(); const o = document.getElementById('xd-send'); if (o) new MutationObserver(add).observe(o, { childList: true }); return r; };
+    }
+    // LUMO / SONO : liste directe
+    function direct() {
+        if (APP === 'lumo' && typeof P !== 'undefined' && P.fx) { const m = new Map(); P.fx.forEach(f => { const n = f.name || 'Projecteur', q = typeof qty === 'function' ? qty(f) : (+f.qty || 1); m.set(n, (m.get(n) || 0) + q); }); return { from: 'lumo', app: 'LUMO XIII', project: { name: P.name || '' }, items: [...m].map(([name, q]) => ({ name, qty: q, fam: 'lum', category: 'Lumière' })) }; }
+        if (APP === 'sono' && typeof P !== 'undefined' && P.ch) { const m = new Map(), inc = (n, c) => { n = String(n || '').trim(); if (n) m.set(n, (m.get(n) || 0) + (c || 1)); }; P.ch.forEach(c => { inc(c.mic); inc(c.stand); }); (P.hf || []).forEach(h => inc(h.model || h.name)); return { from: 'sono', app: 'SONO XIII', project: { name: P.name || '' }, items: [...m].map(([name, q]) => ({ name, qty: q, fam: 'son', category: 'Son' })) }; }
+        return null;
+    }
+    window.xiiiToMatos = () => {
+        if (APP === 'lumo' || APP === 'sono') return put(direct());
+        if (APP === 'packingo' && typeof xdPackPayload === 'function') return put(xdPackPayload());
+        if (typeof openMaterialExport === 'function' && (APP === 'syno' || APP === 'plano')) { openMaterialExport(); setTimeout(() => { const b = document.getElementById('xl-matos') || document.getElementById('xpk-matos'); if (b) b.scrollIntoView({ block: 'center' }); }, 80); return true; }
+        const opener = ['openSendToDeviso', 'openDevisoSend', 'openSendCrewToDeviso'].map(n => typeof window[n] === 'function' ? window[n] : null).find(Boolean);
+        if (opener) { opener(); return true; }
+        const b = [...document.querySelectorAll('button')].find(x => /DEVISO/.test(x.textContent + x.title) && /envoyer|vers|→/i.test(x.textContent + x.title) && !x.closest('#xgt-ov')); if (b) { b.click(); return true; }
+        return false;
+    };
+})();
+
 
 // =====================================================================
 //  SUITE XIII — XPCFG : 🖼️ personnalisation du projet, réglée par le Master pour toute l'équipe
