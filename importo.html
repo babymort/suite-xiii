@@ -1022,7 +1022,380 @@ $('file-in').onchange = e => { const f = e.target.files[0]; e.target.value = '';
 applyTheme(); render();
 
 </script>
-<!-- SUITE XIII:MOBILE:START --><!-- SUITE XIII:MOBILE:END -->
+<!-- SUITE XIII:MOBILE:START -->
+<script>// =====================================================================
+//  XQR : générateur de QR code (mode octets, niveaux L/M/Q/H, versions 1 à 40) — sans dépendance
+//  XQR.make(texte, 'L') → { size, ver, get(x, y) } ou null si trop long ; XQR.svg(texte, opts) → chaîne SVG ou null
+// =====================================================================
+const XQR = (() => {
+    const ECC = [[-1, 7, 10, 15, 20, 26, 18, 20, 24, 30, 18, 20, 24, 26, 30, 22, 24, 28, 30, 28, 28, 28, 28, 30, 30, 26, 28, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30],
+        [-1, 10, 16, 26, 18, 24, 16, 18, 22, 22, 26, 30, 22, 22, 24, 24, 28, 28, 26, 26, 26, 26, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28],
+        [-1, 13, 22, 18, 26, 18, 24, 18, 22, 20, 24, 28, 26, 24, 20, 30, 24, 28, 28, 26, 30, 28, 30, 30, 30, 30, 28, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30],
+        [-1, 17, 28, 22, 16, 22, 28, 26, 26, 24, 28, 24, 28, 22, 24, 24, 30, 28, 28, 26, 28, 30, 24, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30]];
+    const BLK = [[-1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 4, 4, 4, 4, 4, 6, 6, 6, 6, 7, 8, 8, 9, 9, 10, 12, 12, 12, 13, 14, 15, 16, 17, 18, 19, 19, 20, 21, 22, 24, 25],
+        [-1, 1, 1, 1, 2, 2, 4, 4, 4, 5, 5, 5, 8, 9, 9, 10, 10, 11, 13, 14, 16, 17, 17, 18, 20, 21, 23, 25, 26, 28, 29, 31, 33, 35, 37, 38, 40, 43, 45, 47, 49],
+        [-1, 1, 1, 2, 2, 4, 4, 6, 6, 8, 8, 8, 10, 12, 16, 12, 17, 16, 18, 21, 20, 23, 23, 25, 27, 29, 34, 34, 35, 38, 40, 43, 45, 48, 51, 53, 56, 59, 62, 65, 68],
+        [-1, 1, 1, 2, 4, 4, 4, 5, 6, 8, 8, 11, 11, 16, 16, 18, 16, 19, 21, 25, 25, 25, 34, 30, 32, 35, 37, 40, 42, 45, 48, 51, 54, 57, 60, 63, 66, 70, 74, 77, 81]];
+    const ECL = { L: [0, 1], M: [1, 0], Q: [2, 3], H: [3, 2] };
+    const raw = v => { let r = (16 * v + 128) * v + 64; if (v >= 2) { const n = Math.floor(v / 7) + 2; r -= (25 * n - 10) * n - 55; if (v >= 7) r -= 36; } return r; };
+    const dataCw = (v, e) => Math.floor(raw(v) / 8) - ECC[e][v] * BLK[e][v];
+    const bit = (x, i) => ((x >>> i) & 1) !== 0;
+    const mul = (x, y) => { let z = 0; for (let i = 7; i >= 0; i--) { z = (z << 1) ^ ((z >>> 7) * 0x11D); z ^= ((y >>> i) & 1) * x; } return z; };
+    const rsDiv = d => { const r = new Array(d - 1).fill(0); r.push(1); let root = 1; for (let i = 0; i < d; i++) { for (let j = 0; j < r.length; j++) { r[j] = mul(r[j], root); if (j + 1 < r.length) r[j] ^= r[j + 1]; } root = mul(root, 2); } return r; };
+    const rsRem = (data, div) => { const r = div.map(() => 0); data.forEach(b => { const f = b ^ r.shift(); r.push(0); div.forEach((c, i) => { r[i] ^= mul(c, f); }); }); return r; };
+    function make(text, level) {
+        const e = (ECL[level || 'L'] || ECL.L)[0], bytes = Array.from(new TextEncoder().encode(String(text)));
+        let ver = 0; for (let v = 1; v <= 40; v++) { const cc = v <= 9 ? 8 : 16; if (4 + cc + 8 * bytes.length <= dataCw(v, e) * 8) { ver = v; break; } }
+        if (!ver) return null;
+        const bits = []; const put = (val, n) => { for (let i = n - 1; i >= 0; i--) bits.push((val >>> i) & 1); };
+        put(4, 4); put(bytes.length, ver <= 9 ? 8 : 16); bytes.forEach(b => put(b, 8));
+        const cap = dataCw(ver, e) * 8; put(0, Math.min(4, cap - bits.length)); put(0, (8 - bits.length % 8) % 8);
+        for (let p = 0xEC; bits.length < cap; p ^= 0xEC ^ 0x11) put(p, 8);
+        const data = []; for (let i = 0; i < bits.length; i += 8) { let b = 0; for (let j = 0; j < 8; j++) b = (b << 1) | bits[i + j]; data.push(b); }
+        // blocs + correction d'erreur
+        const nb = BLK[e][ver], el = ECC[e][ver], rc = Math.floor(raw(ver) / 8), ns = nb - rc % nb, sl = Math.floor(rc / nb), div = rsDiv(el), blocks = [];
+        for (let i = 0, k = 0; i < nb; i++) { const dl = sl - el + (i < ns ? 0 : 1), dat = data.slice(k, k + dl); k += dl; const ecc = rsRem(dat, div); if (i < ns) dat.push(0); blocks.push(dat.concat(ecc)); }
+        const all = []; for (let i = 0; i < blocks[0].length; i++) blocks.forEach((b, j) => { if (i !== sl - el || j >= ns) all.push(b[i]); });
+        const size = ver * 4 + 17, M = Array.from({ length: size }, () => new Array(size).fill(false)), F = Array.from({ length: size }, () => new Array(size).fill(false));
+        const setF = (x, y, d) => { M[y][x] = d; F[y][x] = true; };
+        for (let i = 0; i < size; i++) { setF(6, i, i % 2 === 0); setF(i, 6, i % 2 === 0); }
+        const finder = (x, y) => { for (let dy = -4; dy <= 4; dy++) for (let dx = -4; dx <= 4; dx++) { const d = Math.max(Math.abs(dx), Math.abs(dy)), xx = x + dx, yy = y + dy; if (xx >= 0 && xx < size && yy >= 0 && yy < size) setF(xx, yy, d !== 2 && d !== 4); } };
+        finder(3, 3); finder(size - 4, 3); finder(3, size - 4);
+        let ap = []; if (ver > 1) { const n = Math.floor(ver / 7) + 2, st = ver === 32 ? 26 : Math.ceil((ver * 4 + 4) / (n * 2 - 2)) * 2; ap = [6]; for (let p = size - 7; ap.length < n; p -= st) ap.splice(1, 0, p); }
+        ap.forEach((x, i) => ap.forEach((y, j) => { if ((i === 0 && j === 0) || (i === 0 && j === ap.length - 1) || (i === ap.length - 1 && j === 0)) return; for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++) setF(x + dx, y + dy, Math.max(Math.abs(dx), Math.abs(dy)) !== 1); }));
+        const fmt = mask => {
+            const d = (ECL[level || 'L'][1] << 3) | mask; let r = d; for (let i = 0; i < 10; i++) r = (r << 1) ^ ((r >>> 9) * 0x537); const b = ((d << 10) | r) ^ 0x5412;
+            for (let i = 0; i <= 5; i++) setF(8, i, bit(b, i)); setF(8, 7, bit(b, 6)); setF(8, 8, bit(b, 7)); setF(7, 8, bit(b, 8)); for (let i = 9; i < 15; i++) setF(14 - i, 8, bit(b, i));
+            for (let i = 0; i < 8; i++) setF(size - 1 - i, 8, bit(b, i)); for (let i = 8; i < 15; i++) setF(8, size - 15 + i, bit(b, i)); setF(8, size - 8, true);
+        };
+        fmt(0);
+        if (ver >= 7) { let r = ver; for (let i = 0; i < 12; i++) r = (r << 1) ^ ((r >>> 11) * 0x1F25); const b = (ver << 12) | r; for (let i = 0; i < 18; i++) { const c = bit(b, i), a = size - 11 + i % 3, d = Math.floor(i / 3); setF(a, d, c); setF(d, a, c); } }
+        for (let i = 0, right = size - 1; right >= 1; right -= 2) { if (right === 6) right = 5; for (let vert = 0; vert < size; vert++) for (let j = 0; j < 2; j++) { const x = right - j, up = ((right + 1) & 2) === 0, y = up ? size - 1 - vert : vert; if (!F[y][x] && i < all.length * 8) { M[y][x] = bit(all[i >>> 3], 7 - (i & 7)); i++; } } }
+        const inv = (m, x, y) => [(x + y) % 2 === 0, y % 2 === 0, x % 3 === 0, (x + y) % 3 === 0, (Math.floor(x / 3) + Math.floor(y / 2)) % 2 === 0, x * y % 2 + x * y % 3 === 0, (x * y % 2 + x * y % 3) % 2 === 0, ((x + y) % 2 + x * y % 3) % 2 === 0][m];
+        const apply = m => { for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) if (!F[y][x] && inv(m, x, y)) M[y][x] = !M[y][x]; };
+        const penalty = () => {
+            let p = 0, dark = 0;
+            for (let y = 0; y < size; y++) { let run = 1; for (let x = 1; x < size; x++) { if (M[y][x] === M[y][x - 1]) { run++; if (run === 5) p += 3; else if (run > 5) p++; } else run = 1; } }
+            for (let x = 0; x < size; x++) { let run = 1; for (let y = 1; y < size; y++) { if (M[y][x] === M[y - 1][x]) { run++; if (run === 5) p += 3; else if (run > 5) p++; } else run = 1; } }
+            for (let y = 0; y < size - 1; y++) for (let x = 0; x < size - 1; x++) { const c = M[y][x]; if (c === M[y][x + 1] && c === M[y + 1][x] && c === M[y + 1][x + 1]) p += 3; }
+            for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) if (M[y][x]) dark++;
+            p += Math.floor(Math.abs(dark * 20 - size * size * 10) / (size * size)) * 10; return p;
+        };
+        let best = 0, bp = Infinity; for (let m = 0; m < 8; m++) { apply(m); fmt(m); const p = penalty(); if (p < bp) { bp = p; best = m; } apply(m); }
+        apply(best); fmt(best);
+        return { size, ver, get: (x, y) => x >= 0 && y >= 0 && x < size && y < size && M[y][x] };
+    }
+    function svg(text, o) {
+        o = o || {}; const q = make(text, o.ecl || 'L'); if (!q) return null; const b = o.border == null ? 4 : o.border, n = q.size + 2 * b; let d = '';
+        for (let y = 0; y < q.size; y++) { let x = 0; while (x < q.size) { if (q.get(x, y)) { let w = 1; while (x + w < q.size && q.get(x + w, y)) w++; d += 'M' + (x + b) + ',' + (y + b) + 'h' + w + 'v1h-' + w + 'z'; x += w; } else x++; } }
+        return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + n + ' ' + n + '" shape-rendering="crispEdges" role="img" aria-label="QR code"><rect width="' + n + '" height="' + n + '" fill="' + (o.light || '#fff') + '"/><path d="' + d + '" fill="' + (o.dark || '#000') + '"/></svg>';
+    }
+    return { make, svg, capacity: (level) => { const e = (ECL[level || 'L'] || ECL.L)[0]; return dataCw(40, e) - 3; } };
+})();
+if (typeof module !== 'undefined') module.exports = XQR;
+
+// =====================================================================
+//  XM : socle mobile SUITE XIII (pages *-m.html) + panneau « 📱 Mobile » des outils bureau
+//  Enveloppe d'échange : { format:'xiii-mobile', v:1, app, kind:'project'|'return', name, ts, data }
+//  Transfert : lien (#mx=… compressé), QR code (si assez court) ou fichier .xiii-m.json
+// =====================================================================
+const XM = (() => {
+    const FORMAT = 'xiii-mobile', QR_MAX = 1800;
+    const $ = (s, r) => (r || document).querySelector(s), $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+    const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const uid = () => Math.random().toString(36).slice(2, 10);
+    const safe = s => String(s || 'projet').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^\w-]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 40) || 'projet';
+    const isPhone = () => { try { return matchMedia('(max-width:700px)').matches && matchMedia('(pointer:coarse)').matches; } catch (e) { return false; } };
+    // ---------- encodage ----------
+    const b64u = u8 => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
+    const unb64u = t => { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
+    async function pipe(u8, Ctor, fmt) { const st = new Blob([u8]).stream().pipeThrough(new Ctor(fmt)); return new Uint8Array(await new Response(st).arrayBuffer()); }
+    async function pack(obj) {
+        const u8 = new TextEncoder().encode(JSON.stringify(obj));
+        if (typeof CompressionStream !== 'undefined') { try { return 'z' + b64u(await pipe(u8, CompressionStream, 'deflate-raw')); } catch (e) { } }
+        return 'r' + b64u(u8);
+    }
+    async function unpack(s) {
+        s = String(s || '').trim(); if (!s) throw new Error('Lien vide');
+        let u8 = unb64u(s.slice(1)); if (s[0] === 'z') u8 = await pipe(u8, DecompressionStream, 'deflate-raw'); else if (s[0] !== 'r') throw new Error('Lien non reconnu');
+        return JSON.parse(new TextDecoder().decode(u8));
+    }
+    const baseUrl = page => { const u = new URL(page || location.pathname.split('/').pop(), location.href); u.hash = ''; u.search = ''; return u.href; };
+    const envelope = (app, kind, name, data) => ({ format: FORMAT, v: 1, app, kind: kind || 'project', name: name || '', ts: Date.now(), data });
+    async function link(page, env) { return baseUrl(page) + '#mx=' + await pack(env); }
+    function checkEnv(env, app) {
+        if (!env || env.format !== FORMAT) throw new Error('Ce fichier n\'est pas un envoi SUITE XIII mobile');
+        if (app && env.app !== app) throw new Error('Cet envoi est destiné à « ' + env.app + ' », pas à « ' + app + ' »');
+        return env;
+    }
+    // ---------- stockage local (une enveloppe par application) ----------
+    const mem = {};
+    const load = app => { try { return JSON.parse(localStorage.getItem('xiii.m.' + app)); } catch (e) { return mem[app] || null; } };
+    const save = (app, obj) => { mem[app] = obj; try { localStorage.setItem('xiii.m.' + app, JSON.stringify(obj)); return true; } catch (e) { return false; } };
+    const drop = app => { delete mem[app]; try { localStorage.removeItem('xiii.m.' + app); } catch (e) { } };
+    // ---------- interface ----------
+    let toastT;
+    function toast(msg, ms) { let t = $('.m-toast'); if (!t) { t = document.createElement('div'); t.className = 'm-toast'; document.body.appendChild(t); } t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), ms || 2600); }
+    function sheet(html, o) {
+        o = o || {}; closeSheet(); const ov = document.createElement('div'); ov.className = 'm-ov'; ov.id = 'm-ov';
+        ov.innerHTML = '<div class="m-sheet" role="dialog"><div class="grab"></div>' + (o.title ? '<h2><span class="grow">' + o.title + '</span><button class="m-ibtn plain" data-x aria-label="Fermer">✕</button></h2>' : '') + html + '</div>';
+        ov.addEventListener('mousedown', e => { if (e.target === ov) closeSheet(); }); ov.addEventListener('touchstart', e => { if (e.target === ov) closeSheet(); }, { passive: true });
+        document.body.appendChild(ov); const x = $('[data-x]', ov); if (x) x.onclick = closeSheet; ov._onClose = o.onClose; return ov.querySelector('.m-sheet');
+    }
+    function closeSheet() { const ov = $('#m-ov'); if (ov) { ov.remove(); if (ov._onClose) try { ov._onClose(); } catch (e) { } } }
+    // choix : renvoie l'index du bouton (ou -1 si fermé)
+    function ask(title, text, buttons) {
+        return new Promise(res => {
+            const s = sheet('<p style="margin:0 0 14px;color:var(--text-muted)">' + text + '</p><div class="m-actions" style="margin-top:0">' + (buttons || ['OK']).map((b, i) => '<button class="m-btn ' + (i === 0 ? 'primary' : '') + (b.danger ? ' danger' : '') + '" data-i="' + i + '">' + esc(b.label || b) + '</button>').join('') + '</div>', { title: esc(title), onClose: () => res(-1) });
+            $$('[data-i]', s).forEach(b => b.onclick = () => { const ov = $('#m-ov'); if (ov) ov._onClose = null; closeSheet(); res(+b.dataset.i); });
+        });
+    }
+    function download(name, content, mime) { const b = content instanceof Blob ? content : new Blob([content], { type: mime || 'application/json' }), a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { a.remove(); URL.revokeObjectURL(a.href); }, 1500); }
+    async function copy(text) { try { await navigator.clipboard.writeText(text); return true; } catch (e) { const t = document.createElement('textarea'); t.value = text; t.style.cssText = 'position:fixed;opacity:0'; document.body.appendChild(t); t.select(); let ok = false; try { ok = document.execCommand('copy'); } catch (e2) { } t.remove(); return ok; } }
+    function pickFile(accept, cb) { const i = document.createElement('input'); i.type = 'file'; i.accept = accept || '.json,application/json'; i.style.display = 'none'; i.onchange = async () => { const f = i.files[0]; i.remove(); if (f) cb(f); }; document.body.appendChild(i); i.click(); }
+    async function readEnvFile(f, app) { return checkEnv(JSON.parse(await f.text()), app); }
+    // ---------- fenêtre d'envoi : QR + lien + fichier (bureau et mobile) ----------
+    //  cfg = { app, page, title, kind, name, make: () => data | null, note, empty }
+    async function send(cfg) {
+        const data = cfg.make(); if (data == null) { toast(cfg.empty || 'Rien à envoyer'); return; }
+        const env = envelope(cfg.app, cfg.kind || 'project', cfg.name ? (typeof cfg.name === 'function' ? cfg.name() : cfg.name) : '', data);
+        const url = await link(cfg.page, env), json = JSON.stringify(env), qr = url.length <= QR_MAX ? XQR.svg(url, { ecl: 'L', border: 2 }) : null, mob = document.body.classList.contains('xm');
+        const fname = cfg.file || ((cfg.title || cfg.app) + '_' + safe(env.name) + '.xiii-m.json').replace(/\s+/g, '_');
+        const body = (qr ? '<div class="m-qr">' + qr + '</div><p class="m-hint" style="text-align:center;margin:4px 0 12px">Scannez ce code avec l\'appareil photo' + (cfg.kind === 'return' ? ' de l\'ordinateur' : ' du téléphone') + '.' + (url.length > 1100 ? ' Code dense : affichez-le en grand.' : '') + '</p>'
+            : '<div class="m-card" style="margin-top:0"><b>Trop volumineux pour un QR code</b><p class="m-hint" style="margin:6px 0 0">' + (url.length < 8000 ? 'Utilisez le lien (message, mail, AirDrop…) ou le fichier ci-dessous.' : 'Utilisez le fichier ci-dessous (AirDrop, mail, cloud…) : le lien serait trop long.') + '</p></div>') +
+            '<div class="m-actions" style="margin-top:0">' + (url.length < 8000 ? '<button class="m-btn" id="xm-copy">🔗 Copier le lien</button>' : '') + ((navigator.share && mob) ? '<button class="m-btn" id="xm-share">📤 Partager…</button>' : '') + '<button class="m-btn primary" id="xm-file">⬇️ Fichier</button>' + (typeof XQT !== 'undefined' ? '<button class="m-btn" id="xm-qra" title="Transfert sans réseau : suite de QR codes animés à scanner avec le téléphone (SUITE XIII › Accueil › 📷 Scanner)">📲 QR animé</button>' : '') + '</div>' +
+            (cfg.note ? '<p class="m-hint" style="margin:12px 2px 0">' + cfg.note + '</p>' : '') + '<p class="m-hint" style="margin:8px 2px 0">' + (json.length / 1024 < 10 ? Math.max(1, Math.round(json.length / 102.4) / 10) : Math.round(json.length / 1024)) + ' Ko · le projet n\'est pas envoyé sur Internet : tout est dans le lien ou le fichier.</p>';
+        const s = host(body, '📱 ' + esc(cfg.heading || (cfg.kind === 'return' ? 'Renvoyer au bureau' : 'Envoyer vers le mobile')), mob);
+        const q = id => $(id, s.ov || s);
+        const c = q('#xm-copy'); if (c) c.onclick = async () => toast(await copy(url) ? '🔗 Lien copié' : '⚠️ Copie impossible : utilisez le fichier');
+        const sh = q('#xm-share'); if (sh) sh.onclick = async () => { try { await navigator.share({ title: cfg.title || cfg.app, text: cfg.title || cfg.app, url }); } catch (e) { } };
+        q('#xm-file').onclick = () => { download(fname, json, 'application/json'); toast('⬇️ Fichier enregistré'); };
+        const qa = q('#xm-qra'); if (qa) qa.onclick = () => XQT.sendText(fname, json);
+    }
+    // fenêtre : feuille du bas sur mobile, boîte centrée sur le bureau (styles en ligne : aucun CSS requis)
+    function host(html, title, mob) {
+        if (mob) { const s = sheet(html, { title }); s.ov = s.parentNode; return s; }
+        const old = document.getElementById('xm-d-ov'); if (old) old.remove();
+        const ov = document.createElement('div'); ov.id = 'xm-d-ov'; ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:10060;display:flex;align-items:center;justify-content:center;';
+        ov.innerHTML = '<div style="background:var(--bg-menu,#2d2d2d);color:var(--text-main,#fff);width:520px;max-width:94vw;max-height:90vh;overflow-y:auto;border-radius:10px;border:1px solid var(--border-color,#444);padding:20px;box-shadow:0 4px 18px rgba(0,0,0,.5);font-size:13.5px;font-family:inherit;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;border-bottom:1px solid var(--border-color,#444);padding-bottom:8px;"><b style="font-size:15px;">' + title + '</b><span data-x style="cursor:pointer;font-weight:bold;color:var(--text-muted,#aaa);padding:0 4px;">✕</span></div><div class="xm-d">' + html + '</div></div>';
+        ov.addEventListener('mousedown', e => { if (e.target === ov) ov.remove(); }); document.body.appendChild(ov); $('[data-x]', ov).onclick = () => ov.remove();
+        const s = $('.xm-d', ov); s.ov = ov; if (!document.getElementById('xm-d-css')) { const st = document.createElement('style'); st.id = 'xm-d-css'; st.textContent = '#xm-d-ov .m-qr{background:#fff;border-radius:10px;padding:6px;width:min(100%,340px);margin:6px auto}#xm-d-ov .m-qr svg{display:block;width:100%;height:auto}#xm-d-ov .m-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}#xm-d-ov .m-actions>*{flex:1 1 130px}#xm-d-ov .m-btn{padding:9px 12px;font-size:13.5px;border-radius:8px;border:1px solid var(--btn-border,rgba(240,179,120,.35));background:var(--btn-bg,rgba(240,179,120,.12));color:inherit;cursor:pointer;font-weight:600}#xm-d-ov .m-btn.primary{border-color:rgba(240,179,120,.85);background:rgba(240,179,120,.28)}#xm-d-ov .m-hint{font-size:12px;color:var(--text-dim,#888);line-height:1.45}#xm-d-ov .m-card{border:1px solid var(--border-color,#444);border-radius:8px;padding:10px 12px;background:var(--bg-panel-alt,#252525);margin:10px 0}#xm-d-ov .m-sec{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-dim,#888);margin:16px 2px 6px}'; document.head.appendChild(st); }
+        return s;
+    }
+    // ---------- réception : lien (#mx=…), fichier ou lien collé ----------
+    async function fromHash(app, onEnv) {
+        if (/^#qrx/.test(location.hash || '')) { // fichier reçu par QR animés (XQT) puis « Ouvrir dans … »
+            try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { }
+            let t = null; try { t = localStorage.getItem('xiii.qrx.pending'); localStorage.removeItem('xiii.qrx.pending'); } catch (e) { }
+            if (t) { try { const env = checkEnv(JSON.parse(t), app); await onEnv(env, 'file'); } catch (e) { toast('⚠️ ' + (e.message || 'Fichier illisible'), 4500); } return true; }
+        }
+        const m = /[#&]mx=([\w-]+)/.exec(location.hash || ''); if (!m) return false;
+        try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { }
+        try { const env = checkEnv(await unpack(m[1]), app); await onEnv(env, 'link'); } catch (e) { toast('⚠️ ' + (e.message || 'Lien illisible'), 4500); }
+        return true;
+    }
+    function importFile(app, onEnv) { pickFile('.json,application/json', async f => { try { await onEnv(await readEnvFile(f, app), 'file'); } catch (e) { toast('⚠️ ' + (e.message || 'Fichier illisible'), 4500); } }); }
+    async function importLink(app, onEnv) {
+        const mob = document.body.classList.contains('xm');
+        const s = host('<label class="m-field" style="display:block;margin-bottom:10px"><span class="m-hint">Collez le lien reçu</span><textarea id="xm-paste" rows="4" style="width:100%;box-sizing:border-box;font-size:16px;padding:10px;border-radius:8px;border:1px solid var(--border-color,#444);background:var(--bg-input,#3a3a3a);color:inherit"></textarea></label><div class="m-actions"><button class="m-btn primary" id="xm-pgo">Importer</button></div>', '🔗 Importer un lien', mob);
+        $('#xm-pgo', s.ov || s).onclick = async () => { const v = $('#xm-paste', s.ov || s).value, m = /mx=([\w-]+)/.exec(v) || [0, v.trim()]; try { const env = checkEnv(await unpack(m[1]), app); if (s.ov) s.ov.remove(); closeSheet(); await onEnv(env, 'link'); } catch (e) { toast('⚠️ ' + (e.message || 'Lien illisible'), 4500); } };
+    }
+    // ---------- panneau « 📱 Mobile » des outils bureau ----------
+    //  cfg = { app, page, title, name:()=>'', make:()=>data|null, apply:async(env)=>message, note }
+    function desktopPanel(cfg) {
+        const s = host('<p class="m-hint" style="margin:0 0 10px">Emportez ce projet sur le téléphone : ouvrez la <b>version mobile</b> de ' + esc(cfg.title) + ' en scannant un QR code, en ouvrant un lien ou en important un fichier.</p>' +
+            '<div class="m-actions" style="margin-top:0"><button class="m-btn primary" id="xm-go">📱 Envoyer vers le mobile</button><button class="m-btn" id="xm-open">↗ Ouvrir la version mobile ici</button></div>' +
+            (cfg.apply ? '<div class="m-sec">Récupérer ce qui a été fait sur le mobile</div><div class="m-actions" style="margin-top:0"><button class="m-btn" id="xm-ifile">📂 Importer un fichier</button><button class="m-btn" id="xm-ilink">🔗 Coller un lien</button></div><p class="m-hint" style="margin:8px 2px 0">' + (cfg.returnNote || 'Sur le mobile, « Renvoyer au bureau » produit le fichier ou le lien à importer ici.') + '</p>' : ''), '📱 Version mobile — ' + esc(cfg.title), false);
+        const q = id => $(id, s.ov);
+        q('#xm-go').onclick = () => { s.ov.remove(); send({ app: cfg.app, page: cfg.page, title: cfg.title, name: cfg.name, make: cfg.make, note: cfg.note, empty: cfg.empty }); };
+        q('#xm-open').onclick = async () => { const d = cfg.make(); if (d == null) { toast(cfg.empty || 'Rien à envoyer'); return; } s.ov.remove(); window.open(await link(cfg.page, envelope(cfg.app, 'project', typeof cfg.name === 'function' ? cfg.name() : cfg.name, d)), '_blank'); };
+        if (cfg.apply) { const ap = async env => { s.ov && s.ov.remove(); const m = await cfg.apply(env); if (m) toast(m, 5000); }; q('#xm-ifile').onclick = () => importFile(cfg.app, ap); q('#xm-ilink').onclick = () => { s.ov.remove(); importLink(cfg.app, async env => { const m = await cfg.apply(env); if (m) toast(m, 5000); }); }; }
+    }
+    // retour par lien sur le bureau (#mx=… de type return)
+    function desktopBoot(cfg) { return fromHash(cfg.app, async env => { if (env.kind === 'return' && cfg.apply) { const m = await cfg.apply(env); if (m) toast(m, 5000); } }); }
+    // ---------- thème, en-tête et menu des pages mobiles ----------
+    function initTheme() { let p = {}; try { p = JSON.parse(localStorage.getItem('hubXIII.prefs')) || {}; } catch (e) { } document.body.classList.add('xm'); document.body.classList.toggle('light-theme', p.theme === 'light'); const m = document.querySelector('meta[name=theme-color]'); if (m) m.content = p.theme === 'light' ? '#ffffff' : '#222222'; }
+    function toggleTheme() { let p = {}; try { p = JSON.parse(localStorage.getItem('hubXIII.prefs')) || {}; } catch (e) { } p.theme = p.theme === 'light' ? 'dark' : 'light'; try { localStorage.setItem('hubXIII.prefs', JSON.stringify(p)); } catch (e) { } initTheme(); }
+    //  menu standard ⋯ : cfg = { app, deskPage, items:[{icon,label,sub,run}] , onImport(env, via) , sendReturn() }
+    function menu(cfg) {
+        const items = (cfg.items || []).concat([
+            cfg.onImport ? { icon: '📂', label: 'Importer un fichier', sub: 'Envoi du bureau (.xiii-m.json)', run: () => importFile(cfg.app, cfg.onImport) } : null,
+            cfg.onImport ? { icon: '🔗', label: 'Coller un lien', sub: 'Lien ou QR reçu du bureau', run: () => importLink(cfg.app, cfg.onImport) } : null,
+            cfg.sendReturn ? { icon: '📤', label: 'Renvoyer au bureau', sub: 'QR code, lien ou fichier', run: cfg.sendReturn } : null,
+            { icon: '🌓', label: 'Thème clair / sombre', run: toggleTheme },
+            cfg.deskPage ? { icon: '🖥️', label: 'Version bureau', sub: 'Interface complète', run: () => { try { sessionStorage.setItem('xiiiDesk', '1'); } catch (e) { } location.href = cfg.deskPage + '?desktop=1'; } } : null,
+            { icon: '🏠', label: 'Accueil SUITE XIII', run: () => { location.href = 'index.html'; } }].filter(Boolean));
+        const s = sheet('<div class="m-list" style="margin:0">' + items.map((it, i) => '<button class="m-item" data-i="' + i + '"><span class="ico">' + it.icon + '</span><span class="grow"><b>' + esc(it.label) + '</b>' + (it.sub ? '<small>' + esc(it.sub) + '</small>' : '') + '</span></button>').join('') + '</div><p class="m-credit">Application développée par Matthieu Lamotte</p>', { title: 'Menu' });
+        $$('[data-i]', s).forEach(b => b.onclick = () => { closeSheet(); setTimeout(() => items[+b.dataset.i].run(), 60); });
+    }
+    return { FORMAT, $, $$, esc, uid, safe, isPhone, pack, unpack, link, envelope, checkEnv, load, save, drop, toast, sheet, closeSheet, ask, download, copy, pickFile, readEnvFile, send, host, fromHash, importFile, importLink, desktopPanel, desktopBoot, initTheme, toggleTheme, menu };
+})();
+// 🏠 retour à l'accueil SUITE XIII : même bouton en tête de chaque version mobile
+(function () {
+    const add = () => { const top = document.querySelector('.m-top'); if (!top || top.querySelector('.xm-home')) return; const a = document.createElement('a'); a.className = 'm-ibtn plain xm-home'; a.href = 'index.html'; a.title = 'Accueil SUITE XIII'; a.setAttribute('aria-label', 'Accueil'); a.textContent = '🏠'; a.style.cssText = 'text-decoration:none;font-size:17px;display:inline-flex;align-items:center;justify-content:center'; top.insertBefore(a, top.firstChild); };
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', add); else add();
+})();
+
+// 📱 XIII Équipe : une fois dans l'application, on y reste (l'accueil ramène à l'application, pas au site)
+(function () {
+    if (window.__xinapp) return; window.__xinapp = 1;
+    var page = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
+    try { if (page === 'equipe.html' && (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (window.matchMedia && matchMedia('(display-mode: standalone)').matches))) sessionStorage.setItem('xiii.inapp', '1'); } catch (e) { }
+    function inApp() { try { return sessionStorage.getItem('xiii.inapp') === '1'; } catch (e) { return false; } }
+    if (!inApp()) return;
+    if (page === 'index.html' || page === '') { location.replace('equipe.html'); return; }
+    document.addEventListener('click', function (e) {
+        var a = e.target.closest && e.target.closest('a[href]'); if (!a) return;
+        var u; try { u = new URL(a.getAttribute('href'), location.href); } catch (er) { return; }
+        if (u.origin !== location.origin) return;
+        var f = (u.pathname.split('/').pop() || 'index.html').toLowerCase();
+        if (f === 'index.html' || f === '') { e.preventDefault(); e.stopPropagation(); location.href = 'equipe.html'; return; }
+        if (a.target === '_blank') { a.removeAttribute('target'); }
+    }, true);
+})();
+
+// =====================================================================
+//  SUITE XIII — XQT : 📲 transfert de fichiers PC ↔ téléphone par QR codes animés, SANS RÉSEAU
+//  Principe repris de « airgapped-qr-code-transfer » (M. Ramachandran, licence MIT) : fichier compressé (gzip),
+//  découpé en morceaux, affichés en suite de QR codes lus par la caméra. Version XIII plus fiable :
+//  la suite tourne EN BOUCLE (on peut prendre le train en marche, les morceaux manqués repassent), chaque QR
+//  porte l'identifiant du transfert et son numéro, une empreinte CRC32 vérifie le fichier reçu.
+//  Envoi : XQT.send(file | {name, type, blob}) · Réception : XQT.scan() · Fichiers reçus : XQT.inbox()
+// =====================================================================
+var XQT = window.XQT || (() => {
+    const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const QR = () => window.XQRS || (typeof XQR !== 'undefined' ? XQR : null);
+    const toast = (m, ms) => { try { (window.XM && XM.toast ? XM.toast : window.toast)(m, ms || 3500); } catch (e) { } };
+    const kb = n => n < 1024 ? n + ' o' : n < 1048576 ? Math.round(n / 1024) + ' Ko' : (n / 1048576).toFixed(1).replace('.', ',') + ' Mo';
+    // ---------- outils binaires ----------
+    const CRC = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return u => { let c = 0xFFFFFFFF; for (let i = 0; i < u.length; i++) c = t[(c ^ u[i]) & 255] ^ (c >>> 8); return ((c ^ 0xFFFFFFFF) >>> 0).toString(16); }; })();
+    const b64 = u => { let s = ''; for (let i = 0; i < u.length; i += 0x8000) s += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000)); return btoa(s); };
+    const unb64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+    async function gz(u, inflate) { if (typeof CompressionStream === 'undefined') return null; const s = new Blob([u]).stream().pipeThrough(inflate ? new DecompressionStream('gzip') : new CompressionStream('gzip')); return new Uint8Array(await new Response(s).arrayBuffer()); }
+    const css = `#xqt{position:fixed;inset:0;z-index:10500;background:#0d0d0f;color:#f2ede6;font:15px/1.4 -apple-system,"Segoe UI",Roboto,sans-serif;display:flex;flex-direction:column}#xqt *{box-sizing:border-box}
+#xqt .h{display:flex;gap:8px;align-items:center;padding:max(10px,env(safe-area-inset-top)) 12px 10px;border-bottom:1px solid #2a2a30}#xqt .h b{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#xqt button{font:inherit;color:inherit;background:#26262b;border:1px solid #3a3a42;border-radius:12px;padding:9px 14px;cursor:pointer;min-height:44px}#xqt button.pr{background:#f0b378;color:#1d1b19;border-color:#f0b378;font-weight:700}
+#xqt .m{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:12px;overflow:auto;position:relative}#xqt canvas.q{background:#fff;padding:14px;border-radius:12px;image-rendering:pixelated;max-width:min(92vw,78vh);max-height:min(92vw,78vh)}
+#xqt .s{color:#a39b91;font-size:13px;text-align:center}#xqt .row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;align-items:center}#xqt select,#xqt input[type=range]{font:inherit;color:inherit;background:#1d1d22;border:1px solid #3a3a42;border-radius:10px;padding:6px 8px}
+#xqt video{width:100%;max-width:560px;max-height:58vh;object-fit:cover;border-radius:14px;background:#000}#xqt .vf{position:relative;width:100%;max-width:560px}#xqt .vf i{position:absolute;inset:12%;border:3px solid #ff8a1e;border-radius:14px}
+#xqt .grid{display:flex;flex-wrap:wrap;gap:2px;max-width:560px;justify-content:center}#xqt .grid span{width:9px;height:9px;border-radius:2px;background:#3a3a42}#xqt .grid span.ok{background:#66bb6a}
+#xqt .bar{height:10px;width:100%;max-width:560px;background:#26262b;border-radius:99px;overflow:hidden}#xqt .bar i{display:block;height:100%;background:#66bb6a;transition:width .2s}
+#xqt .f{display:flex;gap:10px;align-items:center;width:100%;max-width:560px;padding:10px;border:1px solid #2a2a30;border-radius:12px;margin-bottom:6px}#xqt .f span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}`;
+    function shell(title) {
+        if (!document.getElementById('xqt-css')) { const s = document.createElement('style'); s.id = 'xqt-css'; s.textContent = css; document.head.appendChild(s); }
+        close(); const o = document.createElement('div'); o.id = 'xqt'; o.innerHTML = '<div class="h"><button data-x>✕</button><b>' + esc(title) + '</b></div><div class="m"></div>'; document.body.appendChild(o);
+        o.querySelector('[data-x]').onclick = close; return o.querySelector('.m');
+    }
+    let stopFn = null;
+    function close() { if (stopFn) { try { stopFn(); } catch (e) { } stopFn = null; } const o = document.getElementById('xqt'); if (o) o.remove(); }
+    // =================================================================
+    //  ENVOI
+    // =================================================================
+    const SIZES = [['Rapide (gros QR)', 1100], ['Normal', 700], ['Robuste (petits QR)', 380]];
+    async function send(src) {
+        if (!QR()) { toast('⚠️ Générateur de QR indisponible'); return; }
+        if (!src) { const i = document.createElement('input'); i.type = 'file'; i.onchange = () => i.files[0] && send(i.files[0]); i.click(); return; }
+        const blob = src.blob || src, name = src.name || 'fichier', type = src.type || blob.type || 'application/octet-stream';
+        const raw = new Uint8Array(await blob.arrayBuffer()); let z = 0, data = raw; try { const c = await gz(raw); if (c && c.length < raw.length * 0.95) { data = c; z = 1; } } catch (e) { }
+        const meta = { n: name, t: type, s: raw.length, c: CRC(raw), z }; let sid = '';
+        let size = 700, fps = 8, chunks = [], timer = 0, k = 0, turns = 0;
+        const m = shell('📲 Envoi : ' + name);
+        const cut = () => { chunks = []; for (let i = 0; i < data.length; i += size) chunks.push(b64(data.subarray(i, i + size))); };
+        const frame = i => i < 0 ? 'XQT1:' + sid + ':M:' + chunks.length + ':' + b64(new TextEncoder().encode(JSON.stringify(meta))) : 'XQT1:' + sid + ':' + i + ':' + chunks.length + ':' + chunks[i];
+        m.innerHTML = '<canvas class="q"></canvas><div class="s" id="xq-s"></div><div class="row"><label>Vitesse <input type="range" id="xq-f" min="2" max="15" value="' + fps + '"></label><select id="xq-z">' + SIZES.map(s => '<option value="' + s[1] + '"' + (s[1] === size ? ' selected' : '') + '>' + s[0] + '</option>').join('') + '</select></div><div class="s">Sur le téléphone : SUITE XIII › Accueil › 📷 Scanner, visez cet écran. La suite tourne en boucle jusqu\'à ce que tout soit reçu ; aucun réseau n\'est utilisé.</div>';
+        const cv = m.querySelector('canvas'), g = cv.getContext('2d');
+        const draw = txt => { const q = QR().make(txt, 'L'); if (!q) return; const sc = Math.max(2, Math.floor(Math.min(innerWidth * 0.9, innerHeight * 0.72) / q.size)); cv.width = cv.height = q.size * sc; g.fillStyle = '#fff'; g.fillRect(0, 0, cv.width, cv.height); g.fillStyle = '#000'; for (let y = 0; y < q.size; y++) for (let x = 0; x < q.size; x++) if (q.get(x, y)) g.fillRect(x * sc, y * sc, sc, sc); };
+        const loop = () => { const n = chunks.length, i = k % (n + Math.ceil(n / 8)); const mi = Math.floor(i / 9), isMeta = i % 9 === 0; const idx = isMeta ? -1 : Math.min(n - 1, i - mi - 1); draw(frame(idx)); if (!isMeta && idx === n - 1) turns++; k++;
+            const st = document.getElementById('xq-s'); if (st) st.textContent = kb(raw.length) + (z ? ' (compressé ' + kb(data.length) + ')' : '') + ' · ' + n + ' QR · tour ' + (turns + 1) + ' · ' + (isMeta ? 'en-tête' : (idx + 1) + ' / ' + n); };
+        const run = () => { clearInterval(timer); sid = Math.random().toString(36).slice(2, 8); cut(); k = 0; turns = 0; timer = setInterval(loop, 1000 / fps); loop(); };
+        m.querySelector('#xq-f').oninput = e => { fps = +e.target.value; clearInterval(timer); timer = setInterval(loop, 1000 / fps); };
+        m.querySelector('#xq-z').onchange = e => { size = +e.target.value; run(); };
+        stopFn = () => clearInterval(timer); run();
+    }
+    const sendText = (name, text, type) => send({ name, type: type || 'application/json', blob: new Blob([text], { type: type || 'application/json' }) });
+    // =================================================================
+    //  RÉCEPTION
+    // =================================================================
+    let jsqrP = null;
+    const loadJsQR = () => jsqrP || (jsqrP = new Promise((ok, ko) => { if (window.jsQR) return ok(window.jsQR); const U = ['https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js', 'https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js']; let i = 0; const nx = () => { if (i >= U.length) { jsqrP = null; return ko(new Error('Lecteur de QR indisponible : ouvrez une fois cette page en ligne, ou utilisez Chrome (Android)')); } const s = document.createElement('script'); s.src = U[i++]; s.onload = () => ok(window.jsQR); s.onerror = nx; document.head.appendChild(s); }; nx(); }));
+    async function detector() {
+        if ('BarcodeDetector' in window) { try { const f = await BarcodeDetector.getSupportedFormats(); if (f.includes('qr_code')) { const d = new BarcodeDetector({ formats: ['qr_code'] }); return async v => (await d.detect(v)).map(x => x.rawValue); } } catch (e) { } }
+        const J = await loadJsQR(), c = document.createElement('canvas'), g = c.getContext('2d', { willReadFrequently: true });
+        return async v => { const k = Math.min(1, 900 / Math.max(v.videoWidth, v.videoHeight)); c.width = Math.round(v.videoWidth * k); c.height = Math.round(v.videoHeight * k); g.drawImage(v, 0, 0, c.width, c.height); const r = J(g.getImageData(0, 0, c.width, c.height).data, c.width, c.height, { inversionAttempts: 'dontInvert' }); return r ? [r.data] : []; };
+    }
+    async function scan(onText) {
+        const m = shell('📷 Scanner');
+        m.innerHTML = '<div class="vf"><video playsinline muted></video><i></i></div><div class="bar"><i style="width:0"></i></div><div class="s" id="xq-st">Visez le QR code (ou la suite de QR animés) affiché sur l\'ordinateur.</div><div class="grid"></div>';
+        const v = m.querySelector('video'); let stream = null, alive = true, S = null;
+        stopFn = () => { alive = false; if (stream) stream.getTracks().forEach(t => t.stop()); };
+        try { stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 } }, audio: false }); v.srcObject = stream; await v.play(); }
+        catch (e) { m.querySelector('#xq-st').textContent = '⚠️ Caméra inaccessible : autorisez la caméra pour ce site.'; return; }
+        let det; try { det = await detector(); } catch (e) { m.querySelector('#xq-st').textContent = '⚠️ ' + e.message; return; }
+        const st = m.querySelector('#xq-st'), bar = m.querySelector('.bar i'), grid = m.querySelector('.grid');
+        const paint = () => { const got = S.parts.filter(Boolean).length; bar.style.width = Math.round(got / S.n * 100) + '%'; st.textContent = (S.meta ? S.meta.n + ' · ' : '') + got + ' / ' + S.n + ' morceaux' + (got < S.n ? ' — gardez le téléphone pointé, les manquants repassent' : ''); if (S.n <= 600) { if (grid.children.length !== S.n) grid.innerHTML = '<span></span>'.repeat(S.n); S.parts.forEach((p, i) => { if (p) grid.children[i].className = 'ok'; }); } };
+        const tick = async () => {
+            if (!alive) return;
+            if (v.readyState >= 2) { let L = []; try { L = await det(v); } catch (e) { }
+                for (const t of L) {
+                    const mm = /^XQT1:(\w+):(M|\d+):(\d+):(.*)$/s.exec(t);
+                    if (!mm) { if (!S) { stopFn(); close(); if (onText) onText(t); else plain(t); return; } continue; }
+                    const [, sid, i, n] = mm, body = mm[4];
+                    if (!S || S.sid !== sid || S.n !== +n) { S = { sid, n: +n, parts: new Array(+n).fill(null), meta: null }; try { navigator.vibrate && navigator.vibrate(30); } catch (e) { } }
+                    if (i === 'M') { if (!S.meta) { try { S.meta = JSON.parse(new TextDecoder().decode(unb64(body))); } catch (e) { } } } else if (!S.parts[+i]) S.parts[+i] = body;
+                    paint();
+                    if (S.meta && S.parts.every(Boolean)) { stopFn(); await finish(S, m); return; }
+                } }
+            setTimeout(tick, 70);
+        };
+        tick();
+    }
+    async function finish(S, m) {
+        try {
+            const bin = S.parts.map(unb64), tot = bin.reduce((a, u) => a + u.length, 0), all = new Uint8Array(tot); let o = 0; bin.forEach(u => { all.set(u, o); o += u.length; });
+            const raw = S.meta.z ? await gz(all, true) : all; if (!raw) throw new Error('Décompression impossible sur ce navigateur');
+            if (CRC(raw) !== S.meta.c) throw new Error('Fichier altéré (empreinte différente) : relancez le scan');
+            try { navigator.vibrate && navigator.vibrate([60, 40, 60]); } catch (e) { }
+            const rec = { id: 'f' + Date.now(), name: S.meta.n, type: S.meta.t, size: raw.length, at: Date.now(), blob: new Blob([raw], { type: S.meta.t }) };
+            await save(rec); result(rec, m);
+        } catch (e) { m.innerHTML = '<div class="s">⚠️ ' + esc(e.message) + '</div><button class="pr" id="xq-r">↻ Recommencer</button>'; m.querySelector('#xq-r').onclick = () => scan(); }
+    }
+    function plain(t) { const m = shell('📷 QR code lu'); const url = /^https?:\/\//i.test(t);
+        m.innerHTML = '<div class="s" style="word-break:break-all;max-width:560px;color:#f2ede6">' + esc(t.slice(0, 600)) + '</div><div class="row">' + (url ? '<button class="pr" id="xq-o">↗ Ouvrir le lien</button>' : '') + '<button id="xq-c">📋 Copier</button><button id="xq-a">📷 Scanner encore</button></div>';
+        if (url) m.querySelector('#xq-o').onclick = () => { location.href = t; }; m.querySelector('#xq-c').onclick = () => { try { navigator.clipboard.writeText(t); toast('📋 Copié'); } catch (e) { } }; m.querySelector('#xq-a').onclick = () => scan(); }
+    // fichier SUITE XIII (projet) → outil à ouvrir
+    async function xiiiApp(rec) { if (!/json/i.test(rec.type) && !/\.json$/i.test(rec.name)) return null; try { const j = JSON.parse(await rec.blob.text()); if (j && j.format === 'xiii-mobile' && j.app) return j.app; if (j && j.app && typeof j.app === 'string' && /^[a-z]+$/.test(j.app)) return j.app; } catch (e) { } return null; }
+    async function result(rec, m) {
+        const app = await xiiiApp(rec), phone = /Android|iPhone|iPad|Mobile/i.test(navigator.userAgent);
+        m.innerHTML = '<div style="font-size:46px">✅</div><div><b>' + esc(rec.name) + '</b></div><div class="s">' + kb(rec.size) + ' reçus sans réseau · rangé dans « 📁 Fichiers reçus »</div><div class="row">' + (app ? '<button class="pr" id="xq-app">📲 Ouvrir dans ' + esc(app.toUpperCase()) + '</button>' : '<button class="pr" id="xq-o">👁 Ouvrir</button>') + '<button id="xq-d">💾 Enregistrer</button><button id="xq-a">📷 Autre transfert</button></div>';
+        const u = URL.createObjectURL(rec.blob);
+        if (app) m.querySelector('#xq-app').onclick = async () => { try { localStorage.setItem('xiii.qrx.pending', await rec.blob.text()); } catch (e) { toast('⚠️ Fichier trop gros pour l\'ouverture directe : enregistrez-le puis importez-le'); return; } location.href = app + (phone ? '-m' : '') + '.html#qrx'; };
+        else m.querySelector('#xq-o').onclick = () => { const w = window.open(u, '_blank'); if (!w) location.href = u; };
+        m.querySelector('#xq-d').onclick = () => { const a = document.createElement('a'); a.href = u; a.download = rec.name; document.body.appendChild(a); a.click(); a.remove(); };
+        m.querySelector('#xq-a').onclick = () => scan();
+    }
+    // ---------- fichiers reçus (IndexedDB : consultables hors ligne) ----------
+    let dbp = null;
+    const idb = () => dbp || (dbp = new Promise((ok, ko) => { const r = indexedDB.open('xiii-qrx', 1); r.onupgradeneeded = () => r.result.createObjectStore('f', { keyPath: 'id' }); r.onsuccess = () => ok(r.result); r.onerror = () => ko(r.error); }));
+    const store = async (mode, fn) => { const d = await idb(); return new Promise((ok, ko) => { const t = d.transaction('f', mode), r = fn(t.objectStore('f')); t.oncomplete = () => ok(r && r.result); t.onerror = () => ko(t.error); }); };
+    const save = rec => store('readwrite', s => s.put(rec)).then(async () => { const L = await list(); for (const x of L.slice(30)) await del(x.id); });
+    const list = () => store('readonly', s => s.getAll()).then(L => (L || []).sort((a, b) => b.at - a.at)).catch(() => []);
+    const del = id => store('readwrite', s => s.delete(id));
+    async function inbox() {
+        const m = shell('📁 Fichiers reçus'), L = await list();
+        m.style.justifyContent = 'flex-start';
+        m.innerHTML = (L.length ? L.map(r => '<div class="f" data-id="' + r.id + '"><span><b>' + esc(r.name) + '</b><br><small class="s">' + kb(r.size) + ' · ' + new Date(r.at).toLocaleString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) + '</small></span><button data-o>Ouvrir</button><button data-d>🗑</button></div>').join('') : '<div class="s">Aucun fichier reçu. Sur l\'ordinateur : « 📲 Transfert QR » ; ici : « 📷 Scanner ».</div>') + '<button class="pr" id="xq-sc">📷 Scanner</button>';
+        m.querySelectorAll('.f').forEach(d => { const r = L.find(x => x.id === d.dataset.id); d.querySelector('[data-o]').onclick = () => result(r, m); d.querySelector('[data-d]').onclick = async () => { await del(r.id); inbox(); }; });
+        m.querySelector('#xq-sc').onclick = () => scan();
+    }
+    function menu() { const m = shell('📲 Transfert QR (sans réseau)'); m.innerHTML = '<div class="s" style="max-width:520px">Passez un fichier (PDF d\'un plan au sol, synoptique, dossier, projet SUITE XIII…) de l\'ordinateur au téléphone, ou l\'inverse, avec une suite de QR codes animés : aucun réseau, aucun câble.</div><button class="pr" id="xq-s">📤 Envoyer un fichier…</button><button id="xq-r">📷 Recevoir (scanner)</button><button id="xq-i">📁 Fichiers reçus</button>'; m.querySelector('#xq-s').onclick = () => send(); m.querySelector('#xq-r').onclick = () => scan(); m.querySelector('#xq-i').onclick = () => inbox(); }
+    // bouton sur la page d'accueil (ordinateur)
+    (function mount() { if (!/(^|\/)(index\.html)?$/.test(location.pathname)) return; const go = () => { const ref = document.getElementById('xp-btn'), bar = document.querySelector('#top-bar .bar-right'); if (!bar || document.getElementById('xqt-btn')) return !!document.getElementById('xqt-btn'); const b = document.createElement('button'); b.id = 'xqt-btn'; b.title = 'Transfert QR : envoyer un PDF, un plan au sol ou un synoptique au téléphone sans réseau (suite de QR codes animés)'; b.innerHTML = '<span>📲</span><span>Transfert QR</span>'; b.onclick = menu; if (ref) ref.after(b); else bar.prepend(b); return true; }; let n = 0; const t = setInterval(() => { if (go() || ++n > 40) clearInterval(t); }, 250); })();
+    const api = { send, sendText, scan, inbox, close, list, CRC, menu };
+    window.XQT = api; return api;
+})();
+
+</script>
+<!-- SUITE XIII:MOBILE:END -->
 <!-- SUITE XIII:SETTINGS:START -->
 <script>// =====================================================================
 //  SUITE XIII — XBOOT : démarrage sans « saut » de l'interface
@@ -2851,6 +3224,146 @@ const XQR = (() => {
 if (typeof module !== 'undefined') module.exports = XQR;
 
 return XQR;})();
+// =====================================================================
+//  SUITE XIII — XQT : 📲 transfert de fichiers PC ↔ téléphone par QR codes animés, SANS RÉSEAU
+//  Principe repris de « airgapped-qr-code-transfer » (M. Ramachandran, licence MIT) : fichier compressé (gzip),
+//  découpé en morceaux, affichés en suite de QR codes lus par la caméra. Version XIII plus fiable :
+//  la suite tourne EN BOUCLE (on peut prendre le train en marche, les morceaux manqués repassent), chaque QR
+//  porte l'identifiant du transfert et son numéro, une empreinte CRC32 vérifie le fichier reçu.
+//  Envoi : XQT.send(file | {name, type, blob}) · Réception : XQT.scan() · Fichiers reçus : XQT.inbox()
+// =====================================================================
+var XQT = window.XQT || (() => {
+    const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const QR = () => window.XQRS || (typeof XQR !== 'undefined' ? XQR : null);
+    const toast = (m, ms) => { try { (window.XM && XM.toast ? XM.toast : window.toast)(m, ms || 3500); } catch (e) { } };
+    const kb = n => n < 1024 ? n + ' o' : n < 1048576 ? Math.round(n / 1024) + ' Ko' : (n / 1048576).toFixed(1).replace('.', ',') + ' Mo';
+    // ---------- outils binaires ----------
+    const CRC = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return u => { let c = 0xFFFFFFFF; for (let i = 0; i < u.length; i++) c = t[(c ^ u[i]) & 255] ^ (c >>> 8); return ((c ^ 0xFFFFFFFF) >>> 0).toString(16); }; })();
+    const b64 = u => { let s = ''; for (let i = 0; i < u.length; i += 0x8000) s += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000)); return btoa(s); };
+    const unb64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+    async function gz(u, inflate) { if (typeof CompressionStream === 'undefined') return null; const s = new Blob([u]).stream().pipeThrough(inflate ? new DecompressionStream('gzip') : new CompressionStream('gzip')); return new Uint8Array(await new Response(s).arrayBuffer()); }
+    const css = `#xqt{position:fixed;inset:0;z-index:10500;background:#0d0d0f;color:#f2ede6;font:15px/1.4 -apple-system,"Segoe UI",Roboto,sans-serif;display:flex;flex-direction:column}#xqt *{box-sizing:border-box}
+#xqt .h{display:flex;gap:8px;align-items:center;padding:max(10px,env(safe-area-inset-top)) 12px 10px;border-bottom:1px solid #2a2a30}#xqt .h b{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#xqt button{font:inherit;color:inherit;background:#26262b;border:1px solid #3a3a42;border-radius:12px;padding:9px 14px;cursor:pointer;min-height:44px}#xqt button.pr{background:#f0b378;color:#1d1b19;border-color:#f0b378;font-weight:700}
+#xqt .m{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:12px;overflow:auto;position:relative}#xqt canvas.q{background:#fff;padding:14px;border-radius:12px;image-rendering:pixelated;max-width:min(92vw,78vh);max-height:min(92vw,78vh)}
+#xqt .s{color:#a39b91;font-size:13px;text-align:center}#xqt .row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;align-items:center}#xqt select,#xqt input[type=range]{font:inherit;color:inherit;background:#1d1d22;border:1px solid #3a3a42;border-radius:10px;padding:6px 8px}
+#xqt video{width:100%;max-width:560px;max-height:58vh;object-fit:cover;border-radius:14px;background:#000}#xqt .vf{position:relative;width:100%;max-width:560px}#xqt .vf i{position:absolute;inset:12%;border:3px solid #ff8a1e;border-radius:14px}
+#xqt .grid{display:flex;flex-wrap:wrap;gap:2px;max-width:560px;justify-content:center}#xqt .grid span{width:9px;height:9px;border-radius:2px;background:#3a3a42}#xqt .grid span.ok{background:#66bb6a}
+#xqt .bar{height:10px;width:100%;max-width:560px;background:#26262b;border-radius:99px;overflow:hidden}#xqt .bar i{display:block;height:100%;background:#66bb6a;transition:width .2s}
+#xqt .f{display:flex;gap:10px;align-items:center;width:100%;max-width:560px;padding:10px;border:1px solid #2a2a30;border-radius:12px;margin-bottom:6px}#xqt .f span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}`;
+    function shell(title) {
+        if (!document.getElementById('xqt-css')) { const s = document.createElement('style'); s.id = 'xqt-css'; s.textContent = css; document.head.appendChild(s); }
+        close(); const o = document.createElement('div'); o.id = 'xqt'; o.innerHTML = '<div class="h"><button data-x>✕</button><b>' + esc(title) + '</b></div><div class="m"></div>'; document.body.appendChild(o);
+        o.querySelector('[data-x]').onclick = close; return o.querySelector('.m');
+    }
+    let stopFn = null;
+    function close() { if (stopFn) { try { stopFn(); } catch (e) { } stopFn = null; } const o = document.getElementById('xqt'); if (o) o.remove(); }
+    // =================================================================
+    //  ENVOI
+    // =================================================================
+    const SIZES = [['Rapide (gros QR)', 1100], ['Normal', 700], ['Robuste (petits QR)', 380]];
+    async function send(src) {
+        if (!QR()) { toast('⚠️ Générateur de QR indisponible'); return; }
+        if (!src) { const i = document.createElement('input'); i.type = 'file'; i.onchange = () => i.files[0] && send(i.files[0]); i.click(); return; }
+        const blob = src.blob || src, name = src.name || 'fichier', type = src.type || blob.type || 'application/octet-stream';
+        const raw = new Uint8Array(await blob.arrayBuffer()); let z = 0, data = raw; try { const c = await gz(raw); if (c && c.length < raw.length * 0.95) { data = c; z = 1; } } catch (e) { }
+        const meta = { n: name, t: type, s: raw.length, c: CRC(raw), z }; let sid = '';
+        let size = 700, fps = 8, chunks = [], timer = 0, k = 0, turns = 0;
+        const m = shell('📲 Envoi : ' + name);
+        const cut = () => { chunks = []; for (let i = 0; i < data.length; i += size) chunks.push(b64(data.subarray(i, i + size))); };
+        const frame = i => i < 0 ? 'XQT1:' + sid + ':M:' + chunks.length + ':' + b64(new TextEncoder().encode(JSON.stringify(meta))) : 'XQT1:' + sid + ':' + i + ':' + chunks.length + ':' + chunks[i];
+        m.innerHTML = '<canvas class="q"></canvas><div class="s" id="xq-s"></div><div class="row"><label>Vitesse <input type="range" id="xq-f" min="2" max="15" value="' + fps + '"></label><select id="xq-z">' + SIZES.map(s => '<option value="' + s[1] + '"' + (s[1] === size ? ' selected' : '') + '>' + s[0] + '</option>').join('') + '</select></div><div class="s">Sur le téléphone : SUITE XIII › Accueil › 📷 Scanner, visez cet écran. La suite tourne en boucle jusqu\'à ce que tout soit reçu ; aucun réseau n\'est utilisé.</div>';
+        const cv = m.querySelector('canvas'), g = cv.getContext('2d');
+        const draw = txt => { const q = QR().make(txt, 'L'); if (!q) return; const sc = Math.max(2, Math.floor(Math.min(innerWidth * 0.9, innerHeight * 0.72) / q.size)); cv.width = cv.height = q.size * sc; g.fillStyle = '#fff'; g.fillRect(0, 0, cv.width, cv.height); g.fillStyle = '#000'; for (let y = 0; y < q.size; y++) for (let x = 0; x < q.size; x++) if (q.get(x, y)) g.fillRect(x * sc, y * sc, sc, sc); };
+        const loop = () => { const n = chunks.length, i = k % (n + Math.ceil(n / 8)); const mi = Math.floor(i / 9), isMeta = i % 9 === 0; const idx = isMeta ? -1 : Math.min(n - 1, i - mi - 1); draw(frame(idx)); if (!isMeta && idx === n - 1) turns++; k++;
+            const st = document.getElementById('xq-s'); if (st) st.textContent = kb(raw.length) + (z ? ' (compressé ' + kb(data.length) + ')' : '') + ' · ' + n + ' QR · tour ' + (turns + 1) + ' · ' + (isMeta ? 'en-tête' : (idx + 1) + ' / ' + n); };
+        const run = () => { clearInterval(timer); sid = Math.random().toString(36).slice(2, 8); cut(); k = 0; turns = 0; timer = setInterval(loop, 1000 / fps); loop(); };
+        m.querySelector('#xq-f').oninput = e => { fps = +e.target.value; clearInterval(timer); timer = setInterval(loop, 1000 / fps); };
+        m.querySelector('#xq-z').onchange = e => { size = +e.target.value; run(); };
+        stopFn = () => clearInterval(timer); run();
+    }
+    const sendText = (name, text, type) => send({ name, type: type || 'application/json', blob: new Blob([text], { type: type || 'application/json' }) });
+    // =================================================================
+    //  RÉCEPTION
+    // =================================================================
+    let jsqrP = null;
+    const loadJsQR = () => jsqrP || (jsqrP = new Promise((ok, ko) => { if (window.jsQR) return ok(window.jsQR); const U = ['https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js', 'https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js']; let i = 0; const nx = () => { if (i >= U.length) { jsqrP = null; return ko(new Error('Lecteur de QR indisponible : ouvrez une fois cette page en ligne, ou utilisez Chrome (Android)')); } const s = document.createElement('script'); s.src = U[i++]; s.onload = () => ok(window.jsQR); s.onerror = nx; document.head.appendChild(s); }; nx(); }));
+    async function detector() {
+        if ('BarcodeDetector' in window) { try { const f = await BarcodeDetector.getSupportedFormats(); if (f.includes('qr_code')) { const d = new BarcodeDetector({ formats: ['qr_code'] }); return async v => (await d.detect(v)).map(x => x.rawValue); } } catch (e) { } }
+        const J = await loadJsQR(), c = document.createElement('canvas'), g = c.getContext('2d', { willReadFrequently: true });
+        return async v => { const k = Math.min(1, 900 / Math.max(v.videoWidth, v.videoHeight)); c.width = Math.round(v.videoWidth * k); c.height = Math.round(v.videoHeight * k); g.drawImage(v, 0, 0, c.width, c.height); const r = J(g.getImageData(0, 0, c.width, c.height).data, c.width, c.height, { inversionAttempts: 'dontInvert' }); return r ? [r.data] : []; };
+    }
+    async function scan(onText) {
+        const m = shell('📷 Scanner');
+        m.innerHTML = '<div class="vf"><video playsinline muted></video><i></i></div><div class="bar"><i style="width:0"></i></div><div class="s" id="xq-st">Visez le QR code (ou la suite de QR animés) affiché sur l\'ordinateur.</div><div class="grid"></div>';
+        const v = m.querySelector('video'); let stream = null, alive = true, S = null;
+        stopFn = () => { alive = false; if (stream) stream.getTracks().forEach(t => t.stop()); };
+        try { stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 } }, audio: false }); v.srcObject = stream; await v.play(); }
+        catch (e) { m.querySelector('#xq-st').textContent = '⚠️ Caméra inaccessible : autorisez la caméra pour ce site.'; return; }
+        let det; try { det = await detector(); } catch (e) { m.querySelector('#xq-st').textContent = '⚠️ ' + e.message; return; }
+        const st = m.querySelector('#xq-st'), bar = m.querySelector('.bar i'), grid = m.querySelector('.grid');
+        const paint = () => { const got = S.parts.filter(Boolean).length; bar.style.width = Math.round(got / S.n * 100) + '%'; st.textContent = (S.meta ? S.meta.n + ' · ' : '') + got + ' / ' + S.n + ' morceaux' + (got < S.n ? ' — gardez le téléphone pointé, les manquants repassent' : ''); if (S.n <= 600) { if (grid.children.length !== S.n) grid.innerHTML = '<span></span>'.repeat(S.n); S.parts.forEach((p, i) => { if (p) grid.children[i].className = 'ok'; }); } };
+        const tick = async () => {
+            if (!alive) return;
+            if (v.readyState >= 2) { let L = []; try { L = await det(v); } catch (e) { }
+                for (const t of L) {
+                    const mm = /^XQT1:(\w+):(M|\d+):(\d+):(.*)$/s.exec(t);
+                    if (!mm) { if (!S) { stopFn(); close(); if (onText) onText(t); else plain(t); return; } continue; }
+                    const [, sid, i, n] = mm, body = mm[4];
+                    if (!S || S.sid !== sid || S.n !== +n) { S = { sid, n: +n, parts: new Array(+n).fill(null), meta: null }; try { navigator.vibrate && navigator.vibrate(30); } catch (e) { } }
+                    if (i === 'M') { if (!S.meta) { try { S.meta = JSON.parse(new TextDecoder().decode(unb64(body))); } catch (e) { } } } else if (!S.parts[+i]) S.parts[+i] = body;
+                    paint();
+                    if (S.meta && S.parts.every(Boolean)) { stopFn(); await finish(S, m); return; }
+                } }
+            setTimeout(tick, 70);
+        };
+        tick();
+    }
+    async function finish(S, m) {
+        try {
+            const bin = S.parts.map(unb64), tot = bin.reduce((a, u) => a + u.length, 0), all = new Uint8Array(tot); let o = 0; bin.forEach(u => { all.set(u, o); o += u.length; });
+            const raw = S.meta.z ? await gz(all, true) : all; if (!raw) throw new Error('Décompression impossible sur ce navigateur');
+            if (CRC(raw) !== S.meta.c) throw new Error('Fichier altéré (empreinte différente) : relancez le scan');
+            try { navigator.vibrate && navigator.vibrate([60, 40, 60]); } catch (e) { }
+            const rec = { id: 'f' + Date.now(), name: S.meta.n, type: S.meta.t, size: raw.length, at: Date.now(), blob: new Blob([raw], { type: S.meta.t }) };
+            await save(rec); result(rec, m);
+        } catch (e) { m.innerHTML = '<div class="s">⚠️ ' + esc(e.message) + '</div><button class="pr" id="xq-r">↻ Recommencer</button>'; m.querySelector('#xq-r').onclick = () => scan(); }
+    }
+    function plain(t) { const m = shell('📷 QR code lu'); const url = /^https?:\/\//i.test(t);
+        m.innerHTML = '<div class="s" style="word-break:break-all;max-width:560px;color:#f2ede6">' + esc(t.slice(0, 600)) + '</div><div class="row">' + (url ? '<button class="pr" id="xq-o">↗ Ouvrir le lien</button>' : '') + '<button id="xq-c">📋 Copier</button><button id="xq-a">📷 Scanner encore</button></div>';
+        if (url) m.querySelector('#xq-o').onclick = () => { location.href = t; }; m.querySelector('#xq-c').onclick = () => { try { navigator.clipboard.writeText(t); toast('📋 Copié'); } catch (e) { } }; m.querySelector('#xq-a').onclick = () => scan(); }
+    // fichier SUITE XIII (projet) → outil à ouvrir
+    async function xiiiApp(rec) { if (!/json/i.test(rec.type) && !/\.json$/i.test(rec.name)) return null; try { const j = JSON.parse(await rec.blob.text()); if (j && j.format === 'xiii-mobile' && j.app) return j.app; if (j && j.app && typeof j.app === 'string' && /^[a-z]+$/.test(j.app)) return j.app; } catch (e) { } return null; }
+    async function result(rec, m) {
+        const app = await xiiiApp(rec), phone = /Android|iPhone|iPad|Mobile/i.test(navigator.userAgent);
+        m.innerHTML = '<div style="font-size:46px">✅</div><div><b>' + esc(rec.name) + '</b></div><div class="s">' + kb(rec.size) + ' reçus sans réseau · rangé dans « 📁 Fichiers reçus »</div><div class="row">' + (app ? '<button class="pr" id="xq-app">📲 Ouvrir dans ' + esc(app.toUpperCase()) + '</button>' : '<button class="pr" id="xq-o">👁 Ouvrir</button>') + '<button id="xq-d">💾 Enregistrer</button><button id="xq-a">📷 Autre transfert</button></div>';
+        const u = URL.createObjectURL(rec.blob);
+        if (app) m.querySelector('#xq-app').onclick = async () => { try { localStorage.setItem('xiii.qrx.pending', await rec.blob.text()); } catch (e) { toast('⚠️ Fichier trop gros pour l\'ouverture directe : enregistrez-le puis importez-le'); return; } location.href = app + (phone ? '-m' : '') + '.html#qrx'; };
+        else m.querySelector('#xq-o').onclick = () => { const w = window.open(u, '_blank'); if (!w) location.href = u; };
+        m.querySelector('#xq-d').onclick = () => { const a = document.createElement('a'); a.href = u; a.download = rec.name; document.body.appendChild(a); a.click(); a.remove(); };
+        m.querySelector('#xq-a').onclick = () => scan();
+    }
+    // ---------- fichiers reçus (IndexedDB : consultables hors ligne) ----------
+    let dbp = null;
+    const idb = () => dbp || (dbp = new Promise((ok, ko) => { const r = indexedDB.open('xiii-qrx', 1); r.onupgradeneeded = () => r.result.createObjectStore('f', { keyPath: 'id' }); r.onsuccess = () => ok(r.result); r.onerror = () => ko(r.error); }));
+    const store = async (mode, fn) => { const d = await idb(); return new Promise((ok, ko) => { const t = d.transaction('f', mode), r = fn(t.objectStore('f')); t.oncomplete = () => ok(r && r.result); t.onerror = () => ko(t.error); }); };
+    const save = rec => store('readwrite', s => s.put(rec)).then(async () => { const L = await list(); for (const x of L.slice(30)) await del(x.id); });
+    const list = () => store('readonly', s => s.getAll()).then(L => (L || []).sort((a, b) => b.at - a.at)).catch(() => []);
+    const del = id => store('readwrite', s => s.delete(id));
+    async function inbox() {
+        const m = shell('📁 Fichiers reçus'), L = await list();
+        m.style.justifyContent = 'flex-start';
+        m.innerHTML = (L.length ? L.map(r => '<div class="f" data-id="' + r.id + '"><span><b>' + esc(r.name) + '</b><br><small class="s">' + kb(r.size) + ' · ' + new Date(r.at).toLocaleString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) + '</small></span><button data-o>Ouvrir</button><button data-d>🗑</button></div>').join('') : '<div class="s">Aucun fichier reçu. Sur l\'ordinateur : « 📲 Transfert QR » ; ici : « 📷 Scanner ».</div>') + '<button class="pr" id="xq-sc">📷 Scanner</button>';
+        m.querySelectorAll('.f').forEach(d => { const r = L.find(x => x.id === d.dataset.id); d.querySelector('[data-o]').onclick = () => result(r, m); d.querySelector('[data-d]').onclick = async () => { await del(r.id); inbox(); }; });
+        m.querySelector('#xq-sc').onclick = () => scan();
+    }
+    function menu() { const m = shell('📲 Transfert QR (sans réseau)'); m.innerHTML = '<div class="s" style="max-width:520px">Passez un fichier (PDF d\'un plan au sol, synoptique, dossier, projet SUITE XIII…) de l\'ordinateur au téléphone, ou l\'inverse, avec une suite de QR codes animés : aucun réseau, aucun câble.</div><button class="pr" id="xq-s">📤 Envoyer un fichier…</button><button id="xq-r">📷 Recevoir (scanner)</button><button id="xq-i">📁 Fichiers reçus</button>'; m.querySelector('#xq-s').onclick = () => send(); m.querySelector('#xq-r').onclick = () => scan(); m.querySelector('#xq-i').onclick = () => inbox(); }
+    // bouton sur la page d'accueil (ordinateur)
+    (function mount() { if (!/(^|\/)(index\.html)?$/.test(location.pathname)) return; const go = () => { const ref = document.getElementById('xp-btn'), bar = document.querySelector('#top-bar .bar-right'); if (!bar || document.getElementById('xqt-btn')) return !!document.getElementById('xqt-btn'); const b = document.createElement('button'); b.id = 'xqt-btn'; b.title = 'Transfert QR : envoyer un PDF, un plan au sol ou un synoptique au téléphone sans réseau (suite de QR codes animés)'; b.innerHTML = '<span>📲</span><span>Transfert QR</span>'; b.onclick = menu; if (ref) ref.after(b); else bar.prepend(b); return true; }; let n = 0; const t = setInterval(() => { if (go() || ++n > 40) clearInterval(t); }, 250); })();
+    const api = { send, sendText, scan, inbox, close, list, CRC, menu };
+    window.XQT = api; return api;
+})();
+
 // =====================================================================
 //  SUITE XIII — XSHARE : 🔗 partage en lecture seule, sans compte ni serveur
 //  Reprend les documents que l'outil sait envoyer à DOSSIER (feuille de service, conducteur, plan, planning…)
