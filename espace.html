@@ -23,6 +23,14 @@
 .t.pin{flex:0 0 auto;padding:0 14px}.t.pin span{flex:0 0 auto}
 .t i{position:absolute;top:6px;left:8px;width:7px;height:7px;border-radius:50%;background:#4caf50;box-shadow:0 0 8px #4caf50;display:none}.t.busy i{display:block}
 .t.drag{opacity:.4}
+.t{--pc:transparent;box-shadow:inset 0 3px 0 var(--pc);background-image:linear-gradient(180deg,color-mix(in srgb,var(--pc) 14%,transparent),transparent 75%)}
+.t.on{box-shadow:inset 0 3px 0 var(--pc),0 -1px 0 rgba(240,180,41,.55) inset,0 -6px 18px rgba(240,180,41,.18)}
+#proj{all:unset;cursor:pointer;align-self:center;display:flex;align-items:center;gap:7px;max-width:190px;height:28px;padding:0 10px 0 9px;margin-right:4px;border-radius:999px;font-size:12px;font-weight:700;color:var(--txt);border:1px solid color-mix(in srgb,var(--pc,#f0b429) 55%,transparent);background:color-mix(in srgb,var(--pc,#f0b429) 12%,transparent);box-shadow:0 0 14px color-mix(in srgb,var(--pc,#f0b429) 22%,transparent)}
+#proj i{flex:0 0 auto;width:9px;height:9px;border-radius:50%;background:var(--pc,#f0b429);box-shadow:0 0 8px var(--pc,#f0b429)}#proj span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}#proj:hover{background:color-mix(in srgb,var(--pc,#f0b429) 20%,transparent)}
+#pmenu{position:fixed;z-index:20;display:none;min-width:250px;max-width:340px;padding:8px;border-radius:16px;background:var(--glass);border:1px solid var(--line);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);box-shadow:0 20px 60px rgba(0,0,0,.45)}#pmenu.on{display:block}
+#pmenu h6{margin:4px 8px 6px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}#pmenu hr{border:0;border-top:1px solid var(--line);margin:6px 4px}
+#pmenu button{all:unset;cursor:pointer;box-sizing:border-box;width:100%;display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:10px;font-size:13px;font-weight:600}#pmenu button:hover{background:rgba(255,160,70,.12)}
+#pmenu button.on{background:rgba(255,160,70,.16)}#pmenu button.on span::after{content:'  ✓';color:var(--acc)}#pmenu i{flex:0 0 auto;width:11px;height:11px;border-radius:50%}#pmenu span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}#pmenu small{color:var(--dim);font-size:11px}
 #add{all:unset;cursor:pointer;align-self:center;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--txt);margin-left:4px}#add:hover{background:rgba(255,160,70,.16)}
 #pick{position:absolute;top:50px;right:10px;z-index:9;width:min(560px,94vw);max-height:70vh;overflow:auto;display:none;grid-template-columns:repeat(4,1fr);gap:8px;padding:14px;border-radius:20px;background:var(--glass);border:1px solid var(--line);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);box-shadow:0 20px 60px rgba(0,0,0,.45)}#pick.on{display:grid}
 #pick button{all:unset;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 4px;border-radius:14px;border:1px solid var(--line);font-size:11px;font-weight:700;text-align:center}#pick button:hover{border-color:var(--acc)}#pick img{width:38px;height:38px;object-fit:contain}
@@ -30,8 +38,8 @@
 #stage{position:absolute;inset:46px 0 0 0}#stage iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:var(--bg);visibility:hidden}#stage iframe.on{visibility:visible}
 #empty{position:absolute;inset:46px 0 0;display:none;align-items:center;justify-content:center;flex-direction:column;gap:8px;color:var(--dim)}#empty b{font:40px Astoria,serif;color:var(--acc)}
 </style></head><body>
-<div id="bar"><button id="home" title="Accueil SUITE XIII"><img src="logos/index.png" alt="" onerror="this.replaceWith(document.createTextNode('XIII'))"></button><div id="tabs"><span id="ind"></span></div><button id="add" title="Nouvel onglet (Accueil) · clic droit : choisir un outil">＋</button></div>
-<div id="pick"></div>
+<div id="bar"><button id="home" title="Accueil SUITE XIII"><img src="logos/index.png" alt="" onerror="this.replaceWith(document.createTextNode('XIII'))"></button><button id="proj" title="Projet XIII en cours · changer, créer"><i></i><span></span>▾</button><div id="tabs"><span id="ind"></span></div><button id="add" title="Nouvel onglet (Accueil) · clic droit : choisir un outil">＋</button></div>
+<div id="pick"></div><div id="pmenu"></div>
 <div id="stage"></div><div id="empty"><b>Espace onglets</b><span>＋ pour ouvrir un outil</span></div>
 <script>
 window.__xtshell = 1;
@@ -39,16 +47,26 @@ const T = { index: 'Accueil', moodo: 'MOODO', storyboardo: 'STORYBOARDO', decoup
 const $ = id => document.getElementById(id), K = 'xiii.tabs';
 const appOf = u => (String(u).split(/[?#]/)[0].split('/').pop() || 'index').replace(/\.html$/, '') || 'index';
 let S = (() => { try { return JSON.parse(localStorage.getItem(K)) || null; } catch (e) { return null; } })() || { list: [], act: null };
-const save = () => { try { localStorage.setItem(K, JSON.stringify({ list: S.list.map(t => ({ id: t.id, url: t.url, pin: t.pin || undefined })), act: S.act })); } catch (e) { } };
+const save = () => { try { localStorage.setItem(K, JSON.stringify({ list: S.list.map(t => ({ id: t.id, url: t.url, ws: t.pin ? undefined : (t.ws || 'main'), ts: t.ts, pin: t.pin || undefined })), act: S.act })); } catch (e) { } };
 const uid = () => Math.random().toString(36).slice(2, 9);
-function frame(t) { let f = $('f-' + t.id); if (!f) { f = document.createElement('iframe'); f.id = 'f-' + t.id; f.src = t.url; f.setAttribute('allow', 'clipboard-read; clipboard-write; camera; microphone; fullscreen; display-capture'); f.onload = () => hook(t, f); $('stage').appendChild(f); } return f; }
+const esc = x => String(x == null ? '' : x).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+// ---- projets XIII (registre commun « xiii.ws », écrit aussi par les outils) ----
+const RK = 'xiii.ws', PAL = ['#f0b429', '#4fc3f7', '#81c784', '#e57373', '#ba68c8', '#ff8a3d', '#4db6ac', '#f06292', '#9575cd', '#d4e157'];
+const putReg = r => { try { localStorage.setItem(RK, JSON.stringify(r)); } catch (e) { } };
+function reg() { let r = null; try { r = JSON.parse(localStorage.getItem(RK)); } catch (e) { } if (!r || !Array.isArray(r.list) || !r.list.length) { let n = 'Projet XIII'; try { const p = JSON.parse(localStorage.getItem('xiii.projets')), f = p && p.list && p.list.find(x => x && x.id === p.active); if (f && f.title) n = f.title; } catch (e) { } r = { list: [{ id: 'main', name: n, color: PAL[0], created: Date.now() }], cur: 'main' }; putReg(r); } return r; }
+const wsm = i => { const r = reg(); return r.list.find(w => w.id === i) || r.list[0]; };
+const wsOf = t => t.pin ? S.ws : (t.ws || 'main');
+function setCur(i) { S.ws = i; const r = reg(); if (r.cur !== i) { r.cur = i; putReg(r); } }
+function frame(t) { let f = $('f-' + t.id); if (!f) { f = document.createElement('iframe'); f.id = 'f-' + t.id; f.dataset.ws = wsOf(t); f.src = t.url; f.setAttribute('allow', 'clipboard-read; clipboard-write; camera; microphone; fullscreen; display-capture'); f.onload = () => hook(t, f); $('stage').appendChild(f); } return f; }
 function hook(t, f) { try { const w = f.contentWindow; if (t.pin && !/^index\.html/.test(w.location.pathname.split('/').pop())) { const u = w.location.pathname.split('/').pop() + w.location.search; f.src = 'index.html'; open(u); return; } t.url = w.location.pathname.split('/').pop() + w.location.search; save(); draw();
     w.addEventListener('keydown', key, true); } catch (e) { } }
+function reloadF(t) { const f = $('f-' + t.id); if (!f) return; f.dataset.ws = wsOf(t); try { f.contentWindow.location.reload(); } catch (e) { f.src = t.url; } }
 function draw() {
+    const cw = wsm(S.ws), pj = $('proj'); pj.style.setProperty('--pc', cw.color); pj.querySelector('span').textContent = cw.name; pj.title = 'Projet XIII en cours : ' + cw.name + ' · changer, créer';
     const box = $('tabs'); box.querySelectorAll('.t').forEach(x => x.remove());
     S.list.forEach((t, k) => { const a = appOf(t.url), b = document.createElement('button'); b.className = 't' + (t.id === S.act ? ' on' : '') + (t.pin ? ' pin' : ''); b.dataset.id = t.id; b.draggable = !t.pin; b.title = (T[a] || a.toUpperCase()) + (k < 9 ? ' (Alt+' + (k + 1) + ')' : '');
         b.innerHTML = '<img src="logos/' + a + '.png?v=3" alt="" onerror="this.style.visibility=\'hidden\'"><span>' + (T[a] || a.toUpperCase()) + '</span>' + (t.pin ? '' : '<button class="x" title="Fermer (clic molette)">✕</button>') + '<i></i><b></b>';
-        b.title = t.pin ? 'Accueil (toujours ouvert)' : b.title; b.onclick = e => { if (e.target.classList.contains('x')) { e.stopPropagation(); close(t.id); } else show(t.id); };
+        const w = wsm(wsOf(t)); b.style.setProperty('--pc', w.color); b.title = (t.pin ? 'Accueil (toujours ouvert)' : b.title) + ' · Projet : ' + w.name; b.oncontextmenu = e => { e.preventDefault(); pmenu(e.clientX, e.clientY, t); }; b.onclick = e => { if (e.target.classList.contains('x')) { e.stopPropagation(); close(t.id); } else show(t.id); };
         b.onauxclick = e => { if (e.button === 1) { e.preventDefault(); if (!t.pin) close(t.id); } };
         b.ondragstart = e => { e.dataTransfer.setData('text/xt', t.id); b.classList.add('drag'); }; b.ondragend = () => b.classList.remove('drag');
         b.ondragover = e => e.preventDefault(); b.ondrop = e => { e.preventDefault(); const from = e.dataTransfer.getData('text/xt'); if (!from || from === t.id) return; const i = S.list.findIndex(x => x.id === from), it = S.list.splice(i, 1)[0], r = b.getBoundingClientRect(); let j = S.list.findIndex(x => x.id === t.id); if (e.clientX > r.left + r.width / 2 || t.pin) j++; S.list.splice(j, 0, it); save(); draw(); };
@@ -56,8 +74,8 @@ function draw() {
     $('empty').style.display = S.list.length ? 'none' : 'flex'; busy(); requestAnimationFrame(place);
 }
 function place() { const b = $('tabs').querySelector('.t.on'), i = $('ind'); if (!b) { i.style.width = 0; return; } i.style.left = b.offsetLeft + 'px'; i.style.width = b.offsetWidth + 'px'; b.scrollIntoView({ block: 'nearest', inline: 'nearest' }); }
-function show(id) { const t = S.list.find(x => x.id === id); if (!t) return; S.act = id; save(); const f = frame(t); document.querySelectorAll('#stage iframe').forEach(x => x.classList.toggle('on', x === f)); draw(); try { f.contentWindow.focus(); } catch (e) { } document.title = (T[appOf(t.url)] || 'SUITE') + ' — SUITE XIII'; }
-function open(url, bg) { const a = appOf(url), ex = S.list.find(x => !x.pin && appOf(x.url) === a && !/#/.test(url)); if (ex && a !== 'index') { if (!bg) show(ex.id); return; } const t = { id: uid(), url }; const i = S.list.findIndex(x => x.id === S.act); S.list.splice(i + 1, 0, t); save(); if (bg) { frame(t); draw(); } else show(t.id); }
+function show(id) { const t = S.list.find(x => x.id === id); if (!t) return; if (!t.pin) { if ((t.ws || 'main') !== S.ws) setCur(t.ws || 'main'); t.ts = Date.now(); } S.act = id; save(); const f = frame(t); if (t.pin && f.dataset.ws !== S.ws) reloadF(t); document.querySelectorAll('#stage iframe').forEach(x => x.classList.toggle('on', x === f)); draw(); try { f.contentWindow.focus(); } catch (e) { } document.title = (T[appOf(t.url)] || 'SUITE') + ' — SUITE XIII'; }
+function open(url, bg, ws) { ws = ws || S.ws; const a = appOf(url), ex = S.list.find(x => !x.pin && appOf(x.url) === a && (x.ws || 'main') === ws && !/#/.test(url)); if (ex && a !== 'index') { if (!bg) show(ex.id); return; } const t = { id: uid(), url, ws }; const i = S.list.findIndex(x => x.id === S.act); S.list.splice(i + 1, 0, t); save(); if (bg) { frame(t); draw(); } else show(t.id); }
 function close(id) { const i = S.list.findIndex(x => x.id === id); if (i < 0 || S.list[i].pin) return; S.list.splice(i, 1); const f = $('f-' + id); if (f) f.remove(); if (S.act === id) { const n = S.list[i] || S.list[i - 1]; S.act = n ? n.id : null; save(); if (n) show(n.id); else draw(); } else { save(); draw(); } }
 function step(d) { const i = S.list.findIndex(x => x.id === S.act); if (S.list.length) show(S.list[(i + d + S.list.length) % S.list.length].id); }
 function key(e) { if ((e.ctrlKey && e.key === 'Tab')) { e.preventDefault(); step(e.shiftKey ? -1 : 1); }
@@ -66,16 +84,30 @@ function key(e) { if ((e.ctrlKey && e.key === 'Tab')) { e.preventDefault(); step
     else if (e.altKey && e.key.toLowerCase() === 'w') { e.preventDefault(); if (S.act) close(S.act); } }
 addEventListener('keydown', key, true);
 function busy() { let j = null; try { j = JSON.parse(localStorage.getItem('xiii.encodo.job')); } catch (e) { } const on = j && j.name && !j.done && Date.now() - (j.ts || Date.now()) < 6e5; document.querySelectorAll('.t').forEach(b => { const t = S.list.find(x => x.id === b.dataset.id); b.classList.toggle('busy', !!(on && t && appOf(t.url) === 'encodo')); }); }
-setInterval(busy, 3000); addEventListener('storage', e => { if (e.key === 'xiii.encodo.job') busy(); });
-addEventListener('message', e => { if (e.origin !== location.origin || !e.data || !e.data.xtab) return; const d = e.data.xtab; if (d.open) open(d.open, d.bg); if (d.close && S.act) close(S.act); if (d.nav) { const t = S.list.find(x => x.id === S.act); if (t && !t.pin) { t.url = d.nav; save(); } } });
+setInterval(busy, 3000); addEventListener('storage', e => { if (e.key === 'xiii.encodo.job') busy(); if (e.key === RK) onReg(); });
+addEventListener('message', e => { if (e.origin !== location.origin || !e.data || !e.data.xtab) return; const d = e.data.xtab, st = srcTab(e.source); if (d.open) open(d.open, d.bg, st ? wsOf(st) : S.ws); if (d.ws && reg().list.some(w => w.id === d.ws)) moveTab(st || S.list.find(x => x.id === S.act), d.ws); if (d.close && S.act) close(S.act); if (d.nav) { const t = S.list.find(x => x.id === S.act); if (t && !t.pin) { t.url = d.nav; save(); } } });
 // sélecteur d'outil
 function pick() { const p = $('pick'); if (p.classList.toggle('on')) { p.innerHTML = '<input placeholder="Rechercher un outil…">' + Object.keys(T).map(a => '<button data-a="' + a + '"><img src="logos/' + a + '.png?v=3" alt="" onerror="this.style.visibility=\'hidden\'">' + T[a] + '</button>').join(''); const q = p.querySelector('input'); q.focus(); q.oninput = () => p.querySelectorAll('button').forEach(b => b.style.display = b.textContent.toLowerCase().includes(q.value.toLowerCase()) ? '' : 'none'); q.onkeydown = e => { if (e.key === 'Enter') { const b = [...p.querySelectorAll('button')].find(b => b.style.display !== 'none'); if (b) b.click(); } if (e.key === 'Escape') p.classList.remove('on'); }; p.querySelectorAll('button').forEach(b => b.onclick = () => { p.classList.remove('on'); open(b.dataset.a + '.html'); }); } }
 $('add').onclick = () => { $('pick').classList.remove('on'); newTab('index.html'); }; $('add').oncontextmenu = e => { e.preventDefault(); pick(); }; $('home').onclick = () => show(S.list[0].id);
-function newTab(url) { const t = { id: uid(), url }; S.list.push(t); save(); show(t.id); }
-document.addEventListener('pointerdown', e => { if (!e.target.closest('#pick,#add')) $('pick').classList.remove('on'); });
+function newTab(url) { const t = { id: uid(), url, ws: S.ws }; S.list.push(t); save(); show(t.id); }
+document.addEventListener('pointerdown', e => { if (!e.target.closest('#pick,#add')) $('pick').classList.remove('on'); if (!e.target.closest('#pmenu,#proj')) $('pmenu').classList.remove('on'); });
+function srcTab(w) { for (const f of document.querySelectorAll('#stage iframe')) { let x = w; for (let k = 0; k < 6 && x; k++) { if (x === f.contentWindow) return S.list.find(t => 'f-' + t.id === f.id) || null; if (x === x.parent) break; x = x.parent; } } return null; }
+// basculer un onglet (outil) sur un autre projet XIII
+function moveTab(t, ws) { if (!t) return; setCur(ws); const ex = !t.pin && appOf(t.url) !== 'index' && S.list.find(x => x !== t && !x.pin && appOf(x.url) === appOf(t.url) && (x.ws || 'main') === ws); if (ex) { const i = S.list.indexOf(t); S.list.splice(i, 1); const f = $('f-' + t.id); if (f) f.remove(); show(ex.id); return; } if (!t.pin) { t.ws = ws; t.ts = Date.now(); } save(); reloadF(t); draw(); }
+// changer de projet XIII : on retrouve ses onglets (le dernier utilisé), sinon l'Accueil du projet
+function switchProject(ws) { setCur(ws); const ts = S.list.filter(t => !t.pin && (t.ws || 'main') === ws).sort((a, b) => (b.ts || 0) - (a.ts || 0)); show(ts[0] ? ts[0].id : 'home'); }
+function newProject() { const r = reg(), used = r.list.map(w => w.color), w = { id: 'w' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), name: 'Nouveau projet', color: PAL.find(c => !used.includes(c)) || PAL[r.list.length % PAL.length], created: Date.now(), fresh: 1 }; r.list.push(w); putReg(r); switchProject(w.id); }
+function openFiche() { const t = S.list.find(x => x.id === S.act); try { const w = $('f-' + t.id).contentWindow; if (w.XPROJET) { w.XPROJET.open(); return; } } catch (e) { } show('home'); setTimeout(() => { try { $('f-home').contentWindow.XPROJET.open(); } catch (e) { } }, 1800); }
+function onReg() { const ids = new Set(reg().list.map(w => w.id)); S.list.forEach(t => { if (!t.pin && !ids.has(t.ws || 'main')) { t.ws = 'main'; reloadF(t); } }); if (!ids.has(S.ws)) { S.ws = 'main'; const h = S.list.find(t => t.pin); if (h) reloadF(h); } save(); draw(); }
+function pmenu(x, y, tab) { const m = $('pmenu'), R = reg(), cur = tab ? wsOf(tab) : S.ws, cnt = i => S.list.filter(t => !t.pin && (t.ws || 'main') === i).length, a = tab ? appOf(tab.url) : '';
+    m.innerHTML = '<h6>' + (tab ? (tab.pin ? 'Accueil — projet affiché' : 'Ouvrir « ' + esc(T[a] || a.toUpperCase()) + ' » dans le projet…') : 'Projets XIII') + '</h6>' + R.list.map(w => '<button data-w="' + w.id + '" class="' + (w.id === cur ? 'on' : '') + '"><i style="background:' + esc(w.color) + ';box-shadow:0 0 8px ' + esc(w.color) + '"></i><span>' + esc(w.name) + '</span><small>' + cnt(w.id) + ' onglet' + (cnt(w.id) > 1 ? 's' : '') + '</small></button>').join('') +
+        (tab ? (tab.pin ? '' : '<hr><button data-a="close">✕ Fermer l\'onglet</button>') : '<hr><button data-a="new">＋ Nouveau projet XIII</button><button data-a="fiche">✎ Fiche du projet (nom, couleur, Drive…)</button>');
+    m.classList.add('on'); const r = m.getBoundingClientRect(); m.style.left = Math.max(6, Math.min(x, innerWidth - r.width - 6)) + 'px'; m.style.top = Math.max(6, Math.min(y, innerHeight - r.height - 6)) + 'px';
+    m.querySelectorAll('button').forEach(b => b.onclick = () => { m.classList.remove('on'); if (b.dataset.w) { if (tab && !tab.pin) moveTab(tab, b.dataset.w); else switchProject(b.dataset.w); } else if (b.dataset.a === 'new') newProject(); else if (b.dataset.a === 'fiche') openFiche(); else if (b.dataset.a === 'close') close(tab.id); }); }
+$('proj').onclick = () => { if ($('pmenu').classList.contains('on')) { $('pmenu').classList.remove('on'); return; } const r = $('proj').getBoundingClientRect(); pmenu(r.left, r.bottom + 6); };
 addEventListener('resize', place);
 // démarrage : ?open=outil.html ajoute un onglet ; onglets rouverts tels quels
 const q = new URLSearchParams(location.search).get('open');
-S.list = S.list.filter(t => !t.pin); S.list.unshift({ id: 'home', url: 'index.html', pin: 1 });
+S.ws = reg().cur || 'main'; if (!reg().list.some(w => w.id === S.ws)) S.ws = 'main'; S.list = S.list.filter(t => !t.pin); S.list.forEach(t => { if (!t.ws || !reg().list.some(w => w.id === t.ws)) t.ws = 'main'; }); S.list.unshift({ id: 'home', url: 'index.html', pin: 1 });
 if (q && /^[\w-]+\.html([?#].*)?$/.test(q)) { history.replaceState(null, '', location.pathname); open(q); } else show((S.list.find(x => x.id === S.act) || S.list[0]).id);
 </script></body></html>

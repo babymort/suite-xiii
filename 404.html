@@ -1,4 +1,119 @@
-<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Page introuvable — SUITE XIII</title>
+<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><!-- SUITE XIII:WS:START --><script>// =====================================================================
+//  SUITE XIII — XWS : plusieurs « Projets XIII » en parallèle, chacun cloisonné
+//  • chargé en tout premier dans <head> de chaque page (avant tout code d'outil)
+//  • chaque projet XIII a ses propres données : localStorage, IndexedDB et canaux de diffusion
+//    sont préfixés « xws.<id>. » (le projet d'origine « main » garde les clés historiques, sans préfixe)
+//  • donc Drive, équipe, compte, fiche projet, données de chaque outil… séparés par projet
+//  • restent communs à tous les projets : réglages d'affichage, bibliothèques, catalogues, IA, onglets…
+//  • projet de la page : cadre de l'espace onglets (data-ws) › page parente › window.name › session › dernier utilisé
+//  • registre commun « xiii.ws » = { list:[{ id, name, color }], cur }
+// =====================================================================
+(function () {
+    if (window.XWS) return;
+    var LS; try { LS = window.localStorage; } catch (e) { return; } if (!LS || typeof Proxy === 'undefined') return;
+    var REG = 'xiii.ws', SK = 'xiii.ws.cur', SP = Storage.prototype;
+    var gi = SP.getItem, si = SP.setItem, ri = SP.removeItem, ki = SP.key;
+    var COLORS = ['#f0b429', '#4fc3f7', '#81c784', '#e57373', '#ba68c8', '#ff8a3d', '#4db6ac', '#f06292', '#9575cd', '#d4e157'];
+    // clés communes à tous les projets (préférences, bibliothèques, catalogues, IA, onglets…)
+    var G = /^(xiii\.(ws|tabs|theme|a11y|anim\.|tour2?\.|tips\.|pins|recent|start\.|pwa\.|ai$|ai\.|ux\.|bar\.|boot\.|settings\.|home\.|docs\.seen|news\.|ib\.no|inapp|catalogue|data\.|lib\.|annuaire|encodo\.|errlog|cmds|ndi\.|tally\.|gif\.)|[a-zA-Z]+XIII\.(prefs|library|lib|templates|kits|poses|parts|models|presets|base|parc|moi|xlfields|emetteur|comptes|inventory|libMigrated)$|encodoXIII|synoptique_(?!projects|snapshots)|theme$)/;
+    var rg = function (k) { return gi.call(LS, k); }, rs = function (k, v) { si.call(LS, k, v); }, rr = function (k) { ri.call(LS, k); };
+    function rkeys() { var a = [], n = LS.length; for (var i = 0; i < n; i++) a.push(ki.call(LS, i)); return a; }
+    function J(s) { try { return JSON.parse(s); } catch (e) { return null; } }
+    function reg() {
+        var r = J(rg(REG));
+        if (!r || !Array.isArray(r.list) || !r.list.length) {
+            var p = J(rg('xiii.projets')), f = p && Array.isArray(p.list) ? p.list.find(function (x) { return x && x.id === p.active; }) : null;
+            r = { list: [{ id: 'main', name: (f && f.title) || 'Projet XIII', color: COLORS[0], created: Date.now() }], cur: 'main' };
+            try { rs(REG, JSON.stringify(r)); } catch (e) { }
+        }
+        return r;
+    }
+    function put(r) { try { rs(REG, JSON.stringify(r)); } catch (e) { } }
+    function pick() {
+        try { var fe = window.frameElement; if (fe && fe.dataset && fe.dataset.ws) return fe.dataset.ws; } catch (e) { }
+        try { if (window.parent !== window && window.parent.XWS) return window.parent.XWS.id; } catch (e) { }
+        var m = /^xws:([\w-]+)$/.exec(window.name || ''); if (m) return m[1];
+        try { var s = sessionStorage.getItem(SK); if (s) return s; } catch (e) { }
+        return reg().cur || 'main';
+    }
+    var R = reg(), id = pick();
+    if (!R.list.some(function (w) { return w.id === id; })) id = 'main';
+    var inShell = false; try { inShell = !!(window.frameElement && window.frameElement.dataset && window.frameElement.dataset.ws); } catch (e) { }
+    try { if (window.top === window) sessionStorage.setItem(SK, id); } catch (e) { }
+    var P = id === 'main' ? '' : 'xws.' + id + '.';
+    var map = function (k) { k = String(k); return (!P || G.test(k)) ? k : P + k; };
+    var mine = function (rk) { if (rk.indexOf('xws.') === 0) return (P && rk.indexOf(P) === 0) ? rk.slice(P.length) : null; return (!P || G.test(rk)) ? rk : null; };
+    var keys = function () { var a = rkeys(), o = []; for (var i = 0; i < a.length; i++) { var k = mine(a[i]); if (k != null) o.push(k); } return o; };
+    function syncName(v) { // le nom du projet XIII suit le titre de sa fiche projet active
+        var p = J(v), f = p && Array.isArray(p.list) ? p.list.find(function (x) { return x && x.id === p.active; }) : null;
+        if (!f || !f.title) return; var r = reg(), w = r.list.find(function (x) { return x.id === id; });
+        if (w && w.name !== f.title) { w.name = f.title; put(r); }
+    }
+    var PX;
+    // méthodes posées sur Storage.prototype : les surcouches ajoutées ensuite par la suite (sauvegarde auto, lecture seule…)
+    // s'empilent dessus et voient toujours les clés « logiques » avec this === localStorage
+    SP.getItem = function (k) { return this === PX ? gi.call(LS, map(k)) : gi.call(this, k); };
+    SP.setItem = function (k, v) { if (this !== PX) return si.call(this, k, v); si.call(LS, map(k), v); if (String(k) === 'xiii.projets') { try { syncName(String(v)); } catch (e) { } } };
+    SP.removeItem = function (k) { return this === PX ? ri.call(LS, map(k)) : ri.call(this, k); };
+    SP.key = function (i) { if (this !== PX) return ki.call(this, i); var a = keys(); return i >= 0 && i < a.length ? a[i] : null; };
+    var cl = SP.clear; SP.clear = function () { if (this !== PX) return cl.call(this); keys().forEach(function (k) { if (k !== REG && k !== 'xiii.tabs') rr(map(k)); }); };
+    var isProto = function (p) { return typeof p === 'symbol' || p in SP; };
+    PX = new Proxy(LS, {
+        get: function (t, p) { if (p === 'length') return keys().length; if (isProto(p)) { var v = SP[p] !== undefined ? SP[p] : Reflect.get(t, p); return (typeof v === 'function' && typeof p === 'symbol') ? v.bind(t) : v; } var x = gi.call(LS, map(p)); return x === null ? undefined : x; },
+        set: function (t, p, v) { if (isProto(p)) return Reflect.set(t, p, v); SP.setItem.call(PX, p, v); return true; },
+        has: function (t, p) { if (isProto(p)) return Reflect.has(t, p); return gi.call(LS, map(p)) !== null; },
+        deleteProperty: function (t, p) { if (typeof p === 'string') SP.removeItem.call(PX, p); return true; },
+        ownKeys: function () { return keys(); },
+        getOwnPropertyDescriptor: function (t, p) { if (typeof p !== 'string') return undefined; var v = gi.call(LS, map(p)); return v === null ? undefined : { value: v, writable: true, enumerable: true, configurable: true }; },
+        defineProperty: function (t, p, d) { if (typeof p === 'string' && d && 'value' in d) SP.setItem.call(PX, p, d.value); return true; }
+    });
+    try { Object.defineProperty(window, 'localStorage', { configurable: true, enumerable: true, get: function () { return PX; } }); } catch (e) { }
+    // événements « storage » : seulement ceux du projet de la page, avec la clé logique
+    var ae = window.addEventListener, re = window.removeEventListener, WM = new WeakMap();
+    function tr(e) { if (!e || !e.isTrusted || e.key == null || e.storageArea !== LS) return e; var k = mine(e.key); if (k == null) return null; if (k === e.key) return e; try { return new StorageEvent('storage', { key: k, oldValue: e.oldValue, newValue: e.newValue, url: e.url }); } catch (x) { return e; } }
+    function wrap(f) { var w = WM.get(f); if (!w) { w = function (e) { var x = tr(e); if (!x) return; return typeof f === 'function' ? f.call(this, x) : f.handleEvent(x); }; WM.set(f, w); } return w; }
+    window.addEventListener = function (t, f, o) { if (t === 'storage' && f) return ae.call(this || window, t, wrap(f), o); return ae.apply(this || window, arguments); };
+    window.removeEventListener = function (t, f, o) { if (t === 'storage' && f && WM.has(f)) return re.call(this || window, t, WM.get(f), o); return re.apply(this || window, arguments); };
+    var osf = null; try { Object.defineProperty(window, 'onstorage', { configurable: true, get: function () { return osf; }, set: function (f) { if (osf) window.removeEventListener('storage', osf); osf = typeof f === 'function' ? f : null; if (osf) window.addEventListener('storage', osf); } }); } catch (e) { }
+    // IndexedDB : bases propres au projet
+    var F = null; try { F = window.indexedDB; } catch (e) { }
+    var dd = F && F.deleteDatabase, dbs = F && F.databases;
+    if (F) {
+        var op = F.open;
+        var mineDB = function (n) { n = String(n || ''); if (n.indexOf('xws.') === 0) return (P && n.indexOf(P) === 0) ? n.slice(P.length) : null; return P ? null : n; };
+        if (P) { F.open = function (n, v) { return (arguments.length > 1 && v !== undefined) ? op.call(F, P + n, v) : op.call(F, P + n); }; F.deleteDatabase = function (n) { return dd.call(F, P + n); }; }
+        if (dbs) F.databases = function () { return dbs.call(F).then(function (a) { return a.map(function (d) { var n = mineDB(d.name); return n == null ? null : { name: n, version: d.version }; }).filter(Boolean); }); };
+    }
+    // canaux de diffusion entre onglets : propres au projet (sauf la file ENCODO, commune)
+    if (P && window.BroadcastChannel) { var BC = window.BroadcastChannel, W = function (n) { return new BC(/^xiii-encodo/.test(String(n)) ? n : P + n); }; W.prototype = BC.prototype; window.BroadcastChannel = W; }
+    var find = function (i) { return reg().list.find(function (w) { return w.id === i; }) || null; };
+    window.XWS = {
+        id: id, prefix: P, colors: COLORS, shell: inShell,
+        list: function () { return reg().list; },
+        meta: function (i) { return find(i || id); },
+        color: function (i) { var w = find(i || id); return (w && w.color) || COLORS[0]; },
+        set: function (i, o) { var r = reg(), w = r.list.find(function (x) { return x.id === i; }); if (!w) return; for (var k in o) w[k] = o[k]; put(r); try { window.dispatchEvent(new CustomEvent('xiii-ws')); } catch (e) { } },
+        create: function (o) { o = o || {}; var r = reg(), used = r.list.map(function (w) { return w.color; }); var c = COLORS.find(function (x) { return used.indexOf(x) < 0; }) || COLORS[r.list.length % COLORS.length];
+            var w = { id: 'w' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), name: o.name || 'Nouveau projet', color: o.color || c, created: Date.now(), fresh: 1 }; r.list.push(w); put(r); return w; },
+        // basculer CETTE page (ou cet onglet) sur un autre projet XIII
+        go: function (i) { var r = reg(); if (!r.list.some(function (w) { return w.id === i; })) return; r.cur = i; put(r);
+            if (inShell) { try { window.top.postMessage({ xtab: { ws: i } }, location.origin); return; } catch (e) { } }
+            try { sessionStorage.setItem(SK, i); } catch (e) { } if (window.name === '' || /^xws:/.test(window.name)) window.name = 'xws:' + i; location.reload(); },
+        // supprimer définitivement un projet XIII (jamais le projet d'origine)
+        remove: function (i) { if (!i || i === 'main') return false; var p = 'xws.' + i + '.'; rkeys().forEach(function (k) { if (k.indexOf(p) === 0) rr(k); });
+            if (dbs) dbs.call(F).then(function (a) { a.forEach(function (d) { if (d.name && d.name.indexOf(p) === 0) dd.call(F, d.name); }); }).catch(function () { });
+            var r = reg(); r.list = r.list.filter(function (w) { return w.id !== i; }); if (r.cur === i) r.cur = 'main'; put(r); return true; },
+        // lire une clé d'un autre projet (ex. sa fiche) sans basculer
+        peek: function (i, k) { return rg((i === 'main' ? '' : 'xws.' + i + '.') + k); }
+    };
+    // hors espace onglets : fin liseré de la couleur du projet en haut de la page (quand il y a plusieurs projets)
+    if (!inShell && window.top === window && R.list.length > 1) {
+        var bar = function () { if (!document.body || document.getElementById('xws-line')) return; var d = document.createElement('div'); d.id = 'xws-line'; d.title = 'Projet XIII : ' + ((find(id) || {}).name || ''); d.style.cssText = 'position:fixed;left:0;right:0;top:0;height:3px;z-index:2147483646;pointer-events:none;background:' + window.XWS.color(); document.body.appendChild(d); };
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bar); else bar();
+    }
+})();
+</script><!-- SUITE XIII:WS:END -->
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>Page introuvable — SUITE XIII</title>
 <style>:root{--bg:#121110;--fg:#f3ede6;--dim:#a39a8f;--acc:#f0b429}@media(prefers-color-scheme:light){:root{--bg:#f4f1ec;--fg:#1d1a17;--dim:#6b635a;--acc:#b9780a}}body{margin:0;min-height:100vh;display:grid;place-items:center;background:var(--bg);color:var(--fg);font:16px/1.5 "Segoe UI",system-ui,sans-serif;padding:16px;text-align:center}h1{font:800 64px/1 "Archivo","Segoe UI",sans-serif;margin:0;color:var(--acc)}p{color:var(--dim)}a{display:inline-block;margin-top:12px;background:var(--acc);color:#1b1406;font-weight:700;text-decoration:none;padding:10px 18px;border-radius:9px}</style><link rel="icon" type="image/png" href="xiii-icon-192.png">
 </head>
 <body><main><h1>404</h1><p>Cette page n'existe pas (ou plus) dans la SUITE XIII.</p><a href="index.html">Retour aux outils</a></main></body></html>
