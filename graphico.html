@@ -6327,7 +6327,7 @@ const XCHARTE = (() => {
     function coverPage(doc, c) {
         doc.insertPage(1); doc.setPage(1);
         const k = doc.internal.scaleFactor, P = v => v / k, W = doc.internal.pageSize.getWidth(), H = doc.internal.pageSize.getHeight(), F = c.font || 'helvetica', dark = c.coverTheme !== 'light', [r, g, b] = rgb(c.color), M = Math.min(W, H) * 0.09;
-        if (dark) { doc.setFillColor(22, 22, 24); doc.rect(0, 0, W, H, 'F'); } doc.setFillColor(r, g, b); doc.rect(0, 0, P(8), H, 'F');
+        if (dark) { doc.setFillColor(22, 22, 24); doc.rect(0, 0, W, H, 'F'); } { const fc = (fiche() || {}).coverB; if (fc && c.coverImg !== false) { try { doc.addImage(fc, 'JPEG', 0, 0, W, Math.min(W * 0.32, H * 0.26)); } catch (e) { } } } doc.setFillColor(r, g, b); doc.rect(0, 0, P(8), H, 'F');
         let y = H * 0.34;
         if (c.L && c.lw && c.lh) { const lh = Math.min(H * 0.1, P(60)), lw = Math.min(W * 0.4, lh * c.lw / c.lh); try { doc.addImage(c.L, /png/i.test(c.L.slice(0, 22)) ? 'PNG' : 'JPEG', M, y - lh - P(28), lw, lh); } catch (e) { } }
         doc.setFont(F, 'bold'); doc.setTextColor(r, g, b); doc.setFontSize(10); if (c.mention) doc.text(c.mention.toUpperCase(), M, y - P(8), { charSpace: 1.5 });
@@ -6341,9 +6341,9 @@ const XCHARTE = (() => {
         let el = document.getElementById('xc-cover'); if (!c || !c.printCover) { if (el) el.remove(); return ''; }
         if (!el) { el = document.createElement('div'); el.id = 'xc-cover'; document.body.insertBefore(el, document.body.firstChild); }
         const dark = c.coverTheme !== 'light', fam = (FONTS.find(f => f[0] === c.font) || FONTS[0])[2];
-        el.innerHTML = '<div class="xcc-bar" style="background:' + c.color + '"></div><div class="xcc-in">' + (c.L ? '<img src="' + c.L + '" style="max-height:22mm;max-width:70mm;object-fit:contain;margin-bottom:10mm">' : '') + (c.mention ? '<div style="color:' + c.color + ';font-weight:700;letter-spacing:.2em;font-size:10pt;margin-bottom:4mm">' + esc(c.mention.toUpperCase()) + '</div>' : '') + '<div style="font-size:34pt;font-weight:800;line-height:1.1">' + esc(c.T || 'Projet') + '</div>' + (c.S ? '<div style="font-size:14pt;opacity:.75;margin-top:3mm">' + esc(c.S) + '</div>' : '') + '<div style="width:22mm;height:1.5pt;background:' + c.color + ';margin:8mm 0"></div>' + coverLines(c).map(t => '<div style="font-size:10.5pt;opacity:.7;margin:1.5mm 0">' + esc(t) + '</div>').join('') + '</div><div class="xcc-ft">' + esc([c.version, today()].filter(Boolean).join('   ·   ')) + '</div>';
+        const fcv = (fiche() || {}).coverB; el.innerHTML = (fcv && c.coverImg !== false ? '<img class="xcc-img" src="' + fcv + '" alt="">' : '') + '<div class="xcc-bar" style="background:' + c.color + '"></div><div class="xcc-in">' + (c.L ? '<img src="' + c.L + '" style="max-height:22mm;max-width:70mm;object-fit:contain;margin-bottom:10mm">' : '') + (c.mention ? '<div style="color:' + c.color + ';font-weight:700;letter-spacing:.2em;font-size:10pt;margin-bottom:4mm">' + esc(c.mention.toUpperCase()) + '</div>' : '') + '<div style="font-size:34pt;font-weight:800;line-height:1.1">' + esc(c.T || 'Projet') + '</div>' + (c.S ? '<div style="font-size:14pt;opacity:.75;margin-top:3mm">' + esc(c.S) + '</div>' : '') + '<div style="width:22mm;height:1.5pt;background:' + c.color + ';margin:8mm 0"></div>' + coverLines(c).map(t => '<div style="font-size:10.5pt;opacity:.7;margin:1.5mm 0">' + esc(t) + '</div>').join('') + '</div><div class="xcc-ft">' + esc([c.version, today()].filter(Boolean).join('   ·   ')) + '</div>';
         el.style.cssText = 'font-family:' + fam + ';background:' + (dark ? '#161618' : '#fff') + ';color:' + (dark ? '#fff' : '#191919');
-        return '#xc-cover{display:none}@media print{#xc-cover{display:block!important;position:relative;height:100vh;page-break-after:always;break-after:page;-webkit-print-color-adjust:exact;print-color-adjust:exact}#xc-cover .xcc-bar{position:absolute;left:0;top:0;bottom:0;width:3mm}#xc-cover .xcc-in{position:absolute;left:18mm;right:15mm;top:30%}#xc-cover .xcc-ft{position:absolute;left:18mm;bottom:12mm;font-size:9pt;opacity:.6}}';
+        return '#xc-cover{display:none}@media print{#xc-cover{display:block!important;position:relative;height:100vh;page-break-after:always;break-after:page;-webkit-print-color-adjust:exact;print-color-adjust:exact}#xc-cover .xcc-bar{position:absolute;left:0;top:0;bottom:0;width:3mm}#xc-cover .xcc-img{position:absolute;left:0;right:0;top:0;width:100%;height:26%;object-fit:cover}#xc-cover .xcc-in{position:absolute;left:18mm;right:15mm;top:30%}#xc-cover .xcc-ft{position:absolute;left:18mm;bottom:12mm;font-size:9pt;opacity:.6}}';
     }
     function patchJsPDF() {
         const J = window.jspdf && window.jspdf.jsPDF; if (J && !window.__jsPDFPristine && !J.__xcWrap) window.__jsPDFPristine = J; if (!J || !J.API || J.API.__xcPatch) return !!J; const A = J.API; A.__xcPatch = 1;
@@ -6608,7 +6608,7 @@ const XPROJET = (() => {
             '<section id="xpj-g"><h3>🧭 Informations globales</h3><div class="xpj-types">' + TYPES.map(t => '<button data-type="' + t[0] + '" class="' + (F.ptype === t[0] ? 'on' : '') + '">' + t[1] + '</button>').join('') + '</div><p class="xpj-dim">Le type règle aussi le modèle de dossier dans <b>📚 DOSSIER</b> (' + esc(((TYPES.find(t => t[0] === F.ptype) || [])[3]) || '—') + ').</p>' + (WS ? '<div class="xpj-wsc"><span>Couleur du projet <small>liseré des onglets</small></span>' + XWS.colors.map(c => '<button data-wsc="' + c + '" title="' + c + '" style="background:' + c + '" class="' + (c.toLowerCase() === String(WC).toLowerCase() ? 'on' : '') + '"></button>').join('') + '<label title="Autre couleur"><input type="color" id="xpj-wscol" value="' + esc(WC) + '"></label></div>' : '') + '<div class="xpj-grid">' +
             I('production', ['Société de production', 'Productions XIII']) + I('client', ['Client / diffuseur', 'France TV, marque…']) + I('realisation', ['Réalisation', 'Prénom Nom']) + I('producteur', ['Direction de production', 'Prénom Nom']) +
             I('debut', ['Début du tournage'], 'date') + I('fin', ['Fin du tournage'], 'date') + I('diffusion', ['Diffusion / événement'], 'date') + I('duree', ['Format / durée', '52 min · 2 h de direct']) +
-            I('contactName', ['Contact production — nom', 'Prénom Nom']) + I('contactPhone', ['Téléphone', '06 00 00 00 00'], 'tel') + I('contactEmail', ['E-mail', 'prod@exemple.fr'], 'email') + '<span></span>' + '<label class="xpj-f w2"><span>Logo</span><span class="xpj-logo" id="xpj-logo">' + (F.logo ? '<img src="' + esc(F.logo) + '">' : 'Choisir une image…') + '</span><input type="file" id="xpj-lf" accept="image/*" hidden></label></div></section>' +
+            I('contactName', ['Contact production — nom', 'Prénom Nom']) + I('contactPhone', ['Téléphone', '06 00 00 00 00'], 'tel') + I('contactEmail', ['E-mail', 'prod@exemple.fr'], 'email') + '<span></span>' + '<label class="xpj-f w2"><span>Logo</span><span class="xpj-logo" id="xpj-logo">' + (F.logo ? '<img src="' + esc(F.logo) + '">' : 'Choisir une image…') + '</span><input type="file" id="xpj-lf" accept="image/*" hidden></label><label class="xpj-f w2"><span>Couverture <small style="opacity:.6">bannière floutée de l\'Accueil et des PDF (sinon le logo)</small></span><span class="xpj-logo xpj-cov" id="xpj-cov">' + (F.cover ? '<img src="' + esc(F.cover) + '"><a href="#" id="xpj-crm" title="Retirer la couverture">✕</a>' : 'Choisir une image…') + '</span><input type="file" id="xpj-cf" accept="image/*" hidden></label></div></section>' +
             // ----- lieux
             '<section id="xpj-l"><h3>📍 Lieux <small class="xpj-dim">— ajoutés à chaque journée de CALL SHEETO et aux lieux à repérer de REPERO</small></h3><div class="xpj-grid">' + I('lieu', ['Lieu principal', 'Tapez un nom de lieu…']) + I('adresse', ['Adresse (recherche automatique comme dans REPERO)', 'Tapez une adresse ou un lieu, puis choisissez'], 'text', 'w3') + (F.lat ? '<p class="xpj-dim w4" style="grid-column:1/-1;margin:0">📍 ' + (+F.lat).toFixed(5) + ', ' + (+F.lon).toFixed(5) + ' — position reprise par CALL SHEETO (météo, hôpital) et REPERO</p>' : '') + '<label class="xpj-f w4"><span>Accès & infos pratiques</span><textarea data-k="acces" placeholder="Parking, quai de déchargement, codes…">' + esc(F.acces) + '</textarea></label></div>' +
             '<div class="xpj-sub">Autres lieux</div><table class="xpj-t">' + F.locs.map((l, i) => '<tr data-li="' + i + '"><td><input data-lk="name" value="' + esc(l.name) + '" placeholder="Nom (décor, base régie…)"></td><td><input data-lk="address" value="' + esc(l.address) + '" placeholder="Adresse"></td><td><input data-lk="note" value="' + esc(l.note) + '" placeholder="Note"></td><td><button data-ldel="' + i + '">✕</button></td></tr>').join('') + '</table><button id="xpj-ladd" class="xpj-sm">＋ Lieu</button></section>' +
@@ -6636,6 +6636,10 @@ const XPROJET = (() => {
         qa('[data-k]').forEach(i => i.addEventListener('input', () => { set(i.dataset.k, i.value); if (i.dataset.k === 'title') qa('[data-name]').forEach(n => n.placeholder = i.value || 'Nom du projet'); }));
         qa('[data-type]').forEach(b => b.onclick = () => { F.ptype = b.dataset.type; F.genre = TYPES.find(t => t[0] === F.ptype)[2]; F.dtype = TYPES.find(t => t[0] === F.ptype)[3]; redraw(); });
         q('#xpj-logo').onclick = () => q('#xpj-lf').click();
+        q('#xpj-cov').onclick = e => { if (e.target.id === 'xpj-crm') { e.preventDefault(); e.stopPropagation(); delete F.cover; delete F.coverB; q('#xpj-cov').textContent = 'Choisir une image…'; return; } q('#xpj-cf').click(); };
+        q('#xpj-cf').onchange = e => { const f = e.target.files[0]; if (!f) return; const r = new FileReader(); r.onload = () => { const im = new Image(); im.onload = () => { const k = Math.min(1, 600 / im.height, 1400 / im.width), c = document.createElement('canvas'); c.width = Math.round(im.width * k); c.height = Math.round(im.height * k); c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); F.cover = c.toDataURL('image/jpeg', .8);
+            const b = document.createElement('canvas'), w = 900, h = Math.round(w * .32); b.width = w; b.height = h; const x = b.getContext('2d'), s2 = Math.max(w / im.width, h / im.height) * 1.15, dw = im.width * s2, dh = im.height * s2; x.filter = 'blur(16px) saturate(1.2)'; x.drawImage(im, (w - dw) / 2, (h - dh) / 2, dw, dh); x.filter = 'none'; const g = x.createLinearGradient(0, 0, 0, h); g.addColorStop(0, 'rgba(10,8,6,.25)'); g.addColorStop(1, 'rgba(10,8,6,.62)'); x.fillStyle = g; x.fillRect(0, 0, w, h); F.coverB = b.toDataURL('image/jpeg', .75);
+            q('#xpj-cov').innerHTML = '<img src="' + F.cover + '"><a href="#" id="xpj-crm" title="Retirer la couverture">✕</a>'; }; im.src = r.result; }; r.readAsDataURL(f); };
         q('#xpj-lf').onchange = e => { const f = e.target.files[0]; if (!f) return; const r = new FileReader(); r.onload = () => { const im = new Image(); im.onload = () => { const k = Math.min(1, 300 / im.height, 800 / im.width), c = document.createElement('canvas'); c.width = Math.round(im.width * k); c.height = Math.round(im.height * k); c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); F.logo = c.toDataURL('image/png'); q('#xpj-logo').innerHTML = '<img src="' + F.logo + '">'; }; im.src = r.result; }; r.readAsDataURL(f); };
         const rows = (attr, arr, key) => qa('[data-' + attr + ']').forEach(tr => { const o = arr[+tr.dataset[attr]]; tr.querySelectorAll('[data-' + key + ']').forEach(i => i.addEventListener(i.tagName === 'SELECT' ? 'change' : 'input', () => { o[i.dataset[key]] = i.type === 'number' ? (+i.value || 1) : i.value; if (key === 'tk' && i.dataset.tk === 'role') { const d = tr.querySelector('[data-tk=dept]'); if (d && !o._deptSet) { o.dept = deptOf(i.value); d.value = o.dept; } } if (key === 'tk' && i.dataset.tk === 'dept') o._deptSet = 1; })); });
         rows('li', F.locs, 'lk');
@@ -6852,7 +6856,7 @@ const XPROJET = (() => {
             '.xpj-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px 14px}.xpj-f{display:flex;flex-direction:column;gap:4px;min-width:0}.xpj-f>span{font-size:11.5px;color:var(--text-dim,#aaa)}.xpj-f.w2{grid-column:span 2}.xpj-f.w3{grid-column:span 3}.xpj-f.w4{grid-column:1/-1}' +
             '.xpj-box input,.xpj-box textarea,.xpj-t select,.xpj-f select{width:100%;box-sizing:border-box;background:var(--bg-input,#17171a);color:inherit;border:1px solid var(--border-color,#45454b);border-radius:6px;padding:7px 9px;font:inherit}.xpj-box textarea{min-height:60px;resize:vertical}' +
             '.xpj-types{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:6px}.xpj-types button{padding:9px 14px;font-size:14px}.xpj-types button.on{border-color:rgb(240,179,120);background:rgba(240,179,120,.28);font-weight:700}' +
-            '.xpj-logo{display:flex;align-items:center;justify-content:center;height:46px;border:1px dashed var(--border-color,#555);border-radius:6px;cursor:pointer;background:#fff;color:#888;font-size:12px;overflow:hidden}.xpj-logo img{max-height:42px;max-width:100%}' +
+            '.xpj-logo{display:flex;align-items:center;justify-content:center;height:46px;border:1px dashed var(--border-color,#555);border-radius:6px;cursor:pointer;background:#fff;color:#888;font-size:12px;overflow:hidden}.xpj-logo img{max-height:42px;max-width:100%}.xpj-cov{position:relative;background:#222!important}.xpj-cov img{max-height:46px!important;width:100%;object-fit:cover}.xpj-cov a{position:absolute;top:3px;right:5px;color:#fff;text-decoration:none;font-size:12px;background:rgba(0,0,0,.5);border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center}' +
             '.xpj-t{width:100%;border-collapse:collapse}.xpj-t th{text-align:left;font-size:11px;color:var(--text-dim,#999);font-weight:600;padding:4px}.xpj-t td{padding:3px 4px}.xpj-t button{padding:5px 9px}.xpj-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}' +
             '.xpj-chips{display:flex;flex-wrap:wrap;gap:6px}.xpj-chips label{display:inline-flex;gap:6px;align-items:center;border:1px solid var(--border-color,#45454b);border-radius:99px;padding:4px 10px;cursor:pointer;font-size:12.5px}.xpj-chips label.on{border-color:rgb(240,179,120);background:rgba(240,179,120,.18)}.xpj-chips input{width:auto!important}.xpj-chips small{color:var(--text-dim,#999)}' +
             '#xpj-pick{position:absolute;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;z-index:2}.xpj-pk{width:min(520px,92%);max-height:80%;display:flex;flex-direction:column;gap:8px;background:var(--bg-menu,#26262b);border:1px solid var(--border-color,#555);border-radius:10px;padding:16px}#xpj-pl{overflow:auto;display:flex;flex-direction:column;gap:2px}#xpj-pl label{display:flex;gap:8px;align-items:center;padding:4px}#xpj-pl input{width:auto}' +
@@ -7991,7 +7995,7 @@ const XCONF = (() => {
     async function put(rec) { try { const d = await db(), old = await list(), tx = d.transaction('f', 'readwrite'), st = tx.objectStore('f'); old.filter(x => x.name === rec.name && x.app === rec.app).forEach(x => st.delete(x.id)); st.put(rec); old.filter(x => !(x.name === rec.name && x.app === rec.app)).slice(MAXF - 1).forEach(x => st.delete(x.id)); try { window.dispatchEvent(new CustomEvent('xiii-files')); localStorage.setItem('xiii.files.ping', String(Date.now())); } catch (e) { } } catch (e) { } }
     async function remove(id) { try { const d = await db(); d.transaction('f', 'readwrite').objectStore('f').delete(id); } catch (e) { } }
     let lastCap = '';
-    function capture(a) { try { const href = a.href || '', name = a.getAttribute('download') || ''; if (!name || !/^(blob:|data:)/.test(href)) return; const k = href + '|' + name; if (k === lastCap) return; lastCap = k; setTimeout(() => { if (lastCap === k) lastCap = ''; }, 1500);
+    function capture(a) { try { const href = a.href || '', name = a.getAttribute('download') || ''; if (!name || !/^(blob:|data:)/.test(href)) return; try { window.dispatchEvent(new CustomEvent('xiii-file', { detail: { name } })); } catch (e) { } const k = href + '|' + name; if (k === lastCap) return; lastCap = k; setTimeout(() => { if (lastCap === k) lastCap = ''; }, 1500);
         fetch(href).then(r => r.blob()).then(b => { if (!b || b.size > MAXB || b.size < 20) return; put({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), name, app: APP, at: Date.now(), size: b.size, type: b.type || '', blob: b }); }).catch(() => { }); } catch (e) { } }
     function hookDownloads() {
         const A = HTMLAnchorElement.prototype, c0 = A.click, d0 = A.dispatchEvent;
@@ -8062,6 +8066,158 @@ const XCONF = (() => {
 })();
 
 XCONF.init('graphico');
+
+// =====================================================================
+//  SUITE XIII — XGLOW : design glassglow commun (Phase AC)
+//  • barre d'outils en verre orangé, action principale en pilule orange
+//  • panneaux latéraux identiques (Démarrer, ⚙️, passerelles) : même verre, même pilule, indicateur glissant
+//  • mode clair « papier chaud » (verre beige, lueur ambre)
+//  • icônes maison au trait fin à la place des émojis dans les barres d'outils (désactivable dans « ? »)
+//  • progression lumineuse : signale au bandeau d'onglets les exports en cours (barre orange sous l'onglet)
+// =====================================================================
+const XGLOW = (() => {
+    const SK = ['w2k', 'xp', 'cyber', 'rainbow', 'mac9', 'term', 'sepia', 'regie', 'soleil', 'gb'].map(k => ':not(.x' + k + ')').join('');
+    const D = 'body' + SK + ':not(.light-theme)', L = 'body' + SK + '.light-theme', A = 'body' + SK;
+    const KI = 'xiii.ux.icons';
+    const tb = s => s.split(',').map(x => x.trim()).map(x => [D + ' #top-bar ' + x, D + ' #toolbar ' + x]).flat().join(',');
+    const tbL = s => s.split(',').map(x => x.trim()).map(x => [L + ' #top-bar ' + x, L + ' #toolbar ' + x]).flat().join(',');
+    const CSS =
+        // — barre d'outils : verre orangé —
+        D + ' #top-bar,' + D + ' #toolbar{background:linear-gradient(180deg,rgba(255,138,61,.11),rgba(240,180,41,.025) 70%),rgba(18,15,13,.84)!important;border-bottom:1px solid rgba(240,180,41,.22)!important;box-shadow:0 1px 0 rgba(240,180,41,.18),0 10px 30px rgba(0,0,0,.28),0 0 40px rgba(240,180,41,.06)!important}' +
+        // — action principale en pilule orange —
+        [D, L].map(x => x + ' #top-bar button.xgl-pri,' + x + ' #toolbar button.xgl-pri').join(',') + ',' + A + ' .xgl-pri{border-radius:999px!important;background:linear-gradient(135deg,#f0b429,#ff8a3d)!important;color:#1a1206!important;border:1px solid rgba(255,200,120,.9)!important;font-weight:700!important;box-shadow:0 0 18px rgba(240,180,41,.38),0 2px 8px rgba(0,0,0,.25)!important;padding-left:14px!important;padding-right:14px!important}' +
+        [D, L].map(x => x + ' #top-bar button.xgl-pri:hover,' + x + ' #toolbar button.xgl-pri:hover').join(',') + ',' + A + ' .xgl-pri:hover{filter:brightness(1.08);box-shadow:0 0 26px rgba(240,180,41,.55),0 2px 8px rgba(0,0,0,.25)!important}' + A + ' .xgl-pri *{color:#1a1206!important}' +
+        // — icônes maison —
+        '.xgl-e{display:none!important}svg.xgl-ic{width:1.15em;height:1.15em;vertical-align:-.2em;flex:0 0 auto;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;margin-right:.15em}' +
+        tb('button:hover svg.xgl-ic') + '{stroke:#ffcf5c;filter:drop-shadow(0 0 4px rgba(240,180,41,.6))}' +
+        // — mode clair « papier chaud » —
+        L + '{--xgl-paper:#f3ead9}' +
+        L + ' #top-bar,' + L + ' #toolbar{background:linear-gradient(180deg,rgba(255,250,240,.9),rgba(246,236,218,.82))!important;border-bottom:1px solid rgba(176,120,30,.22)!important;box-shadow:0 1px 0 rgba(255,255,255,.7) inset,0 8px 26px rgba(150,100,20,.10),0 0 34px rgba(230,160,40,.10)!important}' +
+        tbL('button,select') + '{background:rgba(255,248,236,.75)!important;border:1px solid rgba(176,120,30,.22)!important;color:#3a2a14!important}' +
+        tbL('button:hover') + '{background:rgba(240,180,41,.18)!important;border-color:rgba(201,133,0,.6)!important;box-shadow:0 0 14px rgba(230,160,40,.28)!important}' +
+        L + ' #top-bar button.xgl-pri,' + L + ' #toolbar button.xgl-pri{color:#2a1a04!important}' +
+        'body.light-theme #xst{--xh-glass:rgba(250,243,230,.88);--xh-line:rgba(150,100,20,.18);--xh-txt:#2a2016;--xh-dim:#7a6a55}body.light-theme #xst-b{--xh-glass:rgba(250,243,230,.85);--xh-line:rgba(150,100,20,.22);--xh-txt:#2a2016}' +
+        // — panneaux latéraux identiques : ⚙️ (#xs-panel) aligné sur Démarrer —
+        A + ' #xs-panel{background:linear-gradient(180deg,rgba(255,138,61,.06),transparent 30%),rgba(20,18,16,.86)!important;backdrop-filter:blur(22px) saturate(1.4);-webkit-backdrop-filter:blur(22px) saturate(1.4);border:1px solid rgba(255,255,255,.12)!important;border-radius:26px 0 0 26px!important;box-shadow:0 20px 60px rgba(0,0,0,.45),0 0 40px rgba(240,180,41,.07)!important;overflow:hidden}' +
+        'body.light-theme' + SK.replace(/:not\(\.xsoleil\)/, '') + ' #xs-panel{background:linear-gradient(180deg,rgba(240,180,41,.10),transparent 30%),rgba(250,243,230,.92)!important;border-color:rgba(150,100,20,.18)!important;color:#2a2016!important}' +
+        A + ' #xs-panel .xs-seg{position:relative;border-radius:999px!important;padding:3px!important;gap:2px;background:rgba(127,127,127,.12)!important;border:1px solid rgba(127,127,127,.18)!important;overflow:hidden}' +
+        A + ' #xs-panel .xs-seg button{position:relative;z-index:1;border-radius:999px!important;border:0!important;background:transparent!important;transition:color .25s}' +
+        A + ' #xs-panel .xs-seg button.on{color:#1a1206!important;background:transparent!important}' +
+        A + ' #xs-panel .xs-seg .xgl-ind{position:absolute;z-index:0;top:3px;bottom:3px;border-radius:999px;background:linear-gradient(135deg,#f0b429,#ff8a3d);box-shadow:0 0 16px rgba(240,180,41,.45);transition:left .3s cubic-bezier(.2,.8,.2,1),width .3s cubic-bezier(.2,.8,.2,1)}' +
+        A + ' #xs-panel .xs-seg:not(:has(.xgl-ind)) button.on{background:linear-gradient(135deg,#f0b429,#ff8a3d)!important}' +
+        A + ' #xs-panel .xs-btn{border-radius:999px!important}' + A + ' #xs-panel .xs-sec{border-radius:16px!important}' +
+        // — passerelles : bandeau et menu au même verre —
+        A + ' #xps-ban{background:linear-gradient(135deg,rgba(255,138,61,.14),rgba(240,180,41,.05)),rgba(20,18,16,.86)!important;backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);border:1px solid rgba(240,180,41,.45)!important;border-radius:18px!important;box-shadow:0 14px 40px rgba(0,0,0,.4),0 0 30px rgba(240,180,41,.15)!important;color:#f3ede6!important}' +
+        A + ' #xps-ban button{border-radius:999px!important}' + A + ' #xps-ok{background:linear-gradient(135deg,#f0b429,#ff8a3d)!important;color:#1a1206!important;border:0!important;font-weight:700!important}' +
+        // — Démarrer : un widget par ligne —
+        '#xst .xd-g{display:flex!important;flex-direction:column!important;gap:10px!important}#xst .xd-g>*{width:100%!important;align-self:stretch!important;box-sizing:border-box;max-width:100%!important;grid-column:auto!important;min-width:0}' +
+        // — fiche « ? » —
+        '.xgl-x h4{margin:14px 0 6px}';
+
+    // ---- icônes maison (trait fin, 24×24) ----
+    const P = {
+        doc: '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/>',
+        save: '<path d="M5 3h11l3 3v13a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2z"/><path d="M8 3v5h7V3M8 21v-6h8v6"/>',
+        folder: '<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
+        down: '<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>', up: '<path d="M12 20V9M7 14l5-5 5 5M5 4h14"/>',
+        share: '<path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7M12 3v12M8 7l4-4 4 4"/>',
+        print: '<path d="M7 9V3h10v6M7 17H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2"/><path d="M7 14h10v7H7z"/>',
+        gear: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-2.7 1.1V21a2 2 0 1 1-4 0v-.1a1.6 1.6 0 0 0-2.7-1.1l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.6 1.6 0 0 0 3.6 14H3a2 2 0 1 1 0-4h.1a1.6 1.6 0 0 0 1.1-2.7l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.6 1.6 0 0 0 10 3.6V3a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 2.7 1.1l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0 1.1 2.7H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1.3z"/>',
+        search: '<circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/>', plus: '<path d="M12 5v14M5 12h14"/>',
+        trash: '<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>', edit: '<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/>',
+        eye: '<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+        clip: '<rect x="6" y="4" width="12" height="17" rx="2"/><path d="M9 4h6v3H9zM9 12h6M9 16h4"/>',
+        link: '<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>',
+        cloud: '<path d="M7 18a4.5 4.5 0 0 1-.6-9A6 6 0 0 1 18 9.5a4.3 4.3 0 0 1-.5 8.5z"/>',
+        undo: '<path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/>', redo: '<path d="M15 14l5-5-5-5"/><path d="M20 9H10a6 6 0 0 0 0 12h3"/>',
+        clock: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3 2"/>', cal: '<rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/>',
+        palette: '<path d="M12 3a9 9 0 1 0 0 18c1 0 1.5-.8 1.5-1.6 0-1.1-.9-1.4-.9-2.4 0-.9.7-1.5 1.6-1.5H17a4 4 0 0 0 4-4C21 6.6 17 3 12 3z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10" cy="7" r="1"/><circle cx="15" cy="7.5" r="1"/>',
+        cam: '<path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.5"/>',
+        img: '<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.8"/><path d="M21 16l-5-5-9 9"/>',
+        cut: '<circle cx="6" cy="7" r="2.5"/><circle cx="6" cy="17" r="2.5"/><path d="M8 8.5L20 17M8 15.5L20 7"/>',
+        lock: '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
+        chart: '<path d="M4 20V10M10 20V4M16 20v-7M2 20h20"/>', mail: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>',
+        play: '<path d="M7 4l13 8-13 8z"/>', pause: '<path d="M8 4v16M16 4v16"/>', stop: '<rect x="5" y="5" width="14" height="14" rx="2"/>',
+        refresh: '<path d="M20 11a8 8 0 0 0-14.6-4.5L4 8M4 4v4h4M4 13a8 8 0 0 0 14.6 4.5L20 16M20 20v-4h-4"/>',
+        help: '<circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14M12 17.5v.01"/>',
+        home: '<path d="M3 11l9-7 9 7M5 9.5V20h5v-6h4v6h5V9.5"/>', users: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6 6 0 0 1 3.5 6"/>',
+        box: '<path d="M3 7.5L12 3l9 4.5v9L12 21l-9-4.5z"/><path d="M3 7.5l9 4.5 9-4.5M12 12v9"/>',
+        clap: '<path d="M3 10h18v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/><path d="M3 10l1.5-5.5 16 3L21 10M8 5l2 4.5M13.5 6l2 4"/>',
+        mic: '<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>', light: '<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9V16h7v-2.1A6 6 0 0 0 12 3z"/>',
+        list: '<path d="M9 6h11M9 12h11M9 18h11M4.5 6v.01M4.5 12v.01M4.5 18v.01"/>', grid: '<rect x="4" y="4" width="7" height="7" rx="1"/><rect x="13" y="4" width="7" height="7" rx="1"/><rect x="4" y="13" width="7" height="7" rx="1"/><rect x="13" y="13" width="7" height="7" rx="1"/>',
+        bell: '<path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 21h4"/>', star: '<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/>',
+        bolt: '<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>', check: '<path d="M4 12.5l5 5L20 6.5"/>', x: '<path d="M6 6l12 12M18 6L6 18"/>', pin: '<path d="M12 21s7-6.3 7-12a7 7 0 0 0-14 0c0 5.7 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/>'
+    };
+    const M = { '📄': 'doc', '📕': 'doc', '🧾': 'doc', '📃': 'doc', '📝': 'edit', '💾': 'save', '📂': 'folder', '📁': 'folder', '🗂': 'folder', '⬇': 'down', '📥': 'down', '⬆': 'up', '📤': 'share', '🖨': 'print', '⚙': 'gear', '🔍': 'search', '🔎': 'search', '➕': 'plus', '＋': 'plus', '🗑': 'trash', '✏': 'edit', '🖊': 'edit', '👁': 'eye', '📋': 'clip', '🔗': 'link', '☁': 'cloud', '↶': 'undo', '↩': 'undo', '↷': 'redo', '↪': 'redo', '🕘': 'clock', '🕑': 'clock', '⏱': 'clock', '📅': 'cal', '📆': 'cal', '🗓': 'cal', '🎨': 'palette', '📷': 'cam', '📸': 'cam', '🖼': 'img', '✂': 'cut', '🔒': 'lock', '📊': 'chart', '📈': 'chart', '✉': 'mail', '📧': 'mail', '▶': 'play', '⏸': 'pause', '⏹': 'stop', '🔄': 'refresh', '🔃': 'refresh', '❓': 'help', '🏠': 'home', '👥': 'users', '📦': 'box', '🎬': 'clap', '🎙': 'mic', '🎤': 'mic', '💡': 'light', '☰': 'list', '📑': 'list', '▦': 'grid', '🔔': 'bell', '⭐': 'star', '⚡': 'bolt', '✅': 'check', '✔': 'check', '📍': 'pin' };
+    const RX = new RegExp('^(\\s*)(' + Object.keys(M).map(k => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).sort((a, b) => b.length - a.length).join('|') + ')(\\uFE0F)?\\s?');
+    const svg = k => '<svg class="xgl-ic" viewBox="0 0 24 24" aria-hidden="true">' + P[k] + '</svg>';
+    const iconsOn = () => { try { return localStorage.getItem(KI) !== '0'; } catch (e) { return true; } };
+    function iconize(root) {
+        if (!iconsOn()) return;
+        (root || document).querySelectorAll('#top-bar button,#toolbar button,#top-bar a,#toolbar a,#top-bar label,#toolbar label').forEach(b => {
+            if (b.closest('#xst')) return;
+            const w = document.createTreeWalker(b, NodeFilter.SHOW_TEXT); let n, done = 0;
+            while (!done && (n = w.nextNode())) {
+                if (!n.nodeValue.trim()) continue; done = 1; if (n.parentNode.classList && n.parentNode.classList.contains('xgl-e')) break;
+                const m = RX.exec(n.nodeValue); if (!m) break; const k = M[m[2]]; if (!k) break;
+                const s = document.createElement('span'); s.className = 'xgl-e'; s.textContent = m[2] + (m[3] || '');
+                const t = document.createElement('template'); t.innerHTML = svg(k);
+                const rest = n.nodeValue.slice(m[0].length); n.nodeValue = (rest ? ' ' : '') + rest;
+                n.parentNode.insertBefore(s, n); n.parentNode.insertBefore(t.content.firstChild, n); if (!rest.trim()) n.nodeValue = '';
+            }
+        });
+    }
+
+    // ---- action principale ----
+    const PRI = /^\s*(\S+\s+)?(exporter|export|pdf|générer|generer|enregistrer|sauvegarder|imprimer|lancer|convertir|publier|envoyer)\b/i;
+    function primary() {
+        const cur = document.querySelector('.xgl-pri'), xe = document.getElementById('xb-exp');
+        if (cur && (cur === xe || (!xe && cur.offsetParent !== null))) return;
+        const vis = x => x.offsetParent !== null && !x.closest('#xst,[class*=menu],[class*=drop],[id*=menu]');
+        const all = [...document.querySelectorAll('#top-bar button,#toolbar button')].filter(vis);
+        const b = document.querySelector('#xb-exp') || all.find(x => x.matches('.primary,.btn-primary,.btn-main,[data-primary]')) || all.find(x => PRI.test(x.textContent || '') && !/^\W*$/.test(x.textContent)) || all.find(x => /^\s*(exporter|export)\b/i.test(x.title || ''));
+        if (b && b !== cur) { if (cur) cur.classList.remove('xgl-pri'); b.classList.add('xgl-pri'); }
+    }
+
+    // ---- indicateur glissant des sélecteurs du panneau ⚙️ ----
+    function slide(seg) {
+        let ind = seg.querySelector(':scope>.xgl-ind'); const on = seg.querySelector(':scope>button.on');
+        if (!ind) { ind = document.createElement('span'); ind.className = 'xgl-ind'; seg.prepend(ind); if (getComputedStyle(seg).position === 'static') seg.style.position = 'relative'; }
+        if (!on) { ind.style.width = '0'; return; } ind.style.left = on.offsetLeft + 'px'; ind.style.width = on.offsetWidth + 'px';
+    }
+    function panels() { document.querySelectorAll('#xs-panel .xs-seg').forEach(s => { try { slide(s); } catch (e) { } }); }
+
+    // ---- progression lumineuse (vers le bandeau d'onglets) ----
+    let bt = 0;
+    const post = p => { try { if (window.__xtshell === undefined && window.parent !== window) window.parent.postMessage({ xtbusy: p }, '*'); } catch (e) { } };
+    function busy(on, pct) { clearTimeout(bt); post(on ? (pct == null ? -1 : Math.max(0, Math.min(100, pct))) : null); if (on) bt = setTimeout(() => post(null), 15000); }
+    const EXP = /(export|pdf|générer|generer|imprimer|convertir|télécharger|telecharger|\.xlsx|excel|zip)/i;
+
+    // ---- fiche « ? » : icônes maison / émojis ----
+    function sheet(o) {
+        if (!o || o.querySelector('.xgl-x')) return; const box = o.firstElementChild || o, on = iconsOn();
+        const d = document.createElement('div'); d.className = 'xgl-x';
+        d.innerHTML = '<h4>✏️ Icônes des barres d\'outils</h4><div class="seg"><button data-i="1" class="' + (on ? 'on' : '') + '">Icônes maison (trait fin)</button><button data-i="0" class="' + (on ? '' : 'on') + '">Émojis</button></div>';
+        d.onclick = e => { const v = e.target.dataset.i; if (v == null) return; try { localStorage.setItem(KI, v); } catch (x) { } d.querySelectorAll('[data-i]').forEach(x => x.classList.toggle('on', x === e.target)); if (v === '1') iconize(); else document.querySelectorAll('.xgl-e').forEach(s => { const g = s.nextSibling; if (g && g.classList && g.classList.contains('xgl-ic')) g.remove(); s.replaceWith(document.createTextNode(s.textContent + ' ')); }); };
+        box.appendChild(d);
+    }
+
+    function init(app) {
+        const go = () => {
+            const st = document.createElement('style'); st.id = 'xgl-css'; st.textContent = CSS; document.head.appendChild(st);
+            let t = 0; const tick = () => { clearTimeout(t); t = setTimeout(() => { try { iconize(); primary(); panels(); } catch (e) { } }, 120); };
+            tick(); setTimeout(tick, 1200);
+            new MutationObserver(m => { for (let i = 0; i < Math.min(m.length, 40); i++) { const r = m[i]; const el = r.target.nodeType === 1 ? r.target : r.target.parentNode; if (el && el.closest && (el.closest('#top-bar,#toolbar,#xs-panel') || [...r.addedNodes].some(n => n.id === 'xs-ov' || n.id === 'xs-panel'))) { tick(); break; } } const o = document.getElementById('xux-ov'); if (o) sheet(o); }).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
+            document.addEventListener('click', e => { const b = e.target.closest && e.target.closest('button,a'); if (!b) return; if (b.closest('#xs-panel .xs-seg')) setTimeout(panels, 0); const l = (b.textContent || '') + ' ' + (b.title || ''); if (b.closest('#top-bar,#toolbar,.xpv-box,[id*=export],[class*=export]') && EXP.test(l)) busy(true); }, true);
+            window.addEventListener('xiii-file', () => busy(false)); window.addEventListener('afterprint', () => busy(false));
+            const wp = window.print; if (wp && !wp.__xgl) { const f = function () { busy(false); return wp.apply(this, arguments); }; f.__xgl = 1; window.print = f; }
+        };
+        if (document.body) go(); else document.addEventListener('DOMContentLoaded', go);
+    }
+    return { init, busy, iconize, icon: k => P[k] ? svg(k) : '' };
+})();
+
+XGLOW.init('graphico');
 
 // =====================================================================
 //  SUITE XIII — XENC : suivi des conversions ENCODO depuis tous les outils
