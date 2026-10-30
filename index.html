@@ -6118,7 +6118,7 @@ const XSTART = (() => {
         const out = [], job = J('xiii.encodo.job', null);
         if (job && job.name) out.push('<a class="r" href="encodo.html"><span>🔄 ENCODO — ' + esc(job.name) + '</span><small>' + (job.done ? '✅ Terminé' : (job.pct || 0) + ' %') + '</small></a>');
         c.innerHTML = out.join('') + '<p class="e">Chargement…</p>';
-        const [m, l] = await Promise.all([api('msg_list'), api('log')]);
+        const [m, l] = await Promise.all([api('msg_list'), api('log')]); if (tab !== 'notif' || !c.isConnected) return; // l'utilisateur a changé d'onglet entre-temps : ne rien écraser
         if (m.ok) (m.msgs || []).filter(x => !x.lu).slice(0, 8).forEach(x => out.push('<div class="r new"><span>💬 <b>' + esc(x.nom) + '</b> : ' + esc(x.txt) + '</span><small>' + dt(x.ts) + '</small></div>'));
         if (l.ok) (l.log || []).filter(x => !/^(projet_cfg|dossier_pub|kiosk_cfg)$/.test(x.app)).slice(0, 8).forEach(x => out.push('<a class="r" href="' + esc(x.app) + '.html"><span>📄 ' + esc(nm(x.app)) + ' enregistré</span><small>' + esc(x.by || '') + ' · ' + dt(x.ts) + '</small></a>'));
         if (!m.ok && !l.ok) out.push('<p class="e">Drive non connecté : seules les notifications locales s\'affichent.</p>');
@@ -6126,7 +6126,7 @@ const XSTART = (() => {
     }
     async function chat(c) {
         c.innerHTML = '<div class="ch"><input id="xst-in" placeholder="Message à l\'équipe…"><button id="xst-go">Envoyer</button></div><div id="xst-ml"><p class="e">Chargement…</p></div>';
-        const draw = async () => { const r = await api('msg_list'), b = c.querySelector('#xst-ml'); if (!b) return; if (!r.ok) { b.innerHTML = '<p class="e">' + (r.err === 'off' ? 'Connectez le Drive d\'équipe (Réglages → Gestion d\'équipe) pour discuter.' : '⚠️ Drive injoignable') + '</p>'; return; }
+        const draw = async () => { const r = await api('msg_list'), b = c.querySelector('#xst-ml'); if (!b || tab !== 'chat') return; if (!r.ok) { b.innerHTML = '<p class="e">' + (r.err === 'off' ? 'Connectez le Drive d\'équipe (Réglages → Gestion d\'équipe) pour discuter.' : '⚠️ Drive injoignable') + '</p>'; return; }
             const L = r.msgs || []; b.innerHTML = L.length ? L.slice(0, 30).map(m => '<div class="r' + (m.lu ? '' : ' new') + '"><span><b>' + esc(m.nom) + '</b> : ' + esc(m.txt) + '</span><small>' + dt(m.ts) + '</small></div>').join('') : '<p class="e">Aucun message.</p>';
             L.filter(m => !m.lu).forEach(m => api('msg_read', { ts: m.ts })); unread = 0; badge(); };
         const send = async () => { const i = c.querySelector('#xst-in'), t = i.value.trim(); if (!t) return; const r = await api('msg_send', { txt: t }); if (r.ok) { i.value = ''; draw(); } else if (typeof toast === 'function') toast('⚠️ ' + (r.err || 'Envoi impossible')); };
