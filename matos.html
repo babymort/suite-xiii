@@ -439,8 +439,9 @@ body.light-theme #dev-credit { color: #555; text-shadow: none; }
 .ps-stats{margin-left:auto;font-size:12.5px;color:var(--text-dim);display:flex;gap:14px;flex-wrap:wrap}.ps-stats b{color:var(--text-main)}.ps-stats .bad{color:var(--danger)}
 
 #mt-cat{display:block;width:100%;height:calc(100vh - 150px);border:0;border-radius:10px}body.mt-cat #content{padding:6px!important;max-width:none!important}
+.pm-h{margin:18px 0 6px;font-size:15px}.pm-t input:not([type=checkbox]),.pm-t select{background:var(--bg-input,rgba(0,0,0,.2));color:inherit;border:1px solid var(--border);border-radius:6px;padding:5px 7px}.pm-t td{vertical-align:middle}
+.modal-box.wide{max-width:820px;width:94vw}
 </style>
-<link rel="icon" type="image/png" href="xiii-icon-192.png">
 </head>
 <body>
 <div id="top-bar">
@@ -457,6 +458,7 @@ body.light-theme #dev-credit { color: #555; text-shadow: none; }
 <div id="toolbar">
     <span class="btn-group" id="view-group">
         <button data-view="parc" onclick="setView('parc')" title="Matos perso : le parc de la société (1)"><span class="btn-icon">📦</span><span class="btn-label keep">Matos perso</span></button>
+        <button data-view="proj" onclick="setView('proj')" title="Matériel du projet en cours (6)"><span class="btn-icon">🎬</span><span class="btn-label keep">Matériel du projet</span></button>
         <button data-view="cat" onclick="setView('cat')" title="Catalogue générique : base des équipements de la suite (5)"><span class="btn-icon">🗃️</span><span class="btn-label keep">Catalogue</span></button>
         <button data-view="resa" onclick="setView('resa')" title="Réservations par projet (2)"><span class="btn-icon">📅</span><span class="btn-label keep">Réservations</span></button>
         <button data-view="plan" onclick="setView('plan')" title="Planning d'occupation (3)"><span class="btn-icon">🗓️</span><span class="btn-label keep">Planning</span></button>
@@ -1120,10 +1122,18 @@ const XCAT = (() => {
     function base() {
         if (BASE) return BASE; if (typeof SYNODB === 'undefined') return [];
         const CN = {}; SYNODB.CATS.forEach(c => CN[c.id] = c.name);
-        return (BASE = SYNODB.LIST.map(e => ({ id: e.id, cat: e.c === 'disp' && /proj|vidéoproj|videoproj/i.test(e.name) ? 'mon' : (BMAP[e.c] || 'div'), brand: e.b, model: e.m, kg: '', w: '', price: '', inp: (e.i || []).join('; '), outp: (e.o || []).join('; '), sn: '', tags: CN[e.c] || '', notes: e.n || '', base: 1 })));
+        return (BASE = SYNODB.LIST.filter(e => !e.feed).map(e => ({ id: e.id, cat: e.c === 'disp' && /proj|vidéoproj|videoproj/i.test(e.name) ? 'mon' : (BMAP[e.c] || 'div'), brand: e.b, model: e.m, kg: '', w: '', price: '', inp: (e.i || []).join('; '), outp: (e.o || []).join('; '), sn: '', tags: CN[e.c] || '', notes: e.n || '', base: 1 })));
     }
+    // 🆕 nouveautés du mois : flux « catalogue » (mis à jour chaque mois côté serveur), ajouté à la base commune
+    function feedItems() {
+        let f = null; try { f = JSON.parse(localStorage.getItem('xiii.data.catalogue')); } catch (e) { }
+        const L = f && f.data && Array.isArray(f.data.items) ? f.data.items : [];
+        return L.filter(x => x && x.id && x.model).map(x => ({ id: 'f_' + x.id, cat: CATS.some(c => c[0] === x.cat) ? x.cat : 'div', brand: x.brand || '', model: x.model, kg: x.kg || '', w: x.w || '', price: '', inp: (x.inp || []).join('; '), outp: (x.outp || []).join('; '), sn: '', tags: '🆕 Nouveauté' + (x.added ? ' ' + x.added.slice(0, 7) : ''), notes: [x.notes, x.src ? 'Source : ' + x.src : ''].filter(Boolean).join(' — '), base: 1, feed: 1 }));
+    }
+    let FEED = null; const feed = () => FEED || (FEED = feedItems());
+    let FQ = 0; const feedQ = () => { if (FQ || typeof XDATA === 'undefined') return; FQ = 1; XDATA.get('catalogue').then(r => { if (!r) return; FEED = null; BASE = null; try { window.dispatchEvent(new CustomEvent('xcat-feed')); } catch (e) { } }).catch(() => { }); };
     const baseOn = () => { try { return localStorage.getItem(K + '.nobase') !== '1'; } catch (e) { return true; } };
-    function all(db) { db = db || load(); const mine = db.items.filter(i => !i.hidden), off = new Set(db.items.filter(i => i.baseId).map(i => i.baseId)); return mine.concat(baseOn() ? base().filter(b => !off.has(b.id)) : []); }
+    function all(db) { feedQ(); db = db || load(); const mine = db.items.filter(i => !i.hidden), off = new Set(db.items.filter(i => i.baseId).map(i => i.baseId)); return mine.concat(baseOn() ? base().concat(feed()).filter(b => !off.has(b.id)) : []); }
     function search(q, cat) { const db = { items: all() }, Q = fold(q).split(/\s+/).filter(Boolean); return db.items.filter(it => (!cat || it.cat === cat) && Q.every(w => fold([it.brand, it.model, it.tags, it.notes, it.inp, it.outp, catOf(it.cat)[1], it.sn].join(' ')).includes(w))); }
     // ---------- CSV ----------
     const COLS = [['cat', 'Famille'], ['brand', 'Marque'], ['model', 'Modèle'], ['kg', 'Poids (kg)'], ['w', 'Consommation (W)'], ['price', 'Prix location HT / jour (€)'], ['inp', 'Entrées'], ['outp', 'Sorties'], ['sn', 'N° de série'], ['tags', 'Mots-clés'], ['notes', 'Notes']];
@@ -1168,9 +1178,531 @@ const XCAT = (() => {
         const s = document.createElement('style'); s.textContent = '#xcat-ov{position:fixed;inset:0;z-index:10230;background:rgba(0,0,0,.55);display:flex;align-items:flex-start;justify-content:center;padding:6vh 14px;font:13.5px/1.4 "Segoe UI",system-ui,sans-serif}.xcat-box{width:min(720px,100%);max-height:84vh;display:flex;flex-direction:column;background:var(--bg-menu,#232327);color:var(--text-main,#eee);border:1px solid rgba(240,179,120,.6);border-radius:14px;padding:14px 16px;box-shadow:0 18px 50px rgba(0,0,0,.6)}.xcat-h{display:flex;gap:10px;align-items:center}.xcat-n{color:var(--text-dim,#999);font-size:12px;margin-right:auto}.xcat-h a{color:rgb(240,179,120);font-size:12px}.xcat-x{cursor:pointer;opacity:.7}.xcat-f{display:flex;gap:8px;margin:10px 0}.xcat-f input{flex:1}.xcat-f input,.xcat-f select{font:inherit;color:inherit;background:var(--bg-input,#1b1b1f);border:1px solid var(--border-color,#45454b);border-radius:8px;padding:6px 9px}.xcat-l{overflow:auto}.xcat-it{display:flex;gap:10px;align-items:center;padding:7px 4px;border-bottom:1px solid var(--border-color,#36363c)}.xcat-c{font-size:20px}.xcat-t{flex:1;min-width:0}.xcat-t small{display:block;color:var(--text-dim,#999);font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.xcat-it button{font:inherit;font-size:12px;color:inherit;background:rgba(240,179,120,.18);border:1px solid rgba(240,179,120,.6);border-radius:7px;padding:4px 9px;cursor:pointer;white-space:nowrap}.xcat-b{font-style:normal;font-size:10px;color:var(--text-dim,#999);border:1px solid var(--border-color,#555);border-radius:6px;padding:0 4px;margin-left:4px}.xcat-e{color:var(--text-dim,#999);padding:12px 4px}';
         document.head.appendChild(s);
         const go = () => { if (document.getElementById('xcat-btn')) return; const tool = document.getElementById('xb-tool') || document.getElementById('toolbar') || document.getElementById('top-bar'); if (!tool) return; const b = document.createElement('button'); b.id = 'xcat-btn'; b.title = '🗃️ Catalogue matériel commun : insérer un équipement (marque, modèle, ports, poids, puissance, prix)'; b.innerHTML = '<span class="btn-icon">🗃️</span><span class="btn-label">Catalogue</span>'; b.onclick = () => picker(app); tool.appendChild(b); };
-        if (document.readyState === 'complete') setTimeout(go, 2700); else addEventListener('load', () => setTimeout(go, 2700));
+        XBOOT.ready(go, 2700);
     }
     return { all, base, baseOn, K, CATS, catOf, load, save, name, ports, search, seedItems, toCsv, parseCsv, COLS, ADD, picker, initTool, uid, esc, fold };
+})();
+
+// tarifs DEVISO (copie générée par build.sh)
+const DVT = (() => {
+const TARIFS_DATE = 'octobre 2026';
+// [id, nom, ville, spécialité, type ('pub' tarif public · 'ref' référence · 'devis' sur devis), précision sur les prix, site]
+const LOUEURS0 = [
+    ['amp', 'AMP Visual TV', 'Île-de-France', 'Cars régie, studios, HF', 'devis', 'Sur devis (tarifs non publiés)', 'ampvisualtv.tv'],
+    ['vi', 'Impact Visuel', 'Paris', 'Caméra, optiques, lumière, son, régie', 'devis', 'Sur devis (« prix sur demande »)', ''],
+    ['mxl', 'Maximaloc', 'Paris 11e', 'Vidéo, caméra, optiques, régie', 'devis', 'Tarifs non consultables en ligne', 'maximaloc.com'],
+    ['lmx', 'Lumex', 'Châtenay-Malabry', 'Lumière cinéma / TV, groupes, nacelles', 'devis', 'Sur devis (catalogue sans prix)', 'lumex.tv'],
+    ['tr', 'Transpa (Transpalux / Transpacam)', 'Gennevilliers', 'Lumière, énergie, caméra, machinerie', 'devis', 'Sur devis (boutique en ligne fermée)', 'transpalux.com'],
+    ['bf', 'Buffaloc', 'Saint-Denis', 'Caméra, optiques, lumière, HF vidéo', 'pub', 'Prix publics HT / jour', 'buffaloc.fr'],
+    ['li', 'Loca Images', 'Paris', 'Caméra, transmission, HF', 'pub', 'Prix publics HT / jour (dégressif selon durée)', 'rent.loca-images.com'],
+    ['cl', 'Cine Loc', 'Paris', 'Caméra, LED, HMI, son', 'pub', 'Prix publics HT / jour', 'cine-loc.com'],
+    ['tm', 'Turtle Max Location', 'Saint-Ouen', 'Caméra cinéma, HMI, LED, tungstène', 'pub', 'Prix publics HT / jour, hors assurance', 'turtlemaxlocation.com'],
+    ['ck', 'Cosmik Vidéo', 'Aubervilliers', 'Caméra, lumière, machinerie', 'pub', 'Prix publics HT / jour (tarifs 2025), week-end = 1 jour', 'cosmikvideo.net'],
+    ['fl', 'Filme', 'Montreuil', 'Caméra, PTZ, lumière, son, régie, streaming', 'pub', 'Prix « à partir de » HT / jour, −50 % dès le 2e jour', 'filme.fr'],
+    ['jm', 'Jamaya', 'Boulogne-Billancourt', 'Caméras', 'pub', 'Prix publics HT / jour', 'jamaya.fr'],
+    ['pi', 'Pleine Image Loc', 'Saint-Denis', 'Caméra, lumière, machinerie', 'pub', 'Prix publics HT / jour, assurance 8 %', 'pleineimage-loc.com'],
+    ['v13', 'Vidéo 13', 'Paris 13e', 'Caméra, lumière', 'pub', 'Prix public HT / jour', 'video-13.com'],
+    ['lbm', 'La Baleine Mécanique', 'Nantes', 'Vidéo', 'pub', 'Prix public HT / jour', 'labaleinemecanique.fr'],
+    ['tp', 'Time Prod', 'Belfort', 'Vidéo, événementiel', 'pub', 'Prix publics HT / jour, week-end = 1 jour', 'timeprod-location.fr'],
+    ['mx', 'MX Événement', 'Chalifert (77)', 'Son, lumière, murs LED', 'pub', 'Prix publics HT / jour', 'location.mxevenement.com'],
+    ['p2g', 'P2G Rent', 'Saint-Prix (95)', 'Son, lumière, vidéo, intercom, LED', 'pub', 'Prix publics HT / jour, coefficients dégressifs', 'p2grent.com'],
+    ['gl', 'GL events', 'National', 'Audiovisuel événementiel', 'pub', 'Prix « à partir de » HT pour 1 jour', 'store.gl-events.com'],
+    ['h7', 'Helium 7', 'Paris 17e', 'Lumière, son, vidéo, structures', 'pub', 'Tarif HT / jour (édition déc. 2025)', 'helium7.com'],
+    ['ls', 'Locasono', 'Paris 11e', 'Son, lumière, vidéo, murs LED', 'pub', 'Prix publiés TTC, convertis en HT (÷ 1,2)', 'locasono.fr'],
+    ['rt', 'RT Events', 'Montélimar', 'Audiovisuel événementiel', 'pub', 'Prix public HT / jour', 'rt-events.fr'],
+    ['lx', 'Loxam', 'National', 'Groupes électrogènes (BTP)', 'pub', 'Prix TTC 1 jour, converti en HT (÷ 1,2)', 'loxam.fr'],
+    ['il', 'Interlocation', 'Chartres', 'Groupes électrogènes (BTP)', 'pub', 'Prix « à partir de » HT / jour (1 à 2 jours)', 'interlocation.fr'],
+    ['afcs', 'AFCS (tarif recommandé)', '—', 'Association française des cadreurs Steadicam', 'ref', 'Tarif recommandé de location du Steadicam (programmes TV)', 'afcs.fr']
+];
+// Familles de matériel : [id, libellé, couleur, icône]
+const ECATS = [
+    ['cam', 'Caméras', '#E53935', '🎥'], ['opt', 'Optiques', '#8E24AA', '🔭'], ['mach', 'Machinerie & stabilisation', '#8D6E63', '🎞️'],
+    ['hfv', 'Transmission & HF vidéo', '#5C6BC0', '📡'], ['mon', 'Moniteurs, écrans & projection', '#00ACC1', '🖥️'], ['led', 'Murs LED', '#26A69A', '🟦'],
+    ['lum', 'Lumière', '#F9A825', '💡'], ['son', 'Son', '#EC407A', '🎚️'], ['com', 'Intercom', '#7E57C2', '🎧'],
+    ['vid', 'Régie vidéo & streaming', '#1E88E5', '🎛️'], ['nrj', 'Énergie', '#FB8C00', '⚡'], ['cab', 'Câblage', '#43A047', '🔌'],
+    ['veh', 'Transport & véhicules', '#78909C', '🚚'], ['div', 'Divers', '#90A4AE', '📦']
+];
+// ---------- Base tarifaire ----------
+// R(id, famille, désignation, alias (séparés par |), { loueur: prix HT / jour }, options)
+// options : u unité ('j' jour, 'm2' m² / jour, 'f' forfait) · g [réf.] type générique estimé d'après ces références ·
+//           est [bas, haut] estimation DEVISO (aucun tarif public) · sd sur devis · inc inclus (prix 0) · note
+const R = (id, c, n, k, p, o) => Object.assign({ id, c, n, k: k || '', p: p || {} }, o || {});
+const CATALOG = [
+    // ---- Caméras cinéma & documentaire ----
+    R('arri-alexa35', 'cam', 'ARRI Alexa 35', 'alexa 35', { bf: 900, li: 840, tm: 1200, ck: 1140, jm: 950 }),
+    R('arri-minilf', 'cam', 'ARRI Alexa Mini LF', 'alexa mini lf|mini lf', { bf: 750, tm: 900, ck: 900 }),
+    R('arri-mini', 'cam', 'ARRI Alexa Mini', 'alexa mini', { bf: 540, li: 375, cl: 550, tm: 700, jm: 380 }),
+    R('arri-amira', 'cam', 'ARRI Amira', 'amira', { jm: 320 }),
+    R('sony-venice', 'cam', 'Sony Venice', 'venice cinealta', { bf: 700, li: 600, ck: 600 }),
+    R('sony-venice2', 'cam', 'Sony Venice 2', 'venice 2|venice2 8k', { tm: 900 }),
+    R('sony-burano', 'cam', 'Sony Burano', 'burano', { li: 350, cl: 385, ck: 550 }),
+    R('sony-fx9', 'cam', 'Sony FX9', 'pxw-fx9|fx9v|fx 9', { bf: 260, li: 170, cl: 200, tm: 290, ck: 200, jm: 210 }),
+    R('sony-fx6', 'cam', 'Sony FX6', 'ilme-fx6|fx 6', { bf: 175, fl: 139, li: 150, cl: 130, tm: 220, ck: 150, jm: 160, lbm: 150 }),
+    R('sony-fx3', 'cam', 'Sony FX3', 'fx 3|ilme-fx3', { fl: 99, li: 125, cl: 90, ck: 120, jm: 140 }),
+    R('sony-f55', 'cam', 'Sony PMW-F55', 'f55', { li: 300 }),
+    R('sony-pmw500', 'cam', 'Sony PMW-500 (épaule)', 'pmw500|pmw 500', { li: 250 }),
+    R('sony-pmw400', 'cam', 'Sony PMW-400 (épaule)', 'pmw400|pmw 400', { li: 180 }),
+    R('sony-z200', 'cam', 'Sony PXW-Z200', 'z200|pxw z200', { li: 110, cl: 130 }),
+    R('red-raptor', 'cam', 'RED V-Raptor', 'v-raptor|raptor 8k', { bf: 450, cl: 530, tm: 550 }),
+    R('red-komodo', 'cam', 'RED Komodo 6K', 'komodo', { bf: 250, fl: 155, cl: 135 }),
+    R('red-komodox', 'cam', 'RED Komodo-X', 'komodo x', { fl: 199, tm: 320 }),
+    R('red-helium', 'cam', 'RED Helium 8K', 'helium 8k', { li: 240 }),
+    R('canon-c300', 'cam', 'Canon C300 Mark III', 'c300 mk3|c300 mkiii|eos c300', { li: 170, cl: 230 }),
+    R('canon-c70', 'cam', 'Canon C70', 'eos c70', { fl: 119, cl: 100 }),
+    R('canon-c80', 'cam', 'Canon C80', 'eos c80', { fl: 139, li: 145 }),
+    R('canon-c400', 'cam', 'Canon C400', 'eos c400', { fl: 189, li: 250 }),
+    R('canon-c700', 'cam', 'Canon C700', 'eos c700', { cl: 360 }),
+    R('canon-c50', 'cam', 'Canon C50', 'eos c50', { cl: 120 }),
+    R('canon-r5c', 'cam', 'Canon R5 C', 'r5c|eos r5 c', { fl: 99 }),
+    R('canon-xf705', 'cam', 'Canon XF705', 'xf705', { li: 150 }),
+    R('bm-pyxis6', 'cam', 'Blackmagic Pyxis 6K', 'pyxis 6k', { fl: 138.5 }),
+    R('bm-pyxis12', 'cam', 'Blackmagic Pyxis 12K', 'pyxis 12k', { fl: 227.5 }),
+    R('bm-ursa46', 'cam', 'Blackmagic URSA Mini Pro 4.6K G2', 'ursa mini pro|ursa 4.6k', { cl: 130 }),
+    R('pana-varicam', 'cam', 'Panasonic VariCam', 'varicam', { bf: 190 }),
+    R('dji-ronin4d', 'cam', 'DJI Ronin 4D 6K', 'ronin 4d', { fl: 161 }),
+    R('phantom-veo', 'cam', 'Phantom VEO 4K (haute vitesse)', 'phantom veo|veo 4k', { tm: 2200 }),
+    // ---- Caméras PTZ ----
+    R('sony-brcam7', 'cam', 'Sony BRC-AM7 (PTZ)', 'brc am7|brc-am7', { fl: 279 }),
+    R('sony-fr7', 'cam', 'Sony FR7 (PTZ cinéma)', 'ilme-fr7|fr 7', { fl: 239, li: 290 }),
+    R('pana-ue150', 'cam', 'Panasonic AW-UE150 (PTZ)', 'aw-ue150|ue150|ue 150', { cl: 390, tp: 320 }),
+    R('pana-he145', 'cam', 'Panasonic AW-HE145 (PTZ)', 'aw-he145|he145', { tp: 290 }),
+    R('pana-he130', 'cam', 'Panasonic AW-HE130 (PTZ)', 'aw-he130|he130', { gl: 360 }),
+    R('pana-he40', 'cam', 'Panasonic AW-HE40 (PTZ)', 'aw-he40|he40', { jm: 140 }),
+    R('dv-ptz300', 'cam', 'Datavideo PTZ-300', 'ptz-300|ptz 300', { h7: 240 }),
+    R('sony-rmip500', 'cam', 'Pupitre PTZ Sony RM-IP500', 'rm-ip500|rm ip500|pupitre ptz sony', { fl: 80 }),
+    R('pana-rp50', 'cam', 'Pupitre PTZ Panasonic AW-RP50', 'aw-rp50|rp50|pupitre ptz panasonic', { jm: 50 }),
+    // ---- Caméras : types génériques ----
+    R('g-cam', 'cam', 'Caméra (modèle à préciser)', 'camera|camescope|cam', {}, { g: ['sony-fx6', 'sony-fx9', 'canon-c300', 'canon-c70', 'sony-z200', 'sony-pmw500'] }),
+    R('g-cam-studio', 'cam', 'Caméra de plateau broadcast (chaîne : tête, optique, CCU, RCP)', 'camera de plateau|camera plateau|camera studio|camera broadcast|hdc|ldx', {}, { est: [400, 900], note: 'Aucun tarif public : chaînes broadcast louées sur devis (cars régie, prestataires)' }),
+    R('g-cam-cine', 'cam', 'Caméra cinéma (corps)', 'camera cinema', {}, { g: ['arri-mini', 'sony-venice', 'sony-burano', 'red-raptor', 'red-komodo'] }),
+    R('g-cam-eng', 'cam', 'Caméra épaule (ENG) + optique', 'camera epaule|eng|camescope epaule', {}, { g: ['sony-pmw500', 'sony-pmw400', 'canon-xf705', 'sony-z200'] }),
+    R('g-cam-light', 'cam', 'Caméra légère (hybride) + optique', 'camera legere|hybride|appareil photo', {}, { g: ['sony-fx3', 'canon-r5c'] }),
+    R('g-ptz', 'cam', 'Caméra PTZ (modèle à préciser)', 'ptz|tourelle|camera ip|camera robotisee', {}, { g: ['sony-brcam7', 'sony-fr7', 'pana-ue150', 'pana-he145', 'pana-he130', 'pana-he40', 'dv-ptz300'] }),
+    R('g-actioncam', 'cam', 'Caméra embarquée (action cam)', 'gopro|action cam|camera embarquee|osmo', {}, { est: [15, 40] }),
+    R('g-drone', 'cam', 'Drone (avec télépilote)', 'drone|mavic|inspire', {}, { sd: 1, note: 'Prestation drone : sur devis (télépilote déclaré)' }),
+    // ---- Optiques ----
+    R('ang-dp', 'opt', 'Angénieux Optimo DP 30-80 / 16-42', 'optimo dp|angenieux dp', { bf: 215 }),
+    R('canon-cn17', 'opt', 'Canon CN 17-120 (CN7x17)', 'cn7x17|cn 17-120|cn17', { bf: 245 }),
+    R('ang-ez', 'opt', 'Angénieux EZ-1 / EZ-2', 'angenieux ez|ez-1|ez-2', { bf: 280 }),
+    R('zeiss-sp', 'opt', 'Série Zeiss Supreme Prime', 'supreme prime', { bf: 595 }),
+    R('zeiss-cp2', 'opt', 'Série Zeiss CP2', 'cp2|cp.2', { bf: 185 }),
+    R('arri-sig', 'opt', 'Série ARRI Signature Prime', 'signature prime', { ck: 1250 }),
+    R('sony-2470', 'opt', 'Sony FE 24-70 GM', '24-70 gm|fe 24-70', { bf: 40 }),
+    R('g-zoom', 'opt', 'Zoom (modèle à préciser)', 'zoom broadcast|zoom|objectif zoom', {}, { g: ['ang-dp', 'canon-cn17', 'ang-ez'] }),
+    R('g-optc', 'opt', 'Optique cinéma (unité)', 'optique cinema|optique fixe|objectif', {}, { est: [40, 150] }),
+    // ---- Machinerie & stabilisation ----
+    R('oconnor-2575', 'mach', 'Tête O\'Connor 2575D', 'oconnor|2575', { bf: 180 }),
+    R('sachtler-99', 'mach', 'Tête Sachtler Studio 9+9', 'studio 9+9|studio 9x9', { bf: 70 }),
+    R('cartoni-maxima', 'mach', 'Tête Cartoni Maxima', 'cartoni maxima', { bf: 120 }),
+    R('sachtler-s20', 'mach', 'Trépied Sachtler S20 (S1)', 'sachtler s20|s20 s1', { bf: 45, li: 45 }),
+    R('sachtler-s18', 'mach', 'Trépied Sachtler S18', 'sachtler s18', { bf: 40, li: 40 }),
+    R('sachtler-fsb8', 'mach', 'Trépied Sachtler FSB 8', 'fsb8|fsb 8', { ck: 35 }),
+    R('dji-ronin2', 'mach', 'DJI Ronin 2', 'ronin 2', { bf: 200, ck: 190 }),
+    R('dji-rs3', 'mach', 'DJI RS3 Pro', 'rs3 pro|rs 3', { ck: 60 }),
+    R('easyrig', 'mach', 'Easyrig Vario 5', 'easyrig', { bf: 75 }),
+    R('dana-dolly', 'mach', 'Dana Dolly (kit)', 'dana dolly', { bf: 75 }),
+    R('gfm-jib', 'mach', 'GFM Tele Jib', 'tele jib|gfm jib', { bf: 160 }),
+    R('arri-wcu4', 'mach', 'ARRI WCU-4 + 3 moteurs (point sans fil)', 'wcu-4|wcu4|follow focus sans fil|moteur de point', { ck: 320 }),
+    R('steadicam', 'mach', 'Steadicam (location du système)', 'steadicam', { afcs: 650 }, { note: 'Tarif recommandé AFCS pour les programmes TV (500 € clip / doc, 600 € série). L\'opérateur se chiffre dans l\'équipe.' }),
+    R('g-tripod', 'mach', 'Trépied + tête fluide', 'trepied|tripod|tete fluide|trepied photo', {}, { g: ['sachtler-s18', 'sachtler-s20', 'sachtler-fsb8'] }),
+    R('g-tripod-bc', 'mach', 'Trépied broadcast lourd / piédestal', 'trepied broadcast|piedestal|vinten', {}, { g: ['sachtler-99', 'cartoni-maxima', 'oconnor-2575'] }),
+    R('g-gimbal', 'mach', 'Stabilisateur (gimbal)', 'gimbal|stabilisateur|ronin', {}, { g: ['dji-rs3', 'dji-ronin2'] }),
+    R('g-dolly', 'mach', 'Dolly', 'dolly', {}, { est: [75, 300] }),
+    R('g-rail', 'mach', 'Rail de travelling (2 m)', 'rail|travelling', {}, { est: [10, 25] }),
+    R('g-jib', 'mach', 'Grue / jib (kit)', 'grue|jib', {}, { est: [160, 400] }),
+    R('g-techno', 'mach', 'Grue télescopique (Technocrane)', 'technocrane|grue telescopique', {}, { sd: 1, note: 'Sur devis (avec équipe)' }),
+    R('g-remotehead', 'mach', 'Tête télécommandée', 'tete telecommandee|tete motorisee', {}, { est: [150, 350] }),
+    R('g-slider', 'mach', 'Slider', 'slider', {}, { est: [25, 60] }),
+    R('g-cstand', 'mach', 'Pied C-stand', 'c-stand|cstand|pied c stand', {}, { est: [5, 10] }),
+    R('g-standl', 'mach', 'Pied lumière léger', 'pied lumiere leger|pied de projecteur|pied leger', {}, { est: [3, 8] }),
+    R('g-standh', 'mach', 'Pied lumière lourd (wind-up)', 'wind-up|pied lumiere lourd|pied lourd', {}, { est: [15, 30] }),
+    R('g-standm', 'mach', 'Pied de moniteur / de perche', 'pied de moniteur|pied de perche', {}, { est: [5, 12] }),
+    R('g-prompteur', 'mach', 'Prompteur (kit)', 'prompteur|teleprompter|autocue', {}, { est: [80, 200] }),
+    // ---- Transmission & HF vidéo ----
+    R('teradek-750', 'hfv', 'Teradek Bolt 4K LT 750 (émetteur + récepteur)', 'bolt 750|bolt 4k lt 750|teradek 750', { bf: 140, li: 120 }, { note: 'Loca Images : 60 € l\'émetteur ou le récepteur' }),
+    R('teradek-1500', 'hfv', 'Teradek Bolt 4K LT 1500 (kit)', 'bolt 1500|teradek 1500', { bf: 150 }),
+    R('teradek-pro300', 'hfv', 'Teradek Bolt Pro 300 (kit)', 'bolt pro 300|teradek 300', { bf: 95 }),
+    R('teradek-bolt6', 'hfv', 'Teradek Bolt 6 LT (kit)', 'bolt 6', { li: 120 }),
+    R('dji-transmission', 'hfv', 'DJI Transmission (kit)', 'dji transmission', { li: 100 }),
+    R('liveu-800', 'hfv', 'LiveU LU800', 'lu800|liveu 800', { li: 800 }),
+    R('liveu-300', 'hfv', 'LiveU LU300S', 'lu300|liveu 300', { li: 600 }),
+    R('tvu-one', 'hfv', 'TVU One', 'tvu', { li: 700 }),
+    R('haivision-360', 'hfv', 'Haivision Pro 360', 'haivision', { li: 600 }),
+    R('starlink', 'hfv', 'Starlink (liaison satellite)', 'starlink|satellite', { li: 220 }),
+    R('g-hfvideo', 'hfv', 'Liaison vidéo HF (kit)', 'emetteur video|hf video|liaison hf|teradek', {}, { g: ['teradek-750', 'teradek-1500', 'teradek-pro300', 'dji-transmission'] }),
+    R('g-backpack', 'hfv', 'Sac de transmission 4G / 5G', 'sac de transmission|liveu|4g|5g|bonding', {}, { g: ['liveu-300', 'liveu-800', 'tvu-one', 'haivision-360'] }),
+    // ---- Moniteurs, écrans & projection ----
+    R('smallhd-24', 'mon', 'SmallHD Cine 24" 4K', 'smallhd 24|cine 24', { bf: 150 }),
+    R('smallhd-703', 'mon', 'SmallHD 703 UltraBright', 'smallhd 703|703', { bf: 75 }),
+    R('sony-pvm170', 'mon', 'Sony PVM-A170 17" OLED', 'pvm-a170|pvm a170|pvm 17', { bf: 105 }),
+    R('tvlogic-24', 'mon', 'TVLogic LQM-241W 24"', 'tvlogic|lqm-241', { bf: 100 }),
+    R('tv-55', 'mon', 'Écran 55"', 'ecran 55|tv 55|55 pouces', { h7: 230 }),
+    R('tv-65', 'mon', 'Écran 65"', 'ecran 65|tv 65|65 pouces', { h7: 320 }),
+    R('tv-75', 'mon', 'Écran 75"', 'ecran 75|tv 75|75 pouces', { h7: 390, ls: 408.33 }),
+    R('tv-85', 'mon', 'Écran 85"', 'ecran 85|tv 85|85 pouces', { h7: 780 }),
+    R('tv-98', 'mon', 'Écran 98"', 'ecran 98|tv 98|98 pouces', { ls: 825 }),
+    R('vp-7k', 'mon', 'Vidéoprojecteur ~7 000 lumens', 'videoprojecteur 7000', { ls: 374.17 }),
+    R('vp-rz670', 'mon', 'Vidéoprojecteur Panasonic PT-RZ670', 'pt-rz670|rz670', { gl: 1030 }),
+    R('vp-epson1505', 'mon', 'Vidéoprojecteur Epson EB-L1505UH', 'eb-l1505|l1505', { h7: 1200 }),
+    R('vp-tz12000', 'mon', 'Vidéoprojecteur Panasonic PT-TZ12000', 'tz12000|pd-tz', { gl: 2350 }),
+    R('vp-barco20', 'mon', 'Vidéoprojecteur Barco HDX-20 Flex', 'barco hdx|hdx-20', { p2g: 3600 }),
+    R('vp-40k', 'mon', 'Vidéoprojecteur 40 000 lumens 4K', 'videoprojecteur 40000|40k lumens', { ls: 5800 }),
+    R('g-monitor', 'mon', 'Moniteur de contrôle', 'moniteur|monitor|moniteur de controle|moniteur de retour|multivue|multiview', {}, { g: ['smallhd-703', 'sony-pvm170', 'tvlogic-24', 'smallhd-24'] }),
+    R('g-tv', 'mon', 'Écran / TV (taille à préciser)', 'ecran|television|televiseur|tv|ecran de salle', {}, { g: ['tv-55', 'tv-65', 'tv-75'] }),
+    R('g-vp', 'mon', 'Vidéoprojecteur (puissance à préciser)', 'videoprojecteur|projecteur video|beamer', {}, { g: ['vp-7k', 'vp-rz670', 'vp-epson1505'] }),
+    R('g-screen', 'mon', 'Écran de projection (toile)', 'ecran de projection|toile de projection', {}, { est: [40, 150] }),
+    // ---- Murs LED (prix au m² déduits des packs publiés) ----
+    R('led-wall', 'led', 'Mur LED intérieur (pitch 2,9 à 3,9 mm)', 'mur led|mur d images|ecran led|dalles led|led wall', { mx: 331, p2g: 278, ls: 333 }, { u: 'm2', note: 'Prix au m² déduits des packs publiés (4,5 à 36 m²), processeur compris selon les loueurs' }),
+    R('led-proc', 'led', 'Processeur LED Novastar VX6S', 'novastar|vx6s|processeur led', { mx: 75 }),
+    // ---- Lumière : LED ----
+    R('ap-1200d', 'lum', 'Aputure LS 1200D Pro', 'ls 1200d|1200d', { bf: 125, li: 125, tm: 140 }),
+    R('ap-storm1200', 'lum', 'Aputure Storm 1200x', 'storm 1200', { li: 130 }),
+    R('ap-600d', 'lum', 'Aputure LS 600D Pro', 'ls 600d|600d|aputure 600', { bf: 90, fl: 66, li: 70, tm: 100 }),
+    R('ap-600c', 'lum', 'Aputure LS 600C Pro', 'ls 600c|600c', { bf: 120 }),
+    R('ap-600x', 'lum', 'Aputure LS 600X Pro', 'ls 600x|600x', { fl: 70 }),
+    R('ap-300d', 'lum', 'Aputure LS 300D II', 'ls 300d|300d|300x', { bf: 50, fl: 38.5 }),
+    R('ap-storm400', 'lum', 'Aputure Storm 400x', 'storm 400', { fl: 55 }),
+    R('amaran-200d', 'lum', 'Amaran 200D', 'amaran 200', { fl: 23 }),
+    R('nanlux-2400', 'lum', 'Nanlux Evoke 2400B', 'evoke 2400', { bf: 200 }),
+    R('nanlux-1200', 'lum', 'Nanlux Evoke 1200', 'evoke 1200', { tm: 135 }),
+    R('nanlux-900c', 'lum', 'Nanlux Evoke 900C', 'evoke 900', { bf: 120 }),
+    R('arri-s60', 'lum', 'ARRI SkyPanel S60-C', 'skypanel s60|s60-c|s60c|skypanel', { cl: 90, tm: 190, ck: 150, v13: 129 }),
+    R('arri-s30', 'lum', 'ARRI SkyPanel S30-C', 'skypanel s30|s30-c', { cl: 70 }),
+    R('arri-s120', 'lum', 'ARRI SkyPanel S120-C', 'skypanel s120|s120-c', { tm: 190 }),
+    R('arri-s360', 'lum', 'ARRI SkyPanel S360-C', 'skypanel s360|s360-c', { tm: 500 }),
+    R('astera-titan', 'lum', 'Astera Titan Tube (kit de 8)', 'titan tube|astera titan|astera fp1', { bf: 190, tm: 250 }),
+    R('astera-helios', 'lum', 'Astera Helios (kit de 8)', 'helios', { bf: 150, tm: 210 }),
+    R('astera-ax1', 'lum', 'Astera AX1 (kit de 4)', 'ax1', { cl: 65 }),
+    R('creamsource-v8', 'lum', 'Creamsource Vortex 8', 'vortex 8|creamsource', { bf: 145 }),
+    R('lp-gemini', 'lum', 'Litepanels Gemini', 'gemini', { bf: 115 }),
+    R('kino-4x4', 'lum', 'Kino Flo 4 tubes 1,20 m', 'kino flo|kino 4 tubes|kino', { bf: 60, cl: 55 }),
+    R('sl1-mix', 'lum', 'SL1 Mix', 'sl1', { tm: 190 }),
+    R('litemat-4', 'lum', 'LiteMat Plus 4', 'litemat', { tm: 125 }),
+    // ---- Lumière : HMI ----
+    R('arri-m18', 'lum', 'ARRI M18 (HMI 1,8 kW)', 'm18|hmi 1800|hmi 1,8|hmi 1.8', { bf: 160, tm: 150, pi: 150 }),
+    R('arri-m40', 'lum', 'ARRI M40 (HMI 4 kW)', 'm40|hmi 4k|hmi 4 kw', { bf: 240, tm: 240 }),
+    R('arri-m90', 'lum', 'ARRI M90 (HMI 9 kW)', 'm90|hmi 9', { tm: 450 }),
+    R('arri-m8', 'lum', 'ARRI M8 (HMI 800 W)', 'arri m8', { pi: 140 }),
+    R('joker-200', 'lum', 'K5600 Joker Bug 200', 'joker 200|joker bug 200', { cl: 40 }),
+    R('joker-400', 'lum', 'K5600 Joker 400', 'joker 400|joker bug 400', { li: 70, cl: 60, pi: 70 }),
+    R('joker-800', 'lum', 'K5600 Joker 800', 'joker 800|joker bug 800', { li: 100, cl: 80, pi: 100 }),
+    R('joker-1600', 'lum', 'K5600 Joker 1600', 'joker 1600|joker bug 1600', { li: 145, tm: 170 }),
+    R('k5600-alpha4', 'lum', 'K5600 Alpha 4K', 'alpha 4k|alpha 2.5', { bf: 160, tm: 180 }),
+    R('k5600-alpha9', 'lum', 'K5600 Alpha 9K', 'alpha 9k', { tm: 450 }),
+    R('ltm-18k', 'lum', 'LTM Luxarc 12/18 kW', 'luxarc|hmi 18|18 kw|18k', { tm: 370 }),
+    R('par-hmi1200', 'lum', 'PAR HMI 1200 W', 'par hmi|par 1200', { tm: 120 }),
+    R('powerbeam', 'lum', 'Filmgear Power Beam 4 / 2,5 kW', 'power beam', { tm: 305 }),
+    R('briese-77', 'lum', 'Briese Focus 77', 'briese', { tm: 650 }),
+    // ---- Lumière : tungstène ----
+    R('fresnel-650', 'lum', 'Fresnel 650 W', 'fresnel 650', { bf: 15, tm: 10 }),
+    R('fresnel-1k', 'lum', 'Fresnel 1 kW', 'fresnel 1 kw|fresnel 1kw|fresnel 1000', { tm: 12 }),
+    R('fresnel-2k', 'lum', 'Fresnel 2 kW', 'fresnel 2 kw|fresnel 2kw|fresnel 2000', { bf: 20, tm: 16 }),
+    R('fresnel-5k', 'lum', 'Fresnel 5 kW', 'fresnel 5 kw|fresnel 5kw|fresnel 5000', { tm: 20 }),
+    R('blonde-2k', 'lum', 'Blonde 2 kW', 'blonde', { bf: 20, tm: 16 }),
+    R('mandarine', 'lum', 'Mandarine 800 W', 'mandarine', { tm: 12 }),
+    // ---- Lumière : spectacle & événementiel ----
+    R('robe-bmfl', 'lum', 'Robe BMFL Blade', 'bmfl', { mx: 230 }),
+    R('mac-viper', 'lum', 'Martin MAC Viper Profile', 'viper', { mx: 220 }),
+    R('robe-megapointe', 'lum', 'Robe MegaPointe', 'megapointe', { mx: 210 }),
+    R('mac-aura', 'lum', 'Martin MAC Aura', 'mac aura|aura', { mx: 110 }),
+    R('robe-robin600', 'lum', 'Robe Robin 600 LED Wash', 'robin 600', { gl: 80 }),
+    R('poursuite-1200', 'lum', 'Poursuite HMI 1200 W', 'poursuite|follow spot', { h7: 180 }),
+    R('grandma3', 'lum', 'Console grandMA3 (on PC)', 'grandma3|grand ma 3|grandma 3', { h7: 350 }),
+    R('grandma', 'lum', 'Console grandMA', 'grandma|grand ma', { ls: 215.83 }),
+    R('jands-vista', 'lum', 'Console Jands Vista T2', 'vista t2|jands', { gl: 310 }),
+    // ---- Lumière : types génériques ----
+    R('g-led', 'lum', 'Projecteur LED (modèle à préciser)', 'projecteur led|panneau led|led cob|cob|softbox|bol beaute|beauty dish', {}, { g: ['ap-300d', 'ap-600d', 'arri-s60', 'ap-1200d'] }),
+    R('g-hmi', 'lum', 'Projecteur HMI (puissance à préciser)', 'hmi', {}, { g: ['joker-800', 'arri-m18', 'joker-1600', 'arri-m40'] }),
+    R('g-fresnel', 'lum', 'Fresnel tungstène (puissance à préciser)', 'fresnel|tungstene|halogene|par 64|decoupe|profile|cycliode|ballon', {}, { g: ['fresnel-650', 'fresnel-1k', 'fresnel-2k', 'fresnel-5k'] }),
+    R('g-tubes', 'lum', 'Tubes LED (kit)', 'tube led|tubes led|astera', {}, { g: ['astera-ax1', 'astera-helios', 'astera-titan'] }),
+    R('g-spot', 'lum', 'Lyre spot / profile (asservi)', 'lyre spot|asservi|lyre profile|spot motorise', {}, { g: ['robe-megapointe', 'mac-viper', 'robe-bmfl'] }),
+    R('g-wash', 'lum', 'Lyre wash LED', 'lyre wash|wash led|lyre', {}, { g: ['robe-robin600', 'mac-aura'] }),
+    R('g-parled', 'lum', 'PAR LED RGBW', 'par led|barre led|batten|stroboscope|strobe', {}, { est: [10, 25] }),
+    R('g-lumconsole', 'lum', 'Console lumière', 'console lumiere|console dmx|pupitre lumiere', {}, { g: ['grandma', 'jands-vista', 'grandma3'] }),
+    R('g-dimmer', 'lum', 'Gradateur DMX', 'gradateur|dimmer|bloc de puissance', {}, { est: [15, 40] }),
+    R('g-flags', 'lum', 'Accessoires lumière (drapeaux, réflecteurs, cadres)', 'drapeau|flag|reflecteur|bounce|polystyrene|cadre butterfly|butterfly|toile|floppy', {}, { est: [5, 25] }),
+    R('g-collier', 'lum', 'Collier + élingue de sécurité', 'collier|elingue', {}, { est: [1, 3] }),
+    R('inc-ballast', 'lum', 'Ballast (inclus avec le projecteur)', 'ballast', {}, { inc: 1 }),
+    // ---- Son ----
+    R('senn-ew500', 'son', 'Sennheiser EW 500 G4 (micro main HF)', 'ew 500|ew500|ew 500 g4|g4 965', { fl: 38, li: 25, h7: 60 }, { note: 'Helium 7 : « micro UHF main Sennheiser »' }),
+    R('senn-ew500-lav', 'son', 'Sennheiser EW 500 G4 + micro cravate', 'mke 40|mke-40|cravate|lavalier|micro cravate', { fl: 50, h7: 70 }),
+    R('senn-dp835', 'son', 'Sennheiser EW-DP 835', 'ew-dp|dp 835', { li: 25 }),
+    R('senn-g3', 'son', 'Micro HF Sennheiser G3', 'sennheiser g3|g3', { cl: 26, bf: 30 }),
+    R('dji-mic3', 'son', 'DJI Mic 3', 'dji mic', { cl: 15 }),
+    R('shure-ur4d', 'son', 'Shure UR4D + 2 émetteurs UR2 (2 canaux)', 'ur4d|ur 4d', { mx: 194.4 }),
+    R('shure-ulxd4d', 'son', 'Shure ULXD4D + 2 émetteurs ULXD2', 'ulxd|ulx-d', { mx: 210 }),
+    R('shure-ad4d', 'son', 'Shure Axient AD4D (récepteur 2 canaux)', 'ad4d', { p2g: 120 }),
+    R('shure-ad4q', 'son', 'Shure Axient AD4Q (récepteur 4 canaux)', 'ad4q', { p2g: 240 }),
+    R('shure-ad2', 'son', 'Shure Axient AD2 (émetteur main)', 'ad2', { p2g: 55 }),
+    R('shure-qlxd', 'son', 'Shure QLX-D (liaison complète)', 'qlx-d|qlxd', { p2g: 50 }),
+    R('senn-iem', 'son', 'Sennheiser IEM G4 (ear monitor)', 'iem|ear monitor|in-ear', { fl: 45 }),
+    R('rode-ntg2', 'son', 'Micro canon Rode NTG-2', 'ntg-2|ntg2', { bf: 25 }),
+    R('zoom-h6', 'son', 'Enregistreur Zoom H6', 'zoom h6', { bf: 35 }),
+    R('yam-cl5', 'son', 'Console Yamaha CL5', 'cl5', { mx: 350 }),
+    R('yam-ql5', 'son', 'Console Yamaha QL5', 'ql5', { mx: 325, rt: 300 }),
+    R('yam-ql1', 'son', 'Console Yamaha QL1', 'ql1', { mx: 250, ls: 241.67 }),
+    R('yam-dm7', 'son', 'Console Yamaha DM7', 'dm7', { mx: 500 }),
+    R('yam-m7cl', 'son', 'Console Yamaha M7CL-48', 'm7cl', { mx: 300 }),
+    R('beh-x32', 'son', 'Console Behringer X32', 'x32', { mx: 203, h7: 150 }, { note: 'MX Événement : X32 Rack' }),
+    R('midas-m32', 'son', 'Console Midas M32R + stagebox DL32', 'm32r|m32|dl32', { ls: 190.83 }),
+    R('ah-sq5', 'son', 'Console Allen & Heath SQ-5', 'sq-5|sq5', { fl: 90, ls: 249.17 }),
+    R('ah-qu16', 'son', 'Console Allen & Heath Qu-16', 'qu-16|qu16', { fl: 80 }),
+    R('rodecaster', 'son', 'Rodecaster Pro II', 'rodecaster', { fl: 33 }),
+    R('yam-rio', 'son', 'Stagebox Yamaha Rio3224', 'rio3224|rio 3224|stagebox', { mx: 160 }),
+    R('lac-k2', 'son', 'Enceinte L-Acoustics K2 (par élément)', 'k2|l-acoustics', { gl: 100 }),
+    R('g-hf', 'son', 'Micro HF (liaison complète)', 'micro hf|kit hf|hf main|micro main hf|emetteur hf|systeme hf', {}, { g: ['senn-ew500', 'shure-qlxd', 'senn-g3', 'senn-dp835'] }),
+    R('g-hf2', 'son', 'Récepteurs HF (rack, 2 canaux)', 'recepteur hf|recepteurs hf|rack hf', {}, { g: ['shure-ad4d', 'shure-ur4d', 'shure-ulxd4d'] }),
+    R('g-mixer', 'son', 'Console son numérique', 'console son|console de mixage|table de mixage|console audio|mixette', {}, { g: ['beh-x32', 'midas-m32', 'yam-ql1', 'ah-sq5', 'yam-ql5'] }),
+    R('g-mic', 'son', 'Micro filaire (sur pied / de table)', 'micro sur pied|micro de table|micro filaire|micro|sm58|micro plafond', {}, { est: [8, 20] }),
+    R('g-boom', 'son', 'Micro canon + perche', 'micro canon|perche|canon', {}, { est: [25, 60] }),
+    R('g-recorder', 'son', 'Enregistreur audio', 'enregistreur audio|enregistreur son|sound devices|mixette', {}, { est: [35, 120] }),
+    R('g-speaker', 'son', 'Enceinte (unité)', 'enceinte|retour|wedge|caisson|sub|line array|ampli|amplificateur', {}, { est: [25, 100] }),
+    R('g-dsp', 'son', 'Processeur audio / DSP', 'dsp|processeur audio', {}, { est: [40, 100] }),
+    // ---- Intercom ----
+    R('cc-fs2-kit', 'com', 'Clear-Com FreeSpeak II (kit 10 beltpacks)', 'freespeak kit|freespeak ii kit', { p2g: 1800 }),
+    R('cc-fs2-bp', 'com', 'Beltpack Clear-Com FreeSpeak II', 'freespeak|fs2', { p2g: 100 }),
+    R('cc-dx410', 'com', 'Clear-Com DX-410 (kit 4 postes)', 'dx-410|dx410', { p2g: 350 }),
+    R('cc-ms702', 'com', 'Station Clear-Com MS-702', 'ms-702|ms702', { p2g: 115 }),
+    R('cc-ms704', 'com', 'Station Clear-Com MS-704', 'ms-704|ms704', { gl: 70 }),
+    R('cc-rs601', 'com', 'Beltpack filaire Clear-Com RS601', 'rs601|rs-601', { gl: 15 }),
+    R('cc-wbs680', 'com', 'Clear-Com WBS-680 (sans fil)', 'wbs-680|wbs680', { gl: 465 }),
+    R('riedel-bolero4', 'com', 'Riedel Bolero (4 postes DECT)', 'bolero|riedel', { gl: 550 }),
+    R('h7-base', 'com', 'Base intercom 2 canaux', 'base intercom', { h7: 140 }),
+    R('h7-bphf', 'com', 'Beltpack intercom HF', 'beltpack hf', { h7: 60 }),
+    R('g-intercom', 'com', 'Intercom (kit 4 postes)', 'intercom|interphonie|ordre', {}, { g: ['cc-dx410', 'riedel-bolero4'] }),
+    R('g-beltpack', 'com', 'Beltpack intercom', 'beltpack|poste intercom', {}, { g: ['cc-rs601', 'h7-bphf', 'cc-fs2-bp'] }),
+    R('g-commstation', 'com', 'Station intercom', 'station intercom|station', {}, { g: ['cc-ms704', 'cc-ms702', 'h7-base'] }),
+    R('g-talkie', 'com', 'Talkie-walkie', 'talkie|talky|walkie', {}, { est: [5, 15] }),
+    // ---- Régie vidéo & streaming ----
+    R('atem-minipro', 'vid', 'Blackmagic ATEM Mini Pro ISO', 'atem mini pro', { fl: 32, li: 80, ls: 40.83 }),
+    R('atem-miniext', 'vid', 'Blackmagic ATEM Mini Extreme ISO', 'atem mini extreme', { fl: 66 }),
+    R('atem-sdiext', 'vid', 'Blackmagic ATEM SDI Extreme ISO', 'atem sdi extreme', { fl: 90, li: 120 }),
+    R('atem-sdipro', 'vid', 'Blackmagic ATEM SDI Pro ISO', 'atem sdi pro', { h7: 160 }),
+    R('atem-tvs4k', 'vid', 'Blackmagic ATEM Television Studio Pro 4K', 'television studio|atem tvs', { h7: 380 }),
+    R('atem-2me', 'vid', 'Blackmagic ATEM 2 M/E 4K', 'atem 2 m/e|atem 2me|2 m/e|constellation', { p2g: 250 }),
+    R('pana-hs410', 'vid', 'Panasonic AV-HS410', 'hs410|av-hs410', { li: 250 }),
+    R('hyperdeck-pro', 'vid', 'Blackmagic HyperDeck Studio Pro', 'hyperdeck studio pro', { p2g: 150 }),
+    R('hyperdeck-mini', 'vid', 'Blackmagic HyperDeck Studio Mini', 'hyperdeck studio mini|hyperdeck mini', { h7: 90 }),
+    R('shogun7', 'vid', 'Atomos Shogun 7', 'shogun', { h7: 130 }),
+    R('regie-atem2me', 'vid', 'Régie ATEM 2 M/E (package complet)', 'regie atem', { fl: 281.45 }),
+    R('regie-hd-sony', 'vid', 'Régie HD-SDI multicaméra 2/3" Sony (package)', 'regie hd sony|regie multicamera', { gl: 3985 }),
+    R('regie-hd-jvc', 'vid', 'Régie HD-SDI multicaméra 1/3" JVC (package)', 'regie jvc', { gl: 2695 }),
+    R('vidiu-go', 'vid', 'Encodeur Teradek Vidiu Go', 'vidiu', { fl: 60 }),
+    R('stream-mbp', 'vid', 'MacBook Pro + OBS (streaming)', 'obs|macbook', { fl: 40 }),
+    R('pack-5g', 'vid', 'Pack internet sécurisé 5G 100 Mb/s', 'internet 5g|routeur 5g|pack 5g|connexion internet', { fl: 131 }),
+    R('g-switcher', 'vid', 'Mélangeur vidéo (modèle à préciser)', 'melangeur|melangeur video|switcher|atem|mixeur video|regie video', {}, { g: ['atem-sdiext', 'atem-sdipro', 'atem-2me', 'pana-hs410', 'atem-tvs4k'] }),
+    R('g-vrec', 'vid', 'Enregistreur vidéo', 'enregistreur|hyperdeck|recorder|ki pro|magneto|nvr', {}, { g: ['hyperdeck-mini', 'shogun7', 'hyperdeck-pro'] }),
+    R('g-encoder', 'vid', 'Encodeur / PC de streaming', 'encodeur|streaming|pc streaming|codec|visioconference|web presenter', {}, { g: ['stream-mbp', 'vidiu-go'] }),
+    R('g-conv', 'vid', 'Convertisseur / distributeur vidéo', 'convertisseur|converter|decimator|distributeur|splitter|scaler', {}, { est: [5, 25] }),
+    R('g-router', 'vid', 'Grille vidéo / routeur', 'grille|routeur video|matrice|router', {}, { est: [50, 150] }),
+    R('g-multiviewer', 'vid', 'Multiviewer', 'multiviewer', {}, { est: [30, 80] }),
+    R('g-laptop', 'vid', 'Ordinateur portable', 'ordinateur|laptop|pc portable|macbook|pc\\b', {}, { est: [30, 60] }),
+    R('g-network', 'vid', 'Réseau (switch, borne Wi-Fi)', 'switch|switch poe|reseau|wifi|wi-fi|borne|point d acces|routeur', {}, { est: [10, 40] }),
+    R('g-rack', 'vid', 'Rack régie complet (baie équipée)', 'rack regie|baie|rack 19|rack', {}, { est: [150, 400] }),
+    R('g-ccu', 'vid', 'Voie de commande caméra (CCU / RCP)', 'ccu|rcp|voie de commande', {}, { est: [80, 200] }),
+    R('g-regiepack', 'vid', 'Régie multicaméra complète (package)', 'regie complete|car regie|ob van|regie mobile|car-regie', {}, { g: ['regie-atem2me', 'regie-hd-jvc', 'regie-hd-sony'] }),
+    // ---- Énergie ----
+    R('ge-100kva', 'nrj', 'Groupe électrogène 100 kVA (chantier, non insonorisé)', 'groupe 100 kva|100 kva', { lx: 393.48, il: 160 }),
+    R('ge-60kva', 'nrj', 'Groupe électrogène 60 kVA (chantier)', 'groupe 60 kva|60 kva', { il: 79 }),
+    R('ge-150kva', 'nrj', 'Groupe électrogène 150 kVA (chantier)', 'groupe 150 kva|150 kva', { il: 153 }),
+    R('g-groupe', 'nrj', 'Groupe électrogène (puissance à préciser)', 'groupe electrogene|generateur|groupe', {}, { g: ['ge-60kva', 'ge-100kva', 'ge-150kva'], note: 'Groupes de chantier : les groupes insonorisés tournage se louent chez Lumex ou Transpalux (sur devis)' }),
+    R('g-distrib', 'nrj', 'Distribution électrique (armoire, boîte P17)', 'armoire electrique|boite de distribution|distribution|p17|armoire', {}, { est: [20, 60] }),
+    R('g-rallonge', 'nrj', 'Rallonges / multiprises / enrouleurs', 'rallonge|multiprise|enrouleur|prolongateur|passe-cable|passe cable', {}, { est: [2, 8] }),
+    R('g-ups', 'nrj', 'Onduleur', 'onduleur|ups', {}, { est: [15, 40] }),
+    // ---- Câblage (par câble et par jour) ----
+    R('cab-sdi', 'cab', 'Câble SDI / BNC', 'cable sdi|sdi|bnc|coax', {}, { est: [2, 5] }),
+    R('cab-hdmi', 'cab', 'Câble HDMI', 'cable hdmi|hdmi', {}, { est: [2, 5] }),
+    R('cab-xlr', 'cab', 'Câble XLR / modulation', 'cable xlr|xlr|modulation|jack', {}, { est: [1, 3] }),
+    R('cab-dmx', 'cab', 'Câble DMX', 'cable dmx|dmx', {}, { est: [1, 3] }),
+    R('cab-rj45', 'cab', 'Câble RJ45 / réseau', 'cable rj45|rj45|ethernet|cat6', {}, { est: [1, 4] }),
+    R('cab-pw', 'cab', 'Câble d\'alimentation', 'cable d alimentation|alimentation|secteur|iec|powercon', {}, { est: [2, 6] }),
+    R('cab-fibre', 'cab', 'Touret fibre / SMPTE', 'fibre|smpte|touret|optique', {}, { est: [20, 60] }),
+    R('cab-multi', 'cab', 'Multipaire', 'multipaire', {}, { est: [15, 40] }),
+    R('g-cable', 'cab', 'Câble (type à préciser)', 'cable|cordon|jarretiere', {}, { est: [1, 5] }),
+    // ---- Transport & véhicules ----
+    R('h7-livraison', 'veh', 'Livraison / reprise camion 10 m³ (Paris)', 'livraison|reprise|enlevement', { h7: 135 }, { u: 'f', note: 'Helium 7 : 135 € HT + 1,50 € / km' }),
+    R('g-van', 'veh', 'Utilitaire 12 à 20 m³ (location)', 'utilitaire|fourgon|camion|porteur|trafic|master|vehicule|van', {}, { est: [90, 160] }),
+    R('g-vl', 'veh', 'Véhicule léger / break', 'voiture|break|vl|ludospace', {}, { est: [50, 90] }),
+    // ---- Divers ----
+    R('g-truss', 'div', 'Structure (truss, totem)', 'truss|totem|pied de levage|structure|portique', {}, { est: [8, 30] }),
+    R('g-prat', 'div', 'Praticable', 'praticable|estrade|scene', {}, { est: [10, 25] }),
+    R('g-fondvert', 'div', 'Fond vert / cyclo (toile + structure)', 'fond vert|cyclo|fond|toile de fond', {}, { est: [40, 150] }),
+    R('g-flight', 'div', 'Flight cases / malles', 'flight|malle|valise', {}, { inc: 1, note: 'Contenants fournis avec le matériel loué' }),
+    R('g-secu', 'div', 'Sécurité (extincteur, trousse de secours)', 'extincteur|trousse de secours|secours', {}, { est: [5, 15] }),
+    R('g-conso', 'div', 'Consommables (gaffer, piles, gélatines…)', 'gaffer|piles|gelatine|consommable|scotch', {}, { u: 'f', est: [50, 200] })
+];
+// Règles d'attribution d'un type générique quand le nom ne correspond à aucun modèle (ordre important)
+
+return { DATE: TARIFS_DATE, LOUEURS0, CATALOG };
+})();
+
+// =====================================================================
+//  MATOS XIII — 🎬 Matériel du projet : liste du matériel du projet en cours (fiche projet commune)
+//  Sources : 🗃️ catalogue, 📦 matos perso, 📥 autres outils (SYNO, PLANO, LUMO, SONO… via la passerelle), saisie libre.
+//  Sorties : 🧳 PACKINGO, 💶 DEVISO, 📚 DOSSIER, 🔎 recherche location (tarifs DEVISO), 📊 Demande de prêt (Excel, modèle).
+// =====================================================================
+const PM = (() => {
+    const GRP = ['IMAGE', 'SON', 'LUMIERE', 'CONSOMMABLES', 'REGIE', 'GRIP'];
+    const GL = { IMAGE: '🎥 Image', SON: '🎚️ Son', LUMIERE: '💡 Lumière', CONSOMMABLES: '🧻 Consommables', REGIE: '🎛️ Régie', GRIP: '🎞️ Grip' };
+    const MAP = { cam: 'IMAGE', opt: 'IMAGE', mach: 'IMAGE', nrj: 'IMAGE', hfv: 'IMAGE', mon: 'IMAGE', son: 'SON', com: 'SON', lum: 'LUMIERE', vid: 'REGIE', rec: 'REGIE', led: 'REGIE', cab: 'REGIE', div: 'CONSOMMABLES', veh: 'CONSOMMABLES' };
+    const guess = (cat, name) => { if (MAP[cat]) return MAP[cat]; const n = fold(name + ' ' + (cat || ''));
+        if (/gaffer|pile|batter|scotch|gelat|consomm|tape|ruban/.test(n)) return 'CONSOMMABLES'; if (/micro|son|audio|perche|hf |zoom|enregistreur audio|casque|intercom/.test(n)) return 'SON';
+        if (/projecteur|led|lumi|panel|fresnel|softbox|dimmer|dmx|eclair/.test(n)) return 'LUMIERE'; if (/melangeur|switcher|regie|atem|stream|convert|sdi|hdmi|cable|enregistreur|serveur/.test(n)) return 'REGIE';
+        if (/pied|grip|travelling|dolly|slider|machin|bras|rotule|clamp/.test(n)) return 'GRIP'; return 'IMAGE'; };
+    const J = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch (e) { return d; } };
+    function proj() { const s = J('xiii.projets', null); const L = s && s.list || []; return L.find(x => x && x.id === s.active) || null; }
+    function cur() { const p = proj(), id = p ? p.id : '_'; P.pm = P.pm || {}; return P.pm[id] = P.pm[id] || { items: [] }; }
+    const add = (name, qty, grp, src) => { name = String(name || '').trim(); if (!name) return; const L = cur().items, x = L.find(i => fold(i.name) === fold(name) && i.grp === grp); if (x) x.qty += qty || 1; else L.push({ id: uid(), name, qty: qty || 1, grp: grp || 'IMAGE', on: true, src: src || '' }); };
+    // ---------- vue ----------
+    function html() {
+        const p = proj(), L = cur().items, n = L.filter(i => i.on).length;
+        return '<div class="mt-bar" style="flex-wrap:wrap"><b>🎬 ' + (p ? esc(p.title || 'Projet sans titre') + (p.debut ? ' <small class="mt-dim">' + frD(p.debut) + (p.fin ? ' → ' + frD(p.fin) : '') + '</small>' : '') : '<span class="mt-dim">Aucune fiche projet active — la liste est rangée dans « sans projet »</span>') + '</b><span style="flex:1"></span>' +
+            '<span class="btn-group"><button data-pa="cat">🗃️ Catalogue</button><button data-pa="parc">📦 Matos perso</button><button data-pa="imp">📥 Autres outils</button><button data-pa="man">✏️ À la main</button></span>' +
+            '<span class="btn-group"><button data-pa="loc">🔎 Location</button><button data-pa="pk">🧳 PACKINGO</button><button data-pa="dv">💶 DEVISO</button><button data-pa="ds">📚 DOSSIER</button><button data-pa="xl" class="btn-active">📊 Demande de prêt</button></span></div>' +
+            (L.length ? GRP.filter(g => L.some(i => i.grp === g)).map(g => '<h3 class="pm-h">' + GL[g] + ' <small class="mt-dim">' + L.filter(i => i.grp === g && i.on).length + ' / ' + L.filter(i => i.grp === g).length + '</small></h3><table class="mt-t pm-t"><tr><th style="width:34px"></th><th>Équipement</th><th style="width:80px">Qté</th><th style="width:170px">Catégorie</th><th class="hm">Source</th><th style="width:40px"></th></tr>' +
+                L.filter(i => i.grp === g).map(i => '<tr data-pi="' + i.id + '"' + (i.on ? '' : ' style="opacity:.45"') + '><td><input type="checkbox" data-k="on"' + (i.on ? ' checked' : '') + ' title="Inclure à l\'export"></td><td><input data-k="name" value="' + esc(i.name) + '" style="width:100%"></td><td><input data-k="qty" type="number" min="1" value="' + i.qty + '" style="width:64px"></td><td><select data-k="grp">' + GRP.map(x => '<option value="' + x + '"' + (x === i.grp ? ' selected' : '') + '>' + GL[x] + '</option>').join('') + '</select></td><td class="hm mt-dim">' + esc(i.src || '') + '</td><td><button data-k="del" title="Retirer">✕</button></td></tr>').join('') + '</table>').join('') +
+                '<p class="mt-dim" style="margin-top:10px">' + n + ' ligne(s) cochée(s) sur ' + L.length + ' — seules les lignes cochées partent à l\'export.</p>'
+                : '<div style="max-width:560px;margin:50px auto;text-align:center;color:var(--text-dim)"><div style="font-size:48px">🎬</div><h2>Matériel du projet</h2><p>Constituez la liste du matériel du projet : depuis le 🗃️ catalogue, votre 📦 matos perso, les listes envoyées par SYNO, PLANO, LUMO, SONO… ou à la main. Exportez-la ensuite en demande de prêt Excel, vers PACKINGO, DEVISO ou DOSSIER.</p></div>');
+    }
+    function bind(c) {
+        c.querySelectorAll('[data-pa]').forEach(b => b.onclick = () => ({ cat: fromCat, parc: fromParc, imp: fromTools, man: manual, loc: rental, pk: () => send('packingo'), dv: () => send('deviso'), ds: toDossier, xl: exportDlg })[b.dataset.pa]());
+        c.querySelectorAll('tr[data-pi]').forEach(tr => { const i = cur().items.find(x => x.id === tr.dataset.pi); if (!i) return;
+            tr.querySelectorAll('[data-k]').forEach(el => { const k = el.dataset.k;
+                if (k === 'del') el.onclick = () => { cur().items = cur().items.filter(x => x !== i); dirty(); render(); };
+                else el.onchange = () => { if (k === 'on') i.on = el.checked; else if (k === 'qty') i.qty = Math.max(1, +el.value || 1); else if (k === 'name') i.name = el.value.trim() || i.name; else i.grp = el.value; dirty(); if (k !== 'name' && k !== 'qty') render(); }; }); });
+    }
+    // ---------- sources ----------
+    function fromCat() {
+        const C = typeof XCAT !== 'undefined' ? XCAT.all() : [];
+        const o = modal('<h3>🗃️ Depuis le catalogue<span class="close-x" onclick="closeModal()">✕</span></h3><label class="fld">Équipement<input id="pc-q" list="pc-l" placeholder="Marque, modèle…" autofocus></label><datalist id="pc-l">' + C.slice(0, 3000).map(i => '<option value="' + esc(XCAT.name(i)) + '">').join('') + '</datalist><label class="fld">Quantité<input id="pc-n" type="number" min="1" value="1"></label><div class="modal-actions"><button onclick="closeModal()">Fermer</button><button class="btn-active" id="pc-ok">➕ Ajouter</button></div>');
+        const go = () => { const q = $('pc-q').value.trim(); if (!q) return; const it = C.find(i => XCAT.name(i) === q); add(q, +$('pc-n').value || 1, guess(it && it.cat, q), 'Catalogue'); dirty(); render(); $('pc-q').value = ''; $('pc-q').focus(); toast('➕ ' + q); };
+        $('pc-ok').onclick = go; $('pc-q').onkeydown = e => { if (e.key === 'Enter') go(); };
+    }
+    function fromParc() {
+        const by = new Map(); P.units.forEach(u => { const x = by.get(u.name) || { name: u.name, cat: u.cat, n: 0 }; x.n++; by.set(u.name, x); });
+        if (!by.size) { toast('Votre matos perso est vide (onglet 📦)'); return; }
+        modal('<h3>📦 Depuis le matos perso<span class="close-x" onclick="closeModal()">✕</span></h3><div style="max-height:55vh;overflow:auto">' + [...by.values()].map((x, k) => '<label style="display:flex;gap:8px;align-items:center;padding:4px 0"><input type="checkbox" data-pp="' + k + '"><span style="flex:1">' + esc(x.name) + '</span><input type="number" min="1" max="' + x.n + '" value="1" data-pq="' + k + '" style="width:60px"><small class="mt-dim">/ ' + x.n + '</small></label>').join('') + '</div><div class="modal-actions"><button onclick="closeModal()">Annuler</button><button class="btn-active" id="pp-ok">➕ Ajouter la sélection</button></div>');
+        const V = [...by.values()]; $('pp-ok').onclick = () => { let n = 0; document.querySelectorAll('[data-pp]').forEach(b => { if (!b.checked) return; const x = V[+b.dataset.pp]; add(x.name, +document.querySelector('[data-pq="' + b.dataset.pp + '"]').value || 1, guess(x.cat, x.name), 'Matos perso'); n++; }); closeModal(); dirty(); render(); toast('➕ ' + n + ' équipement(s)'); };
+    }
+    function fromTools() {
+        const box = (J('xiii.link.outbox', []) || []).filter(d => d && d.kind === 'equipment' && Array.isArray(d.items) && d.items.length && d.from !== 'matos').sort((a, b) => (b.ts || 0) - (a.ts || 0));
+        if (!box.length) { modal('<h3>📥 Depuis les autres outils<span class="close-x" onclick="closeModal()">✕</span></h3><p>Aucune liste en attente. Dans SYNO, PLANO, LUMO, SONO, CADRO… utilisez l\'envoi de liste de matériel (vers PACKINGO ou DEVISO) : la liste apparaîtra ici pendant 7 jours.</p><div class="modal-actions"><button onclick="closeModal()">OK</button></div>'); return; }
+        modal('<h3>📥 Depuis les autres outils<span class="close-x" onclick="closeModal()">✕</span></h3>' + box.map((d, k) => '<label style="display:flex;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--border)"><input type="checkbox" data-pt="' + k + '"><span style="flex:1"><b>' + esc((d.app || d.from || '').toUpperCase()) + '</b> — ' + esc(d.project && d.project.name || '') + '<br><small class="mt-dim">' + d.items.length + ' équipement(s) · ' + new Date(d.ts).toLocaleString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) + '</small></span></label>').join('') + '<div class="modal-actions"><button onclick="closeModal()">Annuler</button><button class="btn-active" id="pt-ok">📥 Importer</button></div>');
+        $('pt-ok').onclick = () => { let n = 0; document.querySelectorAll('[data-pt]').forEach(b => { if (!b.checked) return; const d = box[+b.dataset.pt]; d.items.forEach(it => { add(it.name, +it.qty || 1, guess(it.fam || it.cat, (it.category || '') + ' ' + it.name), (d.app || d.from || '').replace(/ XIII$/, '')); n++; }); }); closeModal(); dirty(); render(); toast('📥 ' + n + ' ligne(s) importée(s)'); };
+    }
+    function manual() {
+        modal('<h3>✏️ Ajouter à la main<span class="close-x" onclick="closeModal()">✕</span></h3><label class="fld">Équipement<input id="pm-n" autofocus></label><div class="fgrid"><label class="fld">Quantité<input id="pm-q" type="number" min="1" value="1"></label><label class="fld">Catégorie<select id="pm-g">' + GRP.map(g => '<option value="' + g + '">' + GL[g] + '</option>').join('') + '</select></label></div><div class="modal-actions"><button onclick="closeModal()">Fermer</button><button class="btn-active" id="pm-ok">➕ Ajouter</button></div>');
+        $('pm-n').oninput = () => { $('pm-g').value = guess('', $('pm-n').value); };
+        const go = () => { const n = $('pm-n').value.trim(); if (!n) return; add(n, +$('pm-q').value || 1, $('pm-g').value, 'Saisie'); dirty(); render(); $('pm-n').value = ''; $('pm-n').focus(); toast('➕ ' + n); };
+        $('pm-ok').onclick = go; $('pm-n').onkeydown = e => { if (e.key === 'Enter') go(); };
+    }
+    const sel = () => cur().items.filter(i => i.on);
+    // ---------- sorties ----------
+    function send(app) {
+        const L = sel(); if (!L.length) { toast('Cochez au moins une ligne'); return; } const p = proj();
+        const d = { format: 'xiii-link', version: 1, kind: 'equipment', id: uid() + uid(), from: 'matos', to: app, app: 'MATOS XIII', ts: Date.now(), created: new Date().toISOString(), project: { name: p ? p.title : '', author: '' }, items: L.map(i => ({ name: i.name, qty: i.qty, category: GL[i.grp].replace(/^\S+ /, ''), note: '' })), cables: [] };
+        try { let box = J('xiii.link.outbox', []) || []; box = box.filter(x => x && Date.now() - (x.ts || 0) < 7 * 864e5 && !(x.to === app && x.from === 'matos')).slice(-8); box.push(d); localStorage.setItem('xiii.link.outbox', JSON.stringify(box)); } catch (e) { toast('⚠️ Stockage plein'); return; }
+        const w = window.open(app + '.html#xlink=' + d.id, '_blank'); toast(w ? 'Liste envoyée à ' + app.toUpperCase() : 'Liste prête : ouvrez ' + app.toUpperCase() + ' (📥 Importer)', 5000);
+    }
+    function table() { const p = proj(); return '<h2>Matériel du projet' + (p && p.title ? ' — ' + esc(p.title) : '') + '</h2>' + GRP.filter(g => sel().some(i => i.grp === g)).map(g => '<h3>' + GL[g] + '</h3><table border="1" cellpadding="5" style="border-collapse:collapse;width:100%"><tr><th align="left">Équipement</th><th>Qté</th></tr>' + sel().filter(i => i.grp === g).map(i => '<tr><td>' + esc(i.name) + '</td><td align="center">' + i.qty + '</td></tr>').join('') + '</table>').join(''); }
+    function toDossier() { if (!sel().length) { toast('Cochez au moins une ligne'); return; } if (typeof xiiiSendToDossier !== 'function') { toast('Envoi vers DOSSIER indisponible'); return; } const p = proj();
+        xiiiSendToDossier({ from: 'matos', app: 'MATOS XIII', project: p ? p.title : '', choices: [{ title: 'Matériel du projet', key: 'matos:projet', keywords: ['matériel', 'liste', 'technique'], sub: sel().length + ' ligne(s) par catégorie', make: async () => ({ html: table() }) }] }); }
+    // ---------- 🔎 location : tarifs DEVISO ----------
+    function rental() {
+        const L = sel(); if (!L.length) { toast('Cochez au moins une ligne'); return; }
+        const T = typeof DVT !== 'undefined' ? DVT : null; if (!T) { toast('Base tarifaire indisponible'); return; }
+        const base = J('devisoXIII.base', {}) || {}, LN = new Map(T.LOUEURS0.map(l => [l[0], l[1]]).concat((base.loueurs || []).map(l => [l.id, l.n])));
+        const refs = T.CATALOG.concat(base.custom || []);
+        const match = n => { const f = ' ' + fold(n).replace(/[^a-z0-9]+/g, ' ') + ' '; let best = null, bs = 0; refs.forEach(r => { [r.n].concat(String(r.k || '').split('|')).forEach(k => { k = fold(k).replace(/[^a-z0-9]+/g, ' ').trim(); if (k.length > 2 && f.includes(' ' + k + ' ') && k.length > bs) { bs = k.length; best = r; } }); }); return best; };
+        const prices = r => { const m = new Map(); Object.entries(r.p || {}).forEach(([l, p]) => m.set(l, +p)); Object.entries((base.prices || {})[r.id] || {}).forEach(([l, o]) => { if (o && isFinite(+o.p)) m.set(l, +o.p); }); return [...m.entries()].sort((a, b) => a[1] - b[1]); };
+        let tot = 0, totHi = 0;
+        const rows = L.map(i => { const r = match(i.name); if (!r) return '<tr><td>' + esc(i.name) + '</td><td>' + i.qty + '</td><td class="mt-dim" colspan="2">Aucune référence — à demander sur devis</td></tr>';
+            const pr = prices(r); if (pr.length) { tot += pr[0][1] * i.qty; totHi += pr[pr.length - 1][1] * i.qty; }
+            let est = !pr.length && r.est ? r.est : null; if (!pr.length && !est && Array.isArray(r.g)) { const v = r.g.map(id => refs.find(x => x.id === id)).filter(Boolean).flatMap(x => prices(x).map(q => q[1])); if (v.length) est = [Math.min(...v), Math.max(...v)]; } if (est) { tot += est[0] * i.qty; totHi += est[1] * i.qty; }
+            return '<tr><td>' + esc(i.name) + '<br><small class="mt-dim">≈ ' + esc(r.n) + '</small></td><td>' + i.qty + '</td><td>' + (pr.length ? pr.slice(0, 4).map(([l, p], k) => (k ? '' : '🏆 ') + esc(LN.get(l) || l) + ' <b>' + p + ' €</b>').join('<br>') : est ? 'Estimation ' + est[0] + '–' + est[1] + ' €' : r.inc ? 'Inclus' : 'Sur devis') + '</td><td>' + (pr.length ? (pr[0][1] * i.qty) + ' €' : '') + '</td></tr>'; }).join('');
+        modal('<h3>🔎 Recherche de location (tarifs DEVISO, HT / jour)<span class="close-x" onclick="closeModal()">✕</span></h3><div style="max-height:58vh;overflow:auto"><table class="mt-t"><tr><th>Équipement</th><th>Qté</th><th>Loueurs (moins cher d\'abord)</th><th>Total / j</th></tr>' + rows + '</table></div><p><b>Fourchette : ' + Math.round(tot) + ' – ' + Math.round(totHi) + ' € HT / jour</b> <small class="mt-dim">· tarifs publics indicatifs (' + esc(T.DATE) + ') + vos prix DEVISO</small></p><div class="modal-actions"><button onclick="closeModal()">Fermer</button><button class="btn-active" id="rl-dv">💶 Chiffrer dans DEVISO</button></div>', 'wide');
+        $('rl-dv').onclick = () => { closeModal(); send('deviso'); };
+    }
+    // ---------- 📊 Demande de prêt (modèle Excel) ----------
+    const KMOI = 'matosXIII.moi', KXF = 'matosXIII.xlfields';
+    function srcVals(src) { const p = proj() || {}, m = J(KMOI, {}) || {};
+        if (src === 'proj') return { nom: p.producteur || p.realisation || '', tel: (String(p.contact || '').match(/(\+?\d[\d .]{7,}\d)/) || [''])[0], f1: p.production || '', f2: p.client || '' };
+        if (src === 'moi') return { nom: m.nom || ((J('xiii.drive', {}) || {}).me || {}).name || '', tel: m.tel || '', f1: m.f1 || '', f2: m.f2 || '' };
+        return null; }
+    function exportDlg() {
+        const L = sel(); if (!L.length) { toast('Cochez au moins une ligne'); return; }
+        const p = proj() || {}, F0 = J(KXF, null) || [{ k: 'f1', lab: 'FILIÈRE / SERVICE' }, { k: 'f2', lab: 'GROUPE' }];
+        const fRow = f => '<div class="xf-r" data-k="' + f.k + '" style="display:flex;gap:10px;align-items:flex-end"><label class="fld" style="flex:1">Intitulé<input class="xf-lab" value="' + esc(f.lab) + '"></label><label class="fld" style="flex:1">Valeur (facultatif)<input class="xf-val"></label><button class="xf-del" title="Supprimer ce champ" style="flex:0 0 auto;margin-bottom:4px">✕</button></div>';
+        modal('<h3>📊 Demande de prêt (Excel)<span class="close-x" onclick="closeModal()">✕</span></h3>' +
+            '<div class="mt-bar" style="gap:6px;flex-wrap:wrap"><span>Coordonnées :</span><span class="btn-group"><button data-src="proj">🎬 Du projet</button><button data-src="moi">👤 Mes infos</button><button data-src="man">✏️ À la main</button></span></div>' +
+            '<div class="fgrid"><label class="fld">Nom & prénom<input id="xd-nom"></label><label class="fld">Téléphone<input id="xd-tel"></label></div><div id="xf-list">' + F0.map(fRow).join('') + '</div><button id="xf-add" style="margin:4px 0 10px">＋ Ajouter un champ</button>' +
+            '<div class="fgrid"><label class="fld w2">Site de livraison<input id="xd-site" placeholder="Saisissez le site"></label><label class="fld w2">Projet<input id="xd-proj" value="' + esc(p.title || '') + '"></label>' +
+            '<label class="fld">Date de la demande<input id="xd-d0" type="date" value="' + today() + '"></label><span></span>' +
+            '<label class="fld">Sortie du matériel<input id="xd-d1" type="date" value="' + (p.debut ? addD(p.debut, -1) : '') + '"></label><label class="fld">Heure de sortie<input id="xd-h1" type="time"></label>' +
+            '<label class="fld">Retour du matériel<input id="xd-d2" type="date" value="' + (p.fin || p.debut ? addD(p.fin || p.debut, 1) : '') + '"></label><label class="fld">Heure de retour<input id="xd-h2" type="time"></label></div>' +
+            '<label style="display:flex;gap:6px;align-items:center;margin:6px 0"><input type="checkbox" id="xd-mem" checked> Mémoriser comme « Mes infos »</label><p class="mt-dim" style="font-size:12px">' + L.length + ' ligne(s) cochée(s) dans le modèle (Image, Son, Lumière, Consommables, Régie, Grip) — lignes ajoutées si besoin.</p>' +
+            '<div class="modal-actions"><button onclick="closeModal()">Annuler</button><button class="btn-active" id="xd-ok">📊 Générer l\'Excel</button></div>', 'wide');
+        const fill = src => { document.querySelectorAll('[data-src]').forEach(b => b.classList.toggle('btn-active', b.dataset.src === src)); const v = srcVals(src); if (!v) { ['xd-nom', 'xd-tel'].forEach(i => $(i).value = ''); document.querySelectorAll('.xf-r .xf-val').forEach(i => i.value = ''); $('xd-nom').focus(); return; }
+            $('xd-nom').value = v.nom; $('xd-tel').value = v.tel; document.querySelectorAll('.xf-r').forEach(r => { r.querySelector('.xf-val').value = v[r.dataset.k] || ((J(KMOI, {}) || {})[r.dataset.k] && src === 'moi' ? J(KMOI, {})[r.dataset.k] : ''); }); };
+        document.querySelectorAll('[data-src]').forEach(b => b.onclick = () => fill(b.dataset.src));
+        const wire = () => document.querySelectorAll('.xf-del').forEach(b => b.onclick = () => b.closest('.xf-r').remove()); wire();
+        $('xf-add').onclick = () => { $('xf-list').insertAdjacentHTML('beforeend', fRow({ k: 'x' + uid(), lab: 'NOUVEAU CHAMP' })); wire(); };
+        fill(J(KMOI, null) ? 'moi' : 'proj');
+        $('xd-ok').onclick = async () => {
+            const fields = [...document.querySelectorAll('.xf-r')].map(r => ({ k: r.dataset.k, lab: r.querySelector('.xf-lab').value.trim() || 'CHAMP', val: r.querySelector('.xf-val').value.trim() }));
+            const D = { nom: $('xd-nom').value.trim(), tel: $('xd-tel').value.trim(), fields, site: $('xd-site').value.trim(), proj: $('xd-proj').value.trim(), d0: $('xd-d0').value, d1: $('xd-d1').value, h1: $('xd-h1').value, d2: $('xd-d2').value, h2: $('xd-h2').value };
+            try { localStorage.setItem(KXF, JSON.stringify(fields.map(f => ({ k: f.k, lab: f.lab })))); if ($('xd-mem').checked) { const m = { nom: D.nom, tel: D.tel }; fields.forEach(f => m[f.k] = f.val); localStorage.setItem(KMOI, JSON.stringify(m)); } } catch (e) { }
+            const b = $('xd-ok'); b.disabled = true; b.textContent = 'Génération…';
+            try { const blob = await buildXlsx(D, sel()); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'Demande de pret - ' + (D.proj || 'projet').replace(/[\\/:*?"<>|]/g, '') + '.xlsx'; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 2000); closeModal(); toast('📊 Demande de prêt générée'); }
+            catch (e) { b.disabled = false; b.textContent = '📊 Générer l\'Excel'; toast('⚠️ ' + (e.message || e), 6000); }
+        };
+    }
+    async function zipLib() { if (window.JSZip) return window.JSZip; await new Promise((ok, ko) => { const s = document.createElement('script'); s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js'; s.onload = ok; s.onerror = () => ko(new Error('JSZip indisponible (hors ligne ?)')); document.head.appendChild(s); }); return window.JSZip; }
+    const xe = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    const serial = s => { const [y, m, d] = s.split('-').map(Number); return (Date.UTC(y, m - 1, d) - Date.UTC(1899, 11, 30)) / 864e5; };
+    const tser = s => { const [h, m] = s.split(':').map(Number); return (h * 60 + m) / 1440; };
+    const colN = c => c.charCodeAt(0) - 64;
+    // écrit une cellule (crée la ligne / la cellule si besoin) ; v null = vide ; style s facultatif
+    function setCell(x, ref, v, s) {
+        const row = +ref.replace(/^[A-Z]+/, ''), col = ref.replace(/\d+$/, '');
+        const body = v == null || v === '' ? null : typeof v === 'number' ? '<v>' + v + '</v>' : '<is><t xml:space="preserve">' + xe(v) + '</t></is>';
+        const mk = st => '<c r="' + ref + '"' + (st ? ' s="' + st + '"' : '') + (body && typeof v !== 'number' ? ' t="inlineStr"' : '') + (body ? '>' + body + '</c>' : '/>');
+        const re = new RegExp('<c r="' + ref + '"([^>]*?)(?:/>|>[\\s\\S]*?</c>)');
+        if (re.test(x)) return x.replace(re, (m, a) => mk(s || (a.match(/ s="(\d+)"/) || [])[1]));
+        const rre = new RegExp('<row r="' + row + '"([^>]*)>([\\s\\S]*?)</row>|<row r="' + row + '"([^>]*)/>');
+        if (rre.test(x)) return x.replace(rre, (m, a, inner, a2) => { inner = inner || ''; const cells = inner.match(/<c r="[A-Z]+\d+"[\s\S]*?(?:\/>|<\/c>)/g) || []; cells.push(mk(s)); cells.sort((p, q) => colN(p.match(/r="([A-Z]+)/)[1]) - colN(q.match(/r="([A-Z]+)/)[1])); return '<row r="' + row + '"' + (a || a2 || '') + '>' + cells.join('') + '</row>'; });
+        // ligne absente : on l'insère à sa place
+        const nr = '<row r="' + row + '" spans="1:9" ht="32.1" customHeight="1">' + mk(s) + '</row>';
+        let done = false; x = x.replace(/<row r="(\d+)"/g, (m, r) => { if (!done && +r > row) { done = true; return nr + m; } return m; });
+        return done ? x : x.replace('</sheetData>', nr + '</sheetData>');
+    }
+    async function buildXlsx(D, L) {
+        const JSZip = await zipLib(); const r = await fetch('modeles/demande_pret.xlsx'); if (!r.ok) throw new Error('Modèle introuvable');
+        const z = await JSZip.loadAsync(await r.arrayBuffer()); const f = 'xl/worksheets/sheet1.xml'; let x = await z.file(f).async('string');
+        if (D.d0) x = setCell(x, 'C6', serial(D.d0)); if (D.d1) x = setCell(x, 'C8', serial(D.d1)); else x = setCell(x, 'C8', null); if (D.d2) x = setCell(x, 'C11', serial(D.d2)); else x = setCell(x, 'C11', null);
+        x = setCell(x, 'C9', D.h1 ? tser(D.h1) : null); x = setCell(x, 'C12', D.h2 ? tser(D.h2) : null);
+        x = setCell(x, 'H6', D.nom || null); x = setCell(x, 'H7', D.tel || null); x = setCell(x, 'G18', D.proj || null); x = setCell(x, 'H11', D.site || null); x = setCell(x, 'G11', 'SITE DE LIVRAISON :');
+        // champs libres : G8, G9 puis G12, G13 ; au-delà, regroupés en G13
+        const slots = [8, 9, 12, 13], F = D.fields.slice(); const extra = F.splice(3);
+        if (extra.length && F[3]) { } F.forEach((fl, k) => { const rw = slots[k]; x = setCell(x, 'G' + rw, fl.lab.toUpperCase().replace(/\s*:?\s*$/, ' :'), '8'); x = setCell(x, 'H' + rw, fl.val || null, '26'); if (rw > 9) x = setCell(x, 'I' + rw, null, '26'); });
+        if (extra.length) { x = setCell(x, 'G13', 'AUTRES :', '8'); x = setCell(x, 'H13', extra.map(e => e.lab + ' : ' + e.val).join(' · '), '26'); x = setCell(x, 'I13', null, '26'); }
+        for (let k = F.length + (extra.length ? 1 : 0); k < 4; k++) { const rw = slots[k]; if (rw <= 9) { x = setCell(x, 'G' + rw, null); x = setCell(x, 'H' + rw, null); } }
+        const mc = []; [12, 13].forEach(rw => { if (new RegExp('<c r="H' + rw + '"').test(x)) mc.push('H' + rw + ':I' + rw); });
+        // liste « site » : saisie libre (plus de liste déroulante)
+        x = x.replace(/<dataValidation [^>]*sqref="H11:I11"[\s\S]*?<\/dataValidation>/, '').replace(/<dataValidations count="(\d+)"/, (m, n) => '<dataValidations count="' + Math.max(0, n - 1) + '"').replace(/<x14:dataValidation [^>]*>(?:(?!<\/x14:dataValidation>)[\s\S])*?H11[\s\S]*?<\/x14:dataValidation>/g, '');
+        // matériel : zones du modèle, débordement en bas de page sous un intitulé « (suite) »
+        const Z = { IMAGE: ['B', 23, 37], SON: ['G', 23, 34], LUMIERE: ['B', 40, 67], CONSOMMABLES: ['G', 40, 67], REGIE: ['B', 70, 9999], GRIP: ['G', 70, 9999] };
+        const qc = c => c === 'B' ? 'C' : 'H', next = { B: 70, G: 70 }, over = { B: [], G: [] };
+        ['REGIE', 'GRIP', 'IMAGE', 'SON', 'LUMIERE', 'CONSOMMABLES'].forEach(g => { const [c, a, b] = Z[g], it = L.filter(i => i.grp === g); let rw = a;
+            it.forEach(i => { if (rw > b) { over[c].push([g, i]); return; } x = setCell(x, c + rw, i.name); x = setCell(x, qc(c) + rw, +i.qty || 1); rw++; }); if (b === 9999) next[c] = rw; });
+        ['B', 'G'].forEach(c => { let rw = next[c], last = '';
+            over[c].forEach(([g, i]) => { if (g !== last) { if (rw > 70) rw++; x = setCell(x, c + rw, g + ' (SUITE)', c === 'B' ? '27' : '30'); last = g; rw++; } x = setCell(x, c + rw, i.name, '7'); x = setCell(x, qc(c) + rw, +i.qty || 1, '7'); x = setCell(x, (c === 'B' ? 'D' : 'I') + rw, null, '7'); rw++; }); });
+        if (mc.length) x = x.replace(/<mergeCells count="(\d+)">/, (m, n) => '<mergeCells count="' + (+n + mc.length) + '">' + mc.map(r => '<mergeCell ref="' + r + '"/>').join(''));
+        const maxR = Math.max(436, ...[...x.matchAll(/<row r="(\d+)"/g)].map(m => +m[1])); x = x.replace(/<dimension ref="[^"]*"\/>/, '<dimension ref="A2:I' + maxR + '"/>');
+        z.file(f, x);
+        return z.generateAsync({ type: 'blob', mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    }
+    return { html, bind, buildXlsx, guess, add, cur, GRP };
 })();
 
 // =====================================================================
@@ -1224,6 +1756,7 @@ function setView(v) { prefs.view = v; savePrefs(); document.querySelectorAll('#v
 function stats() { const n = P.units.length, o = P.units.filter(u => out(u.id)).length, bad = P.units.filter(u => u.state === 'panne' || u.state === 'hs').length, rv = P.units.filter(u => u.nextRev && u.nextRev <= addD(today(), 14)).length, nc = P.resas.filter(r => r.to >= today() && conflicts(r).some(c => c.hard)).length; $('mt-stats').innerHTML = '<span><b>' + n + '</b> unité(s)</span><span><b>' + o + '</b> sortie(s)</span>' + (bad ? '<span class="bad"><b>' + bad + '</b> en panne / HS</span>' : '') + (rv ? '<span><b>' + rv + '</b> révision(s) sous 14 j</span>' : '') + (nc ? '<span class="bad"><b>' + nc + '</b> réservation(s) en conflit</span>' : ''); }
 function render() { stats(); const v = prefs.view, c = $('content'); document.body.classList.toggle('mt-cat', v === 'cat');
     if (v === 'cat') { if (!document.getElementById('mt-cat')) c.innerHTML = '<iframe id="mt-cat" src="catalogue.html?embed=1" title="Catalogue générique"></iframe>'; return; } // 🗃️ CATALOGUE intégré à MATOS
+    if (v === 'proj') { c.innerHTML = PM.html(); PM.bind(c); return; }
     c.innerHTML = v === 'resa' ? resaHtml() : v === 'plan' ? planHtml() : v === 'scan' ? scanHtml() : parcHtml(); bind(v); }
 function parcHtml() {
     const Q = fold(F.q), L = P.units.filter(u => (!F.st || u.state === F.st) && (!F.cat || u.cat === F.cat) && (!Q || fold([u.name, u.sn, u.code, u.loc, u.notes].join(' ')).includes(Q)));
@@ -1382,9 +1915,9 @@ function loadExample() {
     };
     if (P.units.length) confirmBox('Charger l\'exemple ?', 'Le parc actuel sera remplacé. Exportez-le d\'abord si besoin.', 'Charger', go, true); else go();
 }
-addEventListener('keydown', e => { if (e.target.matches('input,textarea,select') || e.ctrlKey || e.metaKey || e.altKey) { if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') { e.preventDefault(); saveAll(true); } return; } if (e.key === '1') setView('parc'); else if (e.key === '2') setView('resa'); else if (e.key === '3') setView('plan'); else if (e.key === '4') setView('scan'); if (e.key === '5') setView('cat'); else if (e.key === 'Escape') closeModal(); });
+addEventListener('keydown', e => { if (e.target.matches('input,textarea,select') || e.ctrlKey || e.metaKey || e.altKey) { if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') { e.preventDefault(); saveAll(true); } return; } if (e.key === '6') setView('proj'); else if (e.key === '1') setView('parc'); else if (e.key === '2') setView('resa'); else if (e.key === '3') setView('plan'); else if (e.key === '4') setView('scan'); if (e.key === '5') setView('cat'); else if (e.key === 'Escape') closeModal(); });
 addEventListener('storage', e => { if (e.key === KEY) { load(); render(); } });
-load(); applyTheme(); setView(/[?&]v=cat/.test(location.search) ? 'cat' : (prefs.view || 'parc'));
+load(); applyTheme(); setView(/[?&]v=cat/.test(location.search) ? 'cat' : /[?&]v=proj/.test(location.search) ? 'proj' : (prefs.view || 'parc'));
 function renderAll() { render(); }
 
 // ---------- 🧳 retour par caisse : scanner le QR d'une étiquette PACKINGO → tout son contenu revient d'un coup ----------
@@ -2264,7 +2797,7 @@ var XRED = (function () {
         theme: { get: () => prefs.theme, set: t => { prefs.theme = t; applyTheme(); savePrefs(); } },
         help: [{ icon: '📦', label: 'Comment ça marche ?', sub: 'Parc, réservations, conflits, sorties / retours, étiquettes QR', run: () => modal('<h3>📦 MATOS XIII<span class="close-x" onclick="closeModal()">✕</span></h3><p><b>1. Parc</b> : ajoutez vos équipements depuis le 🗃️ catalogue commun (ou à la main) avec leurs numéros de série. Chaque unité reçoit un code MAT-0001 et une 🏷️ étiquette QR à imprimer.</p><p><b>2. Réservations</b> : projet, dates, option ou ferme. MATOS signale les conflits : unité déjà réservée, en panne, en révision. Envoyez la liste vers 🧳 PACKINGO ou 💶 DEVISO.</p><p><b>3. Planning</b> : occupation de chaque unité sur 5 semaines.</p><p><b>4. Sorties / retours</b> : scannez le QR (caméra du téléphone) ou le code (douchette) : une unité au dépôt sort, une unité sortie revient, avec son état.</p><p>Raccourcis : 1 à 4 pour les vues, Ctrl+S.</p><div class="mb-actions"><button onclick="closeModal()">Compris</button></div>') }, { icon: '📐', label: 'Charger l\'exemple', run: loadExample }],
         sections: [{ id: 'mt', icon: '📦', title: 'Parc', open: true, fields: [{ k: 'view', label: 'Vue à l\'ouverture', type: 'select', def: 'parc', options: [['parc', 'Parc'], ['resa', 'Réservations'], ['plan', 'Planning'], ['scan', 'Sorties / retours']] }, { k: 'loc', label: 'Dépôt par défaut', type: 'text', def: '' }] }],
-        apply(S, keys) { if (!keys) { if (S.view && S.view !== prefs.view && !/[?&]v=cat/.test(location.search)) setView(S.view); } if (S.loc && !prefs.loc) { prefs.loc = S.loc; savePrefs(); } }
+        apply(S, keys) { if (!keys) { if (S.view && S.view !== prefs.view && !/[?&]v=(cat|proj)/.test(location.search)) setView(S.view); } if (S.loc && !prefs.loc) { prefs.loc = S.loc; savePrefs(); } }
     });
 })();
 
