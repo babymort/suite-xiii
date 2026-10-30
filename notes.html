@@ -86,6 +86,39 @@
     }
     // canaux de diffusion entre onglets : propres au projet (sauf la file ENCODO, commune)
     if (P && window.BroadcastChannel) { var BC = window.BroadcastChannel, W = function (n) { return new BC(/^xiii-encodo/.test(String(n)) ? n : P + n); }; W.prototype = BC.prototype; window.BroadcastChannel = W; }
+    // clés qui appartiennent à un outil (hors préférences et bibliothèques communes)
+    var APPS = /^(moodo|storyboardo|decoup|scripto|casto|planno|calendrier|callsheeto|transporto|deviso|ressourco|controle|importo|dossier|repero|cadro|syno|plano|conduco|graphico|melango|runo|sono|lumo|matos|catalogue|packingo|posto|soustitro|backupo|encodo|direct|ludo|jour|index|hub)$/i;
+    function own(app, k) {
+        if (!k || G.test(k) || /^xiii\.(projets|pass|link|share|files|dash|pcfg|drive|m\.|teamtab|cslive|meteo|resume|draft|inbox|app\.cfg|deleg|acc|wsbak|charte|outbox|start|undo\.|resume)/.test(k)) {
+            var m0 = /^xiii\.(undo|notes|memo)\.([a-z]+)/.exec(k); return !!(m0 && m0[2] === app && !G.test(k));
+        }
+        if (/^synoptique_/.test(k)) return app === 'syno';
+        var m = /^([a-z]+?)XIII[._]/i.exec(k); if (m) return m[1].toLowerCase() === app;
+        m = /^xiii\.([a-z]+)[._]/.exec(k); if (m) { if (m[1] === app) return true; m = /^xiii\.[a-z]+\.([a-z]+)/.exec(k); return !!(m && m[1] === app); }
+        m = /^([a-z]+)[._-]/i.exec(k); if (m && APPS.test(m[1])) return m[1].toLowerCase() === app;
+        return false;
+    }
+    var px = function (i) { return !i || i === 'main' ? '' : 'xws.' + i + '.'; };
+    var lg = function (k, p) { if (p) return k.indexOf(p) === 0 ? k.slice(p.length) : null; return k.indexOf('xws.') === 0 ? null : k; };
+    function copyDB(n, from, to) { return new Promise(function (res) { if (!F) return res(0);
+        var a = op.call(F, from + n); a.onerror = function () { res(0); }; a.onsuccess = function () { var A = a.result, st = [].slice.call(A.objectStoreNames); if (!st.length) { A.close(); return res(0); }
+            dd.call(F, to + n).onsuccess = go; function go() { var b = op.call(F, to + n, A.version); b.onupgradeneeded = function () { var B = b.result, t = a.result.transaction(st, 'readonly'); st.forEach(function (s) { var o = t.objectStore(s), d = B.createObjectStore(s, { keyPath: o.keyPath, autoIncrement: o.autoIncrement }); [].slice.call(o.indexNames).forEach(function (x) { var ix = o.index(x); d.createIndex(x, ix.keyPath, { unique: ix.unique, multiEntry: ix.multiEntry }); }); }); };
+                b.onerror = function () { A.close(); res(0); };
+                b.onsuccess = function () { var B = b.result, n2 = 0, t = A.transaction(st, 'readonly'), w = B.transaction(st, 'readwrite'), left = st.length;
+                    st.forEach(function (s) { var o = t.objectStore(s), d = w.objectStore(s), kp = o.keyPath; o.openCursor().onsuccess = function (e) { var c = e.target.result; if (!c) { return; } try { if (kp == null) d.put(c.value, c.key); else d.put(c.value); n2++; } catch (x) { } c.continue(); }; });
+                    w.oncomplete = function () { A.close(); B.close(); res(n2); }; w.onerror = function () { A.close(); B.close(); res(n2); }; }; } }; }); }
+    function copyTool(app, to) {
+        var tp = px(to); if (tp === P) return Promise.resolve({ keys: 0, dbs: 0, same: 1 });
+        var src = window.XWS.toolKeys(app), old = window.XWS.toolKeys(app, to), bak = { at: Date.now(), keys: {} };
+        old.forEach(function (k) { bak.keys[k] = rg(tp + k); });
+        if (old.length) { try { rs(tp + 'xiii.wsbak.' + app, JSON.stringify(bak)); } catch (e) { } }
+        old.forEach(function (k) { rr(tp + k); }); var n = 0;
+        try { src.forEach(function (k) { rs(tp + k, rg(P + k)); n++; }); }
+        catch (e) { src.forEach(function (k) { rr(tp + k); }); for (var k in bak.keys) { try { rs(tp + k, bak.keys[k]); } catch (x) { } } return Promise.reject(new Error('Stockage du navigateur plein')); }
+        var rx = new RegExp('^' + app + 'XIII', 'i');
+        var L = dbs ? dbs.call(F).then(function (a) { return a.map(function (d) { return lg(d.name || '', P); }).filter(function (x) { return x && rx.test(x); }); }).catch(function () { return []; }) : Promise.resolve([]);
+        return L.then(function (names) { return Promise.all(names.map(function (x) { return copyDB(x, P, tp); })).then(function (r) { return { keys: n, dbs: names.length, recs: r.reduce(function (a, b) { return a + b; }, 0), replaced: old.length }; }); });
+    }
     var find = function (i) { return reg().list.find(function (w) { return w.id === i; }) || null; };
     window.XWS = {
         id: id, prefix: P, colors: COLORS, shell: inShell,
@@ -103,6 +136,12 @@
         remove: function (i) { if (!i || i === 'main') return false; var p = 'xws.' + i + '.'; rkeys().forEach(function (k) { if (k.indexOf(p) === 0) rr(k); });
             if (dbs) dbs.call(F).then(function (a) { a.forEach(function (d) { if (d.name && d.name.indexOf(p) === 0) dd.call(F, d.name); }); }).catch(function () { });
             var r = reg(); r.list = r.list.filter(function (w) { return w.id !== i; }); if (r.cur === i) r.cur = 'main'; put(r); return true; },
+        // ---- copier les données d'un outil vers le même outil d'un autre projet XIII ----
+        own: own,
+        toolKeys: function (app, i) { var p = i === undefined ? P : (i === 'main' ? '' : 'xws.' + i + '.'); return rkeys().map(function (k) { return lg(k, p); }).filter(function (k) { return k != null && own(app, k); }); },
+        copyTool: function (app, to) { return copyTool(app, to); },
+        hasBackup: function (app, to) { return !!rg(px(to) + 'xiii.wsbak.' + app); },
+        restoreTool: function (app, to) { var tp = px(to), b = J(rg(tp + 'xiii.wsbak.' + app)); if (!b) return false; this.toolKeys(app, to).forEach(function (k) { rr(tp + k); }); for (var k in b.keys) { try { rs(tp + k, b.keys[k]); } catch (e) { } } rr(tp + 'xiii.wsbak.' + app); return true; },
         // lire une clé d'un autre projet (ex. sa fiche) sans basculer
         peek: function (i, k) { return rg((i === 'main' ? '' : 'xws.' + i + '.') + k); }
     };

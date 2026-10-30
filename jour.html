@@ -90,6 +90,39 @@
     }
     // canaux de diffusion entre onglets : propres au projet (sauf la file ENCODO, commune)
     if (P && window.BroadcastChannel) { var BC = window.BroadcastChannel, W = function (n) { return new BC(/^xiii-encodo/.test(String(n)) ? n : P + n); }; W.prototype = BC.prototype; window.BroadcastChannel = W; }
+    // clés qui appartiennent à un outil (hors préférences et bibliothèques communes)
+    var APPS = /^(moodo|storyboardo|decoup|scripto|casto|planno|calendrier|callsheeto|transporto|deviso|ressourco|controle|importo|dossier|repero|cadro|syno|plano|conduco|graphico|melango|runo|sono|lumo|matos|catalogue|packingo|posto|soustitro|backupo|encodo|direct|ludo|jour|index|hub)$/i;
+    function own(app, k) {
+        if (!k || G.test(k) || /^xiii\.(projets|pass|link|share|files|dash|pcfg|drive|m\.|teamtab|cslive|meteo|resume|draft|inbox|app\.cfg|deleg|acc|wsbak|charte|outbox|start|undo\.|resume)/.test(k)) {
+            var m0 = /^xiii\.(undo|notes|memo)\.([a-z]+)/.exec(k); return !!(m0 && m0[2] === app && !G.test(k));
+        }
+        if (/^synoptique_/.test(k)) return app === 'syno';
+        var m = /^([a-z]+?)XIII[._]/i.exec(k); if (m) return m[1].toLowerCase() === app;
+        m = /^xiii\.([a-z]+)[._]/.exec(k); if (m) { if (m[1] === app) return true; m = /^xiii\.[a-z]+\.([a-z]+)/.exec(k); return !!(m && m[1] === app); }
+        m = /^([a-z]+)[._-]/i.exec(k); if (m && APPS.test(m[1])) return m[1].toLowerCase() === app;
+        return false;
+    }
+    var px = function (i) { return !i || i === 'main' ? '' : 'xws.' + i + '.'; };
+    var lg = function (k, p) { if (p) return k.indexOf(p) === 0 ? k.slice(p.length) : null; return k.indexOf('xws.') === 0 ? null : k; };
+    function copyDB(n, from, to) { return new Promise(function (res) { if (!F) return res(0);
+        var a = op.call(F, from + n); a.onerror = function () { res(0); }; a.onsuccess = function () { var A = a.result, st = [].slice.call(A.objectStoreNames); if (!st.length) { A.close(); return res(0); }
+            dd.call(F, to + n).onsuccess = go; function go() { var b = op.call(F, to + n, A.version); b.onupgradeneeded = function () { var B = b.result, t = a.result.transaction(st, 'readonly'); st.forEach(function (s) { var o = t.objectStore(s), d = B.createObjectStore(s, { keyPath: o.keyPath, autoIncrement: o.autoIncrement }); [].slice.call(o.indexNames).forEach(function (x) { var ix = o.index(x); d.createIndex(x, ix.keyPath, { unique: ix.unique, multiEntry: ix.multiEntry }); }); }); };
+                b.onerror = function () { A.close(); res(0); };
+                b.onsuccess = function () { var B = b.result, n2 = 0, t = A.transaction(st, 'readonly'), w = B.transaction(st, 'readwrite'), left = st.length;
+                    st.forEach(function (s) { var o = t.objectStore(s), d = w.objectStore(s), kp = o.keyPath; o.openCursor().onsuccess = function (e) { var c = e.target.result; if (!c) { return; } try { if (kp == null) d.put(c.value, c.key); else d.put(c.value); n2++; } catch (x) { } c.continue(); }; });
+                    w.oncomplete = function () { A.close(); B.close(); res(n2); }; w.onerror = function () { A.close(); B.close(); res(n2); }; }; } }; }); }
+    function copyTool(app, to) {
+        var tp = px(to); if (tp === P) return Promise.resolve({ keys: 0, dbs: 0, same: 1 });
+        var src = window.XWS.toolKeys(app), old = window.XWS.toolKeys(app, to), bak = { at: Date.now(), keys: {} };
+        old.forEach(function (k) { bak.keys[k] = rg(tp + k); });
+        if (old.length) { try { rs(tp + 'xiii.wsbak.' + app, JSON.stringify(bak)); } catch (e) { } }
+        old.forEach(function (k) { rr(tp + k); }); var n = 0;
+        try { src.forEach(function (k) { rs(tp + k, rg(P + k)); n++; }); }
+        catch (e) { src.forEach(function (k) { rr(tp + k); }); for (var k in bak.keys) { try { rs(tp + k, bak.keys[k]); } catch (x) { } } return Promise.reject(new Error('Stockage du navigateur plein')); }
+        var rx = new RegExp('^' + app + 'XIII', 'i');
+        var L = dbs ? dbs.call(F).then(function (a) { return a.map(function (d) { return lg(d.name || '', P); }).filter(function (x) { return x && rx.test(x); }); }).catch(function () { return []; }) : Promise.resolve([]);
+        return L.then(function (names) { return Promise.all(names.map(function (x) { return copyDB(x, P, tp); })).then(function (r) { return { keys: n, dbs: names.length, recs: r.reduce(function (a, b) { return a + b; }, 0), replaced: old.length }; }); });
+    }
     var find = function (i) { return reg().list.find(function (w) { return w.id === i; }) || null; };
     window.XWS = {
         id: id, prefix: P, colors: COLORS, shell: inShell,
@@ -107,6 +140,12 @@
         remove: function (i) { if (!i || i === 'main') return false; var p = 'xws.' + i + '.'; rkeys().forEach(function (k) { if (k.indexOf(p) === 0) rr(k); });
             if (dbs) dbs.call(F).then(function (a) { a.forEach(function (d) { if (d.name && d.name.indexOf(p) === 0) dd.call(F, d.name); }); }).catch(function () { });
             var r = reg(); r.list = r.list.filter(function (w) { return w.id !== i; }); if (r.cur === i) r.cur = 'main'; put(r); return true; },
+        // ---- copier les données d'un outil vers le même outil d'un autre projet XIII ----
+        own: own,
+        toolKeys: function (app, i) { var p = i === undefined ? P : (i === 'main' ? '' : 'xws.' + i + '.'); return rkeys().map(function (k) { return lg(k, p); }).filter(function (k) { return k != null && own(app, k); }); },
+        copyTool: function (app, to) { return copyTool(app, to); },
+        hasBackup: function (app, to) { return !!rg(px(to) + 'xiii.wsbak.' + app); },
+        restoreTool: function (app, to) { var tp = px(to), b = J(rg(tp + 'xiii.wsbak.' + app)); if (!b) return false; this.toolKeys(app, to).forEach(function (k) { rr(tp + k); }); for (var k in b.keys) { try { rs(tp + k, b.keys[k]); } catch (e) { } } rr(tp + 'xiii.wsbak.' + app); return true; },
         // lire une clé d'un autre projet (ex. sa fiche) sans basculer
         peek: function (i, k) { return rg((i === 'main' ? '' : 'xws.' + i + '.') + k); }
     };
@@ -5736,7 +5775,11 @@ const XCALEV = (() => {
     const cs = J('callsheetoXIII.project'); if (cs) (cs.days || []).forEach(d => add('callsheeto', d.date, d.date, '🎬 ' + (d.name || 'Tournage') + (d.title ? ' — ' + d.title : ''), (cs.name || '') + ((d.crew || []).length ? ' · ' + d.crew.length + ' personne(s)' : '') + ((d.locations || []).length ? ' · ' + d.locations.map(l => l.name).filter(Boolean).join(', ') : ''), d.times && d.times.general ? d.times.general : ''));
     const cd = J('conducoXIII.project'); if (cd) (cd.tabs || []).forEach(t => t.date && add('conduco', t.date, t.date, '🔴 ' + (t.name || 'Conducteur'), cd.name || '', t.start || ''));
     const rp = J('reperoXIII.project'); if (rp) (rp.spots || []).forEach(s => [s.date].concat(s.wxDays || []).filter(Boolean).forEach(d => add('repero', d, d, '📍 ' + (s.name || 'Lieu'), [s.address, s.city].filter(Boolean).join(', '))));
-    const mt = J('matosXIII.parc'); if (mt) { (mt.resas || []).forEach(r => add('matos', r.from, r.to, (r.status === 'option' ? '(option) ' : '') + 'Matériel : ' + r.proj, r.units.length + ' unité(s)')); (mt.units || []).forEach(u => u.nextRev && add('matos', u.nextRev, u.nextRev, '🔧 Révision ' + u.name, u.sn || '', '', u.nextRev < today())); }
+    const mt = J('matosXIII.parc'); if (mt) { { const pr = J('xiii.projets'), f = pr && (pr.list || []).find(x => x && x.id === pr.active), pm = mt.pm && mt.pm[(pr && pr.active) || '_'], n = pm ? (pm.items || []).filter(i => i.on).reduce((a, i) => a + (+i.qty || 1), 0) : 0;
+            if (n) { const sh = (s, k) => { const d = new Date(s + 'T12:00'); d.setDate(d.getDate() + k); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
+                const o = pm.out || (f && f.debut ? sh(f.debut, -1) : ''), b = pm.back || (f && f.debut ? sh(f.fin || f.debut, 1) : ''), pj = (f && f.title) || 'projet';
+                if (o) { add('matos', o, o, '📤 Sortie du matériel — ' + pj, n + ' équipement(s) · demande de prêt'); add('matos', sh(o, -1), sh(o, -1), '⏰ Rappel : sortie du matériel demain', pj + ' · vérifier la demande de prêt et les caisses'); }
+                if (b) { add('matos', b, b, '📥 Retour du matériel — ' + pj, n + ' équipement(s)'); add('matos', sh(b, -1), sh(b, -1), '⏰ Rappel : retour du matériel demain', pj); } } } (mt.resas || []).forEach(r => add('matos', r.from, r.to, (r.status === 'option' ? '(option) ' : '') + 'Matériel : ' + r.proj, r.units.length + ' unité(s)')); (mt.units || []).forEach(u => u.nextRev && add('matos', u.nextRev, u.nextRev, '🔧 Révision ' + u.name, u.sn || '', '', u.nextRev < today())); }
     const dv = J('devisoXIII.project'); if (dv) { ((dv.factu || {}).inv || []).filter(f => f.num).forEach(f => { add('deviso', f.date, f.date, '🧾 Facture ' + f.num, dv.name || ''); if (f.due) add('deviso', f.due, f.due, '💰 Échéance ' + f.num, 'paiement attendu', '', f.due < today() && !(f.pay || []).length); }); if (dv.debut) add('deviso', dv.debut, dv.fin || dv.debut, 'Prestation : ' + (dv.name || 'devis'), dv.lieu || ''); }
     const po = J('postoXIII.project'); if (po) { (po.versions || []).forEach(v => add('posto', v.date, v.date, 'Version ' + v.label, po.name || '')); (po.steps || []).forEach(s => (s.start || s.due) && add('posto', s.start || s.due, s.due || s.start, s.name, s.who || '', '', s.status !== 'done' && s.due && s.due < today())); (po.deliv || []).forEach(d => d.due && add('posto', d.due, d.due, '📦 Livraison ' + d.name, d.to || '', '', d.status !== 'ok' && d.status !== 'sent' && d.due < today())); (po.arch || []).forEach(a => a.keep && add('posto', a.keep, a.keep, '🗄️ Fin de conservation : ' + a.name)); }
     const rc = J('ressourcoXIII.project'); if (rc) { (rc.docs || []).forEach(d => { if (!/contrat|cddu|engagement/i.test((d.tpl || '') + d.name)) return; d.rows.forEach(r => { const v = r.v || {}, n = [v.prenom, v.nom].filter(Boolean).join(' '); if (n && v.date_debut) add('ressourco', v.date_debut, v.date_fin || v.date_debut, '✍️ Contrat ' + n, v.fonction || v.role || ''); }); }); (rc.rights || []).forEach(x => x.to && add('ressourco', x.to, x.to, '⚖️ Expiration des droits : ' + x.title, x.holder || '', '', x.to < today())); }
@@ -6000,7 +6043,75 @@ var XPASS = window.XPASS || (() => {
     const save = () => { try { if (typeof dirty === 'function') dirty(); } catch (e) { } try { if (typeof saveProject === 'function') saveProject(true); else if (typeof saveAll === 'function') saveAll(true); } catch (e) { } try { if (typeof render === 'function') render(); else if (typeof renderAll === 'function') renderAll(); else if (typeof renderContent === 'function') renderContent(); } catch (e) { } };
     const iso = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     // ---------- les passerelles : [source>cible] = { src() → paquet, lab(paquet), merge(paquet) → message } ----------
+    // ---------- MATOS : ajout au « Matériel du projet » de la fiche active ----------
+    const fold = x => F(x);
+    function toPM(items, src) {
+        const p = G(); if (!p) throw 'MATOS pas encore prêt'; const s = J('xiii.projets', null), id = (s && s.active) || '_'; p.pm = p.pm || {}; const pm = p.pm[id] = p.pm[id] || { items: [] }; let n = 0;
+        items.forEach(e => { const nm = String(e.name || '').trim(); if (!nm) return; const g = e.grp || 'IMAGE', x = pm.items.find(i => fold(i.name) === fold(nm) && i.grp === g);
+            if (x) { if (e.max) x.qty = Math.max(x.qty || 1, e.qty || 1); else x.qty = (x.qty || 0) + (e.qty || 1); if (e.note && !String(x.src || '').includes(e.note)) x.src = (x.src ? x.src + ' · ' : '') + e.note; }
+            else pm.items.push({ id: id2(), name: nm, qty: e.qty || 1, grp: g, on: true, src: src + (e.note ? ' · ' + e.note : '') }); n++; });
+        try { if (typeof setView === 'function') setTimeout(() => setView('proj'), 50); } catch (e) { }
+        return n;
+    }
+    const id2 = () => Math.random().toString(36).slice(2, 10);
+    // véhicule conseillé d'après le poids et le volume (marge de 30 % pour le calage)
+    function vehFor(kg, vol) { const v = vol * 1.3;
+        if (v <= 0.6 && kg <= 250) return ['car', 'Voiture (break / coffre)'];
+        if (v <= 6 && kg <= 800) return ['van', 'Utilitaire 6 m³'];
+        if (v <= 12 && kg <= 1100) return ['van', 'Utilitaire 12 m³'];
+        if (v <= 20 && kg <= 1100) return ['van', 'Utilitaire 20 m³ (permis B)'];
+        const n = Math.max(1, Math.ceil(Math.max(v / 40, kg / 8000))); return ['truck', (n > 1 ? n + ' × ' : '') + 'Porteur 40 m³ (permis C)']; }
+    const nf1 = x => (Math.round(x * 10) / 10).toLocaleString('fr-FR');
     const R = {
+        'packingo>transporto': {
+            src() { const p = G(), C = p.cases || []; if (!C.length) throw 'Aucune caisse dans PACKINGO';
+                const kgC = typeof caseKg === 'function' ? caseKg : c => (+c.tare || 0) + (c.items || []).reduce((a, i) => a + (+i.kg || 0) * (+i.qty || 1), 0), volC = typeof caseVol === 'function' ? caseVol : c => (+c.L || 0) * (+c.W || 0) * (+c.H || 0) / 1e6;
+                const kg = C.reduce((a, c) => a + kgC(c), 0), vol = C.reduce((a, c) => a + volC(c), 0), nodim = C.filter(c => !volC(c)).length;
+                return { kg: Math.round(kg), vol: Math.round(vol * 100) / 100, n: C.length, nodim, proj: (p.prod && p.prod.name) || '' }; },
+            lab: k => k.n + ' caisse(s) · ' + nf1(k.kg) + ' kg · ' + nf1(k.vol) + ' m³',
+            merge(k) { const p = G(); p.veh = p.veh || []; const [t, lab] = vehFor(k.kg, k.vol), MK = '📦 PACKINGO :';
+                const note = MK + ' ' + k.n + ' caisse(s), ' + nf1(k.kg) + ' kg, ' + nf1(k.vol) + ' m³' + (k.nodim ? ' (' + k.nodim + ' sans dimensions)' : '') + ' → conseillé : ' + lab;
+                let v = p.veh.find(x => String(x.note || '').includes(MK)) || p.veh.find(x => x.type !== 'car' && x.type !== 'moto' && !x.note);
+                if (v) { v.note = String(v.note || '').split(MK)[0].trim(); v.note = (v.note ? v.note + ' · ' : '') + note; if (!v.type || v.type === 'autre') v.type = t; }
+                else p.veh.push(v = { id: id(), name: 'Véhicule matériel', type: t, seats: t === 'car' ? 4 : 3, plate: '', driver: '', rent: '', note });
+                return 'Charge reçue : ' + nf1(k.kg) + ' kg, ' + nf1(k.vol) + ' m³ → véhicule conseillé : ' + lab + ' (« ' + v.name + ' »)'; }
+        },
+        'lumo>syno': { noP: 1,
+            src() { const p = G(), X = p.fx || []; if (!X.length) throw 'Aucun projecteur dans LUMO'; const U = [...new Set(X.map(f => String(f.univ || '1').trim() || '1'))].sort((a, b) => (+a || 0) - (+b || 0));
+                return { u: U, n: X.reduce((a, f) => a + (+f.qty || 1), 0), proj: p.name || '' }; },
+            lab: k => 'éclairage : ' + k.n + ' projecteur(s), ' + k.u.length + ' univers DMX',
+            merge(k) { const A = typeof XCAT !== 'undefined' && XCAT.ADD && XCAT.ADD.syno; if (!A) throw 'SYNO pas encore prêt'; const U = k.u.length; let n = 0;
+                const add = it => { try { A.run(Object.assign({ brand: '', cat: 'lum' }, it)); n++; } catch (e) { } };
+                add({ model: 'Console lumière (' + U + ' univers DMX)', inp: 'ETHERNET', outp: 'DMX OUT ×' + Math.min(4, U) + '; ETHERNET' });
+                if (U > 1) { add({ model: 'Switch réseau lumière (Art-Net / sACN)', inp: 'ETHERNET', outp: 'ETHERNET ×' + (Math.ceil(U / 4) + 1) }); for (let i = 0; i < Math.ceil(U / 4); i++) add({ model: 'Nœud Art-Net / sACN ' + (i + 1) + ' (univers ' + k.u.slice(i * 4, i * 4 + 4).join(', ') + ')', inp: 'ETHERNET', outp: 'DMX OUT ×' + Math.min(4, U - i * 4) }); }
+                add({ model: 'Splitter DMX (' + k.n + ' projecteurs)', inp: 'DMX IN', outp: 'DMX OUT ×6' });
+                return n + ' élément(s) d\'éclairage ajoutés au synoptique (console, réseau DMX)'; }
+        },
+        'cadro>matos': {
+            src() { const S0 = typeof S !== 'undefined' ? S : (J('cadro.state', {}) || {}).S || {}; const L = []; if (S0.name) L.push({ name: String(S0.name).split(' · ')[0], qty: 1, grp: 'IMAGE' });
+                const ln = typeof lensOf === 'function' ? lensOf() : null; if (ln) { const nm = ln.name || ln.n || (Array.isArray(ln) ? ln[1] : '') || ln.id; L.push({ name: 'Optiques ' + nm + (S0.f ? ' (focale principale ' + S0.f + ' mm)' : ''), qty: 1, grp: 'IMAGE' }); } if (!L.length) throw 'Choisissez d\'abord un boîtier ou une optique dans CADRO'; return { items: L }; },
+            lab: k => k.items.map(i => i.name).join(' + '),
+            merge(k) { const n = toPM(k.items.map(i => Object.assign({ max: 1 }, i)), '🎥 CADRO'); return n + ' ligne(s) ajoutée(s) au 🎬 Matériel du projet (boîtier, optique)'; }
+        },
+        'decoup>matos': {
+            src() { const p = G(), T = p.tabs || []; if (!T.length) throw 'Aucun découpage';
+                const CT = { 'Steadicam': ['Steadicam', 'GRIP'], 'Grue / Jib': ['Grue / jib', 'GRIP'], 'Grue télescopique': ['Grue télescopique', 'GRIP'], 'Travelling / Dolly': ['Travelling + rails', 'GRIP'], 'Drone': ['Drone de prise de vue', 'IMAGE'], 'Spidercam / Câble': ['Câblecam (Spidercam)', 'GRIP'], 'Gimbal / Smartphone': ['Gimbal (stabilisateur)', 'GRIP'], 'PTZ / Tourelle': ['Caméra PTZ / tourelle', 'IMAGE'] };
+                const MV = { trav_av: ['Travelling + rails', 'GRIP'], trav_ar: ['Travelling + rails', 'GRIP'], trav_lat: ['Travelling + rails', 'GRIP'], dolly_zoom: ['Travelling + rails', 'GRIP'], steadicam: ['Steadicam / gimbal', 'GRIP'], grue: ['Grue / jib', 'GRIP'], drone: ['Drone de prise de vue', 'IMAGE'] };
+                const M = {}; const need = (e, seq, q) => { const k = e[0]; const m = M[k] = M[k] || { name: e[0], grp: e[1], qty: 0, seqs: new Set() }; m.qty = Math.max(m.qty, q || 1); m.seqs.add(String(seq).split(' — ')[0].replace(/^Séq\.?\s*/i, '')); };
+                T.forEach(t => { const C = {}; (t.cams || []).forEach(c => C[c.id] = c); let seq = t.name || 'Découpage';
+                    (t.items || []).forEach(it => { if (it.kind === 'header') { seq = it.title || seq; return; } const cnt = {}; (it.cams || []).forEach(cid => { const c = C[cid] || C[cid && cid.id]; if (c && CT[c.type]) cnt[c.type] = (cnt[c.type] || 0) + 1; }); Object.keys(cnt).forEach(ty => need(CT[ty], seq, cnt[ty])); (it.shots || []).forEach(sh => { if (MV[sh.move]) need(MV[sh.move], seq, 1); }); if (MV[it.move]) need(MV[it.move], seq, 1); }); });
+                const L = Object.values(M).map(m => ({ name: m.name, grp: m.grp, qty: m.qty, note: 'séq. ' + [...m.seqs].slice(0, 4).join(', ') + (m.seqs.size > 4 ? '…' : '') })); if (!L.length) throw 'Aucune machinerie particulière (steadicam, grue, drone, travelling…) dans le découpage'; return { items: L }; },
+            lab: k => k.items.map(i => (i.qty > 1 ? i.qty + '× ' : '') + i.name).join(', '),
+            merge(k) { const n = toPM(k.items.map(i => Object.assign({ max: 1 }, i)), '🎬 DECOUP'); return n + ' machinerie(s) ajoutée(s) au 🎬 Matériel du projet, avec les séquences concernées'; }
+        },
+        'repero>matos': {
+            src() { const p = G(), A = (p.spots || []).filter(s => s.status !== 'ecarte'), K = A.filter(s => s.status === 'retenu'), L0 = K.length ? K : A; if (!L0.length) throw 'Aucun lieu dans REPERO';
+                const RU = [['elec', 'ko', 'Groupe électrogène', 'GRIP', 'pas de courant'], ['elec', 'q', 'Groupe électrogène (à confirmer)', 'GRIP', 'courant incertain'], ['elec', 'ko', 'Distribution électrique (armoire, prolongateurs)', 'GRIP', 'pas de courant'], ['res', 'ko', 'Routeur 4G/5G agrégé (bonding)', 'REGIE', 'pas de réseau'], ['fond', 'ko', 'Micros HF supplémentaires + bonnettes anti-vent', 'SON', 'bruit de fond'], ['camion', 'ko', 'Chariots de manutention', 'GRIP', 'accès camion difficile'], ['dist', 'ko', 'Chariots de manutention', 'GRIP', 'portage long'], ['risque', 'ko', 'EPI (harnais, gilets, casques)', 'CONSOMMABLES', 'risques sur le lieu']];
+                const M = {}; L0.forEach(s => { const c = s.chk || {}; RU.forEach(r => { if (c[r[0]] === r[1]) { const m = M[r[2]] = M[r[2]] || { name: r[2], grp: r[3], qty: 1, why: new Set() }; m.why.add((s.name || 'lieu') + ' : ' + r[4]); } }); });
+                const L = Object.values(M).map(m => ({ name: m.name, grp: m.grp, qty: 1, note: [...m.why].slice(0, 3).join(' ; ') })); if (!L.length) throw 'Aucune contrainte relevée dans la checklist des lieux (courant, réseau, bruit, accès…)'; return { items: L, n: L0.length }; },
+            lab: k => k.items.length + ' besoin(s) liés aux lieux : ' + k.items.map(i => i.name).join(', '),
+            merge(k) { const n = toPM(k.items.map(i => Object.assign({ max: 1 }, i)), '📍 REPERO'); return n + ' suggestion(s) ajoutée(s) au 🎬 Matériel du projet (à vérifier)'; }
+        },
         'casto>transporto': {
             src() { const p = G(), L = (p.talents || []).filter(t => t.status === 'confirme' && t.name).map(t => ({ n: t.name, role: t.role || '', ph: t.phone || '' })); if (!L.length) throw 'Aucun talent « Confirmé » dans CASTO'; return { items: L, proj: p.name || '' }; },
             lab: k => k.items.length + ' talent(s) confirmé(s)',
@@ -6016,7 +6127,7 @@ var XPASS = window.XPASS || (() => {
                 return 'Réservation en option créée : ' + got.length + ' unité(s)' + (miss.length ? ', ' + new Set(miss).size + ' modèle(s) absent(s) du parc' : '') + ' — conflits signalés dans 📅 Réservations'; }
         },
         'matos>callsheeto': {
-            src() { const p = G(), U = {}; (p.units || []).forEach(u => U[u.id] = u.name); const L = (p.resas || []).filter(r => r.status !== 'annule').map(r => ({ proj: r.proj, from: r.from, to: r.to || r.from, names: (r.units || []).map(x => U[x]).filter(Boolean) })).filter(r => r.names.length); if (!L.length) throw 'Aucune réservation avec du matériel'; return { items: L }; },
+            src() { const p = G(), U = {}; (p.units || []).forEach(u => U[u.id] = u.name); const L = (p.resas || []).filter(r => r.status !== 'annule').map(r => ({ proj: r.proj, from: r.from, to: r.to || r.from, names: (r.units || []).map(x => U[x]).filter(Boolean) })).filter(r => r.names.length); { const s0 = J('xiii.projets', null), pm = p.pm && p.pm[(s0 && s0.active) || '_']; if (pm && (pm.items || []).some(i => i.on)) { const nm = []; pm.items.filter(i => i.on).forEach(i => { for (let q = 0; q < Math.min(+i.qty || 1, 50); q++) nm.push(i.name); }); L.push({ proj: 'Matériel du projet', from: pm.out || '0000-00-00', to: pm.back || '9999-12-31', names: nm }); } } if (!L.length) throw 'Aucune réservation ni « Matériel du projet » coché'; return { items: L }; },
             lab: k => k.items.length + ' réservation(s) de matériel',
             merge(k) { const p = G(); let n = 0; const MK = '🎥 Matériel réservé (MATOS) :';
                 (p.days || []).forEach(d => { if (!d.date) return; const names = []; k.items.forEach(r => { if (r.from <= d.date && d.date <= r.to) names.push(...r.names); }); const cnt = {}; names.forEach(x => cnt[x] = (cnt[x] || 0) + 1);
@@ -6070,7 +6181,7 @@ var XPASS = window.XPASS || (() => {
         document.body.insertAdjacentHTML('beforeend', '<div id="xps-ban"><span>📥 <b>' + E(R[pk.k].lab(pk)) + '</b> reçu(s) de ' + fr[0] + ' ' + E(fr[1]) + (L.length > 1 ? ' <small>(+' + (L.length - 1) + ')</small>' : '') + '</span><button id="xps-ok">✓ Intégrer</button><button id="xps-no" class="sec">Ignorer</button></div>');
         const drop = () => W(box(APP), J(box(APP), []).filter(x => x.id !== pk.id));
         document.getElementById('xps-no').onclick = () => { drop(); banner(); };
-        document.getElementById('xps-ok').onclick = () => { let m; try { if (!G() && pk.k !== 'repero>plano') throw 'Outil pas encore prêt'; m = R[pk.k].merge(pk); } catch (e) { alert(typeof e === 'string' ? e : 'Intégration impossible : ' + e.message); return; } drop(); if (pk.k !== 'repero>plano') save(); say('📥 ' + m); banner(); };
+        document.getElementById('xps-ok').onclick = () => { let m; try { if (!G() && pk.k !== 'repero>plano' && !R[pk.k].noP) throw 'Outil pas encore prêt'; m = R[pk.k].merge(pk); } catch (e) { alert(typeof e === 'string' ? e : 'Intégration impossible : ' + e.message); return; } drop(); if (pk.k !== 'repero>plano') save(); say('📥 ' + m); banner(); };
     }
     function init(app) {
         APP = app; const s = document.createElement('style');
@@ -6149,6 +6260,10 @@ var XLINKS = window.XLINKS || (() => {
         ['matos', 'callsheeto', 'Matériel réservé pour la journée → feuille de service.'], ['repero', 'plano', 'Plan de masse / photo aérienne du lieu → fond de plan.'],
         ['conduco', 'soustitro', 'Textes du prompteur → sous-titres préparés du direct.'], ['backupo', 'posto', 'Cartes déchargées et vérifiées → prises disponibles au dérushage.'],
         ['scripto', 'callsheeto', 'Plans non tournés → reportés sur la journée suivante.'],
+        ['packingo', 'transporto', 'Poids et volume des caisses → véhicule conseillé (voiture, utilitaire 6 / 12 / 20 m³, porteur).'], ['lumo', 'syno', 'Éclairage → console DMX, réseau Art-Net / sACN et splitters dans le synoptique.'],
+        ['lumo', 'deviso', 'Projecteurs du plan de feu → chiffrage de la location lumière.'], ['sono', 'deviso', 'Micros, pieds et HF → chiffrage de la location son.'],
+        ['cadro', 'matos', 'Boîtier et optique choisis → « Matériel du projet » de MATOS.'], ['decoup', 'matos', 'Machinerie par séquence (steadicam, grue, drone, travelling) → « Matériel du projet ».'],
+        ['repero', 'matos', 'Contraintes des lieux (pas de courant, pas de réseau, accès…) → matériel suggéré (groupe électrogène…).'], ['matos', 'calendrier', 'Sortie et retour du matériel du projet → calendrier, rappel la veille.'], ['matos', 'catalogue', 'Équipements saisis à la main → proposés à l\'ajout au catalogue.'],
         ['syno', 'matos', 'Équipements du synoptique → « Matériel du projet » (demande de prêt, location).'], ['plano', 'matos', 'Matériel du plan → « Matériel du projet » de MATOS.'], ['packingo', 'matos', 'Contenu des caisses → « Matériel du projet » de MATOS.'], ['lumo', 'matos', 'Projecteurs du plan de feu → « Matériel du projet » de MATOS.'], ['sono', 'matos', 'Micros, pieds et HF → « Matériel du projet » de MATOS.'], ['matos', 'plano', 'Matériel du projet → à placer sur le plan.'], ['matos', 'syno', 'Image, son et régie → nœuds du synoptique.'], ['matos', 'lumo', 'Lumière → liste des projecteurs.'], ['matos', 'sono', 'Son → patch.'], ['matos', 'dossier', 'Matériel du projet → rubrique technique du dossier.'],
         ['importo', 'planno', 'Planning importé (Excel, Movie Magic…).'], ['importo', 'callsheeto', 'Feuilles de service PDF importées.'], ['importo', 'deviso', 'Devis loueurs PDF importés.'], ['importo', 'casto', 'Listes de talents importées.'],
     ];
@@ -6177,9 +6292,10 @@ const XGATE = (() => {
         'syno>deviso': thenClick('openMaterialExport', '#xpk-deviso')
     };
     ['syno', 'plano', 'packingo', 'lumo', 'sono', 'deviso'].forEach(a => { SPECIAL['matos>' + a] = () => { if (typeof PM === 'undefined') return false; PM.sendTo(a); return true; }; });
+    ['lumo', 'sono'].forEach(a => { SPECIAL[a + '>deviso'] = () => { const F = fn('openSendToDeviso'); if (F) { F(); return true; } }; });
     ['syno', 'plano', 'packingo', 'lumo', 'sono'].forEach(a => { SPECIAL[a + '>matos'] = () => { const F = fn('xiiiToMatos'); return F ? F() : false; }; });
     if (window.XPASS) Object.keys(XPASS.R).forEach(k => { SPECIAL[k] = () => XPASS.send(k); }); // passerelles saison 4 (boîte de réception)
-    const can = k => SPECIAL[k] && (window.XPASS && XPASS.has(k) || k !== 'soustitro>graphico' || fn('setView')) && (!/>deviso$/.test(k) || k === 'matos>deviso' || fn(k === 'callsheeto>deviso' ? 'openSendCrewToDeviso' : 'openMaterialExport'));
+    const can = k => SPECIAL[k] && (window.XPASS && XPASS.has(k) || k !== 'soustitro>graphico' || fn('setView')) && (!/>deviso$/.test(k) || k === 'matos>deviso' || ((k === 'lumo>deviso' || k === 'sono>deviso') && fn('openSendToDeviso')) || fn(k === 'callsheeto>deviso' ? 'openSendCrewToDeviso' : 'openMaterialExport'));
     const nameRx = a => new RegExp('\\b' + XLINKS.T[a][1].replace(/ /g, '\\s?').replace('Ô', '[OÔ]') + '\\b', 'i');
     function findBtn(to) {
         const rx = nameRx(to);
@@ -6197,6 +6313,30 @@ const XGATE = (() => {
         if (to === 'dossier') { const d = [...document.querySelectorAll('button')].find(x => /📚/.test(x.textContent) && /DOSSIER/.test(x.textContent + x.title) && !/journal|ouvrir/i.test(x.textContent)); if (d) { d.click(); return; } }
         location.href = to + '.html';
     }
+    // ---- vers le même outil d'un autre projet XIII ----
+    function wsRows(me) {
+        if (!window.XWS || !XWS.copyTool || APP === 'index' || APP === 'dossier-m') return ''; const L = XWS.list().filter(w => w.id !== XWS.id); if (!L.length) return '';
+        return '<div class="xgt-g">' + E(me[1]) + ' vers un autre projet XIII</div>' + L.map(w => { const n = APP === 'matos' ? pmCount(w.id) : XWS.toolKeys(APP, w.id).length;
+            return '<button class="xgt-t xgt-ws" data-ws="' + E(w.id) + '" data-a="' + APP + '" data-dir="out" data-d="' + E('Copie ' + (APP === 'matos' ? 'le « Matériel du projet »' : 'toutes les données') + ' de ' + me[1] + ' dans le projet « ' + w.name + ' »' + (n ? ' — remplace ce qui s\'y trouve (annulable)' : ' (vide pour l\'instant)')) + '"><span class="i" style="display:flex;align-items:center;justify-content:center"><i style="width:14px;height:14px;border-radius:50%;background:' + E(w.color) + ';box-shadow:0 0 8px ' + E(w.color) + '"></i></span><span><b>' + E(w.name) + '</b><small>' + (n ? (APP === 'matos' ? n + ' ligne(s) déjà présente(s) : remplacées' : 'contient déjà des données ' + E(me[1]) + ' : remplacées') : 'aucune donnée ' + E(me[1]) + ' pour l\'instant') + (XWS.hasBackup(APP, w.id) ? ' · <a href="#" data-undo="' + E(w.id) + '">↶ annuler la dernière copie</a>' : '') + '</small></span><span class="go">Copier →</span></button>'; }).join('');
+    }
+    const fiche = i => { try { const p = JSON.parse(XWS.peek(i, 'xiii.projets')); return p && p.active ? p.active : '_'; } catch (e) { return '_'; } };
+    const myFiche = () => { try { const p = JSON.parse(localStorage.getItem('xiii.projets')); return p && p.active ? p.active : '_'; } catch (e) { return '_'; } };
+    function pmCount(i) { try { const pm = (typeof P !== 'undefined' && P && P.pm) || {}; return ((pm[fiche(i)] || {}).items || []).length; } catch (e) { return 0; } }
+    function saveTool() { try { if (typeof dirty === 'function') dirty(); } catch (e) { } try { if (typeof saveProject === 'function') saveProject(true); else if (typeof saveAll === 'function') saveAll(true); } catch (e) { } }
+    function openIn(w) { const u = APP + '.html'; if (window.parent !== window) { try { window.top.postMessage({ xtab: { open: u, openWs: w.id } }, location.origin); return; } catch (e) { } } window.open(u, 'xws:' + w.id); }
+    function toastWs(m, w) { document.querySelectorAll('#xgt-done').forEach(x => x.remove()); const d = document.createElement('div'); d.id = 'xgt-done'; d.innerHTML = '<span>' + m + '</span><button>Ouvrir dans « ' + E(w.name) + ' » ↗</button><button class="sec">OK</button>'; document.body.appendChild(d); const [a, b] = d.querySelectorAll('button'); a.onclick = () => { d.remove(); openIn(w); }; b.onclick = () => d.remove(); setTimeout(() => d.remove(), 15000); }
+    async function toWs(id) {
+        const w = XWS.list().find(x => x.id === id); if (!w) return; const me = (XLINKS.T[APP] || ['', APP.toUpperCase()])[1];
+        if (APP === 'matos') { if (typeof P === 'undefined' || !P) return; P.pm = P.pm || {}; const src = P.pm[myFiche()], dst = fiche(id);
+            if (!src || !(src.items || []).length) { alert('Le « Matériel du projet » est vide dans ce projet.'); return; }
+            if (dst === myFiche() && dst !== '_') { alert('Les deux projets XIII partagent la même fiche projet : rien à copier.'); return; }
+            const had = ((P.pm[dst] || {}).items || []).length; if (had && !confirm('Le projet « ' + w.name + ' » a déjà ' + had + ' ligne(s) de matériel. Les remplacer ?')) return;
+            if (had) P.pm['_bak_' + dst] = P.pm[dst]; P.pm[dst] = JSON.parse(JSON.stringify(src)); saveTool(); close(); toastWs('📦 ' + src.items.length + ' ligne(s) de matériel copiées dans « ' + E(w.name) + ' »', w); return; }
+        const n = XWS.toolKeys(APP, id).length, k = XWS.toolKeys(APP).length; if (!k) { alert('Rien à copier : ' + me + ' est vide dans ce projet.'); return; }
+        if (n && !confirm('Le projet « ' + w.name + ' » contient déjà des données ' + me + '.\nElles seront remplacées par celles de ce projet (vous pourrez annuler depuis cette fenêtre).\n\nContinuer ?')) return;
+        saveTool(); close(); try { const r = await XWS.copyTool(APP, id); toastWs('📦 ' + me + ' copié dans « ' + E(w.name) + ' »' + (r.recs ? ' (' + r.recs + ' élément(s) lourds : images, fichiers)' : ''), w); } catch (e) { alert('Copie impossible : ' + e.message); }
+    }
+    function undoWs(id) { const w = XWS.list().find(x => x.id === id); if (APP === 'matos') { const d = fiche(id), b = P.pm['_bak_' + d]; if (b) { P.pm[d] = b; delete P.pm['_bak_' + d]; saveTool(); } } else XWS.restoreTool(APP, id); close(); try { (window.toast || alert)('↶ Copie annulée dans « ' + (w ? w.name : '') + ' »'); } catch (e) { } }
     function close() { document.querySelectorAll('#xgt-ov').forEach(o => { try { o.remove(); } catch (e) { } }); }
     function open() {
         close(); const T = XLINKS.T, me = T[APP] || ['🧩', APP.toUpperCase(), ''];
@@ -6208,7 +6348,7 @@ const XGATE = (() => {
         o.innerHTML = '<div class="xgt-w" role="dialog" aria-label="Vers Suite XIII"><div class="xgt-h"><b>📤 Vers Suite XIII — depuis ' + E(me[1]) + '</b><button class="xgt-x" aria-label="Fermer">✕</button></div>' +
             '<div class="xgt-b"><svg class="xgt-s"><defs><marker id="xgt-ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="xgt-mk"/></marker></defs><path class="xgt-p" d=""/></svg>' +
             '<div class="xgt-l"><div class="xgt-me"><span class="i">' + me[0] + '</span><b>' + E(me[1]) + '</b><small>' + E(me[2]) + '</small><em>' + outs.length + ' envoi(s) · ' + ins.length + ' réception(s)</em></div></div>' +
-            '<div class="xgt-r">' + (outs.length ? '<div class="xgt-g">Envoyer vers</div>' + outs.map(x => row(x[1], x[2], 'out')).join('') : '<p class="xgt-n">Cet outil n\'envoie pas directement vers un autre outil.</p>') +
+            '<div class="xgt-r">' + wsRows(me) + (outs.length ? '<div class="xgt-g">Envoyer vers</div>' + outs.map(x => row(x[1], x[2], 'out')).join('') : '<p class="xgt-n">Cet outil n\'envoie pas directement vers un autre outil.</p>') +
             (ins.length ? '<div class="xgt-g">Reçoit aussi de</div>' + ins.map(x => row(x[0], x[2], 'in')).join('') : '') + '</div></div>' +
             '<div class="xgt-d" aria-live="polite">Survolez un outil à droite pour voir ce qui passe par la passerelle.</div></div>';
         document.body.appendChild(o);
@@ -6222,9 +6362,10 @@ const XGATE = (() => {
             p.classList.toggle('in', !out);
             o.querySelectorAll('.xgt-t.h').forEach(x => x.classList.remove('h')); el.classList.add('h');
             const t = XLINKS.T[el.dataset.a] || ['', el.dataset.a];
+            if (el.dataset.ws) { D.innerHTML = '<b>' + E(me[1]) + ' → ' + E(me[1]) + ' · ' + E(el.querySelector('b').textContent) + '</b> · ' + E(el.dataset.d) + '<br><small>Cliquez pour copier. Les préférences, bibliothèques et le catalogue sont déjà communs à tous les projets.</small>'; return; }
             D.innerHTML = '<b>' + (out ? E(me[1]) + ' → ' + E(t[1]) : E(t[1]) + ' → ' + E(me[1])) + '</b> · ' + E(el.dataset.d) + '<br><small>' + (out ? (el.dataset.b === '1' || can(APP + '>' + el.dataset.a) ? 'Cliquez pour lancer l\'envoi.' : 'Cliquez pour ouvrir ' + E(t[1]) + ' : la passerelle s\'y trouve (import, 🧺 panier ou Drive du projet).') : 'Passerelle à lancer depuis ' + E(t[1]) + ' (cliquez pour l\'ouvrir).') + '</small>';
         };
-        o.querySelectorAll('.xgt-t').forEach(el => { el.onmouseenter = () => link(el); el.onfocus = () => link(el); el.onclick = () => el.dataset.dir === 'out' ? go(el.dataset.a) : (APP === 'matos' && el.dataset.a !== 'catalogue' ? (close(), location.href = el.dataset.a + '.html#xtomatos') : el.dataset.a === 'matos' && fn('xiiiFromMatos') ? (close(), fn('xiiiFromMatos')()) : (location.href = el.dataset.a + '.html')); });
+        o.querySelectorAll('.xgt-t').forEach(el => { el.onmouseenter = () => link(el); el.onfocus = () => link(el); el.onclick = e => e.target.dataset.undo ? (e.preventDefault(), undoWs(e.target.dataset.undo)) : el.dataset.ws ? toWs(el.dataset.ws) : el.dataset.dir === 'out' ? go(el.dataset.a) : (APP === 'matos' && el.dataset.a !== 'catalogue' ? (close(), location.href = el.dataset.a + '.html#xtomatos') : el.dataset.a === 'matos' && fn('xiiiFromMatos') ? (close(), fn('xiiiFromMatos')()) : (location.href = el.dataset.a + '.html')); });
         o.querySelector('.xgt-r').addEventListener('scroll', () => { const h = o.querySelector('.xgt-t.h'); if (h) link(h); });
         o.querySelector('.xgt-x').onclick = close; o.addEventListener('mousedown', e => { if (e.target === o) close(); });
         o.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
@@ -6232,7 +6373,7 @@ const XGATE = (() => {
     }
     function css() {
         const s = document.createElement('style'); s.id = 'xgt-css';
-        s.textContent = '#xgt-ov{position:fixed;inset:0;z-index:10060;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;font:13px/1.4 "Segoe UI",system-ui,sans-serif}' +
+        s.textContent = '#xgt-done{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:10070;display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center;max-width:calc(100vw - 24px);padding:10px 14px;border-radius:16px;background:rgba(20,18,16,.92);backdrop-filter:blur(18px);color:#f3ede6;border:1px solid rgba(240,180,41,.5);box-shadow:0 14px 40px rgba(0,0,0,.45),0 0 26px rgba(240,180,41,.18);font:13.5px "Segoe UI",sans-serif}#xgt-done button{font:600 13px "Segoe UI",sans-serif;padding:7px 14px;border-radius:999px;border:0;background:linear-gradient(135deg,#f0b429,#ff8a3d);color:#1a1206;cursor:pointer}#xgt-done button.sec{background:transparent;color:#f3ede6;border:1px solid #666}.xgt-ws small a{color:rgb(var(--accent,240,179,120))}' + '#xgt-ov{position:fixed;inset:0;z-index:10060;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;font:13px/1.4 "Segoe UI",system-ui,sans-serif}' +
             '.xgt-w{width:min(760px,96vw);max-height:90vh;display:flex;flex-direction:column;background:var(--bg-menu,#232327);color:var(--text-main,#eee);border:1px solid var(--border-color,#555);border-radius:14px;box-shadow:0 18px 50px rgba(0,0,0,.55);overflow:hidden}' +
             '.xgt-h{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--border-color,#444)}.xgt-h b{font-size:15px}.xgt-x{background:none;border:0;color:inherit;font-size:16px;cursor:pointer}' +
             '.xgt-b{position:relative;display:grid;grid-template-columns:200px 1fr;gap:90px;padding:16px;min-height:0;flex:1}.xgt-s{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}' +
