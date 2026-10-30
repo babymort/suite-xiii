@@ -2379,9 +2379,9 @@ function parcHtml() {
 function resaHtml() {
     const L = P.resas.slice().sort((a, b) => a.from.localeCompare(b.from)), now = today(), up = L.filter(r => r.to >= now), past = L.filter(r => r.to < now);
     const card = r => { const C = conflicts(r), hard = C.filter(c => c.hard), w = r.units.map(unit).filter(Boolean), kg = w.reduce((a, u) => a + (+u.kg || 0), 0), eur = w.reduce((a, u) => a + (+u.price || 0), 0), days = Math.round((new Date(r.to) - new Date(r.from)) / 864e5) + 1, outN = w.filter(u => out(u.id) && out(u.id).resa === r.id).length;
-        return '<div class="mt-card" data-r="' + r.id + '"><h4><span class="st" style="--c:' + (RST.find(s => s[0] === r.status) || RST[0])[2] + '">' + (RST.find(s => s[0] === r.status) || RST[0])[1] + '</span> ' + esc(r.proj) + ' <small>' + frD(r.from) + ' → ' + frD(r.to) + ' · ' + days + ' j · ' + w.length + ' unité(s)' + (kg ? ' · ' + kg.toLocaleString('fr-FR') + ' kg' : '') + (eur ? ' · ≈ ' + Math.round(eur * days).toLocaleString('fr-FR') + ' € HT de location' : '') + (outN ? ' · 🚚 ' + outN + ' sortie(s)' : '') + '</small><span style="flex:1"></span><button class="mt-btn" data-pk>🧳 Vers PACKINGO</button><button class="mt-btn" data-dv>💶 Vers DEVISO</button><button class="mt-btn" data-er>✎</button></h4>' +
+        return '<div class="mt-card" data-r="' + r.id + '"><h4><span class="st" style="--c:' + (RST.find(s => s[0] === r.status) || RST[0])[2] + '">' + (RST.find(s => s[0] === r.status) || RST[0])[1] + '</span> ' + esc(r.proj) + ' <small>' + frD(r.from) + ' → ' + frD(r.to) + ' · ' + days + ' j · ' + w.length + ' unité(s)' + (kg ? ' · ' + kg.toLocaleString('fr-FR') + ' kg' : '') + (eur ? ' · ≈ ' + Math.round(eur * days).toLocaleString('fr-FR') + ' € HT de location' : '') + (outN ? ' · 🚚 ' + outN + ' sortie(s)' : '') + '</small><span style="flex:1"></span>' + (w.length ? '<button class="mt-btn" data-rt title="Liste de retour : pointer le matériel rendu, signaler manques et casse">📥 Retour' + (outN ? ' (' + outN + ')' : '') + '</button>' : '') + '<button class="mt-btn" data-pk>🧳 Vers PACKINGO</button><button class="mt-btn" data-dv>💶 Vers DEVISO</button><button class="mt-btn" data-er>✎</button></h4>' +
             (C.length ? '<div class="' + (hard.length ? 'mt-warn' : '') + '" style="font-size:12.5px;margin:4px 0">' + C.map(c => (c.hard ? '⛔ ' : '⚠️ ') + esc(c.u.name) + (c.u.sn ? ' (' + esc(c.u.sn) + ')' : '') + ' : ' + esc(c.why)).join('<br>') + '</div>' : '<div class="mt-ok" style="font-size:12.5px">✓ Aucun conflit</div>') +
-            '<div class="mt-dim" style="font-size:12px;margin-top:4px">' + w.map(u => esc(u.name) + (u.sn ? ' <span class="mt-code">' + esc(u.code) + '</span>' : '')).join(' · ') + '</div>' + (r.note ? '<div style="font-size:12px;margin-top:4px">📝 ' + esc(r.note) + '</div>' : '') + '</div>'; };
+            '<div class="mt-dim" style="font-size:12px;margin-top:4px">' + w.map(u => esc(u.name) + (u.sn ? ' <span class="mt-code">' + esc(u.code) + '</span>' : '')).join(' · ') + '</div>' + (r.note ? '<div style="font-size:12px;margin-top:4px">📝 ' + esc(r.note) + '</div>' : '') + retSum(r) + '</div>'; };
     return (L.length ? '' : '<div style="max-width:560px;margin:50px auto;text-align:center;color:var(--text-dim)"><div style="font-size:48px">📅</div><p>Réservez des unités du parc pour un projet : MATOS vérifie qu\'elles ne sont pas déjà prises, en panne ou en révision sur ces dates.</p><button class="btn-big" onclick="editResa()">🗓️ Nouvelle réservation</button></div>') + up.map(card).join('') + (past.length ? '<details><summary class="mt-dim" style="cursor:pointer;margin:12px 0">' + past.length + ' réservation(s) passée(s)</summary>' + past.reverse().map(card).join('') + '</details>' : '');
 }
 function planHtml() {
@@ -2405,7 +2405,7 @@ function bind(v) {
     const c = $('content');
     if (v === 'parc') { const q = $('f-q'); if (q) { q.oninput = () => { F.q = q.value; clearTimeout(bind.t); bind.t = setTimeout(() => { render(); const i = $('f-q'); i.focus(); i.setSelectionRange(i.value.length, i.value.length); }, 250); }; $('f-st').onchange = e => { F.st = e.target.value; render(); }; $('f-cat').onchange = e => { F.cat = e.target.value; render(); }; }
         c.querySelectorAll('tr[data-id]').forEach(tr => { tr.querySelector('[data-e]').onclick = () => editUnit(tr.dataset.id); tr.ondblclick = () => editUnit(tr.dataset.id); }); }
-    if (v === 'resa') c.querySelectorAll('[data-r]').forEach(d => { const r = P.resas.find(x => x.id === d.dataset.r); d.querySelector('[data-er]').onclick = () => editResa(r.id); d.querySelector('[data-pk]').onclick = () => sendTo('packingo', r); d.querySelector('[data-dv]').onclick = () => sendTo('deviso', r); });
+    if (v === 'resa') c.querySelectorAll('[data-r]').forEach(d => { const r = P.resas.find(x => x.id === d.dataset.r); d.querySelector('[data-er]').onclick = () => editResa(r.id); { const b = d.querySelector('[data-rt]'); if (b) b.onclick = () => resaReturn(r.id); } d.querySelector('[data-pk]').onclick = () => sendTo('packingo', r); d.querySelector('[data-dv]').onclick = () => sendTo('deviso', r); });
     if (v === 'scan') {
         const inp = $('sc-in'); $('sc-r').onchange = e => { prefs.scanResa = e.target.value; savePrefs(); }; $('sc-who').onchange = e => { prefs.who = e.target.value.trim(); savePrefs(); };
         inp.onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); scanCode(inp.value); inp.value = ''; } };
@@ -2557,6 +2557,50 @@ async function caseReturn(url) {
         let closed = 0; touched.forEach(id => { const r = P.resas.find(x => x.id === id); if (r && r.status !== 'clos' && r.units.every(x => !out(x))) { r.status = 'clos'; r.note = (r.note ? r.note + ' · ' : '') + 'clôturée au retour le ' + frD(today()); closed++; } });
         closeModal(); dirty(); render(); toast('🧳 ' + ok + ' rendu(s)' + (bad ? ' · ⚠ ' + bad + ' abîmé(s)' : '') + (miss ? ' · ✗ ' + miss + ' manquant(s)' : '') + (closed ? ' · ✅ ' + closed + ' réservation(s) clôturée(s)' : ''), 6000); try { navigator.vibrate && navigator.vibrate(miss || bad ? [80, 60, 80] : 60); } catch (e) { }
     };
+}
+
+// =====================================================================
+//  📥 LISTE DE RETOUR d'une réservation : pointer chaque unité (rendu / manquant / abîmé),
+//  remarque par ligne, impression pour le dépôt, historique des retours sur la réservation
+// =====================================================================
+const RT = [['ok', '✓ Rendu', '#66bb6a'], ['miss', '✗ Manquant', '#ef5350'], ['panne', '⚠ Abîmé', '#ffa726']];
+function retSum(r) {
+    const L = r.returns || []; if (!L.length) return '';
+    const x = L[L.length - 1], c = k => x.rows.filter(y => y.s === k).length, still = r.units.filter(id => { const o = out(id); return o && (o.resa === r.id || !o.resa); }).map(unit).filter(Boolean);
+    return '<div style="font-size:12px;margin-top:4px">📥 Retour du ' + new Date(x.at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) + (x.who ? ' (' + esc(x.who) + ')' : '') + ' : ' + c('ok') + ' rendu(s)' + (c('miss') ? ' · <b style="color:#ef5350">✗ ' + c('miss') + ' manquant(s)</b>' : '') + (c('panne') ? ' · <b style="color:#ffa726">⚠ ' + c('panne') + ' abîmé(s)</b>' : '') + (still.length ? ' — encore dehors : ' + still.map(u => esc(u.name) + (u.sn ? ' ' + esc(u.sn) : '')).join(', ') : '') + '</div>';
+}
+function resaReturn(id) {
+    const r = P.resas.find(x => x.id === id); if (!r) return;
+    const rows = r.units.map(unit).filter(Boolean).map(u => { const o = out(u.id); return { u, o, s: o ? 'ok' : '', n: '' }; });
+    const nOut = rows.filter(x => x.o).length, inp = 'font:inherit;color:inherit;background:var(--bg-input);border:1px solid var(--border-color);border-radius:7px;padding:4px 7px';
+    modal('<h3>📥 Liste de retour — ' + esc(r.proj) + '<span class="close-x" onclick="closeModal()">✕</span></h3><p class="mt-dim" style="margin-top:0;font-size:12.5px">' + frD(r.from) + ' → ' + frD(r.to) + ' · ' + rows.length + ' unité(s), ' + nOut + ' sortie(s). Ce qui est sorti est « rendu » par défaut : signalez les manques et la casse, ils sont reportés dans le parc (état, historique). Un manquant reste « sorti » jusqu\'à son retour.</p>' +
+        '<div style="display:flex;gap:6px;margin-bottom:6px;flex-wrap:wrap"><button class="mt-btn" id="rl-all">✓ Tout rendu</button><input id="rl-q" placeholder="🔍 filtrer" style="flex:1;min-width:120px;' + inp + '"></div>' +
+        '<div style="max-height:50vh;overflow:auto">' + rows.map((x, i) => '<div class="rl-r" data-i="' + i + '" style="display:flex;gap:6px;align-items:center;padding:6px 0;border-bottom:1px solid var(--border-color);flex-wrap:wrap"><div style="flex:1;min-width:180px"><b>' + catLab(x.u.cat)[2] + ' ' + esc(x.u.name) + '</b> <span class="mt-code">' + esc(x.u.code) + '</span>' + (x.u.sn ? ' <small class="mt-dim">' + esc(x.u.sn) + '</small>' : '') + '<br><small class="mt-dim">' + (x.o ? '🚚 sorti le ' + new Date(x.o.at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) + (x.o.who ? ' par ' + esc(x.o.who) : '') + (x.o.resa && x.o.resa !== r.id ? ' (autre réservation)' : '') : '🏠 au dépôt (pas sorti)') + '</small></div>' +
+            (x.o ? RT.map(s => '<button data-s="' + s[0] + '" data-c="' + s[2] + '" class="mt-btn" style="padding:6px 9px">' + s[1] + '</button>').join('') + '<input data-n placeholder="remarque" style="width:150px;' + inp + '">' : '') + '</div>').join('') + '</div>' +
+        '<div class="fgrid" style="margin-top:10px"><label class="fld">Réceptionné par<input id="rl-who" value="' + esc(prefs.who || '') + '"></label><label class="fld w2">Remarque générale<input id="rl-note" placeholder="ex. caisse optiques rendue sale, câbles mal enroulés"></label></div>' +
+        '<div class="mb-actions"><button id="rl-pr" style="margin-right:auto">🖨️ Imprimer la liste</button><button onclick="closeModal()">Annuler</button><button class="btn-big" id="rl-ok"' + (nOut ? '' : ' disabled title="Rien n\'est sorti pour cette réservation"') + '>✓ Valider le retour</button></div>', 'wide');
+    const paint = d => { const x = rows[+d.dataset.i]; d.querySelectorAll('[data-s]').forEach(b => { const on = b.dataset.s === x.s; b.style.background = on ? b.dataset.c : ''; b.style.color = on ? '#111' : ''; b.style.borderColor = on ? b.dataset.c : ''; }); };
+    document.querySelectorAll('#modal .rl-r').forEach(d => { paint(d); d.querySelectorAll('[data-s]').forEach(b => b.onclick = () => { rows[+d.dataset.i].s = b.dataset.s; paint(d); }); const n = d.querySelector('[data-n]'); if (n) n.oninput = () => rows[+d.dataset.i].n = n.value; });
+    $('rl-all').onclick = () => { rows.forEach(x => { if (x.o) x.s = 'ok'; }); document.querySelectorAll('#modal .rl-r').forEach(paint); };
+    $('rl-q').oninput = () => { const q = fold($('rl-q').value); document.querySelectorAll('#modal .rl-r').forEach(d => { const x = rows[+d.dataset.i]; d.style.display = !q || fold(x.u.name + ' ' + x.u.code + ' ' + (x.u.sn || '')).includes(q) ? '' : 'none'; }); };
+    $('rl-pr').onclick = () => printReturn(r, rows);
+    $('rl-ok').onclick = () => {
+        const who = $('rl-who').value.trim(), note = $('rl-note').value.trim(), done = []; if (who) { prefs.who = who; savePrefs(); }
+        rows.forEach(x => { if (!x.o) return; const u = x.u, n = x.n.trim(), tag = ' (retour « ' + r.proj + ' »)' + (n ? ' : ' + n : note ? ' : ' + note : '');
+            if (x.s === 'miss') { u.revs = u.revs || []; u.revs.push({ date: today(), note: '✗ Manquant' + tag }); }
+            else { if (x.s === 'panne') { u.state = 'panne'; u.revs = u.revs || []; u.revs.push({ date: today(), note: '⚠ Abîmé' + tag }); } P.moves.push({ id: uid(), unit: u.id, t: 'in', at: Date.now(), resa: x.o.resa || r.id, who, state: x.s === 'panne' ? 'panne' : 'ok', note: n || note }); }
+            done.push({ unit: u.id, name: u.name, code: u.code, sn: u.sn || '', s: x.s, note: n }); });
+        P.moves = P.moves.slice(-3000); r.returns = (r.returns || []).concat([{ at: Date.now(), who, note, rows: done }]).slice(-20);
+        const miss = done.filter(x => x.s === 'miss').length, bad = done.filter(x => x.s === 'panne').length, ok = done.length - miss - bad;
+        let closed = false; if (r.status !== 'clos' && r.units.every(id => !out(id))) { r.status = 'clos'; r.note = (r.note ? r.note + ' · ' : '') + 'clôturée au retour le ' + frD(today()); closed = true; }
+        closeModal(); dirty(); render(); toast('📥 ' + ok + ' rendu(s)' + (bad ? ' · ⚠ ' + bad + ' abîmé(s)' : '') + (miss ? ' · ✗ ' + miss + ' manquant(s), toujours « sortis »' : '') + (closed ? ' · ✅ réservation clôturée' : ''), 6000);
+    };
+}
+function printReturn(r, rows) {
+    const w = window.open('', '_blank'); if (!w) { toast('⚠️ Autorisez les fenêtres pour imprimer'); return; }
+    const tr = rows.map(x => '<tr><td>' + esc(x.u.name) + '</td><td>' + esc(x.u.code) + '</td><td>' + esc(x.u.sn || '') + '</td><td>' + (x.o ? 'sorti' : 'dépôt') + '</td><td class="c">☐</td><td class="c">☐</td><td class="c">☐</td><td class="n"></td></tr>').join('');
+    w.document.write('<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><title>Retour ' + esc(r.proj) + '</title><style>body{font:12px Arial,sans-serif;margin:18mm}h1{font-size:18px;margin:0}p{color:#555;margin:4px 0 12px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #999;padding:6px 5px;text-align:left}th{background:#eee;font-size:11px}.c{text-align:center;width:52px;font-size:16px}.n{width:28%}.sig{display:flex;gap:40px;margin-top:26px}.sig div{flex:1;border-top:1px solid #333;padding-top:4px}</style></head><body><h1>Liste de retour — ' + esc(r.proj) + '</h1><p>Réservation du ' + frD(r.from) + ' au ' + frD(r.to) + ' · ' + rows.length + ' unité(s) · imprimée le ' + new Date().toLocaleDateString('fr-FR') + ' — MATOS XIII</p><table><tr><th>Équipement</th><th>Code</th><th>N° de série</th><th>Situation</th><th>Rendu</th><th>Manquant</th><th>Abîmé</th><th>Remarque</th></tr>' + tr + '</table><div class="sig"><div>Rendu par (nom, date, signature)</div><div>Réceptionné par (nom, date, signature)</div></div><script>setTimeout(function(){print()},300)<\/script></body></html>');
+    w.document.close();
 }
 
 </script>
