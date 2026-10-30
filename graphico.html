@@ -10313,7 +10313,7 @@ var XLINKS = window.XLINKS || (() => {
         ['matos', 'callsheeto', 'Matériel réservé pour la journée → feuille de service.'], ['repero', 'plano', 'Plan de masse / photo aérienne du lieu → fond de plan.'],
         ['conduco', 'soustitro', 'Textes du prompteur → sous-titres préparés du direct.'], ['backupo', 'posto', 'Cartes déchargées et vérifiées → prises disponibles au dérushage.'],
         ['scripto', 'callsheeto', 'Plans non tournés → reportés sur la journée suivante.'],
-        ['syno', 'matos', 'Équipements du synoptique → « Matériel du projet » (demande de prêt, location).'], ['plano', 'matos', 'Matériel du plan → « Matériel du projet » de MATOS.'], ['packingo', 'matos', 'Contenu des caisses → « Matériel du projet » de MATOS.'], ['lumo', 'matos', 'Projecteurs du plan de feu → « Matériel du projet » de MATOS.'], ['sono', 'matos', 'Micros, pieds et HF → « Matériel du projet » de MATOS.'], ['matos', 'dossier', 'Matériel du projet → rubrique technique du dossier.'],
+        ['syno', 'matos', 'Équipements du synoptique → « Matériel du projet » (demande de prêt, location).'], ['plano', 'matos', 'Matériel du plan → « Matériel du projet » de MATOS.'], ['packingo', 'matos', 'Contenu des caisses → « Matériel du projet » de MATOS.'], ['lumo', 'matos', 'Projecteurs du plan de feu → « Matériel du projet » de MATOS.'], ['sono', 'matos', 'Micros, pieds et HF → « Matériel du projet » de MATOS.'], ['matos', 'plano', 'Matériel du projet → à placer sur le plan.'], ['matos', 'syno', 'Image, son et régie → nœuds du synoptique.'], ['matos', 'lumo', 'Lumière → liste des projecteurs.'], ['matos', 'sono', 'Son → patch.'], ['matos', 'dossier', 'Matériel du projet → rubrique technique du dossier.'],
         ['importo', 'planno', 'Planning importé (Excel, Movie Magic…).'], ['importo', 'callsheeto', 'Feuilles de service PDF importées.'], ['importo', 'deviso', 'Devis loueurs PDF importés.'], ['importo', 'casto', 'Listes de talents importées.'],
     ];
     ['callsheeto', 'casto', 'conduco', 'decoup', 'deviso', 'lumo', 'moodo', 'packingo', 'planno', 'plano', 'posto', 'repero', 'ressourco', 'runo', 'scripto', 'sono', 'soustitro', 'storyboardo', 'syno', 'transporto', 'backupo']
@@ -10340,6 +10340,7 @@ const XGATE = (() => {
         'plano>deviso': thenClick('openMaterialExport', '#xpk-deviso'),
         'syno>deviso': thenClick('openMaterialExport', '#xpk-deviso')
     };
+    ['syno', 'plano', 'packingo', 'lumo', 'sono', 'deviso'].forEach(a => { SPECIAL['matos>' + a] = () => { if (typeof PM === 'undefined') return false; PM.sendTo(a); return true; }; });
     ['syno', 'plano', 'packingo', 'lumo', 'sono'].forEach(a => { SPECIAL[a + '>matos'] = () => { const F = fn('xiiiToMatos'); return F ? F() : false; }; });
     if (window.XPASS) Object.keys(XPASS.R).forEach(k => { SPECIAL[k] = () => XPASS.send(k); }); // passerelles saison 4 (boîte de réception)
     const can = k => SPECIAL[k] && (window.XPASS && XPASS.has(k) || k !== 'soustitro>graphico' || fn('setView')) && (!/>deviso$/.test(k) || fn(k === 'callsheeto>deviso' ? 'openSendCrewToDeviso' : 'openMaterialExport'));
@@ -10366,7 +10367,7 @@ const XGATE = (() => {
         if (APP !== 'dossier' && !XLINKS.from(APP).some(x => x[1] === 'dossier') && findBtn('dossier')) XLINKS.L.push([APP, 'dossier', 'Document de l\'outil (PDF) → rubrique adaptée du dossier de production.']);
         const outs = XLINKS.from(APP).slice().sort((a, b) => (b[1] === 'dossier') - (a[1] === 'dossier')), ins = XLINKS.to(APP).filter(x => !outs.some(y => y[1] === x[0]));
         const row = (a, d, dir) => { const t = T[a] || ['🧩', a, '']; const b = dir === 'out' ? findBtn(a) : null;
-            return '<button class="xgt-t" data-a="' + a + '" data-dir="' + dir + '" data-d="' + E(d) + '" data-b="' + (b ? 1 : 0) + '"><span class="i">' + t[0] + '</span><span><b>' + E(t[1]) + '</b><small>' + E(t[2]) + '</small></span><span class="go">' + (dir === 'out' ? (b || can(APP + '>' + a) ? 'Envoyer →' : 'Ouvrir ↗') : '← reçoit') + '</span></button>'; };
+            return '<button class="xgt-t" data-a="' + a + '" data-dir="' + dir + '" data-d="' + E(d) + '" data-b="' + (b ? 1 : 0) + '"><span class="i">' + t[0] + '</span><span><b>' + E(t[1]) + '</b><small>' + E(t[2]) + '</small></span><span class="go">' + (dir === 'out' ? (b || can(APP + '>' + a) ? 'Envoyer →' : 'Ouvrir ↗') : a === 'matos' && fn('xiiiFromMatos') ? '← Importer' : '← reçoit') + '</span></button>'; };
         const o = document.createElement('div'); o.id = 'xgt-ov';
         o.innerHTML = '<div class="xgt-w" role="dialog" aria-label="Vers Suite XIII"><div class="xgt-h"><b>📤 Vers Suite XIII — depuis ' + E(me[1]) + '</b><button class="xgt-x" aria-label="Fermer">✕</button></div>' +
             '<div class="xgt-b"><svg class="xgt-s"><defs><marker id="xgt-ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="xgt-mk"/></marker></defs><path class="xgt-p" d=""/></svg>' +
@@ -10387,7 +10388,7 @@ const XGATE = (() => {
             const t = XLINKS.T[el.dataset.a] || ['', el.dataset.a];
             D.innerHTML = '<b>' + (out ? E(me[1]) + ' → ' + E(t[1]) : E(t[1]) + ' → ' + E(me[1])) + '</b> · ' + E(el.dataset.d) + '<br><small>' + (out ? (el.dataset.b === '1' || can(APP + '>' + el.dataset.a) ? 'Cliquez pour lancer l\'envoi.' : 'Cliquez pour ouvrir ' + E(t[1]) + ' : la passerelle s\'y trouve (import, 🧺 panier ou Drive du projet).') : 'Passerelle à lancer depuis ' + E(t[1]) + ' (cliquez pour l\'ouvrir).') + '</small>';
         };
-        o.querySelectorAll('.xgt-t').forEach(el => { el.onmouseenter = () => link(el); el.onfocus = () => link(el); el.onclick = () => el.dataset.dir === 'out' ? go(el.dataset.a) : (location.href = el.dataset.a + '.html'); });
+        o.querySelectorAll('.xgt-t').forEach(el => { el.onmouseenter = () => link(el); el.onfocus = () => link(el); el.onclick = () => el.dataset.dir === 'out' ? go(el.dataset.a) : (el.dataset.a === 'matos' && fn('xiiiFromMatos') ? (close(), fn('xiiiFromMatos')()) : (location.href = el.dataset.a + '.html')); });
         o.querySelector('.xgt-r').addEventListener('scroll', () => { const h = o.querySelector('.xgt-t.h'); if (h) link(h); });
         o.querySelector('.xgt-x').onclick = close; o.addEventListener('mousedown', e => { if (e.target === o) close(); });
         o.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });

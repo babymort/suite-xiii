@@ -1558,7 +1558,7 @@ const PM = (() => {
         const p = proj(), L = cur().items, n = L.filter(i => i.on).length;
         return '<div class="mt-bar" style="flex-wrap:wrap"><b>🎬 ' + (p ? esc(p.title || 'Projet sans titre') + (p.debut ? ' <small class="mt-dim">' + frD(p.debut) + (p.fin ? ' → ' + frD(p.fin) : '') + '</small>' : '') : '<span class="mt-dim">Aucune fiche projet active — la liste est rangée dans « sans projet »</span>') + '</b><span style="flex:1"></span>' +
             '<span class="btn-group"><button data-pa="cat">🗃️ Catalogue</button><button data-pa="parc">📦 Matos perso</button><button data-pa="imp">📥 Autres outils</button><button data-pa="man">✏️ À la main</button></span>' +
-            '<span class="btn-group"><button data-pa="loc">🔎 Location</button><button data-pa="pk">🧳 PACKINGO</button><button data-pa="dv">💶 DEVISO</button><button data-pa="ds">📚 DOSSIER</button><button data-pa="xl" class="btn-active">📊 Demande de prêt</button></span></div>' +
+            '<span class="btn-group"><button data-pa="loc">🔎 Location</button><select data-pa-to title="Envoyer la liste cochée vers un outil"><option value="">↗ Envoyer vers…</option><option value="plano">📐 PLANO</option><option value="syno">🔀 SYNO</option><option value="lumo">💡 LUMO</option><option value="sono">🎚️ SONO</option><option value="packingo">🧳 PACKINGO</option><option value="deviso">💶 DEVISO</option></select><button data-pa="ds">📚 DOSSIER</button><button data-pa="xl" class="btn-active">📊 Demande de prêt</button></span></div>' +
             (L.length ? GRP.filter(g => L.some(i => i.grp === g)).map(g => '<h3 class="pm-h">' + GL[g] + ' <small class="mt-dim">' + L.filter(i => i.grp === g && i.on).length + ' / ' + L.filter(i => i.grp === g).length + '</small></h3><table class="mt-t pm-t"><tr><th style="width:34px"></th><th>Équipement</th><th style="width:80px">Qté</th><th style="width:170px">Catégorie</th><th class="hm">Source</th><th style="width:40px"></th></tr>' +
                 L.filter(i => i.grp === g).map(i => '<tr data-pi="' + i.id + '"' + (i.on ? '' : ' style="opacity:.45"') + '><td><input type="checkbox" data-k="on"' + (i.on ? ' checked' : '') + ' title="Inclure à l\'export"></td><td><input data-k="name" value="' + esc(i.name) + '" style="width:100%"></td><td><input data-k="qty" type="number" min="1" value="' + i.qty + '" style="width:64px"></td><td><select data-k="grp">' + GRP.map(x => '<option value="' + x + '"' + (x === i.grp ? ' selected' : '') + '>' + GL[x] + '</option>').join('') + '</select></td><td class="hm mt-dim">' + esc(i.src || '') + '</td><td><button data-k="del" title="Retirer">✕</button></td></tr>').join('') + '</table>').join('') +
                 '<p class="mt-dim" style="margin-top:10px">' + n + ' ligne(s) cochée(s) sur ' + L.length + ' — seules les lignes cochées partent à l\'export.</p>'
@@ -1566,6 +1566,7 @@ const PM = (() => {
     }
     function bind(c) {
         c.querySelectorAll('[data-pa]').forEach(b => b.onclick = () => ({ cat: fromCat, parc: fromParc, imp: fromTools, man: manual, loc: rental, pk: () => send('packingo'), dv: () => send('deviso'), ds: toDossier, xl: exportDlg })[b.dataset.pa]());
+        const st = c.querySelector('[data-pa-to]'); if (st) st.onchange = () => { const v = st.value; st.value = ''; if (v) sendTo(v); };
         c.querySelectorAll('tr[data-pi]').forEach(tr => { const i = cur().items.find(x => x.id === tr.dataset.pi); if (!i) return;
             tr.querySelectorAll('[data-k]').forEach(el => { const k = el.dataset.k;
                 if (k === 'del') el.onclick = () => { cur().items = cur().items.filter(x => x !== i); dirty(); render(); };
@@ -1598,6 +1599,10 @@ const PM = (() => {
     }
     const sel = () => cur().items.filter(i => i.on);
     // ---------- sorties ----------
+    function sendTo(app) { if (app === 'packingo' || app === 'deviso') return send(app); const L = sel(); if (!L.length) { toast('Cochez au moins une ligne'); return; } const p = proj();
+        const d = { format: 'xiii-link', version: 1, kind: 'equipment', id: uid() + uid(), from: 'matos', to: app, app: 'MATOS XIII', ts: Date.now(), project: { name: p ? p.title : '' }, items: L.map(i => ({ name: i.name, qty: i.qty, grp: i.grp, category: i.grp })), cables: [] };
+        try { let box = J('xiii.link.outbox', []) || []; box = box.filter(x => x && Date.now() - (x.ts || 0) < 7 * 864e5 && !(x.to === app && x.from === 'matos')).slice(-8); box.push(d); localStorage.setItem('xiii.link.outbox', JSON.stringify(box)); } catch (e) { toast('⚠️ Stockage plein'); return; }
+        const w = window.open(app + '.html#xmatos=' + d.id, '_blank'); toast(w ? 'Matériel envoyé à ' + app.toUpperCase() : 'Ouvrez ' + app.toUpperCase() + ' : 📤 Vers Suite XIII → MATOS ← Importer', 5000); }
     function send(app) {
         const L = sel(); if (!L.length) { toast('Cochez au moins une ligne'); return; } const p = proj();
         const d = { format: 'xiii-link', version: 1, kind: 'equipment', id: uid() + uid(), from: 'matos', to: app, app: 'MATOS XIII', ts: Date.now(), created: new Date().toISOString(), project: { name: p ? p.title : '', author: '' }, items: L.map(i => ({ name: i.name, qty: i.qty, category: GL[i.grp].replace(/^\S+ /, ''), note: '' })), cables: [] };
@@ -1681,7 +1686,7 @@ const PM = (() => {
         const z = await JSZip.loadAsync(await r.arrayBuffer()); const f = 'xl/worksheets/sheet1.xml'; let x = await z.file(f).async('string');
         if (D.d0) x = setCell(x, 'C6', serial(D.d0)); if (D.d1) x = setCell(x, 'C8', serial(D.d1)); else x = setCell(x, 'C8', null); if (D.d2) x = setCell(x, 'C11', serial(D.d2)); else x = setCell(x, 'C11', null);
         x = setCell(x, 'C9', D.h1 ? tser(D.h1) : null); x = setCell(x, 'C12', D.h2 ? tser(D.h2) : null);
-        x = setCell(x, 'H6', D.nom || null); x = setCell(x, 'H7', D.tel || null); x = setCell(x, 'G18', D.proj || null); x = setCell(x, 'H11', D.site || null); x = setCell(x, 'G11', 'SITE DE LIVRAISON :'); x = setCell(x, 'G36', null);
+        x = setCell(x, 'H6', D.nom || null); x = setCell(x, 'H7', D.tel || null); x = setCell(x, 'G18', D.proj || null); x = setCell(x, 'H11', D.site || null); x = setCell(x, 'G11', 'SITE DE LIVRAISON :'); ['G35', 'G36', 'G37'].forEach(r => { x = setCell(x, r, null); });
         // champs libres : G8, G9 puis G12, G13 ; au-delà, regroupés en G13
         const slots = [8, 9, 12, 13], F = D.fields.slice(); const extra = F.splice(3);
         if (extra.length && F[3]) { } F.forEach((fl, k) => { const rw = slots[k]; x = setCell(x, 'G' + rw, fl.lab.toUpperCase().replace(/\s*:?\s*$/, ' :'), '8'); x = setCell(x, 'H' + rw, fl.val || null, '26'); if (rw > 9) x = setCell(x, 'I' + rw, null, '26'); });
@@ -1704,7 +1709,7 @@ const PM = (() => {
     }
     function hashImport() { const m = location.hash.match(/pmimp=([\w-]+)/); if (!m) return; const d = (J('xiii.link.outbox', []) || []).find(x => x && x.id === m[1]); history.replaceState(null, '', location.pathname + location.search); if (!d) return;
         (d.items || []).forEach(it => add(it.name, +it.qty || 1, guess(it.fam || it.cat, (it.category || '') + ' ' + it.name), (d.app || d.from || '').replace(/ XIII$/, ''))); dirty(); setView('proj'); toast('📥 ' + (d.items || []).length + ' ligne(s) reçue(s) de ' + (d.app || d.from || '').toUpperCase(), 5000); }
-    return { hashImport, toDossier, html, bind, buildXlsx, guess, add, cur, GRP };
+    return { sendTo, hashImport, toDossier, html, bind, buildXlsx, guess, add, cur, GRP };
 })();
 
 // =====================================================================
@@ -6987,7 +6992,7 @@ var XLINKS = window.XLINKS || (() => {
         ['matos', 'callsheeto', 'Matériel réservé pour la journée → feuille de service.'], ['repero', 'plano', 'Plan de masse / photo aérienne du lieu → fond de plan.'],
         ['conduco', 'soustitro', 'Textes du prompteur → sous-titres préparés du direct.'], ['backupo', 'posto', 'Cartes déchargées et vérifiées → prises disponibles au dérushage.'],
         ['scripto', 'callsheeto', 'Plans non tournés → reportés sur la journée suivante.'],
-        ['syno', 'matos', 'Équipements du synoptique → « Matériel du projet » (demande de prêt, location).'], ['plano', 'matos', 'Matériel du plan → « Matériel du projet » de MATOS.'], ['packingo', 'matos', 'Contenu des caisses → « Matériel du projet » de MATOS.'], ['lumo', 'matos', 'Projecteurs du plan de feu → « Matériel du projet » de MATOS.'], ['sono', 'matos', 'Micros, pieds et HF → « Matériel du projet » de MATOS.'], ['matos', 'dossier', 'Matériel du projet → rubrique technique du dossier.'],
+        ['syno', 'matos', 'Équipements du synoptique → « Matériel du projet » (demande de prêt, location).'], ['plano', 'matos', 'Matériel du plan → « Matériel du projet » de MATOS.'], ['packingo', 'matos', 'Contenu des caisses → « Matériel du projet » de MATOS.'], ['lumo', 'matos', 'Projecteurs du plan de feu → « Matériel du projet » de MATOS.'], ['sono', 'matos', 'Micros, pieds et HF → « Matériel du projet » de MATOS.'], ['matos', 'plano', 'Matériel du projet → à placer sur le plan.'], ['matos', 'syno', 'Image, son et régie → nœuds du synoptique.'], ['matos', 'lumo', 'Lumière → liste des projecteurs.'], ['matos', 'sono', 'Son → patch.'], ['matos', 'dossier', 'Matériel du projet → rubrique technique du dossier.'],
         ['importo', 'planno', 'Planning importé (Excel, Movie Magic…).'], ['importo', 'callsheeto', 'Feuilles de service PDF importées.'], ['importo', 'deviso', 'Devis loueurs PDF importés.'], ['importo', 'casto', 'Listes de talents importées.'],
     ];
     ['callsheeto', 'casto', 'conduco', 'decoup', 'deviso', 'lumo', 'moodo', 'packingo', 'planno', 'plano', 'posto', 'repero', 'ressourco', 'runo', 'scripto', 'sono', 'soustitro', 'storyboardo', 'syno', 'transporto', 'backupo']
@@ -7014,6 +7019,7 @@ const XGATE = (() => {
         'plano>deviso': thenClick('openMaterialExport', '#xpk-deviso'),
         'syno>deviso': thenClick('openMaterialExport', '#xpk-deviso')
     };
+    ['syno', 'plano', 'packingo', 'lumo', 'sono', 'deviso'].forEach(a => { SPECIAL['matos>' + a] = () => { if (typeof PM === 'undefined') return false; PM.sendTo(a); return true; }; });
     ['syno', 'plano', 'packingo', 'lumo', 'sono'].forEach(a => { SPECIAL[a + '>matos'] = () => { const F = fn('xiiiToMatos'); return F ? F() : false; }; });
     if (window.XPASS) Object.keys(XPASS.R).forEach(k => { SPECIAL[k] = () => XPASS.send(k); }); // passerelles saison 4 (boîte de réception)
     const can = k => SPECIAL[k] && (window.XPASS && XPASS.has(k) || k !== 'soustitro>graphico' || fn('setView')) && (!/>deviso$/.test(k) || fn(k === 'callsheeto>deviso' ? 'openSendCrewToDeviso' : 'openMaterialExport'));
@@ -7040,7 +7046,7 @@ const XGATE = (() => {
         if (APP !== 'dossier' && !XLINKS.from(APP).some(x => x[1] === 'dossier') && findBtn('dossier')) XLINKS.L.push([APP, 'dossier', 'Document de l\'outil (PDF) → rubrique adaptée du dossier de production.']);
         const outs = XLINKS.from(APP).slice().sort((a, b) => (b[1] === 'dossier') - (a[1] === 'dossier')), ins = XLINKS.to(APP).filter(x => !outs.some(y => y[1] === x[0]));
         const row = (a, d, dir) => { const t = T[a] || ['🧩', a, '']; const b = dir === 'out' ? findBtn(a) : null;
-            return '<button class="xgt-t" data-a="' + a + '" data-dir="' + dir + '" data-d="' + E(d) + '" data-b="' + (b ? 1 : 0) + '"><span class="i">' + t[0] + '</span><span><b>' + E(t[1]) + '</b><small>' + E(t[2]) + '</small></span><span class="go">' + (dir === 'out' ? (b || can(APP + '>' + a) ? 'Envoyer →' : 'Ouvrir ↗') : '← reçoit') + '</span></button>'; };
+            return '<button class="xgt-t" data-a="' + a + '" data-dir="' + dir + '" data-d="' + E(d) + '" data-b="' + (b ? 1 : 0) + '"><span class="i">' + t[0] + '</span><span><b>' + E(t[1]) + '</b><small>' + E(t[2]) + '</small></span><span class="go">' + (dir === 'out' ? (b || can(APP + '>' + a) ? 'Envoyer →' : 'Ouvrir ↗') : a === 'matos' && fn('xiiiFromMatos') ? '← Importer' : '← reçoit') + '</span></button>'; };
         const o = document.createElement('div'); o.id = 'xgt-ov';
         o.innerHTML = '<div class="xgt-w" role="dialog" aria-label="Vers Suite XIII"><div class="xgt-h"><b>📤 Vers Suite XIII — depuis ' + E(me[1]) + '</b><button class="xgt-x" aria-label="Fermer">✕</button></div>' +
             '<div class="xgt-b"><svg class="xgt-s"><defs><marker id="xgt-ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="xgt-mk"/></marker></defs><path class="xgt-p" d=""/></svg>' +
@@ -7061,7 +7067,7 @@ const XGATE = (() => {
             const t = XLINKS.T[el.dataset.a] || ['', el.dataset.a];
             D.innerHTML = '<b>' + (out ? E(me[1]) + ' → ' + E(t[1]) : E(t[1]) + ' → ' + E(me[1])) + '</b> · ' + E(el.dataset.d) + '<br><small>' + (out ? (el.dataset.b === '1' || can(APP + '>' + el.dataset.a) ? 'Cliquez pour lancer l\'envoi.' : 'Cliquez pour ouvrir ' + E(t[1]) + ' : la passerelle s\'y trouve (import, 🧺 panier ou Drive du projet).') : 'Passerelle à lancer depuis ' + E(t[1]) + ' (cliquez pour l\'ouvrir).') + '</small>';
         };
-        o.querySelectorAll('.xgt-t').forEach(el => { el.onmouseenter = () => link(el); el.onfocus = () => link(el); el.onclick = () => el.dataset.dir === 'out' ? go(el.dataset.a) : (location.href = el.dataset.a + '.html'); });
+        o.querySelectorAll('.xgt-t').forEach(el => { el.onmouseenter = () => link(el); el.onfocus = () => link(el); el.onclick = () => el.dataset.dir === 'out' ? go(el.dataset.a) : (el.dataset.a === 'matos' && fn('xiiiFromMatos') ? (close(), fn('xiiiFromMatos')()) : (location.href = el.dataset.a + '.html')); });
         o.querySelector('.xgt-r').addEventListener('scroll', () => { const h = o.querySelector('.xgt-t.h'); if (h) link(h); });
         o.querySelector('.xgt-x').onclick = close; o.addEventListener('mousedown', e => { if (e.target === o) close(); });
         o.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
