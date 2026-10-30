@@ -8496,6 +8496,92 @@ body.xrainbow ::selection{background:#ffca3a;color:#1a1033}body.xrainbow a{color
 XTHEME.init('ressourco');
 
 // =====================================================================
+//  SUITE XIII — XPDASH : 📈 tableau de bord du projet
+//  Avancement par phase (PLANNO), budget du devis retenu (DEVISO) comparé au réel (dépenses DEVISO / app équipe),
+//  échéances datées de tous les outils (XCALEV), retards. Carte « Pilotage » sur l'accueil + page complète.
+// =====================================================================
+const XPDASH = (() => {
+    const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } };
+    const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const pad = n => String(n).padStart(2, '0'), today = () => { const d = new Date(); return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); };
+    const dd = s => Math.round((Date.parse(String(s).slice(0, 10) + 'T12:00:00') - Date.parse(today() + 'T12:00:00')) / 864e5);
+    const days = (a, b) => Math.max(1, Math.round((Date.parse(String(b || a).slice(0, 10) + 'T12:00:00') - Date.parse(String(a).slice(0, 10) + 'T12:00:00')) / 864e5) + 1);
+    const fr = s => /^\d{4}-\d{2}-\d{2}/.test(s || '') ? new Date(s.slice(0, 10) + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' }) : (s || '');
+    const eur = n => Math.round(n || 0).toLocaleString('fr-FR') + ' €';
+    const when = n => n === 0 ? 'aujourd\'hui' : n === 1 ? 'demain' : n < 0 ? 'il y a ' + (-n) + ' j' : 'dans ' + n + ' j';
+    const fiche = () => { const s = J('xiii.projets', null); return s && s.list ? s.list.find(f => f && f.id === s.active) || null : null; };
+    const PH = [['prepa', 'Préparation', '#7986cb'], ['casting', 'Casting & talents', '#ba68c8'], ['reperage', 'Repérages', '#4db6ac'], ['tournage', 'Tournage', '#ef5350'], ['post', 'Post-production', '#ffb74d'], ['livraison', 'Livraison & diffusion', '#81c784'], ['autre', 'Autre', '#90a4ae']];
+    // ---------- données ----------
+    function phases() {
+        const pl = J('plannoXIII.project', null), T = ((pl && pl.tasks) || []).filter(t => t && t.name), t0 = today();
+        return PH.map(([id, name, col]) => {
+            const L = T.filter(t => (t.phase || 'autre') === id); if (!L.length) return null;
+            let w = 0, wd = 0, late = 0, wip = 0, done = 0, d0 = '', d1 = '';
+            L.forEach(t => { const s = t.start || '', e = t.end || t.start || ''; const k = t.ms ? 0.5 : (s ? days(s, e) : 1); w += k; const ok = t.status === 'done'; if (ok) { wd += k; done++; } else if (t.status === 'wip') { wd += k * (t.pct != null ? +t.pct / 100 : 0.5); wip++; } if (!ok && e && e < t0) late++; if (s && (!d0 || s < d0)) d0 = s; if (e && (!d1 || e > d1)) d1 = e; });
+            return { id, name, col, n: L.length, done, wip, late, pct: w ? Math.round(wd / w * 100) : 0, d0, d1, now: d0 && d1 && d0 <= t0 && t0 <= d1, tasks: L };
+        }).filter(Boolean);
+    }
+    function budget() {
+        const S = J('devisoXIII.summary', null), DP = J('devisoXIII.project', null); if (!S || !S.ht) return null;
+        const R = (DP && DP.real) || [], by = { eq: 0, crew: 0, fees: 0, other: 0 }; R.forEach(r => { by[r.cat || 'other'] = (by[r.cat || 'other'] || 0) + (+r.ht || 0); });
+        const real = by.eq + by.crew + by.fees + by.other, dev = { eq: +S.eq || 0, crew: +S.crew || 0, fees: +S.fees || 0 }; dev.other = Math.max(0, (+S.ht || 0) - dev.eq - dev.crew - dev.fees); // frais généraux, imprévus, marge
+        return { ht: +S.ht, version: S.version || '', dev, by, real, last: R.slice().sort((a, b) => String(b.date || '').localeCompare(String(a.date || ''))).slice(0, 5) };
+    }
+    function deadlines(n) {
+        const t = today(), L = [], f = fiche();
+        if (typeof XCALEV !== 'undefined') { try { XCALEV.events().forEach(e => { if (e.d1 >= addDays(t, -30) && !/fait/.test(e.det || '')) L.push({ d: e.d0, d1: e.d1, t: e.title, a: e.src, late: e.d1 < t && !!e.warn, det: e.det }); }); } catch (e) { } }
+        else { const pl = J('plannoXIII.project', null); ((pl && pl.tasks) || []).forEach(x => { if (x.status === 'done') return; const d = x.ms ? x.start : (x.end || x.start); if (d) L.push({ d, t: (x.ms ? '◆ ' : '') + x.name, a: 'planno', late: d < t }); }); }
+        if (f) [['debut', '🎬 Début du tournage'], ['fin', '🏁 Fin du tournage'], ['diffusion', '📺 Diffusion']].forEach(([k, l]) => { if (f[k] && !L.some(x => x.d === f[k] && x.t === l)) L.push({ d: f[k], t: l, a: 'calendrier' }); });
+        const seen = new Set(); return L.filter(x => (x.d >= t || x.late) && !seen.has(x.d + x.t) && seen.add(x.d + x.t)).sort((a, b) => (b.late - a.late) || a.d.localeCompare(b.d)).slice(0, n || 12);
+    }
+    function addDays(s, n) { const d = new Date(s + 'T12:00'); d.setDate(d.getDate() + n); return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+    function overall(P) { const w = P.reduce((a, p) => a + p.n, 0); return w ? Math.round(P.reduce((a, p) => a + p.pct * p.n, 0) / w) : null; }
+    const bar = (p, col) => '<div class="xpd-bar"><i style="width:' + Math.max(0, Math.min(100, p)) + '%;background:' + col + '"></i></div>';
+    const cd = f => { if (!f || !f.debut) return null; const n = dd(f.debut), e = f.fin ? dd(f.fin) : n; return n > 0 ? ['J-' + n, 'avant le tournage'] : e >= 0 ? ['Jour ' + (1 - n), 'de tournage' + (f.fin ? ' sur ' + days(f.debut, f.fin) : '')] : ['J+' + (-e), 'après le tournage']; };
+    // ---------- carte de l'accueil ----------
+    function card() {
+        const f = fiche(), P = phases(), B = budget(), D = deadlines(30), late = D.filter(x => x.late).length, o = overall(P), c = cd(f);
+        if (!P.length && !B && !f) return '<p class="xd-e">Remplissez la fiche projet, le planning (PLANNO) et le devis (DEVISO) : le pilotage s\'affiche ici.</p>';
+        const cur = P.find(p => p.now);
+        return '<div class="xpd-k">' + (c ? '<div><b>' + c[0] + '</b><span>' + c[1] + '</span></div>' : '') + (o != null ? '<div><b>' + o + ' %</b><span>avancement' + (cur ? ' · ' + esc(cur.name) : '') + '</span></div>' : '') + (B ? '<div><b class="' + (B.real > B.ht ? 'ko' : '') + '">' + Math.round(B.real / B.ht * 100) + ' %</b><span>du budget dépensé</span></div>' : '') + (late ? '<div><b class="ko">' + late + '</b><span>en retard</span></div>' : '') + '</div>' +
+            (P.length ? P.map(p => '<div class="xpd-ph"><span>' + esc(p.name) + (p.late ? ' <em>⚠️ ' + p.late + '</em>' : '') + '</span>' + bar(p.pct, p.col) + '<small>' + p.pct + ' %</small></div>').join('') : '') +
+            '<button class="xd-l" onclick="XPDASH.open()">📈 Tableau de bord complet →</button>';
+    }
+    // ---------- page complète ----------
+    function open() {
+        const f = fiche(), P = phases(), B = budget(), D = deadlines(16), o = overall(P), c = cd(f), late = D.filter(x => x.late);
+        let ov = document.getElementById('xpd'); if (ov) ov.remove(); ov = document.createElement('div'); ov.id = 'xpd';
+        const sec = (t, body, link) => '<section><h3>' + t + (link ? '<a href="' + link[0] + '">' + link[1] + ' →</a>' : '') + '</h3>' + body + '</section>';
+        const phHtml = P.length ? P.map(p => '<div class="xpd-row' + (p.now ? ' now' : '') + '"><div class="xpd-n"><i style="background:' + p.col + '"></i><b>' + esc(p.name) + '</b>' + (p.now ? ' <span class="xpd-tag">en cours</span>' : '') + '<small>' + (p.d0 ? fr(p.d0) + (p.d1 && p.d1 !== p.d0 ? ' → ' + fr(p.d1) : '') : 'sans dates') + ' · ' + p.done + '/' + p.n + ' tâche(s) faite(s)' + (p.wip ? ' · ' + p.wip + ' en cours' : '') + (p.late ? ' · <b class="ko">' + p.late + ' en retard</b>' : '') + '</small></div>' + bar(p.pct, p.col) + '<b class="xpd-p">' + p.pct + ' %</b></div>' +
+            (p.late ? '<div class="xpd-late">' + p.tasks.filter(t => t.status !== 'done' && (t.end || t.start) && (t.end || t.start) < today()).slice(0, 4).map(t => '⚠️ ' + esc(t.name) + ' <small>(prévu ' + fr(t.end || t.start) + ')</small>').join('<br>') + '</div>' : '')).join('') : '<p class="xpd-e">Aucune tâche dans PLANNO. Le planning par phase (préparation, tournage, post-production…) alimente cet avancement.</p>';
+        let bHtml = '<p class="xpd-e">Aucun devis chiffré dans DEVISO.</p>';
+        if (B) { const rows = [['eq', '🎥 Matériel'], ['crew', '👥 Équipe'], ['fees', '🍽️ Frais'], ['other', '📦 Autres (frais généraux, imprévus, marge / dépenses diverses)']];
+            bHtml = '<div class="xpd-bk"><div><span>Devis retenu' + (B.version ? ' (' + esc(B.version) + ')' : '') + '</span><b>' + eur(B.ht) + ' HT</b></div><div><span>Dépensé</span><b class="' + (B.real > B.ht ? 'ko' : '') + '">' + eur(B.real) + ' HT</b></div><div><span>Reste</span><b class="' + (B.ht - B.real < 0 ? 'ko' : 'ok') + '">' + eur(B.ht - B.real) + '</b></div></div>' +
+                '<table class="xpd-t"><tr><th>Poste</th><th class="r">Devis</th><th class="r">Réel</th><th></th><th class="r">Écart</th></tr>' + rows.map(([k, l]) => { const a = B.by[k] || 0, b = B.dev[k] || 0, p = b ? a / b * 100 : (a ? 101 : 0); return '<tr><td>' + l + '</td><td class="r">' + eur(b) + '</td><td class="r">' + eur(a) + '</td><td style="width:30%">' + bar(Math.min(100, p), p > 100 ? '#e57373' : p > 85 ? '#ffb74d' : '#81c784') + '</td><td class="r ' + (a - b > 0.5 ? 'ko' : 'ok') + '">' + (a - b > 0 ? '+' : '') + eur(a - b) + '</td></tr>'; }).join('') + '</table>' +
+                (B.last.length ? '<div class="xpd-sub">Dernières dépenses : ' + B.last.map(r => esc(r.label || 'Dépense') + ' <small>' + eur(r.ht) + ' · ' + fr(r.date) + '</small>').join(' · ') + '</div>' : '<div class="xpd-sub">Aucune dépense saisie : DEVISO › 💳 Réel, ou « Dépense » dans l\'application de l\'équipe.</div>'); }
+        const dHtml = D.length ? D.map(x => { const n = dd(x.d); return '<a class="xpd-d' + (x.late ? ' late' : '') + '" href="' + (x.a === 'fiche' ? 'calendrier' : x.a) + '.html"><span class="xpd-dd">' + fr(x.d) + '</span><span>' + esc(x.t) + (x.det ? ' <small>' + esc(x.det) + '</small>' : '') + '</span><small>' + (x.late ? '⚠️ en retard' : when(n)) + '</small></a>'; }).join('') : '<p class="xpd-e">Aucune échéance à venir.</p>';
+        ov.innerHTML = '<div class="xpd-box"><div class="xpd-h"><b>📈 Tableau de bord — ' + esc((f && f.title) || 'Projet') + '</b><button onclick="window.print()">🖨️</button><button id="xpd-x">✕</button></div>' +
+            '<div class="xpd-kpi">' + (c ? '<div><b>' + c[0] + '</b><span>' + c[1] + '</span></div>' : '') + '<div><b>' + (o != null ? o + ' %' : '—') + '</b><span>avancement global</span>' + (o != null ? bar(o, '#f0b378') : '') + '</div>' + (B ? '<div><b class="' + (B.real > B.ht ? 'ko' : '') + '">' + Math.round(B.real / B.ht * 100) + ' %</b><span>du budget dépensé</span>' + bar(B.real / B.ht * 100, B.real > B.ht ? '#e57373' : '#81c784') + '</div>' : '') + '<div><b class="' + (late.length ? 'ko' : 'ok') + '">' + late.length + '</b><span>échéance(s) en retard</span></div></div>' +
+            '<div class="xpd-g">' + sec('🗂️ Avancement par phase', phHtml, ['planno.html', 'PLANNO']) + sec('💶 Budget : devis / réel', bHtml, ['deviso.html', 'DEVISO']) + sec('⏰ Échéances', dHtml, ['calendrier.html', 'CALENDRIER']) + '</div></div>';
+        document.body.appendChild(ov); ov.querySelector('#xpd-x').onclick = () => ov.remove(); ov.addEventListener('mousedown', e => { if (e.target === ov) ov.remove(); });
+        const k = e => { if (e.key === 'Escape' && document.getElementById('xpd')) { ov.remove(); removeEventListener('keydown', k); } }; addEventListener('keydown', k);
+    }
+    const css = document.createElement('style');
+    css.textContent = '.xpd-k{display:flex;gap:14px;flex-wrap:wrap;margin:2px 0 8px}.xpd-k div b{display:block;font-size:20px}.xpd-k div span{font-size:11px;opacity:.7}.xpd-ph{display:flex;gap:8px;align-items:center;font-size:12px;margin:3px 0}.xpd-ph span{width:42%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.xpd-ph em{font-style:normal;color:#e57373}.xpd-ph .xpd-bar{flex:1}.xpd-ph small{width:34px;text-align:right}' +
+        '.xpd-bar{height:8px;border-radius:99px;background:rgba(128,128,128,.25);overflow:hidden}.xpd-bar i{display:block;height:100%;border-radius:99px}.ko{color:#e57373!important}.ok{color:#81c784}' +
+        '#xpd{position:fixed;inset:0;z-index:10300;background:rgba(0,0,0,.6);display:flex;justify-content:center;align-items:flex-start;padding:4vh 14px;overflow:auto;font:14px/1.45 "Segoe UI",system-ui,sans-serif}.xpd-box{width:min(1100px,100%);background:var(--bg-menu,#1f1f23);color:var(--text-main,#eee);border:1px solid rgba(240,179,120,.5);border-radius:16px;padding:16px 18px;box-shadow:0 20px 60px rgba(0,0,0,.6)}' +
+        '.xpd-h{display:flex;gap:8px;align-items:center}.xpd-h b{flex:1;font-size:18px}.xpd-h button,.xpd-box button{font:inherit;color:inherit;background:rgba(240,179,120,.15);border:1px solid rgba(240,179,120,.5);border-radius:8px;padding:6px 10px;cursor:pointer}' +
+        '.xpd-kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin:12px 0}.xpd-kpi>div{background:rgba(128,128,128,.1);border:1px solid rgba(128,128,128,.25);border-radius:12px;padding:10px 12px}.xpd-kpi b{display:block;font-size:26px}.xpd-kpi span{font-size:12px;opacity:.75;display:block;margin-bottom:6px}' +
+        '.xpd-g{display:grid;grid-template-columns:1.1fr 1fr;gap:12px}.xpd-g section{background:rgba(128,128,128,.07);border:1px solid rgba(128,128,128,.22);border-radius:12px;padding:12px}.xpd-g section:last-child{grid-column:1/-1}.xpd-g h3{margin:0 0 8px;font-size:15px;display:flex;justify-content:space-between}.xpd-g h3 a{font-size:12px;color:#f0b378;font-weight:400}' +
+        '.xpd-row{display:grid;grid-template-columns:1fr 34% 44px;gap:10px;align-items:center;padding:7px 4px;border-bottom:1px solid rgba(128,128,128,.18)}.xpd-row.now{background:rgba(240,179,120,.08);border-radius:8px}.xpd-n i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px}.xpd-n small{display:block;opacity:.7;font-size:11.5px}.xpd-p{text-align:right}.xpd-tag{font-size:10.5px;background:#f0b378;color:#1d1b19;border-radius:6px;padding:0 5px}.xpd-late{font-size:12px;color:#e57373;padding:2px 4px 6px 20px}' +
+        '.xpd-bk{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:8px}.xpd-bk span{display:block;font-size:11.5px;opacity:.7}.xpd-bk b{font-size:17px}.xpd-t{width:100%;border-collapse:collapse;font-size:12.5px}.xpd-t th{text-align:left;font-size:11px;opacity:.7;font-weight:600;padding:4px}.xpd-t td{padding:5px 4px;border-top:1px solid rgba(128,128,128,.18)}.xpd-t .r{text-align:right;white-space:nowrap}.xpd-sub{font-size:12px;opacity:.85;margin-top:8px}' +
+        '.xpd-d{display:grid;grid-template-columns:110px 1fr auto;gap:10px;padding:6px 4px;border-bottom:1px solid rgba(128,128,128,.18);color:inherit;text-decoration:none;font-size:13px}.xpd-d small{opacity:.7}.xpd-d.late{color:#e57373}.xpd-dd{font-weight:600}.xpd-e{opacity:.7;font-size:13px}' +
+        '@media(max-width:760px){.xpd-g{grid-template-columns:1fr}.xpd-row{grid-template-columns:1fr 30% 40px}.xpd-d{grid-template-columns:86px 1fr}}@media print{#xpd{position:static;background:none;padding:0}.xpd-box{box-shadow:none;border:0;color:#111;background:#fff}.xpd-h button{display:none}}';
+    document.head.appendChild(css);
+    return { open, card, phases, budget, deadlines };
+})();
+
+// =====================================================================
 //  SUITE XIII — XDASH : l'accueil en tableau de bord du projet en cours
 //  En tête : projet (type, dates, compte à rebours, lieu), prochaines échéances (PLANNO, POSTO, fiche),
 //  ce qui manque selon le type de production, derniers retours de l'équipe (avis, mots, travaux reçus,
@@ -8538,7 +8624,7 @@ const XDASH = (() => {
     // ---------- cartes de l'accueil, réglables par le Master (⚙️ au survol) ----------
     // icône d'outil : logo personnalisé (logos/<outil>.png) s'il existe, sinon l'emoji
     const ic = a => '<span class="xd-ic"><img src="logos/' + a + '.png" alt="" onerror="this.parentNode.textContent=\'' + NM[a][0] + '\'"></span>';
-    const CARDS = { proj: '🎬 Projet en cours', dead: '⏰ Prochaines échéances', need: '🧩 Ce qui manque', fb: '💬 Derniers retours de l\'équipe', msg: '📢 Message du Master', toM: '✉️ Écrire au Master', team: '📨 Messages de l\'équipe', day: '📋 Feuille du jour', meteo: '🌤️ Météo & soleil', clock: '🌍 Horloges', notes: '🗒️ Notes rapides', fav: '⭐ Outils récents', budget: '💶 Budget', matos: '🧳 Matériel', rush: '💽 Rushes', post: '🎞️ Versions à valider', online: '🟢 Équipe en ligne', docs: '📄 Derniers documents' };
+    const CARDS = { proj: '🎬 Projet en cours', pilot: '📈 Pilotage du projet', dead: '⏰ Prochaines échéances', need: '🧩 Ce qui manque', fb: '💬 Derniers retours de l\'équipe', msg: '📢 Message du Master', toM: '✉️ Écrire au Master', team: '📨 Messages de l\'équipe', day: '📋 Feuille du jour', meteo: '🌤️ Météo & soleil', clock: '🌍 Horloges', notes: '🗒️ Notes rapides', fav: '⭐ Outils récents', budget: '💶 Budget', matos: '🧳 Matériel', rush: '💽 Rushes', post: '🎞️ Versions à valider', online: '🟢 Équipe en ligne', docs: '📄 Derniers documents' };
     const NEWW = ['day', 'meteo', 'clock', 'notes', 'fav', 'budget', 'matos', 'rush', 'post', 'online', 'docs']; // nouveaux widgets : proposés dans la galerie ＋, masqués tant qu'on ne les coche pas
     const PF = [['countdown', 'Compte à rebours (J-…)'], ['dates', 'Dates de tournage'], ['lieu', 'Lieu'], ['production', 'Production'], ['client', 'Client / diffuseur'], ['realisation', 'Réalisation'], ['diffusion', 'Diffusion'], ['duree', 'Format / durée'], ['contact', 'Contact production']];
     const FBT = [['avis', '💬 Avis'], ['mots', '📌 Mots'], ['travaux', '📥 Travaux reçus'], ['drive', '☁️ Journal du Drive']];
@@ -8546,7 +8632,7 @@ const XDASH = (() => {
     const PC = () => (typeof XPCFG !== 'undefined' ? XPCFG.get() : {}) || {};
     const isMaster = () => { const c = J('xiii.drive', null); return !c || !c.url || !!c.code; }, linked = () => { const c = J('xiii.drive', null); return !!(c && c.url); };
     function conf() {
-        const d = Object.assign({ order: ['proj', 'dead', 'need', 'fav', 'fb', 'msg', 'toM', 'team'], off: [], proj: ['countdown', 'dates', 'lieu', 'production'], src: ['fiche', 'planno', 'posto'], extra: [], n: 6, need: null, fb: ['avis', 'mots', 'travaux', 'drive'], msg: '', zone: true }, PC().dash || {});
+        const d = Object.assign({ order: ['proj', 'pilot', 'dead', 'need', 'fav', 'fb', 'msg', 'toM', 'team'], off: [], proj: ['countdown', 'dates', 'lieu', 'production'], src: ['fiche', 'planno', 'posto'], extra: [], n: 6, need: null, fb: ['avis', 'mots', 'travaux', 'drive'], msg: '', zone: true }, PC().dash || {});
         Object.keys(CARDS).forEach(k => { if (d.order.indexOf(k) < 0) { d.order.push(k); if (NEWW.indexOf(k) > -1 && d.off.indexOf(k) < 0) d.off = d.off.concat(k); } }); return d;
     }
     async function api(a, p) { const c = J('xiii.drive', null); if (!c || !c.url) return { ok: false, err: 'off' }; try { const r = await fetch(c.url, { method: 'POST', body: JSON.stringify(Object.assign({ a }, c.tok ? { tok: c.tok } : { code: c.code, by: (c.me && c.me.name) || 'Master' }, p || {})), redirect: 'follow' }); return await r.json(); } catch (e) { return { ok: false, err: 'net' }; } }
@@ -8563,6 +8649,7 @@ const XDASH = (() => {
         if (k === 'proj') { if (!f) return M ? W('<p class="xd-e">Aucun projet en cours. <button class="xd-l" onclick="XPROJET.open()">Créer la fiche projet →</button></p>', 'xd-proj') : ''; const n = f.debut ? dd(f.debut) : null, P = C.proj, has = x => P.indexOf(x) > -1;
             const meta = [has('lieu') && f.lieu, has('production') && f.production, has('client') && f.client, has('realisation') && f.realisation && 'Réal. ' + f.realisation, has('duree') && f.duree, has('diffusion') && f.diffusion && '📺 ' + fr(f.diffusion), has('contact') && [f.contactName, f.contactPhone].filter(Boolean).join(' ')].filter(Boolean);
             return W('<b class="xd-t">' + esc(f.title || 'Sans nom') + '</b>' + (meta.length ? '<div class="xd-m">' + esc(meta.join(' · ')) + '</div>' : '') + (has('countdown') && n != null ? '<div class="xd-cd"><b>' + (n > 0 ? 'J-' + n : n === 0 ? 'Jour J' : 'J+' + (-n)) + '</b><span>' + (n > 0 ? 'avant le tournage' : n === 0 ? 'tournage aujourd\'hui' : 'depuis le début du tournage') + (has('dates') ? '<br>' + fr(f.debut) + (f.fin && f.fin !== f.debut ? ' → ' + fr(f.fin) : '') : '') + '</span></div>' : has('dates') && f.debut ? '<div class="xd-m">' + fr(f.debut) + (f.fin && f.fin !== f.debut ? ' → ' + fr(f.fin) : '') + '</div>' : '') + '<button class="xd-l" onclick="XPROJET.open()">Ouvrir la fiche projet →</button>', 'xd-proj'); }
+        if (k === 'pilot') return typeof XPDASH !== 'undefined' ? W(XPDASH.card(), 'xd-pilot') : '';
         if (k === 'dead') { const D = dl2(f, C); return W(D.length ? D.map(x => '<a class="xd-r' + (x.late ? ' late' : '') + '" href="' + x.a + '.html"><span>' + esc(x.t) + '</span><small>' + (x.late ? '⚠️ en retard · ' : '') + fr(x.d) + ' · ' + when(dd(x.d)) + '</small></a>').join('') : '<p class="xd-e">Aucune échéance à venir.</p>'); }
         if (k === 'need') { if (!f && !C.need) return ''; const L = C.need || (NEED[(f && f.genre) || 'autre'] || NEED.autre); return W(L.filter(a => NM[a]).map(a => { const n = count(a); return '<a class="xd-r" href="' + a + '.html"><span>' + ic(a) + ' ' + NM[a][1] + '</span><small class="' + (n ? 'ok' : 'ko') + '">' + (n ? '✓ ' + n + ' élément' + (n > 1 ? 's' : '') : '⚠️ à remplir') + '</small></a>'; }).join('') || '<p class="xd-e">Aucun outil choisi.</p>'); }
         if (k === 'fb') { const T = C.fb, FB = feedback().filter(x => (T.indexOf('avis') > -1 && /^💬/.test(x.t)) || (T.indexOf('mots') > -1 && /^📌/.test(x.t)) || (T.indexOf('travaux') > -1 && /^📥/.test(x.t)));
