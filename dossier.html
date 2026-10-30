@@ -10075,7 +10075,94 @@ var XPASS = window.XPASS || (() => {
         if (v <= 20 && kg <= 1100) return ['van', 'Utilitaire 20 m³ (permis B)'];
         const n = Math.max(1, Math.ceil(Math.max(v / 40, kg / 8000))); return ['truck', (n > 1 ? n + ' × ' : '') + 'Porteur 40 m³ (permis C)']; }
     const nf1 = x => (Math.round(x * 10) / 10).toLocaleString('fr-FR');
+    const DRX = [['real', /(realisat|scripte|assistant.*real)/], ['image', /(cadr|chef.*op|camera|steadi|pointeu|dit|vision|drone)/], ['son', /(son|perch|mix|audio)/], ['elec', /(electr|lumiere|eclair)/], ['machino', /(machin|grip)/], ['deco', /(deco|accessoir)/], ['cost', /(costum|habill)/], ['hmc', /(maquill|coiff)/], ['regie', /(regisseu|regie)/], ['post', /(monteu|etalon|truquis|post)/], ['prod', /(product|direct.*prod|charge)/], ['secu', /(secour|secur)/], ['transport', /(chauffeu|transport)/], ['cast', /(comedi|acteu|actric|talent|figura|artiste)/]];
+    const dept = r => { const f = F(r); const m = DRX.find(x => x[1].test(f)); return m ? m[0] : 'autre'; };
+    const hm = (t, k) => { const m = /^(\d{1,2})[:h](\d{2})/.exec(t || ''); if (!m) return ''; let x = (+m[1]) * 60 + (+m[2]) + k; x = (x + 1440) % 1440; return String(Math.floor(x / 60)).padStart(2, '0') + ':' + String(x % 60).padStart(2, '0'); };
+    const isoD = s => { s = String(s || '').trim(); let m = /^(\d{4})-(\d{2})-(\d{2})/.exec(s); if (m) return m[0]; m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})/.exec(s); return m ? m[3] + '-' + m[2].padStart(2, '0') + '-' + m[1].padStart(2, '0') : ''; };
+    // envoi groupé du matériel : payload « équipement » posé pour plusieurs outils d'un coup
+    const EQT = { matos: n => 'matos.html?v=proj#pmimp=' + n, packingo: n => 'packingo.html#xlink=' + n, deviso: n => 'deviso.html#xlink=' + n };
+    function eqPayload() { const f = n => typeof window[n] === 'function' ? window[n] : null; let d = null;
+        try { if (f('xiiiCollectMaterial')) d = xiiiCollectMaterial('all'); else if (f('xpkCollect')) d = xpkCollect('all'); else if (f('xdPackPayload')) d = xdPackPayload(); else if (f('xdLsPayload')) d = xdLsPayload(); } catch (e) { }
+        return d && ((d.items || []).length || (d.cables || []).length) ? d : null; }
+    function sendAll(to) { const d0 = eqPayload(); if (!d0) return 0; let box = J('xiii.link.outbox', []) || [], n = 0;
+        to.forEach(t => { const d = Object.assign({}, d0, { id: id() + id(), to: t, ts: Date.now(), from: APP }); box = box.filter(x => x && Date.now() - (x.ts || 0) < 7 * 864e5 && !(x.to === t && x.from === APP)); box.push(d);
+            const L = J(box2(t), []).filter(x => !(x.k === 'eq' && x.from === APP)); L.push({ k: 'eq', from: APP, at: Date.now(), id: id(), lid: d.id, to: t, n: (d.items || []).reduce((a, i) => a + (+i.qty || 1), 0) }); W(box2(t), L); n++; });
+        try { localStorage.setItem('xiii.link.outbox', JSON.stringify(box.slice(-12))); } catch (e) { return 0; } return n; }
+    const box2 = a => 'xiii.inbox.' + a;
     const R = {
+        'eq': { noP: 1,
+            src() { throw 'Envoi groupé uniquement'; },
+            lab: k => k.n + ' équipement(s)',
+            merge(k) { location.href = EQT[k.to](k.lid); setTimeout(() => location.reload(), 60); return 'Ouverture de l\'import…'; }
+        },
+        'repero>transporto': {
+            src() { const p = G(), A = (p.spots || []).filter(s => s.status !== 'ecarte' && (s.address || s.city)), K = A.filter(s => s.status === 'retenu'), L = (K.length ? K : A).map(s => ({ name: s.name || 'Lieu', addr: [s.address, s.cp, s.city].filter(Boolean).join(' '), date: s.date || '' })); if (!L.length) throw 'Aucun lieu avec une adresse dans REPERO'; return { items: L }; },
+            lab: k => k.items.length + ' lieu(x) de tournage',
+            merge(k) { const p = G(); p.trips = p.trips = p.trips || []; p.xplaces = k.items.map(i => i.name + ' — ' + i.addr); const base = (p.hotels || [])[0]; let n = 0;
+                k.items.forEach(i => { if (!i.date) return; const dest = i.name + ' — ' + i.addr; if (p.trips.some(t => t.date === i.date && F(t.to) === F(dest))) return; p.trips.push({ id: id(), date: i.date, time: '', dur: 30, from: base ? base.name : '', to: dest, veh: '', driver: '', pax: [], note: '📍 REPERO' }); n++; });
+                try { if (typeof places === 'function') places(); } catch (e) { }
+                return k.items.length + ' destination(s) proposée(s) dans les navettes' + (n ? ', ' + n + ' navette(s) créée(s) aux dates de tournage des lieux' : ''); }
+        },
+        'casto>callsheeto': {
+            src() { const p = G(), L = (p.talents || []).filter(t => t.status === 'confirme' && t.name).map(t => ({ name: t.name, role: t.role || '', phone: t.phone || '', email: t.email || '', days: t.days || [], minor: !!t.minor, parent: t.parent || '' })); if (!L.length) throw 'Aucun talent « Confirmé » dans CASTO'; if (!L.some(t => t.days.length)) throw 'Cochez les jours de tournage des talents (📅 Disponibilités)'; return { items: L }; },
+            lab: k => k.items.length + ' talent(s) à convoquer',
+            merge(k) { const p = G(); let n = 0, d0 = 0;
+                (p.days || []).forEach(d => { if (!d.date) return; d.crew = d.crew || []; const gen = (d.times || {}).general || ''; k.items.filter(t => t.days.includes(d.date)).forEach(t => { let c = d.crew.find(x => F(x.name) === F(t.name));
+                    if (!c) { c = { id: id(), dept: 'cast', role: t.role || 'Comédien·ne', name: t.name, phone: t.phone, email: t.email, call: '', hmc: '', note: '' }; d.crew.push(c); }
+                    c.dept = 'cast'; if (t.role) c.role = t.role; if (!c.phone) c.phone = t.phone; if (!c.email) c.email = t.email; if (!c.hmc && gen) c.hmc = gen; if (!c.call && gen) c.call = hm(gen, 60); if (t.minor && !/Mineur/.test(c.note || '')) c.note = ((c.note || '') + ' Mineur — représentant : ' + (t.parent || '?')).trim(); n++; }); d0++; });
+                return n ? n + ' convocation(s) sur ' + d0 + ' journée(s) : HMC à l\'heure générale, plateau 1 h après (à ajuster)' : 'Aucune journée de la feuille de service ne correspond aux jours cochés dans CASTO'; }
+        },
+        'ressourco>callsheeto': {
+            src() { const p = G(), M = {}; (p.docs || []).forEach(d => (d.rows || []).filter(r => r.on !== false && r.v).forEach(r => { const v = r.v, nm = ((v.prenom || '') + ' ' + (v.nom || '')).trim(); if (!nm) return; const m = M[F(nm)] = M[F(nm)] || { name: nm };
+                    ['fonction', 'role', 'telephone', 'email', 'date_debut', 'date_fin', 'jours', 'horaires'].forEach(x => { if (v[x] && !m[x]) m[x] = v[x]; }); m.doc = m.doc || d.name; }));
+                const L = Object.values(M); if (!L.length) throw 'Aucune personne dans les contrats de RESSOURCO'; return { items: L }; },
+            lab: k => k.items.length + ' personne(s) sous contrat',
+            merge(k) { const p = G(); let n = 0, u = 0;
+                (p.days || []).forEach(d => { if (!d.date) return; d.crew = d.crew || []; k.items.forEach(m => { const a = isoD(m.date_debut), b = isoD(m.date_fin) || a, js = String(m.jours || '').split(/[,;\s]+/).map(isoD).filter(Boolean);
+                    const on = js.length ? js.includes(d.date) : a ? (d.date >= a && d.date <= b) : true; if (!on) return; const fn = m.fonction || m.role || '', t0 = /(\d{1,2})[:h](\d{2})/.exec(m.horaires || '');
+                    let c = d.crew.find(x => F(x.name) === F(m.name)); if (!c) { c = { id: id(), dept: dept(fn), role: fn, name: m.name, phone: '', email: '', call: '', hmc: '', note: '' }; d.crew.push(c); n++; } else u++;
+                    if (!c.phone && m.telephone) c.phone = m.telephone; if (!c.email && m.email) c.email = m.email; if (!c.role && fn) c.role = fn; if (!c.call && t0) c.call = t0[1].padStart(2, '0') + ':' + t0[2]; }); });
+                return n + ' membre(s) ajouté(s), ' + u + ' complété(s) (téléphone, horaires) sur les journées de leur contrat'; }
+        },
+        'conduco>graphico': {
+            src() { const p = G(), T = ((p.resources || {}).talents || []).filter(t => t.name).map(t => ({ name: t.name, role: t.role || '' })); if (!T.length) throw 'Aucun intervenant déclaré dans CONDUCO (Ressources › Intervenants)'; return { items: T, name: p.name || '' }; },
+            lab: k => k.items.length + ' synthé(s) nom + fonction',
+            merge(k) { const p = G(); if (typeof GX === 'undefined' || typeof addGraphicObj !== 'function') throw 'GRAPHICO pas encore prêt'; const t = GX.LIB.find(x => x.id === 'syn-classique') || GX.LIB.find(x => x.cat === 'Synthés'); let n = 0;
+                k.items.forEach(i => { const nm = 'Synthé — ' + i.name; if (p.graphics.some(g => g.name === nm)) return; const g = GX.instantiate(t, p, (typeof prefs !== 'undefined' && prefs.palKey) || 'cuivre'); g.name = nm; (g.vars || []).forEach(v => { if (v.k === 'nom') v.def = i.name; if (v.k === 'fonction') v.def = i.role || ''; }); addGraphicObj(typeof normGraphic === 'function' ? normGraphic(g) : g, false); n++; });
+                return n ? n + ' synthé(s) créé(s) (modèle « ' + t.name + ' »), un par intervenant' : 'Tous les intervenants ont déjà leur synthé'; }
+        },
+        'conduco>sono': {
+            src() { const p = G(), T = ((p.resources || {}).talents || []).filter(t => t.name).map(t => ({ name: t.name, role: t.role || '', mic: t.mic || '' })); if (!T.length) throw 'Aucun intervenant déclaré dans CONDUCO'; return { items: T }; },
+            lab: k => k.items.length + ' intervenant(s) à équiper',
+            merge(k) { const p = G(); p.ch = p.ch || []; p.hf = p.hf || []; let n = 0, h = 0;
+                k.items.forEach(i => { if (p.ch.some(c => F(c.src) === F(i.name))) return; const mic = i.mic || 'Micro cravate HF', hfOn = /hf|cravate|serre|lav|sans fil|main hf/i.test(mic) || !i.mic; let hf = '';
+                    if (hfOn) { const x = { id: id(), name: 'HF — ' + i.name, t: 'main', model: '', f: '', lo: '', hi: '', grp: 'Plateau', note: '🎬 CONDUCO' }; p.hf.push(x); hf = x.name; h++; }
+                    p.ch.push({ id: id(), src: i.name, mic, stand: hfOn ? '' : 'Pied de table', sb: '', ph: false, hf, grp: 'Plateau', note: '🎬 CONDUCO' + (i.role ? ' · ' + i.role : '') }); n++; });
+                return n + ' voie(s) ajoutée(s) au patch' + (h ? ', ' + h + ' émetteur(s) HF à fréquencer' : ''); }
+        },
+        'syno>conduco': { noP: 0,
+            src() { if (typeof xiiiCollectSources !== 'function') throw 'SYNO pas encore prêt'; const d = xiiiCollectSources('all'), S = d.sources || []; const cams = S.filter(s => s.kind === 'live' || s.kind === 'cam').map(s => s.name), recs = S.filter(s => s.kind === 'rec' || s.kind === 'iso').map(s => s.name); if (!cams.length && !recs.length) throw 'Aucune caméra ni enregistreur reconnu dans le synoptique'; return { cams, recs }; },
+            lab: k => k.cams.length + ' caméra(s), ' + k.recs.length + ' enregistreur(s)',
+            merge(k) { const p = G(), r = p.resources = p.resources || { cams: [], talents: [], sources: [] }; r.cams = r.cams || []; r.sources = r.sources || []; const PAL = typeof PALETTE !== 'undefined' ? PALETTE : ['#EF5350', '#FFA726', '#66BB6A', '#4FC3F7', '#AB47BC']; let c = 0, s = 0;
+                k.cams.forEach(nm => { if (r.cams.some(x => F(x.name) === F(nm))) return; const num = r.cams.reduce((a, x) => Math.max(a, +x.num || 0), 0) + 1; r.cams.push({ id: id(), num, name: nm, type: /ptz/i.test(nm) ? 'PTZ / Tourelle' : /steadi/i.test(nm) ? 'Steadicam' : /grue|jib/i.test(nm) ? 'Grue / Jib' : 'Studio / pied', op: '', optic: '', pos: '', color: PAL[(num * 3) % PAL.length] }); c++; });
+                k.recs.forEach(nm => { if (r.sources.some(x => F(x.name) === F(nm))) return; const n2 = r.sources.filter(x => /^MAG/.test(x.code || '')).length + 1; r.sources.push({ id: id(), code: 'MAG' + n2, name: nm, kind: 'Playback' }); s++; });
+                return c + ' caméra(s) et ' + s + ' magnéto(s) ajoutés aux listes du conducteur'; }
+        },
+        'encodo>posto': { noP: 1,
+            src() { if (typeof Q === 'undefined') throw 'ENCODO pas encore prêt'; const L = Q.filter(x => x.status === 'done' && (x.outs || []).length).map(x => ({ src: x.name, outs: x.outs.map(o => o.name) })); if (!L.length) throw 'Aucun fichier converti pour l\'instant'; return { items: L }; },
+            lab: k => k.items.length + ' fichier(s) converti(s) prêts au dérushage',
+            merge(k) { const p = G(); if (!p) throw 'POSTO pas encore prêt'; p.rushes = p.rushes || []; const base = s => F(String(s).replace(/\.[a-z0-9]{2,5}$/i, '')); let m = 0, a = 0;
+                k.items.forEach(i => { const b = base(i.src), r = p.rushes.find(x => x.clip && (base(x.clip) === b || b.includes(base(x.clip)) || base(x.clip).includes(b)));
+                    const tag = '🎞️ prêt : ' + i.outs.join(', '); if (r) { if (!String(r.mnote || '').includes(tag)) r.mnote = ((r.mnote || '') + ' ' + tag).trim(); m++; } else { p.rushes.push({ id: id(), clip: i.src.replace(/\.[a-z0-9]{2,5}$/i, ''), st: '', seq: '', plan: '', take: '', mnote: tag, done: false, star: false }); a++; } });
+                try { if (window.XDER && XDER.render) XDER.render(); } catch (e) { }
+                return m + ' prise(s) reliée(s) à leur fichier converti' + (a ? ', ' + a + ' fichier(s) ajouté(s) au dérushage' : ''); }
+        },
+        'posto>soustitro': {
+            src() { const p = G(), V = p.versions || [], v = (typeof vOf === 'function' ? vOf() : null) || V[V.length - 1]; const C = ((v && v.comments) || []).filter(c => c.text && c.tc != null).sort((a, b) => a.tc - b.tc).map(c => ({ tc: +c.tc || 0, text: c.text, cat: c.cat || '', who: c.who || '' })); if (!C.length) throw 'Aucun retour horodaté sur la version en cours'; return { items: C, name: (p.name || '') + (v && (v.label || v.name) ? ' — ' + (v.label || v.name) : '') }; },
+            lab: k => k.items.length + ' marqueur(s) de « ' + k.name + ' »',
+            merge(k) { const p = G(); p.cues = p.cues || []; let n = 0; k.items.forEach((c, i) => { const nx = k.items[i + 1], e = Math.min(c.tc + 3, nx ? Math.max(c.tc + 1, nx.tc - 0.1) : c.tc + 3); if (p.cues.some(x => Math.abs(x.s - c.tc) < .05 && x.t === c.text)) return; p.cues.push({ id: id(), s: +c.tc.toFixed(2), e: +e.toFixed(2), t: (c.who ? c.who + ' : ' : '') + c.text }); n++; });
+                p.cues.sort((a, b) => a.s - b.s); if (!p.name) p.name = k.name; return n + ' marqueur(s) devenus sous-titres aux bons temps (3 s chacun, à ajuster)'; }
+        },
         'packingo>transporto': {
             src() { const p = G(), C = p.cases || []; if (!C.length) throw 'Aucune caisse dans PACKINGO';
                 const kgC = typeof caseKg === 'function' ? caseKg : c => (+c.tare || 0) + (c.items || []).reduce((a, i) => a + (+i.kg || 0) * (+i.qty || 1), 0), volC = typeof caseVol === 'function' ? caseVol : c => (+c.L || 0) * (+c.W || 0) * (+c.H || 0) / 1e6;
@@ -10197,12 +10284,13 @@ var XPASS = window.XPASS || (() => {
         document.getElementById('xps-ok').onclick = () => { let m; try { if (!G() && pk.k !== 'repero>plano' && !R[pk.k].noP) throw 'Outil pas encore prêt'; m = R[pk.k].merge(pk); } catch (e) { alert(typeof e === 'string' ? e : 'Intégration impossible : ' + e.message); return; } drop(); if (pk.k !== 'repero>plano') save(); say('📥 ' + m); banner(); };
     }
     function init(app) {
-        APP = app; const s = document.createElement('style');
+        APP = app; if (app === 'transporto') setTimeout(() => { if (typeof places !== 'function' || places.__x) return; const p0 = places; places = function () { const r = p0.apply(this, arguments); try { const rp = J('reperoXIII.project', null), dl = document.getElementById('dl-place'); if (dl) { const have = new Set([...dl.options].map(o => o.value)); ((rp && rp.spots) || []).filter(s => s.status !== 'ecarte' && (s.address || s.city)).forEach(s => { const v = (s.name || 'Lieu') + ' — ' + [s.address, s.cp, s.city].filter(Boolean).join(' '); if (!have.has(v)) dl.insertAdjacentHTML('beforeend', '<option value="' + E(v) + '">'); }); } } catch (e) { } return r; }; places.__x = 1; try { places(); } catch (e) { } }, 1500);
+        const s = document.createElement('style');
         s.textContent = '#xps-ban{position:fixed;left:50%;top:64px;transform:translateX(-50%);z-index:9980;display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center;max-width:calc(100vw - 24px);background:#2b2723;color:#f2ede6;border:1px solid #f0b378;border-radius:12px;padding:9px 12px;font:13.5px/1.35 "Segoe UI",sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.4)}#xps-ban button{font:600 13px "Segoe UI",sans-serif;padding:6px 12px;border-radius:8px;border:0;background:#f0b378;color:#1d1b19;cursor:pointer}#xps-ban button.sec{background:transparent;color:#f2ede6;border:1px solid #555}@media print{#xps-ban{display:none!important}}html.xembed #xps-ban{display:none!important}';
         document.head.appendChild(s);
         const go = () => setTimeout(banner, 1200); if (document.readyState === 'complete') go(); else addEventListener('load', go);
     }
-    return { init, send, R, has: k => !!R[k] };
+    return { init, send, R, has: k => !!R[k], sendAll, eqPayload, EQT };
 })();
 
 XPASS.init('dossier');
@@ -10273,6 +10361,9 @@ var XLINKS = window.XLINKS || (() => {
         ['matos', 'callsheeto', 'Matériel réservé pour la journée → feuille de service.'], ['repero', 'plano', 'Plan de masse / photo aérienne du lieu → fond de plan.'],
         ['conduco', 'soustitro', 'Textes du prompteur → sous-titres préparés du direct.'], ['backupo', 'posto', 'Cartes déchargées et vérifiées → prises disponibles au dérushage.'],
         ['scripto', 'callsheeto', 'Plans non tournés → reportés sur la journée suivante.'],
+        ['repero', 'transporto', 'Adresses des lieux retenus → destinations des navettes (et navettes aux dates des lieux).'], ['ressourco', 'callsheeto', 'Équipe sous contrat → journées de leur contrat (téléphones, horaires).'],
+        ['conduco', 'graphico', 'Intervenants (nom, fonction) → un synthé chacun.'], ['conduco', 'sono', 'Intervenants → voies du patch et émetteurs HF.'], ['syno', 'conduco', 'Caméras et magnétos du synoptique → listes du conducteur.'],
+        ['backupo', 'encodo', 'Cartes déchargées → proxys ProRes automatiques.'], ['encodo', 'posto', 'Fichiers convertis → prêts au dérushage.'], ['posto', 'soustitro', 'Retours horodatés de la version → sous-titres aux bons temps.'],
         ['packingo', 'transporto', 'Poids et volume des caisses → véhicule conseillé (voiture, utilitaire 6 / 12 / 20 m³, porteur).'], ['lumo', 'syno', 'Éclairage → console DMX, réseau Art-Net / sACN et splitters dans le synoptique.'],
         ['lumo', 'deviso', 'Projecteurs du plan de feu → chiffrage de la location lumière.'], ['sono', 'deviso', 'Micros, pieds et HF → chiffrage de la location son.'],
         ['cadro', 'matos', 'Boîtier et optique choisis → « Matériel du projet » de MATOS.'], ['decoup', 'matos', 'Machinerie par séquence (steadicam, grue, drone, travelling) → « Matériel du projet ».'],
@@ -10305,6 +10396,7 @@ const XGATE = (() => {
         'syno>deviso': thenClick('openMaterialExport', '#xpk-deviso')
     };
     ['syno', 'plano', 'packingo', 'lumo', 'sono', 'deviso'].forEach(a => { SPECIAL['matos>' + a] = () => { if (typeof PM === 'undefined') return false; PM.sendTo(a); return true; }; });
+    SPECIAL['backupo>encodo'] = () => { const b = document.querySelector('.xbk-px button'); if (b) { b.click(); return true; } alert('Déchargez d\'abord une carte : le bouton « 🎞️ Proxies dans ENCODO » apparaît sous le bilan du roll.'); return true; };
     ['lumo', 'sono'].forEach(a => { SPECIAL[a + '>deviso'] = () => { const F = fn('openSendToDeviso'); if (F) { F(); return true; } }; });
     ['syno', 'plano', 'packingo', 'lumo', 'sono'].forEach(a => { SPECIAL[a + '>matos'] = () => { const F = fn('xiiiToMatos'); return F ? F() : false; }; });
     if (window.XPASS) Object.keys(XPASS.R).forEach(k => { SPECIAL[k] = () => XPASS.send(k); }); // passerelles saison 4 (boîte de réception)
@@ -10326,6 +10418,14 @@ const XGATE = (() => {
         if (to === 'dossier') { const d = [...document.querySelectorAll('button')].find(x => /📚/.test(x.textContent) && /DOSSIER/.test(x.textContent + x.title) && !/journal|ouvrir/i.test(x.textContent)); if (d) { d.click(); return; } }
         location.href = to + '.html';
     }
+    // ---- ⚡ tout envoyer d'un coup (matériel → MATOS + PACKINGO + DEVISO) ----
+    const ALLT = () => ['matos', 'packingo', 'deviso'].filter(t => t !== APP);
+    function allRow() { if (!window.XPASS || !XPASS.sendAll || !['plano', 'syno', 'packingo', 'lumo', 'sono'].includes(APP) || !XPASS.eqPayload()) return ''; const T = XLINKS.T;
+        return '<button class="xgt-t xgt-all" data-all="1" data-a="' + ALLT()[0] + '" data-dir="out" data-d="Le matériel de l\'outil part en une fois vers ' + ALLT().map(t => (T[t] || ['', t])[1]).join(', ') + ' : chacun propose l\'intégration à son ouverture (visible aussi dans Démarrer › Notifs)."><span class="i">⚡</span><span><b>Tout envoyer</b><small>' + ALLT().map(t => (T[t] || ['', t.toUpperCase()])[1]).join(' + ') + '</small></span><span class="go">Envoyer →</span></button>'; }
+    function doAll() { const T = ALLT(), n = XPASS.sendAll(T); close(); if (!n) { alert('Rien à envoyer (aucun matériel) ou stockage plein.'); return; }
+        document.querySelectorAll('#xgt-done').forEach(x => x.remove()); const d = document.createElement('div'); d.id = 'xgt-done';
+        d.innerHTML = '<span>⚡ Matériel envoyé vers ' + T.map(t => E((XLINKS.T[t] || ['', t])[1])).join(', ') + '</span>' + T.map(t => '<button data-o="' + t + '">' + E((XLINKS.T[t] || ['', t])[1]) + ' ↗</button>').join('') + '<button class="sec">OK</button>'; document.body.appendChild(d);
+        d.onclick = e => { const t = e.target.dataset.o; if (t) { const u = t + '.html'; if (typeof xiiiOpenTab === 'function' && window.parent !== window) xiiiOpenTab(u, true); else window.open(u, '_blank'); e.target.remove(); } else if (e.target.classList.contains('sec')) d.remove(); }; setTimeout(() => d.remove(), 20000); }
     // ---- vers le même outil d'un autre projet XIII ----
     function wsRows(me) {
         if (!window.XWS || !XWS.copyTool || APP === 'index' || APP === 'dossier-m') return ''; const L = XWS.list().filter(w => w.id !== XWS.id); if (!L.length) return '';
@@ -10361,7 +10461,7 @@ const XGATE = (() => {
         o.innerHTML = '<div class="xgt-w" role="dialog" aria-label="Vers Suite XIII"><div class="xgt-h"><b>📤 Vers Suite XIII — depuis ' + E(me[1]) + '</b><button class="xgt-x" aria-label="Fermer">✕</button></div>' +
             '<div class="xgt-b"><svg class="xgt-s"><defs><marker id="xgt-ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="xgt-mk"/></marker></defs><path class="xgt-p" d=""/></svg>' +
             '<div class="xgt-l"><div class="xgt-me"><span class="i">' + me[0] + '</span><b>' + E(me[1]) + '</b><small>' + E(me[2]) + '</small><em>' + outs.length + ' envoi(s) · ' + ins.length + ' réception(s)</em></div></div>' +
-            '<div class="xgt-r">' + wsRows(me) + (outs.length ? '<div class="xgt-g">Envoyer vers</div>' + outs.map(x => row(x[1], x[2], 'out')).join('') : '<p class="xgt-n">Cet outil n\'envoie pas directement vers un autre outil.</p>') +
+            '<div class="xgt-r">' + allRow() + wsRows(me) + (outs.length ? '<div class="xgt-g">Envoyer vers</div>' + outs.map(x => row(x[1], x[2], 'out')).join('') : '<p class="xgt-n">Cet outil n\'envoie pas directement vers un autre outil.</p>') +
             (ins.length ? '<div class="xgt-g">Reçoit aussi de</div>' + ins.map(x => row(x[0], x[2], 'in')).join('') : '') + '</div></div>' +
             '<div class="xgt-d" aria-live="polite">Survolez un outil à droite pour voir ce qui passe par la passerelle.</div></div>';
         document.body.appendChild(o);
@@ -10375,10 +10475,11 @@ const XGATE = (() => {
             p.classList.toggle('in', !out);
             o.querySelectorAll('.xgt-t.h').forEach(x => x.classList.remove('h')); el.classList.add('h');
             const t = XLINKS.T[el.dataset.a] || ['', el.dataset.a];
+            if (el.dataset.all) { D.innerHTML = '<b>⚡ Tout envoyer</b> · ' + E(el.dataset.d); return; }
             if (el.dataset.ws) { D.innerHTML = '<b>' + E(me[1]) + ' → ' + E(me[1]) + ' · ' + E(el.querySelector('b').textContent) + '</b> · ' + E(el.dataset.d) + '<br><small>Cliquez pour copier. Les préférences, bibliothèques et le catalogue sont déjà communs à tous les projets.</small>'; return; }
             D.innerHTML = '<b>' + (out ? E(me[1]) + ' → ' + E(t[1]) : E(t[1]) + ' → ' + E(me[1])) + '</b> · ' + E(el.dataset.d) + '<br><small>' + (out ? (el.dataset.b === '1' || can(APP + '>' + el.dataset.a) ? 'Cliquez pour lancer l\'envoi.' : 'Cliquez pour ouvrir ' + E(t[1]) + ' : la passerelle s\'y trouve (import, 🧺 panier ou Drive du projet).') : 'Passerelle à lancer depuis ' + E(t[1]) + ' (cliquez pour l\'ouvrir).') + '</small>';
         };
-        o.querySelectorAll('.xgt-t').forEach(el => { el.onmouseenter = () => link(el); el.onfocus = () => link(el); el.onclick = e => e.target.dataset.undo ? (e.preventDefault(), undoWs(e.target.dataset.undo)) : el.dataset.ws ? toWs(el.dataset.ws) : el.dataset.dir === 'out' ? go(el.dataset.a) : (APP === 'matos' && el.dataset.a !== 'catalogue' ? (close(), location.href = el.dataset.a + '.html#xtomatos') : el.dataset.a === 'matos' && fn('xiiiFromMatos') ? (close(), fn('xiiiFromMatos')()) : (location.href = el.dataset.a + '.html')); });
+        o.querySelectorAll('.xgt-t').forEach(el => { el.onmouseenter = () => link(el); el.onfocus = () => link(el); el.onclick = e => el.dataset.all ? doAll() : e.target.dataset.undo ? (e.preventDefault(), undoWs(e.target.dataset.undo)) : el.dataset.ws ? toWs(el.dataset.ws) : el.dataset.dir === 'out' ? go(el.dataset.a) : (APP === 'matos' && el.dataset.a !== 'catalogue' ? (close(), location.href = el.dataset.a + '.html#xtomatos') : el.dataset.a === 'matos' && fn('xiiiFromMatos') ? (close(), fn('xiiiFromMatos')()) : (location.href = el.dataset.a + '.html')); });
         o.querySelector('.xgt-r').addEventListener('scroll', () => { const h = o.querySelector('.xgt-t.h'); if (h) link(h); });
         o.querySelector('.xgt-x').onclick = close; o.addEventListener('mousedown', e => { if (e.target === o) close(); });
         o.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
