@@ -2392,7 +2392,7 @@ function planHtml() {
 }
 function scanHtml() {
     const active = P.resas.filter(r => r.to >= addD(today(), -7) && r.from <= addD(today(), 14));
-    return '<div class="mt-scan"><div><div class="mt-card"><h4>🔁 Sortie / retour</h4><p class="mt-dim" style="font-size:12.5px;margin:2px 0 8px">Scannez l\'étiquette QR avec la caméra, ou tapez / scannez le code (douchette) puis Entrée. Une unité au dépôt sort, une unité sortie revient. 🧳 Le QR d\'une étiquette de caisse PACKINGO fait revenir toute la caisse d\'un coup (manquants et casse signalés, réservation clôturée).</p>' +
+    return '<div class="mt-scan"><div><div class="mt-card"><h4>🔁 Sortie / retour</h4><p class="mt-dim" style="font-size:12.5px;margin:2px 0 8px">Scannez l\'étiquette QR avec la caméra, ou tapez / scannez le code (douchette) puis Entrée. Une unité au dépôt sort, une unité sortie revient. 🧳 Le QR d\'une étiquette de caisse PACKINGO sort toute la caisse au départ (rattachée à la réservation du projet) et la fait revenir au retour (manquants et casse signalés, réservation clôturée).</p>' +
         '<label class="fld">Réservation concernée<select id="sc-r"><option value="">— Aucune (sortie libre) —</option>' + active.map(r => '<option value="' + r.id + '"' + (prefs.scanResa === r.id ? ' selected' : '') + '>' + esc(r.proj) + ' · ' + frD(r.from) + ' → ' + frD(r.to) + '</option>').join('') + '</select></label>' +
         '<label class="fld" style="margin-top:8px">Qui ?<input id="sc-who" value="' + esc(prefs.who || '') + '" placeholder="Nom de la personne qui sort / rend"></label>' +
         '<label class="fld" style="margin-top:8px">Code<input id="sc-in" class="big" placeholder="MAT-0001" autocomplete="off" autofocus></label>' +
@@ -2534,14 +2534,11 @@ function renderAll() { render(); }
 async function caseReturn(url) {
     const h = Object.fromEntries(url.split('#')[1].split('&').filter(Boolean).map(x => { const i = x.indexOf('='); return [x.slice(0, i), decodeURIComponent(x.slice(i + 1))]; }));
     let cs = null;
-    if (h.d) { try { let s = h.d.replace(/-/g, '+').replace(/_/g, '/'); while (s.length % 4) s += '='; const o = JSON.parse(decodeURIComponent(escape(atob(s)))); cs = { code: o.c || '', name: o.n || '', items: (o.i || []).map(x => ({ qty: +x[0] || 1, name: x[1] || '', sn: x[2] || '' })) }; } catch (e) { } }
+    if (h.d) { try { let s = h.d.replace(/-/g, '+').replace(/_/g, '/'); while (s.length % 4) s += '='; const o = JSON.parse(decodeURIComponent(escape(atob(s)))); cs = { p: o.p || '', code: o.c || '', name: o.n || '', items: (o.i || []).map(x => ({ qty: +x[0] || 1, name: x[1] || '', sn: x[2] || '' })) }; } catch (e) { } }
     if (!cs && h.u && h.k && h.c) { try { const r = await (await fetch(h.u, { method: 'POST', body: JSON.stringify({ a: 'case_get', k: h.k, c: h.c }), redirect: 'follow' })).json(); if (r.ok) cs = r.case; else { toast('⚠️ Caisse introuvable (' + r.err + ')'); return; } } catch (e) { toast('⚠️ Pas de réseau : utilisez le QR hors ligne de l\'étiquette', 4000); return; } }
     if (!cs) { toast('⚠️ QR de caisse illisible'); return; }
-    const F2 = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim(), used = new Set(), rows = [];
-    cs.items.forEach(it => { for (let n = 0; n < (it.qty || 1); n++) { let u = it.sn ? P.units.find(x => x.sn && F2(x.sn) === F2(it.sn) && !used.has(x.id)) : null;
-        if (!u) u = P.units.find(x => !used.has(x.id) && out(x.id) && (F2(x.name) === F2(it.name) || F2(uName(x)) === F2(it.name)));
-        if (!u) u = P.units.find(x => !used.has(x.id) && out(x.id) && (F2(uName(x)).includes(F2(it.name)) || F2(it.name).includes(F2(x.name))));
-        if (u) used.add(u.id); rows.push({ name: it.name, sn: it.sn, u }); } });
+    const rows = matchCase(cs, true);
+    if (!rows.some(r => r.u && out(r.u.id))) { caseOut(cs); return; } // rien de la caisse n'est dehors : c'est un départ
     const ST = [['ok', '✓ Rendu', '#66bb6a'], ['miss', '✗ Manquant', '#ef5350'], ['panne', '⚠ Abîmé', '#ffa726']];
     modal('<h3>🧳 Retour de la caisse ' + esc(cs.code || '') + ' ' + esc(cs.name || '') + '<span class="close-x" onclick="closeModal()">✕</span></h3><p class="mt-dim" style="margin-top:0">Vérifiez chaque équipement : tout est « rendu » par défaut. Les manquants et la casse sont signalés dans le parc.</p><div style="max-height:52vh;overflow:auto">' +
         rows.map((r, i) => '<div class="cr-r" data-i="' + i + '" style="display:flex;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--border-soft,#333)"><div style="flex:1;min-width:0"><b>' + esc(r.name) + '</b>' + (r.sn ? ' <small class="mt-dim">' + esc(r.sn) + '</small>' : '') + '<br><small class="mt-dim">' + (r.u ? (out(r.u.id) ? '🚚 sorti · ' : '🏠 déjà au dépôt · ') + esc(r.u.code) : '⚠️ pas d\'unité correspondante dans le parc') + '</small></div>' + (r.u ? ST.map(s => '<button data-s="' + s[0] + '" class="mt-btn" style="padding:6px 9px' + (s[0] === 'ok' ? ';background:' + s[2] + ';color:#111;border-color:' + s[2] : '') + '" data-c="' + s[2] + '">' + s[1] + '</button>').join('') : '') + '</div>').join('') +
@@ -2601,6 +2598,41 @@ function printReturn(r, rows) {
     const tr = rows.map(x => '<tr><td>' + esc(x.u.name) + '</td><td>' + esc(x.u.code) + '</td><td>' + esc(x.u.sn || '') + '</td><td>' + (x.o ? 'sorti' : 'dépôt') + '</td><td class="c">☐</td><td class="c">☐</td><td class="c">☐</td><td class="n"></td></tr>').join('');
     w.document.write('<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><title>Retour ' + esc(r.proj) + '</title><style>body{font:12px Arial,sans-serif;margin:18mm}h1{font-size:18px;margin:0}p{color:#555;margin:4px 0 12px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #999;padding:6px 5px;text-align:left}th{background:#eee;font-size:11px}.c{text-align:center;width:52px;font-size:16px}.n{width:28%}.sig{display:flex;gap:40px;margin-top:26px}.sig div{flex:1;border-top:1px solid #333;padding-top:4px}</style></head><body><h1>Liste de retour — ' + esc(r.proj) + '</h1><p>Réservation du ' + frD(r.from) + ' au ' + frD(r.to) + ' · ' + rows.length + ' unité(s) · imprimée le ' + new Date().toLocaleDateString('fr-FR') + ' — MATOS XIII</p><table><tr><th>Équipement</th><th>Code</th><th>N° de série</th><th>Situation</th><th>Rendu</th><th>Manquant</th><th>Abîmé</th><th>Remarque</th></tr>' + tr + '</table><div class="sig"><div>Rendu par (nom, date, signature)</div><div>Réceptionné par (nom, date, signature)</div></div><script>setTimeout(function(){print()},300)<\/script></body></html>');
     w.document.close();
+}
+
+// =====================================================================
+//  🧳 QR DE CAISSE PACKINGO : sortie de toute la caisse (le retour est géré par caseReturn)
+// =====================================================================
+function matchCase(cs, wantOut) {
+    const F2 = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim(), used = new Set(), rows = [], t = today();
+    const projR = cs.p ? P.resas.filter(r => r.status !== 'clos' && F2(r.proj) === F2(cs.p)) : [];
+    const rank = x => (projR.some(r => r.units.includes(x.id)) ? 0 : 2) + (x.state === 'ok' ? 0 : 1);
+    const pick = test => P.units.filter(x => !used.has(x.id) && (wantOut ? !!out(x.id) : !out(x.id)) && test(x)).sort((a, b) => rank(a) - rank(b))[0];
+    cs.items.forEach(it => { for (let n = 0; n < (it.qty || 1); n++) {
+        let u = it.sn ? P.units.find(x => x.sn && F2(x.sn) === F2(it.sn) && !used.has(x.id)) : null;
+        if (!u) u = pick(x => F2(x.name) === F2(it.name) || F2(uName(x)) === F2(it.name));
+        if (!u) u = pick(x => F2(it.name).length > 3 && (F2(uName(x)).includes(F2(it.name)) || F2(it.name).includes(F2(x.name))));
+        if (u) used.add(u.id); rows.push({ name: it.name, sn: it.sn, u }); } });
+    return rows;
+}
+function caseOut(cs) {
+    const rows = matchCase(cs, false), F2 = s => fold(s).trim(), t = today();
+    const open = P.resas.filter(r => r.status !== 'clos').sort((a, b) => a.from.localeCompare(b.from));
+    const score = r => (cs.p && F2(r.proj) === F2(cs.p) ? 10 : 0) + rows.filter(x => x.u && r.units.includes(x.u.id)).length + (r.from <= addD(t, 3) && r.to >= t ? 2 : 0);
+    const best = open.slice().sort((a, b) => score(b) - score(a))[0], def = best && score(best) > 0 ? best.id : '';
+    const av = x => x.u && !out(x.u.id) && x.u.state !== 'hs';
+    modal('<h3>🧳 Sortie de la caisse ' + esc(cs.code || '') + ' ' + esc(cs.name || '') + '<span class="close-x" onclick="closeModal()">✕</span></h3><p class="mt-dim" style="margin-top:0;font-size:12.5px">' + (cs.p ? 'Projet « ' + esc(cs.p) + ' » · ' : '') + rows.length + ' équipement(s) sur l\'étiquette. Décochez ce qui ne part pas.</p><div style="max-height:46vh;overflow:auto">' +
+        rows.map((x, i) => '<label style="display:flex;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--border-color)"><input type="checkbox" data-co="' + i + '"' + (!av(x) ? ' disabled' : x.u.state === 'panne' ? '' : ' checked') + '><span style="flex:1;min-width:0"><b>' + esc(x.name) + '</b>' + (x.sn ? ' <small class="mt-dim">' + esc(x.sn) + '</small>' : '') + '<br><small class="mt-dim">' + (!x.u ? '⚠️ pas d\'unité correspondante dans le parc (matériel loué ou à ajouter)' : out(x.u.id) ? '🚚 déjà sorti' : '🏠 ' + esc(x.u.code) + (x.u.state !== 'ok' ? ' · <b style="color:#ef5350">' + stOf(x.u.state)[1].toLowerCase() + '</b>' : '')) + '</small></span></label>').join('') + '</div>' +
+        '<div class="fgrid" style="margin-top:10px"><label class="fld w2">Réservation<select id="co-r"><option value="">— sans réservation —</option>' + open.map(r => '<option value="' + r.id + '"' + (r.id === def ? ' selected' : '') + '>' + esc(r.proj) + ' · ' + frD(r.from) + ' → ' + frD(r.to) + '</option>').join('') + '</select></label><label class="fld">Sorti par<input id="co-w" value="' + esc(prefs.who || '') + '"></label></div>' +
+        '<div class="mb-actions"><button onclick="closeModal()">Annuler</button><button class="btn-big" id="co-ok">🚚 Sortir la caisse</button></div>');
+    $('co-ok').onclick = () => {
+        const rid = $('co-r').value, r = rid && P.resas.find(x => x.id === rid), who = $('co-w').value.trim(); if (who) { prefs.who = who; savePrefs(); }
+        let n = 0, add = 0; document.querySelectorAll('[data-co]').forEach(b => { if (!b.checked) return; const x = rows[+b.dataset.co]; if (!av(x)) return;
+            if (r && !r.units.includes(x.u.id)) { r.units.push(x.u.id); add++; }
+            P.moves.push({ id: uid(), unit: x.u.id, t: 'out', at: Date.now(), resa: rid || '', who: who + (cs.code ? ' (caisse ' + cs.code + ')' : ''), state: '', note: '' }); n++; });
+        P.moves = P.moves.slice(-3000); closeModal(); dirty(); render();
+        toast(n ? '🚚 ' + n + ' unité(s) sortie(s)' + (r ? ' pour « ' + r.proj + ' »' : '') + (add ? ' · ➕ ' + add + ' ajoutée(s) à la réservation' : '') : 'Rien à sortir', 5000); try { navigator.vibrate && navigator.vibrate(60); } catch (e) { }
+    };
 }
 
 </script>
