@@ -3156,6 +3156,50 @@ function qiApply() {
 }
 
 // =====================================================================
+//  📊 DÉTAIL DE LA FOURCHETTE (clic sur la tuile « fourchette ») :
+//  ligne par ligne, le prix le plus bas (chez quel loueur) et le plus haut (chez quel autre),
+//  l'équipe (minima conventionnels → haut de l'usage) et les frais, jusqu'au total HT.
+// =====================================================================
+function rangeDetail() {
+    const v = V(), T = totals(v), s = P.set, ln = id => esc((loueurOf(id).n || id).split(' (')[0]);
+    const pj = c => c.unit === 'f' ? 'forfait' : nf(c.qty, c.qty % 1 ? 1 : 0) + ' × ' + nf(c.days, c.days % 1 ? 1 : 0) + ' j' + (c.coef !== c.days && c.unit !== 'f' ? ' <small class="hint">(' + nf(c.coef, 2).replace(/,?0+$/, '') + ' j facturés)</small>' : '');
+    const cnt = { lo: {}, hi: {} };
+    const eq = v.eq.filter(e => e.on !== false && !e.opt).map(e => {
+        const c = eqCalc(e), R = c.R, L = R.list || [], o = { e, c, gap: c.hi - c.lo };
+        if (c.src === 'manual') { o.lo = 'votre prix'; o.hi = 'votre prix'; }
+        else if (R.kind === 'model' && L.length > 1) { const a = L[0], b = L[L.length - 1]; o.lo = '<b>' + ln(a.l) + '</b> · ' + eur(a.p) + ' / j'; o.hi = '<b>' + ln(b.l) + '</b> · ' + eur(b.p) + ' / j'; o.loId = a.l; o.hiId = b.l; cnt.lo[a.l] = (cnt.lo[a.l] || 0) + 1; cnt.hi[b.l] = (cnt.hi[b.l] || 0) + 1; o.n = L.length; }
+        else if (R.kind === 'model' && L.length === 1) { o.lo = o.hi = '<b>' + ln(L[0].l) + '</b> seul · ' + eur(L[0].p) + ' / j <small class="hint">(±10 %)</small>'; o.n = 1; }
+        else if (R.kind === 'est' || R.kind === 'generic') { o.lo = '<span class="hint">estimation</span> · ' + eur0(R.lo) + ' / j'; o.hi = '<span class="hint">estimation</span> · ' + eur0(R.hi) + ' / j'; o.est = 1; }
+        else if (R.kind === 'inc') { o.lo = o.hi = 'inclus'; }
+        else { o.lo = o.hi = '<span style="color:#ef5350">non chiffré</span>'; }
+        return o;
+    }).sort((a, b) => b.gap - a.gap);
+    const top = (m, k) => Object.entries(m).sort((a, b) => b[1] - a[1]).slice(0, 4).map(([l, n]) => '<span class="pill">' + ln(l) + ' · ' + n + '</span>').join(' ') || '<span class="hint">—</span>';
+    const money = (x, cls) => '<td class="calc' + (cls ? ' ' + cls : '') + '">' + eur0(x) + '</td>';
+    const th = '<tr><th>Ligne</th><th>Qté × durée</th><th>Plus bas</th><th class="r">Bas</th><th class="r">Retenu</th><th class="r">Haut</th><th>Plus haut</th><th class="r">Écart</th></tr>';
+    const eqRows = eq.map(o => '<tr><td class="l"><b>' + esc(o.e.name || (o.c.ref && o.c.ref.n) || 'Matériel') + '</b>' + (o.n > 1 ? '<div class="hint">' + o.n + ' loueurs comparés' + (o.c.who ? ' · retenu : ' + ln(o.c.who) : o.c.src === 'med' ? ' · retenu : médiane' : '') + '</div>' : o.est ? '<div class="hint">fourchette estimée, à confirmer par devis</div>' : '') + '</td><td>' + pj(o.c) + '</td><td class="rg-lo">' + o.lo + (o.loId && o.c.who !== o.loId ? ' <button class="btn-sm" data-rl="' + o.e.id + '" data-l="' + esc(o.loId) + '" title="Retenir ce loueur pour cette ligne">retenir</button>' : '') + '</td>' + money(o.c.lo, 'rg-lo') + money(o.c.tot) + money(o.c.hi, 'rg-hi') + '<td class="rg-hi">' + o.hi + '</td><td class="calc">' + (o.gap > 0.5 ? eur0(o.gap) : '—') + '</td></tr>').join('');
+    const crew = v.crew.filter(x => x.on !== false && !x.opt).map(x => ({ x, c: crewCalc(x) }));
+    const crewRows = crew.map(({ x, c }) => '<tr><td class="l"><b>' + esc((c.p && c.p.n) || 'Poste') + '</b>' + (x.name ? ' <span class="hint">' + esc(x.name) + '</span>' : '') + '</td><td>' + nf(c.days, c.days % 1 ? 1 : 0) + ' j</td><td class="rg-lo">' + (c.src === 'manual' ? 'votre tarif' : c.floor != null ? 'minimum conventionnel' : 'bas de l\'usage') + '</td>' + money(c.lo, 'rg-lo') + money(c.tot) + money(c.hi, 'rg-hi') + '<td class="rg-hi">' + (c.src === 'manual' ? 'votre tarif' : 'haut de l\'usage') + '</td><td class="calc">' + (c.hi - c.lo > 0.5 ? eur0(c.hi - c.lo) : '—') + '</td></tr>').join('');
+    const fees = v.fees.filter(f => f.on !== false && !f.opt).map(f => ({ f, c: feeCalc(f, T.eq) }));
+    const feeRows = fees.map(({ f, c }) => '<tr><td class="l"><b>' + esc(c.n || f.name || 'Frais') + '</b></td><td>' + (c.u === '%' ? nf(c.p, 1) + ' %' : nf(c.qty || 0, 0) + ' ' + esc(c.u || '')) + '</td><td class="rg-lo"></td>' + money(c.lo, 'rg-lo') + money(c.tot) + money(c.hi, 'rg-hi') + '<td class="rg-hi"></td><td class="calc">' + (c.hi - c.lo > 0.5 ? eur0(c.hi - c.lo) : '—') + '</td></tr>').join('');
+    const sub = (t, a, b, c2) => '<tr class="rg-sub"><td class="l" colspan="3"><b>' + t + '</b></td>' + money(a, 'rg-lo') + money(b) + money(c2, 'rg-hi') + '<td></td><td class="calc">' + eur0(c2 - a) + '</td></tr>';
+    const fin = (t, k) => '<tr' + (k === 'ht' ? ' class="rg-sub"' : '') + '><td class="l" colspan="3">' + t + '</td>' + money(T.L[k], 'rg-lo') + money(T.R[k]) + money(T.H[k], 'rg-hi') + '<td></td><td class="calc">' + eur0(T.H[k] - T.L[k]) + '</td></tr>';
+    const sec = (ic, t, rows, a, b, c2) => rows ? '<tr class="rg-h"><td colspan="8">' + ic + ' ' + t + '</td></tr>' + rows + sub('Sous-total ' + t.toLowerCase(), a, b, c2) : '';
+    const nEst = eq.filter(o => o.est).length, nMiss = eq.filter(o => o.c.missing).length;
+    modal('<h3>📊 Détail de la fourchette<span class="close-x" onclick="closeModal()">✕</span></h3>' +
+        '<div class="rg-keys"><div class="rg-k lo"><span>Fourchette basse</span><b>' + eur0(T.L.ht) + '</b><small>prix les plus bas</small></div><div class="rg-k"><span>Retenu</span><b>' + eur0(T.R.ht) + '</b><small>' + ({ med: 'prix médians', min: 'meilleurs prix', pref: 'loueurs préférés' }[s.strat] || 'prix retenus') + '</small></div><div class="rg-k hi"><span>Fourchette haute</span><b>' + eur0(T.H.ht) + '</b><small>prix les plus hauts</small></div><div class="rg-k"><span>Écart</span><b>' + eur0(T.H.ht - T.L.ht) + '</b><small>' + (T.L.ht ? '+' + nf((T.H.ht / T.L.ht - 1) * 100, 0) + ' %' : '') + '</small></div></div>' +
+        (Object.keys(cnt.lo).length ? '<div class="rg-who"><div><span class="hint">Les prix les plus bas viennent de</span> ' + top(cnt.lo) + '</div><div><span class="hint">Les plus hauts de</span> ' + top(cnt.hi) + '</div></div>' : '') +
+        (nEst || nMiss ? '<p class="hint" style="margin:6px 0">' + (nEst ? '≈ ' + plural(nEst, 'ligne') + ' en fourchette estimée (pas de tarif public) : un devis loueur (🧾) la rend exacte. ' : '') + (nMiss ? '⚠️ ' + plural(nMiss, 'ligne') + ' non chiffrée(s), absentes du total.' : '') + '</p>' : '') +
+        '<div class="table-wrap" style="max-height:52vh;overflow:auto"><table class="etable rg-table"><thead>' + th + '</thead><tbody>' +
+        sec('🎥', 'Matériel', eqRows, T.eq.lo, T.eq.tot, T.eq.hi) + sec('👥', 'Équipe', crewRows, T.crew.lo, T.crew.tot, T.crew.hi) + sec('🍽️', 'Frais', feeRows, T.fees.lo, T.fees.tot, T.fees.hi) +
+        '<tr class="rg-h"><td colspan="8">🧮 Jusqu\'au total</td></tr>' + fin('Sous-total', 'st') + ((+s.fg || 0) ? fin('Frais généraux (' + nf(+s.fg, 1) + ' %)', 'fg') : '') + ((+s.imp || 0) ? fin('Imprévus (' + nf(+s.imp, 1) + ' %)', 'imp') : '') + ((+s.marge || 0) ? fin('Marge (' + nf(+s.marge, 1) + ' %)', 'mg') : '') + fin('<b>Total HT</b>', 'ht') +
+        '</tbody></table></div><p class="hint" style="margin:8px 0 0">Matériel trié par écart décroissant : en haut, les lignes où le choix du loueur pèse le plus. « retenir » fixe le loueur le moins cher sur la ligne. Équipe : bas = minimum conventionnel, haut = haut de l\'usage constaté.</p>' +
+        '<div class="mb-actions"><button onclick="closeModal();setView(\'cmp\')">⚖️ Comparatif par loueur</button><button onclick="closeModal();setView(\'rep\')">📄 Voir le devis</button><button class="btn-big" onclick="closeModal()">Fermer</button></div>', 'wide rg-modal');
+    document.querySelectorAll('#modal [data-rl]').forEach(b => b.onclick = () => { const e = V().eq.find(x => x.id === b.dataset.rl); if (!e) return; e.loueur = b.dataset.l; dirty(); renderAll(); rangeDetail(); toast('✓ ' + loueurOf(b.dataset.l).n.split(' (')[0] + ' retenu pour « ' + (e.name || 'la ligne') + ' »'); });
+}
+(function () { const st = document.createElement('style'); st.textContent = '.rg-modal{width:1100px}.rg-keys{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:4px 0 8px}.rg-k{background:var(--bg-input);border:1px solid var(--border-color);border-radius:8px;padding:8px 10px}.rg-k span{display:block;font-size:11.5px;color:var(--text-dim)}.rg-k b{font-size:20px}.rg-k small{display:block;font-size:11px;color:var(--text-dim)}.rg-k.lo b,.rg-table td.rg-lo.calc{color:#66bb6a}.rg-k.hi b,.rg-table td.rg-hi.calc{color:#ef7350}.rg-who{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;margin:4px 0}.rg-table td{font-size:12.5px;vertical-align:top}.rg-table td.l{min-width:220px}.rg-table td.rg-lo,.rg-table td.rg-hi{white-space:nowrap}.rg-table tr.rg-h td{background:var(--bg-input);font-weight:700;padding-top:9px}.rg-table tr.rg-sub td{border-top:1px solid var(--border-color);font-weight:600}@media(max-width:700px){.rg-keys{grid-template-columns:repeat(2,1fr)}}'; document.head.appendChild(st); })();
+
+// =====================================================================
 //  VUE COMPARATIF DES LOUEURS
 // =====================================================================
 function cmpData() {
@@ -3909,7 +3953,7 @@ function renderStats() {
     const T = totals(), R0 = T.R, miss = T.eq.miss + T.crew.miss;
     $('ws-stats').innerHTML =
         '<div class="stat big click" onclick="setView(\'rep\')" title="Total HT retenu (frais généraux, imprévus et marge compris)"><b>' + keur(R0.ht) + '</b>total HT</div>' +
-        '<div class="stat click" onclick="setView(\'rep\')" title="Fourchette basse – haute"><b>' + keur(T.L.ht) + ' – ' + keur(T.H.ht) + '</b>fourchette</div>' +
+        '<div class="stat click" onclick="rangeDetail()" title="Détail de la fourchette : prix le plus bas et le plus haut par ligne, et chez quel loueur"><b>' + keur(T.L.ht) + ' – ' + keur(T.H.ht) + '</b>fourchette</div>' +
         '<div class="stat click" onclick="setView(\'eq\')"><b>' + keur(T.eq.tot) + '</b>matériel</div>' +
         '<div class="stat click" onclick="setView(\'crew\')"><b>' + keur(T.crew.tot) + '</b>équipe</div>' +
         '<div class="stat click" onclick="setView(\'fees\')"><b>' + keur(T.fees.tot) + '</b>frais</div>' +
