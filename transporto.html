@@ -695,6 +695,32 @@ table.mx th input{width:96px;font-weight:700;text-align:center}table.mx th selec
 .grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px}
 .kpis{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}.kpis div{border:1px solid var(--border-color);border-radius:10px;padding:8px 12px;background:var(--bg-panel)}.kpis small{display:block;color:var(--text-dim);font-size:11px}.kpis b{font-size:18px}
 .warnl{font-size:12.5px;color:var(--warn)}.badl{font-size:12.5px;color:var(--danger)}
+/* ---------- feuilles de route ---------- */
+.fdr{display:flex;flex-direction:column;gap:12px;padding:14px 16px 40px}
+.fdr-days{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.fdr-days select,.fdr-days button{font:inherit}
+.fdr-chip{cursor:pointer;border-radius:999px;padding:6px 14px;border:1px solid var(--border-color,#4a4a50);font-size:13px;background:rgba(255,255,255,.04)}.fdr-chip:hover{border-color:var(--accent,#f0b378)}.fdr-chip small{opacity:.7;margin-left:4px}.fdr-chip.on{background:#f0b378!important;color:#1d1b19!important;border-color:#f0b378!important;font-weight:700}
+.fdr-head{background:var(--bg-panel,#232327);border:1px solid var(--border-color,#3a3a40);border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:10px}
+.fdr-f{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}.fdr-f label{display:flex;flex-direction:column;gap:3px;font-size:11.5px;color:var(--text-dim,#aaa)}.fdr-f label.w2{flex:1 1 300px}.fdr-f input{font:inherit;font-size:13.5px;color:var(--text-main,#eee);background:var(--bg-input,#17171a);border:1px solid var(--border-color,#45454b);border-radius:8px;padding:6px 9px}
+.fdr input.ok,.fdr textarea.ok{border-color:#66bb6a!important}
+.fdr-tabs{display:flex;gap:6px;flex-wrap:wrap;align-items:center}.fdr-tabs button.on{background:rgba(240,179,120,.25);border-color:var(--accent,#f0b378)}.fdr-tabs small{opacity:.6}.fdr-sum{font-size:12.5px;color:var(--text-dim,#aaa)}
+.fdr-who td{vertical-align:middle}.fdr-who input,.fdr-who select{width:100%}.fdr-two{display:flex;gap:4px}.fdr-two input{width:56px!important}.fdr-add{margin-top:8px}
+.fdr-geo{position:fixed;z-index:20000;background:var(--bg-menu,#26262b);border:1px solid var(--border-color,#555);border-radius:8px;box-shadow:0 10px 30px rgba(0,0,0,.4);max-height:260px;overflow:auto;font-size:13px}.fdr-geo div{padding:7px 10px;cursor:pointer}.fdr-geo div:hover{background:rgba(240,179,120,.18)}
+.fdr-dir{font-size:15px;margin:14px 0 8px;letter-spacing:.06em}.fdr-dir small{font-weight:400;opacity:.65;letter-spacing:0}
+.fdr-leg{border:1px solid var(--border-color,#3a3a40);border-radius:12px;margin-bottom:12px;background:var(--bg-panel,#202024);overflow:hidden}
+.fdr-legh{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:8px 10px;border-bottom:1px solid var(--border-color,#3a3a40)}.fdr-legh select,.fdr-legh input{font:inherit;font-size:12.5px}.fdr-legh small{opacity:.65}.fdr-lines{min-width:280px}
+.fdr-btn{display:inline-block;padding:5px 10px;border:1px solid var(--border-color,#4a4a50);border-radius:8px;color:inherit;text-decoration:none;font-size:12.5px}
+.fdr-tw{overflow-x:auto}.fdr-t{border-collapse:collapse;min-width:100%}.fdr-t th{width:70px;text-align:left;font-size:11.5px;color:var(--text-dim,#aaa);padding:6px 8px;background:rgba(128,128,128,.08)}.fdr-t td{border-left:1px solid var(--border-color,#33333a);padding:5px 6px;min-width:170px;vertical-align:top}
+.fdr-band td{font-weight:700;font-size:12px;text-align:center;letter-spacing:.04em;padding:5px}.fdr-band td.walk{background:rgba(255,138,101,.18);color:#ff8a65}.fdr-band .fdr-lab{background:rgba(128,128,128,.12);color:var(--text-dim,#aaa);min-width:70px}
+.fdr-sh{display:flex;gap:4px;align-items:center}.fdr-sh select{flex:1;font-weight:700}.fdr-sh span{display:flex;gap:2px}.fdr-sh button{padding:1px 5px!important;font-size:11px}
+.fdr-t input,.fdr-t textarea,.fdr-t select{width:100%;box-sizing:border-box;font:inherit;font-size:12.5px;color:var(--text-main,#eee);background:var(--bg-input,#17171a);border:1px solid var(--border-color,#45454b);border-radius:6px;padding:4px 6px}.fdr-t textarea{resize:vertical;margin-top:3px}.fdr-nm{font-weight:600}
+.fdr-who-c{display:flex;flex-wrap:wrap;gap:4px;align-items:center}.fdr-who-c span{background:rgba(66,165,245,.18);border-radius:999px;padding:2px 8px;font-size:12px}.fdr-who-c i{cursor:pointer;margin-left:4px;font-style:normal;opacity:.6}.fdr-who-c select{width:auto!important;padding:2px!important}
+.fdr-hr{display:flex;gap:6px;align-items:center;flex-wrap:wrap}.fdr-hr input[type=time]{width:96px;font-weight:700;font-size:14px}.fdr-hr label{font-size:11px;display:flex;gap:2px;align-items:center;opacity:.8}.fdr-hr input[type=checkbox]{width:auto}
+.fdr-plus{min-width:40px!important;vertical-align:middle!important;text-align:center}
+.fdr-plans{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px}
+.fdr-plan{border:1px solid var(--border-color,#3a3a40);border-radius:14px;padding:12px 14px;background:var(--bg-panel,#202024)}.fdr-ph{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}.fdr-ph b{font-size:15px}.fdr-ph small{opacity:.65}.fdr-cv{margin-left:auto;font-weight:800;color:var(--accent,#f0b378)}
+.fdr-plan h4{margin:10px 0 4px;font-size:13px}.fdr-plan ol{margin:0;padding-left:18px;font-size:13px}.fdr-plan li{margin:3px 0}.fdr-pa{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.fdr-pa a,.fdr-pa button{font-size:12px;padding:4px 9px;border:1px solid var(--border-color,#4a4a50);border-radius:8px;color:inherit;text-decoration:none;background:transparent;cursor:pointer}
+#fdr-map{height:min(70vh,640px);border-radius:12px;border:1px solid var(--border-color,#3a3a40)}.fdr-pin span{display:flex;width:30px;height:30px;border-radius:50%;align-items:center;justify-content:center;color:#fff;font:700 11px system-ui;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.4)}
 </style>
 <link rel="icon" type="image/png" href="xiii-icon-192.png">
 </head>
@@ -722,6 +748,7 @@ table.mx th input{width:96px;font-weight:700;text-align:center}table.mx th selec
         <button data-view="travel" onclick="setView('travel')" title="Trains, avions, trajets (2)"><span class="btn-icon">🚆</span><span class="btn-label keep">Voyages</span></button>
         <button data-view="trips" onclick="setView('trips')" title="Véhicules, chauffeurs et navettes (3)"><span class="btn-icon">🚐</span><span class="btn-label keep">Navettes</span></button>
         <button data-view="hotel" onclick="setView('hotel')" title="Hôtels et rooming list (4)"><span class="btn-icon">🏨</span><span class="btn-label keep">Hébergement</span></button>
+        <button data-view="fdr" onclick="setView('fdr')" title="Feuilles de route : pick-ups, horaires, plans de route personnels (5)"><span class="btn-icon">🗺️</span><span class="btn-label keep">Feuilles de route</span></button>
     </span>
     <div class="divider"></div>
     <span class="btn-group">
@@ -1097,6 +1124,350 @@ document.addEventListener('keydown', e => {
 load(); if (!P.name) { const f = fiche(); const cs = J('callsheetoXIII.project'); P.name = (f && f.title) || (cs && cs.name) || ''; } setView(prefs.view || 'team');
 window.addEventListener('beforeunload', () => saveProject(false));
 function renderAll() { render(); }
+
+// =====================================================================
+//  TRANSPORTO XIII — 🗺️ FEUILLES DE ROUTE (FDR)
+//  À partir de la feuille de service (CALL SHEETO : date, lieu, convocations, fin de journée) et des adresses de l'équipe
+//  (fiche projet) : qui vient comment (conduit, passager, transports, à pied, vélo…), pick-ups optimisés, horaires calculés
+//  à rebours de la convocation (itinéraires OpenStreetMap / OSRM, transports via Navitia si une clé est saisie),
+//  feuille de route imprimable ALLER / RETOUR, et plan de route personnel pour chaque membre (texte, e-mail, SMS, WhatsApp).
+// =====================================================================
+const FM = [['drive', '🚗 Conduit', 'Conduit sa voiture (peut prendre des passagers)'], ['ride', '🧍 Passager', 'Récupéré en voiture par un conducteur'], ['tc', '🚆 Transports', 'Transports en commun (train, RER, métro, bus)'], ['walk', '🚶 À pied', 'Vient à pied'], ['bike', '🚲 Vélo', 'Vient à vélo / trottinette'], ['own', '🙋 Ses moyens', 'Vient par ses propres moyens (pas de plan)'], ['off', '— Absent', 'Pas convoqué ce jour']];
+const FMI = Object.fromEntries(FM.map(m => [m[0], m]));
+const LEGCOL = { car: '#42A5F5', tc: '#AB47BC', walk: '#66BB6A', bike: '#26A69A' };
+const SK = ['dep', 'pu', 'step', 'park', 'arr', 'drop'], SKL = { dep: 'Départ', pu: 'Pick-up', step: 'Étape', park: 'Parking', arr: 'Arrivée', drop: 'Dépose' };
+const hm = m => m == null || isNaN(m) ? '' : pad(Math.floor(((m % 1440) + 1440) % 1440 / 60)) + ':' + pad(((m % 60) + 60) % 60);
+const hh = t => { const m = toMin(t); return m == null ? (t || '') : Math.floor(m / 60) + 'h' + (m % 60 ? pad(m % 60) : ''); };
+const hav = (a, b) => { if (!a || !b || a.lat == null || b.lat == null) return null; const R = 6371, r = x => x * Math.PI / 180, dl = r(b.lat - a.lat), dn = r(b.lon - a.lon), h = Math.sin(dl / 2) ** 2 + Math.cos(r(a.lat)) * Math.cos(r(b.lat)) * Math.sin(dn / 2) ** 2; return 2 * R * Math.asin(Math.sqrt(h)); };
+const short = a => String(a || '').replace(/,\s*France$/i, '');
+function fdrFix() { P.fdr = Object.assign({ days: [], set: { margin: 15, dwell: 3, after: 15, navitia: '' }, cur: '', tab: 'who' }, P.fdr || {}); P.fdr.set = Object.assign({ margin: 15, dwell: 3, after: 15, navitia: '' }, P.fdr.set || {}); P.people.forEach(p => { p.home = p.home || { address: '', lat: null, lon: null }; }); }
+const FDAY = () => P.fdr.days.find(d => d.id === P.fdr.cur) || P.fdr.days[0] || null;
+const pp = id => P.people.find(p => p.id === id) || null;
+const first = n => String(n || '').trim().split(/\s+/)[0];
+// ---------- adresses : Base Adresse Nationale, repli OpenStreetMap ----------
+async function geocode(q) {
+    q = String(q || '').trim(); if (q.length < 4) return [];
+    try { const r = await fetch('https://api-adresse.data.gouv.fr/search/?limit=6&q=' + encodeURIComponent(q)); const j = await r.json(); const L = (j.features || []).map(f => ({ label: f.properties.label, lat: f.geometry.coordinates[1], lon: f.geometry.coordinates[0] })); if (L.length) return L; } catch (e) { }
+    try { const r = await fetch('https://nominatim.openstreetmap.org/search?format=jsonv2&limit=6&accept-language=fr&q=' + encodeURIComponent(q)); const j = await r.json(); return j.map(x => ({ label: short(x.display_name), lat: +x.lat, lon: +x.lon })); } catch (e) { return []; }
+}
+function geoInput(inp, pick) {
+    let t = null, box = null; const close = () => { if (box) { box.remove(); box = null; } };
+    inp.setAttribute('autocomplete', 'off');
+    inp.addEventListener('input', () => { clearTimeout(t); t = setTimeout(async () => { const L = await geocode(inp.value); close(); if (!L.length || document.activeElement !== inp) return; box = document.createElement('div'); box.className = 'fdr-geo'; const r = inp.getBoundingClientRect(); box.style.cssText = 'left:' + r.left + 'px;top:' + (r.bottom + 2) + 'px;min-width:' + Math.max(260, r.width) + 'px'; box.innerHTML = L.map((x, i) => '<div data-i="' + i + '">📍 ' + esc(x.label) + '</div>').join(''); document.body.appendChild(box); box.querySelectorAll('[data-i]').forEach(d => d.onmousedown = e => { e.preventDefault(); const x = L[+d.dataset.i]; inp.value = x.label; close(); pick(x); }); }, 320); });
+    inp.addEventListener('blur', () => setTimeout(close, 150));
+}
+// ---------- itinéraires : OSRM (voiture, pied, vélo), estimation sinon ----------
+const RC = {};
+async function route(pts, prof) {
+    prof = prof || 'car'; if (pts.length < 2 || pts.some(p => !p || p.lat == null)) return null;
+    const key = prof + ':' + pts.map(p => (+p.lat).toFixed(5) + ',' + (+p.lon).toFixed(5)).join(';');
+    if (RC[key]) return RC[key]; const cache = P.fdr.cache = P.fdr.cache || {};
+    const base = prof === 'car' ? 'https://router.project-osrm.org/route/v1/driving/' : 'https://routing.openstreetmap.de/routed-' + (prof === 'bike' ? 'bike' : 'foot') + '/route/v1/driving/';
+    try { const r = await fetch(base + pts.map(p => p.lon + ',' + p.lat).join(';') + '?overview=full&geometries=geojson'); const j = await r.json(); if (j.code === 'Ok' && j.routes && j.routes[0]) { const o = { legs: j.routes[0].legs.map(l => ({ d: l.distance, t: l.duration })), geom: j.routes[0].geometry.coordinates.map(c => [c[1], c[0]]), src: 'osm' }; RC[key] = o; cache[key] = { legs: o.legs, src: 'osm' }; const ks = Object.keys(cache); if (ks.length > 300) delete cache[ks[0]]; return o; } } catch (e) { }
+    if (cache[key]) return (RC[key] = { legs: cache[key].legs, geom: null, src: 'cache' });
+    const legs = []; for (let i = 1; i < pts.length; i++) { const km = (hav(pts[i - 1], pts[i]) || 0) * (prof === 'car' ? 1.32 : 1.25), v = prof === 'car' ? (km < 8 ? 26 : km < 30 ? 42 : 70) : prof === 'bike' ? 15 : 4.8; legs.push({ d: km * 1000, t: km / v * 3600 + (prof === 'car' ? 180 : 0) }); }
+    return { legs, geom: null, src: 'est' };
+}
+// transports en commun : Navitia (clé gratuite) sinon estimation + liens Citymapper / Google Maps
+async function transit(a, b, dateIso, arriveBy) {
+    const tok = (P.fdr.set.navitia || '').trim();
+    if (tok && a && b && a.lat != null && b.lat != null) {
+        try {
+            const dt = dateIso.replace(/-/g, '') + 'T' + arriveBy.replace(':', '') + '00';
+            const r = await fetch('https://api.navitia.io/v1/journeys?from=' + a.lon + ';' + a.lat + '&to=' + b.lon + ';' + b.lat + '&datetime=' + dt + '&datetime_represents=arrival&count=1', { headers: { Authorization: tok } }); const j = await r.json();
+            const J0 = (j.journeys || [])[0];
+            if (J0) { const t = s => s ? s.slice(9, 11) + ':' + s.slice(11, 13) : ''; const steps = J0.sections.filter(s => s.type === 'public_transport' || (s.type === 'street_network' && s.duration > 60) || s.type === 'transfer' && s.duration > 120).map(s => s.type === 'public_transport' ? { k: 'pt', mode: (s.display_informations || {}).commercial_mode || '', line: (s.display_informations || {}).code || (s.display_informations || {}).label || '', dir: (s.display_informations || {}).direction || '', from: (s.from || {}).name || '', to: (s.to || {}).name || '', dep: t(s.departure_date_time), arr: t(s.arrival_date_time) } : { k: 'walk', min: Math.round(s.duration / 60), from: (s.from || {}).name || '', to: (s.to || {}).name || '' });
+                return { src: 'navitia', dep: t(J0.departure_date_time), arr: t(J0.arrival_date_time), dur: Math.round(J0.duration / 60), steps, lines: steps.filter(s => s.k === 'pt').map(s => (s.mode ? s.mode + ' ' : '') + s.line).join(' → ') }; }
+        } catch (e) { }
+    }
+    const km = hav(a, b) || 0, dur = Math.round(14 + km * 2.1);
+    return { src: 'est', dur, dep: hm(toMin(arriveBy) - dur), arr: arriveBy, steps: [], lines: '' };
+}
+const gmaps = (pts, mode) => { const f = p => p.lat != null ? p.lat + ',' + p.lon : encodeURIComponent(p.address || p.name || ''); if (pts.length < 2) return ''; return 'https://www.google.com/maps/dir/?api=1&origin=' + f(pts[0]) + '&destination=' + f(pts[pts.length - 1]) + (pts.length > 2 ? '&waypoints=' + pts.slice(1, -1).map(f).join('%7C') : '') + '&travelmode=' + (mode || 'driving'); };
+const citym = (a, b, date, arr) => a && b && a.lat != null && b.lat != null ? 'https://citymapper.com/directions?startcoord=' + a.lat + ',' + a.lon + '&endcoord=' + b.lat + ',' + b.lon + '&endname=' + encodeURIComponent(b.name || '') + (date && arr ? '&arrival_time=' + encodeURIComponent(date + 'T' + arr + ':00') : '') : '';
+// ---------- journées : depuis CALL SHEETO ----------
+function csDays() { const cs = J('callsheetoXIII.project'); return (cs && cs.days) || []; }
+function newDayFrom(cd) {
+    const L = cd.locations || [], main = L.find(l => l.id === cd.wxLocId) || L.find(l => l.type === 'decor') || L[0] || {}, park = L.find(l => l.type === 'park') || null;
+    const d = { id: uid(), csId: cd.id || '', date: cd.date || iso(new Date()), label: cd.title || cd.name || '', call: (cd.times || {}).general || '08:00', wrap: (cd.times || {}).wrap || '19:00',
+        dest: { name: main.name || '', address: main.address || '', lat: main.lat != null ? +main.lat : null, lon: main.lon != null ? +main.lon : null }, park: park ? { name: park.name || 'Parking', address: park.address || '', lat: park.lat != null ? +park.lat : null, lon: park.lon != null ? +park.lon : null, walk: null } : null, who: {}, legs: [], notes: '' };
+    (cd.crew || []).filter(c => c.name && c.dept !== 'fig').forEach(c => { const p = ensurePerson(c); d.who[p.id] = { mode: p.mode || guessMode(p), call: c.call || '', drv: '' }; });
+    return d;
+}
+function ensurePerson(c) {
+    let p = P.people.find(x => fold(x.n) === fold(c.name));
+    if (!p) { p = { id: uid(), n: c.name, role: c.role || '', ph: c.phone || '', em: c.email || '', arr: '', dep: '', hotel: false, need: '', note: '', home: { address: '', lat: null, lon: null } }; P.people.push(p); }
+    if (!p.ph && c.phone) p.ph = c.phone; if (!p.em && c.email) p.em = c.email; if (!p.role && c.role) p.role = c.role;
+    syncFromTeam(p); return p;
+}
+function teamOf(name) { const f = fiche(); return ((f && f.team) || []).find(m => fold(m.name || ((m.prenom || '') + ' ' + (m.nom || ''))) === fold(name)) || null; }
+function syncFromTeam(p) { const m = teamOf(p.n); if (!m) return false; let ch = false; if (m.address && (!p.home.address || p.home.address !== m.address)) { p.home = { address: m.address, lat: m.lat != null ? +m.lat : null, lon: m.lon != null ? +m.lon : null }; ch = true; } ['phone:ph', 'email:em', 'role:role', 'dept:dept'].forEach(x => { const [a, b] = x.split(':'); if (m[a] && !p[b]) { p[b] = m[a]; ch = true; } }); return ch; }
+function guessMode(p) { const n = p.need || ''; return n === 'car' ? 'drive' : n === 'carpool' ? 'drive' : n === 'need' ? 'ride' : n === 'tc' ? 'tc' : n === 'bike' ? 'bike' : 'tc'; }
+// ---------- calcul ----------
+// durées réelles entre tous les points (OSRM « table ») pour choisir l'ordre des pick-ups ; repli : distances à vol d'oiseau
+async function matrix(pts) {
+    if (pts.length < 3 || pts.some(p => p.lat == null)) return null;
+    try { const r = await fetch('https://router.project-osrm.org/table/v1/driving/' + pts.map(p => p.lon + ',' + p.lat).join(';') + '?annotations=duration'); const j = await r.json(); if (j.code === 'Ok' && j.durations) return j.durations; } catch (e) { }
+    return null;
+}
+async function orderStops(start, groups, end) { // ordre minimisant la durée (exhaustif jusqu'à 7 arrêts)
+    if (groups.length <= 1) return groups.slice();
+    const pts = [start].concat(groups.map(g => g.loc)).concat(end ? [end] : []), M = await matrix(pts), n = groups.length;
+    const c = (i, j) => M && M[i] && M[i][j] != null ? M[i][j] : (hav(pts[i], pts[j]) || 0) * 90;
+    const cost = o => { let s = 0, cur = 0; o.forEach(k => { s += c(cur, k + 1); cur = k + 1; }); return s + (end ? c(cur, n + 1) : 0); };
+    let best = null, bc = Infinity;
+    if (n <= 7) { const rec = (o, rest) => { if (!rest.length) { const v = cost(o); if (v < bc) { bc = v; best = o.slice(); } return; } rest.forEach((x, i) => { o.push(x); rec(o, rest.filter((y, j) => j !== i)); o.pop(); }); }; rec([], groups.map((g, i) => i)); }
+    else { best = []; const rest = groups.map((g, i) => i); let cur = 0; while (rest.length) { rest.sort((a, b) => c(cur, a + 1) - c(cur, b + 1)); const k = rest.shift(); best.push(k); cur = k + 1; } }
+    return best.map(i => groups[i]);
+}
+const modeOf = (d, id, dir) => { const w = d.who[id] || {}; return dir === 'retour' && w.rmode ? w.rmode : w.mode; };
+const drvOf = (d, id, dir) => { const w = d.who[id] || {}; return dir === 'retour' && w.rmode ? w.rdrv || '' : w.drv || ''; };
+function autoAssign(d, dir) { // passagers sans conducteur → le conducteur qui fait le plus petit détour (places comprises)
+    const ids = Object.keys(d.who).filter(id => pp(id)), drivers = ids.filter(id => modeOf(d, id, dir) === 'drive' && pp(id).home.lat != null), dest = d.park || d.dest, out = {};
+    const load = {}; drivers.forEach(id => load[id] = ids.filter(x => modeOf(d, x, dir) === 'ride' && drvOf(d, x, dir) === id).length);
+    ids.filter(id => modeOf(d, id, dir) === 'ride').forEach(id => { const fixed = drvOf(d, id, dir); if (fixed) { out[id] = fixed; return; } const p = pp(id); if (p.home.lat == null) return; let best = null, bd = 1e9; drivers.forEach(dr => { const h = pp(dr).home, seats = (d.who[dr].seats || 4); if (load[dr] >= seats) return; const det = (hav(h, p.home) || 0) + (hav(p.home, dest) || 0) - (hav(h, dest) || 0); if (det < bd) { bd = det; best = dr; } }); if (best) { out[id] = best; load[best]++; } });
+    return out;
+}
+async function generate(d) {
+    const S = P.fdr.set, mg = +S.margin || 0, dw = +S.dwell || 0, dest = d.dest, after = +S.after || 0;
+    if (dest.lat == null && (dest.address || dest.name)) { const g = await geocode(dest.address || dest.name); if (g[0]) Object.assign(dest, { lat: g[0].lat, lon: g[0].lon, address: dest.address || g[0].label }); }
+    const park = d.park && d.park.lat != null ? d.park : null;
+    if (park && park.walk == null) { const w = await route([park, dest], 'walk'); park.walk = w ? Math.max(2, Math.round(w.legs[0].t / 60)) : 10; }
+    const legs = [], ids = Object.keys(d.who).filter(id => pp(id) && d.who[id].mode !== 'off');
+    const callOf = id => toMin(d.who[id].call) != null ? toMin(d.who[id].call) : toMin(d.call);
+    const walkMin = park ? park.walk : 0, end = park || dest, wrap = toMin(d.wrap) + after;
+    const grp = list => { const G = []; list.forEach(id => { const h = pp(id).home, g = h.lat != null && G.find(x => x.loc.lat != null && hav(x.loc, h) < 0.15); if (g) g.who.push(id); else G.push({ loc: h, who: [id] }); }); return G; };
+    const label = g => g.who.map(id => first(pp(id).n)).join(' · ');
+    // ---- ALLER : voitures (pick-ups dans l'ordre le plus rapide, horaires à rebours de la convocation)
+    const asA = autoAssign(d, 'aller');
+    for (const dr of ids.filter(id => modeOf(d, id, 'aller') === 'drive')) {
+        const P0 = pp(dr), pax = ids.filter(id => modeOf(d, id, 'aller') === 'ride' && asA[id] === dr), occ = [dr].concat(pax), target = Math.min(...occ.map(callOf)) - mg;
+        const G = await orderStops(P0.home, grp(pax), end), pts = [P0.home].concat(G.map(g => g.loc)).concat([end]);
+        const r = await route(pts, 'car'), T = r ? r.legs.map(l => Math.round(l.t / 60)) : pts.slice(1).map(() => 15);
+        const arrPark = target - walkMin, tm = []; let t = arrPark; for (let i = T.length - 1; i >= 0; i--) { tm[i + 1] = t; t -= T[i] + (i > 0 ? dw : 0); } tm[0] = t;
+        const st = [{ id: uid(), kind: 'dep', name: 'Domicile de ' + first(P0.n), address: P0.home.address, lat: P0.home.lat, lon: P0.home.lon, who: [dr], time: hm(tm[0]) }].concat(G.map((g, i) => ({ id: uid(), kind: 'pu', name: label(g), address: g.loc.address, lat: g.loc.lat, lon: g.loc.lon, who: g.who, time: hm(tm[i + 1]) })));
+        if (park) st.push({ id: uid(), kind: 'park', name: park.name, address: park.address, lat: park.lat, lon: park.lon, who: [], time: hm(arrPark), max: 1 }, { id: uid(), kind: 'arr', name: dest.name, address: dest.address, lat: dest.lat, lon: dest.lon, who: [], time: hm(target), max: 1, walk: 1 });
+        else st.push({ id: uid(), kind: 'arr', name: dest.name, address: dest.address, lat: dest.lat, lon: dest.lon, who: [], time: hm(target), max: 1 });
+        legs.push({ id: uid(), dir: 'aller', mode: 'car', driver: dr, veh: d.who[dr].veh || '', stops: st, km: r ? Math.round(r.legs.reduce((a, l) => a + l.d, 0) / 1000) : null, src: r ? r.src : 'est' });
+    }
+    // ---- RETOUR : voitures (déposes dans l'ordre le plus rapide, fin chez le conducteur)
+    const asR = autoAssign(d, 'retour');
+    for (const dr of ids.filter(id => modeOf(d, id, 'retour') === 'drive')) {
+        const P0 = pp(dr), pax = ids.filter(id => modeOf(d, id, 'retour') === 'ride' && asR[id] === dr), occ = [dr].concat(pax);
+        const G = (await orderStops(end, grp(pax).filter(g => g.loc.lat != null), P0.home)).concat(grp(pax).filter(g => g.loc.lat == null));
+        const pts = [end].concat(G.map(g => g.loc)).concat([P0.home]), r = await route(pts, 'car'), T = r ? r.legs.map(l => Math.round(l.t / 60)) : pts.slice(1).map(() => 15);
+        let t = wrap + walkMin;
+        const st = park ? [{ id: uid(), kind: 'dep', name: dest.name, address: dest.address, lat: dest.lat, lon: dest.lon, who: occ, time: hm(wrap), walk: 1 }, { id: uid(), kind: 'park', name: park.name, address: park.address, lat: park.lat, lon: park.lon, who: [], time: hm(t) }] : [{ id: uid(), kind: 'dep', name: dest.name, address: dest.address, lat: dest.lat, lon: dest.lon, who: occ, time: hm(t) }];
+        G.forEach((g, i) => { t += T[i] + (i > 0 ? dw : 0); st.push({ id: uid(), kind: 'drop', name: label(g), address: g.loc.address, lat: g.loc.lat, lon: g.loc.lon, who: g.who, time: hm(t) }); });
+        t += T[T.length - 1] + (G.length ? dw : 0); st.push({ id: uid(), kind: 'arr', name: 'Domicile de ' + first(P0.n), address: P0.home.address, lat: P0.home.lat, lon: P0.home.lon, who: [dr], time: hm(t) });
+        legs.push({ id: uid(), dir: 'retour', mode: 'car', driver: dr, veh: d.who[dr].veh || '', stops: st, km: r ? Math.round(r.legs.reduce((a, l) => a + l.d, 0) / 1000) : null, src: r ? r.src : 'est' });
+    }
+    // ---- transports, à pied, vélo (aller et retour)
+    for (const dir of ['aller', 'retour']) for (const id of ids.filter(id => /tc|walk|bike/.test(modeOf(d, id, dir)))) {
+        const p = pp(id), m = modeOf(d, id, dir), target = callOf(id) - mg, H = { name: 'Domicile', address: p.home.address, lat: p.home.lat, lon: p.home.lon }, X = { name: dest.name, address: dest.address, lat: dest.lat, lon: dest.lon };
+        if (m === 'tc') {
+            if (dir === 'aller') { const a = await transit(p.home, dest, d.date, hm(target)); legs.push({ id: uid(), dir, mode: 'tc', who: [id], tc: { lines: a.lines, steps: a.steps, src: a.src, dur: a.dur }, stops: [Object.assign({ id: uid(), kind: 'dep', who: [id], time: a.dep }, H), Object.assign({ id: uid(), kind: 'arr', who: [id], time: a.arr, max: 1 }, X)] }); }
+            else { const est = await transit(p.home, dest, d.date, hm(target)), dur = est.dur || 40, b = await transit(dest, p.home, d.date, hm(wrap + dur)); const nav = b.src === 'navitia'; legs.push({ id: uid(), dir, mode: 'tc', who: [id], tc: { lines: nav ? b.lines : est.lines, steps: nav ? b.steps : [], src: b.src, dur }, stops: [Object.assign({ id: uid(), kind: 'dep', who: [id], time: nav ? b.dep : hm(wrap) }, X), Object.assign({ id: uid(), kind: 'arr', who: [id], time: nav ? b.arr : hm(wrap + dur) }, H)] }); }
+        } else {
+            const r = await route([p.home, dest], m === 'bike' ? 'bike' : 'walk'), dur = r ? Math.round(r.legs[0].t / 60) : 20;
+            legs.push(dir === 'aller' ? { id: uid(), dir, mode: m, who: [id], stops: [Object.assign({ id: uid(), kind: 'dep', who: [id], time: hm(target - dur) }, H), Object.assign({ id: uid(), kind: 'arr', who: [id], time: hm(target), max: 1 }, X)] } : { id: uid(), dir, mode: m, who: [id], stops: [Object.assign({ id: uid(), kind: 'dep', who: [id], time: hm(wrap) }, X), Object.assign({ id: uid(), kind: 'arr', who: [id], time: hm(wrap + dur) }, H)] });
+        }
+    }
+    d.legs = legs; d.gen = Date.now(); dirty();
+}
+async function retime(leg, d) { // recalcule les horaires d'une voiture d'après l'ordre des arrêts (heure d'arrivée conservée)
+    const st = leg.stops.filter(s => s.lat != null); if (st.length < 2) return;
+    const drive = leg.stops.filter(s => !s.walk), r = await route(drive.filter(s => s.lat != null), 'car'); if (!r) return;
+    const T = r.legs.map(l => Math.round(l.t / 60)), dw = +P.fdr.set.dwell || 0;
+    if (leg.dir === 'aller') { const last = drive[drive.length - 1]; let t = toMin(last.time); for (let i = drive.length - 2; i >= 0; i--) { t -= T[i] + (i > 0 ? dw : 0); drive[i].time = hm(t); } }
+    else { let t = toMin(drive[0].time); for (let i = 1; i < drive.length; i++) { t += T[i - 1] + (i > 1 ? dw : 0); drive[i].time = hm(t); } }
+    leg.src = r.src; dirty();
+}
+// ---------- textes : plan de route personnel ----------
+function legsOf(d, id) { return d.legs.filter(l => (l.stops || []).some(s => (s.who || []).includes(id)) || l.driver === id || (l.who || []).includes(id)); }
+function personPlan(d, id) {
+    const p = pp(id), w = d.who[id] || {}, call = w.call || d.call, out = { p, call, aller: [], retour: [], links: [] };
+    legsOf(d, id).forEach(l => {
+        const L = l.dir === 'retour' ? out.retour : out.aller, drv = l.driver ? pp(l.driver) : null, v = l.veh ? P.veh.find(x => x.id === l.veh) : null, me = l.driver === id;
+        const vs = v ? ' · ' + v.name + (v.plate ? ' (' + v.plate + ')' : '') : '';
+        if (l.mode === 'car') {
+            const i0 = l.stops.findIndex(s => (s.who || []).includes(id) && s.kind !== 'arr' && s.kind !== 'drop' || (me && s.kind === 'dep')), mine = l.stops.findIndex(s => l.dir === 'retour' && (s.who || []).includes(id) && (s.kind === 'drop' || s.kind === 'arr'));
+            if (l.dir === 'aller') {
+                const s0 = l.stops[Math.max(0, i0)];
+                L.push(me ? { t: s0.time, txt: '🚗 Tu conduis' + vs + '. Départ ' + short(s0.address) } : { t: s0.time, txt: '🚗 ' + (drv ? first(drv.n) : 'Le conducteur') + ' passe te prendre : ' + short(s0.address) + vs + (drv && drv.ph ? ' · ☎ ' + drv.ph : '') });
+                if (me) l.stops.filter(s => s.kind === 'pu').forEach(s => L.push({ t: s.time, txt: '↳ Pick-up ' + s.name + ' : ' + short(s.address) + (s.who.map(pp).filter(x => x && x.ph).length ? ' · ☎ ' + s.who.map(pp).filter(x => x && x.ph).map(x => first(x.n) + ' ' + x.ph).join(', ') : '') }));
+                l.stops.filter(s => s.kind === 'park').forEach(s => L.push({ t: s.time, txt: '🅿️ ' + s.name + ' — ' + short(s.address) + (s.max ? ' (au plus tard)' : '') }));
+                const a = l.stops[l.stops.length - 1]; L.push({ t: a.time, txt: (a.walk ? '🚶 À pied jusqu’à ' : '📍 Arrivée ') + a.name + ' — ' + short(a.address) + (a.max ? ' (au plus tard)' : '') });
+                out.links.push(['🗺️ Itinéraire aller', gmaps(me ? l.stops.filter(s => !s.walk) : l.stops.slice(Math.max(0, i0)).filter(s => !s.walk))]);
+            } else {
+                const s0 = l.stops[0]; L.push({ t: s0.time, txt: (s0.walk ? '🚶 Départ à pied vers le parking — ' : '🚗 Départ ') + s0.name });
+                l.stops.filter(s => s.kind === 'park').forEach(s => L.push({ t: s.time, txt: '🅿️ Départ de la voiture — ' + s.name + (me ? '' : ' avec ' + (drv ? first(drv.n) : 'le conducteur')) }));
+                if (me) l.stops.filter(s => s.kind === 'drop').forEach(s => L.push({ t: s.time, txt: '↳ Dépose ' + s.name + ' : ' + short(s.address) }));
+                const s1 = me ? l.stops[l.stops.length - 1] : l.stops[mine > -1 ? mine : l.stops.length - 1]; L.push({ t: s1.time, txt: '🏠 Arrivée ' + short(s1.address) });
+            }
+        } else {
+            const a = l.stops[0], b = l.stops[l.stops.length - 1], ic = l.mode === 'tc' ? '🚆' : l.mode === 'bike' ? '🚲' : '🚶';
+            L.push({ t: a.time, txt: ic + ' Départ ' + (l.dir === 'aller' ? short(a.address) || 'de chez toi' : a.name) + (l.tc && l.tc.lines ? ' · ' + l.tc.lines : '') });
+            ((l.tc && l.tc.steps) || []).forEach(s => L.push(s.k === 'pt' ? { t: s.dep, txt: '↳ ' + s.mode + ' ' + s.line + (s.dir ? ' dir. ' + s.dir : '') + ' : ' + s.from + ' → ' + s.to + ' (arr. ' + s.arr + ')' } : { t: '', txt: '↳ 🚶 ' + s.min + ' min à pied' + (s.to ? ' → ' + s.to : '') }));
+            L.push({ t: b.time, txt: (l.dir === 'aller' ? '📍 Arrivée ' + b.name : '🏠 Arrivée') + (b.max ? ' (au plus tard)' : '') });
+            out.links.push([l.dir === 'aller' ? '🗺️ Itinéraire aller' : '🗺️ Itinéraire retour', l.mode === 'tc' ? (citym(a, b, d.date, l.dir === 'aller' ? b.time : '') || gmaps([a, b], 'transit')) : gmaps([a, b], l.mode === 'bike' ? 'bicycling' : 'walking')]);
+        }
+    });
+    return out;
+}
+function planText(d, id) {
+    const o = personPlan(d, id), f = fiche() || {}, w = d.who[id] || {}, mode = FMI[w.mode] || FM[0];
+    const t = ['Bonjour ' + first(o.p.n) + ',', '', (P.name || f.title || 'Tournage') + ' — ' + frD(d.date) + (d.label ? ' (' + d.label + ')' : ''), '⏰ Convocation ' + hh(o.call) + ' — ' + d.dest.name + (d.dest.address ? ', ' + short(d.dest.address) : '')];
+    if (w.mode === 'own') t.push('', 'Tu viens par tes propres moyens.');
+    if (o.aller.length) t.push('', 'ALLER', ...o.aller.map(x => (x.t ? hh(x.t) + ' — ' : '      ') + x.txt));
+    if (o.retour.length) t.push('', 'RETOUR (fin prévue ' + hh(d.wrap) + ')', ...o.retour.map(x => (x.t ? hh(x.t) + ' — ' : '      ') + x.txt));
+    o.links.filter(l => l[1]).forEach(l => t.push(l[0] + ' : ' + l[1]));
+    const rg = J('callsheetoXIII.project'); const reg = rg && (rg.days || []).flatMap(x => x.crew || []).find(c => /regisseu/i.test(fold(c.role)));
+    if (reg) t.push('', 'Un souci sur la route ? ' + reg.name + ' (régie) : ' + (reg.phone || ''));
+    return t.join('\n');
+}
+// ---------- rendu ----------
+function fdrHtml() {
+    fdrFix(); const D = FDAY(), cds = csDays(), S = P.fdr.set;
+    const chips = P.fdr.days.slice().sort((a, b) => a.date.localeCompare(b.date)).map(d => '<span role="button" tabindex="0" class="fdr-chip' + (D && d.id === D.id ? ' on' : '') + '" data-day="' + d.id + '">📅 ' + esc(frS(d.date)) + (d.label ? ' <small>' + esc(d.label) + '</small>' : '') + '</span>').join('');
+    const avail = cds.filter(c => !P.fdr.days.some(d => d.csId === c.id || d.date === c.date));
+    let h = '<div class="fdr"><div class="fdr-days">' + chips + (avail.length ? '<select data-addcs><option value="">➕ Journée de CALL SHEETO…</option>' + avail.map(c => '<option value="' + c.id + '">' + esc((c.name || '') + ' · ' + frS(c.date) + (c.title ? ' — ' + c.title : '')) + '</option>').join('') + '</select>' : '') + '<button data-addday>➕ Journée libre</button><span style="flex:1"></span><button data-team title="Reprendre adresses, téléphones et postes depuis la fiche projet">👥 Équipe du projet</button><button data-set>⚙️ Réglages</button></div>';
+    if (!D) return h + '<div class="empty"><h2>🗺️ Feuilles de route</h2><p>Chaque journée de tournage devient une feuille de route : qui vient comment, les pick-ups dans l’ordre le plus court, les horaires calculés à rebours de la convocation, et un plan de route personnel pour chaque membre de l’équipe.</p>' + (cds.length ? '<p>Choisissez une journée de CALL SHEETO ci-dessus.</p>' : '<p>Créez d’abord vos journées dans <b>CALL SHEETO</b> (date, lieu, convocations), ou ajoutez une journée libre.</p>') + '</div></div>';
+    const tab = P.fdr.tab || 'who', ids = Object.keys(D.who).filter(id => pp(id));
+    const cnt = m => ids.filter(id => D.who[id].mode === m).length;
+    h += '<div class="fdr-head"><div class="fdr-f"><label>Date<input type="date" data-dk="date" value="' + esc(D.date) + '"></label><label>Titre<input data-dk="label" value="' + esc(D.label) + '" placeholder="Ex. Dimanche — Dôme de Paris"></label><label>Convocation générale<input type="time" data-dk="call" value="' + esc(D.call) + '"></label><label>Fin prévue<input type="time" data-dk="wrap" value="' + esc(D.wrap) + '"></label></div>' +
+        '<div class="fdr-f"><label class="w2">📍 Lieu de tournage<input data-geo="dest" value="' + esc(D.dest.name + (D.dest.address && D.dest.address !== D.dest.name ? ' — ' + D.dest.address : '')) + '" class="' + (D.dest.lat != null ? 'ok' : '') + '" placeholder="Adresse du lieu"></label><label class="w2">🅿️ Parking (facultatif : la fin du trajet se fait à pied)<input data-geo="park" value="' + esc(D.park ? D.park.name + (D.park.address && D.park.address !== D.park.name ? ' — ' + D.park.address : '') : '') + '" class="' + (D.park && D.park.lat != null ? 'ok' : '') + '" placeholder="Ex. Parking Indigo Corentin Celton"></label>' + (D.park ? '<label>À pied (min)<input type="number" data-pk="walk" value="' + esc(D.park.walk == null ? '' : D.park.walk) + '" min="0" placeholder="auto"></label><button data-nopark title="Sans parking">✕</button>' : '') + '</div>' +
+        '<div class="fdr-tabs">' + [['who', '👥 Qui vient comment', ids.length], ['fdr', '🗺️ Feuille de route', D.legs.filter(l => l.dir === 'aller').length], ['plans', '📨 Plans personnels', ids.filter(id => D.who[id].mode !== 'off').length], ['map', '🧭 Carte', '']].map(t => '<button data-tab="' + t[0] + '" class="' + (tab === t[0] ? 'on' : '') + '">' + t[1] + (t[2] !== '' ? ' <small>' + t[2] + '</small>' : '') + '</button>').join('') + '<span style="flex:1"></span><span class="fdr-sum">' + FM.slice(0, 5).map(m => cnt(m[0]) ? m[1].split(' ')[0] + ' ' + cnt(m[0]) : '').filter(Boolean).join(' · ') + '</span><button class="btn-big" data-gen title="Recalculer pick-ups et horaires">🪄 ' + (D.legs.length ? 'Recalculer' : 'Générer') + ' la feuille de route</button><button data-print>🖨️ PDF</button><button data-delday title="Supprimer cette journée">🗑</button></div></div>';
+    if (tab === 'who') h += whoHtml(D, ids); else if (tab === 'fdr') h += legsHtml(D); else if (tab === 'plans') h += plansHtml(D, ids); else h += '<div id="fdr-map"></div><p class="hint">Domiciles, pick-ups, parking et lieu de tournage ; trajets calculés sur OpenStreetMap.</p>';
+    return h + '</div>';
+}
+function whoHtml(D, ids) {
+    const drivers = ids.filter(id => D.who[id].mode === 'drive'), others = P.people.filter(p => !D.who[p.id]);
+    const seatsUsed = dr => ids.filter(id => D.who[id].mode === 'ride' && D.who[id].drv === dr).length;
+    return '<div class="sv"><table class="pt fdr-who"><tr><th style="width:17%">Nom</th><th>Poste</th><th style="width:28%">Adresse de départ</th><th style="width:150px">Vient</th><th style="width:170px">Avec / véhicule</th><th style="width:150px">Retour</th><th style="width:90px">Convoc.</th><th>Téléphone</th><th></th></tr>' +
+        ids.map(id => { const p = pp(id), w = D.who[id], m = w.mode;
+            const extra = m === 'ride' ? '<select data-wk="drv"><option value="">🪄 auto</option>' + drivers.map(dr => '<option value="' + dr + '"' + (w.drv === dr ? ' selected' : '') + '>' + esc(pp(dr).n) + ' (' + seatsUsed(dr) + '/' + (D.who[dr].seats || 4) + ')</option>').join('') + '</select>' : m === 'drive' ? '<div class="fdr-two"><select data-wk="veh"><option value="">Sa voiture</option>' + P.veh.map(v => '<option value="' + v.id + '"' + (w.veh === v.id ? ' selected' : '') + '>' + esc(v.name) + '</option>').join('') + '</select><input type="number" data-wk="seats" min="0" max="50" value="' + esc(w.seats || 4) + '" title="Places passagers"></div>' : '';
+            const rdr = ids.filter(x => (D.who[x].rmode || D.who[x].mode) === 'drive' && x !== id), ret = '<select data-wk="rmode"><option value="">↺ comme l’aller</option>' + FM.filter(x => x[0] !== 'off').map(x => '<option value="' + x[0] + '"' + (x[0] === w.rmode ? ' selected' : '') + '>' + x[1] + '</option>').join('') + '</select>' + (w.rmode === 'ride' ? '<select data-wk="rdrv"><option value="">🪄 auto</option>' + rdr.map(dr => '<option value="' + dr + '"' + (w.rdrv === dr ? ' selected' : '') + '>avec ' + esc(pp(dr).n) + '</option>').join('') + '</select>' : '');
+            return '<tr data-w="' + id + '"><td><b>' + esc(p.n) + '</b></td><td><small>' + esc(p.role || '') + '</small></td><td><input data-home="' + id + '" class="' + (p.home.lat != null ? 'ok' : '') + '" value="' + esc(p.home.address) + '" placeholder="Adresse (domicile, hôtel, gare…)"></td><td><select data-wk="mode" title="' + esc((FMI[m] || FM[0])[2]) + '">' + FM.map(x => '<option value="' + x[0] + '"' + (x[0] === m ? ' selected' : '') + '>' + x[1] + '</option>').join('') + '</select></td><td>' + extra + '</td><td>' + ret + '</td><td><input type="time" data-wk="call" value="' + esc(w.call || '') + '" placeholder="' + esc(D.call) + '"></td><td><small>' + esc(p.ph || '') + '</small></td><td><button data-unw title="Retirer de la journée">✕</button></td></tr>'; }).join('') + '</table>' +
+        (others.length ? '<div class="fdr-add"><select data-addw><option value="">➕ Ajouter une personne…</option>' + others.map(p => '<option value="' + p.id + '">' + esc(p.n) + '</option>').join('') + '</select></div>' : '') +
+        '<p class="hint">🪄 Les passagers « auto » sont confiés au conducteur qui fait le plus petit détour (places comprises). Une adresse validée (bordure verte) est nécessaire pour calculer les trajets. Les adresses viennent de la fiche projet (👥 Équipe du projet) : la modifier ici ne change que la logistique.</p></div>';
+}
+function legsHtml(D) {
+    if (!D.legs.length) return '<div class="empty"><h2>🪄 Pas encore de feuille de route</h2><p>Renseignez qui vient comment dans « 👥 Qui vient comment », puis « 🪄 Générer la feuille de route ».</p><div class="tpl"><button data-addleg="car">➕ Voiture</button><button data-addleg="tc">➕ Transports</button></div></div>';
+    const sec = dir => { const L = D.legs.filter(l => l.dir === dir); return '<h2 class="fdr-dir">' + (dir === 'aller' ? '➡️ ALLER' : '⬅️ RETOUR') + ' <small>' + (dir === 'aller' ? 'convocation ' + hh(D.call) : 'fin prévue ' + hh(D.wrap)) + '</small></h2>' + L.map(l => legCard(D, l)).join('') + '<div class="tpl"><button data-addleg="car" data-dir="' + dir + '">➕ Voiture</button><button data-addleg="tc" data-dir="' + dir + '">➕ Transports</button><button data-addleg="walk" data-dir="' + dir + '">➕ À pied / vélo</button></div>'; };
+    return '<div class="sv">' + sec('aller') + sec('retour') + '</div>';
+}
+function legTitle(l) { const drv = l.driver ? pp(l.driver) : null, v = l.veh ? P.veh.find(x => x.id === l.veh) : null; if (l.mode === 'car') return (v ? v.name.toUpperCase() : 'VOITURE') + ' — ' + (drv ? 'Conduite par ' + drv.n : 'conducteur ?'); const w = (l.who || []).map(pp).filter(Boolean).map(p => p.n).join(' · '); return (l.mode === 'tc' ? 'TRANSPORTS' : l.mode === 'bike' ? 'VÉLO' : 'À PIED') + ' — ' + (w || '?') + (l.tc && l.tc.lines ? ' (' + l.tc.lines + ')' : ''); }
+function legCard(D, l) {
+    const col = LEGCOL[l.mode] || '#90a4ae', S = l.stops || [], walkAt = S.findIndex(s => s.walk), allPeople = Object.keys(D.who).filter(id => pp(id));
+    const nCar = walkAt < 0 ? S.length : walkAt, ppl = new Set(S.flatMap(s => s.who || [])).size;
+    const band = '<tr class="fdr-band"><td class="fdr-lab">' + (l.dir === 'aller' ? 'ALLER' : 'RETOUR') + '</td>' + (l.dir === 'retour' && S[0] && S[0].walk ? '<td class="walk" colspan="1">🚶 PIED</td><td colspan="' + (S.length - 1) + '" style="background:' + col + '33;color:' + col + '">' + esc(legTitle(l)) + '</td>' : '<td colspan="' + nCar + '" style="background:' + col + '33;color:' + col + '">' + esc(legTitle(l)) + '</td>' + (walkAt > -1 ? '<td class="walk" colspan="' + (S.length - nCar) + '">🚶 PIED</td>' : '')) + '</tr>';
+    let pu = 0;
+    const lab = s => s.kind === 'pu' ? 'PU ' + (++pu) : s.kind === 'drop' ? 'Dépose ' + (++pu) : (SKL[s.kind] || 'Étape');
+    return '<div class="fdr-leg" data-leg="' + l.id + '"><div class="fdr-legh"><b style="color:' + col + '">' + (l.mode === 'car' ? '🚗' : l.mode === 'tc' ? '🚆' : l.mode === 'bike' ? '🚲' : '🚶') + ' ' + esc(legTitle(l)) + '</b>' + (l.mode === 'car' ? '<select data-lk="driver"><option value="">Conducteur…</option>' + allPeople.map(id => '<option value="' + id + '"' + (l.driver === id ? ' selected' : '') + '>' + esc(pp(id).n) + '</option>').join('') + '</select><select data-lk="veh"><option value="">Voiture perso</option>' + P.veh.map(v => '<option value="' + v.id + '"' + (l.veh === v.id ? ' selected' : '') + '>' + esc(v.name) + '</option>').join('') + '</select><small>' + ppl + ' pers.' + (l.km ? ' · ' + l.km + ' km' : '') + (l.src === 'est' ? ' · ⚠️ durées estimées' : '') + '</small>' : '<select data-lk="mode">' + [['tc', '🚆 Transports'], ['walk', '🚶 À pied'], ['bike', '🚲 Vélo']].map(o => '<option value="' + o[0] + '"' + (l.mode === o[0] ? ' selected' : '') + '>' + o[1] + '</option>').join('') + '</select>' + (l.mode === 'tc' ? '<input data-tck="lines" value="' + esc((l.tc || {}).lines || '') + '" placeholder="Lignes : ex. TrN → M12 ou TrN → RER C → T2" class="fdr-lines">' + (((l.tc || {}).src) === 'navitia' ? '<small>✓ horaires Navitia</small>' : '<small>⏱️ estimé</small>') : '')) +
+        '<span style="flex:1"></span>' + (l.mode === 'car' ? '<button data-retime title="Recalculer les horaires d’après l’ordre des arrêts">🔄 Horaires</button>' : '') + '<a class="fdr-btn" target="_blank" rel="noopener" href="' + esc(l.mode === 'tc' ? citym(S[0], S[S.length - 1], D.date, l.dir === 'aller' ? (S[S.length - 1] || {}).time : '') || gmaps(S, 'transit') : gmaps(S.filter(s => !s.walk), l.mode === 'car' ? 'driving' : l.mode === 'bike' ? 'bicycling' : 'walking')) + '">🗺️ Itinéraire</a><button data-legdel title="Supprimer ce trajet">🗑</button></div>' +
+        '<div class="fdr-tw"><table class="fdr-t">' + band + '<tr><th>Étape</th>' + S.map((s, i) => '<td><div class="fdr-sh"><select data-sk="kind" data-si="' + i + '">' + SK.map(k => '<option value="' + k + '"' + (s.kind === k ? ' selected' : '') + '>' + (k === s.kind ? lab(s) : SKL[k]) + '</option>').join('') + '</select><span>' + (i > 0 ? '<button data-mv="-1" data-si="' + i + '" title="Avancer">◀</button>' : '') + (i < S.length - 1 ? '<button data-mv="1" data-si="' + i + '" title="Reculer">▶</button>' : '') + '<button data-sdel data-si="' + i + '" title="Retirer">✕</button></span></div></td>').join('') + '<td class="fdr-plus"><button data-sadd title="Ajouter une étape">＋</button></td></tr>' +
+        '<tr><th>Adresse</th>' + S.map((s, i) => '<td><input data-sk="name" data-si="' + i + '" value="' + esc(s.name || '') + '" class="fdr-nm"><textarea data-sgeo data-si="' + i + '" rows="2" class="' + (s.lat != null ? 'ok' : '') + '">' + esc(short(s.address || '')) + '</textarea></td>').join('') + '<td></td></tr>' +
+        '<tr><th>Qui</th>' + S.map((s, i) => '<td><div class="fdr-who-c">' + (s.who || []).map(id => pp(id) ? '<span>' + esc(first(pp(id).n)) + '<i data-wrm="' + id + '" data-si="' + i + '">×</i></span>' : '').join('') + '<select data-wadd data-si="' + i + '"><option value="">＋</option>' + allPeople.filter(id => !(s.who || []).includes(id)).map(id => '<option value="' + id + '">' + esc(pp(id).n) + '</option>').join('') + '</select></div></td>').join('') + '<td></td></tr>' +
+        '<tr><th>Heure</th>' + S.map((s, i) => '<td><div class="fdr-hr"><input type="time" data-sk="time" data-si="' + i + '" value="' + esc(s.time || '') + '"><label title="Heure maximale"><input type="checkbox" data-sk="max" data-si="' + i + '"' + (s.max ? ' checked' : '') + '> max</label><label title="Trajet à pied jusqu’à cette étape"><input type="checkbox" data-sk="walk" data-si="' + i + '"' + (s.walk ? ' checked' : '') + '> 🚶</label></div></td>').join('') + '<td></td></tr>' +
+        ((l.tc && (l.tc.steps || []).length) ? '<tr><th>Trajet</th><td colspan="' + S.length + '"><small>' + l.tc.steps.map(s => s.k === 'pt' ? '<b>' + esc(s.mode + ' ' + s.line) + '</b> ' + esc(s.from) + ' ' + esc(s.dep) + ' → ' + esc(s.to) + ' ' + esc(s.arr) : '🚶 ' + s.min + ' min').join(' · ') + '</small></td><td></td></tr>' : '') +
+        '</table></div></div>';
+}
+function plansHtml(D, ids) {
+    if (!D.legs.length) return '<div class="empty"><h2>📨 Plans personnels</h2><p>Générez d’abord la feuille de route : chaque membre reçoit ensuite son plan de route (heure de pick-up, conducteur, parking, transports, retour…).</p></div>';
+    return '<div class="sv"><div class="tpl" style="justify-content:flex-start;margin-bottom:10px"><button data-allcopy>📋 Copier tous les plans</button><button data-printplans>🖨️ Imprimer tous les plans (1 par page)</button><button data-tocs title="Ajouter le trajet de chacun dans sa ligne de la feuille de service">📋 → CALL SHEETO</button></div><div class="fdr-plans">' +
+        ids.filter(id => D.who[id].mode !== 'off').map(id => { const o = personPlan(D, id), p = o.p, w = D.who[id]; const ph = String(p.ph || '').replace(/[^\d+]/g, '').replace(/^0/, '+33');
+            return '<div class="fdr-plan" data-plan="' + id + '"><div class="fdr-ph"><b>' + esc(p.n) + '</b><small>' + esc(p.role || '') + ' · ' + esc((FMI[w.mode] || FM[0])[1]) + '</small><span class="fdr-cv">⏰ ' + esc(hh(o.call)) + '</span></div>' +
+                (o.aller.length ? '<h4>➡️ Aller</h4><ol>' + o.aller.map(x => '<li><b>' + esc(hh(x.t)) + '</b> ' + esc(x.txt) + '</li>').join('') + '</ol>' : w.mode === 'own' ? '<p class="hint">Vient par ses propres moyens.</p>' : '<p class="hint">⚠️ Pas de trajet aller : vérifiez son mode et son adresse.</p>') +
+                (o.retour.length ? '<h4>⬅️ Retour</h4><ol>' + o.retour.map(x => '<li><b>' + esc(hh(x.t)) + '</b> ' + esc(x.txt) + '</li>').join('') + '</ol>' : '') +
+                '<div class="fdr-pa">' + o.links.filter(l => l[1]).map(l => '<a target="_blank" rel="noopener" href="' + esc(l[1]) + '">' + esc(l[0]) + '</a>').join('') + '</div>' +
+                '<div class="fdr-pa"><button data-pcopy>📋 Copier</button>' + (p.em ? '<a href="mailto:' + esc(p.em) + '?subject=' + encodeURIComponent('Plan de route — ' + frD(D.date)) + '&body=' + encodeURIComponent(planText(D, id)) + '">✉️ E-mail</a>' : '') + (ph ? '<a href="sms:' + esc(ph) + '?&body=' + encodeURIComponent(planText(D, id)) + '">📱 SMS</a><a target="_blank" rel="noopener" href="https://wa.me/' + esc(ph.replace('+', '')) + '?text=' + encodeURIComponent(planText(D, id)) + '">💬 WhatsApp</a>' : '') + '</div></div>'; }).join('') + '</div></div>';
+}
+// ---------- carte (Leaflet, chargé à la demande) ----------
+let LMAP = null;
+function loadLeaflet() { return window.L ? Promise.resolve() : new Promise((res, rej) => { const c = document.createElement('link'); c.rel = 'stylesheet'; c.href = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css'; document.head.appendChild(c); const s = document.createElement('script'); s.src = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js'; s.onload = res; s.onerror = rej; document.head.appendChild(s); }); }
+async function drawMap(D) {
+    const el = $('fdr-map'); if (!el) return; try { await loadLeaflet(); } catch (e) { el.innerHTML = '<p class="hint" style="padding:20px">Carte indisponible hors connexion.</p>'; return; }
+    if (LMAP) { LMAP.remove(); LMAP = null; } LMAP = L.map(el); L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap', maxZoom: 19 }).addTo(LMAP);
+    const B = [], pin = (p, html, col) => { if (!p || p.lat == null) return; B.push([p.lat, p.lon]); L.marker([p.lat, p.lon], { icon: L.divIcon({ className: 'fdr-pin', html: '<span style="background:' + col + '">' + html + '</span>', iconSize: [30, 30], iconAnchor: [15, 15] }) }).addTo(LMAP); };
+    pin(D.dest, '★', '#E53935'); if (D.park) pin(D.park, 'P', '#1565C0');
+    Object.keys(D.who).forEach(id => { const p = pp(id); if (p && D.who[id].mode !== 'off') pin(p.home, esc(first(p.n).slice(0, 2)), LEGCOL[D.who[id].mode === 'drive' || D.who[id].mode === 'ride' ? 'car' : D.who[id].mode] || '#90a4ae'); });
+    for (const l of D.legs.filter(l => l.dir === 'aller')) { const pts = l.stops.filter(s => s.lat != null && !s.walk); if (pts.length < 2) continue; const r = l.mode === 'car' ? await route(pts, 'car') : null; L.polyline(r && r.geom ? r.geom : pts.map(s => [s.lat, s.lon]), { color: LEGCOL[l.mode] || '#888', weight: 5, opacity: .75, dashArray: l.mode === 'car' ? null : '6 8' }).addTo(LMAP).bindTooltip(legTitle(l)); }
+    if (B.length) LMAP.fitBounds(B, { padding: [40, 40] }); else LMAP.setView([46.6, 2.4], 6);
+}
+// ---------- impression ----------
+function fdrPrintHtml(D) {
+    const f = fiche() || {}, sec = dir => D.legs.filter(l => l.dir === dir).map(l => { const S = l.stops, col = LEGCOL[l.mode] || '#999', walkAt = S.findIndex(s => s.walk), nCar = walkAt < 0 ? S.length : walkAt; let pu = 0; const lab = s => s.kind === 'pu' ? 'PU ' + (++pu) : s.kind === 'drop' ? 'Dépose ' + (++pu) : SKL[s.kind] || 'Étape';
+        const head = l.dir === 'retour' && S[0] && S[0].walk ? '<td class="pw">PIED</td><td colspan="' + (S.length - 1) + '" style="background:' + col + '22;border-color:' + col + '">' + esc(legTitle(l)) + '</td>' : '<td colspan="' + nCar + '" style="background:' + col + '22;border-color:' + col + '">' + esc(legTitle(l)) + '</td>' + (walkAt > -1 ? '<td class="pw" colspan="' + (S.length - nCar) + '">PIED</td>' : '');
+        return '<table class="pf"><tr class="hd"><th>' + (dir === 'aller' ? 'ALLER' : 'RETOUR') + '</th>' + head + '</tr><tr><th>Étape</th>' + S.map(s => '<td><b>' + lab(s) + '</b></td>').join('') + '</tr><tr><th>Adresse</th>' + S.map(s => '<td>' + (s.name && !/^Domicile/.test(s.name) ? '<b>' + esc(s.name) + '</b><br>' : '') + esc(short(s.address)) + '</td>').join('') + '</tr><tr><th>Qui</th>' + S.map(s => '<td>' + esc((s.who || []).map(pp).filter(Boolean).map(p => first(p.n)).join(' – ')) + '</td>').join('') + '</tr><tr><th>Heure</th>' + S.map(s => '<td class="t">' + esc(hh(s.time)) + (s.max ? '<small> max</small>' : '') + '</td>').join('') + '</tr>' + (l.tc && (l.tc.steps || []).length ? '<tr><th>Trajet</th><td colspan="' + S.length + '">' + l.tc.steps.map(s => s.k === 'pt' ? esc(s.mode + ' ' + s.line + ' ' + s.from + ' ' + s.dep + ' → ' + s.to + ' ' + s.arr) : '🚶 ' + s.min + ' min').join(' · ') + '</td></tr>' : '') + (dir === 'aller' && l.mode === 'tc' ? '<tr><th>Convoc</th><td colspan="' + S.length + '"><b>' + esc(hh((D.who[(l.who || [])[0]] || {}).call || D.call)) + '</b></td></tr>' : '') + '</table>'; }).join('');
+    const contacts = Object.keys(D.who).filter(id => pp(id) && (D.legs.some(l => l.driver === id))).map(id => first(pp(id).n) + ' ' + (pp(id).ph || '')).join(' · ');
+    return '<div class="pp"><h1>FDR — ' + esc(frD(D.date)) + '</h1><p class="pi">' + esc([P.name || f.title, D.label, '📍 ' + D.dest.name + (D.dest.address ? ', ' + short(D.dest.address) : ''), '⏰ Convocation ' + hh(D.call), 'Fin prévue ' + hh(D.wrap)].filter(Boolean).join(' · ')) + (D.park ? '<br>🅿️ ' + esc(D.park.name + ' — ' + short(D.park.address)) + (D.park.walk ? ' · ' + D.park.walk + ' min à pied' : '') : '') + (contacts ? '<br>☎ Conducteurs : ' + esc(contacts) : '') + '</p>' + sec('aller') + '<div style="height:10px"></div>' + sec('retour') + '</div>';
+}
+function plansPrintHtml(D) { return Object.keys(D.who).filter(id => pp(id) && D.who[id].mode !== 'off').map(id => '<div class="pp pl"><pre>' + esc(planText(D, id)) + '</pre></div>').join(''); }
+function printHtml(html, land) { const w = document.createElement('div'); w.id = 'print-rep'; w.innerHTML = html; w.style.display = 'none'; document.body.appendChild(w); const st = document.createElement('style'); st.textContent = '@page{size:A4 ' + (land ? 'landscape' : 'portrait') + ';margin:10mm}@media print{body>*:not(#print-rep){display:none!important}#print-rep{display:block!important;color:#111;font:10.5px "Segoe UI",Arial}#print-rep .pp{page-break-after:always}#print-rep h1{font-size:17px;text-align:center;border:1.5px solid #333;padding:6px;margin:0 auto 8px;max-width:60%}#print-rep .pi{text-align:center;margin:0 0 10px;color:#333}#print-rep table.pf{border-collapse:collapse;margin:0 0 10px;width:auto;min-width:40%}#print-rep .pf th,#print-rep .pf td{border:1px solid #777;padding:4px 7px;text-align:center;vertical-align:middle;max-width:170px}#print-rep .pf th{background:#f2f2f2;font-weight:600;width:70px}#print-rep .pf tr.hd td{font-weight:700;print-color-adjust:exact;-webkit-print-color-adjust:exact}#print-rep .pf .pw{background:#fde4d8!important;print-color-adjust:exact;-webkit-print-color-adjust:exact;font-weight:700}#print-rep .pf .t{font-weight:700;font-size:12px}#print-rep pre{font:12.5px/1.5 "Segoe UI",Arial;white-space:pre-wrap}}'; document.body.appendChild(st); setTimeout(() => { window.print(); setTimeout(() => { w.remove(); st.remove(); }, 800); }, 60); }
+// ---------- événements ----------
+function fdrBind() {
+    const c = $('content'), D = FDAY(); const q = s => c.querySelectorAll(s);
+    q('[data-day]').forEach(b => b.onclick = () => { P.fdr.cur = b.dataset.day; dirty(); render(); });
+    q('[data-addcs]').forEach(s => s.onchange = () => { const cd = csDays().find(x => x.id === s.value); if (!cd) return; const d = newDayFrom(cd); P.fdr.days.push(d); P.fdr.cur = d.id; P.fdr.tab = 'who'; dirty(); render(); toast('📋 Journée reprise de CALL SHEETO : ' + Object.keys(d.who).length + ' personne(s)'); });
+    q('[data-addday]').forEach(b => b.onclick = () => { const d = { id: uid(), csId: '', date: iso(new Date()), label: '', call: '08:00', wrap: '19:00', dest: { name: '', address: '', lat: null, lon: null }, park: null, who: {}, legs: [] }; P.fdr.days.push(d); P.fdr.cur = d.id; dirty(); render(); });
+    q('[data-team]').forEach(b => b.onclick = () => { const f = fiche(); const T = (f && f.team) || []; if (!T.length) { toast('La fiche projet n’a pas d’équipe (🎬 Projet XIII › Équipe)'); return; } let n = 0, a = 0; T.forEach(m => { const nm = m.name || ((m.prenom || '') + ' ' + (m.nom || '')).trim(); if (!nm) return; let p = P.people.find(x => fold(x.n) === fold(nm)); if (!p) { p = ensurePerson({ name: nm, role: m.role, phone: m.phone, email: m.email }); a++; } if (syncFromTeam(p)) n++; }); dirty(); render(); toast('👥 ' + a + ' personne(s) ajoutée(s), ' + n + ' mise(s) à jour (adresses, téléphones)'); });
+    q('[data-set]').forEach(b => b.onclick = fdrSettings);
+    if (!D) return;
+    q('[data-dk]').forEach(i => i.onchange = () => { D[i.dataset.dk] = i.value; dirty(); render(); });
+    q('[data-pk]').forEach(i => i.onchange = () => { D.park.walk = i.value === '' ? null : +i.value; dirty(); });
+    q('[data-nopark]').forEach(b => b.onclick = () => { D.park = null; dirty(); render(); });
+    q('[data-geo]').forEach(i => { i.addEventListener('input', () => i.classList.remove('ok')); geoInput(i, x => { const k = i.dataset.geo, nm = x.label.split(/\s\d{5}\s/)[0]; if (k === 'park') D.park = { name: (D.park && D.park.name && !/^parking$/i.test(D.park.name) ? D.park.name : nm), address: x.label, lat: x.lat, lon: x.lon, walk: null }; else D.dest = { name: D.dest.name || nm, address: x.label, lat: x.lat, lon: x.lon }; dirty(); render(); }); });
+    q('[data-tab]').forEach(b => b.onclick = () => { P.fdr.tab = b.dataset.tab; dirty(); render(); });
+    q('[data-gen]').forEach(b => b.onclick = async () => { const miss = Object.keys(D.who).filter(id => pp(id) && D.who[id].mode !== 'off' && D.who[id].mode !== 'own' && pp(id).home.lat == null); if (D.legs.length && !confirm('Recalculer toute la feuille de route ? Les modifications faites à la main dans les trajets seront remplacées.')) return; b.disabled = true; b.textContent = '⏳ Calcul des itinéraires…'; try { await generate(D); P.fdr.tab = 'fdr'; render(); toast('🪄 Feuille de route : ' + D.legs.filter(l => l.dir === 'aller').length + ' trajet(s) aller' + (miss.length ? ' · ⚠️ ' + miss.length + ' adresse(s) manquante(s) : ' + miss.map(id => first(pp(id).n)).join(', ') : ''), 6000); } catch (e) { console.error(e); toast('⚠️ ' + e.message); b.disabled = false; } });
+    q('[data-print]').forEach(b => b.onclick = () => { if (!D.legs.length) { toast('Générez d’abord la feuille de route'); return; } printHtml(fdrPrintHtml(D), true); });
+    q('[data-delday]').forEach(b => b.onclick = () => { if (!confirm('Supprimer la feuille de route de cette journée ?')) return; P.fdr.days = P.fdr.days.filter(x => x !== D); P.fdr.cur = ''; dirty(); render(); });
+    // qui vient comment
+    q('tr[data-w]').forEach(tr => { const id = tr.dataset.w, w = D.who[id];
+        tr.querySelectorAll('[data-wk]').forEach(i => i.onchange = () => { const k = i.dataset.wk; w[k] = k === 'seats' ? +i.value : i.value; if (k === 'mode') { const p = pp(id); if (p) p.mode = i.value; if (i.value !== 'ride') w.drv = ''; } dirty(); render(); });
+        const u = tr.querySelector('[data-unw]'); if (u) u.onclick = () => { delete D.who[id]; dirty(); render(); }; });
+    q('[data-home]').forEach(i => { const p = pp(i.dataset.home); i.addEventListener('input', () => { p.home = { address: i.value, lat: null, lon: null }; i.classList.remove('ok'); dirty(); }); geoInput(i, x => { p.home = { address: x.label, lat: x.lat, lon: x.lon }; dirty(); i.classList.add('ok'); }); });
+    q('[data-addw]').forEach(s => s.onchange = () => { const p = pp(s.value); if (!p) return; D.who[p.id] = { mode: p.mode || guessMode(p), call: '', drv: '' }; syncFromTeam(p); dirty(); render(); });
+    // trajets
+    q('.fdr-leg').forEach(card => { const l = D.legs.find(x => x.id === card.dataset.leg); if (!l) return; const S = l.stops; const re = () => { dirty(); render(); };
+        card.querySelectorAll('[data-lk]').forEach(i => i.onchange = () => { l[i.dataset.lk] = i.value; re(); });
+        card.querySelectorAll('[data-tck]').forEach(i => i.onchange = () => { l.tc = l.tc || {}; l.tc[i.dataset.tck] = i.value; dirty(); });
+        card.querySelectorAll('[data-sk]').forEach(i => i.onchange = () => { const s = S[+i.dataset.si], k = i.dataset.sk; s[k] = i.type === 'checkbox' ? i.checked : i.value; if (k === 'kind' || i.type === 'checkbox') re(); else dirty(); });
+        card.querySelectorAll('[data-sgeo]').forEach(i => { const s = S[+i.dataset.si]; i.addEventListener('input', () => { s.address = i.value; s.lat = s.lon = null; i.classList.remove('ok'); dirty(); }); geoInput(i, x => { s.address = x.label; s.lat = x.lat; s.lon = x.lon; i.classList.add('ok'); dirty(); }); });
+        card.querySelectorAll('[data-mv]').forEach(b => b.onclick = () => { const i = +b.dataset.si, j = i + +b.dataset.mv; [S[i], S[j]] = [S[j], S[i]]; re(); });
+        card.querySelectorAll('[data-sdel]').forEach(b => b.onclick = () => { S.splice(+b.dataset.si, 1); re(); });
+        card.querySelectorAll('[data-sadd]').forEach(b => b.onclick = () => { const at = Math.max(1, S.length - 1); S.splice(at, 0, { id: uid(), kind: 'pu', name: '', address: '', lat: null, lon: null, who: [], time: '' }); re(); });
+        card.querySelectorAll('[data-wrm]').forEach(b => b.onclick = () => { const s = S[+b.dataset.si]; s.who = s.who.filter(x => x !== b.dataset.wrm); re(); });
+        card.querySelectorAll('[data-wadd]').forEach(sel => sel.onchange = () => { const s = S[+sel.dataset.si]; if (!sel.value) return; s.who = (s.who || []).concat(sel.value); const p = pp(sel.value); if (s.kind === 'pu' && p && p.home.lat != null && s.lat == null) { s.address = p.home.address; s.lat = p.home.lat; s.lon = p.home.lon; if (!s.name) s.name = first(p.n); } re(); });
+        card.querySelectorAll('[data-retime]').forEach(b => b.onclick = async () => { b.textContent = '⏳'; await retime(l, D); re(); toast('🔄 Horaires recalculés'); });
+        card.querySelectorAll('[data-legdel]').forEach(b => b.onclick = () => { if (!confirm('Supprimer ce trajet ?')) return; D.legs = D.legs.filter(x => x !== l); re(); });
+    });
+    q('[data-addleg]').forEach(b => b.onclick = () => { const m = b.dataset.addleg, dir = b.dataset.dir || 'aller', dest = { kind: dir === 'aller' ? 'arr' : 'dep', name: D.dest.name, address: D.dest.address, lat: D.dest.lat, lon: D.dest.lon }; const st = dir === 'aller' ? [{ id: uid(), kind: 'dep', name: '', address: '', lat: null, lon: null, who: [], time: '' }, Object.assign({ id: uid(), who: [], time: D.call, max: true }, dest)] : [Object.assign({ id: uid(), who: [], time: D.wrap }, dest), { id: uid(), kind: 'arr', name: '', address: '', lat: null, lon: null, who: [], time: '' }]; D.legs.push({ id: uid(), dir, mode: m, driver: '', veh: '', who: [], tc: m === 'tc' ? { lines: '' } : undefined, stops: st }); dirty(); render(); });
+    // plans
+    q('.fdr-plan').forEach(card => { const id = card.dataset.plan; const cp = card.querySelector('[data-pcopy]'); if (cp) cp.onclick = async () => { try { await navigator.clipboard.writeText(planText(D, id)); toast('📋 Plan de ' + first(pp(id).n) + ' copié'); } catch (e) { prompt('Plan de route', planText(D, id)); } }; });
+    q('[data-allcopy]').forEach(b => b.onclick = async () => { const t = Object.keys(D.who).filter(id => pp(id) && D.who[id].mode !== 'off').map(id => planText(D, id)).join('\n\n— — —\n\n'); try { await navigator.clipboard.writeText(t); toast('📋 Tous les plans copiés'); } catch (e) { prompt('Plans', t); } });
+    q('[data-printplans]').forEach(b => b.onclick = () => printHtml(plansPrintHtml(D), false));
+    q('[data-tocs]').forEach(b => b.onclick = () => fdrToCs(D));
+    if (P.fdr.tab === 'map') drawMap(D);
+}
+function fdrToCs(D) {
+    const cs = J('callsheetoXIII.project'); if (!cs) { toast('CALL SHEETO est vide'); return; } const day = (cs.days || []).find(x => x.id === D.csId) || (cs.days || []).find(x => x.date === D.date); if (!day) { toast('Aucune journée de CALL SHEETO à cette date'); return; }
+    let n = 0; Object.keys(D.who).forEach(id => { const p = pp(id); if (!p) return; const c = (day.crew || []).find(x => fold(x.name) === fold(p.n)); if (!c) return; const o = personPlan(D, id), a = o.aller[0]; if (!a) return; const txt = '🚐 ' + (a.t ? hh(a.t) + ' ' : '') + a.txt.replace(/^\S+\s/, '').slice(0, 90); c.note = (String(c.note || '').replace(/🚐[^\n]*/g, '').trim() + (c.note && !/^🚐/.test(c.note) ? ' · ' : '') + txt).trim(); n++; });
+    try { localStorage.setItem('callsheetoXIII.project', JSON.stringify(cs)); toast('📋 Trajet ajouté à ' + n + ' ligne(s) de la feuille de service du ' + frS(day.date)); } catch (e) { toast('⚠️ Enregistrement impossible'); }
+}
+function fdrSettings() {
+    const S = P.fdr.set, o = document.createElement('div'); o.className = 'modal-overlay'; o.innerHTML = '<div class="modal-box"><h3>⚙️ Réglages des feuilles de route</h3><label class="fld">Arriver avant la convocation (min)<input type="number" id="fs-m" value="' + esc(S.margin) + '" min="0"></label><label class="fld">Temps par pick-up (min)<input type="number" id="fs-d" value="' + esc(S.dwell) + '" min="0"></label><label class="fld">Départ du retour après la fin prévue (min)<input type="number" id="fs-a" value="' + esc(S.after) + '" min="0"></label><label class="fld">Clé Navitia (facultatif : horaires réels des transports en commun)<input id="fs-n" value="' + esc(S.navitia) + '" placeholder="Jeton gratuit sur navitia.io"></label><p class="hint">Sans clé : durée estimée, lignes à saisir, liens Citymapper / Google Maps avec l’heure d’arrivée. Avec une clé (gratuite, compte sur navitia.io) : itinéraire détaillé (lignes, horaires, correspondances), calculé pour arriver à l’heure. Les trajets en voiture, à pied et à vélo viennent d’OpenStreetMap.</p><div class="mb-actions"><button id="fs-x">Annuler</button><button class="btn-big" id="fs-ok">Enregistrer</button></div></div>';
+    document.body.appendChild(o); o.querySelector('#fs-x').onclick = () => o.remove(); o.querySelector('#fs-ok').onclick = () => { S.margin = +o.querySelector('#fs-m').value || 0; S.dwell = +o.querySelector('#fs-d').value || 0; S.after = +o.querySelector('#fs-a').value || 0; S.navitia = o.querySelector('#fs-n').value.trim(); dirty(); o.remove(); toast('✓ Réglages enregistrés'); };
+}
+// ---------- branchement dans TRANSPORTO ----------
+(function () {
+    const r0 = render; render = function () { fdrFix(); if (prefs.view !== 'fdr') { if (LMAP) { LMAP.remove(); LMAP = null; } return r0(); } $('project-name').value = P.name || ''; stats(); const c = $('content'), st = c.scrollTop; c.innerHTML = fdrHtml(); c.scrollTop = st; fdrBind(); };
+    const f0 = fix; fix = function () { f0(); fdrFix(); };
+    document.addEventListener('keydown', e => { const tag = (e.target.tagName || '').toLowerCase(); if (/input|textarea|select/.test(tag) || e.ctrlKey || e.metaKey || e.altKey) return; if (e.key === '5') setView('fdr'); });
+    // envoi DOSSIER / vitrine : la feuille de route du jour affiché en plus
+    const s0 = openSendToDossier; openSendToDossier = function () { const D = P.fdr && FDAY(); if (!D || !D.legs.length || typeof xiiiSendToDossier !== 'function') return s0(); xiiiSendToDossier({ from: 'transporto', app: 'TRANSPORTO XIII', project: P.name || '', choices: [{ title: 'Feuille de route — ' + frD(D.date), key: 'transporto:fdr:' + D.id, keywords: ['feuille de route', 'fdr', 'transport'], sub: 'Aller / retour, pick-ups, horaires (journée affichée)', make: async () => ({ html: fdrPrintHtml(D).replace('<div class="pp">', '<div>') + '<style>table{border-collapse:collapse}td,th{border:1px solid #999;padding:4px 7px;text-align:center}.pw{background:#fde4d8}</style>' }) }, { title: 'Logistique — navettes, rooming list, voyages', key: 'transporto:all', keywords: ['logistique'], sub: 'Navettes par jour, hôtels, voyages, véhicules', make: async () => ({ html: sheetHtml() }) }] }); };
+})();
+if (prefs.view === 'fdr') setView('fdr');
 
 </script>
 <!-- SUITE XIII:MOBILE:START -->
@@ -2808,6 +3179,10 @@ const XPROJET = (() => {
     const DEPTS = [['prod', 'Production'], ['real', 'Réalisation'], ['image', 'Image'], ['elec', 'Électro'], ['machino', 'Machinerie'], ['son', 'Son'], ['deco', 'Décoration'], ['cost', 'Costumes'], ['hmc', 'Maquillage / Coiffure'], ['regie', 'Régie'], ['cast', 'Comédiens / Talents'], ['fig', 'Figuration'], ['secu', 'Sécurité / Secours'], ['transport', 'Transport'], ['cantine', 'Cantine / Catering'], ['post', 'DIT / Post-prod'], ['autre', 'Autre']];
     const ROLES = ['Réalisateur·rice', 'Producteur·rice', 'Directeur·rice de production', 'Chargé·e de production', 'Régisseur·se général·e', '1er·e assistant·e réalisation', 'Scripte', 'Chef·fe opérateur·rice', 'Cadreur·se', '1er·e assistant·e caméra', 'Pointeur·se', 'DIT', 'Chef·fe électro', 'Électricien·ne', 'Chef·fe machiniste', 'Ingénieur·e du son', 'Perchman', 'Mixeur·se', 'Chef·fe décorateur·rice', 'Accessoiriste', 'Costumier·ère', 'Maquilleur·se', 'Coiffeur·se', 'Monteur·se', 'Étalonneur·se', 'Truquiste', 'Directeur·rice technique', 'Réalisateur·rice live', 'Opérateur·rice vision', 'Comédien·ne', 'Présentateur·rice', 'Chauffeur·se', 'Secouriste'];
     const DEPT_RX = [['real', /(realisat|scripte|assistant.*real)/], ['image', /(cadr|chef.*op|camera|steadi|pointeu|dit|vision|drone)/], ['son', /(son|perch|mix|audio)/], ['elec', /(electr|lumiere|eclair)/], ['machino', /(machin|grip)/], ['deco', /(deco|accessoir)/], ['cost', /(costum|habill)/], ['hmc', /(maquill|coiff)/], ['regie', /(regisseu|regie)/], ['post', /(monteu|etalon|truquis|post)/], ['prod', /(product|direct.*prod|charge)/], ['secu', /(secour|secur)/], ['transport', /(chauffeu|transport)/], ['cast', /(comedien|present|artiste|acteur|actrice|chant|music|talent)/]];
+    const POSK = 'xiii.settings.postes';
+    const postes = () => { const c = J(POSK, []) || []; return ROLES.concat((Array.isArray(c) ? c : []).filter(x => x && ROLES.indexOf(x) < 0)); };
+    const tsplit = m => { if (m.prenom == null && m.nom == null) { const t = String(m.name || '').trim().split(/\s+/).filter(Boolean); m.prenom = t.length > 1 ? t[0] : ''; m.nom = t.length > 1 ? t.slice(1).join(' ') : (t[0] || ''); } m.prenom = m.prenom || ''; m.nom = m.nom || ''; m.address = m.address || ''; m.secu = m.secu || ''; return m; };
+    const tname = m => [m.prenom, m.nom].map(x => String(x || '').trim()).filter(Boolean).join(' ') || String(m.name || '').trim();
     const deptOf = r => { const f = fold(r); const m = DEPT_RX.find(x => x[1].test(f)); return m ? m[0] : 'autre'; };
     let APP = '';
     // ---------- fiche projet ----------
@@ -2860,7 +3235,7 @@ const XPROJET = (() => {
             '<label class="xpj-f"><span>Format d\'image</span>' + sel('tech.aspect', (typeof XOPT !== 'undefined' ? XOPT.aspect : [['1.7778', '16:9']]), F.tech.aspect) + '</label><label class="xpj-f"><span>Définition</span>' + sel('tech.rec', (typeof XOPT !== 'undefined' ? XOPT.rec : [['3840', 'UHD']]), F.tech.rec) + '</label>' + I('tech.codec', ['Codec / enregistrement', 'ProRes 422 HQ, X-OCN…']) +
             I('tech.audio', ['Son', 'Mixette 8 pistes, 4 HF…'], 'text', 'w2') + I('tech.notes', ['Notes techniques', 'Liaisons HF, régie, LUT…'], 'text', 'w2') + '</div></section>' +
             // ----- équipe
-            '<section id="xpj-h"><h3>👥 Équipe <small class="xpj-dim">— ajoutée à chaque journée de CALL SHEETO et versée dans l\'annuaire XIII, proposé dans RESSOURCO, DEVISO, DOSSIER…</small></h3><table class="xpj-t"><tr><th>Nom</th><th>Rôle</th><th>Département</th><th>Téléphone</th><th>E-mail</th><th></th></tr>' + F.team.map((m, i) => '<tr data-ti="' + i + '"><td><input data-tk="name" value="' + esc(m.name) + '" placeholder="Prénom Nom"></td><td><input data-tk="role" value="' + esc(m.role) + '" list="xpj-roles" placeholder="Rôle"></td><td>' + sel('', DEPTS, m.dept || deptOf(m.role)).replace('data-k=""', 'data-tk="dept"') + '</td><td><input data-tk="phone" value="' + esc(m.phone) + '" type="tel"></td><td><input data-tk="email" value="' + esc(m.email) + '" type="email"></td><td><button data-tdel="' + i + '">✕</button></td></tr>').join('') + '</table><datalist id="xpj-roles">' + ROLES.map(r => '<option value="' + esc(r) + '">').join('') + '</datalist>' +
+            '<section id="xpj-h"><h3>👥 Équipe <small class="xpj-dim">— reprise dans CALL SHEETO, TRANSPORTO (adresses → feuilles de route), RESSOURCO (contrats, DPAE : adresse et n° de sécu), DEVISO, l\'annuaire XIII…</small> <button type="button" id="xpj-postes" title="Créer ou retirer des postes">⚙️ Postes</button></h3><div class="xpj-tw"><table class="xpj-t xpj-team"><tr><th>Prénom</th><th>Nom</th><th>Équipe</th><th>Poste</th><th>E-mail</th><th>Téléphone</th><th>Adresse</th><th>N° Sécu</th><th></th></tr>' + F.team.map((m, i) => { tsplit(m); return '<tr data-ti="' + i + '"><td><input data-tk="prenom" value="' + esc(m.prenom) + '" placeholder="Prénom"></td><td><input data-tk="nom" value="' + esc(m.nom) + '" placeholder="Nom"></td><td>' + sel('', DEPTS, m.dept || deptOf(m.role)).replace('data-k=""', 'data-tk="dept"') + '</td><td><input data-tk="role" value="' + esc(m.role) + '" list="xpj-roles" placeholder="Poste"></td><td><input data-tk="email" value="' + esc(m.email) + '" type="email"></td><td><input data-tk="phone" value="' + esc(m.phone) + '" type="tel"></td><td><input data-tk="address" class="xpj-addr' + (m.lat ? ' ok' : '') + '" value="' + esc(m.address) + '" placeholder="Adresse (domicile)" title="' + (m.lat ? 'Adresse localisée ✓' : 'Tapez puis choisissez l\'adresse proposée') + '"></td><td><input data-tk="secu" class="xpj-secu" value="' + esc(m.secu) + '" placeholder="1 85 05 …" inputmode="numeric" autocomplete="off" title="N° de sécurité sociale (15 chiffres) — reste dans ce projet, repris seulement par RESSOURCO"></td><td><button data-tdel="' + i + '">✕</button></td></tr>'; }).join('') + '</table></div><datalist id="xpj-roles">' + postes().map(r => '<option value="' + esc(r) + '">').join('') + '</datalist>' +
             '<div class="xpj-row"><button id="xpj-tadd" class="xpj-sm">＋ Personne</button><button id="xpj-tbook" class="xpj-sm">📇 Ajouter depuis l\'annuaire (' + J(KB, []).length + ')</button></div></section>' +
             // ----- outils
             '<section id="xpj-o"><h3>🗂️ Nom du projet dans chaque outil</h3><p class="xpj-dim">Par défaut, chaque outil prend le nom du projet. Personnalisez-le si besoin (ex. « Conducteur — direct du 17 »). Le nom s\'applique à l\'ouverture de l\'outil, sauf si vous l\'y avez changé à la main.</p><div class="xpj-grid">' + TOOLS.map(t => '<label class="xpj-f"><span>' + t[1] + '</span><input data-name="' + t[0] + '" value="' + esc(F.names[t[0]] || '') + '" placeholder="' + esc(F.title || 'Nom du projet') + '"></label>').join('') + '</div>' +
@@ -2888,8 +3263,10 @@ const XPROJET = (() => {
         ['[data-k=lieu]', '[data-k=adresse]'].forEach(sq => { const i = q(sq); if (i) geoAttach(i, gm); });
         qa('[data-li]').forEach(tr => { const l = F.locs[+tr.dataset.li]; ['name', 'address'].forEach(k => { const i = tr.querySelector('[data-lk=' + k + ']'); geoAttach(i, r => { l.lat = r.lat; l.lon = r.lon; l.address = r.addr; if (!l.name || k === 'name') l.name = r.name || l.name || r.addr; redraw(); }); }); });
  rows('ci', F.tech.cams, 'ck'); rows('ti', F.team, 'tk');
+        qa('[data-ti]').forEach(tr => { const m = F.team[+tr.dataset.ti], i = tr.querySelector('[data-tk=address]'); tr.querySelectorAll('[data-tk=prenom],[data-tk=nom]').forEach(x => x.addEventListener('input', () => { m.name = tname(m); })); if (i) { i.addEventListener('input', () => { delete m.lat; delete m.lon; i.classList.remove('ok'); }); geoAttach(i, r => { m.address = r.addr; m.lat = r.lat; m.lon = r.lon; i.value = r.addr; i.classList.add('ok'); }); } const sc = tr.querySelector('[data-tk=secu]'); if (sc) sc.addEventListener('change', () => { const d = sc.value.replace(/\s/g, ''); sc.classList.toggle('bad', !!d && !/^[12378][0-9]{2}(0[1-9]|1[0-2]|[2-9][0-9])(2[AB]|[0-9]{2})[0-9]{6}([0-9]{2})?$/i.test(d)); }); });
+        if (q('#xpj-postes')) q('#xpj-postes').onclick = () => { const cur = (J(POSK, []) || []).join('\n'); const v = prompt('Postes personnalisés, un par ligne (ils s\'ajoutent à la liste des postes de tous les projets) :', cur); if (v == null) return; try { localStorage.setItem(POSK, JSON.stringify(v.split(/\n|;/).map(x => x.trim()).filter(Boolean))); } catch (e) { } redraw('#xpj-h'); };
         qa('[data-ldel]').forEach(b => b.onclick = () => { F.locs.splice(+b.dataset.ldel, 1); redraw(); }); qa('[data-cdel]').forEach(b => b.onclick = () => { F.tech.cams.splice(+b.dataset.cdel, 1); redraw(); }); qa('[data-tdel]').forEach(b => b.onclick = () => { F.team.splice(+b.dataset.tdel, 1); redraw(); });
-        q('#xpj-ladd').onclick = () => { F.locs.push({ name: '', address: '', note: '' }); redraw('#xpj-l'); }; q('#xpj-cadd').onclick = () => { F.tech.cams.push({ sid: '', label: '', qty: 1 }); redraw('#xpj-t'); }; q('#xpj-tadd').onclick = () => { F.team.push({ name: '', role: '', dept: '', phone: '', email: '' }); redraw('#xpj-h'); };
+        q('#xpj-ladd').onclick = () => { F.locs.push({ name: '', address: '', note: '' }); redraw('#xpj-l'); }; q('#xpj-cadd').onclick = () => { F.tech.cams.push({ sid: '', label: '', qty: 1 }); redraw('#xpj-t'); }; q('#xpj-tadd').onclick = () => { F.team.push({ name: '', prenom: '', nom: '', role: '', dept: '', phone: '', email: '', address: '', secu: '' }); redraw('#xpj-h'); };
         qa('[data-lens]').forEach(c => c.onchange = () => { const L = F.tech.lenses; if (c.checked) { if (!L.includes(c.dataset.lens)) L.push(c.dataset.lens); } else F.tech.lenses = L.filter(x => x !== c.dataset.lens); c.parentElement.classList.toggle('on', c.checked); });
         qa('[data-name]').forEach(i => i.addEventListener('input', () => { const v = i.value.trim(); if (v) F.names[i.dataset.name] = v; else delete F.names[i.dataset.name]; }));
         q('#xpj-tbook').onclick = pickBook;
@@ -2940,19 +3317,19 @@ const XPROJET = (() => {
         const p = document.createElement('div'); p.id = 'xpj-pick'; p.innerHTML = '<div class="xpj-pk"><b>📇 Annuaire XIII</b><input id="xpj-pq" placeholder="Rechercher…"><div id="xpj-pl"></div><div class="xpj-row"><button id="xpj-pok" class="xpj-main">Ajouter la sélection</button><button id="xpj-pno">Annuler</button></div></div>'; ov.appendChild(p);
         const list = () => { const qv = fold(p.querySelector('#xpj-pq').value); p.querySelector('#xpj-pl').innerHTML = book.filter(c => !qv || fold(c.name + ' ' + c.role + ' ' + c.company).includes(qv)).slice(0, 300).map((c, i) => '<label><input type="checkbox" value="' + book.indexOf(c) + '"' + (have.has(fold(c.name)) ? ' disabled checked' : '') + '><b>' + esc(c.name) + '</b> <small>' + esc([c.role, c.phone].filter(Boolean).join(' · ')) + '</small></label>').join('') || '<p class="xpj-dim">Annuaire vide.</p>'; };
         list(); p.querySelector('#xpj-pq').oninput = list; p.querySelector('#xpj-pno').onclick = () => p.remove();
-        p.querySelector('#xpj-pok').onclick = () => { p.querySelectorAll('input[type=checkbox]:checked:not(:disabled)').forEach(c => { const x = book[+c.value]; F.team.push({ name: x.name || '', role: x.role || '', dept: x.dept || deptOf(x.role), phone: x.phone || '', email: x.email || '', _deptSet: 1 }); }); p.remove(); redraw('#xpj-h'); };
+        p.querySelector('#xpj-pok').onclick = () => { p.querySelectorAll('input[type=checkbox]:checked:not(:disabled)').forEach(c => { const x = book[+c.value]; F.team.push(tsplit({ name: x.name || '', prenom: x.prenom, nom: x.nom, role: x.role || '', dept: x.dept || deptOf(x.role), phone: x.phone || '', email: x.email || '', address: x.address || '', lat: x.lat, lon: x.lon, _deptSet: 1 })); }); p.remove(); redraw('#xpj-h'); };
     }
     function toastX(m) { try { if (typeof toast === 'function') return toast(m); } catch (e) { } let t = document.getElementById('xpj-toast'); if (!t) { t = document.createElement('div'); t.id = 'xpj-toast'; document.body.appendChild(t); } t.textContent = m; t.className = 'show'; clearTimeout(t._t); t._t = setTimeout(() => t.className = '', 2600); }
     // ---------- enregistrer et appliquer ----------
     function save(quiet) {
         const f = JSON.parse(JSON.stringify(F)); delete f._snap; f.title = String(f.title || '').trim();
-        f.team = f.team.filter(m => m.name || m.role).map(m => { const o = { name: m.name, role: m.role, dept: m.dept || deptOf(m.role), phone: m.phone, email: m.email }; return o; });
+        f.team = f.team.map(m => { tsplit(m); m.name = tname(m); return m; }).filter(m => m.name || m.role).map(m => { const o = { name: m.name, prenom: m.prenom, nom: m.nom, role: m.role, dept: m.dept || deptOf(m.role), phone: m.phone, email: m.email, address: m.address || '' }; if (m.address && m.lat != null) { o.lat = +m.lat; o.lon = +m.lon; } if (m.secu) o.secu = String(m.secu).replace(/[^0-9AB ]/gi, '').trim(); return o; });
         f.locs = f.locs.filter(l => l.name || l.address); f.tech.cams = f.tech.cams.filter(c => c.sid || c.label);
         const t = TYPES.find(x => x[0] === f.ptype); if (t) { f.genre = t[2]; f.dtype = t[3]; }
         f.contact = [f.contactName, f.contactPhone, f.contactEmail].map(x => String(x || '').trim()).filter(Boolean).join(' · ');
         if (!write(f)) return; F = JSON.parse(JSON.stringify(f)); F._snap = snap();
         // annuaire
-        try { const book = J(KB, []); let n = 0; f.team.forEach(m => { if (!m.name) return; const k = fold(m.name), e = fold(m.email); let c = book.find(x => (e && fold(x.email) === e) || fold(x.name) === k); if (!c) { c = { id: 'c' + Math.random().toString(36).slice(2, 10), name: m.name, role: '', phone: '', email: '', address: '', company: '', notes: '', dept: '' }; book.push(c); n++; } ['role', 'phone', 'email', 'dept'].forEach(x => { if (m[x]) c[x] = m[x]; }); if (!c.company && f.production) c.company = f.production; c.projects = Array.from(new Set((c.projects || []).concat(f.title ? [f.title] : []))); }); localStorage.setItem(KB, JSON.stringify(book)); } catch (e) { }
+        try { const book = J(KB, []); let n = 0; f.team.forEach(m => { if (!m.name) return; const k = fold(m.name), e = fold(m.email); let c = book.find(x => (e && fold(x.email) === e) || fold(x.name) === k); if (!c) { c = { id: 'c' + Math.random().toString(36).slice(2, 10), name: m.name, role: '', phone: '', email: '', address: '', company: '', notes: '', dept: '' }; book.push(c); n++; } ['role', 'phone', 'email', 'dept', 'address', 'prenom', 'nom', 'lat', 'lon'].forEach(x => { if (m[x] != null && m[x] !== '') c[x] = m[x]; }); if (!c.company && f.production) c.company = f.production; c.projects = Array.from(new Set((c.projects || []).concat(f.title ? [f.title] : []))); }); localStorage.setItem(KB, JSON.stringify(book)); } catch (e) { }
         // CADRO : caméra et objectif par défaut (repris aussi par STORYBOARDO et PLANO)
         try { const cs = J('cadro.state', null) || (f.tech.cams.some(c => c.sid) ? { S: {} } : null); const cam = f.tech.cams.find(c => c.sid); if (cs && cs.S && (cam || f.tech.lenses.length)) { const s = typeof XOPT !== 'undefined' && cam ? XOPT.sens.find(x => x[0] === cam.sid) : null; if (cam && s && cam.sid !== cs.S.sid) Object.assign(cs.S, { sid: s[0], name: s[1], sw: s[3], sh: s[4], srw: s[5], srh: s[6], cfa: s[7] || 'bayer' }); if (f.tech.lenses[0] && !cs.S.lens) cs.S.lens = f.tech.lenses[0]; cs.S.fps = +f.tech.fps || cs.S.fps; cs.S.aspect = +f.tech.aspect || cs.S.aspect; cs.S.recW = +f.tech.rec || cs.S.recW; localStorage.setItem('cadro.state', JSON.stringify(cs)); } } catch (e) { }
         if (CHD && typeof XCHARTE !== 'undefined' && CH) { XCHARTE.save(CH); CHD = false; }
@@ -3098,7 +3475,7 @@ const XPROJET = (() => {
             '.xpj-box input,.xpj-box textarea,.xpj-t select,.xpj-f select{width:100%;box-sizing:border-box;background:var(--bg-input,#17171a);color:inherit;border:1px solid var(--border-color,#45454b);border-radius:6px;padding:7px 9px;font:inherit}.xpj-box textarea{min-height:60px;resize:vertical}' +
             '.xpj-types{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:6px}.xpj-types button{padding:9px 14px;font-size:14px}.xpj-types button.on{border-color:rgb(240,179,120);background:rgba(240,179,120,.28);font-weight:700}' +
             '.xpj-logo{display:flex;align-items:center;justify-content:center;height:46px;border:1px dashed var(--border-color,#555);border-radius:6px;cursor:pointer;background:#fff;color:#888;font-size:12px;overflow:hidden}.xpj-logo img{max-height:42px;max-width:100%}.xpj-cov{position:relative;background:#222!important}.xpj-cov img{max-height:46px!important;width:100%;object-fit:cover}.xpj-cov a{position:absolute;top:3px;right:5px;color:#fff;text-decoration:none;font-size:12px;background:rgba(0,0,0,.5);border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center}' +
-            '.xpj-t{width:100%;border-collapse:collapse}.xpj-t th{text-align:left;font-size:11px;color:var(--text-dim,#999);font-weight:600;padding:4px}.xpj-t td{padding:3px 4px}.xpj-t button{padding:5px 9px}.xpj-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}' +
+            '.xpj-tw{overflow-x:auto}.xpj-team{min-width:1100px}.xpj-team td:nth-child(7){min-width:200px}.xpj-addr.ok{border-color:#81c784!important}.xpj-secu{-webkit-text-security:disc;font-family:monospace!important}.xpj-secu:focus{-webkit-text-security:none}.xpj-secu.bad{border-color:#e57373!important}#xpj-postes{font-size:11px;padding:2px 8px;margin-left:6px}' + '.xpj-t{width:100%;border-collapse:collapse}.xpj-t th{text-align:left;font-size:11px;color:var(--text-dim,#999);font-weight:600;padding:4px}.xpj-t td{padding:3px 4px}.xpj-t button{padding:5px 9px}.xpj-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}' +
             '.xpj-chips{display:flex;flex-wrap:wrap;gap:6px}.xpj-chips label{display:inline-flex;gap:6px;align-items:center;border:1px solid var(--border-color,#45454b);border-radius:99px;padding:4px 10px;cursor:pointer;font-size:12.5px}.xpj-chips label.on{border-color:rgb(240,179,120);background:rgba(240,179,120,.18)}.xpj-chips input{width:auto!important}.xpj-chips small{color:var(--text-dim,#999)}' +
             '#xpj-pick{position:absolute;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;z-index:2}.xpj-pk{width:min(520px,92%);max-height:80%;display:flex;flex-direction:column;gap:8px;background:var(--bg-menu,#26262b);border:1px solid var(--border-color,#555);border-radius:10px;padding:16px}#xpj-pl{overflow:auto;display:flex;flex-direction:column;gap:2px}#xpj-pl label{display:flex;gap:8px;align-items:center;padding:4px}#xpj-pl input{width:auto}' +
             '#xpj-bk{position:fixed;inset:0;z-index:10080;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;padding:3vh 3vw;font:13.5px/1.5 "Segoe UI",system-ui,sans-serif}.xpj-bkb{width:min(760px,100%);max-height:100%;display:flex;flex-direction:column;background:var(--bg-menu,#202024);color:var(--text-main,#eee);border:1px solid var(--border-color,#444);border-radius:12px;overflow:hidden}.xpj-bkh{display:flex;gap:10px;align-items:center;padding:14px 16px;border-bottom:1px solid var(--border-color,#3a3a3f);flex-wrap:wrap;background:linear-gradient(90deg,rgba(240,179,120,.12),transparent 60%)}.xpj-bkh small{display:block;font:800 11px/1 "Segoe UI",sans-serif;letter-spacing:.2em;color:rgb(240,179,120)}.xpj-bkh b{font-size:18px}.xpj-bkh input{flex:1;min-width:160px;background:var(--bg-input,#17171a);color:inherit;border:1px solid var(--border-color,#45454b);border-radius:6px;padding:7px 9px;font:inherit}.xpj-bkh button{font:inherit;color:inherit;background:var(--bg-panel-alt,#2c2c31);border:1px solid var(--border-color,#4a4a50);border-radius:8px;padding:7px 12px;cursor:pointer}.xpj-bkh button.xpj-main{border-color:rgb(240,179,120);background:rgba(240,179,120,.3);font-weight:700}.xpj-bkl{overflow:auto;padding:4px 16px 16px}.xpj-bkd{margin:14px 0 4px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim,#999)}.xpj-bkc{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-top:1px solid var(--border-color,#333);flex-wrap:wrap}.xpj-bkc small{display:block;color:var(--text-dim,#999)}.xpj-bka{display:flex;flex-direction:column;align-items:flex-end;gap:2px;font-size:12.5px}.xpj-bka a{color:inherit;text-decoration:none;opacity:.85}.xpj-bka a:hover{opacity:1;text-decoration:underline}.xpj-tag{font-size:10.5px;border:1px solid rgba(240,179,120,.6);color:rgb(240,179,120);border-radius:99px;padding:0 6px;margin-left:4px}' +
