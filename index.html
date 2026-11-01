@@ -4675,6 +4675,7 @@ var XPRS = window.XPRS || (() => {
         document.head.appendChild(s);
     }
     function init(app) {
+        if (/[?&](xrun|xmodel|xvit)=/.test(location.search)) return; // cadres cachés (assistant, modèles, vitrine) : pas de présence
         APP = app; css();
         if (typeof XLIVE !== 'undefined' && XLIVE.onSig) XLIVE.onSig(onSig);
         addEventListener('xiii-pres', paint);
@@ -6576,14 +6577,29 @@ var XPASS = window.XPASS || (() => {
         document.getElementById('xps-no').onclick = () => { drop(); banner(); };
         document.getElementById('xps-ok').onclick = () => { let m; try { if (!G() && pk.k !== 'repero>plano' && !R[pk.k].noP) throw 'Outil pas encore prêt'; m = R[pk.k].merge(pk); } catch (e) { alert(typeof e === 'string' ? e : 'Intégration impossible : ' + e.message); return; } drop(); if (pk.k !== 'repero>plano') save(); say('📥 ' + m); banner(); };
     }
+    // 🤖 exécution sans clic (assistant de projet) : src = préparer le paquet dans la boîte de la cible ; merge = l'intégrer ici et enregistrer
+    function auto(k, mode) {
+        const r = R[k]; if (!r) throw 'Passerelle inconnue : ' + k; const [from, to] = k.split('>');
+        if (mode === 'src') { const pk = r.src(); pk.k = k; pk.from = from; pk.at = Date.now(); pk.id = id(); const L = J(box(to), []).filter(x => x.k !== k); L.push(pk); if (!W(box(to), L)) throw 'Paquet trop lourd (stockage plein)'; return r.lab(pk); }
+        const L = J(box(APP), []), pk = L.filter(x => x.k === k).pop(); if (!pk) throw 'Rien à intégrer (la source est vide ?)';
+        if (!G() && !r.noP) throw 'Outil pas encore prêt'; const m = r.merge(pk); W(box(APP), J(box(APP), []).filter(x => x.id !== pk.id)); save(); return m || 'intégré';
+    }
+    function bootRun() { // ?xrun={"id","op","k"} : lancé dans un cadre caché par l'assistant
+        let q; try { q = JSON.parse(new URLSearchParams(location.search).get('xrun') || 'null'); } catch (e) { q = null; } if (!q || !q.id) return false; let n = 0;
+        const reply = o => { try { (window.parent !== window ? window.parent : window.opener || window).postMessage(Object.assign({ xrun: q.id }, o), location.origin); } catch (e) { } };
+        const go = () => { const ready = document.readyState === 'complete' && (q.op === 'eq' ? !!G() || n > 8 : (R[q.k] && (R[q.k].noP || G()))); if (!ready && n++ < 60) { setTimeout(go, 300); return; }
+            if (q.op === 'eq') { setTimeout(() => { let c = 0; try { c = sendAll([q.k]); } catch (e) { } reply(c ? { ok: true, msg: 'matériel prêt : import proposé à l\'ouverture' } : { ok: false, msg: 'aucun matériel à envoyer' }); }, 1200); return; }
+            try { const m = auto(q.k, q.op); setTimeout(() => reply({ ok: true, msg: String(m || '') }), 700); } catch (e) { reply({ ok: false, msg: typeof e === 'string' ? e : (e && e.message) || String(e) }); } };
+        setTimeout(go, 900); return true;
+    }
     function init(app) {
-        APP = app; if (app === 'transporto') setTimeout(() => { if (typeof places !== 'function' || places.__x) return; const p0 = places; places = function () { const r = p0.apply(this, arguments); try { const rp = J('reperoXIII.project', null), dl = document.getElementById('dl-place'); if (dl) { const have = new Set([...dl.options].map(o => o.value)); ((rp && rp.spots) || []).filter(s => s.status !== 'ecarte' && (s.address || s.city)).forEach(s => { const v = (s.name || 'Lieu') + ' — ' + [s.address, s.cp, s.city].filter(Boolean).join(' '); if (!have.has(v)) dl.insertAdjacentHTML('beforeend', '<option value="' + E(v) + '">'); }); } } catch (e) { } return r; }; places.__x = 1; try { places(); } catch (e) { } }, 1500);
+        APP = app; if (bootRun()) return; if (app === 'transporto') setTimeout(() => { if (typeof places !== 'function' || places.__x) return; const p0 = places; places = function () { const r = p0.apply(this, arguments); try { const rp = J('reperoXIII.project', null), dl = document.getElementById('dl-place'); if (dl) { const have = new Set([...dl.options].map(o => o.value)); ((rp && rp.spots) || []).filter(s => s.status !== 'ecarte' && (s.address || s.city)).forEach(s => { const v = (s.name || 'Lieu') + ' — ' + [s.address, s.cp, s.city].filter(Boolean).join(' '); if (!have.has(v)) dl.insertAdjacentHTML('beforeend', '<option value="' + E(v) + '">'); }); } } catch (e) { } return r; }; places.__x = 1; try { places(); } catch (e) { } }, 1500);
         const s = document.createElement('style');
         s.textContent = '#xps-ban{position:fixed;left:50%;top:64px;transform:translateX(-50%);z-index:9980;display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center;max-width:calc(100vw - 24px);background:#2b2723;color:#f2ede6;border:1px solid #f0b378;border-radius:12px;padding:9px 12px;font:13.5px/1.35 "Segoe UI",sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.4)}#xps-ban button{font:600 13px "Segoe UI",sans-serif;padding:6px 12px;border-radius:8px;border:0;background:#f0b378;color:#1d1b19;cursor:pointer}#xps-ban button.sec{background:transparent;color:#f2ede6;border:1px solid #555}@media print{#xps-ban{display:none!important}}html.xembed #xps-ban{display:none!important}';
         document.head.appendChild(s);
         const go = () => setTimeout(banner, 1200); if (document.readyState === 'complete') go(); else addEventListener('load', go);
     }
-    return { init, send, R, has: k => !!R[k], sendAll, eqPayload, EQT };
+    return { init, send, R, has: k => !!R[k], sendAll, eqPayload, EQT, auto };
 })();
 
 XPASS.init('index');
@@ -8204,7 +8220,7 @@ function xmBoot() {
     if (document.body) start(); else document.addEventListener('DOMContentLoaded', start);
 }
 function xmOffer() { const o = xmJ('xiii.models.offer', null); if (!o || Date.now() - o.at > 120000 || document.getElementById('xmd-ov')) return; localStorage.removeItem('xiii.models.offer'); xmAll(o.type, { intro: 1 }); }
-window.XMODELS = { offer: xmOffer, pick: xmPick, all: xmAll, apply: xmApply, ctx: xmCtx, fillFiche: xmFillFiche, has: xmHas, profiles: XMP, adapters: XMA, tool: XM_TOOL };
+window.XMODELS = { offer: xmOffer, pick: xmPick, all: xmAll, apply: xmApply, ctx: xmCtx, fillFiche: xmFillFiche, has: xmHas, profiles: XMP, adapters: XMA, tool: XM_TOOL, keys: XM_KEYS, frame: xmFrame };
 xmBoot();
 })();
 
@@ -8989,6 +9005,197 @@ body.xh #xb-master,body.xh #xacc-chip,body.xh #xau-chip{left:232px}
     return { init, show };
 })();
 
+// =====================================================================
+//  SUITE XIII — XASSIST : 🤖 assistant de projet (Démarrer › 🤖 Assistant)
+//  « Prépare-moi la demande de prêt pour jeudi » → un plan d'étapes (passerelles entre outils, dates, messages),
+//  montré avant d'agir, puis exécuté d'un clic : chaque passerelle tourne dans un cadre caché (outil source → outil cible),
+//  et le dernier outil s'ouvre prêt à l'emploi. Avec une IA connectée (⚙️ Connexion IA) : demandes libres ;
+//  sans IA : recettes reconnues par mots-clés (prêt, feuille de service, transport, colisage, sous-titres…).
+// =====================================================================
+var XASSIST = window.XASSIST || (() => {
+    const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } };
+    const W = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { } };
+    const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const fold = x => String(x || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+    const pad = n => String(n).padStart(2, '0'), iso = d => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()), T0 = () => iso(new Date());
+    const addD = (s, n) => { const d = new Date(s + 'T12:00'); d.setDate(d.getDate() + n); return iso(d); };
+    const frD = s => { if (!s) return ''; const x = new Date(s + 'T12:00').toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }); return x; };
+    const T = () => (typeof XLINKS !== 'undefined' ? XLINKS.T : {}), nm = a => (T()[a] || ['', String(a || '').toUpperCase()])[1], ic = a => (T()[a] || ['🧰'])[0];
+    const fiche = () => { const s = J('xiii.projets', {}) || {}; return (s.list || []).find(x => x && x.id === s.active) || null; };
+    const URL_OF = { planno: 'calendrier.html?v=prod&', calendrier: 'calendrier.html?v=prod&' };
+    // ---------- l'outil a-t-il des données ? ----------
+    const KX = { matos: 'matosXIII.parc', soustitro: 'soustitroXIII.project', graphico: 'graphicoXIII.project' };
+    function has(app) { try { const k = (window.XMODELS && XMODELS.keys && XMODELS.keys[app]) || KX[app]; if (!k) return true; const v = localStorage.getItem(k); return !!v && v.length > 60; } catch (e) { return true; } } // outil sans clé connue : on tente (l'étape dira « source vide »)
+    // ---------- dates en français : « jeudi », « demain », « le 12 », « 12/11 », « 12 novembre », « lundi prochain » ----------
+    const JOURS = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'], MOIS = ['janvier', 'fevrier', 'mars', 'avril', 'mai', 'juin', 'juillet', 'aout', 'septembre', 'octobre', 'novembre', 'decembre'];
+    function parseDates(txt) {
+        const t = fold(txt), out = [], now = new Date(), t0 = T0(); let m;
+        if (/\bdemain\b/.test(t.replace(/apres[- ]demain/g, ''))) out.push(addD(t0, 1)); if (/apres[- ]demain/.test(t)) out.push(addD(t0, 2)); if (/aujourd/.test(t)) out.push(t0);
+        const R1 = new RegExp('\\b(' + JOURS.join('|') + ')\\b', 'g'); while ((m = R1.exec(t))) { const k = ((JOURS.indexOf(m[1]) - now.getDay() + 7) % 7) || 7; out.push(addD(t0, k)); }
+        const R2 = new RegExp('\\b(\\d{1,2})(?:er)? (' + MOIS.join('|') + ')(?: (\\d{4}))?', 'g'); while ((m = R2.exec(t))) { const y = m[3] ? +m[3] : now.getFullYear(), d = y + '-' + pad(MOIS.indexOf(m[2]) + 1) + '-' + pad(+m[1]); out.push(!m[3] && d < t0 ? (y + 1) + d.slice(4) : d); }
+        const R3 = /\b(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?\b/g; while ((m = R3.exec(t))) { let y = m[3] ? (m[3].length === 2 ? 2000 + +m[3] : +m[3]) : now.getFullYear(); const d = y + '-' + pad(+m[2]) + '-' + pad(+m[1]); out.push(!m[3] && d < t0 ? (y + 1) + d.slice(4) : d); }
+        if (!out.length) { const R4 = /\ble (\d{1,2})\b(?!\/| ?h)/g; while ((m = R4.exec(t))) { let d = now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(+m[1]); if (d < t0) { const n = new Date(now.getFullYear(), now.getMonth() + 1, +m[1]); d = iso(n); } out.push(d); } }
+        return [...new Set(out)].filter(d => !isNaN(new Date(d + 'T12:00')));
+    }
+    // ---------- catalogue des actions ----------
+    const passes = () => (typeof XPASS !== 'undefined' ? Object.keys(XPASS.R).filter(k => k.indexOf('>') > 0) : []);
+    const passDesc = k => { const [a, b] = k.split('>'), l = typeof XLINKS !== 'undefined' ? (XLINKS.L || []).find(x => x[0] === a && x[1] === b) : null; return l ? l[2] : nm(a) + ' → ' + nm(b); };
+    const EQ = [['matos', 'packingo'], ['matos', 'deviso'], ['plano', 'packingo'], ['plano', 'deviso'], ['syno', 'packingo'], ['syno', 'deviso'], ['packingo', 'deviso'], ['plano', 'matos'], ['syno', 'matos']];
+    const label = s => ({
+        pass: () => ic(s.k.split('>')[0]) + ' ' + nm(s.k.split('>')[0]) + ' → ' + ic(s.k.split('>')[1]) + ' ' + nm(s.k.split('>')[1]) + ' <small>' + esc(passDesc(s.k)) + '</small>',
+        eq: () => '📦 Matériel de ' + nm(s.from) + ' → ' + nm(s.to) + ' <small>proposé à l\'import à l\'ouverture de ' + nm(s.to) + '</small>',
+        loan: () => '📊 Demande de prêt MATOS <small>sortie ' + esc(frD(s.d1)) + (s.d2 ? ' · retour ' + esc(frD(s.d2)) : '') + ' — s\'ouvre pré-remplie, à vérifier puis « Générer l\'Excel »</small>',
+        milestone: () => '📅 Jalon PLANNO « ' + esc(s.title) + ' » <small>' + esc(frD(s.date)) + '</small>',
+        dates: () => '🎬 Dates du projet <small>' + esc(frD(s.debut)) + (s.fin && s.fin !== s.debut ? ' → ' + esc(frD(s.fin)) : '') + '</small>',
+        chat: () => '💬 Message à l\'équipe <small>« ' + esc(s.txt) + ' »</small>',
+        dispo: () => '🙋 Disponibilités et propositions de dates',
+        check: () => '✅ Checklist de préparation',
+        open: () => '↗ Ouvrir ' + ic(s.app) + ' ' + nm(s.app) + (s.why ? ' <small>' + esc(s.why) + '</small>' : '')
+    }[s.type] || (() => esc(s.type)))();
+    function valid(s) {
+        if (!s || !s.type) return false;
+        if (s.type === 'pass') return passes().indexOf(s.k) > -1;
+        if (s.type === 'eq') return EQ.some(x => x[0] === s.from && x[1] === s.to);
+        if (s.type === 'loan') return /^\d{4}-\d{2}-\d{2}$/.test(s.d1 || '');
+        if (s.type === 'milestone') return !!s.title && /^\d{4}-\d{2}-\d{2}$/.test(s.date || '');
+        if (s.type === 'dates') return /^\d{4}-\d{2}-\d{2}$/.test(s.debut || '');
+        if (s.type === 'chat') return !!String(s.txt || '').trim();
+        if (s.type === 'open') return !!T()[s.app] || /^(calendrier|planno)$/.test(s.app);
+        return /^(dispo|check)$/.test(s.type);
+    }
+    // ---------- recettes (sans IA) ----------
+    const P2 = (list, to) => list.filter(k => passes().indexOf(k) > -1 && has(k.split('>')[0])).map(k => ({ type: 'pass', k })).concat(to ? [{ type: 'open', app: to }] : []);
+    const RECIPES = [
+        { re: /pret|emprunt|sortie (du )?mat/, name: 'Demande de prêt de matériel', ex: 'Prépare la demande de prêt pour jeudi', make: (q, D) => { const f = fiche() || {}, d1 = D[0] || (f.debut ? addD(f.debut, -1) : addD(T0(), 2)), d2 = D[1] || (f.fin || f.debut ? addD(f.fin || f.debut, 1) : addD(d1, 2)); return P2(['cadro>matos', 'decoup>matos', 'repero>matos', 'deviso>matos']).concat([{ type: 'loan', d1, d2: d2 > d1 ? d2 : addD(d1, 1) }]); } },
+        { re: /feuille de service|call ?sheet|convoc/, name: 'Feuille de service', ex: 'Prépare la feuille de service', make: () => P2(['casto>callsheeto', 'ressourco>callsheeto', 'matos>callsheeto', 'scripto>callsheeto'], 'callsheeto') },
+        { re: /transport|navette|feuille[s]? de route|trajet|vehicule|camion/, name: 'Transports et feuilles de route', ex: 'Organise les transports de l\'équipe', make: () => P2(['repero>transporto', 'casto>transporto', 'packingo>transporto'], 'transporto') },
+        { re: /colisage|caisse|packing|charger le camion/, name: 'Colisage', ex: 'Prépare le colisage', make: () => [has('plano') ? { type: 'eq', from: 'plano', to: 'packingo' } : null, has('matos') ? { type: 'eq', from: 'matos', to: 'packingo' } : null].filter(Boolean).concat(P2(['packingo>transporto']), [{ type: 'open', app: 'packingo' }]) },
+        { re: /devis|budget|chiffr/, name: 'Devis', ex: 'Mets à jour le devis avec le matériel', make: () => [has('matos') ? { type: 'eq', from: 'matos', to: 'deviso' } : null, has('plano') ? { type: 'eq', from: 'plano', to: 'deviso' } : null].filter(Boolean).concat([{ type: 'open', app: 'deviso' }]) },
+        { re: /sous[- ]?titr/, name: 'Sous-titres', ex: 'Prépare les sous-titres', make: () => P2(['posto>soustitro', 'conduco>soustitro'], 'soustitro') },
+        { re: /post[- ]?prod|derush|montage/, name: 'Post-production', ex: 'Prépare la post-production', make: () => P2(['backupo>posto', 'encodo>posto'], 'posto') },
+        { re: /\bson\b|patch|audio/, name: 'Son', ex: 'Prépare le patch son', make: () => P2(['conduco>sono'], 'sono') },
+        { re: /synoptique|cablage|regie/, name: 'Synoptique', ex: 'Prépare le synoptique', make: () => P2(['lumo>syno'], 'syno') },
+        { re: /habillage|ndi|incrust/, name: 'Habillage antenne', ex: 'Prépare l\'habillage', make: () => P2(['conduco>graphico'], 'graphico') },
+        { re: /plan d'?implantation|plano/, name: 'Plan d\'implantation', ex: 'Mets les lieux sur le plan', make: () => P2(['repero>plano'], 'plano') },
+        { re: /dispo|sondage|quelle date|trouver une date/, name: 'Disponibilités', ex: 'Trouve une date avec l\'équipe', make: () => [{ type: 'dispo' }] },
+        { re: /checklist|manque|oubli/, name: 'Checklist', ex: 'Qu\'est-ce qui manque ?', make: () => [{ type: 'check' }] },
+        { re: /jalon|ajoute .* (au planning|dans planno)|deadline|echeance/, name: 'Jalon PLANNO', ex: 'Ajoute un jalon « Rendu V1 » le 20 novembre', make: (q, D) => D[0] ? [{ type: 'milestone', title: (/[«"](.+?)[»"]/.exec(q) || [])[1] || 'Jalon', date: D[0] }] : [] },
+        { re: /previens|dis a l'?equipe|annonce|message a l'?equipe/, name: 'Message à l\'équipe', ex: 'Préviens l\'équipe que le rendez-vous est à 8 h', make: q => [{ type: 'chat', txt: q.replace(/^.*?(previens|préviens|dis à l'équipe|annonce|message à l'équipe)\s*(l'équipe)?\s*(que|:)?\s*/i, '').trim() || q }] }
+    ];
+    function rules(q) {
+        const f = fold(q), D = parseDates(q), out = []; let names = [];
+        RECIPES.forEach(r => { if (r.re.test(f)) { const st = r.make(q, D); if (st.length) { out.push(...st); names.push(r.name); } } });
+        // dédoublonner, une seule ouverture (la dernière)
+        const seen = new Set(), steps = out.filter(s => { const k = JSON.stringify(s); if (seen.has(k)) return false; seen.add(k); return true; }), opens = steps.filter(s => s.type === 'open');
+        const fin = steps.filter(s => s.type !== 'open').concat(opens.length ? [opens[opens.length - 1]] : []);
+        return { resume: names.length ? names.join(' + ') : '', steps: fin, src: 'rules' };
+    }
+    // ---------- planification par l'IA ----------
+    function catalog() {
+        return [
+            'ACTIONS DISPONIBLES (JSON) :',
+            '- {"type":"pass","k":"<source>><cible>"} : passerelle automatique. Passerelles : ' + passes().map(k => k + ' (' + passDesc(k) + (has(k.split('>')[0]) ? '' : ' — SOURCE VIDE') + ')').join(' ; '),
+            '- {"type":"eq","from":"<outil>","to":"<outil>"} : envoi du matériel, couples possibles : ' + EQ.map(x => x.join('>') + (has(x[0]) ? '' : ' (source vide)')).join(', '),
+            '- {"type":"loan","d1":"AAAA-MM-JJ","d2":"AAAA-MM-JJ"} : ouvrir la demande de prêt de matériel de MATOS pré-remplie (d1 = sortie, d2 = retour)',
+            '- {"type":"milestone","title":"…","date":"AAAA-MM-JJ"} : jalon dans PLANNO / CALENDRIER',
+            '- {"type":"dates","debut":"AAAA-MM-JJ","fin":"AAAA-MM-JJ"} : changer les dates de tournage de la fiche projet (seulement si demandé explicitement)',
+            '- {"type":"chat","txt":"…"} : message dans le chat de l\'équipe (@Prénom pour mentionner)',
+            '- {"type":"dispo"} : ouvrir les disponibilités de l\'équipe ; {"type":"check"} : ouvrir la checklist',
+            '- {"type":"open","app":"<outil>","why":"…"} : ouvrir un outil à la fin (un seul, le plus utile). Outils : ' + Object.keys(T()).join(', ')
+        ].join('\n');
+    }
+    async function aiPlan(q) {
+        const f = fiche() || {}, team = (f.team || []).map(m => m.name || [m.prenom, m.nom].filter(Boolean).join(' ')).filter(Boolean).slice(0, 30);
+        const prompt = 'Tu es l\'assistant de projet de SUITE XIII (outils de production audiovisuelle). Transforme la demande en un plan court d\'actions exécutables, dans l\'ordre (passerelles d\'abord, ouverture d\'outil à la fin). N\'invente aucune action hors du catalogue. Ignore les passerelles dont la source est vide. Si la demande est impossible avec ces actions, renvoie des étapes vides et explique dans "resume".\n\n' +
+            'AUJOURD\'HUI : ' + T0() + ' (' + frD(T0()) + ')\nPROJET : ' + JSON.stringify({ titre: f.title || '', type: f.ptype || '', debut: f.debut || '', fin: f.fin || '', lieu: f.lieu || '', equipe: team }) + '\n\n' + catalog() +
+            '\n\nDEMANDE : « ' + q + ' »\n\nRéponds UNIQUEMENT en JSON : {"resume":"une phrase en français","steps":[…],"note":"facultatif : ce que l\'utilisateur devra vérifier"}';
+        const r = await XAI.ask(prompt, { maxTokens: 1500 }); const o = XAI.json(r);
+        return { resume: String(o.resume || ''), note: String(o.note || ''), steps: (o.steps || []).filter(valid).slice(0, 12), src: 'ai' };
+    }
+    async function plan(q) {
+        const ai = typeof XAI !== 'undefined' && XAI.configured && XAI.configured();
+        if (ai) { try { const p = await aiPlan(q); if (p.steps.length || p.resume) return p; } catch (e) { console.warn('XASSIST ia', e); const r = rules(q); r.warn = 'IA indisponible (' + (e.message || e) + ') : plan par mots-clés.'; return r; } }
+        return rules(q);
+    }
+    // ---------- exécution ----------
+    function frame(app, op, k) {
+        return new Promise(res => {
+            const id = 'r' + Math.random().toString(36).slice(2, 9), fr = document.createElement('iframe');
+            const done = r => { clearTimeout(to); removeEventListener('message', on); setTimeout(() => fr.remove(), 50); res(r); };
+            const on = e => { if (e.origin === location.origin && e.data && e.data.xrun === id) done({ ok: !!e.data.ok, msg: e.data.msg || '' }); };
+            const to = setTimeout(() => done({ ok: false, msg: 'Délai dépassé' }), 45000); addEventListener('message', on);
+            try { if (typeof XWS !== 'undefined' && XWS.id) fr.dataset.ws = XWS.id; } catch (e) { }
+            fr.setAttribute('aria-hidden', 'true'); fr.tabIndex = -1;
+            fr.style.cssText = 'position:fixed;left:0;top:0;width:1280px;height:800px;border:0;opacity:.01;pointer-events:none;z-index:-1';
+            fr.src = (URL_OF[app] || app + '.html?') + 'xrun=' + encodeURIComponent(JSON.stringify({ id, op, k }));
+            document.body.appendChild(fr);
+        });
+    }
+    const eqFrame = (from, to) => frame(from, 'eq', to);
+    function toPlanno(title, date) {
+        const pl = J('plannoXIII.project', null) || { app: 'PLANNO XIII', v: 1, name: '', tasks: [] }; pl.tasks = pl.tasks || [];
+        const src = 'xa:' + fold(title).replace(/[^a-z0-9]+/g, '-'), t = pl.tasks.find(x => x.src === src) || (pl.tasks.push({ id: 't' + Date.now().toString(36), phase: 'prepa', who: [], ms: true, src }), pl.tasks[pl.tasks.length - 1]);
+        Object.assign(t, { name: title, start: date, end: date }); pl.updated = Date.now(); W('plannoXIII.project', pl);
+    }
+    async function runStep(s) {
+        if (s.type === 'pass') { const [a, b] = s.k.split('>'); const r1 = await frame(a, 'src', s.k); if (!r1.ok) return /^(aucun|rien|pas de)|vide/i.test(r1.msg) ? { ok: true, nil: true, msg: r1.msg } : r1; const r2 = await frame(b, 'merge', s.k); return r2.ok ? { ok: true, msg: (r1.msg ? r1.msg + ' → ' : '') + r2.msg } : r2; }
+        if (s.type === 'eq') return eqFrame(s.from, s.to);
+        if (s.type === 'milestone') { toPlanno('📌 ' + s.title, s.date); return { ok: true, msg: 'ajouté au ' + frD(s.date) }; }
+        if (s.type === 'dates') { const S = J('xiii.projets', {}) || {}, f = (S.list || []).find(x => x && x.id === S.active); if (!f) return { ok: false, msg: 'aucune fiche projet' }; f.debut = s.debut; f.fin = s.fin || s.debut; f.rev = (f.rev || 0) + 1; W('xiii.projets', S); return { ok: true, msg: 'fiche mise à jour' }; }
+        if (s.type === 'chat') { if (typeof XMENT === 'undefined') return { ok: false, msg: 'chat indisponible' }; const r = await XMENT.chatSend(s.txt, null); return r.ok ? { ok: true, msg: 'envoyé' } : { ok: false, msg: r.err === 'off' ? 'Drive non connecté' : r.err }; }
+        if (s.type === 'loan') return { ok: true, msg: 'prête à ouvrir', open: 'matos.html?v=proj&xloan=' + s.d1 + ',' + (s.d2 || '') };
+        if (s.type === 'dispo') return { ok: true, msg: '', fn: () => typeof XDISPO !== 'undefined' && XDISPO.open('team') };
+        if (s.type === 'check') return { ok: true, msg: '', fn: () => typeof XCHECK !== 'undefined' && XCHECK.open() };
+        if (s.type === 'open') return { ok: true, msg: '', open: s.app === 'planno' || s.app === 'calendrier' ? 'calendrier.html' : s.app + '.html' };
+        return { ok: false, msg: 'action inconnue' };
+    }
+    // ---------- interface (dans Démarrer) ----------
+    let CUR = null;
+    function mount(c) {
+        css(); const ai = typeof XAI !== 'undefined' && XAI.configured && XAI.configured(), H = J('xiii.assist.hist', []);
+        c.innerHTML = '<div class="xas"><p class="xas-i">' + (ai ? '🤖 Demandez en langage courant : l\'assistant (' + esc(XAI.label ? XAI.label() : 'IA') + ') enchaîne les passerelles entre outils, puis ouvre le bon outil.' : '🤖 Dites ce que vous voulez préparer : l\'assistant enchaîne les passerelles entre outils et ouvre le bon outil. <button class="xas-lk" data-ai>Connecter une IA</button> pour des demandes libres.') + '</p>' +
+            '<div class="xas-in"><textarea rows="2" placeholder="Ex. : Prépare la demande de prêt pour jeudi" aria-label="Votre demande"></textarea><button class="xas-go">Préparer</button></div>' +
+            '<div class="xas-ex">' + RECIPES.slice(0, 6).map(r => '<button data-ex="' + esc(r.ex) + '">' + esc(r.ex) + '</button>').join('') + '</div><div class="xas-out"></div>' +
+            (H.length ? '<div class="xas-h"><b>Récemment</b>' + H.slice(0, 5).map(h => '<button data-ex="' + esc(h.q) + '">' + esc(h.q) + '</button>').join('') + '</div>' : '') + '</div>';
+        const ta = c.querySelector('textarea'), out = c.querySelector('.xas-out');
+        const go = async () => { const q = ta.value.trim(); if (!q) { ta.focus(); return; } out.innerHTML = '<p class="xas-w">⏳ Je prépare le plan…</p>'; c.querySelector('.xas-go').disabled = true;
+            let p; try { p = await plan(q); } catch (e) { p = { steps: [], resume: '⚠️ ' + (e.message || e) }; } c.querySelector('.xas-go').disabled = false; CUR = { q, p }; show(out, q, p); };
+        c.querySelector('.xas-go').onclick = go; ta.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); go(); } });
+        c.querySelectorAll('[data-ex]').forEach(b => b.onclick = () => { ta.value = b.dataset.ex; go(); });
+        const a = c.querySelector('[data-ai]'); if (a) a.onclick = () => XAI.openSettings && XAI.openSettings();
+        setTimeout(() => ta.focus(), 60);
+    }
+    function show(out, q, p) {
+        const S = p.steps || [];
+        if (!S.length) { out.innerHTML = '<div class="xas-p"><p class="xas-w">' + (p.resume ? esc(p.resume) : '🤔 Je n\'ai pas trouvé d\'action pour cette demande.') + '</p><p class="xas-n">Essayez avec : demande de prêt, feuille de service, transports, colisage, devis, sous-titres, post-production, disponibilités, checklist, jalon, « préviens l\'équipe que… ».' + (p.src === 'rules' ? ' Ou connectez une IA pour des demandes libres.' : '') + '</p></div>'; return; }
+        out.innerHTML = '<div class="xas-p"><div class="xas-r">' + (p.resume ? '<b>' + esc(p.resume) + '</b>' : '<b>Plan proposé</b>') + '<small>' + (p.src === 'ai' ? '🤖 IA' : '🔎 mots-clés') + '</small></div>' + (p.warn ? '<p class="xas-n">⚠️ ' + esc(p.warn) + '</p>' : '') +
+            '<ol>' + S.map((s, i) => '<li data-i="' + i + '"><label><input type="checkbox" checked data-on="' + i + '"><span class="st">○</span><span class="lb">' + label(s) + '</span></label><em class="ms"></em></li>').join('') + '</ol>' +
+            (p.note ? '<p class="xas-n">💡 ' + esc(p.note) + '</p>' : '') + '<p class="xas-n">Rien n\'est fait avant « Lancer ». Les passerelles complètent les outils cibles (sans effacer) ; chaque outil garde son ↶ Historique.</p>' +
+            '<div class="xas-a"><button class="xas-run">▶ Lancer</button><button class="xas-x">Annuler</button></div></div>';
+        out.querySelector('.xas-x').onclick = () => { out.innerHTML = ''; };
+        out.querySelector('.xas-run').onclick = async () => {
+            const btn = out.querySelector('.xas-run'); btn.disabled = true; out.querySelectorAll('[data-on]').forEach(x => x.disabled = true); let last = null, fn = null, ok = 0, ko = 0;
+            for (let i = 0; i < S.length; i++) { const li = out.querySelector('li[data-i="' + i + '"]'); if (!li.querySelector('[data-on]').checked) { li.classList.add('skip'); continue; }
+                li.querySelector('.st').textContent = '⏳'; li.classList.add('run'); let r; try { r = await runStep(S[i]); } catch (e) { r = { ok: false, msg: e.message || String(e) }; }
+                li.classList.remove('run'); li.classList.add(r.nil ? 'skip' : r.ok ? 'ok' : 'ko'); li.querySelector('.st').textContent = r.nil ? '➖' : r.ok ? '✅' : '⚠️'; li.querySelector('.ms').textContent = r.msg || ''; r.ok ? ok++ : ko++;
+                if (r.ok && r.open) last = r.open; if (r.ok && r.fn) fn = r.fn; }
+            const H = J('xiii.assist.hist', []).filter(h => h.q !== CUR.q); H.unshift({ q: CUR.q, at: Date.now() }); W('xiii.assist.hist', H.slice(0, 12));
+            const a = out.querySelector('.xas-a'); a.innerHTML = '<span class="xas-d">' + (ko ? '⚠️ ' + ok + ' étape(s) faite(s), ' + ko + ' à revoir' : '✅ Terminé') + '</span>' + (last ? '<button class="xas-run" data-open>↗ Ouvrir ' + esc(nm(last.split('.')[0])) + '</button>' : '') + (fn ? '<button class="xas-run" data-fn>Ouvrir</button>' : '') + '<button class="xas-x">Fermer</button>';
+            a.querySelector('.xas-x').onclick = () => { out.innerHTML = ''; }; const o = a.querySelector('[data-open]'); if (o) o.onclick = () => { location.href = last; }; const f2 = a.querySelector('[data-fn]'); if (f2) f2.onclick = () => { try { if (typeof XSTART !== 'undefined') XSTART.toggle(false); } catch (e) { } fn(); };
+            if (!ko && (last || fn)) setTimeout(() => { if (out.isConnected && a.querySelector(last ? '[data-open]' : '[data-fn]')) a.querySelector(last ? '[data-open]' : '[data-fn]').focus(); }, 50);
+        };
+    }
+    function css() {
+        if (document.getElementById('xas-css')) return; const s = document.createElement('style'); s.id = 'xas-css';
+        s.textContent = '.xas{display:flex;flex-direction:column;gap:10px}.xas-i{margin:0;font-size:12.5px;color:var(--text-dim,#bbb);line-height:1.45}.xas-lk{background:none;border:0;color:#F0B378;text-decoration:underline;cursor:pointer;font:inherit;padding:0}.xas-in{display:flex;gap:6px;align-items:flex-end}.xas-in textarea{flex:1;min-width:0;resize:none;font:inherit;font-size:14px;color:inherit;background:var(--bg-input,rgba(0,0,0,.25));border:1px solid var(--border-color,#45454b);border-radius:10px;padding:9px 10px}.xas-go,.xas-run{padding:9px 14px;border-radius:10px;border:0;background:#F0B378;color:#1a1a1a;font-weight:700;cursor:pointer}.xas-go:disabled,.xas-run:disabled{opacity:.5}' +
+            '.xas-ex,.xas-h{display:flex;flex-wrap:wrap;gap:5px}.xas-ex button,.xas-h button{font-size:11.5px;padding:4px 9px;border-radius:99px;border:1px solid var(--border-color,#45454b);background:rgba(255,255,255,.04);color:inherit;cursor:pointer}.xas-h b{width:100%;font-size:11px;color:var(--text-dim,#999);font-weight:600}' +
+            '.xas-p{border:1px solid rgba(240,179,120,.4);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:8px;background:rgba(240,179,120,.05)}.xas-r{display:flex;justify-content:space-between;gap:8px;align-items:baseline}.xas-r small{font-size:11px;color:var(--text-dim,#999);white-space:nowrap}.xas-p ol{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}.xas-p li{display:flex;flex-direction:column;gap:2px;padding:6px 8px;border-radius:8px;background:rgba(255,255,255,.04);font-size:13px}.xas-p li label{display:flex;gap:7px;align-items:flex-start;cursor:pointer}.xas-p li input{width:auto;margin:3px 0 0}.xas-p li .lb small{display:block;font-size:11px;color:var(--text-dim,#aaa);margin-top:1px}.xas-p li .ms{font-style:normal;font-size:11px;color:var(--text-dim,#aaa);padding-left:42px}.xas-p li.ok{background:rgba(102,187,106,.12)}.xas-p li.ko{background:rgba(229,115,115,.14)}.xas-p li.skip{opacity:.45}.xas-p li.run{box-shadow:0 0 0 1px #F0B378 inset}' +
+            '.xas-n{margin:0;font-size:11.5px;color:var(--text-dim,#aaa);line-height:1.4}.xas-w{margin:0;font-size:13px}.xas-a{display:flex;gap:6px;align-items:center;flex-wrap:wrap}.xas-x{padding:8px 12px;border-radius:10px;border:1px solid var(--border-color,#45454b);background:transparent;color:inherit;cursor:pointer}.xas-d{margin-right:auto;font-size:12.5px;font-weight:600}';
+        document.head.appendChild(s);
+    }
+    return { mount, plan, rules, parseDates, runStep, valid };
+})();
+
 /* XSTART — bouton « Démarrer » (haut droite de l'accueil) + panneau droit : notifications, chat, lancement rapide, widgets */
 const XSTART = (() => {
     const J = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch (e) { return d; } };
@@ -9056,7 +9263,7 @@ const XSTART = (() => {
     }
     function outils(c) { const tb = document.getElementById('top-bar'), so = typeof XCONF !== 'undefined' && XCONF.shootOn(); c.innerHTML = '<button class="xst-shoot' + (so ? ' on' : '') + '" title="Gros boutons, contraste élevé, écran toujours allumé — dans tous les outils">🎬 Mode tournage : <b>' + (so ? 'activé' : 'désactivé') + '</b></button><p class="e" style="padding:4px 0 8px">Recherche, Drive, équipe, installation, projet et thème</p>'; const sb = c.querySelector('.xst-shoot'); sb.onclick = () => { if (typeof XCONF === 'undefined') return; const on = XCONF.shoot(); sb.classList.toggle('on', on); sb.querySelector('b').textContent = on ? 'activé' : 'désactivé'; }; if (tb) { c.appendChild(tb); tb.querySelectorAll('*').forEach(e => e.style.removeProperty('margin-left')); } else c.innerHTML += '<p class="e">Barre indisponible.</p>'; }
     function park() { const tb = document.getElementById('top-bar'), h = document.getElementById('xst-hold'); if (tb && h && tb.parentNode !== h) h.appendChild(tb); }
-    const TABS = [['outils', '🧰 Outils', outils], ['notif', '🔔 Notifs', notif], ['chat', '💬 Chat', chat], ['agenda', '📅 Agenda', agenda], ['files', '📁 Fichiers', files], ['quick', '🚀 Lancer', quick], ['wid', '🧩 Widgets', widgets]];
+    const TABS = [['outils', '🧰 Outils', outils], ['ai', '🤖 Assistant', c => typeof XASSIST !== 'undefined' ? XASSIST.mount(c) : (c.innerHTML = '<p class="e">Assistant indisponible.</p>')], ['notif', '🔔 Notifs', notif], ['chat', '💬 Chat', chat], ['agenda', '📅 Agenda', agenda], ['files', '📁 Fichiers', files], ['quick', '🚀 Lancer', quick], ['wid', '🧩 Widgets', widgets]];
     function show(k) { tab = k; try { localStorage.setItem('xiii.start.tab', JSON.stringify(k)); } catch (e) { } const p = document.getElementById('xst'); p.querySelectorAll('nav button').forEach(b => b.classList.toggle('on', b.dataset.k === k)); const b = p.querySelector('nav button.on'), ind = p.querySelector('nav .ind'); if (b) { ind.style.left = b.offsetLeft + 'px'; ind.style.width = b.offsetWidth + 'px'; ind.style.top = b.offsetTop + 'px'; ind.style.height = b.offsetHeight + 'px'; } park(); (TABS.find(t => t[0] === k) || TABS[0])[2](p.querySelector('.xst-c')); }
     // envois entre outils en attente (boîtes de réception « xiii.inbox.<outil> » du projet en cours)
     function inbox() { const L = []; try { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i), m = /^xiii\.inbox\.([a-z]+)$/.exec(k || ''); if (!m) continue; (J(k, []) || []).forEach(pk => { if (!pk || !pk.from) return; let lab = 'un envoi'; try { const r = window.XPASS && XPASS.R[pk.k]; if (r) lab = r.lab(pk); } catch (e) { } L.push({ to: m[1], pk, lab }); }); } } catch (e) { } return L.sort((a, b) => (b.pk.at || 0) - (a.pk.at || 0)).slice(0, 12); }

@@ -5209,6 +5209,7 @@ var XPRS = window.XPRS || (() => {
         document.head.appendChild(s);
     }
     function init(app) {
+        if (/[?&](xrun|xmodel|xvit)=/.test(location.search)) return; // cadres cachés (assistant, modèles, vitrine) : pas de présence
         APP = app; css();
         if (typeof XLIVE !== 'undefined' && XLIVE.onSig) XLIVE.onSig(onSig);
         addEventListener('xiii-pres', paint);
@@ -7220,14 +7221,29 @@ var XPASS = window.XPASS || (() => {
         document.getElementById('xps-no').onclick = () => { drop(); banner(); };
         document.getElementById('xps-ok').onclick = () => { let m; try { if (!G() && pk.k !== 'repero>plano' && !R[pk.k].noP) throw 'Outil pas encore prêt'; m = R[pk.k].merge(pk); } catch (e) { alert(typeof e === 'string' ? e : 'Intégration impossible : ' + e.message); return; } drop(); if (pk.k !== 'repero>plano') save(); say('📥 ' + m); banner(); };
     }
+    // 🤖 exécution sans clic (assistant de projet) : src = préparer le paquet dans la boîte de la cible ; merge = l'intégrer ici et enregistrer
+    function auto(k, mode) {
+        const r = R[k]; if (!r) throw 'Passerelle inconnue : ' + k; const [from, to] = k.split('>');
+        if (mode === 'src') { const pk = r.src(); pk.k = k; pk.from = from; pk.at = Date.now(); pk.id = id(); const L = J(box(to), []).filter(x => x.k !== k); L.push(pk); if (!W(box(to), L)) throw 'Paquet trop lourd (stockage plein)'; return r.lab(pk); }
+        const L = J(box(APP), []), pk = L.filter(x => x.k === k).pop(); if (!pk) throw 'Rien à intégrer (la source est vide ?)';
+        if (!G() && !r.noP) throw 'Outil pas encore prêt'; const m = r.merge(pk); W(box(APP), J(box(APP), []).filter(x => x.id !== pk.id)); save(); return m || 'intégré';
+    }
+    function bootRun() { // ?xrun={"id","op","k"} : lancé dans un cadre caché par l'assistant
+        let q; try { q = JSON.parse(new URLSearchParams(location.search).get('xrun') || 'null'); } catch (e) { q = null; } if (!q || !q.id) return false; let n = 0;
+        const reply = o => { try { (window.parent !== window ? window.parent : window.opener || window).postMessage(Object.assign({ xrun: q.id }, o), location.origin); } catch (e) { } };
+        const go = () => { const ready = document.readyState === 'complete' && (q.op === 'eq' ? !!G() || n > 8 : (R[q.k] && (R[q.k].noP || G()))); if (!ready && n++ < 60) { setTimeout(go, 300); return; }
+            if (q.op === 'eq') { setTimeout(() => { let c = 0; try { c = sendAll([q.k]); } catch (e) { } reply(c ? { ok: true, msg: 'matériel prêt : import proposé à l\'ouverture' } : { ok: false, msg: 'aucun matériel à envoyer' }); }, 1200); return; }
+            try { const m = auto(q.k, q.op); setTimeout(() => reply({ ok: true, msg: String(m || '') }), 700); } catch (e) { reply({ ok: false, msg: typeof e === 'string' ? e : (e && e.message) || String(e) }); } };
+        setTimeout(go, 900); return true;
+    }
     function init(app) {
-        APP = app; if (app === 'transporto') setTimeout(() => { if (typeof places !== 'function' || places.__x) return; const p0 = places; places = function () { const r = p0.apply(this, arguments); try { const rp = J('reperoXIII.project', null), dl = document.getElementById('dl-place'); if (dl) { const have = new Set([...dl.options].map(o => o.value)); ((rp && rp.spots) || []).filter(s => s.status !== 'ecarte' && (s.address || s.city)).forEach(s => { const v = (s.name || 'Lieu') + ' — ' + [s.address, s.cp, s.city].filter(Boolean).join(' '); if (!have.has(v)) dl.insertAdjacentHTML('beforeend', '<option value="' + E(v) + '">'); }); } } catch (e) { } return r; }; places.__x = 1; try { places(); } catch (e) { } }, 1500);
+        APP = app; if (bootRun()) return; if (app === 'transporto') setTimeout(() => { if (typeof places !== 'function' || places.__x) return; const p0 = places; places = function () { const r = p0.apply(this, arguments); try { const rp = J('reperoXIII.project', null), dl = document.getElementById('dl-place'); if (dl) { const have = new Set([...dl.options].map(o => o.value)); ((rp && rp.spots) || []).filter(s => s.status !== 'ecarte' && (s.address || s.city)).forEach(s => { const v = (s.name || 'Lieu') + ' — ' + [s.address, s.cp, s.city].filter(Boolean).join(' '); if (!have.has(v)) dl.insertAdjacentHTML('beforeend', '<option value="' + E(v) + '">'); }); } } catch (e) { } return r; }; places.__x = 1; try { places(); } catch (e) { } }, 1500);
         const s = document.createElement('style');
         s.textContent = '#xps-ban{position:fixed;left:50%;top:64px;transform:translateX(-50%);z-index:9980;display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center;max-width:calc(100vw - 24px);background:#2b2723;color:#f2ede6;border:1px solid #f0b378;border-radius:12px;padding:9px 12px;font:13.5px/1.35 "Segoe UI",sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.4)}#xps-ban button{font:600 13px "Segoe UI",sans-serif;padding:6px 12px;border-radius:8px;border:0;background:#f0b378;color:#1d1b19;cursor:pointer}#xps-ban button.sec{background:transparent;color:#f2ede6;border:1px solid #555}@media print{#xps-ban{display:none!important}}html.xembed #xps-ban{display:none!important}';
         document.head.appendChild(s);
         const go = () => setTimeout(banner, 1200); if (document.readyState === 'complete') go(); else addEventListener('load', go);
     }
-    return { init, send, R, has: k => !!R[k], sendAll, eqPayload, EQT };
+    return { init, send, R, has: k => !!R[k], sendAll, eqPayload, EQT, auto };
 })();
 
 XPASS.init('importo');
@@ -8848,7 +8864,7 @@ function xmBoot() {
     if (document.body) start(); else document.addEventListener('DOMContentLoaded', start);
 }
 function xmOffer() { const o = xmJ('xiii.models.offer', null); if (!o || Date.now() - o.at > 120000 || document.getElementById('xmd-ov')) return; localStorage.removeItem('xiii.models.offer'); xmAll(o.type, { intro: 1 }); }
-window.XMODELS = { offer: xmOffer, pick: xmPick, all: xmAll, apply: xmApply, ctx: xmCtx, fillFiche: xmFillFiche, has: xmHas, profiles: XMP, adapters: XMA, tool: XM_TOOL };
+window.XMODELS = { offer: xmOffer, pick: xmPick, all: xmAll, apply: xmApply, ctx: xmCtx, fillFiche: xmFillFiche, has: xmHas, profiles: XMP, adapters: XMA, tool: XM_TOOL, keys: XM_KEYS, frame: xmFrame };
 xmBoot();
 })();
 
