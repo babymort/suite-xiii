@@ -8110,7 +8110,7 @@ const XCALEV = (() => {
     const pad = n => String(n).padStart(2, '0'), iso = d => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()), today = () => iso(new Date());
     const isoOf = s => { if (!s) return ''; s = String(s); if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0, 10); const m = /(\d{1,2})[\/.](\d{1,2})[\/.](\d{2,4})/.exec(s); return m ? (m[3].length === 2 ? '20' + m[3] : m[3]) + '-' + pad(m[2]) + '-' + pad(m[1]) : ''; };
     const addD = (s, n) => { const d = new Date(s + 'T12:00'); d.setDate(d.getDate() + n); return iso(d); };
-    const SRC = { check: ['✅', 'Checklist prépa', '#81c784'], planno: ['📅', 'PLANNO', '#64b5f6'], callsheeto: ['📋', 'Tournage', '#f0b378'], conduco: ['🎬', 'Direct', '#e57373'], repero: ['📍', 'Repérage', '#4db6ac'], matos: ['📦', 'Matériel', '#a1887f'], deviso: ['💶', 'Facturation', '#81c784'], posto: ['🎞️', 'Post-prod', '#ba68c8'], ressourco: ['✍️', 'Contrats & droits', '#ffb74d'], dossier: ['🏛️', 'Candidatures', '#7986cb'], backupo: ['💽', 'Rushes', '#90a4ae'], casto: ['🎭', 'Casting', '#f06292'] };
+    const SRC = { dispo: ['🙋', 'Dispos équipe', '#ba68c8'], check: ['✅', 'Checklist prépa', '#81c784'], planno: ['📅', 'PLANNO', '#64b5f6'], callsheeto: ['📋', 'Tournage', '#f0b378'], conduco: ['🎬', 'Direct', '#e57373'], repero: ['📍', 'Repérage', '#4db6ac'], matos: ['📦', 'Matériel', '#a1887f'], deviso: ['💶', 'Facturation', '#81c784'], posto: ['🎞️', 'Post-prod', '#ba68c8'], ressourco: ['✍️', 'Contrats & droits', '#ffb74d'], dossier: ['🏛️', 'Candidatures', '#7986cb'], backupo: ['💽', 'Rushes', '#90a4ae'], casto: ['🎭', 'Casting', '#f06292'] };
     function events(off) { off = off || {};
     const E = [], add = (src, d0, d1, title, det, time, warn) => { d0 = isoOf(d0); if (!d0) return; d1 = isoOf(d1) || d0; if (d1 < d0) d1 = d0; E.push({ src, d0, d1, title, det: det || '', time: time || '', warn: !!warn, id: src + ':' + d0 + ':' + title }); };
     const pl = J('plannoXIII.project'); if (pl) (pl.tasks || []).forEach(t => add('planno', t.start, t.end, (t.ms ? '◆ ' : '') + t.name, [t.phase, (t.who || []).join(', '), t.status === 'done' ? 'fait' : ''].filter(Boolean).join(' · '), '', t.status !== 'done' && isoOf(t.end) < today()));
@@ -8128,6 +8128,7 @@ const XCALEV = (() => {
     const cand = J('xiii.cands'); if (cand) (cand.list || []).forEach(c => c.deadline && add('dossier', c.deadline, c.deadline, '🏛️ Date limite : ' + c.fund, cand.proj || '', '', c.deadline < today() && c.status !== 'sent'));
     const bk = J('backupoXIII.project'); if (bk) (bk.days || []).forEach(d => d.date && !(cs && (cs.days || []).some(x => x.date === d.date)) && add('backupo', d.date, d.date, '💽 Déchargement J' + (d.n || ''), bk.prod && bk.prod.name || ''));
     const ca = J('castoXIII.project'); if (ca) (ca.sessions || ca.castings || []).forEach(s => s.date && add('casto', s.date, s.date, '🎭 ' + (s.name || 'Casting'), s.place || ''));
+    try { if (typeof XDISPO !== 'undefined') XDISPO.events().forEach(x => add('dispo', x.d, x.d, x.t, x.det)); } catch (e) { }
     try { if (typeof XCHECK !== 'undefined') XCHECK.events().forEach(x => add('check', x.d, x.d, x.t, 'Checklist de préparation' + (x.tool ? ' · ' + x.tool.toUpperCase() : ''), '', x.late)); } catch (e) { }
     return E.filter(e => !off[e.src]).sort((a, b) => a.d0.localeCompare(b.d0) || (a.time || '').localeCompare(b.time || ''));
 }
@@ -10414,6 +10415,224 @@ const XCHECK = (() => {
     return { init, open, close, card, stats, items, events, toggle, acceptAuto, syncPlanno };
 })();
 XCHECK.init();
+
+
+// =====================================================================
+//  SUITE XIII — XDISPO : 🙋 disponibilités de l'équipe + 🗳️ propositions de dates
+//  Chaque membre coche ses jours (✅ dispo · ❔ peut-être · ❌ indispo) ; le Master voit la grille de l'équipe,
+//  repère les meilleurs créneaux, propose des dates, l'équipe vote, la date retenue part dans PLANNO / CALENDRIER et le chat.
+//  Script Drive v20 (dispo_* / poll_*). Sans Drive : vos dispos restent sur cet appareil.
+// =====================================================================
+var XDISPO = window.XDISPO || (() => {
+    const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } };
+    const W = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { } };
+    const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const fold = x => String(x || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
+    const cfg = () => { const c = J('xiii.drive', null); return c && c.url ? c : null; };
+    const me = () => { const c = cfg(); return (c && c.me && c.me.name) || (J('xiii.deleg.me', {}) || {}).name || 'Moi'; };
+    const isMaster = () => { const c = cfg(); return !c || !!c.code || c.role === 'master'; };
+    async function api(a, p) { const c = cfg(); if (!c) return { ok: false, err: 'off' }; try { const r = await fetch(c.url, { method: 'POST', body: JSON.stringify(Object.assign({ a }, c.tok ? { tok: c.tok } : { code: c.code, by: me() || 'Master' }, p || {})), redirect: 'follow' }); return await r.json(); } catch (e) { return { ok: false, err: 'net' }; } }
+    const pad = n => String(n).padStart(2, '0'), iso = d => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()), T0 = () => iso(new Date());
+    const addD = (s, n) => { const d = new Date(s + 'T12:00'); d.setDate(d.getDate() + n); return iso(d); };
+    const frD = (s, o) => { const x = new Date(s + 'T12:00').toLocaleDateString('fr-FR', o || { weekday: 'short', day: 'numeric', month: 'short' }); return x.charAt(0).toUpperCase() + x.slice(1); };
+    const ST = { y: ['✅', 'Disponible', '#66bb6a'], p: ['❔', 'Peut-être', '#ffb74d'], n: ['❌', 'Indisponible', '#e57373'] }, NEXT = { '': 'y', y: 'p', p: 'n', n: '' };
+    const K_MINE = 'xiii.dispo.mine', K_CACHE = 'xiii.dispo.cache', K_NOTE = 'xiii.dispo.note';
+    const say = m => { try { (window.toast || (() => { }))(m); } catch (e) { } };
+    // ---------- données ----------
+    let D = J(K_CACHE, { list: [], polls: [], at: 0 }), MODE = ''; // MODE : '' | 'off' | 'old' | 'ok'
+    function mine() { return J(K_MINE, {}); }
+    async function refresh() {
+        const r = await api('dispo_list'); if (!r.ok) { MODE = r.err === 'off' ? 'off' : r.err === 'action' ? 'old' : 'err'; return r; }
+        MODE = 'ok'; D = { list: r.list || [], polls: r.polls || [], at: Date.now(), me: r.me || me(), admin: !!r.admin }; W(K_CACHE, D);
+        const m = (r.list || []).find(x => fold(x.nom) === fold(r.me || me())); if (m && !J('xiii.dispo.dirty', 0)) { W(K_MINE, m.days || {}); if (m.note) W(K_NOTE, m.note); }
+        return r;
+    }
+    let pushT = 0;
+    function saveMine(days) { W(K_MINE, days); W('xiii.dispo.dirty', 1); clearTimeout(pushT); pushT = setTimeout(async () => { const r = await api('dispo_set', { days: mine(), note: J(K_NOTE, '') }); if (r.ok) W('xiii.dispo.dirty', 0); setSync(r); }, 900); }
+    function setSync(r) { const s = document.querySelector('#xdp .xdp-sync'); if (!s) return; s.textContent = r.ok ? '☁️ Partagé avec l\'équipe' : r.err === 'off' ? '💾 Enregistré sur cet appareil (Drive non connecté)' : r.err === 'action' ? '💾 Sur cet appareil — mettez à jour le script Drive (v20) pour partager' : '⚠️ Non partagé (' + r.err + ') — nouvel essai à la prochaine modification'; }
+    // personnes : réponses Drive + fiche équipe (même sans réponse) ; moi en premier
+    function people() {
+        const out = [], seen = {}, add = (nom, sec, days, note) => { const k = fold(nom); if (!k) return; if (seen[k]) { if (days && !seen[k].days) Object.assign(seen[k], { days, note }); return; } seen[k] = { nom, sec: sec || '', days: days || null, note: note || '' }; out.push(seen[k]); };
+        add(D.me || me(), '', mine(), J(K_NOTE, ''));
+        (D.list || []).forEach(x => add(x.nom, x.secteur, x.days, x.note));
+        try { const S = J('xiii.projets', {}) || {}, f = (S.list || []).find(x => x && x.id === S.active); (f && f.team || []).forEach(m => add(m.name || [m.prenom, m.nom].filter(Boolean).join(' '), m.dept || '', null)); } catch (e) { }
+        seen[fold(D.me || me())].days = mine(); return out;
+    }
+    // ---------- meilleurs créneaux ----------
+    function best(P, from, n, len) {
+        len = Math.max(1, len || 1); const R = [];
+        for (let i = 0; i < n; i++) { const d0 = addD(from, i); let sc = 0, ok = 0, ko = 0, unk = 0, who = [];
+            for (let k = 0; k < len; k++) { const d = addD(d0, k); P.forEach(p => { const v = p.days ? p.days[d] : undefined; if (v === 'y') { sc += 2; ok++; } else if (v === 'p') sc += 1; else if (v === 'n') { ko++; if (who.indexOf(p.nom) < 0) who.push(p.nom); } else unk++; }); }
+            R.push({ d: d0, sc, ok, ko, unk, who }); }
+        return R.filter(x => x.ok > 0).sort((a, b) => a.ko - b.ko || b.sc - a.sc || a.d.localeCompare(b.d)).slice(0, 6);
+    }
+    // ---------- fenêtre ----------
+    let DRAG = null; addEventListener('pointerup', () => { DRAG = null; }); addEventListener('pointercancel', () => { DRAG = null; });
+    let TAB = 'mine', MONTH = T0().slice(0, 7), SEL = new Set(), FILT = '', LEN = 1;
+    function open(tab) {
+        if (document.getElementById('xdp')) return; if (tab) TAB = tab; css();
+        document.body.insertAdjacentHTML('beforeend', '<div id="xdp" role="dialog" aria-modal="true" aria-label="Disponibilités de l\'équipe"><div class="xdp-b"><div class="xdp-h"><b>🙋 Disponibilités de l\'équipe</b><span class="xdp-sync"></span><button class="xdp-x" aria-label="Fermer">✕</button></div>' +
+            '<nav role="tablist"><button data-t="mine">🙋 Mes dispos</button><button data-t="team">👥 Équipe</button><button data-t="poll">🗳️ Propositions <i></i></button></nav><div class="xdp-c"></div></div></div>');
+        const o = document.getElementById('xdp'), close = () => o.remove(); o.querySelector('.xdp-x').onclick = close; o.addEventListener('click', e => { if (e.target === o) close(); });
+        o.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+        o.querySelectorAll('nav button').forEach(b => b.onclick = () => { TAB = b.dataset.t; draw(); });
+        draw(); refresh().then(r => { setSync(r.ok ? { ok: 1 } : r); if (document.getElementById('xdp')) draw(); });
+    }
+    function draw() {
+        const o = document.getElementById('xdp'); if (!o) return; o.querySelectorAll('nav button').forEach(b => { const on = b.dataset.t === TAB; b.classList.toggle('on', on); b.setAttribute('aria-selected', on); });
+        const open = (D.polls || []).filter(p => p.status !== 'closed' && !(p.votes || {})[D.me || me()] && whoOk(p)).length, i = o.querySelector('nav i'); i.textContent = open || '';
+        const c = o.querySelector('.xdp-c'); ({ mine: vMine, team: vTeam, poll: vPoll })[TAB](c);
+    }
+    const whoOk = p => !p.who || !p.who.length || p.who.some(w => fold(w) === fold(D.me || me()));
+    function monthNav(c, re) { const [y, m] = MONTH.split('-').map(Number), lab = new Date(y, m - 1, 15).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+        return '<div class="xdp-mn"><button data-mv="-1" aria-label="Mois précédent">‹</button><b>' + lab + '</b><button data-mv="1" aria-label="Mois suivant">›</button>' + (MONTH !== T0().slice(0, 7) ? '<button data-mv="0" class="sm">Aujourd\'hui</button>' : '') + '</div>'; }
+    function wireNav(c, re) { c.querySelectorAll('[data-mv]').forEach(b => b.onclick = () => { const v = +b.dataset.mv; if (!v) MONTH = T0().slice(0, 7); else { const [y, m] = MONTH.split('-').map(Number), d = new Date(y, m - 1 + v, 1); MONTH = d.getFullYear() + '-' + pad(d.getMonth() + 1); } re(); }); }
+    function monthDays() { const [y, m] = MONTH.split('-').map(Number), first = new Date(y, m - 1, 1), n = new Date(y, m, 0).getDate(), lead = (first.getDay() + 6) % 7; return { lead, days: Array.from({ length: n }, (_, i) => MONTH + '-' + pad(i + 1)) }; }
+    // 🙋 mes dispos : calendrier du mois, un clic fait tourner ✅ → ❔ → ❌ → vide
+    function vMine(c) {
+        const M = mine(), { lead, days } = monthDays(), t0 = T0();
+        c.innerHTML = '<p class="xdp-hint">Touchez un jour : ✅ disponible → ❔ peut-être → ❌ indisponible → vide. Glissez pour en remplir plusieurs. Le Master et l\'équipe voient vos réponses.</p>' + monthNav() +
+            '<div class="xdp-cal">' + ['L', 'M', 'M', 'J', 'V', 'S', 'D'].map(x => '<span class="wd">' + x + '</span>').join('') + '<span></span>'.repeat(lead) +
+            days.map(d => { const v = M[d] || '', s = ST[v]; return '<button class="dy' + (v ? ' ' + v : '') + (d === t0 ? ' td' : '') + (d < t0 ? ' past' : '') + '" data-d="' + d + '" aria-label="' + frD(d, { weekday: 'long', day: 'numeric', month: 'long' }) + ' : ' + (s ? s[1] : 'non renseigné') + '"><b>' + +d.slice(8) + '</b>' + (s ? '<i>' + s[0] + '</i>' : '') + '</button>'; }).join('') + '</div>' +
+            '<div class="xdp-q"><span>Tout le mois :</span><button data-all="y">✅ Dispo</button><button data-all="wk">✅ Semaine · ❌ week-end</button><button data-all="n">❌ Indispo</button><button data-all="">🧹 Effacer</button></div>' +
+            '<label class="xdp-note">Note pour la production<input maxlength="300" placeholder="Ex. : dispo à partir de 14 h le jeudi, véhiculé…" value="' + esc(J(K_NOTE, '')) + '"></label>' +
+            '<div class="xdp-leg">' + Object.keys(ST).map(k => '<span><i style="background:' + ST[k][2] + '"></i>' + ST[k][1] + '</span>').join('') + '<span class="xdp-n">' + Object.values(M).filter(v => v === 'y').length + ' jour(s) dispo renseigné(s)</span></div>';
+        wireNav(c, () => vMine(c));
+        let last = ''; const set = (b, v) => { last = b.dataset.d; const M2 = mine(); if (v) M2[b.dataset.d] = v; else delete M2[b.dataset.d]; b.className = 'dy' + (v ? ' ' + v : '') + (b.dataset.d === t0 ? ' td' : '') + (b.dataset.d < t0 ? ' past' : ''); b.innerHTML = '<b>' + +b.dataset.d.slice(8) + '</b>' + (v ? '<i>' + ST[v][0] + '</i>' : ''); saveMine(M2); const n = c.querySelector('.xdp-n'); if (n) n.textContent = Object.values(M2).filter(x => x === 'y').length + ' jour(s) dispo renseigné(s)'; };
+        const cal = c.querySelector('.xdp-cal');
+        cal.addEventListener('pointerdown', e => { const b = e.target.closest('.dy'); if (!b) return; e.preventDefault(); try { b.releasePointerCapture(e.pointerId); } catch (x) { } DRAG = NEXT[mine()[b.dataset.d] || '']; set(b, DRAG); });
+        cal.addEventListener('pointermove', e => { if (DRAG == null) return; const t = document.elementFromPoint(e.clientX, e.clientY), b = t && t.closest && t.closest('.dy'); if (b && cal.contains(b) && b.dataset.d !== last) set(b, DRAG); });
+        c.querySelectorAll('.dy').forEach(b => b.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); set(b, NEXT[mine()[b.dataset.d] || '']); } }));
+        c.querySelectorAll('[data-all]').forEach(b => b.onclick = () => { const M2 = mine(), v = b.dataset.all; days.filter(d => d >= t0).forEach(d => { const wd = new Date(d + 'T12:00').getDay(), x = v === 'wk' ? (wd === 0 || wd === 6 ? 'n' : 'y') : v; if (x) M2[d] = x; else delete M2[d]; }); saveMine(M2); vMine(c); });
+        c.querySelector('.xdp-note input').onchange = e => { W(K_NOTE, e.target.value.trim()); saveMine(mine()); };
+    }
+    // 👥 équipe : grille personnes × jours + meilleurs créneaux
+    function vTeam(c) {
+        const all = people(), secs = [...new Set(all.map(p => p.sec).filter(Boolean))], P = all.filter(p => !FILT || p.sec === FILT), { days } = monthDays(), t0 = T0();
+        const DD = days.filter(d => d >= t0 || MONTH < t0.slice(0, 7)), from = DD[0] || days[0], B = best(P, from, DD.length || days.length, LEN);
+        const cnt = d => P.reduce((a, p) => { const v = p.days && p.days[d]; a[v || 'u']++; return a; }, { y: 0, p: 0, n: 0, u: 0 });
+        const noRep = P.filter(p => !p.days || !Object.keys(p.days).length);
+        c.innerHTML = (MODE === 'off' ? '<p class="xdp-warn">Drive d\'équipe non connecté : seules vos dispos apparaissent. Connectez-le (Réglages → Gestion d\'équipe) pour voir celles de l\'équipe.</p>' : MODE === 'old' ? '<p class="xdp-warn">Mettez à jour le script Drive (version 20, page Drive) pour partager les disponibilités.</p>' : '') +
+            monthNav() + '<div class="xdp-f">' + (secs.length ? '<select aria-label="Filtrer par équipe"><option value="">Toute l\'équipe (' + all.length + ')</option>' + secs.map(s => '<option' + (s === FILT ? ' selected' : '') + '>' + esc(s) + '</option>').join('') + '</select>' : '<span>' + P.length + ' personne(s)</span>') +
+            '<label>Durée<select data-len>' + [1, 2, 3, 4, 5, 7].map(n => '<option value="' + n + '"' + (n === LEN ? ' selected' : '') + '>' + n + ' jour' + (n > 1 ? 's' : '') + '</option>').join('') + '</select></label></div>' +
+            '<div class="xdp-best"><b>💡 Meilleurs créneaux' + (LEN > 1 ? ' (' + LEN + ' jours)' : '') + '</b>' + (B.length ? B.map(x => '<button data-pick="' + x.d + '" title="' + (x.who.length ? 'Indisponible(s) : ' + esc(x.who.join(', ')) : 'Personne d\'indisponible') + '">' + frD(x.d) + (LEN > 1 ? ' → ' + frD(addD(x.d, LEN - 1), { day: 'numeric', month: 'short' }) : '') + ' <small>' + (x.ko ? '❌ ' + x.ko : '✅ ' + Math.round(x.ok / LEN)) + (x.unk ? ' · ? ' + Math.round(x.unk / LEN) : '') + '</small></button>').join('') : '<span>Pas encore assez de réponses.</span>') + '</div>' +
+            '<div class="xdp-gw"><table class="xdp-g"><thead><tr><th>Personne</th>' + days.map(d => { const k = cnt(d), wd = new Date(d + 'T12:00').getDay(); return '<th class="' + (SEL.has(d) ? 'sel ' : '') + (wd === 0 || wd === 6 ? 'we ' : '') + (d < t0 ? 'past' : '') + '" data-col="' + d + '" title="' + frD(d, { weekday: 'long', day: 'numeric', month: 'long' }) + ' — ✅ ' + k.y + ' · ❔ ' + k.p + ' · ❌ ' + k.n + ' · sans réponse ' + k.u + '\nCliquez pour sélectionner ce jour"><small>' + 'DLMMJVS'[wd] + '</small>' + +d.slice(8) + '<i style="--k:' + (P.length ? k.y / P.length : 0) + '"></i></th>'; }).join('') + '</tr></thead><tbody>' +
+            P.map(p => '<tr><th title="' + esc(p.note || '') + '">' + esc(p.nom) + (p.sec ? '<small>' + esc(p.sec) + '</small>' : '') + (p.note ? ' 📝' : '') + (!p.days || !Object.keys(p.days).length ? '<small class="nr">sans réponse</small>' : '') + '</th>' + days.map(d => { const v = p.days && p.days[d]; return '<td class="' + (v || '') + (SEL.has(d) ? ' sel' : '') + '" title="' + esc(p.nom) + ' · ' + frD(d) + ' : ' + (v ? ST[v][1] : 'pas de réponse') + '">' + (v ? ST[v][0] : '') + '</td>'; }).join('') + '</tr>').join('') + '</tbody></table></div>' +
+            '<div class="xdp-act"><span>' + (SEL.size ? SEL.size + ' jour(s) sélectionné(s)' : 'Cliquez sur les en-têtes de jours (ou un créneau 💡) pour sélectionner') + '</span>' + (SEL.size ? '<button data-clr>Désélectionner</button>' : '') +
+            (isMaster() ? '<button class="ok" data-prop' + (SEL.size ? '' : ' disabled') + '>🗳️ Proposer ces dates à l\'équipe</button>' : '') +
+            (noRep.length && cfg() && window.XMENT ? '<button data-nudge title="Message dans le chat avec une mention @ à chacun">📣 Relancer ' + noRep.length + ' sans réponse</button>' : '') + '</div>';
+        wireNav(c, () => vTeam(c));
+        const s = c.querySelector('.xdp-f select:not([data-len])'); if (s) s.onchange = () => { FILT = s.value; vTeam(c); };
+        c.querySelector('[data-len]').onchange = e => { LEN = +e.target.value; vTeam(c); };
+        c.querySelectorAll('[data-col]').forEach(h => h.onclick = () => { const d = h.dataset.col; SEL.has(d) ? SEL.delete(d) : SEL.add(d); vTeam(c); });
+        c.querySelectorAll('[data-pick]').forEach(b => b.onclick = () => { for (let k = 0; k < LEN; k++) SEL.add(addD(b.dataset.pick, k)); vTeam(c); });
+        const cl = c.querySelector('[data-clr]'); if (cl) cl.onclick = () => { SEL.clear(); vTeam(c); };
+        const pr = c.querySelector('[data-prop]'); if (pr) pr.onclick = () => { TAB = 'poll'; draw(); editPoll(null, [...SEL].sort()); };
+        const nu = c.querySelector('[data-nudge]'); if (nu) nu.onclick = async () => { const tg = noRep.map(p => '@' + p.nom.trim().replace(/\s+/g, '_')).join(' '); const r = await XMENT.chatSend(tg + ' pouvez-vous indiquer vos disponibilités ? (Démarrer › 📅 Agenda › 🙋 Disponibilités, ou l\'app équipe)', null); say(r.ok ? '📣 Relance envoyée dans le chat' : '⚠️ Relance impossible (' + r.err + ')'); };
+    }
+    // 🗳️ propositions de dates
+    function vPoll(c) {
+        const L = (D.polls || []).slice().sort((a, b) => (a.status === 'closed') - (b.status === 'closed') || b.at - a.at), my = D.me || me(), M = isMaster();
+        c.innerHTML = (MODE === 'off' ? '<p class="xdp-warn">Les propositions de dates passent par le Drive d\'équipe : connectez-le pour en créer et voter.</p>' : MODE === 'old' ? '<p class="xdp-warn">Mettez à jour le script Drive (version 20) pour les propositions de dates.</p>' : '') +
+            (M && MODE !== 'off' ? '<div class="xdp-act" style="justify-content:flex-start"><button class="ok" data-new>➕ Nouvelle proposition</button><span>Astuce : dans 👥 Équipe, sélectionnez les jours où le plus de monde est dispo puis « Proposer ».</span></div>' : '') +
+            '<div class="xdp-pl">' + (L.length ? L.map(p => {
+                const V = p.votes || {}, voters = Object.keys(V), mv = (V[my] || {}).v || {}, closed = p.status === 'closed', who = p.who && p.who.length ? p.who : null, miss = who ? who.filter(w => !voters.some(v => fold(v) === fold(w))) : [];
+                const score = d => voters.reduce((a, n) => { const x = (V[n].v || {})[d.d + (d.t ? ' ' + d.t : '')] || (V[n].v || {})[d.d]; if (x) a[x]++; return a; }, { y: 0, p: 0, n: 0 }), top = p.dates.map(d => ({ d, s: score(d) })).sort((a, b) => a.s.n - b.s.n || (b.s.y * 2 + b.s.p) - (a.s.y * 2 + a.s.p))[0];
+                return '<div class="xdp-p' + (closed ? ' cl' : '') + '" data-id="' + esc(p.id) + '"><div class="hd"><b>' + esc(p.title) + '</b><small>par ' + esc(p.by) + ' · ' + voters.length + ' réponse(s)' + (who ? ' / ' + who.length + ' concerné(s)' : '') + '</small>' + (closed ? '<span class="chs">📅 Retenu : ' + esc(frD(p.chosen.slice(0, 10), { weekday: 'long', day: 'numeric', month: 'long' }) + (p.chosen.slice(11) ? ' ' + p.chosen.slice(11) : '')) + '</span>' : '') + '</div>' + (p.note ? '<p class="nt">' + esc(p.note) + '</p>' : '') +
+                    '<table class="xdp-pv"><thead><tr><th></th>' + p.dates.map(d => { const s = score(d), isTop = top && top.d === d && voters.length; return '<th class="' + (isTop && !closed ? 'top' : '') + (closed && p.chosen === d.d + (d.t ? ' ' + d.t : '') ? ' chosen' : '') + '">' + frD(d.d) + (d.t ? '<small>' + esc(d.t) + '</small>' : '') + '<em>✅ ' + s.y + ' · ❔ ' + s.p + ' · ❌ ' + s.n + '</em></th>'; }).join('') + '</tr></thead><tbody>' +
+                    (!closed && whoOk(p) ? '<tr class="mine"><th>Vous</th>' + p.dates.map(d => { const k = d.d + (d.t ? ' ' + d.t : ''), v = mv[k] || ''; return '<td><button data-vote="' + esc(k) + '" class="' + v + '" aria-label="Votre réponse pour ' + frD(d.d) + ' : ' + (v ? ST[v][1] : 'aucune') + '">' + (v ? ST[v][0] : '—') + '</button></td>'; }).join('') + '</tr>' : '') +
+                    voters.filter(n => fold(n) !== fold(my) || closed || !whoOk(p)).map(n => '<tr><th>' + esc(n) + '</th>' + p.dates.map(d => { const x = (V[n].v || {})[d.d + (d.t ? ' ' + d.t : '')]; return '<td class="' + (x || '') + '">' + (x ? ST[x][0] : '') + '</td>'; }).join('') + '</tr>').join('') + '</tbody></table>' +
+                    (miss.length && !closed ? '<p class="nt">⏳ Sans réponse : ' + esc(miss.join(', ')) + '</p>' : '') +
+                    '<div class="xdp-act">' + (!closed && whoOk(p) ? '<button class="ok" data-send>✓ Envoyer mes réponses</button><button data-fill title="Reprend ce que vous avez coché dans « Mes dispos »">🙋 Pré-remplir avec mes dispos</button>' : '') +
+                    (M ? (closed ? '<button data-reopen>↺ Rouvrir</button>' : '<button data-close>📅 Retenir une date…</button>' + (miss.length && window.XMENT ? '<button data-nudge>📣 Relancer</button>' : '') + '<button data-edit>✏️ Modifier</button>') + '<button data-del title="Supprimer la proposition">🗑️</button>' : '') + '</div></div>';
+            }).join('') : '<p class="xdp-e">Aucune proposition de dates pour l\'instant.' + (M ? ' Créez-en une, l\'équipe vote depuis Démarrer ou l\'app équipe.' : ' Le Master vous préviendra dans le chat.') + '</p>') + '</div>';
+        const nw = c.querySelector('[data-new]'); if (nw) nw.onclick = () => editPoll(null, [...SEL].sort());
+        c.querySelectorAll('.xdp-p').forEach(el => { const p = L.find(x => x.id === el.dataset.id); if (!p) return; const V = {}; Object.assign(V, (((p.votes || {})[my] || {}).v) || {});
+            el.querySelectorAll('[data-vote]').forEach(b => b.onclick = () => { const k = b.dataset.vote, v = NEXT[V[k] || ''] || 'y'; if (v) V[k] = v; else delete V[k]; b.className = v; b.textContent = v ? ST[v][0] : '—'; });
+            const f = el.querySelector('[data-fill]'); if (f) f.onclick = () => { const Mi = mine(); el.querySelectorAll('[data-vote]').forEach(b => { const v = Mi[b.dataset.vote.slice(0, 10)]; if (v) { V[b.dataset.vote] = v; b.className = v; b.textContent = ST[v][0]; } }); };
+            const s = el.querySelector('[data-send]'); if (s) s.onclick = async () => { s.disabled = true; const r = await api('poll_vote', { id: p.id, votes: V }); s.disabled = false; if (r.ok) { say('🗳️ Réponses envoyées'); Object.assign(p, r.poll); W(K_CACHE, D); vPoll(c); } else say('⚠️ Envoi impossible (' + r.err + ')'); };
+            const cl = el.querySelector('[data-close]'); if (cl) cl.onclick = () => choose(p, c);
+            const ro = el.querySelector('[data-reopen]'); if (ro) ro.onclick = () => savePoll(Object.assign({}, p, { status: 'open', chosen: '' }), c);
+            const ed = el.querySelector('[data-edit]'); if (ed) ed.onclick = () => editPoll(p);
+            const de = el.querySelector('[data-del]'); if (de) de.onclick = async () => { if (!confirm('Supprimer « ' + p.title + ' » et ses réponses ?')) return; const r = await api('poll_del', { id: p.id }); if (r.ok) { D.polls = D.polls.filter(x => x.id !== p.id); W(K_CACHE, D); vPoll(c); } else say('⚠️ ' + r.err); };
+            const nu = el.querySelector('[data-nudge]'); if (nu) nu.onclick = async () => { const voters = Object.keys(p.votes || {}), miss = (p.who || []).filter(w => !voters.some(v => fold(v) === fold(w))); const r = await XMENT.chatSend(miss.map(w => '@' + w.trim().replace(/\s+/g, '_')).join(' ') + ' merci de répondre à la proposition « ' + p.title + ' » (Démarrer › 📅 Agenda › 🙋 Disponibilités › 🗳️)', null); say(r.ok ? '📣 Relance envoyée' : '⚠️ ' + r.err); };
+        });
+    }
+    async function savePoll(p, c, announce) {
+        const r = await api('poll_save', { poll: p }); if (!r.ok) { say('⚠️ Enregistrement impossible (' + (r.err === 'admin' ? 'réservé au Master' : r.err) + ')'); return null; }
+        const i = D.polls.findIndex(x => x.id === r.poll.id); if (i < 0) D.polls.push(r.poll); else D.polls[i] = r.poll; W(K_CACHE, D);
+        if (announce && window.XMENT && XMENT.chatSend) XMENT.chatSend(announce, null).catch(() => { });
+        if (c && c.isConnected) vPoll(c); else draw(); return r.poll;
+    }
+    // création / modification
+    function editPoll(p, preDates) {
+        const all = people(), isNew = !p; p = p || { id: 'p' + Date.now().toString(36), title: '', note: '', dates: (preDates || []).map(d => ({ d, t: '' })), who: all.map(x => x.nom).filter(n => fold(n) !== fold(D.me || me())) };
+        const o = document.getElementById('xdp'), c = o.querySelector('.xdp-c');
+        const render = () => { c.innerHTML = '<div class="xdp-ed"><h4>' + (isNew ? '➕ Nouvelle proposition de dates' : '✏️ Modifier la proposition') + '</h4>' +
+            '<label>Objet<input data-k="title" maxlength="120" placeholder="Ex. : Tournage clip — jour 1, Repérage Lyon, Réunion de prépa…" value="' + esc(p.title) + '"></label>' +
+            '<label>Précisions (facultatif)<input data-k="note" maxlength="500" placeholder="Lieu, horaires, durée…" value="' + esc(p.note) + '"></label>' +
+            '<div class="xdp-dl"><b>Dates proposées</b>' + (p.dates.length ? p.dates.map((d, i) => '<span class="dt"><input type="date" data-di="' + i + '" value="' + d.d + '"><input data-ti="' + i + '" placeholder="Heure / créneau" value="' + esc(d.t) + '" maxlength="20"><button data-rm="' + i + '" aria-label="Retirer">✕</button></span>').join('') : '<span class="xdp-e">Aucune date.</span>') + '<button data-add>➕ Ajouter une date</button></div>' +
+            '<div class="xdp-who"><b>Concerné(s)</b> <button data-allw class="sm">Tous</button><button data-now class="sm">Aucun</button><div>' + all.filter(x => fold(x.nom) !== fold(D.me || me())).map(x => '<label><input type="checkbox" value="' + esc(x.nom) + '"' + (p.who.some(w => fold(w) === fold(x.nom)) ? ' checked' : '') + '>' + esc(x.nom) + (x.sec ? ' <small>' + esc(x.sec) + '</small>' : '') + '</label>').join('') + '</div></div>' +
+            '<label class="ck"><input type="checkbox" data-ann checked> 💬 Annoncer dans le chat avec une mention @ aux personnes concernées</label>' +
+            '<div class="xdp-act"><button data-cancel>Annuler</button><button class="ok" data-save>' + (isNew ? '🗳️ Envoyer la proposition' : '💾 Enregistrer') + '</button></div></div>';
+            const sync = () => { p.title = c.querySelector('[data-k=title]').value.trim(); p.note = c.querySelector('[data-k=note]').value.trim(); c.querySelectorAll('[data-di]').forEach(x => p.dates[+x.dataset.di].d = x.value); c.querySelectorAll('[data-ti]').forEach(x => p.dates[+x.dataset.ti].t = x.value.trim()); p.who = [...c.querySelectorAll('.xdp-who input:checked')].map(x => x.value); };
+            c.querySelector('[data-add]').onclick = () => { sync(); const l = p.dates.slice(-1)[0]; p.dates.push({ d: l ? addD(l.d, 1) : addD(T0(), 7), t: l ? l.t : '' }); render(); };
+            c.querySelectorAll('[data-rm]').forEach(b => b.onclick = () => { sync(); p.dates.splice(+b.dataset.rm, 1); render(); });
+            c.querySelector('[data-allw]').onclick = () => c.querySelectorAll('.xdp-who input').forEach(x => x.checked = true); c.querySelector('[data-now]').onclick = () => c.querySelectorAll('.xdp-who input').forEach(x => x.checked = false);
+            c.querySelector('[data-cancel]').onclick = () => draw();
+            c.querySelector('[data-save]').onclick = async () => { sync(); p.dates = p.dates.filter(d => /^\d{4}-\d{2}-\d{2}$/.test(d.d)); if (!p.title) { c.querySelector('[data-k=title]').focus(); say('Donnez un objet à la proposition'); return; } if (!p.dates.length) { say('Ajoutez au moins une date'); return; }
+                const ann = c.querySelector('[data-ann]').checked && isNew ? (p.who.map(w => '@' + w.trim().replace(/\s+/g, '_')).join(' ') + ' 🗳️ Nouvelle proposition de dates : « ' + p.title + ' » — ' + p.dates.map(d => frD(d.d) + (d.t ? ' ' + d.t : '')).join(', ') + ' · Répondez dans Démarrer › 📅 Agenda › 🙋 Disponibilités (ou l\'app équipe).').trim() : '';
+                SEL.clear(); const b = c.querySelector('[data-save]'); b.disabled = true; const r = await savePoll(Object.assign({}, p, { status: 'open' }), null, ann); b.disabled = false; if (r) { TAB = 'poll'; draw(); say(isNew ? '🗳️ Proposition envoyée' : '💾 Enregistré'); } };
+        };
+        render(); c.querySelector('[data-k=title]').focus();
+    }
+    // retenir une date → PLANNO (jalon) + chat
+    function choose(p, c) {
+        const el = c.querySelector('.xdp-p[data-id="' + p.id + '"] .xdp-act'), V = p.votes || {};
+        el.innerHTML = '<span>Quelle date retenir ?</span>' + p.dates.map(d => { const k = d.d + (d.t ? ' ' + d.t : ''), s = Object.keys(V).reduce((a, n) => { const x = (V[n].v || {})[k]; if (x) a[x]++; return a; }, { y: 0, p: 0, n: 0 }); return '<button data-ch="' + esc(k) + '">' + frD(d.d) + (d.t ? ' ' + esc(d.t) : '') + ' <small>✅' + s.y + ' ❌' + s.n + '</small></button>'; }).join('') + '<label class="ck"><input type="checkbox" checked data-pl> Ajouter à PLANNO / CALENDRIER</label><button data-x>Annuler</button>';
+        el.querySelector('[data-x]').onclick = () => vPoll(c);
+        el.querySelectorAll('[data-ch]').forEach(b => b.onclick = async () => { const k = b.dataset.ch, toPl = el.querySelector('[data-pl]').checked;
+            const ann = ((p.who || []).concat(Object.keys(V)).filter((x, i, a) => a.findIndex(y => fold(y) === fold(x)) === i && fold(x) !== fold(D.me || me())).map(w => '@' + w.trim().replace(/\s+/g, '_')).join(' ') + ' 📅 Date retenue pour « ' + p.title + ' » : ' + frD(k.slice(0, 10), { weekday: 'long', day: 'numeric', month: 'long' }) + (k.slice(11) ? ' ' + k.slice(11) : '') + '.').trim();
+            const r = await savePoll(Object.assign({}, p, { status: 'closed', chosen: k }), c, ann); if (r && toPl) toPlanno(r); });
+    }
+    function toPlanno(p) {
+        try { const pl = J('plannoXIII.project', null) || { app: 'PLANNO XIII', v: 1, name: '', tasks: [] }; pl.tasks = pl.tasks || []; let t = pl.tasks.find(x => x.src === 'xd:' + p.id);
+            if (!t) { t = { id: 't' + Date.now().toString(36), phase: 'prepa', who: [], ms: true, src: 'xd:' + p.id }; pl.tasks.push(t); }
+            Object.assign(t, { name: '📅 ' + p.title + (p.chosen.slice(11) ? ' (' + p.chosen.slice(11) + ')' : ''), start: p.chosen.slice(0, 10), end: p.chosen.slice(0, 10), who: Object.keys(p.votes || {}).filter(n => ((p.votes[n].v || {})[p.chosen]) !== 'n').slice(0, 30) });
+            pl.updated = Date.now(); W('plannoXIII.project', pl); say('📅 Ajouté à PLANNO et au CALENDRIER'); } catch (e) { say('⚠️ PLANNO : ' + e.message); }
+    }
+    // ---------- pour CALENDRIER / agenda : propositions ouvertes, dates retenues, indispos agrégées ----------
+    function events() {
+        const C = J(K_CACHE, { list: [], polls: [] }), E = [], t0 = addD(T0(), -31);
+        (C.polls || []).forEach(p => { if (p.status === 'closed' && p.chosen) return; (p.dates || []).forEach(d => d.d >= t0 && E.push({ d: d.d, t: '🗳️ Proposé : ' + p.title + (d.t ? ' (' + d.t + ')' : ''), det: Object.keys(p.votes || {}).length + ' réponse(s)' })); });
+        const ko = {}; (C.list || []).forEach(m => Object.keys(m.days || {}).forEach(d => { if (m.days[d] === 'n' && d >= t0) (ko[d] = ko[d] || []).push(m.nom); }));
+        Object.keys(ko).forEach(d => E.push({ d, t: '❌ ' + (ko[d].length > 2 ? ko[d].length + ' indisponibles' : ko[d].join(', ') + ' indispo.'), det: ko[d].join(', ') }));
+        return E;
+    }
+    async function pending() { if (!cfg()) return 0; await refresh(); return (D.polls || []).filter(p => p.status !== 'closed' && !(p.votes || {})[D.me || me()] && whoOk(p)).length; }
+    function css() {
+        if (document.getElementById('xdp-css')) return; const s = document.createElement('style'); s.id = 'xdp-css';
+        s.textContent = '#xdp{position:fixed;inset:0;z-index:9991;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:14px;font:14px system-ui,sans-serif}.xdp-b{background:var(--bg-panel,#252321);color:var(--text,#eee);border:1px solid rgba(240,179,120,.5);border-radius:14px;width:min(980px,100%);max-height:92vh;display:flex;flex-direction:column;box-shadow:0 14px 50px rgba(0,0,0,.5)}' +
+            '.xdp-h{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--border-soft,#3a3633)}.xdp-h b{font-size:16px}.xdp-sync{font-size:11.5px;color:var(--text-dim,#aaa);margin-left:auto}.xdp-x{background:none;border:0;color:inherit;font-size:17px;cursor:pointer;padding:4px 8px}' +
+            '#xdp nav{display:flex;gap:6px;padding:8px 14px 0;flex-wrap:wrap}#xdp nav button{padding:7px 12px;border-radius:9px 9px 0 0;border:1px solid var(--border-color,#45454b);border-bottom:0;background:transparent;color:inherit;font:600 13px system-ui,sans-serif;cursor:pointer}#xdp nav button.on{background:rgba(240,179,120,.18);border-color:rgba(240,179,120,.7)}#xdp nav i{font-style:normal;background:#F0B378;color:#1a1a1a;border-radius:9px;padding:0 6px;margin-left:4px}#xdp nav i:empty{display:none}' +
+            '.xdp-c{overflow:auto;padding:12px 14px 14px;border-top:1px solid var(--border-soft,#3a3633);display:flex;flex-direction:column;gap:10px}.xdp-hint{margin:0;font-size:12.5px;color:var(--text-dim,#bbb)}.xdp-warn{margin:0;padding:8px 10px;border-radius:8px;background:rgba(255,183,77,.12);border:1px solid rgba(255,183,77,.4);font-size:12.5px}.xdp-e{color:var(--text-dim,#999);font-size:13px}' +
+            '.xdp-mn{display:flex;align-items:center;gap:8px}.xdp-mn b{text-transform:capitalize;min-width:150px;text-align:center}.xdp-mn button,.xdp-q button,.xdp-act button,.xdp-best button,.xdp-ed button,.xdp-who button{padding:6px 11px;border-radius:8px;border:1px solid var(--border-color,#45454b);background:rgba(255,255,255,.04);color:inherit;font:inherit;font-size:13px;cursor:pointer}.xdp-mn button.sm,.sm{font-size:12px!important;padding:4px 8px!important}' +
+            '.xdp-cal{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;max-width:560px}.xdp-cal .wd{text-align:center;font-size:11px;color:var(--text-dim,#999)}.xdp-cal .dy{aspect-ratio:1.25;border-radius:9px;border:1px solid var(--border-color,#45454b);background:rgba(255,255,255,.03);color:inherit;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;touch-action:none;user-select:none;font:inherit;padding:0}.xdp-cal .dy b{font-size:13px}.xdp-cal .dy i{font-style:normal;font-size:13px}.xdp-cal .dy.y{background:rgba(102,187,106,.22);border-color:#66bb6a}.xdp-cal .dy.p{background:rgba(255,183,77,.2);border-color:#ffb74d}.xdp-cal .dy.n{background:rgba(229,115,115,.2);border-color:#e57373}.xdp-cal .dy.td{box-shadow:0 0 0 2px #F0B378 inset}.xdp-cal .dy.past{opacity:.45}' +
+            '.xdp-q{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12.5px}.xdp-note{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--text-dim,#bbb);max-width:560px}.xdp-note input,.xdp-ed input,.xdp-f select{font:inherit;color:inherit;background:var(--bg-input,#17171a);border:1px solid var(--border-color,#45454b);border-radius:7px;padding:7px 9px}' +
+            '.xdp-leg{display:flex;flex-wrap:wrap;gap:12px;font-size:11.5px;color:var(--text-dim,#aaa)}.xdp-leg i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;vertical-align:-1px}' +
+            '.xdp-f{display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:12.5px}.xdp-f label{display:flex;gap:6px;align-items:center}.xdp-best{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12.5px}.xdp-best b{margin-right:4px}.xdp-best button small{color:var(--text-dim,#aaa)}' +
+            '.xdp-gw{overflow:auto;border:1px solid var(--border-soft,#3a3633);border-radius:10px;max-height:46vh}.xdp-g{border-collapse:collapse;font-size:12px;min-width:100%}.xdp-g th,.xdp-g td{border-bottom:1px solid var(--border-soft,#333);text-align:center;padding:4px 3px;min-width:26px}.xdp-g thead th{position:sticky;top:0;background:var(--bg-panel,#252321);cursor:pointer;font-weight:600;z-index:1}.xdp-g thead th small{display:block;font-size:9.5px;color:var(--text-dim,#999)}.xdp-g thead th i{display:block;height:4px;border-radius:2px;margin:2px 2px 0;background:rgba(102,187,106,calc(.15 + var(--k)*.85))}.xdp-g thead th.we{color:var(--text-dim,#999)}.xdp-g th.past,.xdp-g td.past{opacity:.5}' +
+            '.xdp-g tbody th{text-align:left;position:sticky;left:0;background:var(--bg-panel,#252321);white-space:nowrap;padding-right:10px;font-weight:600;z-index:1}.xdp-g tbody th small{display:block;font-weight:400;font-size:10.5px;color:var(--text-dim,#999)}.xdp-g tbody th small.nr{color:#ffb74d}.xdp-g thead th:first-child{left:0;z-index:2;text-align:left}.xdp-g td.y{background:rgba(102,187,106,.25)}.xdp-g td.p{background:rgba(255,183,77,.22)}.xdp-g td.n{background:rgba(229,115,115,.25)}.xdp-g .sel{outline:2px solid #F0B378;outline-offset:-2px}' +
+            '.xdp-act{display:flex;flex-wrap:wrap;gap:6px;align-items:center;justify-content:flex-end;font-size:12.5px}.xdp-act span{margin-right:auto;color:var(--text-dim,#aaa)}.xdp-act button.ok,.xdp-ed button.ok{background:#F0B378;color:#1a1a1a;border-color:#F0B378;font-weight:600}.xdp-act button:disabled{opacity:.45;cursor:default}' +
+            '.xdp-pl{display:flex;flex-direction:column;gap:10px}.xdp-p{border:1px solid var(--border-color,#45454b);border-radius:11px;padding:10px 12px;display:flex;flex-direction:column;gap:8px}.xdp-p.cl{opacity:.8}.xdp-p .hd{display:flex;flex-wrap:wrap;gap:8px;align-items:baseline}.xdp-p .hd small{color:var(--text-dim,#aaa)}.xdp-p .chs{margin-left:auto;background:rgba(102,187,106,.2);border:1px solid #66bb6a;border-radius:8px;padding:2px 8px;font-size:12.5px}.xdp-p .nt{margin:0;font-size:12.5px;color:var(--text-dim,#bbb)}' +
+            '.xdp-pv{border-collapse:collapse;font-size:12.5px;overflow:auto;display:block}.xdp-pv th,.xdp-pv td{padding:5px 7px;text-align:center;border-bottom:1px solid var(--border-soft,#333);white-space:nowrap}.xdp-pv thead th{font-weight:600}.xdp-pv thead th small,.xdp-pv thead th em{display:block;font-weight:400;font-style:normal;font-size:10.5px;color:var(--text-dim,#aaa)}.xdp-pv th.top{background:rgba(102,187,106,.15);border-radius:6px}.xdp-pv th.chosen{background:rgba(102,187,106,.3)}.xdp-pv tbody th{text-align:left;font-weight:600}.xdp-pv td.y{background:rgba(102,187,106,.22)}.xdp-pv td.p{background:rgba(255,183,77,.2)}.xdp-pv td.n{background:rgba(229,115,115,.22)}' +
+            '.xdp-pv [data-vote]{min-width:40px;min-height:34px;border-radius:8px;border:1px dashed var(--border-color,#555);background:transparent;color:inherit;cursor:pointer;font-size:15px}.xdp-pv [data-vote].y{background:rgba(102,187,106,.3);border:1px solid #66bb6a}.xdp-pv [data-vote].p{background:rgba(255,183,77,.28);border:1px solid #ffb74d}.xdp-pv [data-vote].n{background:rgba(229,115,115,.3);border:1px solid #e57373}.xdp-pv tr.mine th{color:#F0B378}' +
+            '.xdp-ed{display:flex;flex-direction:column;gap:10px;max-width:640px}.xdp-ed h4{margin:0}.xdp-ed label{display:flex;flex-direction:column;gap:3px;font-size:12.5px;color:var(--text-dim,#bbb)}.xdp-ed label.ck{flex-direction:row;align-items:center;gap:6px}.xdp-ed label.ck input{width:auto}.xdp-dl{display:flex;flex-direction:column;gap:6px;align-items:flex-start}.xdp-dl .dt{display:flex;gap:6px;align-items:center}.xdp-dl .dt input:nth-child(2){width:130px}.xdp-who div{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:6px}.xdp-who label{flex-direction:row!important;align-items:center;gap:5px;color:var(--text,#eee)!important}.xdp-who input{width:auto}' +
+            '@media (max-width:640px){.xdp-b{max-height:100vh;border-radius:0}#xdp{padding:0}.xdp-cal .dy{aspect-ratio:1}}';
+        document.head.appendChild(s);
+    }
+    return { open, refresh, events, pending, best, _people: people };
+})();
 
 
 // =====================================================================
