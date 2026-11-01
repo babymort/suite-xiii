@@ -6974,7 +6974,7 @@ const XIFTTT = (() => {
 const XLIVE = (() => {
     const WS = 'wss://abvvsoccbdftticlmpgi.supabase.co/realtime/v1/websocket?apikey=sb_publishable_wB5kIn6lQtO-YWdUlt3gfg_IBIgBMuL&vsn=1.0.0';
     const J = k => { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } };
-    const ME = Math.random().toString(36).slice(2, 10), L = new Set();
+    const ME = Math.random().toString(36).slice(2, 10), L = new Set(), L2 = new Set();
     let ws = null, topic = '', ref = 0, hb = null, retry = 0, joined = false, wantUrl = '', q = [];
     async function hash(s) { const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('xiii|' + s)); return [...new Uint8Array(b)].slice(0, 16).map(x => x.toString(16).padStart(2, '0')).join(''); }
     const send = o => { try { if (ws && ws.readyState === 1) ws.send(JSON.stringify(o)); } catch (e) { } };
@@ -6987,15 +6987,19 @@ const XLIVE = (() => {
         ws.onopen = () => { retry = 0; send({ topic, event: 'phx_join', payload: { config: { broadcast: { self: false, ack: false }, presence: { key: '' }, private: false } }, ref: String(++ref) }); clearInterval(hb); hb = setInterval(() => send({ topic: 'phoenix', event: 'heartbeat', payload: {}, ref: String(++ref) }), 25000); };
         ws.onmessage = e => { let m; try { m = JSON.parse(e.data); } catch (x) { return; }
             if (m.event === 'phx_reply' && m.topic === topic && m.payload && m.payload.status === 'ok') { joined = true; const Q = q; q = []; Q.forEach(p => ping(p)); }
+            if (m.event === 'broadcast' && m.payload && m.payload.event === 'xpres') { const p = m.payload.payload || {}; if (p.from !== ME) L2.forEach(fn => { try { fn(p); } catch (x) { } }); }
             if (m.event === 'broadcast' && m.payload && m.payload.event === 'xiii') { const p = m.payload.payload || {}; if (p.from === ME) return; L.forEach(fn => { try { fn(p); } catch (x) { } }); } };
         ws.onclose = () => { joined = false; clearInterval(hb); if (!J('xiii.drive')) return; const d = Math.min(30000, 1000 * Math.pow(2, retry++)); setTimeout(() => { if (document.visibilityState === 'visible') connect(); }, d); };
         ws.onerror = () => { };
     }
     function ping(p) { p = Object.assign({ from: ME, at: Date.now() }, p || {}); if (!joined) { q.push(p); if (q.length > 20) q.shift(); connect(); return; } send({ topic, event: 'broadcast', payload: { type: 'broadcast', event: 'xiii', payload: p }, ref: String(++ref) }); }
     const on = fn => { L.add(fn); connect(); return () => L.delete(fn); };
+    // 👥 présence en direct : signal léger, jamais mis en file (perdu si non connecté), écouté à part des signaux de données
+    function sig(p) { if (!joined) { connect(); return false; } send({ topic, event: 'broadcast', payload: { type: 'broadcast', event: 'xpres', payload: Object.assign({ from: ME }, p || {}) }, ref: String(++ref) }); return true; }
+    const onSig = fn => { L2.add(fn); connect(); return () => L2.delete(fn); };
     document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') connect(); });
     addEventListener('storage', e => { if (e.key === 'xiii.drive') connect(); });
-    return { on, ping, connect, live: () => joined };
+    return { on, ping, sig, onSig, connect, live: () => joined, id: ME };
 })();
 
 // =====================================================================
@@ -7041,13 +7045,13 @@ const XDRIVE = (() => {
     function lockGuard(e) { const L = e.target && e.target.closest && e.target.closest('.xlock'); if (!L) return; e.preventDefault(); e.stopPropagation(); if (e.target.blur) try { e.target.blur(); } catch (x) { } const now = Date.now(); if (now - (lockGuard.t || 0) > 2500) { lockGuard.t = now; try { (window.toast || window.showToast || alert.bind(null))(L.getAttribute('data-xlock') + ' modifie cet élément : réessayez dans quelques secondes'); } catch (x) { } } }
     function look() { // présence : toutes les 20 s quand l'outil est visible
         const c = cfg(); if (!c || why() || document.visibilityState !== 'visible') return; const now = Date.now(); if (now - lastLook < 18000) return; lastLook = now;
-        api('beat', { app: APP, by: me(), id: DEV, look: 1, w: where() }).then(r => { if (r && r.ok && r.pres) { const had = around().length; PRES = r.pres; presUI(); if (!had && around().length) tick(false); } });
+        api('beat', { app: APP, by: me(), id: DEV, look: 1, w: where() }).then(r => { if (r && r.ok && r.pres) { const had = around().length; PRES = r.pres; presUI(); try { dispatchEvent(new Event('xiii-pres')); } catch (e) { } if (!had && around().length) tick(false); } });
     }
     function beat(stop) {
         const c = cfg(); if (!c || why()) return; const now = Date.now(); if (!stop && now - lastBeat < 10000) return; lastBeat = stop ? 0 : now;
         const body = { app: APP, by: me(), id: DEV, stop: !!stop, w: where() };
         if (stop && navigator.sendBeacon) { try { navigator.sendBeacon(c.url, new Blob([JSON.stringify(Object.assign({ a: 'beat', code: c.code }, body))], { type: 'text/plain' })); } catch (e) { } return; }
-        api('beat', body).then(r => { if (r && r.ok && r.pres) { PRES = r.pres; presUI(); } });
+        api('beat', body).then(r => { if (r && r.ok && r.pres) { PRES = r.pres; presUI(); try { dispatchEvent(new Event('xiii-pres')); } catch (e) { } } });
     }
     function presUI() {
         const O = others(), b = document.getElementById('xdr-btn'); if (!b) return;
@@ -7260,7 +7264,7 @@ const XDRIVE = (() => {
         const s = document.createElement('style'); s.textContent = '.xdr-pin{position:absolute;top:8px;right:8px;z-index:5;font:700 10.5px/1 "Segoe UI",sans-serif;padding:4px 8px;border-radius:10px;pointer-events:none;white-space:nowrap}.xdr-pin.busy{background:#ff9800;color:#1b1b1b;animation:xdrp 1.6s infinite}.xdr-pin.news{background:#42a5f5;color:#0d1b2a}@keyframes xdrp{50%{opacity:.65}}'; document.head.appendChild(s);
         const run = async () => {
             if (document.visibilityState !== 'visible') return;
-            const r = await api('revs', {}); if (!r || !r.ok) return;
+            const r = await api('revs', {}); if (!r || !r.ok) return; if (r.pres) { PRES = r.pres; try { dispatchEvent(new Event('xiii-pres')); } catch (e) { } }
             document.querySelectorAll('.xdr-pin').forEach(x => x.remove());
             Object.keys(XDELEG.KEYS).forEach(a => {
                 const card = [...document.querySelectorAll('a.card[href]')].find(x => new RegExp('(^|/)' + a + '(\\.html)?([?#]|$)').test(x.getAttribute('href'))); if (!card) return;
@@ -7711,6 +7715,93 @@ var XMENT = window.XMENT || (() => {
 })();
 
 XMENT.init('ressourco');
+
+// =====================================================================
+//  SUITE XIII — XPRS : 👥 présence en direct — qui est dans quel outil
+//  Deux sources fusionnées : le Drive (battement toutes les 20 s, fiable) et XLIVE (signal instantané à
+//  l'ouverture, au retour sur l'onglet, à la frappe, au départ). Affichage :
+//   · accueil : avatars sur les cartes des outils ;  · Démarrer : « 🟢 En ligne maintenant » ;
+//   · espace de travail (onglets) : avatars sur chaque onglet (l'outil envoie la liste à la fenêtre parente).
+// =====================================================================
+var XPRS = window.XPRS || (() => {
+    let APP = '';
+    const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } };
+    const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const fold = x => String(x || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
+    const cfg = () => { const c = J('xiii.drive', null); return c && c.url ? c : null; };
+    const me = () => { try { if (typeof XDRIVE !== 'undefined' && XDRIVE.me) return XDRIVE.me(); } catch (e) { } const c = cfg(); return (c && c.me && c.me.name) || (J('xiii.deleg.me', {}) || {}).name || 'Moi'; };
+    const TTL = 45000, LIVE = {}; // LIVE[app][id] = { by, ts, e, w }
+    const col = n => { let h = 0; for (let i = 0; i < n.length; i++) h = (h * 31 + n.charCodeAt(i)) | 0; return 'hsl(' + (Math.abs(h) % 360) + ',60%,55%)'; }; // même couleur que la pastille de l'outil
+    const ini = n => (String(n).trim().split(/\s+/).map(w => w[0] || '').join('').slice(0, 2) || '?').toUpperCase();
+    const name = a => (typeof XLINKS !== 'undefined' && XLINKS.T[a] ? XLINKS.T[a][1] : String(a || '').toUpperCase());
+    // ---------- état fusionné : { app: [ { by, e (modifie), w, ts } ] } — sans moi ----------
+    function state() {
+        const out = {}, now = Date.now(), mine = fold(me()), add = (a, x) => { if (!a || a === 'index' || !x || !x.by || now - (x.ts || 0) > TTL || fold(x.by) === mine) return; const L = out[a] = out[a] || [], o = L.find(y => fold(y.by) === fold(x.by)); const ed = x.e && now - x.e < TTL;
+            if (o) { o.ts = Math.max(o.ts, x.ts); o.e = o.e || ed; o.w = o.w || x.w || ''; } else L.push({ by: String(x.by), ts: x.ts, e: !!ed, w: x.w || '' }); };
+        let P = {}; try { P = (typeof XDRIVE !== 'undefined' && XDRIVE._pres && XDRIVE._pres()) || {}; } catch (e) { }
+        Object.keys(P).forEach(a => Object.values(P[a] || {}).forEach(x => add(a, x)));
+        Object.keys(LIVE).forEach(a => Object.values(LIVE[a]).forEach(x => add(a, x)));
+        Object.keys(out).forEach(a => out[a].sort((x, y) => (y.e - x.e) || x.by.localeCompare(y.by)));
+        return out;
+    }
+    // par personne : { by: [apps] }
+    function people(S) { S = S || state(); const P = {}; Object.keys(S).forEach(a => S[a].forEach(x => { const o = P[x.by] = P[x.by] || { by: x.by, apps: [], e: false }; o.apps.push({ app: a, e: x.e, w: x.w }); o.e = o.e || x.e; })); return Object.values(P).sort((a, b) => a.by.localeCompare(b.by)); }
+    function stack(L, max) { max = max || 3; return L.slice(0, max).map(x => '<i class="xprs-a' + (x.e ? ' ed' : '') + '" style="background:' + col(x.by) + '" title="' + esc(x.by + (x.w ? ' — ' + x.w : '') + (x.e ? ' · ✏️ modifie' : ' · 👁️ consulte')) + '">' + esc(ini(x.by)) + '</i>').join('') + (L.length > max ? '<i class="xprs-a more" title="' + esc(L.slice(max).map(x => x.by).join(', ')) + '">+' + (L.length - max) + '</i>' : ''); }
+    // ---------- signal instantané ----------
+    let lastSig = 0, lastIn = 0, sigEd = false;
+    function send(bye) {
+        if (!cfg() || typeof XLIVE === 'undefined' || !XLIVE.sig || APP === 'index') return; const now = Date.now(), ed = now - lastIn < 15000;
+        if (!bye && now - lastSig < 12000 && ed === sigEd) return; lastSig = now; sigEd = ed;
+        if (!XLIVE.sig({ k: bye ? 'bye' : 'here', app: APP, by: me(), e: ed ? now : 0, w: '' })) lastSig = 0; // pas encore relié : on réessaie au prochain passage
+    }
+    function onSig(p) {
+        if (!p || !p.app || !p.from) return; const A = LIVE[p.app] = LIVE[p.app] || {};
+        if (p.k === 'bye') delete A[p.from]; else A[p.from] = { by: p.by, ts: Date.now(), e: p.e ? Date.now() : 0, w: p.w || '' };
+        if (p.k === 'hello') { lastSig = 0; send(); } // un nouvel arrivant demande qui est là
+        paint();
+    }
+    // ---------- rendu ----------
+    let raf = 0; function paint() { if (raf) return; raf = requestAnimationFrame(() => { raf = 0; const S = state(); cards(S); start(S); parent(S); try { dispatchEvent(new CustomEvent('xiii-presence', { detail: S })); } catch (e) { } }); }
+    function cards(S) {
+        if (APP !== 'index') return; const appOf = a => ((a.getAttribute('href') || '').split(/[?#]/)[0].split('/').pop() || '').replace(/\.html$/, '');
+        document.querySelectorAll('main a.card[href]').forEach(a => { const k = appOf(a), L = S[k] || []; let b = a.querySelector('.xprs-c');
+            if (!L.length) { if (b) b.remove(); return; } if (!b) { b = document.createElement('span'); b.className = 'xprs-c'; if (getComputedStyle(a).position === 'static') a.style.position = 'relative'; a.appendChild(b); }
+            const h = stack(L, 3); if (b.innerHTML !== h) b.innerHTML = h; b.title = L.map(x => x.by + (x.e ? ' (modifie)' : '')).join(', ') + ' — dans ' + name(k); });
+    }
+    function start(S) {
+        const n = people(S).length, b = document.getElementById('xst-online'); if (b) b.textContent = n ? n + ' en ligne' : '';
+        const box = document.getElementById('xprs-list'); if (box) box.innerHTML = listHtml(S);
+    }
+    function listHtml(S) {
+        const P = people(S); if (!cfg()) return '<p class="xprs-e">Reliez le Drive d\'équipe pour voir qui travaille sur le projet.</p>';
+        if (!P.length) return '<p class="xprs-e">Personne d\'autre dans les outils en ce moment.</p>';
+        return P.map(p => '<div class="xprs-r"><i class="xprs-a' + (p.e ? ' ed' : '') + '" style="background:' + col(p.by) + '">' + esc(ini(p.by)) + '</i><div><b>' + esc(p.by) + '</b><span>' + p.apps.map(x => '<a href="' + esc(x.app) + '.html">' + (x.e ? '✏️ ' : '') + esc(name(x.app)) + (x.w ? ' <small>› ' + esc(x.w) + '</small>' : '') + '</a>').join('') + '</span></div></div>').join('');
+    }
+    // espace de travail : la fenêtre parente (onglets) reçoit l'état
+    function parent(S) { try { if (window.parent && window.parent !== window) window.parent.postMessage({ xpres: S, ws: (typeof XWS !== 'undefined' && XWS.id) || 'main', at: Date.now() }, location.origin); } catch (e) { } }
+    function css() {
+        const s = document.createElement('style'); s.textContent = '.xprs-a{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;color:#fff;font:700 9.5px/1 system-ui,sans-serif;font-style:normal;border:2px solid var(--bg-panel,#252321);margin-left:-6px;text-shadow:0 1px 1px rgba(0,0,0,.4);box-sizing:border-box}.xprs-a:first-child{margin-left:0}.xprs-a.ed{box-shadow:0 0 0 2px #ff9800}.xprs-a.more{background:#555}' +
+            '.xprs-c{position:absolute;left:10px;bottom:10px;z-index:4;display:flex;align-items:center;pointer-events:auto;animation:xprsIn .25s ease-out}@keyframes xprsIn{from{opacity:0;transform:scale(.7)}}' +
+            '.xprs-r{display:flex;gap:9px;align-items:flex-start;padding:6px 2px}.xprs-r .xprs-a{width:28px;height:28px;font-size:11px;margin:0;flex:none}.xprs-r div{display:flex;flex-direction:column;gap:2px;min-width:0}.xprs-r b{font-size:13px}.xprs-r span{display:flex;flex-wrap:wrap;gap:4px}.xprs-r a{font-size:11.5px;padding:2px 7px;border-radius:8px;background:rgba(255,255,255,.07);color:inherit;text-decoration:none}.xprs-r a:hover{background:rgba(240,179,120,.2)}.xprs-r small{color:var(--text-dim,#aaa)}.xprs-e{font-size:12.5px;color:var(--text-dim,#999);margin:4px 0}';
+        document.head.appendChild(s);
+    }
+    function init(app) {
+        APP = app; css();
+        if (typeof XLIVE !== 'undefined' && XLIVE.onSig) XLIVE.onSig(onSig);
+        addEventListener('xiii-pres', paint);
+        if (app !== 'index') {
+            ['keydown', 'input', 'pointerdown'].forEach(t => addEventListener(t, () => { lastIn = Date.now(); if (!sigEd) send(); }, { passive: true, capture: true }));
+            document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { lastSig = 0; send(); } else send(true); });
+            addEventListener('pagehide', () => send(true));
+            setTimeout(() => { send(); if (typeof XLIVE !== 'undefined' && XLIVE.sig) XLIVE.sig({ k: 'hello', app: APP, by: me() }); }, 1500);
+            setInterval(() => { if (document.visibilityState === 'visible') send(); }, 15000);
+        } else setTimeout(() => { if (typeof XLIVE !== 'undefined' && XLIVE.sig && cfg()) XLIVE.sig({ k: 'hello', app: 'index', by: me() }); }, 2000);
+        setInterval(paint, 10000); setTimeout(paint, 2500);
+    }
+    return { init, state, people, listHtml, stack, paint };
+})();
+
+XPRS.init('ressourco');
 
 // =====================================================================
 //  SUITE XIII — XBAR : barre commune des outils
@@ -8805,7 +8896,7 @@ const XDASH = (() => {
     // icône d'outil : logo personnalisé (logos/<outil>.png) s'il existe, sinon l'emoji
     const ic = a => '<span class="xd-ic"><img src="logos/' + a + '.png" alt="" onerror="this.parentNode.textContent=\'' + NM[a][0] + '\'"></span>';
     const CARDS = { proj: '🎬 Projet en cours', pilot: '📈 Pilotage du projet', check: '✅ Checklist de préparation', vit: '🌐 Vitrine à commenter', dead: '⏰ Prochaines échéances', need: '🧩 Ce qui manque', fb: '💬 Derniers retours de l\'équipe', msg: '📢 Message du Master', toM: '✉️ Écrire au Master', team: '📨 Messages de l\'équipe', day: '📋 Feuille du jour', meteo: '🌤️ Météo & soleil', clock: '🌍 Horloges', notes: '🗒️ Notes rapides', fav: '⭐ Outils récents', budget: '💶 Budget', matos: '🧳 Matériel', rush: '💽 Rushes', post: '🎞️ Versions à valider', online: '🟢 Équipe en ligne', docs: '📄 Derniers documents' };
-    const NEWW = ['day', 'meteo', 'clock', 'notes', 'fav', 'budget', 'matos', 'rush', 'post', 'online', 'docs']; // nouveaux widgets : proposés dans la galerie ＋, masqués tant qu'on ne les coche pas
+    const NEWW = ['day', 'meteo', 'clock', 'notes', 'fav', 'budget', 'matos', 'rush', 'post', 'docs']; // nouveaux widgets : proposés dans la galerie ＋, masqués tant qu'on ne les coche pas
     const PF = [['countdown', 'Compte à rebours (J-…)'], ['dates', 'Dates de tournage'], ['lieu', 'Lieu'], ['production', 'Production'], ['client', 'Client / diffuseur'], ['realisation', 'Réalisation'], ['diffusion', 'Diffusion'], ['duree', 'Format / durée'], ['contact', 'Contact production']];
     const FBT = [['avis', '💬 Avis'], ['mots', '📌 Mots'], ['travaux', '📥 Travaux reçus'], ['drive', '☁️ Journal du Drive']];
     const DS = [['fiche', '🎬 Dates du projet'], ['planno', '📅 Tâches PLANNO'], ['posto', '🎞️ Livrables POSTO'], ['cal', '🗓️ Toutes les dates du calendrier']];
@@ -8866,6 +8957,7 @@ const XDASH = (() => {
         const b = document.getElementById('xd-onl'); if (!b) return; const r = await api('beat', { look: 1, app: 'index', id: 'dash' + (J('xiii.drive', {}).tok || 'm').slice(-6), by: ((J('xiii.drive', {}) || {}).me || {}).name || 'Master' });
         if (!r.ok) { b.innerHTML = '<p class="xd-e">⚠️ ' + esc(r.err === 'action' ? 'Script Google à mettre à jour' : r.err || 'Drive injoignable') + '</p>'; return; }
         const now = Date.now(), M2 = {}; Object.keys(r.pres || {}).forEach(a => Object.values(r.pres[a] || {}).forEach(x => { if (now - x.ts < 150000) { const m = M2[x.by] || (M2[x.by] = new Set()); if (a !== 'index') m.add(a); } }));
+        if (typeof XPRS !== 'undefined') { b.innerHTML = XPRS.listHtml(); if (!onl.w) { onl.w = 1; addEventListener('xiii-presence', () => { const o = document.getElementById('xd-onl'); if (o) o.innerHTML = XPRS.listHtml(); }); } return; }
         const L = Object.keys(M2); b.innerHTML = L.length ? L.map(n => '<div class="xd-r"><span>🟢 <b>' + esc(n) + '</b></span><small>' + ([...M2[n]].map(a => (NM[a] || [0, a])[1]).join(', ') || 'sur l\'accueil') + '</small></div>').join('') : '<p class="xd-e">Personne en ligne pour l\'instant.</p>';
     }
     async function docs() {
