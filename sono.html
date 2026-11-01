@@ -6458,7 +6458,8 @@ const XDASH = (() => {
         const W = (body, cls) => '<div class="xd-c' + (cls ? ' ' + cls : '') + '" data-card="' + k + '">' + g + '<h4>' + CARDS[k] + '</h4>' + body + '</div>';
         if (k === 'proj') { if (!f) return M ? W('<p class="xd-e">Aucun projet en cours. <button class="xd-l" onclick="XPROJET.open()">Créer la fiche projet →</button></p>', 'xd-proj') : ''; const n = f.debut ? dd(f.debut) : null, P = C.proj, has = x => P.indexOf(x) > -1;
             const meta = [has('lieu') && f.lieu, has('production') && f.production, has('client') && f.client, has('realisation') && f.realisation && 'Réal. ' + f.realisation, has('duree') && f.duree, has('diffusion') && f.diffusion && '📺 ' + fr(f.diffusion), has('contact') && [f.contactName, f.contactPhone].filter(Boolean).join(' ')].filter(Boolean);
-            return W('<b class="xd-t">' + esc(f.title || 'Sans nom') + '</b>' + (meta.length ? '<div class="xd-m">' + esc(meta.join(' · ')) + '</div>' : '') + (has('countdown') && n != null ? '<div class="xd-cd"><b>' + (n > 0 ? 'J-' + n : n === 0 ? 'Jour J' : 'J+' + (-n)) + '</b><span>' + (n > 0 ? 'avant le tournage' : n === 0 ? 'tournage aujourd\'hui' : 'depuis le début du tournage') + (has('dates') ? '<br>' + fr(f.debut) + (f.fin && f.fin !== f.debut ? ' → ' + fr(f.fin) : '') : '') + '</span></div>' : has('dates') && f.debut ? '<div class="xd-m">' + fr(f.debut) + (f.fin && f.fin !== f.debut ? ' → ' + fr(f.fin) : '') + '</div>' : '') + '<button class="xd-l" onclick="XPROJET.open()">Ouvrir la fiche projet →</button>', 'xd-proj'); }
+            const rsx = M && typeof XPCFG !== 'undefined' ? XPCFG.restrictions() : [], rh = rsx.length ? '<div class="xd-m" style="color:#ef9a9a" title="Visible par le Master uniquement">🔐 ' + rsx.map(r => esc(r.label) + ' : ' + esc(r.txt)).join(' · ') + '</div>' : '';
+            return W('<b class="xd-t">' + esc(f.title || 'Sans nom') + '</b>' + rh + (meta.length ? '<div class="xd-m">' + esc(meta.join(' · ')) + '</div>' : '') + (has('countdown') && n != null ? '<div class="xd-cd"><b>' + (n > 0 ? 'J-' + n : n === 0 ? 'Jour J' : 'J+' + (-n)) + '</b><span>' + (n > 0 ? 'avant le tournage' : n === 0 ? 'tournage aujourd\'hui' : 'depuis le début du tournage') + (has('dates') ? '<br>' + fr(f.debut) + (f.fin && f.fin !== f.debut ? ' → ' + fr(f.fin) : '') : '') + '</span></div>' : has('dates') && f.debut ? '<div class="xd-m">' + fr(f.debut) + (f.fin && f.fin !== f.debut ? ' → ' + fr(f.fin) : '') + '</div>' : '') + '<button class="xd-l" onclick="XPROJET.open()">Ouvrir la fiche projet →</button>', 'xd-proj'); }
         if (k === 'pilot') return typeof XPDASH !== 'undefined' ? W(XPDASH.card(), 'xd-pilot') : '';
         if (k === 'vit') return typeof XVIT !== 'undefined' ? W(XVIT.card(), 'xd-vit') : '';
         if (k === 'check') return typeof XCHECK !== 'undefined' ? W(XCHECK.card(), 'xd-check') : '';
@@ -7674,19 +7675,35 @@ const XPCFG = (() => {
     const THEMES = [['', '— libre (chacun son thème) —'], ['dark', '🌙 Sombre'], ['light', '☀️ Clair'], ['auto', '🖥️ Auto'], ['w2k', '🪟 Win 2000'], ['xp', '🟦 Win XP'], ['cyber', '🌆 Cyberpunk'], ['rainbow', '🌈 Rainbow'], ['mac9', '🍎 Mac OS 9'], ['term', '📟 Terminal'], ['sepia', '🎞️ Pellicule'], ['regie', '🎛️ Régie'], ['soleil', '🔆 Plein soleil'], ['gb', '🎮 Game Boy']];
     let APP = '';
     const cfg = () => J(K, {}) || {};
+    // ---------- 🔐 outils par secteur ----------
+    const SECT = [['production', 'Production'], ['realisation', 'Réalisation'], ['image', 'Image'], ['son', 'Son'], ['lumiere', 'Lumière'], ['regie', 'Régie'], ['technique', 'Technique'], ['decor', 'Décor'], ['hmc', 'HMC'], ['post', 'Post-production'], ['artistes', 'Artistes'], ['client', 'Client']];
+    const fold = x => String(x || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+    const secLabel = k => { const f = SECT.find(x => x[0] === fold(k)); return f ? f[1] : (((cfg().secs || []).find(x => fold(x[0]) === fold(k)) || [])[1] || k); };
+    const mySecs = () => { const d = drive(); return d && d.tok && !d.code ? String(d.secteur || '').split(',').map(fold).filter(Boolean) : []; };
+    // interdit pour moi si TOUS mes secteurs l'interdisent (une personne image + prod garde ce que la prod a)
+    function denied(app, c) { c = c || cfg(); const D = c.deny || {}, S = mySecs(); if (master() || !S.length) return false; return S.every(s => { const k = Object.keys(D).find(x => fold(x) === s); return k && (D[k] || []).indexOf(app) > -1; }); }
+    function restrictions(c) { c = c || cfg(); const D = c.deny || {}, T = typeof XLINKS !== 'undefined' ? XLINKS.T : {}; const all = Object.keys(T).filter(a => a !== 'jour'), nm = a => (T[a] || ['', a.toUpperCase()])[1];
+        return Object.keys(D).filter(k => (D[k] || []).length).map(k => { const open = all.filter(a => D[k].indexOf(a) < 0), few = open.length < D[k].length; return { sec: k, label: secLabel(k), apps: D[k], open, names: D[k].map(nm), txt: few ? (open.length ? 'seulement ' + open.map(nm).join(', ') : 'aucun outil') : 'sans ' + D[k].map(nm).join(', ') }; }); }
     async function api(a, p) { const c = drive(); if (!c || !c.url) return { ok: false, err: 'off' }; try { const r = await fetch(c.url, { method: 'POST', body: JSON.stringify(Object.assign({ a }, c.tok ? { tok: c.tok } : { code: c.code, by: (c.me && c.me.name) || 'Master' }, p || {})), redirect: 'follow' }); return await r.json(); } catch (e) { return { ok: false, err: 'net' }; } }
     // ---------- appliquer ----------
     async function bgUrl(c) { if (!c.bg) return ''; if (/^data:/.test(c.bg)) return c.bg; if (typeof XFILES === 'undefined') return ''; const r = await XFILES.unpack({ b: c.bg }); return /^data:/.test(r.b) ? r.b : ''; }
     async function apply() {
         const c = cfg();
         if (c.theme && typeof XTHEME !== 'undefined' && XTHEME.mode() !== c.theme && localStorage.getItem('xiii.pcfg.applied') !== c.theme + '|' + (c.at || 0)) { XTHEME.set(c.theme); localStorage.setItem('xiii.pcfg.applied', c.theme + '|' + (c.at || 0)); }
-        if (APP !== 'index') return;
-        const hid = new Set(c.hidden || []), app = a => ((a.getAttribute('href') || '').split(/[?#]/)[0].split('/').pop() || '').replace(/\.html$/, '');
+        if (APP !== 'index') { block(c); return; }
+        const hid = new Set((c.hidden || []).concat(Object.keys((typeof XLINKS !== 'undefined' && XLINKS.T) || {}).filter(a => denied(a, c)))), app = a => ((a.getAttribute('href') || '').split(/[?#]/)[0].split('/').pop() || '').replace(/\.html$/, '');
         document.querySelectorAll('a.card').forEach(a => { if (hid.has(app(a))) { a.style.display = 'none'; a.dataset.pcfg = '1'; } else if (a.dataset.pcfg) { a.style.display = ''; delete a.dataset.pcfg; } });
         document.querySelectorAll('section.phase').forEach(ph => { if (!ph.querySelector('a.card')) return; ph.style.display = [...ph.querySelectorAll('a.card')].some(a => a.style.display !== 'none') ? '' : 'none'; });
         const u = await bgUrl(c), a = Math.max(0, Math.min(.9, c.dim == null ? .55 : +c.dim));
         if (u) { document.body.classList.add('xpbg'); document.body.style.setProperty('--xpbg', 'linear-gradient(rgba(0,0,0,' + a + '),rgba(0,0,0,' + a + ')),url("' + u + '")'); }
         else { document.body.classList.remove('xpbg'); document.body.style.removeProperty('--xpbg'); }
+    }
+    // outil interdit à mon secteur : écran d'information (les données ne sont de toute façon plus servies par le Drive v21)
+    function block(c) {
+        const on = APP && APP !== 'index' && denied(APP, c), o = document.getElementById('xpc-deny');
+        if (!on) { if (o) o.remove(); return; } if (o) return;
+        const T = typeof XLINKS !== 'undefined' ? XLINKS.T : {}, nm = (T[APP] || ['', APP.toUpperCase()])[1], S = mySecs().map(secLabel).join(' / ');
+        document.body.insertAdjacentHTML('beforeend', '<div id="xpc-deny" role="alertdialog" aria-modal="true" style="position:fixed;inset:0;z-index:99990;background:rgba(10,10,12,.92);display:flex;align-items:center;justify-content:center;padding:20px;font:15px system-ui,sans-serif;color:#eee"><div style="max-width:420px;text-align:center;background:#252321;border:1px solid rgba(240,179,120,.5);border-radius:16px;padding:26px 22px"><div style="font-size:40px">🔐</div><h2 style="margin:8px 0 6px;font-size:19px">' + esc(nm) + ' n\'est pas ouvert à votre secteur</h2><p style="color:#bbb;margin:0 0 16px">Le Master du projet a réservé cet outil à d\'autres secteurs' + (S ? ' (vous : <b>' + esc(S) + '</b>)' : '') + '. Demandez-lui si vous en avez besoin.</p><a href="index.html" style="display:inline-block;padding:10px 18px;border-radius:10px;background:#F0B378;color:#1a1a1a;font-weight:700;text-decoration:none">← Retour à l\'accueil</a></div></div>');
     }
     // ---------- partage par le Drive ----------
     async function pull() {
@@ -7712,14 +7729,33 @@ const XPCFG = (() => {
             '<div class="xpc-g"><label class="xpj-f"><span>Thème imposé à l\'équipe</span><select id="xpc-th"' + (M ? '' : ' disabled') + '>' + THEMES.map(t => '<option value="' + t[0] + '"' + ((c.theme || '') === t[0] ? ' selected' : '') + '>' + t[1] + '</option>').join('') + '</select></label>' +
             '<div class="xpj-f"><span>Photo de fond de l\'accueil</span><div class="xpc-bg" id="xpc-bgp" style="' + (prev ? 'background-image:url(&quot;' + prev + '&quot;)' : '') + '">' + (prev ? '' : '<small>Aucune photo</small>') + '</div>' +
             (M ? '<div class="xpc-row"><label class="xpc-btn">📷 Choisir une photo<input type="file" accept="image/*" id="xpc-file" hidden></label>' + (prev ? '<button id="xpc-rm">✕ Retirer</button>' : '') + '</div><label class="xpc-row"><span>Assombrir</span><input type="range" id="xpc-dim" min="0" max="0.85" step="0.05" value="' + (c.dim == null ? .55 : c.dim) + '"></label>' : '') + '</div></div>' +
-            '<div class="xpj-f"><span>Outils masqués sur l\'accueil pour ce projet <small>(activé = masqué)</small></span><div class="xpc-tools">' + Object.keys(T).filter(a => a !== 'jour').map(a => '<label><span>' + T[a][0] + ' ' + esc(T[a][1]) + '</span><input type="checkbox" data-h="' + a + '"' + (hid.has(a) ? ' checked' : '') + (M ? '' : ' disabled') + ' title="Masquer sur l\'accueil"></label>').join('') + '</div></div>' +
+            '<div class="xpj-f" id="xpc-acc"></div>' +
             (M ? '<div class="xpc-row"><button id="xpc-save" class="xpj-main">💾 Enregistrer pour l\'équipe</button><span id="xpc-st" class="xpj-dim">' + (drive() && drive().code ? 'Partagé par le ☁️ Drive du projet.' : 'Drive non relié : réglage gardé sur ce poste.') + '</span></div>' : '');
+        const deny = JSON.parse(JSON.stringify(c.deny || {})); let cols = [...new Set(Object.keys(deny).filter(k => (deny[k] || []).length).concat(c.cols || []))];
+        const TL = Object.keys(T).filter(a => a !== 'jour');
+        const acc = () => { const box = el.querySelector('#xpc-acc'); if (!box) return; const D = deny, avail = SECT.concat(c.secs || []).filter(x => cols.indexOf(x[0]) < 0);
+            box.innerHTML = '<span>🧰 Outils disponibles pour l\'équipe <small>— cochés = ouverts. « Tous » s\'applique à toute l\'équipe (outil masqué sinon) ; une colonne de secteur réserve ou interdit un outil à ce secteur. Le Master voit toujours tout.</small></span>' +
+                '<div class="xpc-acc"><table><thead><tr><th>Outil</th><th title="Toute l\'équipe">👥 Tous</th>' + cols.map(k => '<th><label title="Tout cocher / décocher pour ' + esc(secLabel(k)) + '"><input type="checkbox" data-colall="' + esc(k) + '"' + (M ? '' : ' disabled') + (!(D[k] || []).length ? ' checked' : '') + '> ' + esc(secLabel(k)) + '</label>' + (M ? '<button data-rmcol="' + esc(k) + '" title="Retirer la colonne (le secteur retrouve tous les outils)">✕</button>' : '') + '</th>').join('') +
+                (M ? '<th class="add"><select id="xpc-addsec" aria-label="Ajouter un secteur"><option value="">➕ Secteur…</option>' + avail.map(x => '<option value="' + esc(x[0]) + '">' + esc(x[1]) + '</option>').join('') + '<option value="__new">Autre secteur…</option></select></th>' : '') + '</tr></thead><tbody>' +
+                TL.map(a => { const off = hid.has(a); return '<tr class="' + (off ? 'off' : '') + '"><th>' + T[a][0] + ' ' + esc(T[a][1]) + '</th><td><input type="checkbox" data-all="' + a + '"' + (off ? '' : ' checked') + (M ? '' : ' disabled') + ' aria-label="' + esc(T[a][1]) + ' pour toute l\'équipe"></td>' + cols.map(k => '<td><input type="checkbox" data-sec="' + esc(k) + '" data-app="' + a + '"' + ((D[k] || []).indexOf(a) > -1 ? '' : ' checked') + (M && !off ? '' : ' disabled') + ' aria-label="' + esc(T[a][1]) + ' pour ' + esc(secLabel(k)) + '"></td>').join('') + (M ? '<td></td>' : '') + '</tr>'; }).join('') + '</tbody></table></div>' +
+                (cols.length ? '' : '<p class="xpj-dim" style="margin:6px 0 0">Ajoutez une colonne de secteur (➕) pour ouvrir ou fermer des outils à un secteur précis (image, production…).</p>') +
+                '<div class="xpc-sum">' + restrictions({ deny: D }).map(r => '<span>🔐 <b>' + esc(r.label) + '</b> : ' + esc(r.txt) + '</span>').join('') + '</div>';
+            if (!M) return;
+            box.querySelectorAll('[data-all]').forEach(x => x.onchange = () => { x.checked ? hid.delete(x.dataset.all) : hid.add(x.dataset.all); acc(); });
+            box.querySelectorAll('[data-sec]').forEach(x => x.onchange = () => { const k = x.dataset.sec, L = D[k] = D[k] || []; const i = L.indexOf(x.dataset.app); if (x.checked && i > -1) L.splice(i, 1); else if (!x.checked && i < 0) L.push(x.dataset.app); acc(); });
+            box.querySelectorAll('[data-colall]').forEach(x => x.onchange = () => { D[x.dataset.colall] = x.checked ? [] : TL.slice(); acc(); });
+            box.querySelectorAll('[data-rmcol]').forEach(b => b.onclick = () => { const k = b.dataset.rmcol; delete D[k]; cols = cols.filter(x => x !== k); acc(); });
+            const ad = box.querySelector('#xpc-addsec'); if (ad) ad.onchange = () => { let k = ad.value; if (!k) return; if (k === '__new') { const n = (prompt('Nom du secteur (tel qu\'il est donné aux membres dans 👥 Membres et droits) :') || '').trim(); if (!n) { acc(); return; } k = fold(n).replace(/[^a-z0-9]+/g, '-'); c.secs = (c.secs || []).filter(x => x[0] !== k).concat([[k, n]]); } if (cols.indexOf(k) < 0) cols.push(k); D[k] = D[k] || []; acc(); };
+        };
+        acc();
+        // secteurs déjà donnés aux membres (Drive) : proposés d'office en colonnes s'ils ont des restrictions, sinon dans la liste
+        if (M && drive() && drive().code) api('team').then(r => { if (!r.ok) return; const extra = []; (r.team || []).forEach(m => String(m.secteur || '').split(',').map(x => x.trim()).filter(Boolean).forEach(x => { if (!SECT.some(y => y[0] === fold(x)) && !(c.secs || []).some(y => fold(y[0]) === fold(x))) extra.push([fold(x), x]); })); if (extra.length) { c.secs = (c.secs || []).concat(extra.filter((x, i, a) => a.findIndex(y => y[0] === x[0]) === i)); acc(); } }).catch(() => { });
         if (!M) return;
         const q = s => el.querySelector(s);
         q('#xpc-file').onchange = async e => { const f = e.target.files[0]; if (!f) return; try { c.bg = await photo(f); const p = q('#xpc-bgp'); p.style.backgroundImage = 'url("' + c.bg + '")'; p.innerHTML = ''; } catch (x) { q('#xpc-st').textContent = '⚠️ Image illisible'; } };
         const rm = q('#xpc-rm'); if (rm) rm.onclick = () => { c.bg = ''; const p = q('#xpc-bgp'); p.style.backgroundImage = ''; p.innerHTML = '<small>Aucune photo</small>'; };
         q('#xpc-save').onclick = async () => {
-            c.theme = q('#xpc-th').value; c.dim = +q('#xpc-dim').value; c.hidden = [...el.querySelectorAll('[data-h]:checked')].map(x => x.dataset.h); c.at = Date.now();
+            c.theme = q('#xpc-th').value; c.dim = +q('#xpc-dim').value; c.hidden = [...hid]; Object.keys(deny).forEach(k => { if (!(deny[k] || []).length) delete deny[k]; }); c.deny = deny; c.cols = cols; c.at = Date.now();
             q('#xpc-st').textContent = '⏳ Enregistrement…'; if (!W(K, c)) { q('#xpc-st').textContent = '⚠️ Stockage plein : choisissez une photo plus légère'; return; }
             const r = await push(c); q('#xpc-st').textContent = r.ok ? (r.local ? '✅ Enregistré sur ce poste' : '✅ Enregistré pour toute l\'équipe') : '⚠️ Drive : ' + (r.err || 'erreur'); apply();
         };
@@ -7727,13 +7763,14 @@ const XPCFG = (() => {
     function init(app) {
         APP = app;
         const s = document.createElement('style'); s.textContent = 'body.xpbg{background-image:var(--xpbg)!important;background-size:cover!important;background-position:center!important;background-attachment:fixed!important}body.xpbg .intro,body.xpbg .intro *,body.xpbg #ui-subtitle,body.xpbg .phase-head,body.xpbg .phase-head *{color:#fff!important;text-shadow:0 1px 3px rgba(0,0,0,.9),0 0 14px rgba(0,0,0,.7)}' +
+            '.xpc-acc{overflow:auto;max-height:420px;border:1px solid var(--border-soft,#3a3633);border-radius:10px;margin-top:6px}.xpc-acc table{border-collapse:collapse;font-size:12.5px;min-width:100%}.xpc-acc th,.xpc-acc td{padding:5px 8px;border-bottom:1px solid var(--border-soft,#333);text-align:center;white-space:nowrap}.xpc-acc thead th{position:sticky;top:0;background:var(--bg-panel,#252321);z-index:1;font-weight:600}.xpc-acc thead th label{display:inline-flex;gap:4px;align-items:center;cursor:pointer}.xpc-acc thead th button{background:none;border:0;color:var(--text-dim,#999);cursor:pointer;padding:0 0 0 4px;font-size:11px}.xpc-acc tbody th{text-align:left;font-weight:500;position:sticky;left:0;background:var(--bg-panel,#252321)}.xpc-acc tr.off th{opacity:.5;text-decoration:line-through}.xpc-acc td input{width:auto;margin:0;cursor:pointer}.xpc-acc select{width:auto!important;max-width:150px;font:inherit;font-size:12px;color:inherit;background:var(--bg-input,#17171a);border:1px solid var(--border-color,#45454b);border-radius:6px;padding:3px 5px}.xpc-sum{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.xpc-sum span{font-size:12px;padding:3px 9px;border-radius:99px;background:rgba(229,115,115,.14);border:1px solid rgba(229,115,115,.4)}' +
             '.xpc-g{display:grid;grid-template-columns:1fr 1fr;gap:12px}.xpc-bg{height:110px;border-radius:10px;border:1px dashed var(--border-color,#555);background:center/cover no-repeat;display:flex;align-items:center;justify-content:center;color:var(--text-dim,#999)}.xpc-row{display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap}.xpc-btn{cursor:pointer;border:1px solid var(--border-color,#555);border-radius:8px;padding:5px 10px}.xpc-tools{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:2px 18px;font-size:13.5px}.xpc-tools label{display:flex!important;flex-direction:row!important;gap:8px;align-items:center;justify-content:space-between;padding:6px 2px;border-bottom:1px solid var(--border-color,rgba(128,128,128,.25));cursor:pointer;margin:0!important}.xpc-tools label span{flex:1}.xpc-tools label input{order:2}@media(max-width:640px){.xpc-g{grid-template-columns:1fr}}';
         document.head.appendChild(s);
         const go = () => { apply(); pull(); }; XBOOT.ready(go, 600);
         addEventListener('storage', e => { if (e.key === K) apply(); });
     }
     async function save(patch) { const c = Object.assign({}, cfg(), patch, { at: Date.now() }); if (!W(K, c)) return { ok: false, err: 'stockage' }; const r = await push(c); apply(); return r; }
-    return { init, mount, apply, pull, save, get: cfg };
+    return { init, mount, apply, pull, save, get: cfg, denied, restrictions, isMaster: master };
 })();
 
 XPCFG.init('sono');
