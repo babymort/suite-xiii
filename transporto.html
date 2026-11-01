@@ -4270,7 +4270,7 @@ const XDELEG = (() => {
             '<div class="xdl-ch">' + (vis.length ? vis.map(id => { const t = N[id], st = ST2[t.status]; return '<div class="xnt-t" data-id="' + esc(id) + '"><div class="xnt-h"><b>' + esc(t.label || id) + '</b>' + (st ? ' <span class="' + st[2] + '">' + st[0] + ' ' + st[1] + (t.by ? ' par ' + esc(t.by) : '') + '</span>' : '') + '</div>' +
                 t.thread.map(m => '<div class="xnt-m"><b>' + esc(m.who || '—') + '</b> <small>' + fmt(m.ts) + '</small><br>' + esc(m.txt).replace(/\n/g, '<br>') + '</div>').join('') +
                 '<div class="xnt-a"><input data-rep placeholder="Répondre…"><button data-s="ok" title="Valider">✅</button><button data-s="rev" title="À revoir">🔁</button>' + (t.status ? '<button data-s="" title="Rouvrir">↺</button>' : '') + '<button data-d title="Supprimer le fil">✕</button></div></div>'; }).join('') : '<p class="xdl-h" style="padding:10px">Aucun commentaire' + (f ? ' dans ce filtre' : '') + '. Commentez un élément ci-dessus : le fil part avec vos liens de délégation et revient avec les réponses.</p>') + '</div>' +
-            '<div class="xdl-b"><button id="xnt-dos" title="Envoyer le journal des commentaires et validations à DOSSIER XIII">📚 Journal vers DOSSIER</button><button data-x class="ok">Fermer</button></div>');
+            '<div class="xdl-b"><button id="xnt-chat" title="Discuter avec toute l\'équipe (tapez @ pour mentionner)">💬 Chat du projet</button><button id="xnt-dos" title="Envoyer le journal des commentaires et validations à DOSSIER XIII">📚 Journal vers DOSSIER</button><button data-x class="ok">Fermer</button></div>');
         const who = () => { const v = o.querySelector('#xnt-me').value.trim(); if (v) { const me = J(K_ME, {}); if (!J(K_ACT(APP), null) && me.name !== v) { me.name = v; W(K_ME, me); } } return v || 'Moi'; };
         const lab = id => id === '__all' ? 'Général' : (EL.find(e => e.id === id) || {}).label || id;
         const save = (fn) => { const N2 = notes(); fn(N2); W(K_NOTES(), N2); refreshNoteBtn(); o.remove(); openNotes(); };
@@ -4280,6 +4280,7 @@ const XDELEG = (() => {
             d.querySelector('[data-rep]').onkeydown = e => { if (e.key === 'Enter' && e.target.value.trim()) { const tx = e.target.value.trim(), ww = w(); save(N2 => N2[id].thread.push({ who: ww, txt: tx, ts: Date.now() })); } };
             d.querySelectorAll('[data-s]').forEach(b => b.onclick = () => { const ww = w(); save(N2 => { N2[id].status = b.dataset.s || null; N2[id].by = ww; N2[id].sts = Date.now(); N2[id].thread.push({ who: ww, txt: b.dataset.s === 'ok' ? '✅ Validé' : b.dataset.s === 'rev' ? '🔁 À revoir' : '↺ Rouvert', ts: Date.now(), sys: 1 }); }); });
             d.querySelector('[data-d]').onclick = () => { if (confirm('Supprimer ce fil de commentaires ?')) save(N2 => { delete N2[id]; }); }; });
+        o.querySelector('#xnt-chat').onclick = () => { const el = o.querySelector('#xnt-el'), lb = el && el.value !== '__all' ? el.options[el.selectedIndex].text : ''; o.remove(); if (window.XMENT && XMENT.openChat) XMENT.openChat(lb); };
         o.querySelector('#xnt-dos').onclick = () => { if (typeof xiiiSendToDossier !== 'function') { say('Envoi vers DOSSIER indisponible'); return; } const N2 = notes(), ks = Object.keys(N2); if (!ks.length) { say('Aucun commentaire'); return; } o.remove();
             const html = '<p><b>Journal des commentaires et validations — ' + esc(NAMES[APP]) + '</b> (' + new Date().toLocaleDateString('fr-FR') + ')</p>' + ks.map(id => { const t = N2[id], st = ST2[t.status]; return '<p><b>' + esc(t.label || id) + '</b> — ' + (st ? st[1] + (t.by ? ' par ' + esc(t.by) : '') + ' le ' + fmt(t.sts) : 'ouvert') + '</p><ul>' + t.thread.map(m => '<li>' + esc(fmt(m.ts)) + ' — <b>' + esc(m.who) + '</b> : ' + esc(m.txt) + '</li>').join('') + '</ul>'; }).join('');
             xiiiSendToDossier({ app: 'SUITE XIII', from: APP, project: (fiche() || {}).title || '', choices: [{ label: 'Journal des validations ' + NAMES[APP], sub: ks.length + ' fil(s) de commentaires avec leur statut', title: 'Validations — ' + NAMES[APP], keywords: ['validation', 'commentaires', 'suivi'], key: 'notes:' + APP, make: async () => ({ html }) }] }); };
@@ -5546,7 +5547,7 @@ var XMENT = window.XMENT || (() => {
     async function api(a, p) { const c = cfg(); if (!c) return { ok: false, err: 'off' }; try { const r = await fetch(c.url, { method: 'POST', body: JSON.stringify(Object.assign({ a }, c.tok ? { tok: c.tok } : { code: c.code, by: me() || c.master || 'Master' }, p || {})), redirect: 'follow' }); return await r.json(); } catch (e) { return { ok: false, err: 'net' }; } }
     const RX = /(^|[\s(,;:])@([A-Za-zÀ-ÖØ-öø-ÿ][\wÀ-ÖØ-öø-ÿ'.-]*)/g;
     const tags = t => { const o = []; let m; RX.lastIndex = 0; while ((m = RX.exec(String(t || '')))) o.push(m[2].replace(/[.'-]+$/, '')); return [...new Set(o)]; };
-    const NAMES = { callsheeto: 'CALL SHEETO', soustitro: 'SOUSTITRO' };
+    const NAMES = { callsheeto: 'CALL SHEETO', soustitro: 'SOUSTITRO', chat: 'Chat du projet', index: 'Accueil' };
     const appName = a => (window.XLINKS && XLINKS.T[a] ? XLINKS.T[a][1] : NAMES[a] || String(a || '').toUpperCase());
     // ---------- dans un outil : repérer mes nouveaux messages avec des @ ----------
     function scan(k, v) {
@@ -5568,7 +5569,7 @@ var XMENT = window.XMENT || (() => {
         const show = () => {
             if (document.getElementById('xmt-ov')) return; if (document.getElementById('xnw-ov')) { setTimeout(show, 1500); return; }
             const L = r.ments.map(m => Object.assign({}, m, { txt: String(m.txt || '').replace(/^'/, '') })); document.body.insertAdjacentHTML('beforeend', '<div id="xmt-ov"><div class="xmt-b"><div class="xmt-h"><b>📣 On vous a mentionné</b><span>' + L.length + ' message' + (L.length > 1 ? 's' : '') + ' depuis votre dernière visite</span></div><div class="xmt-l">' +
-                L.map(m => '<a class="xmt-i" href="' + esc(m.app) + '.html"><div><b>' + esc(m.by) + '</b> · ' + esc(appName(m.app)) + (m.el ? ' › ' + esc(m.el) : '') + '<small>' + new Date(m.ts).toLocaleString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) + '</small></div><p>' + esc(m.txt).replace(/(^|\s)@([\wÀ-ÿ'.-]+)/g, '$1<mark>@$2</mark>') + '</p></a>').join('') +
+                L.map(m => '<a class="xmt-i" href="' + (m.app === 'chat' ? 'index.html' : esc(m.app) + '.html') + '"><div><b>' + esc(m.by) + '</b> · ' + esc(appName(m.app)) + (m.el ? ' › ' + esc(m.el) : '') + '<small>' + new Date(m.ts).toLocaleString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) + '</small></div><p>' + esc(m.txt).replace(/(^|\s)@([\wÀ-ÿ'.-]+)/g, '$1<mark>@$2</mark>') + '</p></a>').join('') +
                 '</div><div class="xmt-f"><button id="xmt-ok">✓ Marquer comme lu</button><button id="xmt-later" class="sec">Plus tard</button></div></div></div>');
             const o = document.getElementById('xmt-ov'), close = () => o.remove();
             document.getElementById('xmt-ok').onclick = () => { api('ment_read'); close(); };
@@ -5580,13 +5581,143 @@ var XMENT = window.XMENT || (() => {
     function init(app) {
         APP = app; started = Date.now();
         const s = document.createElement('style'); s.textContent = '#xmt-ov{position:fixed;inset:0;z-index:9993;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:16px}.xmt-b{background:var(--bg-panel,#252321);color:var(--text,#eee);border:1px solid rgba(240,179,120,.5);border-radius:14px;width:min(520px,100%);max-height:84vh;display:flex;flex-direction:column;font:14px/1.45 "Segoe UI",sans-serif;box-shadow:0 20px 60px rgba(0,0,0,.5)}.xmt-h{padding:14px 16px 8px;display:flex;flex-direction:column;gap:2px}.xmt-h b{font-size:16px}.xmt-h span{opacity:.65;font-size:12.5px}.xmt-l{overflow:auto;padding:0 10px}.xmt-i{display:block;text-decoration:none;color:inherit;padding:10px 8px;border-top:1px solid rgba(255,255,255,.08);border-radius:8px}.xmt-i:hover{background:rgba(240,179,120,.08)}.xmt-i small{float:right;opacity:.55}.xmt-i p{margin:4px 0 0;white-space:pre-wrap}.xmt-i mark{background:rgba(240,179,120,.25);color:inherit;border-radius:4px;padding:0 2px}.xmt-f{display:flex;gap:8px;justify-content:flex-end;padding:12px 16px}.xmt-f button{font:600 13px "Segoe UI",sans-serif;padding:8px 14px;border-radius:8px;border:0;background:#f0b378;color:#1d1b19;cursor:pointer}.xmt-f button.sec{background:transparent;color:inherit;border:1px solid rgba(255,255,255,.2)}@media print{#xmt-ov{display:none!important}}';
-        document.head.appendChild(s);
+        document.head.appendChild(s); s.textContent += CSS2; try { acWire(); hlWire(); } catch (e) { }
+        if (app !== 'index') setTimeout(() => toolMentions().catch(() => { }), 5000);
         if (app === 'index') { setTimeout(() => home().catch(() => { }), 3500); return; }
         const prev = Storage.prototype.setItem;
         Storage.prototype.setItem = function (k, v) { const r = prev.apply(this, arguments); if (this === localStorage && (k === 'xiii.notes.' + APP || k === 'xiii.memo.' + APP)) { try { scan(k, v); } catch (e) { } } return r; };
         ['xiii.notes.' + APP, 'xiii.memo.' + APP].forEach(k => { const v = localStorage.getItem(k); if (v) try { scan(k, v); } catch (e) { } }); // mémoriser l'existant
     }
-    return { init, tags };
+
+    // =================================================================
+    //  👥 qui peut-on mentionner : équipe de la fiche projet + annuaire + membres Drive vus dans le chat
+    // =================================================================
+    const fold = x => String(x || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+    function people() {
+        const out = [], seen = {}, add = (prenom, nom, info) => { prenom = String(prenom || '').trim(); nom = String(nom || '').trim(); if (!prenom && !nom) return; const full = (prenom + ' ' + nom).trim(), k = fold(full); if (!k || seen[k]) return; seen[k] = 1; out.push({ prenom: prenom || nom, nom: prenom ? nom : '', full, info: info || '' }); };
+        const split = n => { const a = String(n || '').trim().split(/\s+/); return [a.shift() || '', a.join(' ')]; };
+        try { const S = J('xiii.projets', {}) || {}, f = (S.list || []).find(x => x && x.id === S.active); (f && f.team || []).forEach(m => { const [a, b] = m.prenom || m.nom ? [m.prenom, m.nom] : split(m.name); add(a, b, [m.role, m.dept].filter(Boolean).join(' · ')); }); } catch (e) { }
+        (J('xiii.annuaire', []) || []).forEach(m => { if (!m) return; const [a, b] = m.prenom || m.nom ? [m.prenom, m.nom] : split(m.name); add(a, b, m.role || m.job || ''); });
+        (J('xiii.chat.who', []) || []).forEach(n => { const [a, b] = split(n); add(a, b, 'membre du Drive'); });
+        return out;
+    }
+    // jeton à insérer : @Prénom si unique, sinon @Prénom_Nom
+    const token = (p, all) => { const dup = all.filter(x => fold(x.prenom) === fold(p.prenom)).length > 1; return '@' + (dup && p.nom ? (p.prenom + '_' + p.nom) : p.prenom).replace(/\s+/g, '_'); };
+    // =================================================================
+    //  ⌨️ autocomplétion @ dans les avis, mots, réponses et le chat
+    // =================================================================
+    const ZONE = '.xdl-box,#xst,#xch,[data-xment],.xmo,#xmo,.xnt-a';
+    let AC = null; // { el, start, items, i }
+    function acClose() { const d = document.getElementById('xmt-ac'); if (d) d.remove(); AC = null; }
+    function acShow(el) {
+        if (!el || !(el.tagName === 'TEXTAREA' || (el.tagName === 'INPUT' && /^(text|search|)$/.test(el.type || ''))) || !el.closest(ZONE)) { acClose(); return; }
+        const pos = el.selectionStart, before = el.value.slice(0, pos), m = /(^|[\s(,;:])@([\wÀ-ÖØ-öø-ÿ'.-]{0,30})$/.exec(before);
+        if (!m) { acClose(); return; }
+        const q = fold(m[2]).replace(/_/g, ' '), all = people(), items = all.filter(p => !q || fold(p.full).split(/\s+/).some(w => w.indexOf(q) === 0) || fold(p.full).indexOf(q) === 0).slice(0, 8);
+        if (!items.length) { acClose(); return; }
+        AC = { el, start: pos - m[2].length - 1, items, i: AC && AC.el === el ? Math.min(AC.i, items.length - 1) : 0, all };
+        let d = document.getElementById('xmt-ac'); if (!d) { d = document.createElement('div'); d.id = 'xmt-ac'; d.setAttribute('role', 'listbox'); document.body.appendChild(d); }
+        d.innerHTML = '<small>Mentionner — ↑↓ puis Entrée</small>' + items.map((p, k) => '<div role="option" data-k="' + k + '"' + (k === AC.i ? ' class="on" aria-selected="true"' : '') + '><b>' + esc(p.full) + '</b>' + (p.info ? '<i>' + esc(p.info) + '</i>' : '') + '</div>').join('');
+        const r = el.getBoundingClientRect(), h = Math.min(260, 26 + items.length * 34), up = r.bottom + h > innerHeight - 8;
+        d.style.left = Math.max(6, Math.min(r.left, innerWidth - 270)) + 'px'; d.style.top = (up ? Math.max(6, r.top - h - 4) : r.bottom + 4) + 'px';
+        d.querySelectorAll('[data-k]').forEach(o => o.onmousedown = e => { e.preventDefault(); AC.i = +o.dataset.k; acPick(); });
+    }
+    function acPick() {
+        if (!AC) return; const { el, start, items, i, all } = AC, t = token(items[i], all) + ' ', end = el.selectionStart;
+        el.value = el.value.slice(0, start) + t + el.value.slice(end); const c = start + t.length; el.setSelectionRange(c, c); acClose(); el.focus();
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+    function acWire() {
+        document.addEventListener('input', e => { try { acShow(e.target); } catch (x) { } }, true);
+        document.addEventListener('keydown', e => { if (!AC || e.target !== AC.el) return; const n = AC.items.length;
+            if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); e.stopImmediatePropagation(); AC.i = (AC.i + (e.key === 'ArrowDown' ? 1 : n - 1)) % n; acShow(AC.el); }
+            else if (e.key === 'Enter' || e.key === 'Tab') { e.preventDefault(); e.stopImmediatePropagation(); acPick(); }
+            else if (e.key === 'Escape') { e.stopImmediatePropagation(); acClose(); } }, true);
+        document.addEventListener('focusout', e => { if (AC && e.target === AC.el) setTimeout(() => { if (AC && document.activeElement !== AC.el) acClose(); }, 120); }, true);
+        addEventListener('resize', acClose); document.addEventListener('scroll', e => { if (AC && !(e.target && e.target.id === 'xmt-ac')) acClose(); }, true);
+    }
+    // =================================================================
+    //  🖍️ surligner les @ dans les fils affichés (avis, mots, chat) — @moi en plus fort
+    // =================================================================
+    const isMe = t => { const a = fold(String(t).replace(/_/g, ' ')), b = fold(me()); return !!a && !!b && (a === b || a === b.split(' ')[0] || a.replace(/ /g, '') === b.replace(/ /g, '')); };
+    const hl = html => String(html).replace(/(^|[\s(,;:>])@([A-Za-zÀ-ÖØ-öø-ÿ][\wÀ-ÖØ-öø-ÿ'.-]*)/g, (m0, a, t) => a + '<mark class="xmt-at' + (isMe(t.replace(/[.'-]+$/, '')) ? ' me' : '') + '">@' + t + '</mark>');
+    function hlNode(n) { if (!n || n.dataset.xmh || n.textContent.indexOf('@') < 0) return; n.dataset.xmh = 1;
+        const w = document.createTreeWalker(n, NodeFilter.SHOW_TEXT), L = []; while (w.nextNode()) if (/@\w|@[À-ÿ]/.test(w.currentNode.nodeValue) && !w.currentNode.parentNode.closest('mark,input,textarea,a')) L.push(w.currentNode);
+        L.forEach(t => { const s = document.createElement('span'); s.innerHTML = hl(esc(t.nodeValue)); t.parentNode.replaceChild(s, t); });
+        if (n.querySelector('mark.xmt-at.me')) n.classList.add('xmt-mine'); }
+    const HLSEL = '.xnt-m,.xch-m .tx,#xst-ml .r span,.xmo-t,.xmo-r';
+    function hlWire() { const run = () => document.querySelectorAll(HLSEL).forEach(hlNode); let q = 0; new MutationObserver(() => { if (q) return; q = requestAnimationFrame(() => { q = 0; run(); }); }).observe(document.body, { childList: true, subtree: true }); run(); }
+    // =================================================================
+    //  💬 chat du projet (Drive v19 : chat_send / chat_list) — repli : messages au Master (msg_*)
+    // =================================================================
+    let CHAT_MODE = null; // 'chat' | 'msg'
+    async function chatList(since) {
+        if (CHAT_MODE !== 'msg') { const r = await api('chat_list', { since: since || 0 }); if (r.ok) { CHAT_MODE = 'chat'; const who = new Set(J('xiii.chat.who', [])); (r.msgs || []).forEach(m => m.nom && who.add(m.nom)); W('xiii.chat.who', [...who].slice(-60)); return r; } if (r.err !== 'action') return r; CHAT_MODE = 'msg'; }
+        const r = await api('msg_list'); if (!r.ok) return r; return { ok: true, legacy: 1, msgs: (r.msgs || []).slice().reverse() };
+    }
+    async function chatSend(txt, ctx) {
+        txt = String(txt || '').trim(); if (!txt) return { ok: false, err: 'vide' }; const to = tags(txt);
+        let r = CHAT_MODE === 'msg' ? { ok: false, err: 'action' } : await api('chat_send', { txt, app: ctx && ctx.app || '', el: ctx && ctx.el || '', to });
+        if (!r.ok && r.err === 'action') { CHAT_MODE = 'msg'; r = await api('msg_send', { txt: (ctx && ctx.app ? '[' + appName(ctx.app) + (ctx.el ? ' › ' + ctx.el : '') + '] ' : '') + txt }); }
+        if (r.ok && to.length) { api('ment_add', { to, app: ctx && ctx.app || 'chat', el: '💬 Chat' + (ctx && ctx.el ? ' › ' + ctx.el : ''), txt });
+            if (window.XPUSH && XPUSH.isMaster && XPUSH.isMaster()) to.forEach(t => XPUSH.send({ title: '📣 ' + (me() || 'Le Master') + ' vous mentionne', body: '💬 ' + txt.slice(0, 140), url: (ctx && ctx.app || 'index') + '.html', tag: 'ment', to: '@' + t.replace(/_/g, ' ') }).catch(() => { })); }
+        if (r.ok) W('xiii.chat.seen', Date.now());
+        return r;
+    }
+    const fmtT = ts => { const d = new Date(ts), t = new Date(); return d.toDateString() === t.toDateString() ? d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : d.toLocaleString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }); };
+    // dessine un chat complet dans le conteneur c ; ctx = { app, el } (contexte proposé, désactivable)
+    function chatInto(c, ctx) {
+        ctx = ctx || {}; let last = 0, timer = 0, useCtx = !!ctx.app, L = [];
+        c.innerHTML = '<div class="xch-l" aria-live="polite"><p class="xch-e">Chargement…</p></div>' +
+            '<div class="xch-f">' + (ctx.app ? '<label class="xch-ctx" title="Le message rappelle l\'outil et l\'élément d\'où il est parti (lien direct)"><input type="checkbox" checked> 📎 ' + esc(appName(ctx.app)) + (ctx.el ? ' › ' + esc(ctx.el) : '') + '</label>' : '') +
+            '<div class="xch-in"><textarea rows="1" placeholder="Message à l\'équipe… (@ pour mentionner)" aria-label="Message"></textarea><button class="xch-go">Envoyer</button></div><small class="xch-h"></small></div>';
+        const box = c.querySelector('.xch-l'), ta = c.querySelector('textarea'), hint = c.querySelector('.xch-h'), cb = c.querySelector('.xch-ctx input');
+        if (cb) cb.onchange = () => useCtx = cb.checked;
+        const row = m => { const mine = m.nom && fold(m.nom) === fold(me()); let tx = esc(m.txt).replace(/\n/g, '<br>'); const lg = /^\[([^\]]{1,80})\]\s*/.exec(m.txt || '');
+            const chip = m.app ? '<a class="xch-chip" href="' + esc(m.app) + '.html">📎 ' + esc(appName(m.app)) + (m.el ? ' › ' + esc(m.el) : '') + '</a>' : '';
+            return '<div class="xch-m' + (mine ? ' me' : '') + '"><div class="hd"><b>' + esc(m.nom || '—') + '</b>' + (m.secteur ? '<i>' + esc(m.secteur) + '</i>' : '') + '<small>' + fmtT(m.ts) + '</small></div>' + chip + '<div class="tx">' + hl(tx) + '</div></div>'; };
+        const draw = () => { if (!L.length) { box.innerHTML = '<p class="xch-e">Aucun message pour l\'instant. Écrivez le premier — tapez @ pour prévenir quelqu\'un.</p>'; return; }
+            const atEnd = box.scrollHeight - box.scrollTop - box.clientHeight < 40; let prevDay = '';
+            box.innerHTML = L.map(m => { const d = new Date(m.ts).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }); const sep = d !== prevDay ? '<div class="xch-d">' + d + '</div>' : ''; prevDay = d; return sep + row(m); }).join('');
+            box.querySelectorAll('.xch-m').forEach(n => { if (n.querySelector('mark.me')) n.classList.add('xmt-mine'); n.querySelector('.tx').dataset.xmh = 1; });
+            if (atEnd || !last) box.scrollTop = box.scrollHeight; };
+        const load = async () => { if (!c.isConnected) { clearInterval(timer); return; } const r = await chatList(last); if (!c.isConnected) return;
+            if (!r.ok) { box.innerHTML = '<p class="xch-e">' + (r.err === 'off' ? 'Connectez le Drive d\'équipe (Réglages → Gestion d\'équipe) pour discuter avec l\'équipe.' : r.err === 'admin' ? 'Le chat d\'équipe demande la mise à jour du script Drive (version 19).' : '⚠️ Drive injoignable — nouvel essai dans un instant.') + '</p>'; return; }
+            if (r.legacy) { L = r.msgs; hint.textContent = 'ℹ️ Script Drive ancien : vos messages arrivent au Master seulement. Mettez à jour le script (page Drive) pour un chat partagé.'; }
+            else { const seen = new Set(L.map(m => m.ts + '|' + m.nom)); (r.msgs || []).forEach(m => { if (!seen.has(m.ts + '|' + m.nom)) L.push(m); }); L.sort((a, b) => a.ts - b.ts); L = L.slice(-200); }
+            if (L.length) last = r.legacy ? 0 : L[L.length - 1].ts; W('xiii.chat.seen', Date.now()); draw(); };
+        const send = async () => { const t = ta.value.trim(); if (!t) return; const b = c.querySelector('.xch-go'); b.disabled = true;
+            const r = await chatSend(t, useCtx ? ctx : null); b.disabled = false;
+            if (r.ok) { ta.value = ''; ta.style.height = ''; const T = tags(t); hint.textContent = T.length ? '📣 Mention envoyée à ' + T.map(x => '@' + x).join(' ') : ''; if (r.ts && !r.legacy) { L.push({ ts: r.ts, nom: me(), txt: t, app: useCtx ? ctx.app : '', el: useCtx ? ctx.el : '' }); last = Math.max(last, r.ts); draw(); } else load(); }
+            else hint.textContent = '⚠️ ' + (r.err === 'off' ? 'Drive non connecté' : r.err === 'net' ? 'Hors ligne : message non envoyé, réessayez' : 'Envoi impossible (' + r.err + ')'); };
+        c.querySelector('.xch-go').onclick = send;
+        ta.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey && !AC) { e.preventDefault(); send(); } });
+        ta.addEventListener('input', () => { ta.style.height = ''; ta.style.height = Math.min(120, ta.scrollHeight) + 'px'; });
+        load(); timer = setInterval(() => { if (!document.hidden) load(); }, 20000);
+        return { reload: load, focus: () => ta.focus() };
+    }
+    // fenêtre de chat dans un outil (depuis 💬 Avis ou la palette)
+    function openChat(el) {
+        if (document.getElementById('xch')) return; const ctx = { app: APP, el: el || '' };
+        document.body.insertAdjacentHTML('beforeend', '<div id="xch" role="dialog" aria-label="Chat du projet"><div class="xch-t"><b>💬 Chat du projet</b><button class="xch-x" aria-label="Fermer">✕</button></div><div class="xch-c"></div></div>');
+        const o = document.getElementById('xch'), close = () => o.remove(); o.querySelector('.xch-x').onclick = close;
+        o.addEventListener('keydown', e => { if (e.key === 'Escape' && !AC) close(); }); const h = chatInto(o.querySelector('.xch-c'), ctx); setTimeout(() => h.focus(), 50);
+    }
+    // nombre de messages du chat non lus (pour les badges)
+    async function chatUnread() { const s = J('xiii.chat.seen', 0); const r = await chatList(s); if (!r.ok || r.legacy) return 0; const m = me(); return (r.msgs || []).filter(x => x.ts > s && fold(x.nom) !== fold(m)).length; }
+    // à l'ouverture d'un outil : mentions qui le concernent
+    async function toolMentions() { if (!cfg()) return; const r = await api('ment_list'); if (!r.ok) return; const here = (r.ments || []).filter(m => m.app === APP); if (!here.length) return;
+        const b = document.getElementById('xnt-btn'); if (b) { b.dataset.m = here.length; b.title = '📣 ' + here.length + ' mention(s) pour vous dans cet outil'; }
+        try { (window.toast || (() => { }))('📣 ' + here.map(m => m.by).filter((x, i, a) => a.indexOf(x) === i).join(', ') + ' vous mentionne ici — ouvrez 💬 Avis'); } catch (e) { } }
+    const CSS2 = '#xmt-ac{position:fixed;z-index:10050;width:260px;max-height:260px;overflow:auto;background:var(--bg-panel,#252321);color:var(--text,#eee);border:1px solid rgba(240,179,120,.6);border-radius:10px;box-shadow:0 8px 28px rgba(0,0,0,.45);padding:4px;font:13px system-ui,sans-serif}#xmt-ac small{display:block;padding:3px 8px;color:var(--text-dim,#999);font-size:11px}#xmt-ac div{padding:6px 8px;border-radius:7px;cursor:pointer;display:flex;flex-direction:column}#xmt-ac div.on,#xmt-ac div:hover{background:rgba(240,179,120,.18)}#xmt-ac i{font-style:normal;font-size:11px;color:var(--text-dim,#aaa)}' +
+        'mark.xmt-at{background:rgba(66,165,245,.18);color:inherit;border-radius:4px;padding:0 2px;font-weight:600}mark.xmt-at.me{background:rgba(240,179,120,.35);box-shadow:0 0 0 1px rgba(240,179,120,.7)}.xmt-mine{border-left-color:#F0B378!important}' +
+        '#xch{position:fixed;right:16px;bottom:16px;z-index:9992;width:min(400px,calc(100vw - 32px));height:min(560px,calc(100vh - 32px));background:var(--bg-panel,#252321);color:var(--text,#eee);border:1px solid rgba(240,179,120,.5);border-radius:14px;box-shadow:0 12px 40px rgba(0,0,0,.5);display:flex;flex-direction:column;font:14px system-ui,sans-serif}.xch-t{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid var(--border-soft,#3a3633)}.xch-x{background:none;border:0;color:inherit;font-size:16px;cursor:pointer;padding:4px 8px}.xch-c{flex:1;min-height:0;display:flex;flex-direction:column}' +
+        '.xch-c,#xst .xch-wrap{display:flex;flex-direction:column;min-height:0}.xch-l{flex:1;min-height:120px;overflow:auto;padding:8px 10px;display:flex;flex-direction:column;gap:6px}.xch-e{color:var(--text-dim,#999);font-size:13px;text-align:center;padding:16px 6px}.xch-d{text-align:center;font-size:11px;color:var(--text-dim,#999);margin:6px 0 2px;text-transform:capitalize}' +
+        '.xch-m{background:rgba(255,255,255,.05);border-left:3px solid rgba(66,165,245,.5);border-radius:8px;padding:6px 9px;max-width:92%;align-self:flex-start}.xch-m.me{align-self:flex-end;border-left-color:rgba(240,179,120,.7);background:rgba(240,179,120,.08)}.xch-m .hd{display:flex;gap:6px;align-items:baseline;font-size:12px}.xch-m .hd i{font-style:normal;color:var(--text-dim,#999)}.xch-m .hd small{margin-left:auto;color:var(--text-dim,#999);font-size:11px}.xch-m .tx{font-size:13.5px;line-height:1.4;margin-top:2px;overflow-wrap:anywhere}' +
+        '.xch-chip{display:inline-block;margin-top:3px;font-size:11px;padding:1px 7px;border-radius:9px;background:rgba(66,165,245,.15);color:inherit;text-decoration:none}.xch-chip:hover{background:rgba(66,165,245,.3)}' +
+        '.xch-f{border-top:1px solid var(--border-soft,#3a3633);padding:8px 10px;display:flex;flex-direction:column;gap:5px}.xch-ctx{font-size:12px;color:var(--text-dim,#bbb);display:flex;gap:5px;align-items:center}.xch-ctx input{width:auto;margin:0}.xch-in{display:flex;gap:6px;align-items:flex-end}.xch-in textarea{flex:1;min-width:0;resize:none;font:inherit;color:inherit;background:var(--bg-input,#17171a);border:1px solid var(--border-color,#45454b);border-radius:8px;padding:7px 9px;max-height:120px}.xch-go{padding:7px 12px;border-radius:8px;border:0;background:#F0B378;color:#1a1a1a;font-weight:600;cursor:pointer}.xch-go:disabled{opacity:.5}.xch-h{font-size:11px;color:var(--text-dim,#999);min-height:0}.xch-h:empty{display:none}' +
+        '#xnt-btn[data-m]:not([data-m=""])::before{content:"@";position:absolute;top:-5px;left:-5px;background:#F0B378;color:#1a1a1a;border-radius:9px;font:700 10px/15px sans-serif;min-width:15px;text-align:center}';
+    return { init, tags, people, hl, chatInto, openChat, chatSend, chatList, chatUnread };
 })();
 
 XMENT.init('transporto');

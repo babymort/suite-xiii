@@ -2,160 +2,6 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<!-- SUITE XIII:WS:START --><script>// =====================================================================
-//  SUITE XIII — XWS : plusieurs « Projets XIII » en parallèle, chacun cloisonné
-//  • chargé en tout premier dans <head> de chaque page (avant tout code d'outil)
-//  • chaque projet XIII a ses propres données : localStorage, IndexedDB et canaux de diffusion
-//    sont préfixés « xws.<id>. » (le projet d'origine « main » garde les clés historiques, sans préfixe)
-//  • donc Drive, équipe, compte, fiche projet, données de chaque outil… séparés par projet
-//  • restent communs à tous les projets : réglages d'affichage, bibliothèques, catalogues, IA, onglets…
-//  • projet de la page : cadre de l'espace onglets (data-ws) › page parente › window.name › session › dernier utilisé
-//  • registre commun « xiii.ws » = { list:[{ id, name, color }], cur }
-// =====================================================================
-(function () {
-    if (window.XWS) return;
-    var LS; try { LS = window.localStorage; } catch (e) { return; } if (!LS || typeof Proxy === 'undefined') return;
-    var REG = 'xiii.ws', SK = 'xiii.ws.cur', SP = Storage.prototype;
-    var gi = SP.getItem, si = SP.setItem, ri = SP.removeItem, ki = SP.key;
-    var COLORS = ['#f0b429', '#4fc3f7', '#81c784', '#e57373', '#ba68c8', '#ff8a3d', '#4db6ac', '#f06292', '#9575cd', '#d4e157'];
-    // clés communes à tous les projets (préférences, bibliothèques, catalogues, IA, onglets…)
-    var G = /^(xiii\.(ws|tabs|theme|a11y|anim\.|tour2?\.|tips\.|pins|recent|start\.|pwa\.|ai$|ai\.|ux\.|bar\.|boot\.|settings\.|home\.|docs\.seen|news\.|ib\.no|inapp|catalogue|data\.|lib\.|annuaire|encodo\.|errlog|cmds|ndi\.|tally\.|gif\.)|[a-zA-Z]+XIII\.(prefs|library|lib|templates|kits|poses|parts|models|presets|base|parc|moi|xlfields|emetteur|comptes|inventory|libMigrated)$|encodoXIII|synoptique_(?!projects|snapshots)|theme$)/;
-    var rg = function (k) { return gi.call(LS, k); }, rs = function (k, v) { si.call(LS, k, v); }, rr = function (k) { ri.call(LS, k); };
-    function rkeys() { var a = [], n = LS.length; for (var i = 0; i < n; i++) a.push(ki.call(LS, i)); return a; }
-    function J(s) { try { return JSON.parse(s); } catch (e) { return null; } }
-    function reg() {
-        var r = J(rg(REG));
-        if (!r || !Array.isArray(r.list) || !r.list.length) {
-            var p = J(rg('xiii.projets')), f = p && Array.isArray(p.list) ? p.list.find(function (x) { return x && x.id === p.active; }) : null;
-            r = { list: [{ id: 'main', name: (f && f.title) || 'Projet XIII', color: COLORS[0], created: Date.now() }], cur: 'main' };
-            try { rs(REG, JSON.stringify(r)); } catch (e) { }
-        }
-        return r;
-    }
-    function put(r) { try { rs(REG, JSON.stringify(r)); } catch (e) { } }
-    function pick() {
-        try { var fe = window.frameElement; if (fe && fe.dataset && fe.dataset.ws) return fe.dataset.ws; } catch (e) { }
-        try { if (window.parent !== window && window.parent.XWS) return window.parent.XWS.id; } catch (e) { }
-        var m = /^xws:([\w-]+)$/.exec(window.name || ''); if (m) return m[1];
-        try { var s = sessionStorage.getItem(SK); if (s) return s; } catch (e) { }
-        return reg().cur || 'main';
-    }
-    var R = reg(), id = pick();
-    if (!R.list.some(function (w) { return w.id === id; })) id = 'main';
-    var inShell = false; try { inShell = !!(window.frameElement && window.frameElement.dataset && window.frameElement.dataset.ws); } catch (e) { }
-    try { if (window.top === window) sessionStorage.setItem(SK, id); } catch (e) { }
-    var P = id === 'main' ? '' : 'xws.' + id + '.';
-    var map = function (k) { k = String(k); return (!P || G.test(k)) ? k : P + k; };
-    var mine = function (rk) { if (rk.indexOf('xws.') === 0) return (P && rk.indexOf(P) === 0) ? rk.slice(P.length) : null; return (!P || G.test(rk)) ? rk : null; };
-    var keys = function () { var a = rkeys(), o = []; for (var i = 0; i < a.length; i++) { var k = mine(a[i]); if (k != null) o.push(k); } return o; };
-    function syncName(v) { // le nom du projet XIII suit le titre de sa fiche projet active
-        var p = J(v), f = p && Array.isArray(p.list) ? p.list.find(function (x) { return x && x.id === p.active; }) : null;
-        if (!f || !f.title) return; var r = reg(), w = r.list.find(function (x) { return x.id === id; });
-        if (w && w.name !== f.title) { w.name = f.title; put(r); }
-    }
-    var PX;
-    // méthodes posées sur Storage.prototype : les surcouches ajoutées ensuite par la suite (sauvegarde auto, lecture seule…)
-    // s'empilent dessus et voient toujours les clés « logiques » avec this === localStorage
-    SP.getItem = function (k) { return this === PX ? gi.call(LS, map(k)) : gi.call(this, k); };
-    SP.setItem = function (k, v) { if (this !== PX) return si.call(this, k, v); si.call(LS, map(k), v); if (String(k) === 'xiii.projets') { try { syncName(String(v)); } catch (e) { } } };
-    SP.removeItem = function (k) { return this === PX ? ri.call(LS, map(k)) : ri.call(this, k); };
-    SP.key = function (i) { if (this !== PX) return ki.call(this, i); var a = keys(); return i >= 0 && i < a.length ? a[i] : null; };
-    var cl = SP.clear; SP.clear = function () { if (this !== PX) return cl.call(this); keys().forEach(function (k) { if (k !== REG && k !== 'xiii.tabs') rr(map(k)); }); };
-    var isProto = function (p) { return typeof p === 'symbol' || p in SP; };
-    PX = new Proxy(LS, {
-        get: function (t, p) { if (p === 'length') return keys().length; if (isProto(p)) { var v = SP[p] !== undefined ? SP[p] : Reflect.get(t, p); return (typeof v === 'function' && typeof p === 'symbol') ? v.bind(t) : v; } var x = gi.call(LS, map(p)); return x === null ? undefined : x; },
-        set: function (t, p, v) { if (isProto(p)) return Reflect.set(t, p, v); SP.setItem.call(PX, p, v); return true; },
-        has: function (t, p) { if (isProto(p)) return Reflect.has(t, p); return gi.call(LS, map(p)) !== null; },
-        deleteProperty: function (t, p) { if (typeof p === 'string') SP.removeItem.call(PX, p); return true; },
-        ownKeys: function () { return keys(); },
-        getOwnPropertyDescriptor: function (t, p) { if (typeof p !== 'string') return undefined; var v = gi.call(LS, map(p)); return v === null ? undefined : { value: v, writable: true, enumerable: true, configurable: true }; },
-        defineProperty: function (t, p, d) { if (typeof p === 'string' && d && 'value' in d) SP.setItem.call(PX, p, d.value); return true; }
-    });
-    try { Object.defineProperty(window, 'localStorage', { configurable: true, enumerable: true, get: function () { return PX; } }); } catch (e) { }
-    // événements « storage » : seulement ceux du projet de la page, avec la clé logique
-    var ae = window.addEventListener, re = window.removeEventListener, WM = new WeakMap();
-    function tr(e) { if (!e || !e.isTrusted || e.key == null || e.storageArea !== LS) return e; var k = mine(e.key); if (k == null) return null; if (k === e.key) return e; try { return new StorageEvent('storage', { key: k, oldValue: e.oldValue, newValue: e.newValue, url: e.url }); } catch (x) { return e; } }
-    function wrap(f) { var w = WM.get(f); if (!w) { w = function (e) { var x = tr(e); if (!x) return; return typeof f === 'function' ? f.call(this, x) : f.handleEvent(x); }; WM.set(f, w); } return w; }
-    window.addEventListener = function (t, f, o) { if (t === 'storage' && f) return ae.call(this || window, t, wrap(f), o); return ae.apply(this || window, arguments); };
-    window.removeEventListener = function (t, f, o) { if (t === 'storage' && f && WM.has(f)) return re.call(this || window, t, WM.get(f), o); return re.apply(this || window, arguments); };
-    var osf = null; try { Object.defineProperty(window, 'onstorage', { configurable: true, get: function () { return osf; }, set: function (f) { if (osf) window.removeEventListener('storage', osf); osf = typeof f === 'function' ? f : null; if (osf) window.addEventListener('storage', osf); } }); } catch (e) { }
-    // IndexedDB : bases propres au projet
-    var F = null; try { F = window.indexedDB; } catch (e) { }
-    var dd = F && F.deleteDatabase, dbs = F && F.databases;
-    if (F) {
-        var op = F.open;
-        var mineDB = function (n) { n = String(n || ''); if (n.indexOf('xws.') === 0) return (P && n.indexOf(P) === 0) ? n.slice(P.length) : null; return P ? null : n; };
-        if (P) { F.open = function (n, v) { return (arguments.length > 1 && v !== undefined) ? op.call(F, P + n, v) : op.call(F, P + n); }; F.deleteDatabase = function (n) { return dd.call(F, P + n); }; }
-        if (dbs) F.databases = function () { return dbs.call(F).then(function (a) { return a.map(function (d) { var n = mineDB(d.name); return n == null ? null : { name: n, version: d.version }; }).filter(Boolean); }); };
-    }
-    // canaux de diffusion entre onglets : propres au projet (sauf la file ENCODO, commune)
-    if (P && window.BroadcastChannel) { var BC = window.BroadcastChannel, W = function (n) { return new BC(/^xiii-encodo/.test(String(n)) ? n : P + n); }; W.prototype = BC.prototype; window.BroadcastChannel = W; }
-    // clés qui appartiennent à un outil (hors préférences et bibliothèques communes)
-    var APPS = /^(moodo|storyboardo|decoup|scripto|casto|planno|calendrier|callsheeto|transporto|deviso|ressourco|controle|importo|dossier|repero|cadro|syno|plano|conduco|graphico|melango|runo|sono|lumo|matos|catalogue|packingo|posto|soustitro|backupo|encodo|direct|ludo|jour|index|hub)$/i;
-    function own(app, k) {
-        if (!k || G.test(k) || /^xiii\.(projets|pass|link|share|files|dash|pcfg|drive|m\.|teamtab|cslive|meteo|resume|draft|inbox|app\.cfg|deleg|acc|wsbak|charte|outbox|start|undo\.|resume)/.test(k)) {
-            var m0 = /^xiii\.(undo|notes|memo)\.([a-z]+)/.exec(k); return !!(m0 && m0[2] === app && !G.test(k));
-        }
-        if (/^synoptique_/.test(k)) return app === 'syno';
-        var m = /^([a-z]+?)XIII[._]/i.exec(k); if (m) return m[1].toLowerCase() === app;
-        m = /^xiii\.([a-z]+)[._]/.exec(k); if (m) { if (m[1] === app) return true; m = /^xiii\.[a-z]+\.([a-z]+)/.exec(k); return !!(m && m[1] === app); }
-        m = /^([a-z]+)[._-]/i.exec(k); if (m && APPS.test(m[1])) return m[1].toLowerCase() === app;
-        return false;
-    }
-    var px = function (i) { return !i || i === 'main' ? '' : 'xws.' + i + '.'; };
-    var lg = function (k, p) { if (p) return k.indexOf(p) === 0 ? k.slice(p.length) : null; return k.indexOf('xws.') === 0 ? null : k; };
-    function copyDB(n, from, to) { return new Promise(function (res) { if (!F) return res(0);
-        var a = op.call(F, from + n); a.onerror = function () { res(0); }; a.onsuccess = function () { var A = a.result, st = [].slice.call(A.objectStoreNames); if (!st.length) { A.close(); return res(0); }
-            dd.call(F, to + n).onsuccess = go; function go() { var b = op.call(F, to + n, A.version); b.onupgradeneeded = function () { var B = b.result, t = a.result.transaction(st, 'readonly'); st.forEach(function (s) { var o = t.objectStore(s), d = B.createObjectStore(s, { keyPath: o.keyPath, autoIncrement: o.autoIncrement }); [].slice.call(o.indexNames).forEach(function (x) { var ix = o.index(x); d.createIndex(x, ix.keyPath, { unique: ix.unique, multiEntry: ix.multiEntry }); }); }); };
-                b.onerror = function () { A.close(); res(0); };
-                b.onsuccess = function () { var B = b.result, n2 = 0, t = A.transaction(st, 'readonly'), w = B.transaction(st, 'readwrite'), left = st.length;
-                    st.forEach(function (s) { var o = t.objectStore(s), d = w.objectStore(s), kp = o.keyPath; o.openCursor().onsuccess = function (e) { var c = e.target.result; if (!c) { return; } try { if (kp == null) d.put(c.value, c.key); else d.put(c.value); n2++; } catch (x) { } c.continue(); }; });
-                    w.oncomplete = function () { A.close(); B.close(); res(n2); }; w.onerror = function () { A.close(); B.close(); res(n2); }; }; } }; }); }
-    function copyTool(app, to) {
-        var tp = px(to); if (tp === P) return Promise.resolve({ keys: 0, dbs: 0, same: 1 });
-        var src = window.XWS.toolKeys(app), old = window.XWS.toolKeys(app, to), bak = { at: Date.now(), keys: {} };
-        old.forEach(function (k) { bak.keys[k] = rg(tp + k); });
-        if (old.length) { try { rs(tp + 'xiii.wsbak.' + app, JSON.stringify(bak)); } catch (e) { } }
-        old.forEach(function (k) { rr(tp + k); }); var n = 0;
-        try { src.forEach(function (k) { rs(tp + k, rg(P + k)); n++; }); }
-        catch (e) { src.forEach(function (k) { rr(tp + k); }); for (var k in bak.keys) { try { rs(tp + k, bak.keys[k]); } catch (x) { } } return Promise.reject(new Error('Stockage du navigateur plein')); }
-        var rx = new RegExp('^' + app + 'XIII', 'i');
-        var L = dbs ? dbs.call(F).then(function (a) { return a.map(function (d) { return lg(d.name || '', P); }).filter(function (x) { return x && rx.test(x); }); }).catch(function () { return []; }) : Promise.resolve([]);
-        return L.then(function (names) { return Promise.all(names.map(function (x) { return copyDB(x, P, tp); })).then(function (r) { return { keys: n, dbs: names.length, recs: r.reduce(function (a, b) { return a + b; }, 0), replaced: old.length }; }); });
-    }
-    var find = function (i) { return reg().list.find(function (w) { return w.id === i; }) || null; };
-    window.XWS = {
-        id: id, prefix: P, colors: COLORS, shell: inShell,
-        list: function () { return reg().list; },
-        meta: function (i) { return find(i || id); },
-        color: function (i) { var w = find(i || id); return (w && w.color) || COLORS[0]; },
-        set: function (i, o) { var r = reg(), w = r.list.find(function (x) { return x.id === i; }); if (!w) return; for (var k in o) w[k] = o[k]; put(r); try { window.dispatchEvent(new CustomEvent('xiii-ws')); } catch (e) { } },
-        create: function (o) { o = o || {}; var r = reg(), used = r.list.map(function (w) { return w.color; }); var c = COLORS.find(function (x) { return used.indexOf(x) < 0; }) || COLORS[r.list.length % COLORS.length];
-            var w = { id: 'w' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), name: o.name || 'Nouveau projet', color: o.color || c, created: Date.now(), fresh: 1 }; r.list.push(w); put(r); return w; },
-        // basculer CETTE page (ou cet onglet) sur un autre projet XIII
-        go: function (i) { var r = reg(); if (!r.list.some(function (w) { return w.id === i; })) return; r.cur = i; put(r);
-            if (inShell) { try { window.top.postMessage({ xtab: { ws: i } }, location.origin); return; } catch (e) { } }
-            try { sessionStorage.setItem(SK, i); } catch (e) { } if (window.name === '' || /^xws:/.test(window.name)) window.name = 'xws:' + i; location.reload(); },
-        // supprimer définitivement un projet XIII (jamais le projet d'origine)
-        remove: function (i) { if (!i || i === 'main') return false; var p = 'xws.' + i + '.'; rkeys().forEach(function (k) { if (k.indexOf(p) === 0) rr(k); });
-            if (dbs) dbs.call(F).then(function (a) { a.forEach(function (d) { if (d.name && d.name.indexOf(p) === 0) dd.call(F, d.name); }); }).catch(function () { });
-            var r = reg(); r.list = r.list.filter(function (w) { return w.id !== i; }); if (r.cur === i) r.cur = 'main'; put(r); return true; },
-        // ---- copier les données d'un outil vers le même outil d'un autre projet XIII ----
-        own: own,
-        toolKeys: function (app, i) { var p = i === undefined ? P : (i === 'main' ? '' : 'xws.' + i + '.'); return rkeys().map(function (k) { return lg(k, p); }).filter(function (k) { return k != null && own(app, k); }); },
-        copyTool: function (app, to) { return copyTool(app, to); },
-        hasBackup: function (app, to) { return !!rg(px(to) + 'xiii.wsbak.' + app); },
-        restoreTool: function (app, to) { var tp = px(to), b = J(rg(tp + 'xiii.wsbak.' + app)); if (!b) return false; this.toolKeys(app, to).forEach(function (k) { rr(tp + k); }); for (var k in b.keys) { try { rs(tp + k, b.keys[k]); } catch (e) { } } rr(tp + 'xiii.wsbak.' + app); return true; },
-        // lire une clé d'un autre projet (ex. sa fiche) sans basculer
-        peek: function (i, k) { return rg((i === 'main' ? '' : 'xws.' + i + '.') + k); }
-    };
-    // hors espace onglets : fin liseré de la couleur du projet en haut de la page (quand il y a plusieurs projets)
-    if (!inShell && window.top === window && R.list.length > 1) {
-        var bar = function () { if (!document.body || document.getElementById('xws-line')) return; var d = document.createElement('div'); d.id = 'xws-line'; d.title = 'Projet XIII : ' + ((find(id) || {}).name || ''); d.style.cssText = 'position:fixed;left:0;right:0;top:0;height:3px;z-index:2147483646;pointer-events:none;background:' + window.XWS.color(); document.body.appendChild(d); };
-        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bar); else bar();
-    }
-})();
-</script><!-- SUITE XIII:WS:END -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ÉQUIPE XIII - Gestion de l'équipe</title>
 <style>
@@ -573,7 +419,7 @@ const XTOUR = (() => {
             [null, '👋 Bienvenue dans SUITE XIII', '<p>Vingt-quatre outils pour préparer, organiser, tourner et livrer un projet audiovisuel, <b>dans le navigateur</b>, sans installation.</p><p>Ce grand tuto fait le tour de l\'accueil : le projet, les outils, l\'équipe, le Drive, l\'application mobile. Comptez 2 minutes. Chaque outil a ensuite sa propre visite à sa première ouverture.</p>'],
             [() => btn('Projet XIII'), '🎬 Le projet', '<p>La <b>fiche projet</b> est partagée par tous les outils : titre, dates, lieux, production, logo.</p><ul><li><b>＋ Nouveau projet</b> : un assistant pas à pas</li><li><b>📦 Fichier</b> : enregistrer / ouvrir tout le projet en un seul fichier <b>.xiii</b>, ou <b>📥 Importer d\'un logiciel</b> (Excel, Movie Magic, PDF…)</li><li>Personnalisation : thème, outils masqués, photo de fond</li></ul>'],
             ['#xd-dash', '📊 Le tableau de bord', '<p>L\'essentiel du projet en un coup d\'œil : <b>projet en cours</b>, <b>prochaines échéances</b> (toutes les dates des outils), <b>derniers retours de l\'équipe</b> et <b>message du Master</b> affiché à tous.</p>'],
-            [() => document.querySelector('section.phase'), '🧰 Les outils', '<p>Rangés par étape : <b>concevoir</b>, <b>préparer</b>, <b>tourner</b>, <b>livrer</b>. Cliquez une carte pour ouvrir l\'outil.</p><p>Les outils <b>se parlent</b> : dans chaque outil, <b>📤 Vers Suite XIII</b> envoie son travail vers les autres (devis, feuille de service, colisage, dossier…).</p>'],
+            [() => document.getElementById('xh-nav') || document.querySelector('section.phase'), '🧰 Les onglets et les outils', '<p>Les onglets de gauche (en bas sur téléphone) : <b>📊 Dashboard</b> (widgets et outils épinglés), un onglet par étape — <b>concevoir</b>, <b>organiser</b>, <b>tourner</b>, <b>livrer</b> —, <b>⚙️ Réglages</b> du projet et <b>👥 Équipe</b> (Master). Cliquez une tuile pour ouvrir l\'outil, clic droit pour l\'épingler au Dashboard.</p><p>Les outils <b>se parlent</b> : dans chaque outil, <b>📤 Vers Suite XIII</b> envoie son travail vers les autres (devis, feuille de service, colisage, dossier…).</p>'],
             [() => btn('Rechercher'), '🔎 Recherche', '<p><b>Ctrl K</b> (ou ⌘ K) depuis n\'importe où : un outil, un élément, une personne, une action.</p>'],
             [() => btn('Drive'), '☁️ Le Drive du projet', '<p>Relie le projet au <b>Google Drive du Master</b> : tout le monde travaille sur les mêmes données, sans compte, avec la synchronisation, la présence en direct (pastilles), le verrou des éléments modifiés, le journal et les rapports de fin de journée.</p>'],
             [() => btn('Équipe'), '👥 L\'équipe', '<p>Toute la gestion de l\'équipe :</p><ul><li><b>Membres</b> : noms, secteurs, droits, outils (et vues précises), fin d\'accès</li><li><b>En attente</b> : les demandes à valider</li><li><b>Secteurs</b> : à créer et renommer</li><li><b>Liens & QR</b> : connecter une personne, un secteur, votre téléphone, la <b>vitrine client</b>, les <b>écrans kiosque</b></li><li><b>Échanges</b> : délégations et envois</li></ul>'],
@@ -738,7 +584,7 @@ const XTOUR = (() => {
         ['decoup', 'DECOUP — découpage technique', 'decoupage technique plan valeur mouvement transition'], ['posto', 'POSTO — post-production', 'post production montage version retour client livrable derushage archive etalonnage'],
         ['casto', 'CASTO — casting', 'casting talent comedien role candidat cachet disponibilite'], ['transporto', 'TRANSPORTO — logistique', 'transport navette hotel chambre voyage vehicule logistique'],
         ['calendrier', 'CALENDRIER — planning', 'calendrier planning production date tache jalon gantt'], ['matos', 'MATOS — parc matériel', 'matos materiel parc reservation sortie retour scan catalogue inventaire'],
-        ['lumo', 'LUMO — lumière', 'lumiere projecteur plan de feu dmx'], ['sono', 'SONO — son', 'son patch micro hf console audio'], ['runo', 'RUNO — déroulé live', 'deroule live run of show'], ['soustitro', 'SOUSTITRO — sous-titres', 'sous-titres srt traduction live ndi'], ['graphico', 'GRAPHICO — habillage', 'habillage graphique overlay ndi obs vmix synthe'], ['jour', 'MODE TOURNAGE', 'tournage jour j check-in arrivee qr kiosque regie']];
+        ['lumo', 'LUMO — lumière', 'lumiere projecteur plan de feu dmx'], ['sono', 'SONO — son', 'son patch micro hf console audio'], ['runo', 'RUNO — déroulé live', 'deroule live run of show'], ['soustitro', 'SOUSTITRO — sous-titres', 'sous-titres srt traduction live ndi'], ['encodo', 'ENCODO — convertisseur', 'convertir conversion encoder encodage format codec h264 h265 prores dnxhr mp4 mov wav mp3 pdf image compresser shutter format factory'], ['graphico', 'GRAPHICO — habillage', 'habillage graphique overlay ndi obs vmix synthe'], ['jour', 'MODE TOURNAGE', 'tournage jour j check-in arrivee qr kiosque regie']];
     const fold = s => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
     function search(q) { const W = fold(q).split(/[^a-z0-9]+/).filter(w => w.length > 1); if (!W.length) return []; return TOPICS.map(t => { const hay = fold(t[1] + ' ' + t[2] + ' ' + ((T[t[0]] || {}).i || '')); let sc = 0; W.forEach(w => { if (hay.indexOf(w) > -1) sc += (fold(t[1]).indexOf(w) > -1 ? 3 : 1); else if (w.length > 3 && hay.indexOf(w.slice(0, -1)) > -1) sc += .5; }); return [sc, t]; }).filter(x => x[0] > 0).sort((a, b) => b[0] - a[0]).slice(0, 8).map(x => x[1]); }
     function go(k) { if (k === APP) { start(true); return; } if (k === 'projet') { if (APP === 'index' && typeof XPROJET !== 'undefined') { XPROJET.open(); setTimeout(() => run('projet', T.projet, true), 300); } else location.href = 'index.html#xtour=projet'; return; } location.href = (k === 'index' ? 'index' : k) + '.html#xtour'; }

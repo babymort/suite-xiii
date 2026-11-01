@@ -180,7 +180,7 @@ function instBar() {
 addEventListener('appinstalled', () => { BIP = null; instBar(); }); setTimeout(instBar, 300);
 // ---------- 💬 échanges d'équipe : avis des outils, message au Master, mentions, activité ----------
 const NM = { callsheeto: 'Feuille de service', planno: 'Planning', calendrier: 'Calendrier', deviso: 'Devis', dossier: 'Dossier', moodo: 'Moodboard', repero: 'Repérages', storyboardo: 'Storyboard', decoup: 'Découpage', scripto: 'Script', posto: 'Post-prod', casto: 'Casting', plano: 'Plan', syno: 'Synoptique', conduco: 'Conducteur', transporto: 'Transports', packingo: 'Colisage', backupo: 'Rushes', matos: 'Matos', lumo: 'Lumière', sono: 'Son', runo: 'Déroulé', ressourco: 'Contrats', cadro: 'Cadre', soustitro: 'Sous-titres', catalogue: 'Catalogue', jour: 'Tournage' };
-const nm = a => NM[a] || String(a || '').toUpperCase();
+const nm = a => a === 'chat' ? '💬 Chat du projet' : NM[a] || String(a || '').toUpperCase();
 function tabBar() {
     let b = document.getElementById('tb'); if (!ME || !ME.d) { if (b) b.remove(); return; }
     if (!b) { b = document.createElement('nav'); b.id = 'tb'; b.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:15;display:grid;grid-template-columns:repeat(4,1fr)'; document.body.appendChild(b); }
@@ -197,10 +197,12 @@ async function vEx() {
     const m = $('m'), master = ME.d.master; let h = '';
     if (master) { const r = await api('msg_list'); h += card('✉️ Messages de l\'équipe', r.ok && r.msgs.length ? r.msgs.slice(0, 15).map(x => '<div class="nt" style="' + (x.lu ? 'opacity:.55' : '') + '"><span>' + (x.lu ? '✉️' : '📩') + '</span><div style="flex:1"><b>' + esc(x.nom) + '</b><small>' + esc(x.txt) + ' · ' + ago(x.ts) + '</small></div>' + (x.lu ? '' : '<button data-rd="' + x.ts + '" style="font-size:12px">✓ Lu</button>') + '</div>').join('') : '<p class="dim" style="margin:0">Aucun message.</p>'); }
     else { const S = J('xiii.app.sent', []); h += card('✉️ Message au Master', '<textarea id="mx" rows="3" placeholder="Une question, une info pour la production…" style="width:100%;box-sizing:border-box"></textarea><button class="pri full" id="mxs" style="margin-top:8px">Envoyer au Master</button>' + (S.length ? '<p class="dim" style="margin:10px 0 0;font-size:12px">Envoyés : ' + S.slice(0, 5).map(x => esc(x.t.slice(0, 50)) + ' (' + ago(x.at) + ')').join(' · ') + '</p>' : '')); }
+    h += '<div class="card"><h2>💬 Chat du projet</h2><div id="chl" style="max-height:340px;overflow:auto;display:flex;flex-direction:column;gap:6px"><p class="dim" style="margin:0">Chargement…</p></div><div style="display:flex;gap:6px;margin-top:8px"><textarea id="chx" rows="2" placeholder="Message à toute l\'équipe… (@Prénom pour prévenir)" style="flex:1;box-sizing:border-box"></textarea><button class="pri" id="chs">Envoyer</button></div></div>';
     h += '<div class="card"><h2>💬 Avis récents dans les outils</h2><div id="av"><p class="dim" style="margin:0">Chargement des outils…</p></div></div>';
     m.innerHTML = h;
     m.querySelectorAll('[data-rd]').forEach(b => b.onclick = async () => { await api('msg_read', { ts: +b.dataset.rd }); vEx(); });
     const mxs = $('mxs'); if (mxs) mxs.onclick = async () => { const t = $('mx').value.trim(); if (!t) return; mxs.disabled = true; const r = await api('msg_send', { txt: t }); mxs.disabled = false; if (!r.ok) { toast('⚠️ Envoi impossible (' + r.err + ')'); return; } const S = J('xiii.app.sent', []); S.unshift({ t, at: Date.now() }); W('xiii.app.sent', S.slice(0, 20)); toast('✉️ Envoyé au Master'); vEx(); };
+    chatCard();
     // avis : un fil par élément dans chaque outil (xiii.notes.<outil>)
     const p = await api('ping'); if (!p.ok) { $('av').innerHTML = '<p class="dim">Drive injoignable.</p>'; return; }
     const apps = Object.keys(p.apps || {}).filter(a => NM[a]), all = [], D = {};
@@ -358,6 +360,21 @@ function vPh(a) {
     $('phs').onclick = async () => { if (a === 'casto') { const tg = JSON.parse(target()); if (tg.kind === 'role' ? !tg.role : !tg.name) { toast(tg.kind === 'role' ? 'Nom du rôle ?' : 'Nom du candidat ?'); return; } if (tg.kind === 'role' || !PHS.length) { const r = await api('ph_add', { app: a, target: JSON.stringify(tg), cap: '', b64: '', mime: '' }); toast(r.ok ? '🎭 Envoyé à CASTO' : '⚠️ ' + r.err); if (r.ok) vPh(a); return; } }
         const b = $('phs'); b.disabled = true; let n = 0; for (let i = 0; i < PHS.length; i++) { b.textContent = 'Envoi ' + (i + 1) + ' / ' + PHS.length + '…'; const r = await api('ph_add', { app: a, target: target(), cap: $('phc').value.trim(), b64: PHS[i].split(',')[1], mime: 'image/jpeg' }); if (r.ok) n++; else { toast('⚠️ ' + (r.err === 'net' ? 'Pas de réseau' : r.err === 'forbidden' ? t[2] + ' n\'est pas partagé avec vous' : r.err)); break; } }
         if (n && a === 'casto') { toast('🎭 Candidat envoyé à CASTO'); vPh(a); return; } if (n) { toast('📷 ' + n + ' photo(s) envoyée(s) : elles s\'ajoutent dès que ' + t[2] + ' est ouvert sur l\'ordinateur', 4500); PHS = PHS.slice(n); $('phc').value = ''; } draw(); };
+}
+// 💬 chat du projet (script Drive v19 : chat_list / chat_send)
+async function chatCard() {
+    const l = $('chl'), x = $('chx'), b = $('chs'); if (!l) return;
+    const tagsOf = t => { const o = [], R = /(^|[\s(,;:])@([A-Za-zÀ-ÖØ-öø-ÿ][\wÀ-ÖØ-öø-ÿ'.-]*)/g; let m; while ((m = R.exec(t))) o.push(m[2].replace(/[.'-]+$/, '')); return [...new Set(o)]; };
+    const hl = h => h.replace(/(^|[\s(,;:>])@([\wÀ-ÿ'.-]+)/g, '$1<mark style="background:rgba(240,179,120,.3);color:inherit;border-radius:4px;padding:0 2px">@$2</mark>');
+    const draw = async () => { const r = await api('chat_list', { since: Date.now() - 14 * 864e5 }); if (!$('chl')) return;
+        if (!r.ok) { l.innerHTML = '<p class="dim" style="margin:0">' + (r.err === 'action' ? 'Le chat d\'équipe arrive avec la mise à jour du script Drive (demandez au Master).' : 'Chat injoignable pour l\'instant.') + '</p>'; if (r.err === 'action') { x.parentNode.style.display = 'none'; } return; }
+        const L = (r.msgs || []).slice(-40), moi = String(ME.nom || '').replace(/ \(app\)$/, '').toLowerCase();
+        l.innerHTML = L.length ? L.map(m => { const mine = String(m.nom).toLowerCase() === moi; return '<div style="align-self:' + (mine ? 'flex-end' : 'flex-start') + ';max-width:90%;background:' + (mine ? 'rgba(240,179,120,.12)' : 'rgba(255,255,255,.06)') + ';border-radius:10px;padding:6px 9px"><small class="dim"><b>' + esc(m.nom) + '</b>' + (m.app ? ' · 📎 ' + esc(nm(m.app)) + (m.el ? ' › ' + esc(m.el) : '') : '') + ' · ' + ago(m.ts) + '</small><div style="font-size:14px;overflow-wrap:anywhere">' + hl(esc(m.txt).replace(/\n/g, '<br>')) + '</div></div>'; }).join('') : '<p class="dim" style="margin:0">Aucun message. Lancez la conversation !</p>';
+        l.scrollTop = l.scrollHeight; };
+    b.onclick = async () => { const t = x.value.trim(); if (!t) return; b.disabled = true; const T = tagsOf(t), r = await api('chat_send', { txt: t, to: T }); b.disabled = false;
+        if (!r.ok) { toast('⚠️ Envoi impossible (' + r.err + ')'); return; } if (T.length) api('ment_add', { to: T, app: 'chat', el: '💬 Chat', txt: t }); x.value = ''; toast(T.length ? '📣 Envoyé, ' + T.map(y => '@' + y).join(' ') + ' prévenu(s)' : '💬 Envoyé'); draw(); };
+    x.onkeydown = e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); b.onclick(); } };
+    draw();
 }
 // 📣 mentions
 async function vMe() {
