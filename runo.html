@@ -3784,7 +3784,7 @@ const XSHARE = (() => {
         const add = () => { if (document.getElementById('xsh-btn')) return; const b = [...document.querySelectorAll('#top-bar button,#toolbar button')].find(x => /Dossier/i.test(x.getAttribute('onclick') || '') || /Vers DOSSIER/i.test(x.title || x.textContent || '')); if (!b) return; b.insertAdjacentHTML('afterend', '<button id="xsh-btn" title="Partager en lecture seule : lien, QR code ou page autonome, sans compte"><span class="btn-icon">🔗</span><span class="btn-label">Partager</span></button>'); document.getElementById('xsh-btn').onclick = open; };
         XBOOT.ready(add, 250); // avant le rangement de la barre (XBAR)
     }
-    return { init, open };
+    return { init, open, grab: grabCfg, pack };
 })();
 
 XSHARE.init('runo');
@@ -6393,7 +6393,7 @@ const XDASH = (() => {
     // ---------- cartes de l'accueil, réglables par le Master (⚙️ au survol) ----------
     // icône d'outil : logo personnalisé (logos/<outil>.png) s'il existe, sinon l'emoji
     const ic = a => '<span class="xd-ic"><img src="logos/' + a + '.png" alt="" onerror="this.parentNode.textContent=\'' + NM[a][0] + '\'"></span>';
-    const CARDS = { proj: '🎬 Projet en cours', pilot: '📈 Pilotage du projet', check: '✅ Checklist de préparation', dead: '⏰ Prochaines échéances', need: '🧩 Ce qui manque', fb: '💬 Derniers retours de l\'équipe', msg: '📢 Message du Master', toM: '✉️ Écrire au Master', team: '📨 Messages de l\'équipe', day: '📋 Feuille du jour', meteo: '🌤️ Météo & soleil', clock: '🌍 Horloges', notes: '🗒️ Notes rapides', fav: '⭐ Outils récents', budget: '💶 Budget', matos: '🧳 Matériel', rush: '💽 Rushes', post: '🎞️ Versions à valider', online: '🟢 Équipe en ligne', docs: '📄 Derniers documents' };
+    const CARDS = { proj: '🎬 Projet en cours', pilot: '📈 Pilotage du projet', check: '✅ Checklist de préparation', vit: '🌐 Vitrine à commenter', dead: '⏰ Prochaines échéances', need: '🧩 Ce qui manque', fb: '💬 Derniers retours de l\'équipe', msg: '📢 Message du Master', toM: '✉️ Écrire au Master', team: '📨 Messages de l\'équipe', day: '📋 Feuille du jour', meteo: '🌤️ Météo & soleil', clock: '🌍 Horloges', notes: '🗒️ Notes rapides', fav: '⭐ Outils récents', budget: '💶 Budget', matos: '🧳 Matériel', rush: '💽 Rushes', post: '🎞️ Versions à valider', online: '🟢 Équipe en ligne', docs: '📄 Derniers documents' };
     const NEWW = ['day', 'meteo', 'clock', 'notes', 'fav', 'budget', 'matos', 'rush', 'post', 'online', 'docs']; // nouveaux widgets : proposés dans la galerie ＋, masqués tant qu'on ne les coche pas
     const PF = [['countdown', 'Compte à rebours (J-…)'], ['dates', 'Dates de tournage'], ['lieu', 'Lieu'], ['production', 'Production'], ['client', 'Client / diffuseur'], ['realisation', 'Réalisation'], ['diffusion', 'Diffusion'], ['duree', 'Format / durée'], ['contact', 'Contact production']];
     const FBT = [['avis', '💬 Avis'], ['mots', '📌 Mots'], ['travaux', '📥 Travaux reçus'], ['drive', '☁️ Journal du Drive']];
@@ -6419,6 +6419,7 @@ const XDASH = (() => {
             const meta = [has('lieu') && f.lieu, has('production') && f.production, has('client') && f.client, has('realisation') && f.realisation && 'Réal. ' + f.realisation, has('duree') && f.duree, has('diffusion') && f.diffusion && '📺 ' + fr(f.diffusion), has('contact') && [f.contactName, f.contactPhone].filter(Boolean).join(' ')].filter(Boolean);
             return W('<b class="xd-t">' + esc(f.title || 'Sans nom') + '</b>' + (meta.length ? '<div class="xd-m">' + esc(meta.join(' · ')) + '</div>' : '') + (has('countdown') && n != null ? '<div class="xd-cd"><b>' + (n > 0 ? 'J-' + n : n === 0 ? 'Jour J' : 'J+' + (-n)) + '</b><span>' + (n > 0 ? 'avant le tournage' : n === 0 ? 'tournage aujourd\'hui' : 'depuis le début du tournage') + (has('dates') ? '<br>' + fr(f.debut) + (f.fin && f.fin !== f.debut ? ' → ' + fr(f.fin) : '') : '') + '</span></div>' : has('dates') && f.debut ? '<div class="xd-m">' + fr(f.debut) + (f.fin && f.fin !== f.debut ? ' → ' + fr(f.fin) : '') + '</div>' : '') + '<button class="xd-l" onclick="XPROJET.open()">Ouvrir la fiche projet →</button>', 'xd-proj'); }
         if (k === 'pilot') return typeof XPDASH !== 'undefined' ? W(XPDASH.card(), 'xd-pilot') : '';
+        if (k === 'vit') return typeof XVIT !== 'undefined' ? W(XVIT.card(), 'xd-vit') : '';
         if (k === 'check') return typeof XCHECK !== 'undefined' ? W(XCHECK.card(), 'xd-check') : '';
         if (k === 'dead') { const D = dl2(f, C); return W(D.length ? D.map(x => '<a class="xd-r' + (x.late ? ' late' : '') + '" href="' + x.a + '.html"><span>' + esc(x.t) + '</span><small>' + (x.late ? '⚠️ en retard · ' : '') + fr(x.d) + ' · ' + when(dd(x.d)) + '</small></a>').join('') : '<p class="xd-e">Aucune échéance à venir.</p>'); }
         if (k === 'need') { if (!f && !C.need) return ''; const L = C.need || (NEED[(f && f.genre) || 'autre'] || NEED.autre); return W(L.filter(a => NM[a]).map(a => { const n = count(a); return '<a class="xd-r" href="' + a + '.html"><span>' + ic(a) + ' ' + NM[a][1] + '</span><small class="' + (n ? 'ok' : 'ko') + '">' + (n ? '✓ ' + n + ' élément' + (n > 1 ? 's' : '') : '⚠️ à remplir') + '</small></a>'; }).join('') || '<p class="xd-e">Aucun outil choisi.</p>'); }
@@ -9074,6 +9075,198 @@ const XCHECK = (() => {
     return { init, open, close, card, stats, items, events, toggle, acceptAuto, syncPlanno };
 })();
 XCHECK.init();
+
+
+// =====================================================================
+//  SUITE XIII — XVIT : 🌐 vitrine client du projet, en lecture seule, avec commentaires
+//  • sections automatiques : le projet (fiche), planning (PLANNO), intentions & moodboard (MOODO)
+//  • + documents des outils (ceux qu'ils envoient à DOSSIER : plan, synoptique, conducteur, storyboard…),
+//    ajoutés depuis « 🔗 Partager » de chaque outil ou récupérés d'un clic (outils ouverts invisibles)
+//  • publication : lien court + QR code (Supabase : la page publiée et les commentaires du client, rien d'autre)
+//    repli sans serveur : lien qui contient tout (sans commentaires) ou page .html autonome
+//  • le client lit, commente chaque section, valide ✓ ou demande une modification ; réponses depuis la fiche projet
+// =====================================================================
+const XVIT = (() => {
+    const SB = 'https://abvvsoccbdftticlmpgi.supabase.co', KEY = 'sb_publishable_wB5kIn6lQtO-YWdUlt3gfg_IBIgBMuL';
+    const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } };
+    const W = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } };
+    const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const rid = n => { const a = new Uint8Array(n); crypto.getRandomValues(a); return Array.from(a, b => 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789'[b % 57]).join(''); };
+    const fr = s => /^\d{4}-\d{2}-\d{2}/.test(s || '') ? new Date(s.slice(0, 10) + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) : (s || '');
+    const PAGE = (/([a-z-]+)\.html$/i.exec(location.pathname) || [])[1] || 'index', APP = PAGE === 'calendrier' ? 'planno' : PAGE;
+    const base = () => location.href.replace(/[#?].*$/, '').replace(/[^/]*$/, '');
+    const KS = 'xiii.vitrine';
+    const st = () => Object.assign({ id: '', key: '', at: 0, sec: { fiche: 1, plan: 1, mood: 1 }, docs: [], comments: true, msg: '', days: 180, contacts: false, seen: 0 }, J(KS, {}) || {});
+    const fiche = () => { const s = J('xiii.projets', null); return s && s.list ? s.list.find(f => f && f.id === s.active) || null : null; };
+    const NAMES = { planno: 'PLANNO', moodo: 'MOODO', storyboardo: 'STORYBOARDO', plano: 'PLANO', syno: 'SYNO', conduco: 'CONDUCO', callsheeto: 'CALL SHEETO', decoup: 'DECOUP', deviso: 'DEVISO', repero: 'REPERO', casto: 'CASTO', posto: 'POSTO', lumo: 'LUMO', sono: 'SONO', transporto: 'TRANSPORTO', scripto: 'SCRIPTO', packingo: 'PACKINGO', runo: 'RUNO', ressourco: 'RESSOURCO', graphico: 'GRAPHICO', dossier: 'DOSSIER' };
+    const COLLECT = ['storyboardo', 'moodo', 'plano', 'syno', 'conduco', 'decoup', 'repero', 'callsheeto', 'deviso', 'posto', 'casto'];
+    // ---------- documents (IndexedDB du projet) ----------
+    function db() { return new Promise((res, rej) => { const r = indexedDB.open('xiii-vitrine', 1); r.onupgradeneeded = () => r.result.createObjectStore('docs'); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }); }
+    async function dput(id, v) { const d = await db(); return new Promise((res, rej) => { const t = d.transaction('docs', 'readwrite'); v == null ? t.objectStore('docs').delete(id) : t.objectStore('docs').put(v, id); t.oncomplete = () => res(); t.onerror = () => rej(t.error); }); }
+    async function dget(id) { const d = await db(); return new Promise(res => { const t = d.transaction('docs'), r = t.objectStore('docs').get(id); r.onsuccess = () => res(r.result || null); r.onerror = () => res(null); }); }
+    const blobUrl = b => new Promise(r => { const f = new FileReader(); f.onload = () => r(String(f.result)); f.onerror = () => r(''); f.readAsDataURL(b); });
+    async function fromChoice(c, app) {
+        const r = await c.make(); if (!r || (!r.html && !r.blob)) throw new Error('Document vide');
+        if (r.html) return { app, title: c.title || c.label || 'Document', kind: 'html', data: r.html };
+        const t = r.type || r.blob.type || 'application/pdf'; return { app, title: c.title || c.label || 'Document', kind: /pdf/.test(t) ? 'pdf' : /image/.test(t) ? 'img' : 'file', name: r.name || 'document', data: await blobUrl(r.blob) };
+    }
+    async function addDoc(doc) {
+        const s = st(), id = 'd' + rid(8); doc.at = Date.now(); doc.size = (doc.data || '').length; await dput(id, doc);
+        s.docs = s.docs.filter(x => !(x.app === doc.app && x.title === doc.title)); s.docs.push({ id, app: doc.app, title: doc.title, kind: doc.kind, size: doc.size, at: doc.at, on: 1 }); W(KS, s); return id;
+    }
+    // ---------- sections automatiques ----------
+    function secFiche(s) {
+        const f = fiche() || {}, T = { live: 'Captation live / concert', tv: 'Émission TV', fiction: 'Fiction', doc: 'Documentaire', pub: 'Publicité / clip', corporate: 'Institutionnel / corporate', event: 'Événementiel', artistique: 'Projet artistique' };
+        const rows = [['Type', T[f.ptype] || ''], ['Production', f.production], ['Client / diffuseur', f.client], ['Réalisation', f.realisation], ['Tournage', f.debut ? fr(f.debut) + (f.fin && f.fin !== f.debut ? ' → ' + fr(f.fin) : '') : ''], ['Lieu', [f.lieu, f.adresse].filter(Boolean).join(' — ')], ['Durée', f.duree], ['Diffusion / livraison', fr(f.diffusion)]].filter(r => r[1]);
+        const KEY = /real|product|direct|chef op|photo|cadre|son|decor|costum|maquill|montage|etalon|metteu|choregr|scripte|regisseu/;
+        const team = (f.team || []).filter(m => m.name && KEY.test(String(m.role || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase())).slice(0, 18).map(m => [m.role, m.name].concat(s.contacts ? [m.email || '', m.phone || ''] : []));
+        return { k: 'fiche', id: 'fiche', title: 'Le projet', rows, team, locs: (f.locs || []).filter(l => l.name).slice(0, 8).map(l => [l.name, l.address || '']) };
+    }
+    function secPlan() {
+        const pl = J('plannoXIII.project', null), T = ((pl && pl.tasks) || []).filter(t => t && t.name && t.start && !/^xc:/.test(t.src || ''));
+        if (!T.length) return null;
+        const PH = [['prepa', 'Préparation', '#7986cb'], ['casting', 'Casting & talents', '#ba68c8'], ['reperage', 'Repérages', '#4db6ac'], ['tournage', 'Tournage', '#ef5350'], ['post', 'Post-production', '#ffb74d'], ['livraison', 'Livraison & diffusion', '#81c784'], ['autre', 'Autre', '#90a4ae']];
+        return { k: 'plan', id: 'plan', title: 'Planning', phases: PH.map(([id, name, col]) => ({ name, col, tasks: T.filter(t => (t.phase || 'autre') === id).sort((a, b) => a.start.localeCompare(b.start)).map(t => ({ n: t.name, s: t.start, e: t.end || t.start, ms: !!t.ms, st: t.status || 'todo' })) })).filter(p => p.tasks.length) };
+    }
+    async function shrink(src, max) {
+        return new Promise(res => { const im = new Image(); im.onload = () => { const k = Math.min(1, (max || 640) / Math.max(im.width, im.height)), c = document.createElement('canvas'); c.width = Math.round(im.width * k); c.height = Math.round(im.height * k); c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); try { res(c.toDataURL('image/jpeg', 0.74)); } catch (e) { res(''); } }; im.onerror = () => res(''); im.src = src; });
+    }
+    async function moodImg(id) { try { const d = await new Promise((res, rej) => { const r = indexedDB.open('moodoXIII', 1); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); r.onupgradeneeded = () => { try { r.transaction.abort(); } catch (e) { } rej(new Error('vide')); }; }); return await new Promise(res => { try { const t = d.transaction('imgs'), q = t.objectStore('imgs').get(id); q.onsuccess = async () => { const v = q.result; res(!v ? '' : typeof v === 'string' ? v : v instanceof Blob ? await blobUrl(v) : v.data || v.src || ''); }; q.onerror = () => res(''); } catch (e) { res(''); } }); } catch (e) { return ''; } }
+    async function secMood() {
+        const m = J('moodoXIII.project', null); if (!m || !(m.boards || []).length) return null;
+        const LAB = { intention: 'Intention', palette: 'Palette', ratio: 'Format', focales: 'Focales', look: 'Image', refs: 'Références', nom: 'Personnage', role: 'Rôle', silhouette: 'Silhouette', visage: 'Visage', cheveux: 'Coiffure', tenue: 'Tenue', accessoires: 'Accessoires', attitude: 'Attitude', type: 'Lieu', ambiance: 'Ambiance', lumiere: 'Lumière', contraintes: 'Contraintes', personnages: 'Personnages', matieres: 'Matières', epoque: 'Époque', moment: 'Moment' };
+        const boards = [];
+        for (const b of m.boards.slice(0, 8)) {
+            const imgs = []; for (const it of (b.items || []).filter(i => i.kind === 'img' && i.img).slice(0, 6)) { const src = await moodImg(it.img); const sm = src ? await shrink(src, 560) : ''; if (sm) imgs.push([sm, it.cap || '']); }
+            boards.push({ name: b.name, type: b.type, fiche: Object.keys(b.fiche || {}).filter(k => b.fiche[k]).map(k => [LAB[k] || k, b.fiche[k]]), palette: b.palette || [], notes: (b.items || []).filter(i => i.kind === 'note').map(i => i.text).slice(0, 6), refs: (b.items || []).filter(i => i.kind === 'ref').map(i => [i.title, i.who, i.year].filter(Boolean).join(' · ')).slice(0, 8), imgs });
+        }
+        return { k: 'mood', id: 'mood', title: 'Intentions & moodboard', boards };
+    }
+    async function payload() {
+        const s = st(), f = fiche() || {}, out = { v: 1, title: f.title || 'Projet', sub: [f.debut ? fr(f.debut) + (f.fin && f.fin !== f.debut ? ' → ' + fr(f.fin) : '') : '', f.lieu].filter(Boolean).join(' · '), prod: f.production || '', client: f.client || '', msg: s.msg || '', cover: '', at: Date.now(), sections: [] };
+        if (f.cover) out.cover = await shrink(f.cover, 1400); else if (f.logo) out.logo = await shrink(f.logo, 400);
+        if (s.sec.fiche) out.sections.push(secFiche(s));
+        if (s.sec.plan) { const p = secPlan(); if (p) out.sections.push(p); }
+        if (s.sec.mood) { const m = await secMood(); if (m) out.sections.push(m); }
+        for (const d of s.docs.filter(d => d.on)) { const v = await dget(d.id); if (v) out.sections.push({ k: 'doc', id: d.id, title: d.title, app: NAMES[d.app] || d.app, kind: v.kind, name: v.name || '', data: v.data }); }
+        return out;
+    }
+    // ---------- serveur ----------
+    async function rpc(fn, args) { const r = await fetch(SB + '/rest/v1/rpc/' + fn, { method: 'POST', headers: { apikey: KEY, Authorization: 'Bearer ' + KEY, 'Content-Type': 'application/json' }, body: JSON.stringify(args) }); const t = await r.text(); let j = null; try { j = t ? JSON.parse(t) : null; } catch (e) { } if (!r.ok) { const m = (j && (j.message || j.hint)) || t || r.status; throw new Error(/could not find|not find the function|PGRST202/i.test(m) ? 'serveur' : String(m)); } return j; }
+    const urlOf = s => base() + 'projet.html?v=' + s.id;
+    async function publish() {
+        const s = st(); if (!s.id) { s.id = rid(14); s.key = rid(32); W(KS, s); }
+        const p = await payload(), size = JSON.stringify(p).length;
+        if (size > 8800000) throw new Error('Vitrine trop lourde (' + Math.round(size / 1048576) + ' Mo) : retirez des documents.');
+        await rpc('vitrine_put', { p_id: s.id, p_key: s.key, p_title: p.title, p_payload: p, p_comments: !!s.comments, p_days: s.days || 180 });
+        const s2 = st(); s2.at = Date.now(); s2.url = urlOf(s2); W(KS, s2); return { url: s2.url, size };
+    }
+    async function comments() { const s = st(); if (!s.id) return []; try { return (await rpc('vitrine_comments_list', { p_id: s.id })) || []; } catch (e) { return null; } }
+    async function answer(cid, resolved, reply) { const s = st(); return rpc('vitrine_comment_answer', { p_id: s.id, p_key: s.key, p_cid: cid, p_resolved: resolved, p_reply: reply }); }
+    async function unpublish() { const s = st(); if (s.id) { try { await rpc('vitrine_del', { p_id: s.id, p_key: s.key }); } catch (e) { } } s.id = ''; s.key = ''; s.at = 0; s.url = ''; W(KS, s); }
+    async function packed() { const p = await payload(); return XSHARE.pack(p); }
+    // ---------- récupération invisible des documents des outils ----------
+    function frame(app) {
+        return new Promise(res => {
+            const fr0 = document.createElement('iframe'), done = r => { clearTimeout(to); removeEventListener('message', on); fr0.remove(); res(r); };
+            const on = e => { const d = e.data; if (d && d.xvit === app) done(d); };
+            const to = setTimeout(() => done({ ok: false, msg: 'délai dépassé' }), 45000);
+            addEventListener('message', on);
+            try { if (window.XWS && XWS.id) fr0.dataset.ws = XWS.id; } catch (e) { }
+            fr0.style.cssText = 'position:fixed;left:0;top:0;width:1400px;height:900px;border:0;opacity:0.01;pointer-events:none;z-index:-1';
+            fr0.src = (app === 'planno' ? 'calendrier.html?v=prod&' : app + '.html?') + 'xvit=1&t=1'; document.body.appendChild(fr0);
+        });
+    }
+    // ---------- interface ----------
+    const CSS = '#xvt{position:fixed;inset:0;z-index:10310;background:rgba(0,0,0,.6);display:flex;justify-content:center;align-items:flex-start;padding:4vh 14px;overflow:auto;font:14px/1.45 "Segoe UI",system-ui,sans-serif}.xvt-box{width:min(900px,100%);background:var(--bg-menu,#1f1f23);color:var(--text-main,#eee);border:1px solid rgba(100,181,246,.5);border-radius:16px;padding:16px 18px;box-shadow:0 20px 60px rgba(0,0,0,.6)}.xvt-h{display:flex;gap:8px;align-items:center}.xvt-h b{flex:1;font-size:18px}.xvt-box button{font:inherit;color:inherit;background:rgba(100,181,246,.12);border:1px solid rgba(100,181,246,.45);border-radius:8px;padding:6px 11px;cursor:pointer}.xvt-box button.p{background:#64b5f6;color:#0b1a28;font-weight:700;border-color:#64b5f6}.xvt-box button:disabled{opacity:.5}.xvt-d{opacity:.78;font-size:12.5px}' +
+        '.xvt-box section{background:rgba(128,128,128,.07);border:1px solid rgba(128,128,128,.22);border-radius:12px;padding:10px 12px;margin-top:10px}.xvt-box h4{margin:0 0 6px;font-size:14px;display:flex;justify-content:space-between;align-items:center;gap:8px}.xvt-r{display:flex;gap:8px;align-items:center;padding:5px 2px;border-top:1px solid rgba(128,128,128,.15);font-size:13px}.xvt-r:first-of-type{border-top:0}.xvt-r span{flex:1}.xvt-r small{opacity:.6}.xvt-r .x{padding:2px 7px}' +
+        '.xvt-link{display:flex;gap:6px;margin:8px 0}.xvt-link input,.xvt-box textarea,.xvt-box input[type=text]{flex:1;width:100%;box-sizing:border-box;background:rgba(0,0,0,.25);color:inherit;border:1px solid rgba(128,128,128,.4);border-radius:8px;padding:7px 9px;font:inherit}.xvt-qr{background:#fff;border-radius:10px;padding:8px;width:170px}.xvt-qr svg{display:block;width:100%;height:auto}.xvt-pub{display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap}.xvt-pub>div{flex:1;min-width:260px}.xvt-pub>.xvt-qr{flex:0 0 170px;min-width:0}' +
+        '.xvt-c{padding:8px 10px;border-radius:10px;background:rgba(128,128,128,.1);margin:6px 0;font-size:13px}.xvt-c.ok{border-left:3px solid #81c784}.xvt-c.change{border-left:3px solid #ffb74d}.xvt-c.res{opacity:.55}.xvt-c b{font-size:12.5px}.xvt-c small{opacity:.6}.xvt-c .rp{margin-top:4px;padding-left:10px;border-left:2px solid #64b5f6;opacity:.9}.xvt-c .a{display:flex;gap:6px;margin-top:6px}.xvt-w{color:#ffb74d}.xvt-k{display:flex;gap:6px;align-items:center;font-size:13px;margin:4px 0}' +
+        '@media print{#xvt{display:none}}';
+    function css() { if (!document.getElementById('xvt-css')) { const s = document.createElement('style'); s.id = 'xvt-css'; s.textContent = CSS; document.head.appendChild(s); } }
+    function close() { const o = document.getElementById('xvt'); if (o) o.remove(); }
+    async function open(tab) {
+        css(); let ov = document.getElementById('xvt'); if (!ov) { ov = document.createElement('div'); ov.id = 'xvt'; document.body.appendChild(ov); ov.addEventListener('mousedown', e => { if (e.target === ov) close(); }); }
+        const s = st(), f = fiche() || {}, pl = secPlan(), mo = J('moodoXIII.project', null);
+        const sizeK = s.docs.filter(d => d.on).reduce((a, d) => a + (d.size || 0), 0);
+        ov.innerHTML = '<div class="xvt-box"><div class="xvt-h"><b>🌐 Vitrine à commenter — ' + esc(f.title || 'Projet') + '</b><button data-prev>👁 Aperçu</button><button data-x>✕</button></div>' +
+            '<p class="xvt-d">Une page en lecture seule pour votre client ou votre diffuseur : il consulte, commente chaque partie, valide ✓ ou demande une modification. Seul ce que vous cochez est publié ; les contacts de l’équipe restent masqués par défaut. <i>Pour ouvrir au client les outils eux-mêmes, mis à jour en direct : 👥 Équipe › Liens & QR › Vitrine client.</i></p>' +
+            '<section><h4>📑 Contenu</h4>' +
+            '<label class="xvt-k"><input type="checkbox" data-s="fiche"' + (s.sec.fiche ? ' checked' : '') + '> 🎬 Le projet <small>&nbsp;fiche : type, dates, lieu, équipe clé</small></label>' +
+            '<label class="xvt-k" style="padding-left:22px"><input type="checkbox" data-contacts' + (s.contacts ? ' checked' : '') + '> afficher e-mails et téléphones de l’équipe</label>' +
+            '<label class="xvt-k"><input type="checkbox" data-s="plan"' + (s.sec.plan ? ' checked' : '') + (pl ? '' : ' disabled') + '> 🗓️ Planning <small>&nbsp;' + (pl ? pl.phases.reduce((a, p) => a + p.tasks.length, 0) + ' étape(s) de PLANNO' : 'PLANNO est vide') + '</small></label>' +
+            '<label class="xvt-k"><input type="checkbox" data-s="mood"' + (s.sec.mood ? ' checked' : '') + (mo && (mo.boards || []).length ? '' : ' disabled') + '> 🎨 Intentions & moodboard <small>&nbsp;' + (mo && (mo.boards || []).length ? mo.boards.length + ' planche(s) de MOODO, images comprises' : 'MOODO est vide') + '</small></label>' +
+            '<h4 style="margin-top:10px">📎 Documents des outils <span><button data-collect>⚡ Récupérer depuis les outils…</button></span></h4>' +
+            (s.docs.length ? s.docs.map(d => '<div class="xvt-r"><input type="checkbox" data-on="' + d.id + '"' + (d.on ? ' checked' : '') + '><span>' + esc(d.title) + ' <small>' + esc(NAMES[d.app] || d.app) + ' · ' + (d.kind === 'pdf' ? 'PDF' : d.kind === 'img' ? 'image' : 'page') + ' · ' + Math.round((d.size || 0) * 0.75 / 1024) + ' Ko</small></span><button class="x" data-up="' + d.id + '" title="Monter">↑</button><button class="x" data-del="' + d.id + '" title="Retirer">✕</button></div>').join('') : '<p class="xvt-d">Aucun document. Ajoutez-en depuis « 🔗 Partager » de n’importe quel outil (bouton « 🌐 Ajouter à la vitrine »), ou récupérez-les ici d’un clic.</p>') +
+            (sizeK > 6e6 ? '<p class="xvt-w">⚠️ Documents lourds (' + Math.round(sizeK * 0.75 / 1048576) + ' Mo) : la publication peut être lente.</p>' : '') + '</section>' +
+            '<section><h4>⚙️ Options</h4><label class="xvt-k" style="display:block">Message d’accueil pour le client<textarea data-msg rows="2" placeholder="Ex. Bonjour Isabelle, voici le planning et les intentions pour le tournage du 12. Vos retours sont les bienvenus !">' + esc(s.msg) + '</textarea></label>' +
+            '<label class="xvt-k"><input type="checkbox" data-com' + (s.comments ? ' checked' : '') + '> Autoriser les commentaires et validations du client</label><label class="xvt-k">Lien valable <select data-days>' + [30, 90, 180, 365].map(n => '<option' + (n === (s.days || 180) ? ' selected' : '') + ' value="' + n + '">' + n + ' jours</option>').join('') + '</select> après la dernière mise à jour</label></section>' +
+            '<section><h4>🚀 Publication</h4><div data-pubzone>' + (s.id ? '<div class="xvt-pub"><div><p class="xvt-d" style="margin:0">Publiée le ' + new Date(s.at).toLocaleString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) + '. Republiez après chaque modification : le lien ne change pas.</p><div class="xvt-link"><input readonly value="' + esc(s.url || urlOf(s)) + '"><button data-copy>📋</button></div><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="p" data-pub>🔄 Mettre à jour</button><button data-open>↗ Ouvrir</button>' + (navigator.share ? '<button data-share>📤 Partager…</button>' : '') + '<button data-unpub>🗑️ Dépublier</button></div></div>' + (typeof XQRS !== 'undefined' ? '<div class="xvt-qr">' + XQRS.svg(s.url || urlOf(s), { ecl: 'M', border: 2 }) + '</div>' : '') + '</div>' : '<button class="p" data-pub>🌐 Publier la vitrine</button> <button data-local>⬇️ Page .html autonome (sans commentaires)</button>') + '</div><div data-pubmsg></div></section>' +
+            (s.id ? '<section><h4>💬 Retours du client <button data-refresh>↻</button></h4><div data-com-list><p class="xvt-d">Chargement…</p></div></section>' : '') + '</div>';
+        const q = x => ov.querySelector(x), qa = x => ov.querySelectorAll(x), save = () => { const n = st(); qa('[data-s]').forEach(c => n.sec[c.dataset.s] = c.checked ? 1 : 0); n.contacts = q('[data-contacts]').checked; n.comments = q('[data-com]').checked; n.msg = q('[data-msg]').value; n.days = +q('[data-days]').value; qa('[data-on]').forEach(c => { const d = n.docs.find(x => x.id === c.dataset.on); if (d) d.on = c.checked ? 1 : 0; }); W(KS, n); };
+        qa('input,textarea,select').forEach(i => i.addEventListener('change', save));
+        q('[data-x]').onclick = close;
+        q('[data-prev]').onclick = async () => { save(); try { const code = await packed(); const w = window.open(base() + 'projet.html#' + code, '_blank'); if (!w) alert('Autorisez les fenêtres pour l’aperçu'); } catch (e) { alert('Aperçu impossible : ' + e.message); } };
+        qa('[data-del]').forEach(b => b.onclick = async () => { const n = st(); n.docs = n.docs.filter(d => d.id !== b.dataset.del); W(KS, n); await dput(b.dataset.del, null); open(); });
+        qa('[data-up]').forEach(b => b.onclick = () => { const n = st(), i = n.docs.findIndex(d => d.id === b.dataset.up); if (i > 0) { const t = n.docs[i]; n.docs[i] = n.docs[i - 1]; n.docs[i - 1] = t; W(KS, n); open(); } });
+        q('[data-collect]').onclick = () => collectUI();
+        const msg = h => { q('[data-pubmsg]').innerHTML = h; };
+        qa('[data-pub]').forEach(b => b.onclick = async () => { save(); b.disabled = true; b.textContent = '⏳ Publication…'; try { const r = await publish(); open(); setTimeout(() => { const m = document.querySelector('#xvt [data-pubmsg]'); if (m) m.innerHTML = '<p class="xvt-d">✅ Vitrine publiée (' + Math.round(r.size / 1024) + ' Ko).</p>'; }, 30); } catch (e) { b.disabled = false; b.textContent = '🌐 Publier la vitrine';
+            msg(e.message === 'serveur' ? '<p class="xvt-w">⚠️ Le service de vitrines n’est pas encore activé sur le serveur XIII. En attendant : « 👁 Aperçu » donne un lien qui contient toute la vitrine (sans commentaires), ou la page .html autonome.</p><div style="display:flex;gap:6px"><button data-fb-link>🔗 Lien sans serveur</button><button data-local2>⬇️ Page .html autonome</button></div>' : '<p class="xvt-w">⚠️ ' + esc(e.message) + '</p>');
+            const fb = q('[data-fb-link]'); if (fb) fb.onclick = async () => { const code = await packed(), url = base() + 'projet.html#' + code; try { await navigator.clipboard.writeText(url); fb.textContent = '📋 Lien copié (' + Math.round(url.length / 1024) + ' Ko)'; } catch (x) { prompt('Lien de la vitrine', url); } };
+            const l2 = q('[data-local2]'); if (l2) l2.onclick = local; } });
+        const lc = q('[data-local]'); if (lc) lc.onclick = local;
+        const cp = q('[data-copy]'); if (cp) cp.onclick = async () => { const i = q('.xvt-link input'); try { await navigator.clipboard.writeText(i.value); cp.textContent = '✓'; } catch (e) { i.select(); document.execCommand('copy'); } };
+        const op = q('[data-open]'); if (op) op.onclick = () => window.open(st().url || urlOf(st()), '_blank');
+        const sh = q('[data-share]'); if (sh) sh.onclick = () => navigator.share({ title: (f.title || 'Projet') + ' — vitrine', text: s.msg || 'La vitrine du projet', url: st().url || urlOf(st()) }).catch(() => { });
+        const up = q('[data-unpub]'); if (up) up.onclick = async () => { if (!confirm('Dépublier la vitrine ? Le lien ne fonctionnera plus et les commentaires du client seront supprimés.')) return; await unpublish(); open(); };
+        if (s.id) { const rf = q('[data-refresh]'); rf.onclick = () => loadComments(ov); loadComments(ov); }
+        async function local() { save(); try { const code = await packed(); const v = await (await fetch(base() + 'projet.html', { cache: 'no-store' })).text(); const page = v.replace('/*XVT_EMBED*/', 'window.XVT_EMBED=' + JSON.stringify(code) + ';'); const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([page], { type: 'text/html' })); a.download = ('Vitrine ' + (f.title || 'projet')).normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^\w.-]+/g, '_') + '.html'; document.body.appendChild(a); a.click(); a.remove(); } catch (e) { alert('Page impossible : ' + e.message); } }
+    }
+    async function loadComments(ov) {
+        const box = ov.querySelector('[data-com-list]'); if (!box) return; const L = await comments();
+        if (L == null) { box.innerHTML = '<p class="xvt-w">Commentaires indisponibles (serveur injoignable).</p>'; return; }
+        const s = st(); const maxId = L.reduce((a, c) => Math.max(a, c.id), 0); if (maxId > (s.seen || 0)) { s.seen = maxId; W(KS, s); }
+        const SN = { fiche: 'Le projet', plan: 'Planning', mood: 'Intentions & moodboard' }; s.docs.forEach(d => SN[d.id] = d.title);
+        box.innerHTML = L.length ? L.slice().reverse().map(c => '<div class="xvt-c ' + c.kind + (c.resolved ? ' res' : '') + '"><b>' + (c.kind === 'ok' ? '✅ Validé' : c.kind === 'change' ? '✏️ Modification demandée' : '💬') + ' · ' + esc(c.author) + '</b> <small>' + esc(SN[c.section] || c.section || 'Général') + ' · ' + new Date(c.at).toLocaleString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) + '</small>' + (c.body ? '<div>' + esc(c.body) + '</div>' : '') + (c.reply ? '<div class="rp">↪ ' + esc(c.reply) + '</div>' : '') + '<div class="a"><button data-rep="' + c.id + '">↪ Répondre</button><button data-res="' + c.id + '" data-v="' + (c.resolved ? 0 : 1) + '">' + (c.resolved ? '↺ Rouvrir' : '✓ Traité') + '</button></div></div>').join('') : '<p class="xvt-d">Pas encore de retour du client.</p>';
+        box.querySelectorAll('[data-rep]').forEach(b => b.onclick = async () => { const c = L.find(x => x.id == b.dataset.rep), t = prompt('Réponse visible par le client', c.reply || ''); if (t == null) return; try { await answer(c.id, null, t); loadComments(ov); } catch (e) { alert(e.message); } });
+        box.querySelectorAll('[data-res]').forEach(b => b.onclick = async () => { try { await answer(+b.dataset.res, b.dataset.v === '1', null); loadComments(ov); } catch (e) { alert(e.message); } });
+    }
+    function collectUI() {
+        css(); const ov = document.getElementById('xvt'); const box = ov.querySelector('.xvt-box'), s = st();
+        const has = a => { const k = { storyboardo: 'storyboardoXIII.project', moodo: 'moodoXIII.project', plano: 'planoXIII.project', syno: 'synoptique_projects', conduco: 'conducoXIII.project', decoup: 'decoupXIII.project', repero: 'reperoXIII.project', callsheeto: 'callsheetoXIII.project', deviso: 'devisoXIII.project', posto: 'postoXIII.project', casto: 'castoXIII.project' }[a]; return (localStorage.getItem(k) || '').length > 300; };
+        const DEF = { storyboardo: 1, plano: 1, moodo: 0, syno: 0, conduco: 1, decoup: 0, repero: 1, callsheeto: 0, deviso: 0, posto: 0, casto: 0 };
+        box.innerHTML = '<div class="xvt-h"><b>⚡ Récupérer les documents des outils</b><button data-back>← Retour</button></div><p class="xvt-d">Chaque outil coché prépare son document principal (celui qu’il envoie à DOSSIER), sans quitter cette page. Le devis et la feuille de service sont décochés : ils contiennent souvent des informations internes.</p>' +
+            COLLECT.map(a => '<label class="xvt-k"><input type="checkbox" data-c="' + a + '"' + (has(a) ? (DEF[a] ? ' checked' : '') : ' disabled') + '> ' + NAMES[a] + (has(a) ? '' : ' <small>(vide)</small>') + (s.docs.some(d => d.app === a) ? ' <small>· déjà dans la vitrine (sera remplacé)</small>' : '') + '<span data-st="' + a + '" style="margin-left:auto"></span></label>').join('') +
+            '<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px"><button class="p" data-go>⚡ Récupérer</button></div>';
+        box.querySelector('[data-back]').onclick = () => open();
+        box.querySelector('[data-go]').onclick = async e => { e.target.disabled = true; const L = [...box.querySelectorAll('[data-c]:checked')].map(c => c.dataset.c); let ok = 0;
+            for (const a of L) { const sp = box.querySelector('[data-st="' + a + '"]'); sp.textContent = '⏳'; const r = await frame(a); if (r.ok && r.doc) { const n = st(); n.docs.filter(d => d.app === a).forEach(d => dput(d.id, null)); n.docs = n.docs.filter(d => d.app !== a); W(KS, n); await addDoc(r.doc); ok++; sp.textContent = '✅'; } else { sp.textContent = '⚠️'; sp.title = r.msg || ''; } }
+            e.target.textContent = '✅ ' + ok + ' document(s) ajouté(s)'; setTimeout(() => open(), 900); };
+    }
+    // ---------- dans les outils : bouton « 🌐 Ajouter à la vitrine » de la fenêtre Partager ; mode invisible ----------
+    function hookShare() {
+        const mo = new MutationObserver(() => { const go = document.getElementById('xsh-go'); if (!go || document.getElementById('xvt-add')) return;
+            go.insertAdjacentHTML('afterend', '<button id="xvt-add" title="Ajouter ce document à la vitrine client du projet">🌐 Ajouter à la vitrine</button>');
+            document.getElementById('xvt-add').onclick = async ev => { const b = ev.target; b.disabled = true; b.textContent = '⏳…'; try { const cfg = await XSHARE.grab(), i = +((document.querySelector('#xsh-ov input[name=xsh-c]:checked') || {}).value || 0), c = (cfg.choices || [])[i]; if (!c) throw new Error('Aucun document'); await addDoc(await fromChoice(c, APP)); b.textContent = '✅ Ajouté à la vitrine'; } catch (e) { b.textContent = '⚠️ ' + (e.message || e); } }; });
+        const go = () => mo.observe(document.body, { childList: true, subtree: true }); if (document.body) go(); else document.addEventListener('DOMContentLoaded', go);
+    }
+    function init() {
+        if (/[?&]xvit=1/.test(location.search)) {
+            const run = async () => { let r; try { const cfg = await XSHARE.grab(); const c = (cfg.choices || [])[0]; if (!c) throw new Error('Aucun document'); r = { xvit: APP, ok: true, doc: await fromChoice(c, APP) }; } catch (e) { r = { xvit: APP, ok: false, msg: String(e && e.message || e) }; } try { (window.parent !== window ? window.parent : window).postMessage(r, '*'); } catch (e) { } };
+            const go = () => setTimeout(run, 1500); if (document.readyState === 'complete') go(); else addEventListener('load', go); return;
+        }
+        if (typeof XSHARE !== 'undefined') hookShare();
+        window.XSET_HELP = window.XSET_HELP || []; if (!window.XSET_HELP.some(x => x.k === 'xvt')) window.XSET_HELP.push({ k: 'xvt', icon: '🌐', label: 'Vitrine à commenter (client)', sub: 'Planning, intentions et documents en lecture seule, avec commentaires', run: () => setTimeout(open, 150) });
+        const mo = new MutationObserver(() => { const g = document.querySelector('#xpj-g .xpj-types'); if (!g || document.getElementById('xvt-fiche')) return; const s = st(); const b = document.createElement('button'); b.id = 'xvt-fiche'; b.type = 'button'; b.textContent = '🌐 Vitrine à commenter' + (s.id ? ' — publiée' : ''); b.style.cssText = 'margin:6px 0 2px;padding:9px 14px;border-radius:12px;border:1px solid #64b5f6;background:rgba(100,181,246,.12);color:inherit;font-weight:700;cursor:pointer;width:100%';
+            b.onclick = () => { const sv = document.getElementById('xpj-save'); if (sv) sv.click(); setTimeout(() => { try { XPROJET.close(); } catch (e) { } open(); }, 200); }; (document.getElementById('xck-fiche') || document.getElementById('xmd-fiche') || g).insertAdjacentElement('afterend', b); });
+        const go = () => mo.observe(document.body, { childList: true, subtree: true }); if (document.body) go(); else document.addEventListener('DOMContentLoaded', go);
+    }
+    // carte du tableau de bord : nouveaux retours du client
+    function card() { const s = st(); if (!s.id) return '<p class="xd-e">Pas de vitrine publiée. Partagez le planning, les intentions et les documents avec votre client, en lecture seule.</p><button class="xd-l" onclick="XVIT.open()">🌐 Créer la vitrine client →</button>'; const id = 'xvtc' + Date.now(); setTimeout(async () => { const el = document.getElementById(id); if (!el) return; const L = await comments(); if (!L) { el.textContent = 'Retours indisponibles'; return; } const nw = L.filter(c => c.id > (s.seen || 0)).length, open_ = L.filter(c => !c.resolved).length; el.innerHTML = '<b>' + L.length + '</b> retour(s) · ' + (nw ? '<b style="color:#64b5f6">' + nw + ' nouveau(x)</b> · ' : '') + open_ + ' à traiter' + (L.length ? '<br><small>Dernier : ' + esc((L[L.length - 1].author || '') + ' — ' + (L[L.length - 1].body || (L[L.length - 1].kind === 'ok' ? 'validé ✓' : ''))).slice(0, 90) + '</small>' : ''); }, 30); return '<div id="' + id + '" style="font-size:13px">…</div><button class="xd-l" onclick="XVIT.open()">🌐 Vitrine & retours du client →</button>'; }
+    return { init, open, close, publish, payload, card, addDoc, comments };
+})();
+XVIT.init();
 
 </script>
 <!-- SUITE XIII:SETTINGS:END -->

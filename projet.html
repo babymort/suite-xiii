@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Vitrine du projet — SUITE XIII</title>
+<style>
+@font-face{font-family:Astoria;src:url(fonts/astoria.woff) format('woff');font-display:swap}
+:root{--bg:#f6f3ee;--panel:#fff;--fg:#1c1a17;--dim:#6f685f;--line:#e2dcd2;--acc:#c46a1b;--ok:#2e7d32;--chg:#d97706;color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#151413;--panel:#1f1d1b;--fg:#f2ede6;--dim:#a39b91;--line:#36322e;--acc:#f0b378;--ok:#81c784;--chg:#ffb74d;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.55 -apple-system,"Segoe UI",system-ui,sans-serif}
+header{position:relative;padding:56px 20px 34px;text-align:center;overflow:hidden;background:linear-gradient(160deg,#1d1a17,#3a2414);color:#fff}
+header .cov{position:absolute;inset:0;background-size:cover;background-position:center;filter:blur(2px) brightness(.45);transform:scale(1.04)}
+header .in{position:relative;max-width:900px;margin:0 auto}
+header .logo{max-height:70px;margin-bottom:12px}
+h1{font:400 clamp(30px,6vw,56px)/1.05 Astoria,Georgia,serif;letter-spacing:.03em;margin:0 0 10px;text-wrap:balance}
+header p{margin:4px 0;opacity:.9}.kick{font-size:12px;letter-spacing:.18em;text-transform:uppercase;opacity:.7}
+.msg{max-width:640px;margin:16px auto 0;padding:12px 16px;border-radius:12px;background:rgba(255,255,255,.12);backdrop-filter:blur(8px);text-align:left;white-space:pre-wrap}
+nav{position:sticky;top:0;z-index:5;display:flex;gap:6px;overflow-x:auto;padding:10px 16px;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+nav a{flex:0 0 auto;padding:6px 12px;border-radius:99px;border:1px solid var(--line);color:inherit;text-decoration:none;font-size:13px;background:var(--panel)}
+main{max-width:980px;margin:0 auto;padding:18px 16px 60px;display:grid;gap:22px}
+section.s{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px 18px 14px;scroll-margin-top:60px}
+section.s>h2{font:600 20px/1.2 -apple-system,"Segoe UI",system-ui,sans-serif;margin:0 0 12px;display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+section.s>h2 small{font-size:12px;color:var(--dim);font-weight:400}
+.st{font-size:12px;padding:2px 9px;border-radius:99px;border:1px solid var(--line)}.st.ok{color:var(--ok);border-color:var(--ok)}.st.chg{color:var(--chg);border-color:var(--chg)}
+dl{display:grid;grid-template-columns:minmax(120px,190px) 1fr;gap:6px 14px;margin:0}dt{color:var(--dim)}dd{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14px;margin-top:12px}td,th{padding:6px 4px;border-top:1px solid var(--line);text-align:left}th{font-size:12px;color:var(--dim);font-weight:600}
+h3{font-size:15px;margin:16px 0 6px}
+.tl{position:relative;margin-top:8px}.tl-h{display:flex;justify-content:space-between;font-size:11.5px;color:var(--dim);margin-bottom:4px}
+.tl-r{display:grid;grid-template-columns:minmax(120px,32%) 1fr;gap:10px;align-items:center;padding:3px 0;font-size:13px}
+.tl-r .n{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.tl-r .n small{color:var(--dim)}
+.tl-b{position:relative;height:16px;background:color-mix(in srgb,var(--line) 50%,transparent);border-radius:6px}
+.tl-b i{position:absolute;top:2px;bottom:2px;border-radius:5px;min-width:6px}.tl-b i.ms{width:12px!important;height:12px;top:2px;transform:rotate(45deg);border-radius:2px;min-width:0}
+.tl-b i.done{opacity:.45}.tl-now{position:absolute;top:0;bottom:0;width:2px;background:var(--acc);z-index:2}
+.ph{display:flex;align-items:center;gap:8px;margin:12px 0 4px;font-weight:600;font-size:13.5px}.ph b{width:10px;height:10px;border-radius:3px;display:inline-block}
+.pal{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}.pal span{width:46px;height:46px;border-radius:10px;border:1px solid var(--line);position:relative}.pal span em{position:absolute;bottom:-16px;left:0;font-size:9.5px;color:var(--dim);font-style:normal}
+.imgs{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-top:22px}.imgs figure{margin:0}.imgs img{width:100%;border-radius:10px;display:block;aspect-ratio:3/2;object-fit:cover;background:var(--line)}.imgs figcaption{font-size:12px;color:var(--dim);margin-top:3px}
+.board{border-top:1px solid var(--line);padding-top:12px;margin-top:12px}.board:first-of-type{border-top:0;margin-top:0;padding-top:0}
+.notes li{margin:3px 0}.refs{color:var(--dim);font-size:13.5px}
+.doc iframe{width:100%;border:1px solid var(--line);border-radius:10px;background:#fff;min-height:480px}.doc img{max-width:100%;border-radius:10px}.dl{display:inline-block;margin-top:8px;color:var(--acc)}
+.com{margin-top:14px;border-top:1px dashed var(--line);padding-top:10px}
+.c{padding:8px 10px;border-radius:10px;background:color-mix(in srgb,var(--line) 40%,transparent);margin:6px 0;font-size:14px}.c b{font-size:13px}.c small{color:var(--dim)}.c.ok{border-left:3px solid var(--ok)}.c.change{border-left:3px solid var(--chg)}.c .rp{margin-top:5px;padding-left:10px;border-left:2px solid var(--acc);font-size:13.5px}
+.f{display:grid;gap:6px;margin-top:8px}.f input,.f textarea{font:inherit;color:inherit;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px 10px;width:100%}.f .b{display:flex;gap:6px;flex-wrap:wrap}
+button{font:inherit;cursor:pointer;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:inherit;padding:7px 12px}button.p{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:600}button.okb{color:var(--ok);border-color:var(--ok)}button.chb{color:var(--chg);border-color:var(--chg)}button:disabled{opacity:.5}
+.err{text-align:center;padding:80px 20px;color:var(--dim)}
+footer{text-align:center;font-size:12px;color:var(--dim);padding:20px}
+@media(max-width:640px){dl{grid-template-columns:1fr}dt{margin-top:6px}.tl-r{grid-template-columns:1fr}header{padding:40px 16px 26px}}
+@media print{nav,.com,.f{display:none!important}section.s{break-inside:avoid}}
+</style>
+</head>
+<body>
+<header id="hd"><div class="in"><p class="kick">Vitrine du projet</p><h1>Chargement…</h1></div></header>
+<nav id="nv" hidden></nav>
+<main id="m"></main>
+<footer>Vitrine en lecture seule réalisée avec la SUITE XIII — application développée par Matthieu Lamotte</footer>
+<script>
+/*XVT_EMBED*/
+(async function () {
+    const SB = 'https://abvvsoccbdftticlmpgi.supabase.co', KEY = 'sb_publishable_wB5kIn6lQtO-YWdUlt3gfg_IBIgBMuL';
+    const m = document.getElementById('m'), hd = document.getElementById('hd'), nv = document.getElementById('nv');
+    const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const fr = s => /^\d{4}-\d{2}-\d{2}/.test(s || '') ? new Date(s.slice(0, 10) + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) : (s || '');
+    const err = t => { hd.querySelector('h1').textContent = 'Vitrine indisponible'; m.innerHTML = '<div class="err"><p style="font-size:40px;margin:0">🌐</p><p>' + t + '</p></div>'; };
+    const rpc = async (fn, args) => { const r = await fetch(SB + '/rest/v1/rpc/' + fn, { method: 'POST', headers: { apikey: KEY, Authorization: 'Bearer ' + KEY, 'Content-Type': 'application/json' }, body: JSON.stringify(args) }); const t = await r.text(); let j = null; try { j = t ? JSON.parse(t) : null; } catch (e) { } if (!r.ok) throw new Error((j && j.message) || t || r.status); return j; };
+    const vid = (/[?&]v=([A-Za-z0-9_-]{10,40})/.exec(location.search) || [])[1];
+    let D, server = false, comOn = false;
+    try {
+        if (vid) { const r = await rpc('vitrine_get', { p_id: vid }); if (!r) { err('Ce lien a expiré ou la vitrine a été retirée. Demandez un nouveau lien à la production.'); return; } D = r.payload; server = true; comOn = !!r.comments_on; D._upd = r.updated_at; }
+        else {
+            const code = window.XVT_EMBED || decodeURIComponent((location.hash || '').slice(1)); if (!code) { err('Ce lien ne contient aucune vitrine.'); return; }
+            const u8 = s => { s = s.replace(/-/g, '+').replace(/_/g, '/'); while (s.length % 4) s += '='; return Uint8Array.from(atob(s), c => c.charCodeAt(0)); };
+            const kind = code.slice(0, 2), data = u8(code.slice(2));
+            const txt = kind === 'z.' ? await new Response(new Blob([data]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).text() : new TextDecoder().decode(data);
+            D = JSON.parse(txt);
+        }
+    } catch (e) { err('Impossible de charger la vitrine (' + esc(e.message || e) + '). Vérifiez votre connexion puis rechargez la page.'); return; }
+    document.title = (D.title || 'Projet') + ' — vitrine';
+    hd.innerHTML = (D.cover ? '<div class="cov" style="background-image:url(' + D.cover + ')"></div>' : '') + '<div class="in">' + (D.logo ? '<img class="logo" src="' + D.logo + '" alt="">' : '') + '<p class="kick">' + esc([D.prod, D.client].filter(Boolean).join(' · ') || 'Vitrine du projet') + '</p><h1>' + esc(D.title) + '</h1>' + (D.sub ? '<p>' + esc(D.sub) + '</p>' : '') + (D.msg ? '<div class="msg">' + esc(D.msg) + '</div>' : '') + (D._upd ? '<p style="font-size:12px;opacity:.6;margin-top:12px">Mis à jour le ' + new Date(D._upd).toLocaleString('fr-FR', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' }) + '</p>' : '') + '</div>';
+    const S = D.sections || [];
+    nv.innerHTML = S.map(s => '<a href="#s-' + esc(s.id) + '">' + esc(s.title) + '</a>').join('') + (server && comOn ? '<a href="#s-gen">💬 Commentaire général</a>' : ''); nv.hidden = S.length < 2;
+    // ---------- rendus ----------
+    function rFiche(s) {
+        return '<dl>' + (s.rows || []).map(r => '<dt>' + esc(r[0]) + '</dt><dd>' + esc(r[1]) + '</dd>').join('') + '</dl>' +
+            ((s.team || []).length ? '<h3>Équipe</h3><table>' + s.team.map(t => '<tr><td style="color:var(--dim);width:40%">' + esc(t[0]) + '</td><td>' + esc(t[1]) + (t[2] ? ' <small style="color:var(--dim)">· ' + esc(t[2]) + (t[3] ? ' · ' + esc(t[3]) : '') + '</small>' : '') + '</td></tr>').join('') + '</table>' : '') +
+            ((s.locs || []).length ? '<h3>Lieux</h3><table>' + s.locs.map(l => '<tr><td>' + esc(l[0]) + '</td><td style="color:var(--dim)">' + esc(l[1]) + '</td></tr>').join('') + '</table>' : '');
+    }
+    function rPlan(s) {
+        const all = s.phases.flatMap(p => p.tasks); if (!all.length) return '';
+        const t = d => Date.parse(d + 'T12:00:00'), a = Math.min(...all.map(x => t(x.s))), b = Math.max(...all.map(x => t(x.e || x.s))) + 864e5, W = Math.max(864e5, b - a), pc = d => ((t(d) - a) / W * 100);
+        const now = Date.now(), nowP = now > a && now < b ? (now - a) / W * 100 : null;
+        const months = []; const d0 = new Date(a); d0.setDate(1); for (let d = new Date(d0); d.getTime() < b; d.setMonth(d.getMonth() + 1)) months.push(d.toLocaleDateString('fr-FR', { month: 'short', year: '2-digit' }));
+        return '<div class="tl"><div class="tl-h"><span>' + fr(new Date(a).toISOString()) + '</span><span>' + months.slice(1, -1).join(' · ') + '</span><span>' + fr(new Date(b - 864e5).toISOString()) + '</span></div>' + s.phases.map(p => '<div class="ph"><b style="background:' + p.col + '"></b>' + esc(p.name) + '</div>' + p.tasks.map(x => '<div class="tl-r"><div class="n">' + (x.st === 'done' ? '✓ ' : '') + esc(x.n) + ' <small>' + fr(x.s) + (x.e && x.e !== x.s ? ' → ' + fr(x.e) : '') + '</small></div><div class="tl-b">' + (nowP != null ? '<span class="tl-now" style="left:' + nowP + '%"></span>' : '') + '<i class="' + (x.ms ? 'ms ' : '') + (x.st === 'done' ? 'done' : '') + '" style="background:' + p.col + ';left:' + pc(x.s) + '%;width:' + Math.max(0.6, pc(x.e || x.s) - pc(x.s) + 864e5 / W * 100) + '%"></i></div></div>').join('')).join('') + '</div>' + (nowP != null ? '<p style="font-size:12px;color:var(--dim)">Le trait orange indique aujourd’hui.</p>' : '');
+    }
+    function rMood(s) {
+        return (s.boards || []).map(b => '<div class="board"><h3>' + esc(b.name) + '</h3>' + ((b.palette || []).length ? '<div class="pal">' + b.palette.map(c => '<span style="background:' + esc(c) + '"><em>' + esc(c) + '</em></span>').join('') + '</div><div style="height:12px"></div>' : '') +
+            ((b.fiche || []).length ? '<dl>' + b.fiche.map(f => '<dt>' + esc(f[0]) + '</dt><dd>' + esc(f[1]) + '</dd>').join('') + '</dl>' : '') + ((b.notes || []).length ? '<ul class="notes">' + b.notes.map(n => '<li>' + esc(n) + '</li>').join('') + '</ul>' : '') + ((b.refs || []).length ? '<p class="refs">🎞️ ' + b.refs.map(esc).join(' · ') + '</p>' : '') +
+            ((b.imgs || []).length ? '<div class="imgs">' + b.imgs.map(i => '<figure><img loading="lazy" src="' + i[0] + '" alt=""><figcaption>' + esc(i[1]) + '</figcaption></figure>').join('') + '</div>' : '') + '</div>').join('');
+    }
+    function rDoc(s, i) {
+        if (s.kind === 'html') return '<div class="doc"><iframe data-h="' + i + '" sandbox="allow-same-origin allow-popups" title="' + esc(s.title) + '"></iframe></div>';
+        if (s.kind === 'img') return '<div class="doc"><img src="' + s.data + '" alt=""></div>';
+        return '<div class="doc"><iframe data-p="' + i + '" title="' + esc(s.title) + '" style="height:78vh"></iframe><a class="dl" data-dl="' + i + '" download="' + esc(s.name || s.title) + '.pdf">⬇️ Télécharger le PDF</a></div>';
+    }
+    m.innerHTML = S.map((s, i) => '<section class="s" id="s-' + esc(s.id) + '"><h2><span>' + esc(s.title) + (s.app ? ' <small>' + esc(s.app) + '</small>' : '') + '</span><span data-badge="' + esc(s.id) + '"></span></h2>' + (s.k === 'fiche' ? rFiche(s) : s.k === 'plan' ? rPlan(s) : s.k === 'mood' ? rMood(s) : rDoc(s, i)) + (server && comOn ? '<div class="com" data-com="' + esc(s.id) + '"></div>' : '') + '</section>').join('') +
+        (server && comOn ? '<section class="s" id="s-gen"><h2>💬 Commentaire général</h2><div class="com" data-com="" style="border:0;margin:0;padding:0"></div></section>' : '');
+    // documents : HTML dans un cadre isolé, PDF en lecture intégrée
+    m.querySelectorAll('[data-h]').forEach(f => { const s = S[+f.dataset.h]; f.srcdoc = '<!doctype html><meta charset="utf-8"><base target="_blank"><style>body{font:14px/1.5 -apple-system,"Segoe UI",Roboto,sans-serif;color:#1d1b19;margin:20px;max-width:1100px}table{border-collapse:collapse;width:100%;margin:8px 0 16px}th,td{border:1px solid #ddd;padding:5px 8px;text-align:left;vertical-align:top}th{background:#f4f1ec}h1{font-size:22px}h2{font-size:17px;border-bottom:2px solid #b8651f;padding-bottom:3px;margin-top:22px}img{max-width:100%}</style>' + s.data; f.onload = () => { try { f.style.height = Math.min(4000, f.contentDocument.documentElement.scrollHeight + 20) + 'px'; } catch (e) { f.style.height = '80vh'; } }; });
+    m.querySelectorAll('[data-p]').forEach(f => { const s = S[+f.dataset.p]; try { const b = Uint8Array.from(atob(String(s.data).split(',')[1] || ''), c => c.charCodeAt(0)); const u = URL.createObjectURL(new Blob([b], { type: 'application/pdf' })); f.src = u; const a = m.querySelector('[data-dl="' + f.dataset.p + '"]'); if (a) a.href = u; } catch (e) { f.outerHTML = '<p>Document illisible.</p>'; } });
+    if (!server || !comOn) return;
+    // ---------- commentaires ----------
+    const ME = 'xvt.name';
+    let L = [];
+    async function load() { try { L = (await rpc('vitrine_comments_list', { p_id: vid })) || []; } catch (e) { L = []; } draw(); }
+    function draw() {
+        m.querySelectorAll('[data-com]').forEach(box => {
+            const sec = box.dataset.com, C = L.filter(c => (c.section || '') === sec), last = C.filter(c => c.kind !== 'comment').pop();
+            const bd = m.querySelector('[data-badge="' + sec + '"]'); if (bd) bd.innerHTML = last ? (last.kind === 'ok' ? '<span class="st ok">✓ Validé par ' + esc(last.author) + '</span>' : '<span class="st chg">✏️ Modification demandée</span>') : '';
+            const keep = box.querySelector('textarea') ? box.querySelector('textarea').value : '';
+            box.innerHTML = C.map(c => '<div class="c ' + c.kind + '"><b>' + (c.kind === 'ok' ? '✅ ' : c.kind === 'change' ? '✏️ ' : '') + esc(c.author) + '</b> <small>' + new Date(c.at).toLocaleString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) + (c.resolved ? ' · traité ✓' : '') + '</small>' + (c.body ? '<div>' + esc(c.body).replace(/\n/g, '<br>') + '</div>' : '') + (c.reply ? '<div class="rp">↪ <b>Production</b> : ' + esc(c.reply) + '</div>' : '') + '</div>').join('') +
+                '<div class="f"><input data-n placeholder="Votre nom" value="' + esc(localStorage.getItem(ME) || '') + '" maxlength="60"><textarea data-t rows="2" maxlength="3000" placeholder="' + (sec ? 'Un commentaire sur cette partie…' : 'Un message pour la production…') + '">' + esc(keep) + '</textarea><div class="b"><button class="p" data-k="comment">💬 Commenter</button>' + (sec ? '<button class="okb" data-k="ok">✅ Valider</button><button class="chb" data-k="change">✏️ Demander une modification</button>' : '') + '<span data-msg style="font-size:12.5px;color:var(--dim);align-self:center"></span></div></div>';
+            box.querySelectorAll('[data-k]').forEach(b => b.onclick = async () => {
+                const n = box.querySelector('[data-n]').value.trim(), t = box.querySelector('[data-t]').value.trim(), k = b.dataset.k, out = box.querySelector('[data-msg]');
+                if (!n) { box.querySelector('[data-n]').focus(); out.textContent = 'Indiquez votre nom'; return; } if (!t && k !== 'ok') { box.querySelector('[data-t]').focus(); out.textContent = k === 'change' ? 'Précisez la modification souhaitée' : 'Écrivez votre commentaire'; return; }
+                localStorage.setItem(ME, n); b.disabled = true;
+                try { await rpc('vitrine_comment_add', { p_id: vid, p_section: sec, p_author: n, p_body: t, p_kind: k }); box.querySelector('[data-t]').value = ''; await load(); } catch (e) { b.disabled = false; out.textContent = /trop_vite/.test(e.message) ? 'Patientez une minute' : /ferme/.test(e.message) ? 'Les commentaires sont fermés' : 'Envoi impossible, réessayez'; }
+            });
+        });
+    }
+    load(); setInterval(() => { if (!document.hidden && !document.activeElement.matches('textarea,input')) load(); }, 60000);
+})();
+</script>
+</body>
+</html>
