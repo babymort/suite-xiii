@@ -5832,7 +5832,7 @@ const XDASH = (() => {
     // ---------- cartes de l'accueil, réglables par le Master (⚙️ au survol) ----------
     // icône d'outil : logo personnalisé (logos/<outil>.png) s'il existe, sinon l'emoji
     const ic = a => '<span class="xd-ic"><img src="logos/' + a + '.png" alt="" onerror="this.parentNode.textContent=\'' + NM[a][0] + '\'"></span>';
-    const CARDS = { proj: '🎬 Projet en cours', pilot: '📈 Pilotage du projet', dead: '⏰ Prochaines échéances', need: '🧩 Ce qui manque', fb: '💬 Derniers retours de l\'équipe', msg: '📢 Message du Master', toM: '✉️ Écrire au Master', team: '📨 Messages de l\'équipe', day: '📋 Feuille du jour', meteo: '🌤️ Météo & soleil', clock: '🌍 Horloges', notes: '🗒️ Notes rapides', fav: '⭐ Outils récents', budget: '💶 Budget', matos: '🧳 Matériel', rush: '💽 Rushes', post: '🎞️ Versions à valider', online: '🟢 Équipe en ligne', docs: '📄 Derniers documents' };
+    const CARDS = { proj: '🎬 Projet en cours', pilot: '📈 Pilotage du projet', check: '✅ Checklist de préparation', dead: '⏰ Prochaines échéances', need: '🧩 Ce qui manque', fb: '💬 Derniers retours de l\'équipe', msg: '📢 Message du Master', toM: '✉️ Écrire au Master', team: '📨 Messages de l\'équipe', day: '📋 Feuille du jour', meteo: '🌤️ Météo & soleil', clock: '🌍 Horloges', notes: '🗒️ Notes rapides', fav: '⭐ Outils récents', budget: '💶 Budget', matos: '🧳 Matériel', rush: '💽 Rushes', post: '🎞️ Versions à valider', online: '🟢 Équipe en ligne', docs: '📄 Derniers documents' };
     const NEWW = ['day', 'meteo', 'clock', 'notes', 'fav', 'budget', 'matos', 'rush', 'post', 'online', 'docs']; // nouveaux widgets : proposés dans la galerie ＋, masqués tant qu'on ne les coche pas
     const PF = [['countdown', 'Compte à rebours (J-…)'], ['dates', 'Dates de tournage'], ['lieu', 'Lieu'], ['production', 'Production'], ['client', 'Client / diffuseur'], ['realisation', 'Réalisation'], ['diffusion', 'Diffusion'], ['duree', 'Format / durée'], ['contact', 'Contact production']];
     const FBT = [['avis', '💬 Avis'], ['mots', '📌 Mots'], ['travaux', '📥 Travaux reçus'], ['drive', '☁️ Journal du Drive']];
@@ -5840,7 +5840,7 @@ const XDASH = (() => {
     const PC = () => (typeof XPCFG !== 'undefined' ? XPCFG.get() : {}) || {};
     const isMaster = () => { const c = J('xiii.drive', null); return !c || !c.url || !!c.code; }, linked = () => { const c = J('xiii.drive', null); return !!(c && c.url); };
     function conf() {
-        const d = Object.assign({ order: ['proj', 'pilot', 'dead', 'need', 'fav', 'fb', 'msg', 'toM', 'team'], off: [], proj: ['countdown', 'dates', 'lieu', 'production'], src: ['fiche', 'planno', 'posto'], extra: [], n: 6, need: null, fb: ['avis', 'mots', 'travaux', 'drive'], msg: '', zone: true }, PC().dash || {});
+        const d = Object.assign({ order: ['proj', 'pilot', 'check', 'dead', 'need', 'fav', 'fb', 'msg', 'toM', 'team'], off: [], proj: ['countdown', 'dates', 'lieu', 'production'], src: ['fiche', 'planno', 'posto'], extra: [], n: 6, need: null, fb: ['avis', 'mots', 'travaux', 'drive'], msg: '', zone: true }, PC().dash || {});
         Object.keys(CARDS).forEach(k => { if (d.order.indexOf(k) < 0) { d.order.push(k); if (NEWW.indexOf(k) > -1 && d.off.indexOf(k) < 0) d.off = d.off.concat(k); } }); return d;
     }
     async function api(a, p) { const c = J('xiii.drive', null); if (!c || !c.url) return { ok: false, err: 'off' }; try { const r = await fetch(c.url, { method: 'POST', body: JSON.stringify(Object.assign({ a }, c.tok ? { tok: c.tok } : { code: c.code, by: (c.me && c.me.name) || 'Master' }, p || {})), redirect: 'follow' }); return await r.json(); } catch (e) { return { ok: false, err: 'net' }; } }
@@ -5858,6 +5858,7 @@ const XDASH = (() => {
             const meta = [has('lieu') && f.lieu, has('production') && f.production, has('client') && f.client, has('realisation') && f.realisation && 'Réal. ' + f.realisation, has('duree') && f.duree, has('diffusion') && f.diffusion && '📺 ' + fr(f.diffusion), has('contact') && [f.contactName, f.contactPhone].filter(Boolean).join(' ')].filter(Boolean);
             return W('<b class="xd-t">' + esc(f.title || 'Sans nom') + '</b>' + (meta.length ? '<div class="xd-m">' + esc(meta.join(' · ')) + '</div>' : '') + (has('countdown') && n != null ? '<div class="xd-cd"><b>' + (n > 0 ? 'J-' + n : n === 0 ? 'Jour J' : 'J+' + (-n)) + '</b><span>' + (n > 0 ? 'avant le tournage' : n === 0 ? 'tournage aujourd\'hui' : 'depuis le début du tournage') + (has('dates') ? '<br>' + fr(f.debut) + (f.fin && f.fin !== f.debut ? ' → ' + fr(f.fin) : '') : '') + '</span></div>' : has('dates') && f.debut ? '<div class="xd-m">' + fr(f.debut) + (f.fin && f.fin !== f.debut ? ' → ' + fr(f.fin) : '') + '</div>' : '') + '<button class="xd-l" onclick="XPROJET.open()">Ouvrir la fiche projet →</button>', 'xd-proj'); }
         if (k === 'pilot') return typeof XPDASH !== 'undefined' ? W(XPDASH.card(), 'xd-pilot') : '';
+        if (k === 'check') return typeof XCHECK !== 'undefined' ? W(XCHECK.card(), 'xd-check') : '';
         if (k === 'dead') { const D = dl2(f, C); return W(D.length ? D.map(x => '<a class="xd-r' + (x.late ? ' late' : '') + '" href="' + x.a + '.html"><span>' + esc(x.t) + '</span><small>' + (x.late ? '⚠️ en retard · ' : '') + fr(x.d) + ' · ' + when(dd(x.d)) + '</small></a>').join('') : '<p class="xd-e">Aucune échéance à venir.</p>'); }
         if (k === 'need') { if (!f && !C.need) return ''; const L = C.need || (NEED[(f && f.genre) || 'autre'] || NEED.autre); return W(L.filter(a => NM[a]).map(a => { const n = count(a); return '<a class="xd-r" href="' + a + '.html"><span>' + ic(a) + ' ' + NM[a][1] + '</span><small class="' + (n ? 'ok' : 'ko') + '">' + (n ? '✓ ' + n + ' élément' + (n > 1 ? 's' : '') : '⚠️ à remplir') + '</small></a>'; }).join('') || '<p class="xd-e">Aucun outil choisi.</p>'); }
         if (k === 'fb') { const T = C.fb, FB = feedback().filter(x => (T.indexOf('avis') > -1 && /^💬/.test(x.t)) || (T.indexOf('mots') > -1 && /^📌/.test(x.t)) || (T.indexOf('travaux') > -1 && /^📥/.test(x.t)));
@@ -8285,6 +8286,194 @@ function xmOffer() { const o = xmJ('xiii.models.offer', null); if (!o || Date.no
 window.XMODELS = { offer: xmOffer, pick: xmPick, all: xmAll, apply: xmApply, ctx: xmCtx, fillFiche: xmFillFiche, has: xmHas, profiles: XMP, adapters: XMA, tool: XM_TOOL };
 xmBoot();
 })();
+
+
+// =====================================================================
+//  SUITE XIII — XCHECK : ✅ checklist de préparation, générée depuis la fiche projet et les outils
+//  • les tâches dépendent du type de projet, des lieux (voie publique, lieu privé, ERP), des talents (mineurs),
+//    des risques (drone, nuit, pyrotechnie, hauteur, eau), de la musique, des déplacements…
+//  • échéance en J-x par rapport au premier jour de tournage ; détection automatique de ce qui est déjà fait dans les outils
+//  • état par projet : « xiii.check » = { done:{id:{at,by}}, na:{id:1}, custom:[{id,cat,t,j}] }
+//  • passerelles : PLANNO (jalons de préparation), CALENDRIER / agenda (XCALEV), tableau de bord (carte), fiche projet
+// =====================================================================
+const XCHECK = (() => {
+    const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } };
+    const S = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { } };
+    const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const pad = n => String(n).padStart(2, '0'), iso = d => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()), today = () => iso(new Date());
+    const addD = (s, n) => { const d = new Date(s + 'T12:00:00'); d.setDate(d.getDate() + n); return iso(d); };
+    const fr = s => s ? new Date(s + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' }) : '';
+    const fold = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+    const uid = () => Math.random().toString(36).slice(2, 9);
+    const K = 'xiii.check';
+    const fiche = () => { const s = J('xiii.projets', null); return s && s.list ? s.list.find(f => f && f.id === s.active) || null : null; };
+    const st = () => Object.assign({ done: {}, na: {}, custom: [] }, J(K, {}) || {});
+    const me = () => { const d = J('xiii.drive', null); return (d && d.me && d.me.name) || 'Moi'; };
+    const CATS = [['adm', '🧾 Production & administratif'], ['aut', '🏛️ Autorisations & droits'], ['eq', '👥 Équipe & contrats'], ['tal', '🎭 Talents'], ['lieu', '📍 Lieux & technique'], ['mat', '🎥 Matériel'], ['sec', '🦺 Sécurité'], ['log', '🚐 Logistique'], ['post', '🎞️ Post-production & livraison'], ['perso', '📝 Mes tâches']];
+    const L = { net: ['https://www.net-entreprises.fr', 'net-entreprises.fr (DPAE)'], cs: ['https://www.conges-spectacles.com', 'Congés Spectacles'], au: ['https://www.audiens.org', 'Audiens'], guso: ['https://www.guso.fr', 'GUSO'], sacem: ['https://www.sacem.fr', 'SACEM'], ff: ['https://www.filmfrance.net', 'Film France (commissions du film)'], cnc: ['https://www.cnc.fr', 'CNC'], at: ['https://alphatango.aviation-civile.gouv.fr', 'AlphaTango (déclaration drone)'], geo: ['https://www.geoportail.gouv.fr', 'Géoportail (zones drones)'], cmb: ['https://www.cmb-sante.fr', 'Centre médical de la Bourse'] };
+    // ---------- contexte : ce que disent la fiche et les outils ----------
+    function ctx() {
+        const f = fiche() || {}, raw = k => localStorage.getItem(k) || '';
+        const cs = J('callsheetoXIII.project', null), ca = J('castoXIII.project', null), rp = J('reperoXIII.project', null), rc = J('ressourcoXIII.project', null), tr = J('transportoXIII.project', null), so = J('sonoXIII.project', null), po = J('postoXIII.project', null), pk = J('packingoXIII.project', null), dv = J('devisoXIII.project', null), pl = J('planoXIII.project', null), sy = J('synoptique_projects', null), cd = J('conducoXIII.project', null), lu = J('lumoXIII.project', null);
+        const type = f.ptype || ({ live: 'live', tv: 'tv', doc: 'doc', pub: 'pub', corporate: 'corporate', event: 'event', fiction: 'fiction', autre: 'artistique' }[f.genre] || '');
+        const risks = new Set(); ((cs && cs.days) || []).forEach(d => ((d.safety || {}).risks || []).forEach(r => risks.add(r)));
+        const big = [raw('devisoXIII.project'), raw('synoptique_projects'), raw('planoXIII.project'), raw('decoupXIII.project'), raw('scriptoXIII.project'), raw('storyboardoXIII.project'), JSON.stringify(f.tech || {})].join(' ');
+        const docs = ((rc && rc.docs) || []), docRows = rx => docs.filter(d => rx.test(d.tpl || '')).reduce((a, d) => a + (d.rows || []).filter(r => Object.values(r.v || {}).filter(Boolean).length > 1).length, 0);
+        const talents = (ca && ca.talents) || [], spots = (rp && rp.spots) || [];
+        const ext = /"ie":"EXT|EXT\.|\bEXT\b/.test(raw('decoupXIII.project') + raw('scriptoXIII.project') + raw('callsheetoXIII.project'));
+        const night = risks.has('nuit') || /—\s*nuit|NUIT|"effet":"Nuit/.test(raw('decoupXIII.project')) || ((cs && cs.days) || []).some(d => (d.times || {}).wrap >= '22:00' || ((d.times || {}).wrap || '9') < '05:00');
+        const c = {
+            f, type, debut: f.debut || ((cs && cs.days && cs.days[0]) || {}).date || '', fin: f.fin || f.debut || '',
+            public: /live|event|corporate|tv|artistique/.test(type) || risks.has('enfants') && false,
+            voie: risks.has('voie') || spots.some(s => s.access === 'public') || (ext && /fiction|doc|pub/.test(type)),
+            prive: spots.some(s => s.access && s.access !== 'public') || !!(f.lieu || f.adresse) || /fiction|pub|doc/.test(type),
+            drone: risks.has('drone') || /drone|inspire|mavic|\bdji (air|mini|avata)/i.test(big),
+            pyro: risks.has('pyro') || /pyrotech|canon co2|co2 \(|étincelles|etincelles|artificier/i.test(big + raw('lumoXIII.project')),
+            hauteur: risks.has('hauteur') || /nacelle|truss|accroche|grue|technocrane|toit/i.test(big),
+            eau: risks.has('eau') || /quai|berge|plage|bateau|péniche|peniche|écluse|piscine/i.test(big + raw('reperoXIII.project')),
+            night, ext,
+            minors: talents.some(t => t.minor || t.kind === 'enfant') || risks.has('enfants'),
+            talents: talents.length || ((cs && cs.days) || []).some(d => (d.crew || []).some(m => m.dept === 'cast')),
+            music: /live|tv|event|pub|artistique/.test(type) || /"mus":"[^"]/.test(raw('conducoXIII.project')),
+            travel: !!(tr && ((tr.travels || []).length || (tr.hotels || []).length)), hotels: !!(tr && (tr.hotels || []).length),
+            hf: !!(so && (so.hf || []).length), tvdeliv: /tv|live|doc/.test(type),
+            cs, ca, rp, rc, tr, so, po, pk, dv, pl, sy, cd, lu, docRows, spots, talents
+        };
+        return c;
+    }
+    // ---------- catalogue des tâches : [id, cat, J-x, titre, aide, condition, détection, lien, outil] ----------
+    function catalog(c) {
+        const T = c.type, fic = /fiction|pub/.test(T), flux = /live|tv|event|corporate|artistique/.test(T);
+        const day1 = c.cs && c.cs.days && c.cs.days[0];
+        const n = v => v ? v : 0, has = x => x ? true : null;
+        const crewN = day1 ? (day1.crew || []).filter(m => m.dept !== 'cast' && m.dept !== 'fig').length : (c.f.team || []).length;
+        return [
+            ['devis', 'adm', -30, 'Devis validé et signé par le client / diffuseur', 'Version retenue du devis, conditions de paiement, acompte.', 1, () => c.dv && (c.dv.versions || []).some(v => (v.eq || []).length || (v.crew || []).length) ? 'chiffré dans DEVISO' : null, null, 'deviso'],
+            ['contrat-client', 'adm', -21, 'Contrat de production / bon de commande signé', 'Objet, livrables, droits cédés, calendrier, pénalités, conditions d’annulation.', /pub|corporate|event|tv|live/.test(T), null, null, 'ressourco'],
+            ['budget', 'adm', -45, 'Plan de financement et budget arrêtés', 'Apports, aides (CNC, région), crédit d’impôt, part producteur.', /fiction|doc|artistique/.test(T), null, L.cnc, 'deviso'],
+            ['assurance', 'adm', -21, 'Assurances : RC production, matériel (bris, vol), multirisque tournage', 'Attestation demandée par les lieux et les loueurs. Vérifier les franchises et la valeur assurée du matériel loué.', 1, null, null, null],
+            ['assur-indispo', 'adm', -21, 'Assurance indisponibilité des artistes / négatif', 'Couvre l’arrêt du tournage si un rôle principal est indisponible.', /fiction|pub/.test(T), null, null, null],
+            ['rca', 'adm', 15, 'Dépôt au Registre public du cinéma et de l’audiovisuel (RCA)', 'Pour les œuvres exploitées commercialement : titre, contrats de cession de droits.', /fiction|doc/.test(T), null, L.cnc, null],
+            ['voie', 'aut', -21, 'Autorisation de tournage sur la voie publique', 'Mairie ou bureau des tournages (Mission cinéma, préfecture de police à Paris). Délai souvent de 2 à 3 semaines. Joindre l’attestation d’assurance.', c.voie, null, L.ff, 'repero'],
+            ['stationnement', 'aut', -15, 'Arrêté de stationnement pour les véhicules techniques', 'Emplacements réservés (camions, loges) : demande à la mairie avec plan et immatriculations.', c.voie || /live|event/.test(T), null, null, 'transporto'],
+            ['lieux', 'aut', -14, 'Autorisations des lieux privés signées', 'Propriétaire, dates, horaires, état des lieux, conditions financières.', c.prive, () => c.docRows(/lieu|reperage/) ? c.docRows(/lieu|reperage/) + ' autorisation(s) dans RESSOURCO' : null, null, 'ressourco'],
+            ['drone', 'aut', -10, 'Vol de drone : déclaration et autorisations', 'Télépilote certifié et exploitant déclaré ; scénario (S1/S2/S3 ou catégorie ouverte/spécifique) ; notification préalable sur AlphaTango ; autorisation préfectorale en zone peuplée ; vérifier les zones interdites.', c.drone, null, L.at, null],
+            ['drone-zone', 'aut', -10, 'Zones de vol vérifiées (aéroports, zones réglementées)', 'Carte des restrictions pour drones sur Géoportail, NOTAM du jour J.', c.drone, null, L.geo, 'repero'],
+            ['pyro', 'aut', -30, 'Pyrotechnie / effets spéciaux : déclaration en préfecture', 'Artificier certifié (F4-T2 / C4), déclaration préalable, accord du lieu et du chargé de sécurité.', c.pyro, null, null, null],
+            ['enfants', 'aut', -30, 'Enfants de moins de 16 ans : autorisation préalable de la DDETS', 'Commission des enfants du spectacle : dossier par enfant (autorisation des parents, certificat médical, horaires, scolarité). Part de la rémunération versée à la Caisse des dépôts.', c.minors, null, null, 'casto'],
+            ['sacem', 'aut', -14, /pub/.test(T) ? 'Musique : licences de synchronisation (éditeur + producteur)' : 'Musique : droits SACEM / déclaration des œuvres', /pub/.test(T) ? 'Durée, territoires, médias, période : à négocier avec l’éditeur et le label.' : 'Autorisation de captation des œuvres, programme déposé, relevé des musiques après diffusion (CONDUCO › relevé SACEM).', c.music, null, L.sacem, 'conduco'],
+            ['image', 'aut', -3, 'Autorisations de droit à l’image signées', 'Talents, invités, figurants, public identifiable. Les mineurs : signature des deux parents.', c.talents || c.public, () => c.docRows(/img-/) ? c.docRows(/img-/) + ' autorisation(s) dans RESSOURCO' : null, null, 'ressourco'],
+            ['affichage', 'aut', -2, 'Affichage « tournage en cours — vous pouvez être filmé » aux entrées', 'Pour le public, les spectateurs et les passants.', c.public || c.voie, null, null, null],
+            ['contrats', 'eq', -7, 'Contrats CDDU de l’équipe technique envoyés et signés', 'Fonction, dates, rémunération conforme aux minima de la convention (RESSOURCO › Intermittents).', crewN > 0 || 1, () => c.docRows(/cddu|contrat-tech/) ? c.docRows(/cddu|contrat-tech/) + ' contrat(s) dans RESSOURCO' : null, null, 'ressourco'],
+            ['fiches', 'eq', -10, 'Fiches de renseignements de l’équipe complètes', 'N° de sécurité sociale, Congés Spectacles, adresse, RIB, contact d’urgence, allergies.', 1, () => c.docRows(/fiche/) ? c.docRows(/fiche/) + ' fiche(s) dans RESSOURCO' : null, null, 'ressourco'],
+            ['dpae', 'eq', -1, 'DPAE de chaque salarié faite avant l’embauche', 'Déclaration préalable à l’embauche pour chaque contrat (techniciens et artistes), au plus tard avant la prise de poste.', 1, () => c.docRows(/dpae/) ? c.docRows(/dpae/) + ' personne(s) dans la DPAE (RESSOURCO)' : null, L.net, 'ressourco'],
+            ['cs-audiens', 'eq', -7, 'Affiliations Congés Spectacles et Audiens à jour', 'Déclarations et cotisations des intermittents après le tournage.', 1, null, L.cs, null],
+            ['guso', 'eq', -7, 'GUSO si l’organisateur n’est pas une entreprise du spectacle', 'Pour les artistes engagés par un organisateur occasionnel (entreprise, association).', /event|corporate|artistique/.test(T), null, L.guso, null],
+            ['medecine', 'eq', -14, 'Suivi médical des intermittents', 'Visite d’information et de prévention via le Centre médical de la Bourse.', 1, null, L.cmb, null],
+            ['convoc', 'eq', -2, 'Feuille de service du premier jour diffusée', 'Horaires, lieux, plan d’accès, contacts, sécurité. Envoi groupé depuis CALL SHEETO.', 1, () => day1 && (day1.crew || []).length && (day1.schedule || []).length ? 'J1 prête dans CALL SHEETO (' + day1.crew.length + ' pers.)' : null, null, 'callsheeto'],
+            ['casting', 'tal', -21, 'Tous les rôles confirmés', 'Casting, options levées, disponibilités sur les jours de tournage (CASTO).', c.talents, () => { const R = (c.ca && c.ca.roles) || []; return R.length && R.every(r => (c.ca.talents || []).some(t => t.status === 'confirme' && fold(t.role) === fold(r.name))) ? R.length + ' rôle(s) confirmé(s) dans CASTO' : null; }, null, 'casto'],
+            ['contrats-art', 'tal', -7, 'Contrats des artistes-interprètes signés', 'Cachets, droits voisins, cession des droits d’exploitation.', c.talents, () => c.docRows(/contrat-art/) ? c.docRows(/contrat-art/) + ' contrat(s) artiste dans RESSOURCO' : null, null, 'ressourco'],
+            ['hmc', 'tal', -7, 'Essais maquillage, coiffure et costumes', 'Validation réalisation, photos de référence (MOODO).', fic || /tv/.test(T), null, null, 'moodo'],
+            ['reperages', 'lieu', -21, 'Repérages faits et lieux validés', 'Lumière, son, accès, électricité, loges, stationnement (REPERO).', 1, () => c.spots.some(s => s.status === 'retenu') ? c.spots.filter(s => s.status === 'retenu').length + ' lieu(x) retenu(s) dans REPERO' : null, null, 'repero'],
+            ['visite-tech', 'lieu', -14, 'Visite technique avec la régie du lieu', 'Accroches (charges), puissance électrique, quai de déchargement, passages de câbles, réseau.', flux, null, null, 'plano'],
+            ['plan', 'lieu', -10, 'Plan d’implantation validé', 'Caméras, lumière, son, régie, circulations et issues de secours (PLANO).', flux || fic, () => c.pl && (c.pl.tabs || []).some(t => (t.items || []).length > 5) ? 'plan dans PLANO' : null, null, 'plano'],
+            ['syno', 'lieu', -10, 'Synoptique et liste des liaisons validés', 'Signaux, câbles, adresses IP, intercom (SYNO).', flux, () => Array.isArray(c.sy) && c.sy.some(t => (t.nodes || []).length > 3) ? 'synoptique dans SYNO' : null, null, 'syno'],
+            ['elec', 'lieu', -10, 'Puissance électrique confirmée (ou groupe électrogène réservé)', 'Bilan des projecteurs et de la régie (LUMO) comparé à l’alimentation disponible.', 1, () => c.lu && (c.lu.fx || []).length ? 'bilan de puissance dans LUMO' : null, null, 'lumo'],
+            ['hf', 'lieu', -5, 'Plan de fréquences HF calculé et coordonné', 'Canaux TNT libres du lieu, coordination avec les autres prestataires (SONO).', c.hf, () => c.so && (c.so.hf || []).length && c.so.hf.every(h => h.f) ? 'fréquences toutes attribuées dans SONO' : null, null, 'sono'],
+            ['meteo', 'lieu', -3, 'Plan B météo (lieu de repli, protections)', 'Séquences de remplacement en intérieur, bâches, housses de pluie.', c.ext || c.voie, null, null, 'repero'],
+            ['liste', 'mat', -14, 'Liste du matériel arrêtée', 'Caméras, optiques, lumière, son, machinerie, consommables (MATOS / DEVISO).', 1, () => c.dv && (c.dv.versions || []).some(v => (v.eq || []).length) ? 'liste chiffrée dans DEVISO' : null, null, 'matos'],
+            ['loueur', 'mat', -10, 'Matériel réservé chez le(s) loueur(s)', 'Bon de commande, dates d’enlèvement et de retour, attestation d’assurance envoyée.', 1, null, null, 'matos'],
+            ['essais', 'mat', -3, fic ? 'Essais caméra chez le loueur' : 'Préparation et test du matériel', fic ? 'Optiques, LUT, enregistrement, synchro TC, liaisons vidéo.' : 'Mise en route complète de la chaîne (caméras → régie → enregistrement / diffusion).', 1, null, null, null],
+            ['caisses', 'mat', -1, 'Caisses préparées et pointées au départ', 'Contenu, numéros de série, véhicules (PACKINGO).', 1, () => c.pk && (c.pk.cases || []).length ? c.pk.cases.length + ' caisse(s) dans PACKINGO' : null, null, 'packingo'],
+            ['supports', 'mat', -2, 'Supports d’enregistrement et disques de sauvegarde prêts', 'Cartes formatées, 2 copies + navette (BACKUPO).', 1, null, null, 'backupo'],
+            ['risques', 'sec', -5, 'Évaluation des risques et consignes de sécurité', 'Risques du tournage, référent sécurité, consignes sur la feuille de service (CALL SHEETO › Sécurité).', 1, () => day1 && ((day1.safety || {}).risks || []).length && (day1.safety || {}).referent ? 'consignes dans CALL SHEETO' : null, null, 'callsheeto'],
+            ['secours', 'sec', -2, 'Secours : trousse, SST désigné, hôpital le plus proche', 'Sur la feuille de service et affiché à la base régie.', 1, () => day1 && (day1.safety || {}).hospital && (day1.safety || {}).firstAid ? 'hôpital et SST dans CALL SHEETO' : null, null, 'callsheeto'],
+            ['erp', 'sec', -21, 'Sécurité du public : jauge, issues de secours, SSIAP', 'Dossier de sécurité validé avec l’exploitant du lieu, plan d’évacuation, agents de sécurité.', c.public, null, null, 'plano'],
+            ['hauteur', 'sec', -5, 'Travail en hauteur et levage : accroches certifiées, nacelles, harnais', 'Vérification des points d’accroche, CACES des opérateurs, zone d’exclusion.', c.hauteur, null, null, null],
+            ['nuit', 'sec', -3, 'Tournage de nuit : circulations éclairées, retour des équipes', 'Taxis ou navettes au-delà de l’amplitude prévue, vigilance fatigue.', c.night, null, null, 'transporto'],
+            ['eau', 'sec', -3, 'Proximité de l’eau : gilets, sauveteur désigné', 'Pas de matériel électrique sans protection.', c.eau, null, null, null],
+            ['hotels', 'log', -14, 'Hôtels réservés et rooming list envoyée', 'Chambres par personne, arrivées / départs, petits-déjeuners (TRANSPORTO).', c.hotels || c.travel, () => c.tr && (c.tr.rooms || []).length ? c.tr.rooms.length + ' chambre(s) dans TRANSPORTO' : null, null, 'transporto'],
+            ['billets', 'log', -14, 'Billets de train / avion émis', 'Références envoyées à chaque voyageur.', c.travel, () => c.tr && (c.tr.travels || []).length && c.tr.travels.every(t => t.ref) ? c.tr.travels.length + ' trajet(s) avec référence' : null, null, 'transporto'],
+            ['navettes', 'log', -5, 'Véhicules loués et navettes planifiées', 'Chauffeurs, horaires, points de rendez-vous.', 1, () => c.tr && (c.tr.veh || []).length ? c.tr.veh.length + ' véhicule(s) dans TRANSPORTO' : null, null, 'transporto'],
+            ['repas', 'log', -5, 'Repas et catering commandés', 'Nombre de couverts par jour, régimes (végétarien, allergies).', 1, null, null, 'callsheeto'],
+            ['workflow', 'post', -7, 'Workflow de post-production validé', 'Codecs, DIT, sauvegardes, proxies, montage, étalonnage, mixage (POSTO).', 1, () => c.po && (c.po.steps || []).length ? c.po.steps.length + ' étape(s) dans POSTO' : null, null, 'posto'],
+            ['specs', 'post', -14, 'Spécifications de livraison reçues', c.tvdeliv ? 'PAD du diffuseur : format, normes sonores (EBU R128), sous-titres, conducteur de diffusion.' : 'Formats et déclinaisons attendus par le client (16:9, 9:16, durées).', 1, () => c.po && (c.po.deliv || []).length ? c.po.deliv.length + ' livrable(s) dans POSTO' : null, null, 'posto'],
+            ['releve', 'post', 7, 'Relevé des musiques envoyé (cue sheet)', 'Après diffusion : relevé SACEM depuis CONDUCO.', c.music && /live|tv|event/.test(T), null, L.sacem, 'conduco']
+        ].filter(x => x[5]).map(x => ({ id: x[0], cat: x[1], j: x[2], t: x[3], help: x[4], auto: x[6], link: x[7], tool: x[8] }));
+    }
+    function items() {
+        const c = ctx(), s = st(), t0 = today();
+        const L = catalog(c).concat((s.custom || []).map(x => ({ id: x.id, cat: x.cat || 'perso', j: x.j, t: x.t, help: x.help || '', custom: 1 })));
+        return { c, s, list: L.map(x => { let a = null; try { a = x.auto ? x.auto() : null; } catch (e) { } const due = c.debut && x.j != null ? addD(x.j > 0 ? (c.fin || c.debut) : c.debut, x.j) : ''; const done = !!s.done[x.id], na = !!s.na[x.id];
+            return Object.assign(x, { autoTxt: a || '', due, done, na, ok: done || na, late: !done && !na && due && due < t0 }); }).sort((a, b) => (a.j || 0) - (b.j || 0)) };
+    }
+    function stats() { const { list } = items(), A = list.filter(x => !x.na), d = A.filter(x => x.done).length; return { n: A.length, done: d, pct: A.length ? Math.round(d / A.length * 100) : 0, late: A.filter(x => x.late).length, next: A.filter(x => !x.done).slice(0, 4), autoN: A.filter(x => !x.done && x.autoTxt).length }; }
+    // ---------- actions ----------
+    function toggle(id, k) { const s = st(); if (k === 'na') { if (s.na[id]) delete s.na[id]; else { s.na[id] = 1; delete s.done[id]; } } else { if (s.done[id]) delete s.done[id]; else { s.done[id] = { at: Date.now(), by: me() }; delete s.na[id]; } } S(K, s); syncPlanno(true); }
+    function acceptAuto() { const s = st(); let n = 0; items().list.forEach(x => { if (!x.done && !x.na && x.autoTxt) { s.done[x.id] = { at: Date.now(), by: me(), auto: x.autoTxt }; n++; } }); S(K, s); syncPlanno(true); return n; }
+    function syncPlanno(quiet) {
+        const pl = J('plannoXIII.project', null) || { app: 'PLANNO XIII', v: 1, name: '', tasks: [] }; const { list, c } = items(); let n = 0;
+        if (quiet && !pl.tasks.some(t => /^xc:/.test(t.src || ''))) return 0;
+        if (!c.debut) return -1;
+        list.forEach(x => { if (!x.due) return; let t = pl.tasks.find(y => y.src === 'xc:' + x.id); if (x.na) { if (t) pl.tasks = pl.tasks.filter(y => y !== t); return; } if (!t) { t = { id: uid(), phase: x.j > 0 ? 'livraison' : 'prepa', who: [], ms: true, src: 'xc:' + x.id }; pl.tasks.push(t); n++; } Object.assign(t, { name: '✅ ' + x.t, start: x.due, end: x.due, status: x.done ? 'done' : 'todo' }); });
+        pl.updated = Date.now(); S('plannoXIII.project', pl); return n;
+    }
+    // ---------- carte (tableau de bord) ----------
+    function card() {
+        const s = stats(); if (!s.n) return '<p class="xd-e">Remplissez la fiche projet : la checklist de préparation se génère d’après le type, les lieux et les dates.</p>';
+        return '<div class="xck-k"><div><b>' + s.pct + ' %</b><span>' + s.done + ' / ' + s.n + ' faites</span></div>' + (s.late ? '<div><b class="ko">' + s.late + '</b><span>en retard</span></div>' : '') + (s.autoN ? '<div><b>' + s.autoN + '</b><span>détectée(s) faite(s)</span></div>' : '') + '</div><div class="xpd-bar"><i style="width:' + s.pct + '%;background:#81c784"></i></div>' +
+            s.next.map(x => '<div class="xck-n' + (x.late ? ' ko' : '') + '">' + (x.late ? '⚠️' : '○') + ' ' + esc(x.t) + (x.due ? ' <small>' + fr(x.due) + '</small>' : '') + '</div>').join('') + '<button class="xd-l" onclick="XCHECK.open()">✅ Checklist complète →</button>';
+    }
+    // ---------- page ----------
+    let FIL = 'todo';
+    function open() {
+        let ov = document.getElementById('xck'); if (!ov) { ov = document.createElement('div'); ov.id = 'xck'; document.body.appendChild(ov); ov.addEventListener('mousedown', e => { if (e.target === ov) close(); }); }
+        const { list, c } = items(), A = list.filter(x => !x.na), done = A.filter(x => x.done).length, pct = A.length ? Math.round(done / A.length * 100) : 0, late = A.filter(x => x.late).length, autoN = A.filter(x => !x.done && x.autoTxt).length;
+        const vis = list.filter(x => FIL === 'all' || (FIL === 'todo' && !x.ok) || (FIL === 'late' && x.late) || (FIL === 'done' && x.ok));
+        const T = { live: 'concert / captation', tv: 'émission TV', fiction: 'fiction', doc: 'documentaire', pub: 'publicité / clip', corporate: 'corporate', event: 'événementiel', artistique: 'projet artistique' }[c.type];
+        const tags = [c.voie && '🚦 voie publique', c.public && '👥 public', c.drone && '🛸 drone', c.minors && '🧒 mineurs', c.night && '🌙 nuit', c.pyro && '🎆 pyrotechnie', c.hauteur && '🏗️ hauteur', c.eau && '🌊 eau', c.music && '🎵 musique', c.travel && '🚆 déplacements'].filter(Boolean);
+        const row = x => '<div class="xck-r' + (x.ok ? ' ok' : '') + (x.late ? ' late' : '') + (x.na ? ' na' : '') + '" data-id="' + x.id + '"><button class="xck-c" data-tg="' + x.id + '" title="Fait / à faire">' + (x.done ? '✓' : x.na ? '—' : '') + '</button><div class="xck-t"><b>' + esc(x.t) + '</b>' + (x.help ? '<small>' + esc(x.help) + '</small>' : '') + '<div class="xck-m">' + (x.autoTxt && !x.done ? '<span class="xck-a">🔎 ' + esc(x.autoTxt) + '</span>' : '') + (x.tool ? '<a href="' + x.tool + '.html">Ouvrir ' + x.tool.toUpperCase() + ' →</a>' : '') + (x.link ? '<a href="' + x.link[0] + '" target="_blank" rel="noopener">' + esc(x.link[1]) + ' ↗</a>' : '') + (x.done && st().done[x.id] && st().done[x.id].by ? '<span>fait par ' + esc(st().done[x.id].by) + '</span>' : '') + '</div></div><div class="xck-d"><b>' + (x.j != null ? (x.j > 0 ? 'J+' + x.j : 'J' + x.j) : '') + '</b><small>' + (x.due ? fr(x.due) : '') + (x.late ? '<br>en retard' : '') + '</small></div><button class="xck-na" data-na="' + x.id + '" title="Non concerné">' + (x.na ? '↺' : 'N/A') + '</button>' + (x.custom ? '<button class="xck-na" data-del="' + x.id + '" title="Supprimer">🗑</button>' : '') + '</div>';
+        ov.innerHTML = '<div class="xck-box"><div class="xck-h"><b>✅ Checklist de préparation — ' + esc(c.f.title || 'Projet') + '</b><button data-print>🖨️</button><button data-x>✕</button></div>' +
+            '<p class="xck-s">Générée d’après la fiche projet' + (T ? ' (<b>' + T + '</b>' + (c.debut ? ', tournage le ' + fr(c.debut) : ', <b>dates à renseigner</b>') + ')' : ' — <b>choisissez le type de projet dans la fiche</b>') + ' et le contenu des outils. ' + (tags.length ? 'Détecté : ' + tags.join(' · ') + '.' : '') + '</p>' +
+            '<div class="xck-kpi"><div><b>' + pct + ' %</b><span>' + done + ' / ' + A.length + ' faites</span><div class="xpd-bar"><i style="width:' + pct + '%;background:#81c784"></i></div></div><div><b class="' + (late ? 'ko' : 'ok') + '">' + late + '</b><span>en retard</span></div><div><b>' + autoN + '</b><span>détectée(s) faite(s) dans les outils</span>' + (autoN ? '<button data-auto>Tout cocher</button>' : '') + '</div></div>' +
+            '<div class="xck-f">' + [['todo', 'À faire'], ['late', 'En retard'], ['done', 'Faites / N/A'], ['all', 'Tout']].map(f => '<button data-f="' + f[0] + '" class="' + (FIL === f[0] ? 'on' : '') + '">' + f[1] + '</button>').join('') + '<span></span><button data-add>➕ Ajouter une tâche</button><button data-pl title="Ajouter les échéances au planning (jalons)">🗓️ Vers PLANNO</button></div>' +
+            CATS.map(([k, l]) => { const R = vis.filter(x => x.cat === k); return R.length ? '<section><h4>' + l + ' <small>' + list.filter(x => x.cat === k && x.ok).length + ' / ' + list.filter(x => x.cat === k).length + '</small></h4>' + R.map(row).join('') + '</section>' : ''; }).join('') + (vis.length ? '' : '<p class="xck-e">' + (FIL === 'todo' ? '🎉 Tout est fait !' : 'Rien ici.') + '</p>') + '</div>';
+        const q = s => ov.querySelectorAll(s);
+        q('[data-x]').forEach(b => b.onclick = close); q('[data-print]').forEach(b => b.onclick = () => window.print());
+        q('[data-tg]').forEach(b => b.onclick = () => { toggle(b.dataset.tg); open(); });
+        q('[data-na]').forEach(b => b.onclick = () => { toggle(b.dataset.na, 'na'); open(); });
+        q('[data-del]').forEach(b => b.onclick = () => { const s = st(); s.custom = s.custom.filter(x => x.id !== b.dataset.del); S(K, s); open(); });
+        q('[data-f]').forEach(b => b.onclick = () => { FIL = b.dataset.f; open(); });
+        q('[data-auto]').forEach(b => b.onclick = () => { acceptAuto(); open(); });
+        q('[data-pl]').forEach(b => b.onclick = () => { const n = syncPlanno(false); b.textContent = n < 0 ? '⚠️ Dates du tournage manquantes' : '✓ ' + n + ' jalon(s) ajouté(s) à PLANNO'; });
+        q('[data-add]').forEach(b => b.onclick = () => { const t = (prompt('Nouvelle tâche de préparation') || '').trim(); if (!t) return; const j = parseInt(prompt('Échéance : combien de jours avant le tournage ? (ex. 7)', '7'), 10); const s = st(); s.custom.push({ id: 'u' + uid(), cat: 'perso', t, j: isNaN(j) ? null : -Math.abs(j) }); S(K, s); open(); });
+        if (!document.getElementById('xck-k')) addEventListener('keydown', e => { if (e.key === 'Escape' && document.getElementById('xck')) close(); });
+    }
+    function close() { const o = document.getElementById('xck'); if (o) o.remove(); }
+    const css = document.createElement('style');
+    css.textContent = '#xck{position:fixed;inset:0;z-index:10300;background:rgba(0,0,0,.6);display:flex;justify-content:center;align-items:flex-start;padding:4vh 14px;overflow:auto;font:14px/1.45 "Segoe UI",system-ui,sans-serif}.xck-box{width:min(980px,100%);background:var(--bg-menu,#1f1f23);color:var(--text-main,#eee);border:1px solid rgba(129,199,132,.5);border-radius:16px;padding:16px 18px;box-shadow:0 20px 60px rgba(0,0,0,.6)}' +
+        '.xck-h{display:flex;gap:8px;align-items:center}.xck-h b{flex:1;font-size:18px}.xck-box button{font:inherit;color:inherit;background:rgba(129,199,132,.12);border:1px solid rgba(129,199,132,.45);border-radius:8px;padding:5px 10px;cursor:pointer}.xck-s{opacity:.8;font-size:12.5px;margin:6px 0 10px}' +
+        '.xck-kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-bottom:10px}.xck-kpi>div{background:rgba(128,128,128,.1);border:1px solid rgba(128,128,128,.25);border-radius:12px;padding:10px 12px}.xck-kpi b{display:block;font-size:24px}.xck-kpi span{font-size:12px;opacity:.75;display:block;margin-bottom:6px}' +
+        '.xck-f{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:4px 0 8px}.xck-f span{flex:1}.xck-f button.on{background:#81c784;color:#10200f}' +
+        '#xck section{margin-top:10px}#xck h4{margin:6px 0;font-size:14px}#xck h4 small{opacity:.6;font-weight:400}.xck-r{display:grid;grid-template-columns:30px 1fr 92px auto auto;gap:10px;align-items:start;padding:8px 6px;border-top:1px solid rgba(128,128,128,.18)}.xck-r.late .xck-d{color:#e57373}.xck-r.ok .xck-t b{text-decoration:line-through;opacity:.6}.xck-r.na{opacity:.5}' +
+        '.xck-c{width:26px;height:26px;padding:0!important;border-radius:8px!important;font-weight:800}.xck-r.ok .xck-c{background:#81c784!important;color:#10200f}.xck-t small{display:block;opacity:.72;font-size:12px}.xck-m{display:flex;gap:10px;flex-wrap:wrap;font-size:11.5px;margin-top:3px}.xck-m a{color:#f0b378;text-decoration:none}.xck-m span{opacity:.75}.xck-a{color:#81c784;opacity:1!important}.xck-d{text-align:right;font-size:12px}.xck-d b{display:block}.xck-d small{opacity:.75}.xck-na{font-size:11px!important;padding:3px 6px!important}' +
+        '.xck-k{display:flex;gap:14px;margin:2px 0 6px}.xck-k b{display:block;font-size:20px}.xck-k span{font-size:11px;opacity:.7}.xck-n{font-size:12.5px;margin:3px 0}.xck-n small{opacity:.6}.xck-n.ko{color:#e57373}.xck-e{opacity:.7;padding:10px}.ko{color:#e57373!important}.ok{color:#81c784}' +
+        '.xpd-bar{height:8px;border-radius:99px;background:rgba(128,128,128,.25);overflow:hidden}.xpd-bar i{display:block;height:100%;border-radius:99px}' +
+        '@media(max-width:700px){.xck-r{grid-template-columns:28px 1fr 70px}.xck-na{display:none}}@media print{#xck{position:static;background:none;padding:0}.xck-box{box-shadow:none;border:0;color:#111;background:#fff}.xck-h button,.xck-f,.xck-na,.xck-kpi button{display:none}}';
+    document.head.appendChild(css);
+    // ---------- accès : fiche projet, ⚙️ ----------
+    function init() {
+        window.XSET_HELP = window.XSET_HELP || []; if (!window.XSET_HELP.some(x => x.k === 'xck')) window.XSET_HELP.push({ k: 'xck', icon: '✅', label: 'Checklist de préparation du projet', sub: 'Autorisations, assurances, contrats, sécurité… d’après la fiche projet', run: () => setTimeout(open, 150) });
+        const mo = new MutationObserver(() => { const g = document.querySelector('#xpj-g .xpj-types'); if (!g || document.getElementById('xck-fiche')) return; const s = stats(); const b = document.createElement('button'); b.id = 'xck-fiche'; b.type = 'button'; b.textContent = '✅ Checklist de préparation — ' + s.done + ' / ' + s.n + (s.late ? ' · ⚠️ ' + s.late + ' en retard' : ''); b.style.cssText = 'margin:6px 0 2px;padding:9px 14px;border-radius:12px;border:1px solid #81c784;background:rgba(129,199,132,.12);color:inherit;font-weight:700;cursor:pointer;width:100%';
+            b.onclick = () => { const sv = document.getElementById('xpj-save'); if (sv) sv.click(); setTimeout(() => { try { XPROJET.close(); } catch (e) { } open(); }, 200); }; (document.getElementById('xmd-fiche') || g).insertAdjacentElement('afterend', b); });
+        const go = () => mo.observe(document.body, { childList: true, subtree: true }); if (document.body) go(); else document.addEventListener('DOMContentLoaded', go);
+        if (/[?&]check=1/.test(location.search)) setTimeout(open, 900);
+    }
+    // échéances non faites pour l'agenda (XCALEV)
+    function events() { try { const { list } = items(); return list.filter(x => x.due && !x.ok).map(x => ({ d: x.due, t: '✅ ' + x.t, late: x.late, tool: x.tool })); } catch (e) { return []; } }
+    return { init, open, close, card, stats, items, events, toggle, acceptAuto, syncPlanno };
+})();
+XCHECK.init();
 
 </script>
 <!-- SUITE XIII:SETTINGS:END -->
