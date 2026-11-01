@@ -1467,6 +1467,14 @@ function fdrSettings() {
     // envoi DOSSIER / vitrine : la feuille de route du jour affiché en plus
     const s0 = openSendToDossier; openSendToDossier = function () { const D = P.fdr && FDAY(); if (!D || !D.legs.length || typeof xiiiSendToDossier !== 'function') return s0(); xiiiSendToDossier({ from: 'transporto', app: 'TRANSPORTO XIII', project: P.name || '', choices: [{ title: 'Feuille de route — ' + frD(D.date), key: 'transporto:fdr:' + D.id, keywords: ['feuille de route', 'fdr', 'transport'], sub: 'Aller / retour, pick-ups, horaires (journée affichée)', make: async () => ({ html: fdrPrintHtml(D).replace('<div class="pp">', '<div>') + '<style>table{border-collapse:collapse}td,th{border:1px solid #999;padding:4px 7px;text-align:center}.pw{background:#fde4d8}</style>' }) }, { title: 'Logistique — navettes, rooming list, voyages', key: 'transporto:all', keywords: ['logistique'], sub: 'Navettes par jour, hôtels, voyages, véhicules', make: async () => ({ html: sheetHtml() }) }] }); };
 })();
+
+// ---------- plans de route publiés pour l'application équipe (lus depuis le Drive du projet) ----------
+const nkeyF = s => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim().split(' ').filter(Boolean).sort().join(' ');
+function buildPlans() {
+    const out = {}; ((P.fdr && P.fdr.days) || []).filter(d => (d.legs || []).length).forEach(d => Object.keys(d.who || {}).forEach(id => { const p = pp(id); if (!p || d.who[id].mode === 'off') return; try { const o = personPlan(d, id); (out[nkeyF(p.n)] = out[nkeyF(p.n)] || []).push({ date: d.date, label: d.label || '', call: o.call || d.call, wrap: d.wrap, dest: d.dest.name, adr: d.dest.address || '', mode: (FMI[d.who[id].mode] || FM[0])[1], aller: o.aller, retour: o.retour, links: o.links.filter(l => l[1]), text: planText(d, id) }); } catch (e) { } }));
+    return out;
+}
+(function () { const s0 = saveProject; saveProject = function (explicit) { try { P.fdrPlans = buildPlans(); P.fdrPlansAt = Date.now(); } catch (e) { } return s0(explicit); }; })();
 if (prefs.view === 'fdr') setView('fdr');
 
 </script>

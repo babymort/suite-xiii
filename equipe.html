@@ -432,16 +432,27 @@ async function convRefresh() {
     const g = await api('get', { app: 'callsheeto', since: -1 }); if (!g.ok) return;
     let P = null; try { P = JSON.parse((g.data || {})['callsheetoXIII.project'] || 'null'); } catch (e) { }
     try { W('xiii.app.convs', convAll(P, ME.nom)); } catch (e) { }
+    try { const g2 = await api('get', { app: 'transporto', since: -1 }); if (g2.ok) { const T = JSON.parse((g2.data || {})['transportoXIII.project'] || 'null'); W('xiii.app.route', ((T && T.fdrPlans) || {})[nkey(ME.nom)] || []); } } catch (e) { }
     const c = convFind(P, ME.nom), old = JSON.stringify(J('xiii.app.conv', null)); W('xiii.app.conv', c ? Object.assign(c, { nom: ME.nom }) : null);
     convNotify(c);
     if (JSON.stringify(J('xiii.app.conv', null)) !== old && TAB === 'home') render();
 }
-function convCard() {
+function convCard() { const h = convCard0(), c = J('xiii.app.conv', null); if (!h || !c) return h; const rt = routeHtml(c.date); if (!rt) return h; const k = h.lastIndexOf('</div>'); return h.slice(0, k) + rt + h.slice(k); }
+function convCard0() {
     const c = J('xiii.app.conv', null); if (!c || !ME || nkey(c.nom) !== nkey(ME.nom)) return '';
     const t0 = new Date(); t0.setHours(0, 0, 0, 0); const dd = new Date(c.date + 'T00:00:00'), n = Math.round((dd - t0) / 86400000);
     const quand = n === 0 ? "Aujourd'hui" : n === 1 ? 'Demain' : dd.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
     return '<div class="card" style="border-color:var(--acc,#f0b429)"><h2>⏰ Votre convocation</h2><p style="margin:0 0 4px">' + esc(quand) + (c.day ? ' · ' + esc(c.day) : '') + (c.role ? ' · ' + esc(c.role) : '') + '</p><p style="margin:0;font-size:34px;font-weight:800;letter-spacing:.02em">' + esc(c.call || '—') + '</p>' + (c.hmc ? '<p class="dim" style="margin:4px 0 0">HMC ' + esc(c.hmc) + '</p>' : '') + (c.pat ? '<p class="dim" style="margin:2px 0 0">PAT ' + esc(c.pat) + '</p>' : '') + (c.loc || c.adr ? '<p style="margin:8px 0 0">📍 ' + esc(c.loc || c.adr) + ((c.adr || c.loc) ? ' <a href="https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(c.adr || c.loc) + '" target="_blank" rel="noopener">🧭 Itinéraire</a>' : '') + '</p>' : '') + (c.note ? '<p class="dim" style="margin:6px 0 0">' + esc(c.note) + '</p>' : '') + (n === 0 ? (() => { const A = J('xiii.app.arr', null), ok = A && A.d === c.date; return '<p style="margin:10px 0 0">' + (ok ? '<span style="color:var(--ok,#7fd88a);font-weight:700">✅ Arrivée signalée à ' + new Date(A.ts).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) + '</span>' : '<button class="btn" id="cv-arr" style="background:var(--acc,#f0b429);color:#1b1406;font-weight:800">📍 Je suis arrivé(e)</button>') + '</p>'; })() : '') + '<p id="cv-dep" style="margin:8px 0 0">' + (J('xiii.app.home', null) ? '<span class="dim">🚗 Calcul du trajet…</span>' : '<button class="btn" onclick="setHome()">🚗 Heure de départ conseillée</button>') + '</p>' + '<details style="margin:10px 0 0"><summary class="btn" style="display:inline-block;cursor:pointer;list-style:none">📅 Ajouter à mon agenda ▾</summary><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><button class="btn" onclick="convAgenda()">Tous mes jours (fichier agenda, avec rappels)</button><a class="btn" target="_blank" rel="noopener" href="' + esc(convGoogle(c)) + '">Prochain jour dans Google Agenda</a></div></details></div>';
 }
+// 🗺️ mon plan de route (TRANSPORTO › Feuilles de route), sur la carte de convocation
+function routeHtml(date) {
+    const L = J('xiii.app.route', []) || [], r = L.find(x => x.date === date) || null; if (!r) return '';
+    const li = A => A.map(x => '<li style="margin:3px 0"><b>' + esc(String(x.t || '').replace(':', 'h').replace(/h00$/, 'h').replace(/^0(\d)/, '$1')) + '</b> ' + esc(x.txt) + '</li>').join('');
+    return '<details class="xrt" open style="margin-top:10px;border-top:1px solid var(--line,rgba(255,255,255,.12));padding-top:8px"><summary style="cursor:pointer;font-weight:700">🗺️ Mon trajet <span class="dim" style="font-weight:400">· ' + esc(r.mode) + '</span></summary>' +
+        (r.aller.length ? '<p style="margin:8px 0 2px;font-weight:600">➡️ Aller</p><ol style="margin:0;padding-left:20px;font-size:14px">' + li(r.aller) + '</ol>' : '') + (r.retour.length ? '<p style="margin:8px 0 2px;font-weight:600">⬅️ Retour</p><ol style="margin:0;padding-left:20px;font-size:14px">' + li(r.retour) + '</ol>' : '') +
+        '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">' + r.links.map(l => '<a class="btn" style="padding:6px 10px;border-radius:10px;border:1px solid var(--line,rgba(255,255,255,.2));text-decoration:none;color:inherit;font-size:13px" target="_blank" rel="noopener" href="' + esc(l[1]) + '">' + esc(l[0]) + '</a>').join('') + '<button type="button" data-rtcopy style="font-size:13px">📋 Copier</button></div></details>';
+}
+document.addEventListener('click', e => { const b = e.target.closest && e.target.closest('[data-rtcopy]'); if (!b) return; const c = J('xiii.app.conv', null), r = (J('xiii.app.route', []) || []).find(x => c && x.date === c.date); if (r) { try { navigator.clipboard.writeText(r.text); toast('📋 Trajet copié'); } catch (x) { } } });
 async function render() {
     const m = $('m');
     if (PEND) {
