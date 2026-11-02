@@ -11498,7 +11498,8 @@ var XAIC = window.XAIC || (() => {
     const nm = () => (typeof XLINKS !== 'undefined' && XLINKS.T && XLINKS.T[APP] ? XLINKS.T[APP][1] : APP.toUpperCase());
     const SYS = 'Tu es l’assistant de SUITE XIII, une suite d’outils web pour la production audiovisuelle (tournage, direct, captation, post-production). Tu réponds en français, de façon concise et concrète, comme un régisseur / directeur de production expérimenté : préparation, feuilles de service, plans de tournage, matériel, devis, conventions collectives de l’audiovisuel, sécurité sur les plateaux. Quand c’est utile, indique quel outil XIII sert à quoi (PLANO plan de tournage et plateau, CALL SHEETO feuilles de service, CONDUCO conducteurs, DEVISO devis, MATOS matériel, CASTO casting, REPERO repérages, STORYBOARDO storyboard, PLANNO tâches, DOSSIER dossier de production, SYNO synoptiques…). Si tu n’es pas sûr d’un chiffre réglementaire, dis-le.';
     function ctx() { const p = proj(), d = new Date(); return 'Contexte : outil ouvert ' + nm() + (p.title ? ' · projet « ' + p.title + ' »' : '') + ' · ' + d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) + '.'; }
-    let busy = null;
+    let busy = null, att = null, lastField = null;
+    document.addEventListener('focusin', e => { const t = e.target; if (t && !t.closest('#xaic') && (t.tagName === 'TEXTAREA' || (t.tagName === 'INPUT' && /^(text|search|)$/.test(t.type || '')) || t.isContentEditable)) lastField = t; }, true);
     function css() {
         if (document.getElementById('xaic-css')) return; const s = document.createElement('style'); s.id = 'xaic-css';
         s.textContent = '#xaic-btn{font:700 12.5px system-ui,sans-serif;padding:6px 11px;border-radius:9px;border:1px solid rgba(240,179,120,.6);background:linear-gradient(135deg,rgba(240,179,120,.25),rgba(240,179,120,.08));color:inherit;cursor:pointer;margin-left:6px}#xaic-btn.fl{position:fixed;right:18px;bottom:84px;z-index:9990;background:#2a2622;color:#f0b378}' +
@@ -11518,30 +11519,44 @@ var XAIC = window.XAIC || (() => {
     function toggle() { const o = document.getElementById('xaic'); if (o) { o.remove(); return; } open(); }
     function open() {
         css(); const p = proj();
-        document.body.insertAdjacentHTML('beforeend', '<aside id="xaic" role="dialog" aria-label="Assistant IA"><header><div style="flex:1"><b>✨ Assistant XIII</b><small>' + esc(XAI.label ? XAI.label() : '') + (p.title ? ' · ' + esc(p.title) : '') + '</small></div><button data-clr title="Effacer la conversation de ce projet">🧹</button><button data-x title="Fermer">✕</button></header><div class="l"></div><form><textarea placeholder="Votre question… (Entrée pour envoyer, Maj+Entrée pour aller à la ligne)"></textarea><button>Envoyer</button></form></aside>');
+        document.body.insertAdjacentHTML('beforeend', '<aside id="xaic" role="dialog" aria-label="Assistant IA"><header><div style="flex:1"><b>✨ Assistant XIII</b><small>' + esc(XAI.label ? XAI.label() : '') + (p.title ? ' · ' + esc(p.title) : '') + '</small></div><button data-clr title="Effacer la conversation de ce projet">🧹</button><button data-x title="Fermer">✕</button></header><div class="l"></div><div class="at" style="padding:0 12px;font-size:12px;opacity:.8"></div><form><label title="Joindre une photo, un croquis ou un fichier texte (TXT, CSV, MD, JSON)" style="display:flex;align-items:center;cursor:pointer;font-size:18px">📎<input type="file" accept="image/*,.txt,.csv,.md,.json,.srt,.html" hidden></label><textarea placeholder="Votre question… (Entrée pour envoyer, Maj+Entrée pour aller à la ligne)"></textarea><button>Envoyer</button></form></aside>');
         const o = document.getElementById('xaic'), ta = o.querySelector('textarea');
         o.querySelector('[data-x]').onclick = () => o.remove();
         o.querySelector('[data-clr]').onclick = () => { if (confirm('Effacer la conversation de ce projet ?')) { save([]); draw(); } };
         o.querySelector('form').onsubmit = e => { e.preventDefault(); send(ta.value); ta.value = ''; };
         ta.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(ta.value); ta.value = ''; } if (e.key === 'Escape') o.remove(); });
-        draw(); setTimeout(() => ta.focus(), 50);
+        o.querySelector('input[type=file]').onchange = async e => { const f = e.target.files[0]; e.target.value = ''; if (!f) return; try { att = await readAtt(f); } catch (x) { att = null; alert(x.message || x); } showAtt(); };
+        draw(); showAtt(); setTimeout(() => ta.focus(), 50);
     }
     const SUG = ['Prépare la liste des étapes de préparation de ce tournage', 'Quels postes prévoir pour une captation 3 caméras ?', 'Rappelle-moi les temps de repos entre deux journées', 'Aide-moi à rédiger le mot d’accueil de la feuille de service'];
     function draw() {
         const o = document.getElementById('xaic'); if (!o) return; const L = msgs(), box = o.querySelector('.l');
         box.innerHTML = (L.length ? '' : '<p class="h">Posez une question sur votre production : l’assistant connaît le métier et les outils XIII. Rien ne part avant votre envoi ; seul le contexte (outil ouvert, titre du projet, date) accompagne la question.</p><div class="sg">' + SUG.map(s => '<button>' + esc(s) + '</button>').join('') + '</div>') +
-            L.map((m, i) => '<div class="m ' + (m.r === 'u' ? 'u' : 'a') + (m.err ? ' e' : '') + '">' + esc(m.t) + (m.r === 'a' && !m.err ? '<button class="cp" data-cp="' + i + '">📋 Copier</button>' : '') + '</div>').join('') + (busy ? '<div class="m a h">⏳ L’IA réfléchit…</div>' : '');
+            L.map((m, i) => '<div class="m ' + (m.r === 'u' ? 'u' : 'a') + (m.err ? ' e' : '') + '">' + esc(m.t) + (m.r === 'u' && m.att ? '\n📎 ' + esc(m.att) : '') + (m.r === 'a' && !m.err ? '<span style="display:flex;gap:12px"><button class="cp" data-cp="' + i + '">📋 Copier</button><button class="cp" data-in="' + i + '" title="Insérer dans le dernier champ de texte utilisé de l’outil">↘️ Dans le champ</button></span>' : '') + '</div>').join('') + (busy ? '<div class="m a h">⏳ L’IA réfléchit…</div>' : '');
         box.querySelectorAll('.sg button').forEach(b => b.onclick = () => send(b.textContent));
         box.querySelectorAll('[data-cp]').forEach(b => b.onclick = async () => { try { await navigator.clipboard.writeText(L[+b.dataset.cp].t); b.textContent = '✅ Copié'; } catch (e) { } });
+        box.querySelectorAll('[data-in]').forEach(b => b.onclick = () => { const f = lastField, v = L[+b.dataset.in].t; if (!f || !document.contains(f)) { b.textContent = 'Cliquez d’abord dans un champ de l’outil'; return; } if (f.isContentEditable) f.focus(), document.execCommand('insertText', false, v); else { const a = f.selectionStart != null ? f.selectionStart : f.value.length; f.value = f.value.slice(0, a) + v + f.value.slice(f.selectionEnd != null ? f.selectionEnd : a); f.dispatchEvent(new Event('input', { bubbles: true })); f.dispatchEvent(new Event('change', { bubbles: true })); } b.textContent = '✅ Inséré'; });
         box.scrollTop = box.scrollHeight;
     }
     async function send(t) {
-        t = String(t || '').trim(); if (!t || busy) return; const L = msgs(); L.push({ r: 'u', t, ts: Date.now() }); save(L); busy = new AbortController(); draw();
+        t = String(t || '').trim(); if (!t || busy) return; const L = msgs(), A = att; att = null; showAtt(); L.push({ r: 'u', t, ts: Date.now(), att: A ? A.name : '' }); save(L); busy = new AbortController(); draw();
         const hist = L.slice(-12, -1).map(m => (m.r === 'u' ? 'Utilisateur : ' : 'Assistant : ') + m.t).join('\n\n');
-        const prompt = SYS + '\n\n' + ctx() + (hist ? '\n\nConversation précédente :\n' + hist : '') + '\n\nUtilisateur : ' + t + '\n\nAssistant :';
-        let r; try { r = { r: 'a', t: String(await XAI.ask(prompt, { signal: busy.signal, maxTokens: 2000 }) || '').trim() || '(réponse vide)' }; } catch (e) { r = { r: 'a', err: 1, t: '⚠️ ' + (e && e.message || e) }; }
+        const prompt = SYS + '\n\n' + ctx() + (hist ? '\n\nConversation précédente :\n' + hist : '') + (A && A.text ? '\n\nFichier joint « ' + A.name + ' » :\n' + A.text : '') + (A && A.image ? '\n\n(Une image est jointe : « ' + A.name + ' ».)' : '') + '\n\nUtilisateur : ' + t + '\n\nAssistant :';
+        let r; try { r = { r: 'a', t: String(await XAI.ask(prompt, Object.assign({ signal: busy.signal, maxTokens: 2000 }, A && A.image ? { image: A.image } : {})) || '').trim() || '(réponse vide)' }; } catch (e) { r = { r: 'a', err: 1, t: '⚠️ ' + (e && e.message || e) }; }
         busy = null; const L2 = msgs(); L2.push(Object.assign(r, { ts: Date.now() })); save(L2); draw();
     }
+    async function readAtt(f) {
+        if (/^image\//.test(f.type)) {
+            if (XAI.canSee && !XAI.canSee()) throw new Error('L’IA connectée ne lit pas les images : choisissez-en une autre dans ⚙️ › Intelligence artificielle.');
+            const url = await new Promise((ok, ko) => { const r = new FileReader(); r.onload = () => ok(r.result); r.onerror = ko; r.readAsDataURL(f); });
+            const im = await new Promise((ok, ko) => { const i = new Image(); i.onload = () => ok(i); i.onerror = ko; i.src = url; }), k = Math.min(1, 1568 / Math.max(im.naturalWidth, im.naturalHeight)), c = document.createElement('canvas');
+            c.width = Math.round(im.naturalWidth * k); c.height = Math.round(im.naturalHeight * k); c.getContext('2d').drawImage(im, 0, 0, c.width, c.height);
+            return { name: f.name, image: { mediaType: 'image/jpeg', base64: c.toDataURL('image/jpeg', 0.85).split(',')[1] } };
+        }
+        if (f.size > 400000) throw new Error('Fichier trop lourd (400 Ko maximum pour un texte).');
+        return { name: f.name, text: (await f.text()).slice(0, 60000) };
+    }
+    function showAtt() { const d = document.querySelector('#xaic .at'); if (!d) return; d.innerHTML = att ? '📎 ' + esc(att.name) + ' <a href="#" style="color:inherit">✕</a>' : ''; const a = d.querySelector('a'); if (a) a.onclick = e => { e.preventDefault(); att = null; showAtt(); }; }
     setTimeout(mount, 300); addEventListener('load', () => setTimeout(mount, 300)); addEventListener('storage', e => { if (e.key && /^xiii\.ai/.test(e.key)) mount(); }); setInterval(mount, 5000);
     return { open, toggle, mount };
 })();
