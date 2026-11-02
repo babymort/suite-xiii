@@ -2370,7 +2370,7 @@ var XRED = (function () {
     if (typeof XSET === 'undefined' || typeof prefs === 'undefined' || typeof HFT === 'undefined') return;
     function apply(S) { try { render(); } catch (e) { } }
     XSET.init({
-        app: 'sono', title: 'SONO', version: 'v1.0',
+        app: 'sono', title: 'SONO', version: 'v1.11',
         sections: [{ id: 'aff', icon: '🎚️', title: 'Fiche son', open: true, desc: 'Écart minimal entre fréquences, tolérance d\'intermodulation et canaux TNT occupés se règlent dans 📡 Plan HF. Bandes : repères France, à vérifier auprès de l\'ANFR.', fields: [{ k: 'view', label: 'Vue à l\'ouverture', type: 'select', def: 'patch', options: [['patch', 'Patch'], ['hf', 'Plan HF'], ['mix', 'Retours']] }] }],
         apply
     });

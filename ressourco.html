@@ -4692,7 +4692,7 @@ var XRED = (function () {
 
     ready = true;
     XSET.init({
-        app: 'ressourco', title: 'RESSOURCO', version: 'v8',
+        app: 'ressourco', title: 'RESSOURCO', version: 'v18',
         theme: { get: () => prefs.theme === 'light' ? 'light' : 'dark', set: t => { if ((prefs.theme === 'light' ? 'light' : 'dark') !== t) toggleTheme(); } },
         hide: ['#toolbar button[onclick="toggleTheme()"]', '#toolbar button[onclick="openGuide()"]'],
         css: '#xs-panel .xs-c:has(>table.xs-t){flex-direction:column;align-items:stretch}#xs-panel .xs-c:has(>table.xs-t)>.xs-acts{align-self:flex-start}#xs-panel table.xs-t select{width:100%;max-width:none;padding:4px 3px;font-size:12px}#xs-panel table.xs-t td:first-child input{min-width:96px}',

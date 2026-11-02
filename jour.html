@@ -1729,7 +1729,7 @@ var XRED = (function () {
     if (typeof XSET === 'undefined' || typeof pref === 'undefined') return;
     function apply(S) { if (S.big != null) pref.big = !!S.big; savePref(); applyPref(); }
     XSET.init({
-        app: 'jour', title: 'MODE TOURNAGE', version: 'v1.3',
+        app: 'jour', title: 'MODE TOURNAGE', version: 'v1.10',
         sections: [{ id: 'aff', icon: '🎬', title: 'Affichage', open: true, desc: 'La journée de tournage rassemble CALL SHEETO, SCRIPTO, BACKUPO, PACKINGO et CONDUCO.',
             fields: [{ k: 'big', label: 'Grands caractères', type: 'toggle', def: false }] }],
         apply

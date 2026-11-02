@@ -5934,7 +5934,7 @@ var XRED = (function () {
     // ---------- paramètres ----------
     const cvf = (k, label, ph, hint) => ({ k: 'cv_' + k, label, hint, type: 'text', def: '', placeholder: ph });
     XSET.init({
-        app: 'dossier', title: 'DOSSIER', version: 'v13',
+        app: 'dossier', title: 'DOSSIER', version: 'v25',
         theme: { get: () => prefs.theme === 'light' ? 'light' : 'dark', set: t => { if ((prefs.theme === 'light' ? 'light' : 'dark') !== t) toggleTheme(); } },
         // écran peu haut : l'aperçu collant de la page de garde (≈ 500 px) dépassait sous le badge Netlify et cachait « Générer »
         css: '@media (max-height: 900px) { .cover-prev { position: static; } }',

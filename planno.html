@@ -2404,7 +2404,7 @@ var XRED = (function () {
     if (typeof XSET === 'undefined' || typeof prefs === 'undefined' || typeof ZW === 'undefined') return;
     function apply(S) { if (S.zoom != null) { prefs.zoom = +S.zoom; } try { render(); } catch (e) { } }
     XSET.init({
-        app: 'planno', title: 'PLANNO', version: 'v1.0',
+        app: 'planno', title: 'PLANNO', version: 'v1.9',
         sections: [{ id: 'aff', icon: '📊', title: 'Frise', open: true, desc: 'Échelle par défaut de la frise (modifiable avec − / +).',
             fields: [{ k: 'zoom', label: 'Échelle', type: 'select', def: 2, options: [[0, 'Trimestre'], [1, 'Mois'], [2, 'Semaines'], [3, 'Jours'], [4, 'Jours (large)']] }] }],
         apply

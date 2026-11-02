@@ -2792,7 +2792,7 @@ var XRED = (function () {
     if (typeof XSET === 'undefined' || typeof prefs === 'undefined' || typeof VT === 'undefined') return;
     function apply(S) { try { render(); } catch (e) { } }
     XSET.init({
-        app: 'transporto', title: 'TRANSPORTO', version: 'v1.0',
+        app: 'transporto', title: 'TRANSPORTO', version: 'v1.11',
         sections: [{ id: 'aff', icon: '🚐', title: 'Logistique', open: true, desc: 'Équipe importée de CALL SHEETO, de l\'annuaire et de MODE TOURNAGE ; la logistique de chacun apparaît dans son espace équipe (MODE TOURNAGE).', fields: [{ k: 'view', label: 'Vue à l\'ouverture', type: 'select', def: 'team', options: [['team', 'Équipe'], ['travel', 'Voyages'], ['trips', 'Navettes'], ['hotel', 'Hébergement']] }] }],
         apply
     });
