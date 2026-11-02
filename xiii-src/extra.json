@@ -1,1 +1,1 @@
-[["suite-scen.js", "*"]]
+[["suite-scen.js", "*"], ["suite-coh.js", ["index"]]]
