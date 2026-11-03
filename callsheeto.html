@@ -13053,7 +13053,7 @@ var XDVER = window.XDVER || (() => {
 //  Rien ne part tant que l'utilisateur n'envoie pas de message ; l'équipe n'est jamais envoyée si l'option est cochée.
 // =====================================================================
 var XAIC = window.XAIC || (() => {
-    if (/[?&](xrun|xmodel|xvit)=/.test(location.search)) return {};
+    if (/[?&](xrun|xmodel|xvit|embed)=/.test(location.search)) return {};
     const APP = 'callsheeto', J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } }, W = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { } };
     const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     const ok = () => typeof XAI !== 'undefined' && XAI.configured && XAI.configured();
@@ -13083,9 +13083,9 @@ var XAIC = window.XAIC || (() => {
     function toggle() { const o = document.getElementById('xaic'); if (o) { o.remove(); return; } open(); }
     function open() {
         css(); const p = proj();
-        document.body.insertAdjacentHTML('beforeend', '<aside id="xaic" role="dialog" aria-label="Assistant IA"><header><div style="flex:1"><b>✨ Assistant XIII</b><small>' + esc(XAI.label ? XAI.label() : '') + (p.title ? ' · ' + esc(p.title) : '') + '</small></div><button data-clr title="Effacer la conversation de ce projet">🧹</button><button data-x title="Fermer">✕</button></header><div class="l"></div><div class="at" style="padding:0 12px;font-size:12px;opacity:.8"></div><form><label title="Joindre une photo, un croquis ou un fichier texte (TXT, CSV, MD, JSON)" style="display:flex;align-items:center;cursor:pointer;font-size:18px">📎<input type="file" accept="image/*,.txt,.csv,.md,.json,.srt,.html" hidden></label><textarea placeholder="Votre question… (Entrée pour envoyer, Maj+Entrée pour aller à la ligne)"></textarea><button>Envoyer</button></form></aside>');
+        document.body.insertAdjacentHTML('beforeend', '<aside id="xaic" role="dialog" aria-label="Assistant IA"><header><div style="flex:1"><b>✨ Assistant XIII</b><small>' + esc(XAI.label ? XAI.label() : '') + (p.title ? ' · ' + esc(p.title) : '') + '</small></div>' + (ACT[APP] ? '<button data-act title="' + esc(ACT[APP].lab) + ' : l’IA propose, vous cochez et validez">🛠️</button>' : '') + '<button data-clr title="Effacer la conversation de ce projet">🧹</button><button data-x title="Fermer">✕</button></header><div class="l"></div><div class="at" style="padding:0 12px;font-size:12px;opacity:.8"></div><form><label title="Joindre une photo, un croquis ou un fichier texte (TXT, CSV, MD, JSON)" style="display:flex;align-items:center;cursor:pointer;font-size:18px">📎<input type="file" accept="image/*,.txt,.csv,.md,.json,.srt,.html" hidden></label><textarea placeholder="Votre question… (Entrée pour envoyer, Maj+Entrée pour aller à la ligne)"></textarea><button>Envoyer</button></form></aside>');
         const o = document.getElementById('xaic'), ta = o.querySelector('textarea');
-        o.querySelector('[data-x]').onclick = () => o.remove();
+        o.querySelector('[data-x]').onclick = () => o.remove(); const ab = o.querySelector('[data-act]'); if (ab) ab.onclick = act;
         o.querySelector('[data-clr]').onclick = () => { if (confirm('Effacer la conversation de ce projet ?')) { save([]); draw(); } };
         o.querySelector('form').onsubmit = e => { e.preventDefault(); send(ta.value); ta.value = ''; };
         ta.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(ta.value); ta.value = ''; } if (e.key === 'Escape') o.remove(); });
@@ -13121,6 +13121,32 @@ var XAIC = window.XAIC || (() => {
         return { name: f.name, text: (await f.text()).slice(0, 60000) };
     }
     function showAtt() { const d = document.querySelector('#xaic .at'); if (!d) return; d.innerHTML = att ? '📎 ' + esc(att.name) + ' <a href="#" style="color:inherit">✕</a>' : ''; const a = d.querySelector('a'); if (a) a.onclick = e => { e.preventDefault(); att = null; showAtt(); }; }
+
+    // ---------- 🛠️ actions dans l'outil : l'IA propose, l'utilisateur coche et valide ----------
+    const ACT = {
+        planno: { lab: '🛠️ Créer des tâches dans PLANNO', ask: 'Propose les tâches de planning correspondant à la demande (préparation, repérages, tournage, post-production, livraison).',
+            schema: '{"items":[{"name":"…","phase":"prepa|casting|reperage|tournage|post|livraison","start":"AAAA-MM-JJ","end":"AAAA-MM-JJ"}]}',
+            row: x => x.name + (x.start ? ' · ' + x.start.split('-').reverse().join('/') + (x.end && x.end !== x.start ? ' → ' + x.end.split('-').reverse().join('/') : '') : '') + (x.phase ? ' · ' + x.phase : ''),
+            apply(L) { let f = window.XPLANNO_AI; if (typeof f !== 'function') { const fr = [...document.querySelectorAll('iframe')].find(x => /planno\.html/.test(x.src)); try { f = fr && fr.contentWindow.XPLANNO_AI; } catch (e) { } } if (typeof f !== 'function') throw new Error('Ouvrez la vue Production (planning PLANNO) puis recommencez'); return f(L) + ' tâche(s) ajoutée(s) au planning'; } },
+        storyboardo: { lab: '🛠️ Créer des plans dans STORYBOARDO', ask: 'Découpe la demande en plans de storyboard (valeur de plan, action, dialogue éventuel).',
+            schema: '{"items":[{"titre":"…","valeur":"Plan large|Plan moyen|Plan rapproché|Gros plan|…","action":"…","dialogue":"…"}]}',
+            row: x => (x.titre ? x.titre + ' — ' : '') + (x.valeur ? '[' + x.valeur + '] ' : '') + (x.action || ''),
+            apply(L) { const cur = PN(); let at = idx(cur); L.forEach(x => { const n = blankPanel({ seq: cur.seq }); if (x.titre) n.title = String(x.titre).slice(0, 80); n.action = [x.valeur, x.action].filter(Boolean).join(' — '); if (x.dialogue) n.dialogue = x.dialogue; P.panels.splice(++at, 0, n); }); dirty(); renderAll(); return L.length + ' plan(s) ajouté(s) après le plan affiché'; } }
+    };
+    ACT.calendrier = ACT.planno;
+    async function act() {
+        const A = ACT[APP], ta = document.querySelector('#xaic textarea'); if (!A || busy) return;
+        const t = (ta.value || '').trim() || (msgs().filter(m => m.r === 'u').slice(-1)[0] || {}).t; if (!t) { ta.placeholder = 'Décrivez d’abord ce que l’IA doit créer…'; ta.focus(); return; } ta.value = '';
+        const L = msgs(); L.push({ r: 'u', t: A.lab + ' : ' + t, ts: Date.now() }); save(L); busy = new AbortController(); draw();
+        const prompt = SYS + '\n\n' + ctx() + '\n\n' + A.ask + '\nDemande : ' + t + '\n\nRéponds UNIQUEMENT par un JSON de la forme ' + A.schema + ' (10 éléments au plus, dates au format AAAA-MM-JJ à partir d’aujourd’hui si besoin).';
+        let items = null, err = ''; try { const r = await XAI.ask(prompt, { signal: busy.signal, maxTokens: 3000 }); items = (XAI.json(r).items || []).slice(0, 20); } catch (e) { err = e && e.message || String(e); }
+        busy = null; draw(); const box = document.querySelector('#xaic .l'); if (!box) return;
+        if (!items || !items.length) { const L2 = msgs(); L2.push({ r: 'a', err: 1, t: '⚠️ ' + (err || 'L’IA n’a rien proposé de lisible. Reformulez la demande.'), ts: Date.now() }); save(L2); draw(); return; }
+        box.insertAdjacentHTML('beforeend', '<div class="m a" id="xaic-prop"><b>Proposition — cochez ce qu’il faut créer :</b>' + items.map((x, i) => '<label style="display:flex;gap:6px;margin-top:5px;white-space:normal"><input type="checkbox" data-k="' + i + '" checked><span>' + esc(A.row(x)) + '</span></label>').join('') + '<div style="display:flex;gap:8px;margin-top:8px"><button class="cp" data-ok style="opacity:1;font-weight:700">✅ Créer</button><button class="cp" data-no>Annuler</button></div></div>'); box.scrollTop = box.scrollHeight;
+        const pr = document.getElementById('xaic-prop');
+        pr.querySelector('[data-no]').onclick = () => pr.remove();
+        pr.querySelector('[data-ok]').onclick = () => { const sel = items.filter((x, i) => pr.querySelector('[data-k="' + i + '"]').checked); let m; try { m = sel.length ? A.apply(sel) : 'Rien de créé'; } catch (e) { m = '⚠️ ' + e.message; } pr.remove(); const L3 = msgs(); L3.push({ r: 'a', t: '✅ ' + m + '.', ts: Date.now() }); save(L3); draw(); };
+    }
     setTimeout(mount, 300); addEventListener('load', () => setTimeout(mount, 300)); addEventListener('storage', e => { if (e.key && /^xiii\.ai/.test(e.key)) mount(); }); setInterval(mount, 5000);
     return { open, toggle, mount };
 })();
