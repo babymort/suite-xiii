@@ -10346,7 +10346,7 @@ const XGATE = (() => {
         APP = app; if (!XLINKS.T[app]) return; if (!XLINKS.peers(app).length) return; if (!$('xgt-css')) css();
         let n = 0; const iv = setInterval(() => { n++; if (($('xb-file') || n > 8) && place()) clearInterval(iv); if (n > 30) clearInterval(iv); }, 600);
     }
-    return { init, open, findBtn };
+    return { init, open, findBtn, go };
 })();
 
 XGATE.init('storyboardo');
@@ -13294,10 +13294,10 @@ var XAIC = window.XAIC || (() => {
     function open() {
         const ex = document.getElementById('xaic'); if (ex) { const t = ex.querySelector('textarea'); if (t) t.focus(); return; }   // jamais deux volets ouverts
         css(); const p = proj();
-        document.body.insertAdjacentHTML('beforeend', '<aside id="xaic" role="dialog" aria-label="Assistant IA"><header><div style="flex:1"><b>✨ Assistant XIII</b><small>' + esc(XAI.label ? XAI.label() : '') + (p.title ? ' · ' + esc(p.title) : '') + '</small></div>' + (ACT[APP] ? '<button data-act title="' + esc(ACT[APP].lab) + ' : l’IA propose, vous cochez et validez">🛠️</button>' : '') + '<button data-clr title="Effacer la conversation de ce projet">🧹</button><button data-x title="Fermer">✕</button></header><div class="l"></div><div class="at" style="padding:0 12px;font-size:12px;opacity:.8"></div><label style="display:flex;gap:6px;align-items:center;padding:4px 12px 0;font-size:11.5px;opacity:.75" title="Seuls partent : votre message, la pièce jointe éventuelle et, si coché, le nom de l’outil, le titre du projet et la date. Jamais l’équipe, les contacts ni les données des outils."><input type="checkbox" data-ctx' + (noCtx() ? '' : ' checked') + '> Joindre le contexte (outil, titre du projet, date) · 🔒 jamais l’équipe ni les données</label><form><label title="Joindre une photo, un croquis, un PDF (texte) ou un fichier texte (TXT, CSV, MD, JSON)" style="display:flex;align-items:center;cursor:pointer;font-size:18px">📎<input type="file" accept="image/*,.pdf,.txt,.csv,.md,.json,.srt,.html" hidden></label><textarea placeholder="Votre question… (Entrée pour envoyer, Maj+Entrée pour aller à la ligne)"></textarea><button>Envoyer</button></form></aside>');
+        document.body.insertAdjacentHTML('beforeend', '<aside id="xaic" role="dialog" aria-label="Assistant IA"><header><div style="flex:1"><b>✨ Assistant XIII</b><small>' + esc(XAI.label ? XAI.label() : '') + (p.title ? ' · ' + esc(p.title) : '') + '</small></div>' + (ACT[APP] ? '<button data-act title="' + esc(ACT[APP].lab) + ' : l’IA propose, vous cochez et validez">🛠️</button>' : '') + '<button data-gate title="🔀 Envoyer vers un autre outil : écrivez ce que vous voulez transmettre, l’IA choisit la bonne passerelle (champ vide : toutes les passerelles)">🔀</button>' + '<button data-clr title="Effacer la conversation de ce projet">🧹</button><button data-x title="Fermer">✕</button></header><div class="l"></div><div class="at" style="padding:0 12px;font-size:12px;opacity:.8"></div><label style="display:flex;gap:6px;align-items:center;padding:4px 12px 0;font-size:11.5px;opacity:.75" title="Seuls partent : votre message, la pièce jointe éventuelle et, si coché, le nom de l’outil, le titre du projet et la date. Jamais l’équipe, les contacts ni les données des outils."><input type="checkbox" data-ctx' + (noCtx() ? '' : ' checked') + '> Joindre le contexte (outil, titre du projet, date) · 🔒 jamais l’équipe ni les données</label><form><label title="Joindre une photo, un croquis, un PDF (texte) ou un fichier texte (TXT, CSV, MD, JSON)" style="display:flex;align-items:center;cursor:pointer;font-size:18px">📎<input type="file" accept="image/*,.pdf,.txt,.csv,.md,.json,.srt,.html" hidden></label><textarea placeholder="Votre question… (Entrée pour envoyer, Maj+Entrée pour aller à la ligne)"></textarea><button>Envoyer</button></form></aside>');
         const o = document.getElementById('xaic'), ta = o.querySelector('textarea');
         o.querySelector('[data-ctx]').onchange = e => W('xiii.aichat.noctx', !e.target.checked);
-        o.querySelector('[data-x]').onclick = () => o.remove(); const ab = o.querySelector('[data-act]'); if (ab) ab.onclick = act;
+        o.querySelector('[data-x]').onclick = () => o.remove(); const ab = o.querySelector('[data-act]'); if (ab) ab.onclick = act; const gb = o.querySelector('[data-gate]'); if (gb) gb.onclick = gateAI;
         o.querySelector('[data-clr]').onclick = () => { if (confirm('Effacer la conversation de ce projet ?')) { save([]); draw(); } };
         o.querySelector('form').onsubmit = e => { e.preventDefault(); send(ta.value); ta.value = ''; };
         ta.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(ta.value); ta.value = ''; } if (e.key === 'Escape') o.remove(); });
@@ -13317,7 +13317,9 @@ var XAIC = window.XAIC || (() => {
         box.scrollTop = box.scrollHeight;
     }
     async function send(t) {
-        t = String(t || '').trim(); if (!t || busy) return; const L = msgs(), A = att; att = null; showAtt(); L.push({ r: 'u', t, ts: Date.now(), att: A ? A.name : '' }); save(L); busy = new AbortController(); draw();
+        t = String(t || '').trim(); if (!t || busy) return;
+        const IN = !att && intent(t); if (IN) { const M = msgs(); M.push({ r: 'u', t, ts: Date.now() }); save(M); draw(); gate(IN, null, '🔀 Passerelle correspondante'); return; }
+        const L = msgs(), A = att; att = null; showAtt(); L.push({ r: 'u', t, ts: Date.now(), att: A ? A.name : '' }); save(L); busy = new AbortController(); draw();
         const hist = L.slice(-12, -1).map(m => (m.r === 'u' ? 'Utilisateur : ' : 'Assistant : ') + m.t).join('\n\n');
         const prompt = SYS + '\n\n' + ctx() + (hist ? '\n\nConversation précédente :\n' + hist : '') + (A && A.text ? '\n\nFichier joint « ' + A.name + ' » :\n' + A.text : '') + (A && A.image ? '\n\n(Une image est jointe : « ' + A.name + ' ».)' : '') + '\n\nUtilisateur : ' + t + '\n\nAssistant :';
         // ✍️ la réponse s'écrit au fur et à mesure (si le service le permet), sinon elle arrive d'un bloc
@@ -13387,6 +13389,38 @@ var XAIC = window.XAIC || (() => {
             dirty(); renderContent(); renderStats(); renderTabs();
             return [n.eq && n.eq + ' matériel', n.crew && n.crew + ' poste(s) d’équipe', n.fees && n.fees + ' frais'].filter(Boolean).join(', ') + ' ajouté(s) à la version « ' + (v.name || 'affichée') + ' » — à vérifier : prix vides = tarifs DEVISO'; } };
     ACT.calendrier = ACT.planno;
+    // ---------- 🔀 passerelles depuis le volet : ce que cet outil peut envoyer, et l'IA qui dit lesquelles servent ----------
+    const PAPP = APP === 'calendrier' ? 'planno' : APP;
+    function links() { try { return typeof XLINKS !== 'undefined' ? XLINKS.from(PAPP).filter((x, i, a) => a.findIndex(y => y[1] === x[1]) === i) : []; } catch (e) { return []; } }
+    const tname = t => { const T = typeof XLINKS !== 'undefined' ? XLINKS.T : {}; return T[t] ? T[t][0] + ' ' + T[t][1] : t.toUpperCase(); };
+    function gate(L, why, title) {
+        const box = document.querySelector('#xaic .l'); if (!box) return; document.querySelectorAll('#xaic-gate').forEach(x => x.remove());
+        if (!L.length) { box.insertAdjacentHTML('beforeend', '<div class="m a h" id="xaic-gate">Cet outil n’a pas de passerelle vers un autre outil.</div>'); return; }
+        box.insertAdjacentHTML('beforeend', '<div class="m a" id="xaic-gate"><b>' + esc(title || '🔀 Envoyer vers un autre outil') + '</b>' + L.map(x => '<div style="display:flex;gap:8px;align-items:flex-start;margin-top:7px;white-space:normal"><button class="cp" data-go="' + esc(x[1]) + '" style="opacity:1;font-weight:700;flex:none">' + esc(tname(x[1])) + ' ↗</button><span>' + esc(x[2]) + (why && why[x[1]] ? '<br><i>💡 ' + esc(why[x[1]]) + '</i>' : '') + '</span></div>').join('')
+            + '<div style="margin-top:8px;display:flex;gap:8px"><button class="cp" data-all>Toutes les passerelles…</button><button class="cp" data-no>Fermer</button></div></div>');
+        const g = document.getElementById('xaic-gate'); box.scrollTop = box.scrollHeight;
+        g.querySelector('[data-no]').onclick = () => g.remove();
+        g.querySelector('[data-all]').onclick = () => { try { XGATE.open(); } catch (e) { } };
+        g.querySelectorAll('[data-go]').forEach(b => b.onclick = () => { const t = b.dataset.go; const L2 = msgs(); L2.push({ r: 'a', t: '🔀 Passerelle vers ' + tname(t) + ' lancée : suivez les indications de l’outil (l’outil d’arrivée propose l’intégration, rien n’est remplacé sans votre accord).', ts: Date.now() }); save(L2); draw();
+            try { if (typeof XGATE !== 'undefined' && XGATE.go) XGATE.go(t); else location.href = t + '.html'; } catch (e) { location.href = t + '.html'; } });
+    }
+    async function gateAI() {
+        const L = links(); if (!L.length || busy) { gate(L); return; } const ta = document.querySelector('#xaic textarea'), t = (ta && ta.value || '').trim(); if (ta) ta.value = '';
+        if (!t) { gate(L); return; }
+        const M = msgs(); M.push({ r: 'u', t: '🔀 ' + t, ts: Date.now() }); save(M); busy = new AbortController(); draw();
+        const prompt = SYS + '\n\n' + ctx() + '\n\nPasserelles disponibles depuis cet outil (id = ce qui passe) :\n' + L.map(x => x[1] + ' = ' + x[2]).join('\n') + '\n\nL’utilisateur demande : ' + t + '\n\nChoisis les passerelles utiles (3 au plus, la plus utile d’abord) et dis en une phrase pourquoi. Réponds UNIQUEMENT par un JSON {"items":[{"id":"…","pourquoi":"…"}]} ({"items":[]} si aucune ne convient).';
+        let R = null, err = ''; try { R = (XAI.json(await XAI.ask(prompt, { signal: busy.signal, maxTokens: 800 })).items || []); } catch (e) { err = e && e.name === 'AbortError' ? 'Arrêté.' : (e && e.message || String(e)); }
+        busy = null; draw();
+        if (!R) { const M2 = msgs(); M2.push({ r: 'a', err: 1, t: '⚠️ ' + err, ts: Date.now() }); save(M2); draw(); gate(L); return; }
+        const why = {}, pick = []; R.forEach(x => { const l = L.find(y => y[1] === x.id); if (l && !pick.includes(l)) { pick.push(l); why[l[1]] = String(x.pourquoi || '').slice(0, 200); } });
+        gate(pick.length ? pick : L, why, pick.length ? '🔀 Passerelles conseillées par l’IA' : '🔀 Aucune passerelle ne correspond : toutes celles de l’outil');
+    }
+    // « envoie le matériel vers DEVISO » : proposé directement, sans appel à l'IA
+    function intent(t) {
+        const f = String(t).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, ''); if (!/\b(envoi|envoie|envoyer|transf[e]?re|transmet|transmettre|pousse|exporte|bascule|passe)\w*\b/.test(f)) return null;
+        const L = links().filter(x => { const T = typeof XLINKS !== 'undefined' ? XLINKS.T[x[1]] : null; const nm = (T ? T[1] : x[1]).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, ''); return f.includes(nm) || f.includes(x[1]); });
+        return L.length ? L : null;
+    }
     async function act() {
         const A = ACT[APP], ta = document.querySelector('#xaic textarea'); if (!A || busy) return;
         const t = (ta.value || '').trim() || (msgs().filter(m => m.r === 'u').slice(-1)[0] || {}).t; if (!t) { ta.placeholder = 'Décrivez d’abord ce que l’IA doit créer…'; ta.focus(); return; } ta.value = '';
