@@ -5853,7 +5853,7 @@ XLIB.init('casto');
 // =====================================================================
 const XFIT = (() => {
     const L = 5, rows = () => ['top-bar', 'toolbar'].map(id => document.getElementById(id)).filter(Boolean);
-    const over = r => r.scrollWidth > r.clientWidth + 1 || [...r.children].some(c => c.scrollWidth > c.clientWidth + 1 && getComputedStyle(c).overflow !== 'visible');
+    const over = r => r.scrollWidth > r.clientWidth + 1 || [...r.children].some(c => { if (c.scrollWidth <= c.clientWidth + 1) return false; const o = getComputedStyle(c).overflowX; return o !== 'auto' && o !== 'scroll'; }); // un groupe qui déborde sans défiler fait chevaucher ses boutons
     let busy = false;
     function fit() {
         if (busy) return; busy = true;
@@ -10585,9 +10585,27 @@ var XZZB = window.XZZB || (() => {
             if (anchor) { anchor.before(d); anchor.before(g); } else { t.appendChild(d); t.appendChild(g); } }
         strays.forEach(b => g.appendChild(b));
     }
-    function run() { try { nouveau(); } catch (e) { } try { exemples(); } catch (e) { } try { envois(); } catch (e) { } try { rangeTools(); } catch (e) { } }
+    // ---------- espacement et alignement (contrôlé sur ordinateur 1440, tablette 1024, téléphone 390, thèmes clair et sombre) ----------
+    function css() {
+        if ($('xzz-css')) return; const st = document.createElement('style'); st.id = 'xzz-css';
+        st.textContent = // le resserrement par paliers reste celui de XFIT (corrigé : il voit maintenant les groupes qui débordent)
+            
+            '.xfit2 .btn-group,.xfit2 .tool-group,.xfit2 .view-group{width:auto!important}' + // largeur réservée aux libellés inutile quand ils sont masqués
+            '#top-bar .tabs-container{min-width:0}#xzz-tg:empty,#xzz-tg:empty+.divider{display:none}' +
+            '#toolbar button,#top-bar button{white-space:nowrap}' +
+            '@media(max-width:1180px){#toolbar>.tb-label{display:none}}' +
+            '.xzz-scroll{overflow-x:auto!important;overflow-y:hidden!important;scrollbar-width:thin;overscroll-behavior-x:contain}' +
+            (APP === 'melango' ? '@media(max-width:1100px){#h-learn{display:none!important}}@media(max-width:1200px){header{gap:3px!important}header>button,header>div>button,header .hb{padding-left:6px!important;padding-right:6px!important;font-size:11.5px!important}}' : '');
+        (document.head || document.documentElement).appendChild(st);
+    }
+    // 🏠 Accueil : même taille d'icône que les autres boutons de la barre quand celle-ci passe en mode compact
+    function homeIcon() {
+        const h = document.querySelector('#top-bar .xn-home .btn-icon'); if (!h) return; const o = [...document.querySelectorAll('#top-bar button:not(.xn-home) .btn-icon')].find(x => x.offsetParent); if (!o) return;
+        const f = parseFloat(getComputedStyle(o).fontSize); h.style.fontSize = f < 14 ? f + 'px' : '';
+    }
+    function run() { try { nouveau(); } catch (e) { } try { exemples(); } catch (e) { } try { envois(); } catch (e) { } try { rangeTools(); } catch (e) { } try { css(); homeIcon(); } catch (e) { } }
     function init() { let n = 0; const iv = setInterval(() => { run(); if (++n > 25) clearInterval(iv); }, 600); if (document.readyState !== 'loading') run(); else addEventListener('DOMContentLoaded', run); }
-    init();
+    init(); addEventListener('resize', () => { try { homeIcon(); } catch (e) { } });
     return { run, menu };
 })();
 
