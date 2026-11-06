@@ -14,6 +14,8 @@
   Cache-Control: public, max-age=3600
 /logos/*
   Cache-Control: public, max-age=3600
+/aide/*
+  Cache-Control: public, max-age=86400
 /data/*
   Cache-Control: public, max-age=300
 /encodo.html
