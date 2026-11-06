@@ -1,0 +1,27 @@
+[
+[
+"o = o || {}; const img = o.image, max = o.maxTokens || 8000; let res, data;",
+"o = o || {}; const imgs = (o.images && o.images.length ? o.images : (o.image ? [o.image] : [])).slice(0, 8), img = imgs[0], max = o.maxTokens || 8000; let res, data;",
+20
+],
+[
+"const content = []; if (img) content.push({ type: 'image', source: { type: 'base64', media_type: img.mediaType, data: img.base64 } }); content.push({ type: 'text', text: prompt });",
+"const content = []; imgs.forEach(im => content.push({ type: 'image', source: { type: 'base64', media_type: im.mediaType, data: im.base64 } })); content.push({ type: 'text', text: prompt });",
+20
+],
+[
+"const parts = []; if (img) parts.push({ inline_data: { mime_type: img.mediaType, data: img.base64 } }); parts.push({ text: prompt });",
+"const parts = []; imgs.forEach(im => parts.push({ inline_data: { mime_type: im.mediaType, data: im.base64 } })); parts.push({ text: prompt });",
+20
+],
+[
+"const content = img ? [{ type: 'text', text: prompt }, { type: 'image_url', image_url: { url: 'data:' + img.mediaType + ';base64,' + img.base64 } }] : prompt;",
+"const content = img ? [{ type: 'text', text: prompt }].concat(imgs.map(im => ({ type: 'image_url', image_url: { url: 'data:' + im.mediaType + ';base64,' + im.base64 } }))) : prompt;",
+20
+],
+[
+"if (o && o.image && !x.d.vision)",
+"if (o && (o.image || (o.images && o.images.length)) && !x.d.vision)",
+20
+]
+]
