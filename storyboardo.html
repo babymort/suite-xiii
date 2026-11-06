@@ -5047,7 +5047,7 @@ var XRED = (function () {
     // personnage ajouté : type et couleur par défaut quand on clique « Personnage » sans choisir
     const _ap = addPuppet; addPuppet = function (type) { return _ap(type || XSET.val('pupType') || 'homme'); };
     XSET.init({
-        app: 'storyboardo', title: 'STORYBOARDO', version: 'v4.13',
+        app: 'storyboardo', title: 'STORYBOARDO', version: 'v4.14',
         css: '.sb-props{max-height:calc(100vh - 370px)!important}#content{padding-bottom:90px}',
         theme: { get: () => prefs.theme === 'light' ? 'light' : 'dark', set: t => { if ((prefs.theme === 'light' ? 'light' : 'dark') !== t) toggleTheme(); } },
         hide: ['#toolbar button[onclick="toggleTheme()"]', '#toolbar button[onclick="openGuide()"]'],
@@ -12908,7 +12908,10 @@ var XPEEPS = window.XPEEPS || (() => {
     // pièce : repère de la pose → articulation `at`, rotation (repos − actuel)
     const tf = (at, phi, piv, sx) => 'translate(' + r1(at[0]) + ' ' + r1(at[1]) + ') rotate(' + phi.toFixed(2) + ') scale(' + r3((sx || 1) * K) + ' ' + r3(K) + ') translate(' + (-piv[0]) + ' ' + (-piv[1]) + ')';
     function handFor(el, s, J) {
-        const id = el[s === 'l' ? 'handL' : 'handR']; if (!id || J.lk[s] || !J.q[s + 's']) return null;
+        let id = el[s === 'l' ? 'handL' : 'handR'];
+        // main dessinée dans la poche : dès que le bras bouge, on lui donne une main détendue
+        if (!id && J.P.hid && J.P.hid.includes(s) && (Math.abs(nrm(J.p[s + 'UA'] - J.R0[s + 'UA'])) > 6 || Math.abs(nrm(J.p[s + 'FA'] - J.R0[s + 'FA'])) > 6)) id = 'detendue';
+        if (!id || J.lk[s] || !J.q[s + 's']) return null;
         const M = (D.M || []).find(x => x[0] === id); if (!M || !D.P[M[2]]) return null;
         return { id, S: D.P[M[2]], side: M[3], src: M[2] };
     }
@@ -12918,13 +12921,18 @@ var XPEEPS = window.XPEEPS || (() => {
         let defs = '<g id="' + u + 'b">' + lay(P.L, c.fill, c.ink) + '</g>';
         Object.keys(P.pc).forEach(n => { defs += '<clipPath id="' + u + n + '"><path clip-rule="evenodd" d="' + P.pc[n] + '"/></clipPath>'; });
         const use = n => '<g clip-path="url(#' + u + n + ')"><use href="#' + u + 'b"/></g>';
-        const part = (n, at, piv, phi) => P.pc[n] ? '<g transform="' + tf(at, phi, piv) + '">' + use(n) + '</g>' : '';
+        // parties reconstruites (cachées dans le dessin d'origine) : aplat + contour, sous TOUS les dessins, solidaires de leur pièce
+        let EXT = '', EXT_T = '';
+        const exoS = (E, tr) => (E && (E[0] || E[1])) ? '<g transform="' + tr + '">' + (E[0] ? '<path fill-rule="evenodd" fill="' + c.fill + '" d="' + E[0] + '"/>' : '') + (E[1] ? '<path fill-rule="evenodd" fill="' + c.ink + '" d="' + E[1] + '"/>' : '') + '</g>' : '';
+        const exo = (E, tr, top) => { if (top) EXT_T += exoS(E, tr); else EXT += exoS(E, tr); };
+        const part = (n, at, piv, phi) => { if (!P.pc[n]) return ''; const tr = tf(at, phi, piv); if (P.ex) exo(P.ex[n], tr); return '<g transform="' + tr + '">' + use(n) + '</g>'; };
         const T = { torso: '' }, A = a => angTo(q[a[0]], q[a[1]]);
         // torse (+ rustines dessous : haut des jambes et aplat sous les bras)
         const tT = tf(J.pelvis, -dT, q.p);
         let under = '';
-        if (P.pl) { defs += '<clipPath id="' + u + 'pl"><path clip-rule="evenodd" d="' + P.pl + '"/></clipPath>'; under += '<g transform="' + tT + '"><g clip-path="url(#' + u + 'pl)"><use href="#' + u + 'b"/></g></g>'; }
-        if (P.pa) under += '<g transform="' + tT + '"><path fill-rule="evenodd" fill="' + c.fill + '" d="' + P.pa + '"/></g>';
+        if (P.pl && !P.ex) { defs += '<clipPath id="' + u + 'pl"><path clip-rule="evenodd" d="' + P.pl + '"/></clipPath>'; under += '<g transform="' + tT + '"><g clip-path="url(#' + u + 'pl)"><use href="#' + u + 'b"/></g></g>'; }
+        if (P.pa && !P.ex) under += '<g transform="' + tT + '"><path fill-rule="evenodd" fill="' + c.fill + '" d="' + P.pa + '"/></g>';
+        if (P.ex) exo(P.ex.torso, tT, true);
         const torso = P.pc.torso ? '<g transform="' + tT + '">' + use('torso') + '</g>' : '<g transform="' + tT + '"><use href="#' + u + 'b"/></g>';
         const head = '<g transform="' + tf(J.neck, -(dT + p.head), D.hp, el.headFlip ? -1 : 1) + '">' + headInner(el, c) + '</g>';
         const arm = s => {
@@ -12934,12 +12942,14 @@ var XPEEPS = window.XPEEPS || (() => {
             if (h) {
                 const S = h.S, sq = S.j, ss = h.side, rH = angTo(sq[ss + 'w'], sq[ss + 'h']), bend = rH - angTo(sq[ss + 'e'], sq[ss + 'w']);
                 defs += '<g id="' + u + 'h' + s + '">' + lay(S.L, c.fill, c.ink) + '</g><clipPath id="' + u + 'hc' + s + '"><path clip-rule="evenodd" d="' + S.pc[ss + 'Hd'] + '"/></clipPath>';
-                o += '<g transform="' + tf(J[s + 'Hand'], rH - (J[s + '_fa'] + bend), sq[ss + 'w']) + '"><g clip-path="url(#' + u + 'hc' + s + ')"><use href="#' + u + 'h' + s + '"/></g></g>';
+                const trh = tf(J[s + 'Hand'], rH - (J[s + '_fa'] + bend), sq[ss + 'w']); if (S.ex) exo(S.ex[ss + 'Hd'], trh);
+                o += '<g transform="' + trh + '"><g clip-path="url(#' + u + 'hc' + s + ')"><use href="#' + u + 'h' + s + '"/></g></g>';
             } else o += part(s + 'Hd', J[s + 'Hand'], q[s + 'w'], A([s + 'w', s + 'h']) - (J[s + '_fa'] + A([s + 'w', s + 'h']) - A([s + 'e', s + 'w'])));
             return o;
         };
         const leg = s => (!q[s + 'p'] || J.lk.legs) ? '' : part(s + 'Th', J[s + 'Hip'], q[s + 'p'], A([s + 'p', s + 'k']) - J[s + '_th']) + part(s + 'Sh', J[s + 'Knee'], q[s + 'k'], A([s + 'k', s + 'a']) - J[s + '_sh']);
-        return '<defs>' + defs + '</defs>' + under + arm('l') + leg('l') + leg('r') + torso + head + arm('r');
+        const aL = arm('l'), lL = leg('l'), lR = leg('r'), aR = arm('r');
+        return '<defs>' + defs + '</defs>' + under + EXT + EXT_T + aL + lL + lR + torso + head + aR;
     }
     // ---------- personnage fixe (vignettes) : pose au repos, sans découpe ----------
     function still(o, w, h, pad) {
@@ -13029,7 +13039,7 @@ var XPEEPS = window.XPEEPS || (() => {
         const bw = 900, bh = 1330, s2 = Math.min((bw - 60) / (xs1 - xs0), (bh - 80) / (ys1 - ys0));
         o += box(610, 130, bw, 1420, '2. Pièces détachées (pantin)');
         let ex = '';
-        names.forEach(n => { const d = offs[n]; ex += '<g transform="translate(' + r1(d[0]) + ' ' + r1(d[1]) + ')">' + (n === 'torso' && !P.pc.torso ? '<use href="#' + u + 'b"/>' : '<g clip-path="url(#' + u + n + ')"><use href="#' + u + 'b"/></g>') + '</g>'; });
+        names.forEach(n => { const d = offs[n]; ex += '<g transform="translate(' + r1(d[0]) + ' ' + r1(d[1]) + ')">' + (P.ex && P.ex[n] ? (P.ex[n][0] ? '<path fill-rule="evenodd" fill="' + c.fill + '" d="' + P.ex[n][0] + '"/>' : '') + (P.ex[n][1] ? '<path fill-rule="evenodd" fill="' + c.ink + '" d="' + P.ex[n][1] + '"/>' : '') : '') + (n === 'torso' && !P.pc.torso ? '<use href="#' + u + 'b"/>' : '<g clip-path="url(#' + u + n + ')"><use href="#' + u + 'b"/></g>') + '</g>'; });
         ex += '<g transform="translate(' + (off[0] + hOff[0]) + ' ' + (off[1] + hOff[1]) + ')"><use href="#' + u + 'h"/></g>';
         // articulations : rond sur la pièce enfant + trait pointillé vers le parent
         const piv = (n, side) => { const k = PIV[n], pt = q[k] || q.p, d = offs[side === 'parent' ? PAR[n] : n]; return [pt[0] + d[0], pt[1] + d[1]]; };
@@ -13132,7 +13142,7 @@ var XPEEPS = window.XPEEPS || (() => {
         // un projet qui contient des Open Peeps charge les données tout de suite
         setTimeout(() => { try { if (P.panels.some(pn => pn.els.some(isP))) load().then(refresh).catch(() => { }); } catch (e) { } }, 0);
     }
-    return { load, ready, addTpl, addRandom, shuffle, props, restPose, sheet, sheetSvg, sheetPng, still, joints: el => D ? joints(el) : null, data: () => D };
+    return { load, ready, addTpl, addRandom, shuffle, props, restPose, sheet, sheetSvg, sheetPng, still, svg, joints: el => D ? joints(el) : null, data: () => D };
 })();
 
 
