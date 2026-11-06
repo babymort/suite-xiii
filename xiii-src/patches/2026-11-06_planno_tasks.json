@@ -1,0 +1,1 @@
+[["window.XPLANNO_AI = L => {", "window.XPLANNO_TASKS = () => (P && P.tasks || []).map(t => ({ name: t.name, start: t.start, end: t.end, phase: t.phase, done: !!t.done || t.status === 'done' }));\nwindow.XPLANNO_AI = L => {", 1]]
