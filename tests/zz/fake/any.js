@@ -1,0 +1,2 @@
+// objet « tout-terrain » : toute propriété est une fonction qui renvoie le même objet ; nombres = 100, texte = ''
+window.__any = function any(name) { const f = function () { return p; }; const p = new Proxy(f, { get(t, k) { if (k === Symbol.toPrimitive) return h => h === 'number' ? 100 : ''; if (k === 'then') return undefined; if (k === 'length') return 0; if (k === Symbol.iterator) return function* () { }; if (k === 'toString' || k === 'valueOf') return () => ''; if (k in t) return t[k]; return p; }, apply() { return p; }, construct() { return p; } }); return p; };

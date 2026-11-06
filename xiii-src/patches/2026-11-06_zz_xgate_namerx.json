@@ -1,0 +1,1 @@
+[["    const nameRx = a => new RegExp('\\\\b' + XLINKS.T[a][1].replace(/ /g, '\\\\s?').replace('Ô', '[OÔ]') + '\\\\b', 'i');", "    const nameRx = a => XLINKS.T[a] ? new RegExp('\\\\b' + XLINKS.T[a][1].replace(/ /g, '\\\\s?').replace('Ô', '[OÔ]') + '\\\\b', 'i') : /(?!)/; // outil sans fiche XLINKS : aucun bouton à chercher", 30]]

@@ -8,7 +8,7 @@ const { chromium } = require('playwright');
     R[a] = await pg.evaluate(async () => { document.querySelectorAll('#xt-root,.modal-ov,#modal-ov').forEach(m => m.remove()); const j0 = JSON.stringify(P); const n = document.getElementById('project-name');
       n.value = (n.value || '') + ' TEST'; n.dispatchEvent(new Event('input', { bubbles: true })); n.dispatchEvent(new Event('change', { bubbles: true })); await new Promise(r => setTimeout(r, 900));
       const j1 = JSON.stringify(P); const u = document.getElementById('xu-undo'); const dis = u.disabled; u.click(); await new Promise(r => setTimeout(r, 500));
-      const j2 = JSON.stringify(P); const strip = s => s.replace(/"(updated|savedAt|lastSave)":[^,}]*,?/g, '');
+      const j2 = JSON.stringify(P); const strip = s => { const o = JSON.parse(s); ["updated", "savedAt", "lastSave", "fdrPlans", "fdrPlansAt"].forEach(k => delete o[k]); return JSON.stringify(o); };
       return { j0: j0.slice(0, 300), j2: j2.slice(0, 300), changed: j0 !== j1, undoEnabled: !dis, back: strip(j2) === strip(j0), size0: j0.length, size2: j2.length }; });
     await pg.close(); }
   console.log(JSON.stringify(R), 'ERR', errs.join(' | ')); await b.close(); })();

@@ -30,6 +30,17 @@ var XZZB = window.XZZB || (() => {
         tick();
     }
     try { if (document.getElementById('top-bar') || document.getElementById('toolbar') || document.readyState === 'loading') shield(); } catch (e) { }
+    // ---------- stockage du navigateur plein : prévenir au lieu d'afficher « Enregistré » ----------
+    // (contrôle ZZ : DEVISO, STORYBOARDO… affichaient « Enregistré » alors que l'écriture avait échoué)
+    (function quota() {
+        const S = window.Storage && Storage.prototype; if (!S || S.__xzzq) return; S.__xzzq = 1; const set = S.setItem; let shown = 0;
+        const warn = () => { const now = Date.now(); const st = document.getElementById('save-state'); if (st) { st.textContent = '⚠️ Non enregistré : stockage plein'; st.style.color = '#ff8a65'; }
+            if (now - shown < 20000 || !document.body) return; shown = now; let b = document.getElementById('xzz-quota');
+            if (!b) { b = document.createElement('div'); b.id = 'xzz-quota'; b.setAttribute('role', 'alert'); b.style.cssText = 'position:fixed;left:50%;top:64px;transform:translateX(-50%);z-index:2147483002;max-width:min(560px,94vw);background:#3a1d14;color:#ffe0d6;border:1px solid #ff8a65;border-radius:10px;padding:10px 14px;font:13px/1.45 system-ui,sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.5)';
+                b.innerHTML = '<b>⚠️ Stockage du navigateur plein</b> : vos dernières modifications ne sont <b>pas enregistrées</b> ici. Exportez le projet (⬇️ fichier .json) pour ne rien perdre, puis libérez de la place (anciens projets, photos, ⚙️ › stockage). <button style="margin-left:6px">OK</button>';
+                b.querySelector('button').onclick = () => b.remove(); document.body.appendChild(b); } };
+        S.setItem = function (k, v) { try { return set.call(this, k, v); } catch (e) { if (e && (e.name === 'QuotaExceededError' || e.code === 22 || /quota/i.test(e.message || '')) && this === window.localStorage && !/^__/.test(k)) { try { warn(); setTimeout(warn, 400); } catch (x) { } } throw e; } };
+    })();
     // ---------- 🗒️ Nouveau ▾ ----------
     function nouveau() {
         if (done.nv) return; const z = $('xb-tool'); if (!z) return;
