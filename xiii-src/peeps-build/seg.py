@@ -109,6 +109,20 @@ def run(name, verbose=False):
                 Pq = np.stack([xx[m], yy[m]], 1).astype(float)
                 Dl = np.stack([segd(Pq, info[names[k]]['a'], info[names[k]]['e']) for k in legs_], 1)
                 lab[yy[m], xx[m]] = np.array(legs_)[Dl.argmin(1)]
+    # îlots : un morceau isolé d'une étiquette (éclat d'encre, doigt oublié) rejoint l'étiquette voisine majoritaire
+    for it in range(2):
+        for k in range(len(names)):
+            m = ((lab == k) & (sil > 0)).astype(np.uint8)
+            if not m.any(): continue
+            nc2, cc, stt, _ = cv2.connectedComponentsWithStats(m, connectivity=8)
+            if nc2 <= 2: continue
+            big = stt[1:, cv2.CC_STAT_AREA].max()
+            for c in range(1, nc2):
+                a = stt[c, cv2.CC_STAT_AREA]
+                if a >= max(400, big * 0.08): continue
+                cm = cc == c; ring = cv2.dilate(cm.astype(np.uint8), np.ones((7, 7), np.uint8)).astype(bool) & ~cm & (sil > 0)
+                nb = lab[ring]; nb = nb[nb != k]
+                if len(nb): lab[cm] = np.bincount(nb, minlength=len(names)).argmax()
     # pixels hors silhouette : étiquette du pixel de silhouette le plus proche
     _, (iy, ix) = ndi.distance_transform_edt(1 - sil, return_indices=True)
     full = lab[iy, ix]

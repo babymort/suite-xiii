@@ -5,7 +5,7 @@ const OUT = process.argv[2];
   await pg.addInitScript(() => { try { if (!localStorage.getItem('xiii.tips.off')) { localStorage.setItem('xiii.tips.off', 'true'); localStorage.setItem('xiii.tour2.storyboardo.hide', '1'); } } catch (e) { } });
   const errs = []; pg.on('pageerror', e => errs.push('PAGEERR ' + e.message));
   await pg.goto('http://localhost:8765/storyboardo.html?desktop=1', { waitUntil: 'load' }); await pg.waitForTimeout(1800);
-  await pg.evaluate(async () => { try { closeModal(); } catch (e) { } await XPEEPS.load(); XPEEPS.addTpl(25); const el = PN().els[PN().els.length - 1]; el.handR = 'pointe'; el.handL = 'salut'; SEL = el.id; renderStage(); renderProps(); });
+  await pg.evaluate(async () => { try { closeModal(); } catch (e) { } await XPEEPS.load(); XPEEPS.addTpl(25); const el = PN().els[PN().els.length - 1]; el.handR = 'pointe'; el.handL = 'salut'; SEL = el.id; XEXPERT.setAll(true); renderStage(); renderProps(); });
   await pg.waitForTimeout(300);
   // glisser la poignée du coude avant
   const h = await pg.$('#ovl [data-h="j:rElbow"]'); const bb = await h.boundingBox();

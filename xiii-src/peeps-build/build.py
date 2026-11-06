@@ -1,5 +1,5 @@
 # Construit data/openpeeps.json pour STORYBOARDO : poses découpées, têtes, visages, barbes, accessoires, personnages prêts
-import svgp, seg, comp, tpl, numpy as np, cv2, json, glob, os, math, re
+import svgp, seg, comp, tpl, complete, numpy as np, cv2, json, glob, os, math, re
 from ann import J as ANN
 A = seg.A; S = seg.S
 HP = (225, 480)  # pivot de la tête (repère de la tête) : haut du cou
@@ -54,7 +54,7 @@ def polys_of(mask, ox, oy):
     cs, _ = cv2.findContours(mask.astype(np.uint8), cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
     out = []
     for c in cs:
-        if cv2.contourArea(c) < 12: continue
+        if cv2.contourArea(c) < 40: continue
         c = cv2.approxPolyDP(c, 0.9, True)
         if len(c) < 3: continue
         out.append([(R(p[0][0] / S + ox), R(p[0][1] / S + oy)) for p in c])
@@ -71,6 +71,7 @@ def pose_label(n):
     return lab + (' ' + k if k else '')
 def build_pose(name):
     r = seg.run(name); an = r['an']; cat = r['cat']; ox, oy = r['frame'][0], r['frame'][1]
+    ext, cinf = complete.complete(r)   # affine aussi les étiquettes (r['lab'] modifié sur place)
     lab, sil = r['lab'], r['sil']; names = r['names']; info = r['info']
     layers = r['layers']; bb = bbox_layers(layers); ground = bb[3]
     hp = (comp.OFF[cat][0] + HP[0], comp.OFF[cat][1] + HP[1])  # cou (attache de la tête), repère de la pose
@@ -79,36 +80,31 @@ def build_pose(name):
     if 'rp' in j: j['p'] = [R((j['rp'][0] + j['lp'][0]) / 2), R((j['rp'][1] + j['lp'][1]) / 2)]
     else: j['p'] = [j['n'][0], R(min(ground - 300, hp[1] + 900))]
     toP = lambda p: ((p[0] - ox) * S, (p[1] - oy) * S)
-    pcs = {}; H, W = lab.shape
+    pcs = {}; exs = {}; H, W = lab.shape
     idx = {n: i for i, n in enumerate(names)}
+    hw = cinf['hw']
+    JN = {'UA': ('s', 'e'), 'FA': ('e', 'w'), 'Th': ('p', 'k'), 'Sh': ('k', None), 'Hd': ('w', None)}
     for i, n in enumerate(names):
-        m = (lab == i).astype(np.uint8)
-        par = seg.PARENT.get(n)
-        if n in ('rFA', 'lFA', 'rSh', 'lSh', 'rHd', 'lHd') and n in info:
-            jn = {'rFA': 're', 'lFA': 'le', 'rSh': 'rk', 'lSh': 'lk', 'rHd': 'rw', 'lHd': 'lw'}[n]
-            rad = info[n]['rad'] * (0.95 if n.endswith('Hd') else 0.9)
-            allow = (lab == i) | ((lab == idx[par]) if par in idx else False)
-            m = m | (disc(m.shape, toP(an[jn]), rad).astype(bool) & allow).astype(np.uint8)
-        m = cv2.dilate(m, np.ones((5, 5), np.uint8))
+        m = (lab == i).astype(bool)
+        if n != 'torso' and n in info and n in hw:
+            sd, t = n[0], n[1:]; q = lambda k: toP(an[sd + k])
+            nb = lambda nm: (lab == idx[nm]) if nm in idx else np.zeros(m.shape, bool)
+            rr = hw[n] * (0.95 if t != 'Hd' else 1.0)
+            if t == 'UA': m = m | (disc(m.shape, q('e'), rr).astype(bool) & nb(sd + 'FA'))
+            elif t == 'FA': m = m | (disc(m.shape, q('e'), rr).astype(bool) & nb(sd + 'UA')) | (disc(m.shape, q('w'), rr).astype(bool) & nb(sd + 'Hd'))
+            elif t == 'Hd': m = m | (disc(m.shape, q('w'), rr).astype(bool) & nb(sd + 'FA'))
+            elif t == 'Th': m = m | (disc(m.shape, q('k'), rr).astype(bool) & nb(sd + 'Sh'))
+            elif t == 'Sh': m = m | (disc(m.shape, q('k'), rr).astype(bool) & nb(sd + 'Th'))
+        m = cv2.dilate(m.astype(np.uint8), np.ones((5, 5), np.uint8))
         pcs[n] = enc_poly(polys_of(m, ox, oy))
-    # rustines sous le torse (repère du torse) : sous les bras (aplat) et haut des jambes (dessin)
-    raw = np.zeros_like(lab); ys_, xs_ = np.nonzero(sil); raw[:] = -1
+        f, k = ext[n]
+        if f.any() or k.any(): exs[n] = [enc_poly(polys_of(cv2.dilate(f.astype(np.uint8), np.ones((3, 3), np.uint8)), ox, oy)), enc_poly(polys_of(cv2.dilate(k.astype(np.uint8), np.ones((3, 3), np.uint8)), ox, oy))]
     patchA = patchL = ''
-    armI = [idx[n] for n in names if n[1:] in ('UA', 'FA', 'Hd')]; legI = [idx[n] for n in names if n[1:] in ('Th', 'Sh')]
-    if armI and 'rs' in an and 'rp' in an:
-        q = np.array([toP(an['rs']), toP(an['ls']), toP(an['lp']), toP(an['rp'])], np.int32)
-        quad = np.zeros(lab.shape, np.uint8); cv2.fillPoly(quad, [q], 1); quad = cv2.dilate(quad, np.ones((int(70 * S), int(70 * S)), np.uint8))
-        pm = (sil > 0) & np.isin(lab, armI) & (quad > 0)
-        patchA = enc_poly(polys_of(cv2.dilate(pm.astype(np.uint8), np.ones((3, 3), np.uint8)), ox, oy))
-    if legI:
-        hy = max(an['rp'][1], an['lp'][1]); band = np.zeros(lab.shape, bool); band[: int((hy + 70 - oy) * S), :] = True
-        pm = (sil > 0) & np.isin(lab, legI) & band
-        patchL = enc_poly(polys_of(cv2.dilate(pm.astype(np.uint8), np.ones((5, 5), np.uint8)), ox, oy))
     ce = {}
     for i, n in enumerate(names):
         yy, xx = np.nonzero((lab == i) & (sil > 0))
         if len(xx): ce[n] = [R(xx.mean() / S + ox), R(yy.mean() / S + oy)]
-    out = dict(c=cat, n=pose_label(name), L=layers_out(layers), j=j, lk=an.get('lock', []), hid=an.get('hidden', []), pc=pcs, pa=patchA, pl=patchL, g=ground, bb=bb, ce=ce)
+    out = dict(c=cat, n=pose_label(name), L=layers_out(layers), j=j, lk=an.get('lock', []), hid=an.get('hidden', []), pc=pcs, ex=exs, pa=patchA, pl=patchL, g=ground, bb=bb, ce=ce)
     return out
 def build_bust(f):
     r = svgp.load(f); L = r['layers']; bb = bbox_layers(L); hp = (comp.OFF['bust'][0] + HP[0], comp.OFF['bust'][1] + HP[1])
