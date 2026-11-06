@@ -5077,7 +5077,7 @@ var XRED = (function () {
     // personnage ajouté : type et couleur par défaut quand on clique « Personnage » sans choisir
     const _ap = addPuppet; addPuppet = function (type) { return _ap(type || XSET.val('pupType') || 'homme'); };
     XSET.init({
-        app: 'storyboardo', title: 'STORYBOARDO', version: 'v4.17',
+        app: 'storyboardo', title: 'STORYBOARDO', version: 'v4.18',
         css: '.sb-props{max-height:calc(100vh - 370px)!important}#content{padding-bottom:90px}',
         theme: { get: () => prefs.theme === 'light' ? 'light' : 'dark', set: t => { if ((prefs.theme === 'light' ? 'light' : 'dark') !== t) toggleTheme(); } },
         hide: ['#toolbar button[onclick="toggleTheme()"]', '#toolbar button[onclick="openGuide()"]'],
@@ -6752,7 +6752,7 @@ const XDELEG = (() => {
             const inbox = J(K_IN, null);
             if (inbox && inbox.app === APP) { W(K_IN, null); if (inbox.t === 'i') startMember(inbox); else if (inbox.t === 'r') receive(inbox); }
         };
-        const run = () => setTimeout(go, 900);
+        const run = () => (typeof XBOOT !== 'undefined' ? XBOOT.ready(go, 900) : setTimeout(go, 900)); // boutons placés avant l'affichage
         if (document.readyState === 'complete') run(); else window.addEventListener('load', run);
     }
     return { init, openInvite, sendBack, openNotes, mergeNotes, KEYS, NAMES, grab, put, notes: () => notes(), _t: { diff, changes, merged } };
@@ -10344,6 +10344,7 @@ const XGATE = (() => {
     }
     function init(app) {
         APP = app; if (!XLINKS.T[app]) return; if (!XLINKS.peers(app).length) return; if (!$('xgt-css')) css();
+        if (typeof XBOOT !== 'undefined') XBOOT.ready(() => { if ($('xb-file') || $('top-bar')) place(); }, 1850); // placé avec la barre, avant l'affichage
         let n = 0; const iv = setInterval(() => { n++; if (($('xb-file') || n > 8) && place()) clearInterval(iv); if (n > 30) clearInterval(iv); }, 600);
     }
     return { init, open, findBtn, go };
@@ -13513,7 +13514,7 @@ var XAIC = window.XAIC || (() => {
         pr.querySelector('[data-no]').onclick = () => pr.remove();
         pr.querySelector('[data-ok]').onclick = () => { const sel = items.filter((x, i) => pr.querySelector('[data-k="' + i + '"]').checked); let m; try { m = sel.length ? A.apply(sel) : 'Rien de créé'; } catch (e) { m = '⚠️ ' + e.message; } pr.remove(); const L3 = msgs(); L3.push({ r: 'a', t: '✅ ' + m + '.', ts: Date.now() }); save(L3); draw(); };
     }
-    setTimeout(mount, 300); addEventListener('load', () => setTimeout(mount, 300)); addEventListener('storage', e => { if (e.key && /^xiii\.ai/.test(e.key)) mount(); }); setInterval(mount, 5000);
+    if (typeof XBOOT !== 'undefined') XBOOT.ready(mount, 1950); setTimeout(mount, 300); addEventListener('load', () => setTimeout(mount, 300)); addEventListener('storage', e => { if (e.key && /^xiii\.ai/.test(e.key)) mount(); }); setInterval(mount, 5000);
     return { open, toggle, mount };
 })();
 
@@ -13829,6 +13830,26 @@ var XZZB = window.XZZB || (() => {
     const $ = id => document.getElementById(id), ico = b => ((b.querySelector('.btn-icon') || {}).textContent || b.textContent || '').trim();
     const tip = b => (b.title || b.textContent || '').replace(/\s+/g, ' ').trim(), vis = b => b && b.style.display !== 'none' && !b.hidden && b.offsetParent !== null;
     const done = {}, APP = 'storyboardo';
+    // ---------- barres complètes dès l'ouverture ----------
+    // les modules communs se placent dans les barres pendant ~1 à 2 s : le contenu des barres reste invisible (place réservée,
+    // fond visible) jusqu'à ce qu'il ne bouge plus, puis apparaît d'un bloc — 2,5 s au plus après l'affichage de l'outil
+    const H = document.documentElement;
+    function shield() {
+        if (/[?&](embed|out|view|share|pub)=/.test(location.search) || H.classList.contains('xzzb1')) return;
+        H.classList.add('xzzb0'); const st = document.createElement('style'); st.id = 'xzzb-css';
+        st.textContent = 'html.xzzb0 #top-bar>*:not(#xb-brand):not(.xn-homeg),html.xzzb0 #toolbar>*{opacity:0!important;pointer-events:none!important}html.xzzb1 #top-bar>*,html.xzzb1 #toolbar>*{transition:opacity .18s ease-out}';
+        (document.head || H).appendChild(st);
+        const t0 = performance.now(); let shownAt = 0, last = '', stable = 0;
+        const sig = () => { let s = ''; document.querySelectorAll('#top-bar button,#top-bar select,#top-bar input,#toolbar button,#toolbar select,#toolbar input').forEach(e => { const r = e.getBoundingClientRect(); if (r.width) s += (e.id || e.title.slice(0, 8)) + Math.round(r.left) + ',' + Math.round(r.top) + ';'; }); return s; };
+        const free = () => { H.classList.remove('xzzb0'); H.classList.add('xzzb1'); };
+        const tick = () => { const now = performance.now();
+            if (!shownAt && !H.classList.contains('xb0')) shownAt = now;
+            if (now - t0 > 6000 || (shownAt && now - shownAt > 2500)) return free();
+            if (shownAt) { const s = sig(); if (s === last) { if (!stable) stable = now; if (now - stable > 300) return free(); } else { last = s; stable = 0; } }
+            setTimeout(tick, 50); };
+        tick();
+    }
+    try { if (document.getElementById('top-bar') || document.getElementById('toolbar') || document.readyState === 'loading') shield(); } catch (e) { }
     // ---------- 🗒️ Nouveau ▾ ----------
     function nouveau() {
         if (done.nv) return; const z = $('xb-tool'); if (!z) return;
@@ -13896,7 +13917,7 @@ var XZZB = window.XZZB || (() => {
         const f = parseFloat(getComputedStyle(o).fontSize); h.style.fontSize = f < 14 ? f + 'px' : '';
     }
     function run() { try { nouveau(); } catch (e) { } try { exemples(); } catch (e) { } try { envois(); } catch (e) { } try { rangeTools(); } catch (e) { } try { css(); homeIcon(); } catch (e) { } }
-    function init() { let n = 0; const iv = setInterval(() => { run(); if (++n > 25) clearInterval(iv); }, 600); if (document.readyState !== 'loading') run(); else addEventListener('DOMContentLoaded', run); }
+    function init() { if (typeof XBOOT !== 'undefined') XBOOT.ready(run, 1900); let n = 0; const iv = setInterval(() => { run(); if (++n > 25) clearInterval(iv); }, 300); if (document.readyState !== 'loading') run(); else addEventListener('DOMContentLoaded', run); }
     init(); addEventListener('resize', () => { try { homeIcon(); } catch (e) { } });
     return { run, menu };
 })();
