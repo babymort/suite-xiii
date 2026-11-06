@@ -2406,7 +2406,7 @@ var XRED = (function () {
     if (typeof XSET === 'undefined' || typeof prefs === 'undefined' || typeof FX === 'undefined') return;
     function apply(S) { try { render(); } catch (e) { } }
     XSET.init({
-        app: 'lumo', title: 'LUMO', version: 'v1.11',
+        app: 'lumo', title: 'LUMO', version: 'v1.12',
         sections: [{ id: 'aff', icon: '💡', title: 'Plan de feu', open: true, desc: 'Alimentation, calibre des circuits et tension se règlent dans ⚡ Puissance. Puissances et canaux du catalogue : valeurs indicatives.', fields: [{ k: 'view', label: 'Vue à l\'ouverture', type: 'select', def: 'fx', options: [['fx', 'Projecteurs'], ['dmx', 'Univers DMX'], ['pow', 'Puissance']] }] }],
         apply
     });
