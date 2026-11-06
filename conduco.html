@@ -13403,14 +13403,14 @@ var XAIC = window.XAIC || (() => {
         const b = document.createElement('button'); b.id = 'xaic-btn'; b.textContent = '✨ IA'; b.title = 'Assistant IA (' + (XAI.label ? XAI.label() : '') + ')'; b.onclick = toggle;
         // à droite du premier bouton ＋ de la barre du haut, sinon bouton flottant
         const plus = [...document.querySelectorAll('.top-bar button, #xb-tool button, header button')].find(x => /^\s*[＋+➕]/.test(x.textContent) || /➕/.test(x.innerHTML.slice(0, 200)));
-        if (plus) plus.insertAdjacentElement('afterend', b); else { b.classList.add('fl'); document.body.appendChild(b); place(); addEventListener('resize', place); setTimeout(place, 1500); }
+        if (plus) plus.insertAdjacentElement('afterend', b); else { b.classList.add('fl'); document.body.appendChild(b); place(); addEventListener('resize', place); setInterval(place, 1500); }
     }
     // bouton flottant : entre ⚙️ (en bas) et 🐞 Bug & Suggestion (au-dessus), sans recouvrement
     function place() {
         const b = document.getElementById('xaic-btn'); if (!b || !b.classList.contains('fl')) return;
         const g = document.getElementById('xs-gear'), bug = document.getElementById('xbug-btn'), H = innerHeight;
         if (g) { const r = g.getBoundingClientRect(); b.style.right = Math.max(8, innerWidth - r.right) + 'px'; b.style.bottom = (H - r.top + 10) + 'px'; }
-        if (bug) { const rb = b.getBoundingClientRect(), r2 = bug.getBoundingClientRect(); if (r2.bottom > rb.top - 8) bug.style.setProperty('bottom', (H - rb.top + 10) + 'px', 'important'); }
+        if (bug) { bug.style.removeProperty('bottom'); const rb = b.getBoundingClientRect(), g2 = g && g.getBoundingClientRect(); bug.style.bottom = (H - rb.top + 10) + 'px'; if (g2) bug.style.right = Math.max(8, innerWidth - g2.right) + 'px'; }
     }
     function toggle() { const o = document.getElementById('xaic'); if (o) { o.remove(); return; } open(); }
     function open() {

@@ -751,7 +751,7 @@ document.addEventListener('keydown', e => {
         if (!g || getComputedStyle(g).display === 'none') { if (b) b.style.display = 'none'; return; }
         if (!b) { b = document.createElement('a'); b.id = 'xbug-btn'; b.href = MAIL; b.title = 'Bug & Suggestion : signaler un problème ou proposer une idée (ouvre votre messagerie)'; b.innerHTML = '<span>🐞</span><b>Bug &amp; Suggestion</b>'; document.body.appendChild(b);
             const st = document.createElement('style'); st.textContent = '#xbug-btn{position:fixed;z-index:9970;display:flex;align-items:center;gap:6px;height:34px;padding:0 12px;border-radius:99px;background:var(--bg-panel,#2d2d2d);border:1px solid rgba(240,179,120,.55);color:var(--text-main,#fff);text-decoration:none;font:600 12.5px "Segoe UI",sans-serif;box-shadow:0 4px 14px rgba(0,0,0,.35);white-space:nowrap}#xbug-btn:hover{border-color:rgb(240,179,120);background:rgba(240,179,120,.15)}#xbug-btn span{font-size:15px}@media(max-width:600px){#xbug-btn b{display:none}#xbug-btn{padding:0 9px}}@media print{#xbug-btn{display:none!important}}'; document.head.appendChild(st); }
-        const r = g.getBoundingClientRect(); b.style.display = ''; b.style.right = Math.max(8, innerWidth - r.right) + 'px'; b.style.bottom = (innerHeight - r.top + 10) + 'px';
+        const ia = document.getElementById('xaic-btn'), gr = g.getBoundingClientRect(), r = ia && ia.classList.contains('fl') && ia.offsetParent ? ia.getBoundingClientRect() : gr; b.style.display = ''; b.style.right = Math.max(8, innerWidth - gr.right) + 'px'; b.style.bottom = (innerHeight - r.top + 10) + 'px';
     }
     const go = () => { place(); setInterval(place, 1500); addEventListener('resize', place); };
     if (document.readyState === 'complete') setTimeout(go, 800); else addEventListener('load', () => setTimeout(go, 800));
@@ -10010,14 +10010,14 @@ var XAIC = window.XAIC || (() => {
         const b = document.createElement('button'); b.id = 'xaic-btn'; b.textContent = '✨ IA'; b.title = 'Assistant IA (' + (XAI.label ? XAI.label() : '') + ')'; b.onclick = toggle;
         // à droite du premier bouton ＋ de la barre du haut, sinon bouton flottant
         const plus = [...document.querySelectorAll('.top-bar button, #xb-tool button, header button')].find(x => /^\s*[＋+➕]/.test(x.textContent) || /➕/.test(x.innerHTML.slice(0, 200)));
-        if (plus) plus.insertAdjacentElement('afterend', b); else { b.classList.add('fl'); document.body.appendChild(b); place(); addEventListener('resize', place); setTimeout(place, 1500); }
+        if (plus) plus.insertAdjacentElement('afterend', b); else { b.classList.add('fl'); document.body.appendChild(b); place(); addEventListener('resize', place); setInterval(place, 1500); }
     }
     // bouton flottant : entre ⚙️ (en bas) et 🐞 Bug & Suggestion (au-dessus), sans recouvrement
     function place() {
         const b = document.getElementById('xaic-btn'); if (!b || !b.classList.contains('fl')) return;
         const g = document.getElementById('xs-gear'), bug = document.getElementById('xbug-btn'), H = innerHeight;
         if (g) { const r = g.getBoundingClientRect(); b.style.right = Math.max(8, innerWidth - r.right) + 'px'; b.style.bottom = (H - r.top + 10) + 'px'; }
-        if (bug) { const rb = b.getBoundingClientRect(), r2 = bug.getBoundingClientRect(); if (r2.bottom > rb.top - 8) bug.style.setProperty('bottom', (H - rb.top + 10) + 'px', 'important'); }
+        if (bug) { bug.style.removeProperty('bottom'); const rb = b.getBoundingClientRect(), g2 = g && g.getBoundingClientRect(); bug.style.bottom = (H - rb.top + 10) + 'px'; if (g2) bug.style.right = Math.max(8, innerWidth - g2.right) + 'px'; }
     }
     function toggle() { const o = document.getElementById('xaic'); if (o) { o.remove(); return; } open(); }
     function open() {

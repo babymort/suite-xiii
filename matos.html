@@ -2525,14 +2525,14 @@ const PM = (() => {
         const p = proj(), L = cur().items, n = L.filter(i => i.on).length;
         return '<div class="mt-bar" style="flex-wrap:wrap"><b>🎬 ' + (p ? esc(p.title || 'Projet sans titre') + (p.debut ? ' <small class="mt-dim">' + frD(p.debut) + (p.fin ? ' → ' + frD(p.fin) : '') + '</small>' : '') : '<span class="mt-dim">Aucune fiche projet active — la liste est rangée dans « sans projet »</span>') + '</b><span style="flex:1"></span>' +
             '<span class="btn-group"><button data-pa="cat">🗃️ Catalogue</button><button data-pa="parc">📦 Matos perso</button><button data-pa="imp">📥 Autres outils</button><button data-pa="man">✏️ À la main</button><button data-pa="kit" title="Kits réutilisables : kit interview, multicam 3 caméras… ou vos propres kits">🧰 Kits</button></span>' +
-            '<span class="btn-group"><button data-pa="loc">🔎 Location</button><select data-pa-to title="Envoyer la liste cochée vers un outil"><option value="">↗ Envoyer vers…</option><option value="plano">📐 PLANO</option><option value="syno">🔀 SYNO</option><option value="lumo">💡 LUMO</option><option value="sono">🎚️ SONO</option><option value="packingo">🧳 PACKINGO</option><option value="deviso">💶 DEVISO</option></select><button data-pa="ds">📚 DOSSIER</button><button data-pa="xl" class="btn-active">📊 Demande de prêt</button><button data-pa="hist" title="Historique des demandes de prêt : revoir, dupliquer dans ce projet">🕘 Historique</button></span></div>' +
+            '<span class="btn-group"><button data-pa="loc">🔎 Location</button><select data-pa-to title="Envoyer la liste cochée vers un outil"><option value="">↗ Envoyer vers…</option><option value="plano">📐 PLANO</option><option value="syno">🔀 SYNO</option><option value="lumo">💡 LUMO</option><option value="sono">🎚️ SONO</option><option value="packingo">🧳 PACKINGO</option><option value="deviso">💶 DEVISO</option></select><button data-pa="ds">📚 DOSSIER</button><button data-pa="ata" title="Tournage à l’étranger : liste générale du carnet ATA (Excel, PDF)">🌍 Carnet ATA</button><button data-pa="xl" class="btn-active">📊 Demande de prêt</button><button data-pa="hist" title="Historique des demandes de prêt : revoir, dupliquer dans ce projet">🕘 Historique</button></span></div>' +
             (L.length ? avBanner(p, L) + GRP.filter(g => L.some(i => i.grp === g)).map(g => '<h3 class="pm-h">' + GL[g] + ' <small class="mt-dim">' + L.filter(i => i.grp === g && i.on).length + ' / ' + L.filter(i => i.grp === g).length + '</small></h3><table class="mt-t pm-t"><tr><th style="width:34px"></th><th>Équipement</th><th style="width:80px">Qté</th><th style="width:170px">Catégorie</th><th class="hm">Source</th><th style="width:40px"></th></tr>' +
                 L.filter(i => i.grp === g).map(i => '<tr data-pi="' + i.id + '"' + (i.on ? '' : ' style="opacity:.45"') + '><td><input type="checkbox" data-k="on"' + (i.on ? ' checked' : '') + ' title="Inclure à l\'export"></td><td><input data-k="name" value="' + esc(i.name) + '" style="width:100%">' + avChip(i, p) + '</td><td><input data-k="qty" type="number" min="1" value="' + i.qty + '" style="width:64px"></td><td><select data-k="grp">' + GRP.map(x => '<option value="' + x + '"' + (x === i.grp ? ' selected' : '') + '>' + GL[x] + '</option>').join('') + '</select></td><td class="hm mt-dim">' + esc(i.src || '') + '</td><td><button data-k="del" title="Retirer">✕</button></td></tr>').join('') + '</table>').join('') +
                 '<p class="mt-dim" style="margin-top:10px">' + n + ' ligne(s) cochée(s) sur ' + L.length + ' — seules les lignes cochées partent à l\'export.</p>'
                 : '<div style="max-width:560px;margin:50px auto;text-align:center;color:var(--text-dim)"><div style="font-size:48px">🎬</div><h2>Matériel du projet</h2><p>Constituez la liste du matériel du projet : depuis le 🗃️ catalogue, votre 📦 matos perso, les listes envoyées par SYNO, PLANO, LUMO, SONO…, un 🧰 kit tout prêt (interview, multicam 3 caméras…) ou à la main. Exportez-la ensuite en demande de prêt Excel, vers PACKINGO, DEVISO ou DOSSIER.</p></div>');
     }
     function bind(c) {
-        c.querySelectorAll('[data-pa]').forEach(b => b.onclick = () => ({ cat: fromCat, parc: fromParc, imp: fromTools, man: manual, loc: rental, pk: () => send('packingo'), dv: () => send('deviso'), ds: toDossier, xl: exportDlg, book, kit: kits, hist: history })[b.dataset.pa]());
+        c.querySelectorAll('[data-pa]').forEach(b => b.onclick = () => ({ cat: fromCat, parc: fromParc, imp: fromTools, man: manual, loc: rental, pk: () => send('packingo'), dv: () => send('deviso'), ds: toDossier, xl: exportDlg, book, kit: kits, hist: history, ata: () => { if (typeof XATA !== 'undefined') XATA.open({ items: cur().items.filter(i => i.on), proj: proj(), unitsFor }); } })[b.dataset.pa]());
         const st = c.querySelector('[data-pa-to]'); if (st) st.onchange = () => { const v = st.value; st.value = ''; if (v) sendTo(v); };
         c.querySelectorAll('tr[data-pi]').forEach(tr => { const i = cur().items.find(x => x.id === tr.dataset.pi); if (!i) return;
             tr.querySelectorAll('[data-k]').forEach(el => { const k = el.dataset.k;
@@ -3881,7 +3881,7 @@ var XRED = (function () {
 (function () {
     if (typeof XSET === 'undefined' || typeof STATES === 'undefined') return;
     XSET.init({
-        app: 'matos', title: 'MATOS', version: 'v1.16',
+        app: 'matos', title: 'MATOS', version: 'v1.17',
         theme: { get: () => prefs.theme, set: t => { prefs.theme = t; applyTheme(); savePrefs(); } },
         help: [{ icon: '📦', label: 'Comment ça marche ?', sub: 'Parc, réservations, conflits, sorties / retours, étiquettes QR', run: () => modal('<h3>📦 MATOS XIII<span class="close-x" onclick="closeModal()">✕</span></h3><p><b>1. Parc</b> : ajoutez vos équipements depuis le 🗃️ catalogue commun (ou à la main) avec leurs numéros de série. Chaque unité reçoit un code MAT-0001 et une 🏷️ étiquette QR à imprimer.</p><p><b>2. Réservations</b> : projet, dates, option ou ferme. MATOS signale les conflits : unité déjà réservée, en panne, en révision. Envoyez la liste vers 🧳 PACKINGO ou 💶 DEVISO.</p><p><b>3. Planning</b> : occupation de chaque unité sur 5 semaines.</p><p><b>4. Sorties / retours</b> : scannez le QR (caméra du téléphone) ou le code (douchette) : une unité au dépôt sort, une unité sortie revient, avec son état.</p><p>Raccourcis : 1 à 4 pour les vues, Ctrl+S.</p><div class="mb-actions"><button onclick="closeModal()">Compris</button></div>') }, { icon: '📐', label: 'Charger l\'exemple', run: loadExample }],
         sections: [{ id: 'mt', icon: '📦', title: 'Parc', open: true, fields: [{ k: 'view', label: 'Vue à l\'ouverture', type: 'select', def: 'parc', options: [['parc', 'Parc'], ['resa', 'Réservations'], ['plan', 'Planning'], ['scan', 'Sorties / retours']] }, { k: 'loc', label: 'Dépôt par défaut', type: 'text', def: '' }] }],
@@ -11767,14 +11767,14 @@ var XAIC = window.XAIC || (() => {
         const b = document.createElement('button'); b.id = 'xaic-btn'; b.textContent = '✨ IA'; b.title = 'Assistant IA (' + (XAI.label ? XAI.label() : '') + ')'; b.onclick = toggle;
         // à droite du premier bouton ＋ de la barre du haut, sinon bouton flottant
         const plus = [...document.querySelectorAll('.top-bar button, #xb-tool button, header button')].find(x => /^\s*[＋+➕]/.test(x.textContent) || /➕/.test(x.innerHTML.slice(0, 200)));
-        if (plus) plus.insertAdjacentElement('afterend', b); else { b.classList.add('fl'); document.body.appendChild(b); place(); addEventListener('resize', place); setTimeout(place, 1500); }
+        if (plus) plus.insertAdjacentElement('afterend', b); else { b.classList.add('fl'); document.body.appendChild(b); place(); addEventListener('resize', place); setInterval(place, 1500); }
     }
     // bouton flottant : entre ⚙️ (en bas) et 🐞 Bug & Suggestion (au-dessus), sans recouvrement
     function place() {
         const b = document.getElementById('xaic-btn'); if (!b || !b.classList.contains('fl')) return;
         const g = document.getElementById('xs-gear'), bug = document.getElementById('xbug-btn'), H = innerHeight;
         if (g) { const r = g.getBoundingClientRect(); b.style.right = Math.max(8, innerWidth - r.right) + 'px'; b.style.bottom = (H - r.top + 10) + 'px'; }
-        if (bug) { const rb = b.getBoundingClientRect(), r2 = bug.getBoundingClientRect(); if (r2.bottom > rb.top - 8) bug.style.setProperty('bottom', (H - rb.top + 10) + 'px', 'important'); }
+        if (bug) { bug.style.removeProperty('bottom'); const rb = b.getBoundingClientRect(), g2 = g && g.getBoundingClientRect(); bug.style.bottom = (H - rb.top + 10) + 'px'; if (g2) bug.style.right = Math.max(8, innerWidth - g2.right) + 'px'; }
     }
     function toggle() { const o = document.getElementById('xaic'); if (o) { o.remove(); return; } open(); }
     function open() {
@@ -11856,6 +11856,97 @@ var XAIC = window.XAIC || (() => {
     }
     setTimeout(mount, 300); addEventListener('load', () => setTimeout(mount, 300)); addEventListener('storage', e => { if (e.key && /^xiii\.ai/.test(e.key)) mount(); }); setInterval(mount, 5000);
     return { open, toggle, mount };
+})();
+
+
+// =====================================================================
+//  MATOS XIII — 🌍 Carnet ATA : la liste matériel du projet devient la « liste générale » du carnet
+//  (tournage à l'étranger, admission temporaire). Colonnes de la liste générale CCI / ICC :
+//  n° d'ordre · désignation commerciale (marque, modèle, n° de série) · nombre de pièces · poids · valeur · pays d'origine.
+//  Valeurs et n° de série repris du parc (Matos perso), poids du Catalogue ; tout se corrige ici, gardé par projet.
+//  Exports : Excel (.xlsx) et PDF (impression, format A4 paysage), plus rappels (délais, pays, assurance).
+// =====================================================================
+var XATA = window.XATA || (() => {
+    const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } }, W = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { } };
+    const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const fold = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
+    const num = v => { const n = parseFloat(String(v == null ? '' : v).replace(/\s/g, '').replace(',', '.')); return isNaN(n) ? 0 : n; };
+    const eur = n => n.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
+    let C = null; // contexte fourni par MATOS : { items, proj, unitsFor }
+    const key = () => 'xiii.ata.' + ((C && C.proj && C.proj.id) || '_');
+    function catalog(name) { const db = J('xiii.catalogue', {}) || {}, f = fold(name); return (db.items || []).find(c => { const m = fold((c.brand || '') + ' ' + (c.model || '')); return m.length > 3 && (f.includes(m) || m.includes(f) || (c.model && f.includes(fold(c.model)) && fold(c.model).length > 2)); }) || null; }
+    // lignes : une par équipement (les n° de série des unités du parc à la suite)
+    function build() {
+        const saved = J(key(), null);
+        const rows = (C.items || []).map(i => {
+            const U = (C.unitsFor ? C.unitsFor(i.name) : []).slice(0, i.qty || 1), c = catalog(i.name);
+            const sn = U.map(u => u.sn).filter(Boolean).join(', '), val = U.reduce((a, u) => a + num(u.value), 0) || (U.length ? 0 : 0);
+            const old = saved && saved.rows && saved.rows.find(r => r.src === i.id);
+            return old ? Object.assign({}, old, { qty: i.qty || 1 }) : { src: i.id, desc: i.name, brand: c ? [c.brand, c.model].filter(Boolean).join(' ') : '', sn, qty: i.qty || 1, kg: c && num(c.kg) ? +(num(c.kg) * (i.qty || 1)).toFixed(2) : '', val: val ? +val.toFixed(2) : '', orig: '' };
+        });
+        return { rows, head: (saved && saved.head) || { holder: '', addr: '', countries: '', from: (C.proj && C.proj.debut) || '', to: (C.proj && C.proj.fin) || '', purpose: 'Matériel professionnel (tournage audiovisuel)', origDef: '' } };
+    }
+    let S = null;
+    const save = () => W(key(), S);
+    function totals() { return S.rows.reduce((a, r) => ({ qty: a.qty + num(r.qty), kg: a.kg + num(r.kg), val: a.val + num(r.val) }), { qty: 0, kg: 0, val: 0 }); }
+    function open(ctx) {
+        C = ctx; S = build(); css(); const o0 = document.getElementById('xata'); if (o0) o0.remove();
+        document.body.insertAdjacentHTML('beforeend', '<div id="xata" role="dialog" aria-modal="true" aria-label="Carnet ATA"><div class="xa-b"><div class="xa-h"><b>🌍 Carnet ATA — liste générale</b><small>' + esc((C.proj && C.proj.title) || 'Projet') + '</small><button class="xa-x" aria-label="Fermer">✕</button></div><div class="xa-c"></div></div></div>');
+        const o = document.getElementById('xata'); o.querySelector('.xa-x').onclick = () => o.remove(); o.addEventListener('keydown', e => { if (e.key === 'Escape') o.remove(); });
+        draw();
+    }
+    function draw() {
+        const c = document.querySelector('#xata .xa-c'); if (!c) return; const T = totals(), h = S.head, miss = S.rows.filter(r => !num(r.val) || !r.orig && !h.origDef).length;
+        c.innerHTML = '<p class="xa-n">Le carnet ATA (« passeport » du matériel) évite de payer les droits et taxes à chaque frontière pour un tournage à l\'étranger. Il se demande à la <b>CCI</b> (en ligne : e-ata / CCI France) avec cette <b>liste générale</b>, une garantie et l\'assurance du matériel. Comptez <b>quelques jours</b> de délai, faites-le viser au départ (douane) et gardez le matériel exactement tel que listé.</p>' +
+            '<div class="xa-g"><label>Titulaire (société)<input data-h="holder" value="' + esc(h.holder) + '"></label><label>Adresse<input data-h="addr" value="' + esc(h.addr) + '"></label><label>Pays visités / traversés<input data-h="countries" value="' + esc(h.countries) + '" placeholder="ex. Maroc, Suisse"></label><label>Départ<input type="date" data-h="from" value="' + esc(h.from) + '"></label><label>Retour<input type="date" data-h="to" value="' + esc(h.to) + '"></label><label>Utilisation prévue<input data-h="purpose" value="' + esc(h.purpose) + '"></label><label>Pays d\'origine par défaut<input data-h="origDef" value="' + esc(h.origDef) + '" placeholder="ex. Japon"></label></div>' +
+            (S.rows.length ? '<div class="xa-t"><table><tr><th>N°</th><th>Désignation</th><th>Marque / modèle</th><th>N° de série</th><th>Pièces</th><th>Poids (kg)</th><th>Valeur (€)</th><th>Pays d\'origine</th><th></th></tr>' +
+                S.rows.map((r, i) => '<tr data-i="' + i + '"><td>' + (i + 1) + '</td><td><input data-k="desc" value="' + esc(r.desc) + '"></td><td><input data-k="brand" value="' + esc(r.brand) + '"></td><td><input data-k="sn" value="' + esc(r.sn) + '"></td><td><input data-k="qty" type="number" min="1" value="' + esc(r.qty) + '" class="n"></td><td><input data-k="kg" value="' + esc(r.kg) + '" class="n"></td><td><input data-k="val" value="' + esc(r.val) + '" class="n' + (num(r.val) ? '' : ' w') + '"></td><td><input data-k="orig" value="' + esc(r.orig) + '" placeholder="' + esc(h.origDef || '?') + '"' + (r.orig || h.origDef ? '' : ' class="w"') + '></td><td><button data-del title="Retirer de la liste ATA">✕</button></td></tr>').join('') +
+                '<tr class="tot"><td></td><td colspan="3"><b>Total</b></td><td>' + T.qty + '</td><td>' + (+T.kg.toFixed(2)) + '</td><td><b>' + eur(T.val) + '</b></td><td colspan="2"></td></tr></table></div>' : '<p class="xa-n">⚠️ La liste matériel du projet est vide (ou rien n\'est coché).</p>') +
+            (miss ? '<p class="xa-w">⚠️ ' + miss + ' ligne(s) sans valeur ou sans pays d\'origine : la douane les exige. Valeurs reprises de « Matos perso » (champ « Valeur, assurance ») quand l\'appareil y est.</p>' : '') +
+            '<div class="xa-a"><button data-x="xl" class="p">📊 Excel (.xlsx)</button><button data-x="pdf">🖨️ PDF / imprimer</button><button data-x="re" title="Repartir de la liste matériel du projet">↻ Recharger la liste</button></div>';
+        c.querySelectorAll('[data-h]').forEach(e => e.onchange = () => { S.head[e.dataset.h] = e.value.trim(); save(); draw(); });
+        c.querySelectorAll('tr[data-i]').forEach(tr => { const r = S.rows[+tr.dataset.i]; tr.querySelectorAll('[data-k]').forEach(e => e.onchange = () => { r[e.dataset.k] = e.type === 'number' ? Math.max(1, +e.value || 1) : e.value.trim(); save(); draw(); }); tr.querySelector('[data-del]').onclick = () => { S.rows.splice(+tr.dataset.i, 1); save(); draw(); }; });
+        c.querySelector('[data-x="xl"]').onclick = xlsx; c.querySelector('[data-x="pdf"]').onclick = pdf;
+        c.querySelector('[data-x="re"]').onclick = () => { if (!confirm('Repartir de la liste matériel du projet ? Vos corrections de lignes seront perdues (l\'en-tête est gardé).')) return; const hd = S.head; W(key(), null); S = build(); S.head = hd; save(); draw(); };
+    }
+    const lines = () => S.rows.map((r, i) => [i + 1, [r.desc, r.brand && !fold(r.desc).includes(fold(r.brand)) ? r.brand : ''].filter(Boolean).join(' — ') + (r.sn ? ' · N° de série : ' + r.sn : ''), num(r.qty) || 1, num(r.kg) || '', num(r.val) || '', r.orig || S.head.origDef || '']);
+    function pdf() {
+        const T = totals(), h = S.head, w = window.open('', '_blank'); if (!w) { alert('Autorisez les fenêtres pour imprimer'); return; }
+        const fr = d => d ? d.split('-').reverse().join('/') : '';
+        w.document.write('<!doctype html><meta charset="utf-8"><title>Carnet ATA — liste générale</title><style>@page{size:A4 landscape;margin:12mm}body{font:11px Helvetica,Arial,sans-serif;color:#111}h1{font-size:16px;margin:0 0 4px}.m{display:grid;grid-template-columns:repeat(3,1fr);gap:4px 14px;margin:8px 0 10px}.m b{display:block;font-size:9px;text-transform:uppercase;color:#555}table{width:100%;border-collapse:collapse}th,td{border:1px solid #333;padding:4px 5px;vertical-align:top}th{background:#eee;font-size:9.5px;text-align:left}td.n{text-align:right;white-space:nowrap}.t td{font-weight:700;background:#f6f6f6}.f{margin-top:14px;font-size:9.5px;color:#444}</style>' +
+            '<h1>CARNET ATA — LISTE GÉNÉRALE / GENERAL LIST</h1><div class="m"><div><b>Titulaire / Holder</b>' + esc(h.holder || '—') + '</div><div><b>Adresse / Address</b>' + esc(h.addr || '—') + '</div><div><b>Utilisation prévue / Intended use</b>' + esc(h.purpose || '—') + '</div><div><b>Pays / Countries</b>' + esc(h.countries || '—') + '</div><div><b>Dates</b>' + esc(fr(h.from)) + (h.to ? ' → ' + esc(fr(h.to)) : '') + '</div><div><b>Projet</b>' + esc((C.proj && C.proj.title) || '') + '</div></div>' +
+            '<table><tr><th style="width:42px">N° d\'ordre<br>Item No.</th><th>Désignation commerciale des marchandises, marques et numéros<br>Trade description of goods and marks and numbers, if any</th><th style="width:60px">Nombre de pièces<br>Number of pieces</th><th style="width:70px">Poids (kg)<br>Weight</th><th style="width:90px">Valeur (EUR)<br>Value</th><th style="width:90px">Pays d\'origine<br>Country of origin</th></tr>' +
+            lines().map(l => '<tr><td class="n">' + l[0] + '</td><td>' + esc(l[1]) + '</td><td class="n">' + l[2] + '</td><td class="n">' + (l[3] === '' ? '' : l[3].toLocaleString('fr-FR')) + '</td><td class="n">' + (l[4] === '' ? '' : l[4].toLocaleString('fr-FR', { minimumFractionDigits: 2 })) + '</td><td>' + esc(l[5]) + '</td></tr>').join('') +
+            '<tr class="t"><td></td><td>TOTAL</td><td class="n">' + T.qty + '</td><td class="n">' + (+T.kg.toFixed(2)).toLocaleString('fr-FR') + '</td><td class="n">' + T.val.toLocaleString('fr-FR', { minimumFractionDigits: 2 }) + '</td><td></td></tr></table>' +
+            '<p class="f">Liste préparée avec MATOS XIII le ' + new Date().toLocaleDateString('fr-FR') + ' — à reporter sur le formulaire officiel de la CCI (ou à joindre à la demande e-ata). Vérifiez chaque n° de série : la douane contrôle le matériel au départ et au retour.</p><script>setTimeout(()=>print(),300)<\/script>');
+        w.document.close();
+    }
+    async function xlsx() {
+        if (!window.JSZip) await new Promise((ok, ko) => { const s = document.createElement('script'); s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js'; s.onload = ok; s.onerror = () => ko(new Error('JSZip injoignable')); document.head.appendChild(s); });
+        const T = totals(), h = S.head, X = v => String(v == null ? '' : v).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+        const col = n => String.fromCharCode(65 + n), cell = (r, c, v, st) => typeof v === 'number' ? '<c r="' + col(c) + r + '"' + (st ? ' s="' + st + '"' : '') + '><v>' + v + '</v></c>' : '<c r="' + col(c) + r + '" t="inlineStr"' + (st ? ' s="' + st + '"' : '') + '><is><t xml:space="preserve">' + X(v) + '</t></is></c>';
+        const R = []; let n = 1; const row = (cells, st) => { R.push('<row r="' + n + '">' + cells.map((v, c) => v === '' || v == null ? '' : cell(n, c, v, st)).join('') + '</row>'); n++; };
+        row(['CARNET ATA — LISTE GÉNÉRALE / GENERAL LIST'], 1); row(['Titulaire', h.holder]); row(['Adresse', h.addr]); row(['Pays', h.countries]); row(['Dates', [h.from, h.to].filter(Boolean).join(' → ')]); row(['Utilisation prévue', h.purpose]); row(['Projet', (C.proj && C.proj.title) || '']); row([]);
+        row(['N° d\'ordre', 'Désignation commerciale, marques et numéros', 'Nombre de pièces', 'Poids (kg)', 'Valeur (EUR)', 'Pays d\'origine'], 1);
+        lines().forEach(l => row(l)); row(['', 'TOTAL', T.qty, +T.kg.toFixed(2), +T.val.toFixed(2), ''], 1);
+        const z = new JSZip();
+        z.file('[Content_Types].xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>');
+        z.file('_rels/.rels', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>');
+        z.file('xl/workbook.xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="Liste générale" sheetId="1" r:id="rId1"/></sheets></workbook>');
+        z.file('xl/_rels/workbook.xml.rels', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>');
+        z.file('xl/styles.xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><name val="Calibri"/></font></fonts><fills count="2"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill></fills><borders count="1"><border/></borders><cellStyleXfs count="1"><xf/></cellStyleXfs><cellXfs count="2"><xf/><xf fontId="1" applyFont="1"/></cellXfs></styleSheet>');
+        z.file('xl/worksheets/sheet1.xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><cols><col min="1" max="1" width="11" customWidth="1"/><col min="2" max="2" width="70" customWidth="1"/><col min="3" max="5" width="14" customWidth="1"/><col min="6" max="6" width="18" customWidth="1"/></cols><sheetData>' + R.join('') + '</sheetData></worksheet>');
+        const b = await z.generateAsync({ type: 'blob', mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), a = document.createElement('a');
+        a.href = URL.createObjectURL(b); a.download = 'Carnet_ATA_liste_generale_' + String((C.proj && C.proj.title) || 'projet').replace(/[^\w-]+/g, '_') + '.xlsx'; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 2000);
+    }
+    function css() {
+        if (document.getElementById('xata-css')) return; const s = document.createElement('style'); s.id = 'xata-css';
+        s.textContent = '#xata{position:fixed;inset:0;z-index:10230;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;padding:14px;font:13px/1.45 system-ui,sans-serif}.xa-b{background:var(--bg-menu,#232327);color:var(--text-main,#eee);border:1px solid #4fa3e0;border-radius:12px;width:min(1180px,100%);max-height:92vh;display:flex;flex-direction:column}.xa-h{display:flex;align-items:baseline;gap:10px;padding:12px 16px;border-bottom:1px solid var(--border-color,#3a3a40)}.xa-h b{font-size:15px}.xa-h small{opacity:.65}.xa-x{margin-left:auto;background:none;border:0;color:inherit;font-size:17px;cursor:pointer}.xa-c{overflow:auto;padding:12px 16px;display:flex;flex-direction:column;gap:10px}' +
+            '.xa-n{margin:0;font-size:12.5px;color:var(--text-dim,#aaa)}.xa-w{margin:0;font-size:12.5px;color:#ffb74d}.xa-g{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px}.xa-g label{display:flex;flex-direction:column;font-size:11.5px;opacity:.9;gap:3px}#xata input{font:inherit;font-size:12.5px;color:inherit;background:var(--bg-input,#17171a);border:1px solid var(--border-color,#45454b);border-radius:6px;padding:5px 7px;min-width:0;width:100%;box-sizing:border-box}#xata input.n{text-align:right}#xata input.w{border-color:#ffb74d}' +
+            '.xa-t{overflow:auto}.xa-t table{width:100%;border-collapse:collapse}.xa-t th{font-size:11px;text-align:left;padding:4px;opacity:.75}.xa-t td{padding:2px 3px}.xa-t td:first-child{opacity:.6;text-align:right;width:26px}.xa-t tr.tot td{padding:6px 4px;border-top:1px solid #555;text-align:right}.xa-t button{background:none;border:0;color:inherit;opacity:.6;cursor:pointer}.xa-a{display:flex;gap:8px;flex-wrap:wrap}.xa-a button{font:600 13px system-ui;padding:8px 13px;border-radius:9px;border:1px solid var(--border-color,#45454b);background:transparent;color:inherit;cursor:pointer}.xa-a .p{background:#F0B378;color:#1a1a1a;border-color:#F0B378}';
+        document.head.appendChild(s);
+    }
+    return { open };
 })();
 
 </script>
