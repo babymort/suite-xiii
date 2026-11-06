@@ -1,0 +1,1 @@
+[["        if (typeof XBOOT !== 'undefined') XBOOT.ready(() => { if ($('xb-file')) place(); }, 1850); // placé avec la barre, avant l'affichage\n", "        if (typeof XBOOT !== 'undefined') XBOOT.ready(() => { if ($('xb-file') || $('top-bar')) place(); }, 1850); // placé avec la barre, avant l'affichage\n", 20]]

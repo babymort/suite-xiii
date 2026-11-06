@@ -1,0 +1,5 @@
+const { chromium } = require('playwright'); const p = process.argv[2];
+(async () => { const b = await chromium.launch(); const ctx = await b.newContext({ viewport: { width: 1440, height: 900 } }); await ctx.route('**/*', r => r.request().url().startsWith('http://localhost') ? r.continue() : r.abort());
+  const pg = await ctx.newPage(); await pg.addInitScript(() => { localStorage.setItem('xiii.tips.off', 'true'); window.__o = []; let prev = '';
+    const t = () => { const tb = document.getElementById('top-bar'); if (tb) { const kids = [...tb.children].map(c => (c.id || c.className.toString().slice(0, 12)) + ':' + Math.round(c.getBoundingClientRect().width)).join(' '); const s = tb.className + ' | ' + kids; if (s !== prev) { window.__o.push(Math.round(performance.now()) + ' ' + s); prev = s; } } if (performance.now() < 4000) requestAnimationFrame(t); }; requestAnimationFrame(t); });
+  await pg.goto('http://localhost:8765/' + p + '?desktop=1'); await pg.waitForTimeout(4500); console.log((await pg.evaluate(() => window.__o)).join('\n')); await b.close(); })();

@@ -1,0 +1,1 @@
+[["        APP = app; if (!XLINKS.T[app]) return; if (!XLINKS.peers(app).length) return; if (!$('xgt-css')) css();\n", "        APP = app; if (!XLINKS.T[app]) return; if (!XLINKS.peers(app).length) return; if (!$('xgt-css')) css();\n        if (typeof XBOOT !== 'undefined') XBOOT.ready(() => { if ($('xb-file')) place(); }, 1850); // placé avec la barre, avant l'affichage\n", 20]]
