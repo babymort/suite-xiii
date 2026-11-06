@@ -10312,13 +10312,41 @@ var XAIC = window.XAIC || (() => {
             row: x => (x.titre ? x.titre + ' — ' : '') + (x.valeur ? '[' + x.valeur + '] ' : '') + (x.action || ''),
             apply(L) { const cur = PN(); let at = idx(cur); L.forEach(x => { const n = blankPanel({ seq: cur.seq }); if (x.titre) n.title = String(x.titre).slice(0, 80); n.action = [x.valeur, x.action].filter(Boolean).join(' — '); if (x.dialogue) n.dialogue = x.dialogue; P.panels.splice(++at, 0, n); }); dirty(); renderAll(); return L.length + ' plan(s) ajouté(s) après le plan affiché'; } }
     };
+    // feuille de service : déroulé horaire du jour affiché
+    ACT.callsheeto = { max: 20, lab: '🛠️ Remplir le déroulé de la feuille de service', ask: 'Propose le déroulé horaire de la journée de tournage affichée (séquences à tourner et événements : prêt à tourner, mise en place, repas, déplacement, fin de journée), cohérent avec la demande, les horaires et les lieux du projet.',
+        schema: '{"items":[{"heure":"HH:MM","type":"seq|event","seq":"n° de séquence","ie":"INT|EXT|INT/EXT","desc":"…","roles":"rôles présents","pages":"1 3/8"}]}',
+        row: x => (x.heure || '--:--') + ' · ' + (x.type === 'event' ? '⏸ ' : '') + (x.seq ? 'Séq. ' + x.seq + ' ' : '') + (x.ie ? x.ie + ' ' : '') + (x.desc || '') + (x.roles ? ' (' + x.roles + ')' : ''),
+        apply(L) { const d = D(); const hm = v => { const m = /^(\d{1,2})\s*[:h]\s*(\d{2})$/.exec(String(v || '').trim()); return m ? String(+m[1]).padStart(2, '0') + ':' + m[2] : ''; };
+            L.forEach(x => { const t = hm(x.heure); if (x.type === 'event') d.schedule.push({ id: uid(), ev: true, time: t, desc: String(x.desc || 'PAUSE').toUpperCase().slice(0, 60) });
+                else d.schedule.push({ id: uid(), ev: false, time: t, seq: String(x.seq || '').slice(0, 20), ie: /int\s*\/\s*ext/i.test(x.ie) ? 'INT/EXT' : /ext/i.test(x.ie) ? 'EXT' : /int/i.test(x.ie) ? 'INT' : '', loc: (typeof wxLoc === 'function' && wxLoc(d) || {}).id || '', desc: String(x.desc || '').slice(0, 300), roles: String(x.roles || '').slice(0, 200), pages: String(x.pages || '').slice(0, 12) }); });
+            if (typeof setView === 'function' && typeof view !== 'undefined' && view !== 'edit') setView('edit'); if (typeof sortSched === 'function') sortSched(); else { refreshSched(); touch(); }
+            return L.length + ' ligne(s) ajoutée(s) au déroulé du jour affiché, triées par heure'; } };
+    // MATOS : liste du matériel du projet actif
+    ACT.matos = { max: 30, lab: '🛠️ Ajouter du matériel au projet (MATOS)', ask: () => 'Propose la liste du matériel à emporter pour la demande (caméras, optiques, son, lumière, machinerie, régie, consommables), avec des quantités réalistes. Groupe parmi : ' + (typeof PM !== 'undefined' ? PM.GRP.join(', ') : 'IMAGE, SON, LUMIERE, CONSOMMABLES, REGIE, GRIP') + '.',
+        schema: '{"items":[{"nom":"…","qte":1,"groupe":"IMAGE"}]}',
+        row: x => (x.qte > 1 ? x.qte + ' × ' : '') + (x.nom || '') + (x.groupe ? ' · ' + x.groupe : ''),
+        apply(L) { if (typeof PM === 'undefined') throw new Error('MATOS pas encore prêt'); L.forEach(x => { const g = String(x.groupe || '').toUpperCase(); PM.add(String(x.nom || '').slice(0, 120), Math.max(1, Math.min(99, Math.round(+x.qte || 1))), PM.GRP.includes(g) ? g : PM.guess('', x.nom || ''), 'IA'); });
+            try { dirty(); } catch (e) { } try { render(); } catch (e) { } return L.length + ' ligne(s) ajoutée(s) au matériel du projet (sous « Matériel du projet »)'; } };
+    // DEVISO : lignes de matériel, d'équipe et de frais dans la version affichée
+    ACT.deviso = { max: 30, lab: '🛠️ Ajouter des lignes au devis (DEVISO)', ask: () => 'Propose les lignes de devis correspondant à la demande : matériel (avec catégorie), postes d’équipe (avec nombre et jours) et frais (transport, repas, hébergement, assurance…). Laisse "prix" vide si tu ne le connais pas : DEVISO applique ses tarifs (conventions collectives pour l’équipe). Postes disponibles (id = intitulé) : '
+            + (typeof POSTES0 !== 'undefined' ? POSTES0.map(p => p[0] + ' = ' + p[1]).join(' ; ') : '') + '. Catégories de matériel (id = nom) : ' + (typeof ECATS !== 'undefined' ? ECATS.map(c => c[0] + ' = ' + c[1]).join(' ; ') : '') + '.',
+        schema: '{"items":[{"type":"materiel|equipe|frais","nom":"…","poste":"id du poste (équipe)","cat":"id de catégorie (matériel)","qte":1,"jours":1,"prix":null}]}',
+        row: x => ({ materiel: '🎥 ', equipe: '👥 ', frais: '🧾 ' }[x.type] || '• ') + (x.qte > 1 ? x.qte + ' × ' : '') + (x.nom || x.poste || '') + (x.jours ? ' · ' + x.jours + ' j' : '') + (x.prix ? ' · ' + x.prix + ' € HT' : ''),
+        apply(L) { const v = V(), n = { eq: 0, crew: 0, fees: 0 }, q = x => Math.max(1, Math.min(999, Math.round(+x.qte || 1))), dj = x => (+x.jours > 0 ? Math.min(365, +x.jours) : null), pr = x => (x.prix != null && x.prix !== '' && isFinite(+x.prix) && +x.prix >= 0 ? Math.round(+x.prix * 100) / 100 : null);
+            L.forEach(x => {
+                if (x.type === 'equipe') { const p = posteOf(String(x.poste || '')); const c = { id: uid(), on: true, name: '', role: String(x.nom || p.name || '').slice(0, 80), poste: p.id, dept: p.dept, mode: p.mode, qty: q(x) }; if (dj(x)) c.days = dj(x); if (pr(x) != null) c.rate = pr(x); v.crew.push(c); n.crew++; }
+                else if (x.type === 'frais') { const f = { id: uid(), on: true, name: String(x.nom || '').slice(0, 120), qty: q(x), unit: 'forfait' }; if (pr(x) != null) f.price = pr(x); v.fees.push(f); n.fees++; }
+                else { const cats = typeof ECATS !== 'undefined' ? ECATS.map(c => c[0]) : []; const e = newEq({ name: String(x.nom || '').slice(0, 120), qty: q(x), cat: cats.includes(x.cat) ? x.cat : 'div' }); if (dj(x)) e.days = dj(x); if (pr(x) != null) e.price = pr(x); v.eq.push(e); n.eq++; }
+            });
+            dirty(); renderContent(); renderStats(); renderTabs();
+            return [n.eq && n.eq + ' matériel', n.crew && n.crew + ' poste(s) d’équipe', n.fees && n.fees + ' frais'].filter(Boolean).join(', ') + ' ajouté(s) à la version « ' + (v.name || 'affichée') + ' » — à vérifier : prix vides = tarifs DEVISO'; } };
     ACT.calendrier = ACT.planno;
     async function act() {
         const A = ACT[APP], ta = document.querySelector('#xaic textarea'); if (!A || busy) return;
         const t = (ta.value || '').trim() || (msgs().filter(m => m.r === 'u').slice(-1)[0] || {}).t; if (!t) { ta.placeholder = 'Décrivez d’abord ce que l’IA doit créer…'; ta.focus(); return; } ta.value = '';
         const L = msgs(); L.push({ r: 'u', t: A.lab + ' : ' + t, ts: Date.now() }); save(L); busy = new AbortController(); draw();
-        const prompt = SYS + '\n\n' + ctx() + '\n\n' + A.ask + '\nDemande : ' + t + '\n\nRéponds UNIQUEMENT par un JSON de la forme ' + A.schema + ' (10 éléments au plus, dates au format AAAA-MM-JJ à partir d’aujourd’hui si besoin).';
-        let items = null, err = ''; try { const r = await XAI.ask(prompt, { signal: busy.signal, maxTokens: 3000 }); items = (XAI.json(r).items || []).slice(0, 20); } catch (e) { err = e && e.message || String(e); }
+        const prompt = SYS + '\n\n' + ctx() + '\n\n' + (typeof A.ask === 'function' ? A.ask() : A.ask) + '\nDemande : ' + t + '\n\nRéponds UNIQUEMENT par un JSON de la forme ' + A.schema + ' (' + (A.max || 10) + ' éléments au plus, dates au format AAAA-MM-JJ à partir d’aujourd’hui si besoin).';
+        let items = null, err = ''; try { const r = await XAI.ask(prompt, { signal: busy.signal, maxTokens: 5000 }); items = (XAI.json(r).items || []).slice(0, A.max || 20); } catch (e) { err = e && e.message || String(e); }
         busy = null; draw(); const box = document.querySelector('#xaic .l'); if (!box) return;
         if (!items || !items.length) { const L2 = msgs(); L2.push({ r: 'a', err: 1, t: '⚠️ ' + (err || 'L’IA n’a rien proposé de lisible. Reformulez la demande.'), ts: Date.now() }); save(L2); draw(); return; }
         box.insertAdjacentHTML('beforeend', '<div class="m a" id="xaic-prop"><b>Proposition — cochez ce qu’il faut créer :</b>' + items.map((x, i) => '<label style="display:flex;gap:6px;margin-top:5px;white-space:normal"><input type="checkbox" data-k="' + i + '" checked><span>' + esc(A.row(x)) + '</span></label>').join('') + '<div style="display:flex;gap:8px;margin-top:8px"><button class="cp" data-ok style="opacity:1;font-weight:700">✅ Créer</button><button class="cp" data-no>Annuler</button></div></div>'); box.scrollTop = box.scrollHeight;
