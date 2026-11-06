@@ -4314,16 +4314,16 @@ const XAI = (() => {
     function canSee() { const x = cur(); return !!(x && x.d.vision); }
 
     async function call(x, prompt, o) {
-        o = o || {}; const img = o.image, max = o.maxTokens || 8000; let res, data;
+        o = o || {}; const imgs = (o.images && o.images.length ? o.images : (o.image ? [o.image] : [])).slice(0, 8), img = imgs[0], max = o.maxTokens || 8000; let res, data;
         try {
             if (x.d.kind === 'anthropic') {
-                const content = []; if (img) content.push({ type: 'image', source: { type: 'base64', media_type: img.mediaType, data: img.base64 } }); content.push({ type: 'text', text: prompt });
+                const content = []; imgs.forEach(im => content.push({ type: 'image', source: { type: 'base64', media_type: im.mediaType, data: im.base64 } })); content.push({ type: 'text', text: prompt });
                 res = await fetch(x.url, { method: 'POST', signal: o.signal, headers: { 'content-type': 'application/json', 'x-api-key': x.key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' }, body: JSON.stringify({ model: x.model, max_tokens: max, messages: [{ role: 'user', content }] }) });
             } else if (x.d.kind === 'gemini') {
-                const parts = []; if (img) parts.push({ inline_data: { mime_type: img.mediaType, data: img.base64 } }); parts.push({ text: prompt });
+                const parts = []; imgs.forEach(im => parts.push({ inline_data: { mime_type: im.mediaType, data: im.base64 } })); parts.push({ text: prompt });
                 res = await fetch(x.url + encodeURIComponent(x.model) + ':generateContent?key=' + encodeURIComponent(x.key), { method: 'POST', signal: o.signal, headers: { 'content-type': 'application/json' }, body: JSON.stringify({ contents: [{ role: 'user', parts }], generationConfig: { maxOutputTokens: Math.max(max, 8192) } }) });
             } else {
-                const content = img ? [{ type: 'text', text: prompt }, { type: 'image_url', image_url: { url: 'data:' + img.mediaType + ';base64,' + img.base64 } }] : prompt;
+                const content = img ? [{ type: 'text', text: prompt }].concat(imgs.map(im => ({ type: 'image_url', image_url: { url: 'data:' + im.mediaType + ';base64,' + im.base64 } }))) : prompt;
                 const body = { model: x.model, messages: [{ role: 'user', content }] }; if (x.id === 'openai') body.max_completion_tokens = max; else body.max_tokens = max;
                 const h = { 'content-type': 'application/json' }; if (x.key) h.authorization = 'Bearer ' + x.key; if (x.id === 'openrouter') { h['HTTP-Referer'] = location.origin; h['X-Title'] = 'SUITE XIII'; }
                 res = await fetch(x.url, { method: 'POST', signal: o.signal, headers: h, body: JSON.stringify(body) });
@@ -4390,7 +4390,7 @@ const XAI = (() => {
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', finishLogin); else finishLogin();
     async function ask(prompt, o) {
         const x = cur(); if (!configured()) { const e = new Error('NO_AI'); throw e; }
-        if (o && o.image && !x.d.vision) throw new Error(x.d.n + ' ne lit pas les images : choisissez un autre service dans ⚙️ Connexion IA.');
+        if (o && (o.image || (o.images && o.images.length)) && !x.d.vision) throw new Error(x.d.n + ' ne lit pas les images : choisissez un autre service dans ⚙️ Connexion IA.');
         return call(x, prompt, o);
     }
     function json(text) { let t = String(text || '').trim().replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/i, '').trim(); const a = t.indexOf('{'), b = t.lastIndexOf('}'); if (a >= 0 && b > a) t = t.slice(a, b + 1); return JSON.parse(t); }
