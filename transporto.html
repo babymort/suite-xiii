@@ -2351,8 +2351,38 @@ const XAI = (() => {
     function label() { const x = cur(); return x ? x.d.n.replace(/ \(.*\)$/, '') + ' · ' + x.model : 'non configurée'; }
     function canSee() { const x = cur(); return !!(x && x.d.vision); }
 
+    // ✍️ réponse en continu (o.onDelta(texte_complet)) : Claude, Gemini et services compatibles OpenAI ; null = on repasse par l'appel normal
+    async function streamCall(x, prompt, o, imgs, max) {
+        if (typeof ReadableStream === 'undefined' || typeof TextDecoder === 'undefined') return null;
+        let res, kind = x.d.kind;
+        if (kind === 'anthropic') {
+            const content = []; imgs.forEach(im => content.push({ type: 'image', source: { type: 'base64', media_type: im.mediaType, data: im.base64 } })); content.push({ type: 'text', text: prompt });
+            res = await fetch(x.url, { method: 'POST', signal: o.signal, headers: { 'content-type': 'application/json', 'x-api-key': x.key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' }, body: JSON.stringify({ model: x.model, max_tokens: max, stream: true, messages: [{ role: 'user', content }] }) });
+        } else if (kind === 'gemini') {
+            const parts = []; imgs.forEach(im => parts.push({ inline_data: { mime_type: im.mediaType, data: im.base64 } })); parts.push({ text: prompt });
+            res = await fetch(x.url + encodeURIComponent(x.model) + ':streamGenerateContent?alt=sse&key=' + encodeURIComponent(x.key), { method: 'POST', signal: o.signal, headers: { 'content-type': 'application/json' }, body: JSON.stringify({ contents: [{ role: 'user', parts }], generationConfig: { maxOutputTokens: Math.max(max, 8192) } }) });
+        } else {
+            const content = imgs.length ? [{ type: 'text', text: prompt }].concat(imgs.map(im => ({ type: 'image_url', image_url: { url: 'data:' + im.mediaType + ';base64,' + im.base64 } }))) : prompt;
+            const body = { model: x.model, stream: true, messages: [{ role: 'user', content }] }; if (x.id === 'openai') body.max_completion_tokens = max; else body.max_tokens = max;
+            const h = { 'content-type': 'application/json' }; if (x.key) h.authorization = 'Bearer ' + x.key; if (x.id === 'openrouter') { h['HTTP-Referer'] = location.origin; h['X-Title'] = 'SUITE XIII'; }
+            res = await fetch(x.url, { method: 'POST', signal: o.signal, headers: h, body: JSON.stringify(body) });
+        }
+        if (!res.ok || !res.body || !/event-stream|ndjson|text\/plain/i.test(res.headers.get('content-type') || 'text/event-stream')) return null;
+        const rd = res.body.getReader(), dec = new TextDecoder(); let buf = '', text = '';
+        const take = line => { line = line.trim(); if (!line.startsWith('data:')) return; const d = line.slice(5).trim(); if (!d || d === '[DONE]') return; let j; try { j = JSON.parse(d); } catch (e) { return; }
+            let t = '';
+            if (kind === 'anthropic') { if (j.type === 'content_block_delta' && j.delta && j.delta.text) t = j.delta.text; if (j.type === 'error') throw new Error(x.d.n + ' : ' + (j.error && j.error.message || 'erreur')); }
+            else if (kind === 'gemini') { const c = j.candidates && j.candidates[0]; t = c && c.content && c.content.parts ? c.content.parts.map(p => p.text || '').join('') : ''; }
+            else { const c = j.choices && j.choices[0]; t = c && c.delta && typeof c.delta.content === 'string' ? c.delta.content : ''; }
+            if (t) { text += t; try { o.onDelta(text); } catch (e) { } } };
+        for (;;) { const { done, value } = await rd.read(); if (done) break; buf += dec.decode(value, { stream: true }); let k; while ((k = buf.indexOf('\n')) >= 0) { take(buf.slice(0, k)); buf = buf.slice(k + 1); } }
+        if (buf) take(buf);
+        if (!text) throw new Error('Réponse vide de ' + x.d.n + '.');
+        return text;
+    }
     async function call(x, prompt, o) {
         o = o || {}; const imgs = (o.images && o.images.length ? o.images : (o.image ? [o.image] : [])).slice(0, 8), img = imgs[0], max = o.maxTokens || 8000; let res, data;
+        if (o.onDelta && !o._retry) { let t = null; try { t = await streamCall(x, prompt, o, imgs, max); } catch (e) { if (e && e.name === 'AbortError') throw e; if (/^Réponse vide|: /.test(e && e.message || '')) throw e; t = null; } if (t != null) return t; }
         try {
             if (x.d.kind === 'anthropic') {
                 const content = []; imgs.forEach(im => content.push({ type: 'image', source: { type: 'base64', media_type: im.mediaType, data: im.base64 } })); content.push({ type: 'text', text: prompt });
@@ -10609,7 +10639,7 @@ var XAIC = window.XAIC || (() => {
     const SYS = 'Tu es l’assistant de SUITE XIII, une suite d’outils web pour la production audiovisuelle (tournage, direct, captation, post-production). Tu réponds en français, de façon concise et concrète, comme un régisseur / directeur de production expérimenté : préparation, feuilles de service, plans de tournage, matériel, devis, conventions collectives de l’audiovisuel, sécurité sur les plateaux. Quand c’est utile, indique quel outil XIII sert à quoi (PLANO plan de tournage et plateau, CALL SHEETO feuilles de service, CONDUCO conducteurs, DEVISO devis, MATOS matériel, CASTO casting, REPERO repérages, STORYBOARDO storyboard, PLANNO tâches, DOSSIER dossier de production, SYNO synoptiques…). Si tu n’es pas sûr d’un chiffre réglementaire, dis-le. Tu aides aussi à écrire les documents d’auteur et de production : note d’intention (pourquoi ce film, le regard, l’enjeu, la forme), note de réalisation (dispositif, image, lumière, son, montage, rythme, références), synopsis, logline, traitement, bible, présentation de l’équipe, lettres aux partenaires, dossiers CNC / régions / chaînes. Pour un texte à rédiger : si des éléments essentiels manquent (sujet, personnages, ton, durée, format, destinataire), pose d’abord 3 à 5 questions courtes ; sinon rédige directement un texte prêt à coller, à la première personne pour l’auteur, dans un français soigné et sans clichés, puis propose une variante plus courte.';
     const noCtx = () => !!J('xiii.aichat.noctx', false);
     function ctx() { if (noCtx()) return 'Contexte : non communiqué par l’utilisateur.'; const p = proj(), d = new Date(); return 'Contexte : outil ouvert ' + nm() + (p.title ? ' · projet « ' + p.title + ' »' : '') + ' · ' + d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) + '.'; }
-    let busy = null, att = null, lastField = null;
+    let busy = null, att = null, lastField = null, live = '', liveT = 0;
     document.addEventListener('focusin', e => { const t = e.target; if (t && !t.closest('#xaic') && (t.tagName === 'TEXTAREA' || (t.tagName === 'INPUT' && /^(text|search|)$/.test(t.type || '')) || t.isContentEditable)) lastField = t; }, true);
     function css() {
         if (document.getElementById('xaic-css')) return; const s = document.createElement('style'); s.id = 'xaic-css';
@@ -10652,7 +10682,7 @@ var XAIC = window.XAIC || (() => {
     function draw() {
         const o = document.getElementById('xaic'); if (!o) return; const L = msgs(), box = o.querySelector('.l');
         box.innerHTML = (L.length ? '' : '<p class="h">Posez une question sur votre production : l’assistant connaît le métier et les outils XIII. Rien ne part avant votre envoi, et directement vers votre IA (pas de serveur XIII au milieu) ; seul le contexte coché en bas (outil ouvert, titre du projet, date) accompagne la question — jamais l’équipe, les contacts ni les données des outils.</p><p class="h" style="margin:8px 0 4px">✍️ Écrire avec l’IA :</p><div class="sg">' + WRI.map(w => '<button data-w="' + esc(w[1]) + '">' + esc(w[0]) + '</button>').join('') + '</div><p class="h" style="margin:8px 0 4px">💬 Questions :</p><div class="sg">' + SUG.map(s => '<button>' + esc(s) + '</button>').join('') + '</div>') +
-            L.map((m, i) => '<div class="m ' + (m.r === 'u' ? 'u' : 'a') + (m.err ? ' e' : '') + '">' + esc(m.t) + (m.r === 'u' && m.att ? '\n📎 ' + esc(m.att) : '') + (m.r === 'a' && !m.err ? '<span style="display:flex;gap:12px"><button class="cp" data-cp="' + i + '">📋 Copier</button><button class="cp" data-in="' + i + '" title="Insérer dans le dernier champ de texte utilisé de l’outil">↘️ Dans le champ</button></span>' : '') + '</div>').join('') + (busy ? '<div class="m a h">⏳ L’IA réfléchit…</div>' : '');
+            L.map((m, i) => '<div class="m ' + (m.r === 'u' ? 'u' : 'a') + (m.err ? ' e' : '') + '">' + esc(m.t) + (m.r === 'u' && m.att ? '\n📎 ' + esc(m.att) : '') + (m.r === 'a' && !m.err ? '<span style="display:flex;gap:12px"><button class="cp" data-cp="' + i + '">📋 Copier</button><button class="cp" data-in="' + i + '" title="Insérer dans le dernier champ de texte utilisé de l’outil">↘️ Dans le champ</button></span>' : '') + '</div>').join('') + (busy ? (live ? '<div class="m a" id="xaic-live">' + esc(live) + '<span class="h"> ▍</span></div>' : '<div class="m a h">⏳ L’IA réfléchit…</div>') : '');
         box.querySelectorAll('.sg button').forEach(b => b.onclick = () => send(b.dataset.w || b.textContent));
         box.querySelectorAll('[data-cp]').forEach(b => b.onclick = async () => { try { await navigator.clipboard.writeText(L[+b.dataset.cp].t); b.textContent = '✅ Copié'; } catch (e) { } });
         box.querySelectorAll('[data-in]').forEach(b => b.onclick = () => { const f = lastField, v = L[+b.dataset.in].t; if (!f || !document.contains(f)) { b.textContent = 'Cliquez d’abord dans un champ de l’outil'; return; } if (f.isContentEditable) f.focus(), document.execCommand('insertText', false, v); else { const a = f.selectionStart != null ? f.selectionStart : f.value.length; f.value = f.value.slice(0, a) + v + f.value.slice(f.selectionEnd != null ? f.selectionEnd : a); f.dispatchEvent(new Event('input', { bubbles: true })); f.dispatchEvent(new Event('change', { bubbles: true })); } b.textContent = '✅ Inséré'; });
@@ -10662,8 +10692,10 @@ var XAIC = window.XAIC || (() => {
         t = String(t || '').trim(); if (!t || busy) return; const L = msgs(), A = att; att = null; showAtt(); L.push({ r: 'u', t, ts: Date.now(), att: A ? A.name : '' }); save(L); busy = new AbortController(); draw();
         const hist = L.slice(-12, -1).map(m => (m.r === 'u' ? 'Utilisateur : ' : 'Assistant : ') + m.t).join('\n\n');
         const prompt = SYS + '\n\n' + ctx() + (hist ? '\n\nConversation précédente :\n' + hist : '') + (A && A.text ? '\n\nFichier joint « ' + A.name + ' » :\n' + A.text : '') + (A && A.image ? '\n\n(Une image est jointe : « ' + A.name + ' ».)' : '') + '\n\nUtilisateur : ' + t + '\n\nAssistant :';
-        let r; try { r = { r: 'a', t: String(await XAI.ask(prompt, Object.assign({ signal: busy.signal, maxTokens: 2000 }, A && A.image ? { image: A.image } : {})) || '').trim() || '(réponse vide)' }; } catch (e) { r = { r: 'a', err: 1, t: '⚠️ ' + (e && e.message || e) }; }
-        busy = null; const L2 = msgs(); L2.push(Object.assign(r, { ts: Date.now() })); save(L2); draw();
+        // ✍️ la réponse s'écrit au fur et à mesure (si le service le permet), sinon elle arrive d'un bloc
+        live = ''; const onDelta = txt => { live = txt; if (liveT) return; liveT = requestAnimationFrame(() => { liveT = 0; const el = document.getElementById('xaic-live'), box = document.querySelector('#xaic .l'); if (el) { el.firstChild.textContent = live; if (box) box.scrollTop = box.scrollHeight; } else draw(); }); };
+        let r; try { r = { r: 'a', t: String(await XAI.ask(prompt, Object.assign({ signal: busy.signal, maxTokens: 2000, onDelta }, A && A.image ? { image: A.image } : {})) || '').trim() || '(réponse vide)' }; } catch (e) { r = live && e && e.name === 'AbortError' ? { r: 'a', t: live + ' […]' } : { r: 'a', err: 1, t: '⚠️ ' + (e && e.message || e) }; }
+        live = ''; busy = null; const L2 = msgs(); L2.push(Object.assign(r, { ts: Date.now() })); save(L2); draw();
     }
     async function readAtt(f) {
         if (/^image\//.test(f.type)) {
