@@ -11817,7 +11817,7 @@ var XZZB = window.XZZB || (() => {
             '#toolbar button,#top-bar button{white-space:nowrap}' +
             '@media(max-width:1180px){#toolbar>.tb-label{display:none}}' +
             '.xzz-scroll{overflow-x:auto!important;overflow-y:hidden!important;scrollbar-width:thin;overscroll-behavior-x:contain}' +
-            (APP === 'melango' ? '@media(max-width:1100px){#h-learn{display:none!important}}@media(max-width:1200px){header{gap:3px!important}header>button,header>div>button,header .hb{padding-left:6px!important;padding-right:6px!important;font-size:11.5px!important}}' : '');
+            (APP === 'melango' ? '@media(max-width:1100px){#h-learn{display:none!important}}@media(max-width:1000px){#app>header{overflow-x:auto!important;scrollbar-width:none}}@media(max-width:1200px){header{gap:3px!important}header>button,header>div>button,header .hb{padding-left:6px!important;padding-right:6px!important;font-size:11.5px!important}}' : '');
         (document.head || document.documentElement).appendChild(st);
     }
     // 🏠 Accueil : même taille d'icône que les autres boutons de la barre quand celle-ci passe en mode compact
