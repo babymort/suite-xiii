@@ -2010,7 +2010,7 @@ var XRED = (function () {
 // CONTRÔLE XIII — ⚙️ Paramètres
 (function () {
     if (typeof XSET === 'undefined' || typeof checks !== 'function') return;
-    XSET.init({ app: 'controle', title: 'CONTRÔLE', version: 'v1.8', theme: { get: () => prefs.theme, set: t => { prefs.theme = t; applyTheme(); savePrefs(); } },
+    XSET.init({ app: 'controle', title: 'CONTRÔLE', version: 'v1.9', theme: { get: () => prefs.theme, set: t => { prefs.theme = t; applyTheme(); savePrefs(); } },
         help: [{ icon: '✅', label: 'Comment ça marche ?', sub: 'Vérification de tous les outils avant le tournage', run: () => alert('CONTRÔLE XIII lit les données de tous les outils (CALL SHEETO, CASTO, DEVISO, RESSOURCO, REPERO, MATOS, PACKINGO, PLANO, SYNO, TRANSPORTO, BACKUPO…) et liste ce qui est prêt, à vérifier ou bloquant pour la période choisie. Cliquez une ligne pour ouvrir l\'outil.') }],
         sections: [], apply() { } });
 })();
@@ -4122,10 +4122,10 @@ XENC.init('controle');
     const app = (location.pathname.split('/').pop() || 'index').replace(/\.html$/, '').slice(0, 40) || 'index';
     const ua = (() => { const u = navigator.userAgent; const b = /Edg\//.test(u) ? 'Edge' : /Chrome\//.test(u) ? 'Chrome' : /Firefox\//.test(u) ? 'Firefox' : /Safari\//.test(u) ? 'Safari' : 'Autre'; const o = /iPhone|iPad/.test(u) ? 'iOS' : /Android/.test(u) ? 'Android' : /Mac OS/.test(u) ? 'Mac' : /Windows/.test(u) ? 'Windows' : 'Linux'; return b + ' · ' + o; })();
     const seen = {}; let sent = 0;
-    const IGN = /ResizeObserver loop|Script error\.?$|extension:\/\/|NetworkError|Failed to fetch|Load failed|AbortError|The user aborted/i;
+    const IGN = /ResizeObserver loop|Script error\.?$|extension:\/\/|NetworkError|Failed to fetch|Load failed|AbortError|The user aborted|\[object ErrorEvent\]/i; // ErrorEvent : relais vide d'un worker, sans information
     const clean = s => String(s || '').replace(/https?:\/\/[^\s)]+\/([^\/\s)]+)/g, '$1').replace(/[\w.+-]+@[\w-]+\.[\w.]+/g, '[e-mail]').replace(/\b\d{6,}\b/g, '[n]').slice(0, 400);
     function send(msg, src) {
-        msg = clean(msg); if (!msg || IGN.test(msg)) return; const k = msg + '|' + src; if (seen[k]) { seen[k]++; return; } if (sent >= 5) return; seen[k] = 1; sent++;
+        msg = clean(msg); if (!msg || IGN.test(msg) || window.__xdiag) return; const k = msg + '|' + src; // __xdiag : diagnostic en cours (échecs attendus) if (seen[k]) { seen[k]++; return; } if (sent >= 5) return; seen[k] = 1; sent++;
         setTimeout(() => { try { fetch('https://abvvsoccbdftticlmpgi.supabase.co/rest/v1/client_errors', { method: 'POST', keepalive: true, headers: { apikey: 'sb_publishable_wB5kIn6lQtO-YWdUlt3gfg_IBIgBMuL', 'Content-Type': 'application/json', Prefer: 'return=minimal' }, body: JSON.stringify({ app, msg, src: clean(src).slice(0, 200), site, ua, n: Math.min(50, seen[k]) }) }).catch(() => { }); } catch (e) { } }, 3000);
     }
     addEventListener('error', e => { if (!e || !e.message) return; send(e.message, (e.filename || '').split('/').pop() + ':' + (e.lineno || 0)); });
@@ -7129,7 +7129,7 @@ const XGATE = (() => {
     ['syno', 'plano', 'packingo', 'lumo', 'sono'].forEach(a => { SPECIAL[a + '>matos'] = () => { const F = fn('xiiiToMatos'); return F ? F() : false; }; });
     if (window.XPASS) Object.keys(XPASS.R).forEach(k => { SPECIAL[k] = () => XPASS.send(k); }); // passerelles saison 4 (boîte de réception)
     const can = k => SPECIAL[k] && (window.XPASS && XPASS.has(k) || k !== 'soustitro>graphico' || fn('setView')) && (!/>deviso$/.test(k) || k === 'matos>deviso' || ((k === 'lumo>deviso' || k === 'sono>deviso') && fn('openSendToDeviso')) || fn(k === 'callsheeto>deviso' ? 'openSendCrewToDeviso' : 'openMaterialExport'));
-    const nameRx = a => new RegExp('\\b' + XLINKS.T[a][1].replace(/ /g, '\\s?').replace('Ô', '[OÔ]') + '\\b', 'i');
+    const nameRx = a => XLINKS.T[a] ? new RegExp('\\b' + XLINKS.T[a][1].replace(/ /g, '\\s?').replace('Ô', '[OÔ]') + '\\b', 'i') : /(?!)/; // outil sans fiche XLINKS : aucun bouton à chercher
     function findBtn(to) {
         const rx = nameRx(to);
         const B = [...document.querySelectorAll('button,[role=button]')].filter(b => !b.closest('#xgt-ov,#xb-menu'));
@@ -10203,6 +10203,17 @@ var XZZB = window.XZZB || (() => {
         tick();
     }
     try { if (document.getElementById('top-bar') || document.getElementById('toolbar') || document.readyState === 'loading') shield(); } catch (e) { }
+    // ---------- stockage du navigateur plein : prévenir au lieu d'afficher « Enregistré » ----------
+    // (contrôle ZZ : DEVISO, STORYBOARDO… affichaient « Enregistré » alors que l'écriture avait échoué)
+    (function quota() {
+        const S = window.Storage && Storage.prototype; if (!S || S.__xzzq) return; S.__xzzq = 1; const set = S.setItem; let shown = 0;
+        const warn = () => { const now = Date.now(); const st = document.getElementById('save-state'); if (st) { st.textContent = '⚠️ Non enregistré : stockage plein'; st.style.color = '#ff8a65'; }
+            if (now - shown < 20000 || !document.body) return; shown = now; let b = document.getElementById('xzz-quota');
+            if (!b) { b = document.createElement('div'); b.id = 'xzz-quota'; b.setAttribute('role', 'alert'); b.style.cssText = 'position:fixed;left:50%;top:64px;transform:translateX(-50%);z-index:2147483002;max-width:min(560px,94vw);background:#3a1d14;color:#ffe0d6;border:1px solid #ff8a65;border-radius:10px;padding:10px 14px;font:13px/1.45 system-ui,sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.5)';
+                b.innerHTML = '<b>⚠️ Stockage du navigateur plein</b> : vos dernières modifications ne sont <b>pas enregistrées</b> ici. Exportez le projet (⬇️ fichier .json) pour ne rien perdre, puis libérez de la place (anciens projets, photos, ⚙️ › stockage). <button style="margin-left:6px">OK</button>';
+                b.querySelector('button').onclick = () => b.remove(); document.body.appendChild(b); } };
+        S.setItem = function (k, v) { try { return set.call(this, k, v); } catch (e) { if (e && (e.name === 'QuotaExceededError' || e.code === 22 || /quota/i.test(e.message || '')) && this === window.localStorage && !/^__/.test(k)) { try { warn(); setTimeout(warn, 400); } catch (x) { } } throw e; } };
+    })();
     // ---------- 🗒️ Nouveau ▾ ----------
     function nouveau() {
         if (done.nv) return; const z = $('xb-tool'); if (!z) return;

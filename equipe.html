@@ -1093,10 +1093,10 @@ const XLIVE = (() => {
     const app = (location.pathname.split('/').pop() || 'index').replace(/\.html$/, '').slice(0, 40) || 'index';
     const ua = (() => { const u = navigator.userAgent; const b = /Edg\//.test(u) ? 'Edge' : /Chrome\//.test(u) ? 'Chrome' : /Firefox\//.test(u) ? 'Firefox' : /Safari\//.test(u) ? 'Safari' : 'Autre'; const o = /iPhone|iPad/.test(u) ? 'iOS' : /Android/.test(u) ? 'Android' : /Mac OS/.test(u) ? 'Mac' : /Windows/.test(u) ? 'Windows' : 'Linux'; return b + ' · ' + o; })();
     const seen = {}; let sent = 0;
-    const IGN = /ResizeObserver loop|Script error\.?$|extension:\/\/|NetworkError|Failed to fetch|Load failed|AbortError|The user aborted/i;
+    const IGN = /ResizeObserver loop|Script error\.?$|extension:\/\/|NetworkError|Failed to fetch|Load failed|AbortError|The user aborted|\[object ErrorEvent\]/i; // ErrorEvent : relais vide d'un worker, sans information
     const clean = s => String(s || '').replace(/https?:\/\/[^\s)]+\/([^\/\s)]+)/g, '$1').replace(/[\w.+-]+@[\w-]+\.[\w.]+/g, '[e-mail]').replace(/\b\d{6,}\b/g, '[n]').slice(0, 400);
     function send(msg, src) {
-        msg = clean(msg); if (!msg || IGN.test(msg)) return; const k = msg + '|' + src; if (seen[k]) { seen[k]++; return; } if (sent >= 5) return; seen[k] = 1; sent++;
+        msg = clean(msg); if (!msg || IGN.test(msg) || window.__xdiag) return; const k = msg + '|' + src; // __xdiag : diagnostic en cours (échecs attendus) if (seen[k]) { seen[k]++; return; } if (sent >= 5) return; seen[k] = 1; sent++;
         setTimeout(() => { try { fetch('https://abvvsoccbdftticlmpgi.supabase.co/rest/v1/client_errors', { method: 'POST', keepalive: true, headers: { apikey: 'sb_publishable_wB5kIn6lQtO-YWdUlt3gfg_IBIgBMuL', 'Content-Type': 'application/json', Prefer: 'return=minimal' }, body: JSON.stringify({ app, msg, src: clean(src).slice(0, 200), site, ua, n: Math.min(50, seen[k]) }) }).catch(() => { }); } catch (e) { } }, 3000);
     }
     addEventListener('error', e => { if (!e || !e.message) return; send(e.message, (e.filename || '').split('/').pop() + ':' + (e.lineno || 0)); });
