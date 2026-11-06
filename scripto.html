@@ -11892,7 +11892,7 @@ var XZZB = window.XZZB || (() => {
         const tick = () => { const now = performance.now();
             if (!shownAt && !H.classList.contains('xb0')) shownAt = now;
             if (now - t0 > 6000 || (shownAt && now - shownAt > 2500)) return free();
-            if (shownAt) { const s = sig(); if (s === last) { if (!stable) stable = now; if (now - stable > 300) return free(); } else { last = s; stable = 0; } }
+            if (shownAt) { const s = sig(); if (s === last) { if (!stable) stable = now; if (now - stable > 200) return free(); } else { last = s; stable = 0; } }
             setTimeout(tick, 50); };
         tick();
     }
