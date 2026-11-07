@@ -81,6 +81,7 @@ var XZZB = window.XZZB || (() => {
         vierge.before(n); L.forEach(b => { b.style.display = 'none'; b.dataset.xzz = 'nv'; });
         n.onclick = e => menu(e, n, '🗒️ Nouveau', 'Partir d’une page blanche ou d’un exemple à adapter.', L.map(b => [b.id === 'xmd-btn' || /📐/.test(ico(b)) ? '🧩' : ico(b).slice(0, 3), tip(b), () => b.click()]));
     }
+    window.XZZB_MENU = (...a) => menu(...a); // réutilisé par la barre du haut commune (XTOP)
     function menu(e, at, title, sub, items) {
         e.stopPropagation(); let m = $('xb-menu'); if (m) { m.remove(); return; }
         const r = at.getBoundingClientRect(); m = document.createElement('div'); m.id = 'xb-menu';
