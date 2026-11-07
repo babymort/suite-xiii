@@ -1265,5 +1265,9 @@ boot();
 })();
 
 </script>
+<!-- SUITE XIII:MFIX:START --><style>/* téléphone (phase ZZ) : cibles tactiles d'au moins 38 px de haut */
+body button,body [role=button],body select{min-height:38px}body button.m-x,body .close-x{min-height:0}</style>
+<script>/* téléphone (phase ZZ) : aucun texte sous 11 px (libellés des compteurs, légendes) */
+(function(){var fix=function(){var a=document.querySelectorAll('body *');for(var i=0;i<a.length&&i<6000;i++){var e=a[i];if(e.dataset.mf||!e.firstChild)continue;var t=0;for(var c=e.firstChild;c;c=c.nextSibling)if(c.nodeType===3&&c.textContent.trim().length>1){t=1;break}if(!t)continue;var f=parseFloat(getComputedStyle(e).fontSize);if(f&&f<11){e.style.fontSize='11px';e.dataset.mf=1}}};var T=null,run=function(){clearTimeout(T);T=setTimeout(fix,120)};if(document.readyState==='loading')addEventListener('DOMContentLoaded',run);else run();try{new MutationObserver(run).observe(document.documentElement,{childList:true,subtree:true})}catch(e){}})();</script><!-- SUITE XIII:MFIX:END -->
 </body>
 </html>
