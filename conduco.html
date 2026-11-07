@@ -5378,7 +5378,7 @@ var XRED = (function () {
     const typeOpts = () => TYPES.map(t => [t.id, t.ico + ' ' + t.name]);
 
     const CFG = {
-        app: 'conduco', title: 'CONDUCO', version: 'v36',
+        app: 'conduco', title: 'CONDUCO', version: 'v37',
         theme: { get: () => prefs.theme === 'light' ? 'light' : 'dark', set: t => { prefs.theme = t; applyTheme(); savePrefs(); } },
         hide: ['#settings-btn'],
         // ancien ⚙️ masqué ; zoom/horloge alignés à gauche du nouveau ⚙️ (hors badge Netlify) ; panneau de propriétés raccourci ; ⚙️ absent du Direct

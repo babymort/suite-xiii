@@ -2720,7 +2720,7 @@ var XRED = (function () {
         if (ch) { try { dirty(); renderAll(); } catch (e) { } }
     }
     XSET.init({
-        app: 'cadro', title: 'CADRO', version: 'v1.15',
+        app: 'cadro', title: 'CADRO', version: 'v1.16',
         css: '#content{padding-bottom:70px}',
         theme: { get: () => prefs.theme === 'light' ? 'light' : 'dark', set: t => { if ((prefs.theme === 'light' ? 'light' : 'dark') !== t) toggleTheme(); } },
         hide: ['#toolbar button[onclick="toggleTheme()"]', '#toolbar button[onclick="openGuide()"]'],

@@ -3045,7 +3045,7 @@ var XRED = (function () {
 (function () {
     if (typeof XSET === 'undefined' || typeof XCAT === 'undefined') return;
     XSET.init({
-        app: 'catalogue', title: 'CATALOGUE', version: 'v1.13',
+        app: 'catalogue', title: 'CATALOGUE', version: 'v1.14',
         theme: { get: () => prefs.theme, set: t => { prefs.theme = t; applyTheme(); savePrefs(); } },
         help: [{ icon: '🗃️', label: 'Comment ça marche ?', sub: 'Catalogue commun, insertion dans les outils, partage', run: () => modal('<h3>🗃️ Catalogue matériel<span class="close-x" onclick="closeModal()">✕</span></h3><p>Chaque équipement saisi ici une seule fois est disponible dans <b>SYNO</b> (nœud avec ses ports), <b>PLANO</b> (placé sur le plan), <b>LUMO</b> (projecteur et puissance), <b>SONO</b> (patch), <b>PACKINGO</b> (caisse, poids) et <b>DEVISO</b> (ligne de devis et prix) par le bouton 🗃️ Catalogue de chaque outil.</p><p>Avec le ☁️ Drive du projet relié, le catalogue se partage avec l\'équipe comme un outil.</p><p>Raccourci : <b>N</b> nouvel équipement.</p><div class="mb-actions"><button onclick="closeModal()">Compris</button></div>') }],
         sections: [], apply() { }

@@ -4601,7 +4601,7 @@ var XRED = (function () {
         return p;
     };
     XSET.init({
-        app: 'packingo', title: 'PACKINGO', version: 'v35',
+        app: 'packingo', title: 'PACKINGO', version: 'v36',
         theme: { get: () => prefs.theme === 'light' ? 'light' : 'dark', set: t => { if ((prefs.theme === 'light' ? 'light' : 'dark') !== t) toggleTheme(); } },
         hide: ['#toolbar button[onclick="toggleTheme()"]', '#toolbar button[onclick="openGuide()"]'],
         help: [{ icon: '📖', label: 'Guide d\'utilisation', sub: 'Caisses, chargement, vérification, rapport', run: openGuide }],
