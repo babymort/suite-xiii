@@ -1,0 +1,9 @@
+const { chromium } = require('playwright');
+(async () => { const b = await chromium.launch(); const ctx = await b.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 2 }); await ctx.route('**/*', r => r.request().url().startsWith('http://localhost') ? r.continue() : r.abort());
+  const pg = await ctx.newPage(); await pg.addInitScript(() => { try { localStorage.setItem('xiii.tips.off', 'true'); localStorage.setItem('xiii.tour2.plano.hide', '1'); localStorage.setItem('xiii.theme.mode', 'dark'); } catch (e) { } });
+  await pg.goto('http://localhost:8765/plano.html?desktop=1'); await pg.waitForTimeout(3000); await pg.evaluate(() => { document.querySelectorAll('#xt-root,#xtp').forEach(m => m.remove()); document.getElementById('xs-gear').click(); });
+  await pg.waitForTimeout(900); await pg.evaluate(() => { const h = [...document.querySelectorAll('#xs-panel summary,#xs-panel button,#xs-panel .xs-h,#xs-panel h3,#xs-panel div')].find(x => /^\s*🎨\s*Affichage/.test(x.textContent) && x.children.length < 4); if (h) h.click(); }); await pg.waitForTimeout(600);
+  const box = await pg.evaluate(() => { const b = document.querySelector('#xs-panel [data-xtm]'); if (!b) return null; const s = b.parentElement; s.scrollIntoView({ block: 'center' }); const r = s.getBoundingClientRect(); return { x: r.left - 90, y: r.top - 40, width: r.width + 110, height: r.height + 60 }; });
+  await pg.waitForTimeout(500); if (box) await pg.screenshot({ path: '/tmp/zz/themes.png', clip: box });
+  await pg.evaluate(() => { const b = [...document.querySelectorAll('#xs-panel [data-xtm]')].find(x => x.dataset.xtm === 'sepia'); b.click(); }); await pg.waitForTimeout(700);
+  if (box) await pg.screenshot({ path: '/tmp/zz/themes2.png', clip: box }); console.log(JSON.stringify(box)); await b.close(); })();

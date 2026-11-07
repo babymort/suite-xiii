@@ -1,0 +1,4 @@
+const { chromium } = require('playwright');
+(async () => { const b = await chromium.launch(); const pg = await b.newPage(); await pg.addInitScript(() => { try { localStorage.setItem('xiii.tips.off', 'true'); localStorage.setItem('xiii.tour2.plano.hide', '1'); } catch (e) { } });
+  await pg.goto('http://localhost:8765/plano.html?desktop=1'); await pg.waitForTimeout(3000); await pg.evaluate(() => document.getElementById('xs-gear').click()); await pg.waitForTimeout(800);
+  console.log(await pg.evaluate(() => { const s = document.querySelector('#xs-panel [data-xtm]').parentElement; const cs = getComputedStyle(s); const i = s.querySelector('.xgl-ind'); return [s.className, s.getAttribute('style'), cs.borderRadius, !!document.getElementById('xzz-css'), i && getComputedStyle(i).position].join(' | '); })); await b.close(); })();

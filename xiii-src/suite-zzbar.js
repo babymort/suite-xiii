@@ -41,6 +41,10 @@ var XZZB = window.XZZB || (() => {
                 b.querySelector('button').onclick = () => b.remove(); document.body.appendChild(b); } };
         S.setItem = function (k, v) { try { return set.call(this, k, v); } catch (e) { if (e && (e.name === 'QuotaExceededError' || e.code === 22 || /quota/i.test(e.message || '')) && this === window.localStorage && !/^__/.test(k)) { try { warn(); setTimeout(warn, 400); } catch (x) { } } throw e; } };
     })();
+    // 🖼️ photo de fond de l'accueil : aussi dans ⚙️ Réglages de l'accueil (le réglage vit dans 🎬 Projet XIII › Personnalisation)
+    if (APP === 'index') { window.XSET_HELP = window.XSET_HELP || []; if (!window.XSET_HELP.some(x => x.k === 'xpbg')) window.XSET_HELP.unshift({ k: 'xpbg', icon: '🖼️', label: 'Photo de fond de l’accueil', sub: 'Choisie par le Master pour toute l’équipe (avec le thème et les outils visibles)', run: () => { try { XPROJET.open('p'); } catch (e) { } } }); }
+    // sélecteurs sur plusieurs lignes (thèmes de ⚙️ Paramètres) : coins moins arrondis, posés en style direct (les skins utilisent des sélecteurs très précis)
+    try { new MutationObserver(() => { document.querySelectorAll('.xs-seg').forEach(g => { if (g.dataset.xzzr || !/wrap/.test(g.style.flexWrap)) return; g.dataset.xzzr = 1; g.style.setProperty('border-radius', '16px', 'important'); }); }).observe(document.documentElement, { childList: true, subtree: true }); } catch (e) { }
     // ---------- 🗒️ Nouveau ▾ ----------
     function nouveau() {
         if (done.nv) return; const z = $('xb-tool'); if (!z) return;
@@ -95,6 +99,12 @@ var XZZB = window.XZZB || (() => {
         st.textContent = // le resserrement par paliers reste celui de XFIT (corrigé : il voit maintenant les groupes qui débordent)
             
             '.xfit2 .btn-group,.xfit2 .tool-group,.xfit2 .view-group{width:auto!important}' + // largeur réservée aux libellés inutile quand ils sont masqués
+            'html body #xs-panel .xs-seg[style*="flex-wrap"],html body .xs-seg[style*="flex-wrap"]{border-radius:16px!important;justify-content:flex-start}.xs-seg>.xgl-ind{position:absolute;pointer-events:none}' + // sélecteur de thèmes sur plusieurs lignes : coins arrondis qui ne mangent plus les boutons des extrémités
+            (APP === 'index' ? 'body.xh.xpbg,body.xpbg{background:var(--xpbg) center/cover fixed no-repeat!important}' : '') + // photo de fond de l'accueil choisie par le Master : passe devant le dégradé du tableau de bord
+            '#top-bar #project-name,#toolbar #project-name{field-sizing:content;min-width:120px;max-width:300px}' +
+            '#top-bar button,#toolbar button{flex-shrink:0}#top-bar input[type=text],#top-bar input:not([type]),#toolbar input[type=text],#toolbar input:not([type]){flex-shrink:0;min-width:104px!important}' + // un champ (nom, « Votre nom ») ne se laisse plus écraser sous les boutons : la barre se resserre ou défile à la place
+ // nom du projet lisible en entier (dans la limite de la barre)
+            '#top-bar>#tabs-container,#top-bar>.tabs-container{flex-shrink:40!important;min-width:140px!important}#top-bar>div:last-child:not(.tabs-container):not(#tabs-container){flex-shrink:0!important}' + // les onglets (qui défilent) cèdent la place en premier, avant les boutons et le nom
             '#top-bar .tabs-container{min-width:0}#xzz-tg:empty,#xzz-tg:empty+.divider{display:none}' +
             '#toolbar button,#top-bar button{white-space:nowrap}' +
             '@media(max-width:1180px){#toolbar>.tb-label{display:none}}' +

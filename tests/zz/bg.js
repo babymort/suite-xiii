@@ -1,0 +1,13 @@
+const { chromium } = require('playwright');
+(async () => { const b = await chromium.launch(); const ctx = await b.newContext({ viewport: { width: 1440, height: 900 } }); await ctx.route('**/*', r => r.request().url().startsWith('http://localhost') ? r.continue() : r.abort());
+  const pg = await ctx.newPage(); const E = []; pg.on('pageerror', e => E.push(e.message)); pg.on('dialog', d => d.accept());
+  await pg.addInitScript(() => { try { localStorage.setItem('xiii.tips.off', 'true'); localStorage.setItem('xiii.tour2.index.hide', '1'); } catch (e) { } });
+  await pg.goto('http://localhost:8765/index.html'); await pg.waitForTimeout(3000); const F = () => pg.frames().find(f => /index\.html/.test(f.url())) || pg.mainFrame();
+  await F().evaluate(() => { document.querySelectorAll('#xt-root').forEach(m => m.remove()); const d = document.createElement('div'); d.id = 'tbg'; d.style.cssText = 'position:fixed;left:0;top:0;width:600px;z-index:999999;background:#222'; document.body.appendChild(d); XPCFG.mount(d); });
+  await pg.waitForTimeout(500); await F().setInputFiles('#xpc-file', '/tmp/zz/fond.jpg'); await pg.waitForTimeout(1200);
+  await F().evaluate(() => document.getElementById('xpc-save').click()); await pg.waitForTimeout(1500);
+  const st = await F().evaluate(() => (document.getElementById('xpc-st') || {}).textContent);
+  await pg.reload(); await pg.waitForTimeout(3500); await F().evaluate(() => document.querySelectorAll('#xt-root,#xtp').forEach(m => m.remove()));
+  const r = await F().evaluate(() => ({ cls: document.body.classList.contains('xpbg'), bg: getComputedStyle(document.body).backgroundImage.slice(0, 60), cfg: (localStorage.getItem('xiii.pcfg') || '').length }));
+  await F().evaluate(() => document.querySelectorAll('#xnw-ov').forEach(x => x.remove())); await pg.screenshot({ path: '/tmp/zz/accueil_fond.png' });
+  console.log(JSON.stringify({ st, r, E })); await b.close(); })();
