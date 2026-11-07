@@ -1,0 +1,3 @@
+const { chromium } = require('playwright');
+(async () => { const b = await chromium.launch(); const pg = await b.newPage(); await pg.goto('http://localhost:8766/repero.html?desktop=1'); await pg.waitForTimeout(2500);
+  console.log(await pg.evaluate(() => { openSend(); const fx = [...document.querySelectorAll('body > *')].filter(x => getComputedStyle(x).position === 'fixed' && x.offsetHeight > 100).map(x => (x.id || x.className) + ':' + /RESSOURCO/.test(x.textContent)); const m = document.querySelector('.mitem'); let p = m, chain = []; while (p && p !== document.body) { chain.push((p.id || p.className) + ':' + getComputedStyle(p).position); p = p.parentElement; } return JSON.stringify({ fx, chain }); })); await b.close(); })();

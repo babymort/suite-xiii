@@ -45,6 +45,28 @@ var XZZB = window.XZZB || (() => {
     if (APP === 'index') { window.XSET_HELP = window.XSET_HELP || []; if (!window.XSET_HELP.some(x => x.k === 'xpbg')) window.XSET_HELP.unshift({ k: 'xpbg', icon: '🖼️', label: 'Photo de fond de l’accueil', sub: 'Choisie par le Master pour toute l’équipe (avec le thème et les outils visibles)', run: () => { try { XPROJET.open('p'); } catch (e) { } } }); }
     // sélecteurs sur plusieurs lignes (thèmes de ⚙️ Paramètres) : coins moins arrondis, posés en style direct (les skins utilisent des sélecteurs très précis)
     try { new MutationObserver(() => { document.querySelectorAll('.xs-seg').forEach(g => { if (g.dataset.xzzr || !/wrap/.test(g.style.flexWrap)) return; g.dataset.xzzr = 1; g.style.setProperty('border-radius', '16px', 'important'); }); }).observe(document.documentElement, { childList: true, subtree: true }); } catch (e) { }
+    // ---------- 📥 arrivée depuis un autre outil (📤 Vers Suite XIII sans envoi direct) : #xfrom=<outil> ----------
+    // on ouvre l'import de cet outil s'il existe ici (« Depuis PLANO », « Importer depuis SYNO… »), sinon on dit ce qui est repris et comment
+    function xfrom() {
+        const m = /[#&]xfrom=([a-z]+)/.exec(location.hash || ''); if (!m || typeof XLINKS === 'undefined') return; const src = m[1];
+        try { history.replaceState(null, '', location.pathname + location.search + location.hash.replace(/[#&]?xfrom=[a-z]+/, '')); } catch (e) { }
+        const T = XLINKS.T, me = APP === 'calendrier' && /v=prod/.test(location.search) ? 'planno' : APP, nm = (T[src] || ['', src.toUpperCase()])[1], ic = (T[src] || ['📤'])[0];
+        const L = XLINKS.L.find(x => x[0] === src && x[1] === me), what = L ? L[2] : '';
+        const rx = new RegExp(nm.replace(/ /g, '\\s?').replace('Ô', '[OÔ]'), 'i');
+        const B = [...document.querySelectorAll('button,[role=button]')].filter(b => { const t = (b.title || '') + ' ' + (b.textContent || ''); return rx.test(t) && /(depuis|import|reprendre|charger|récupérer)/i.test(t) && !b.closest('#xb-menu,#xgt-ov'); });
+        const say = h => { document.querySelectorAll('#xzz-from').forEach(x => x.remove()); const d = document.createElement('div'); d.id = 'xzz-from'; d.setAttribute('role', 'status');
+            d.style.cssText = 'position:fixed;left:50%;top:64px;transform:translateX(-50%);z-index:9985;max-width:min(620px,94vw);background:#2b2723;color:#f2ede6;border:1px solid #f0b378;border-radius:12px;padding:10px 14px;font:13.5px/1.45 system-ui,sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.45)';
+            d.innerHTML = h + ' <button style="margin-left:8px;font:600 12.5px system-ui;background:#f0b378;color:#1b1206;border:0;border-radius:7px;padding:4px 10px;cursor:pointer">OK</button>'; d.querySelector('button').onclick = () => d.remove(); document.body.appendChild(d); setTimeout(() => d.remove(), 14000); };
+        const esc = s => String(s || '').replace(/[<>&]/g, '');
+        if (B.length) { const b = B.find(x => x.offsetParent) || B[0]; try { b.click(); } catch (e) { } say('📥 <b>Depuis ' + ic + ' ' + esc(nm) + '</b> : import ouvert — ' + esc(what || b.title || '')); return; }
+        // trajets vérifiés (phase ZZ) : lecture directe des données de la suite par l'outil d'arrivée
+        const AUTO = { jour: ['callsheeto', 'repero'], calendrier: ['planno', 'matos'], planno: [], storyboardo: ['cadro'], posto: ['scripto'], callsheeto: ['decoup'] };
+        const how = { 'decoup>callsheeto': 'le plan de travail de DECOUP est lu par 🤖 Préremplir et par les journées', 'scripto>posto': 'les prises cerclées de SCRIPTO sont lues au dérushage', 'cadro>storyboardo': 'le boîtier et la focale de CADRO sont repris dans 🎯 Optique de chaque plan' }[src + '>' + me];
+        if (src === 'importo') { say('📥 <b>Depuis 📥 IMPORTO</b> : les fichiers importés dans IMPORTO (' + esc(what) + ') sont versés ici au moment de l’import, depuis IMPORTO.'); return; }
+        if ((AUTO[me] || []).indexOf(src) > -1) { say('📥 <b>Depuis ' + ic + ' ' + esc(nm) + '</b>' + (what ? ' : ' + esc(what) : '') + '<br><small>' + (how ? esc(how) : 'Cet outil lit directement ces informations à l’ouverture') + ' : rien d’autre à faire.</small>'); return; }
+        say('📥 <b>Depuis ' + ic + ' ' + esc(nm) + '</b>' + (what ? ' : ' + esc(what) : '') + '<br><small>⚠️ Ce trajet n’a pas encore d’envoi automatique : reprenez ces éléments à la main pour l’instant (prévu dans une prochaine version).</small>');
+    }
+    if (typeof XBOOT !== 'undefined') XBOOT.ready(() => setTimeout(xfrom, 600), 2100); else addEventListener('load', () => setTimeout(xfrom, 2500));
     // ---------- 🗒️ Nouveau ▾ ----------
     function nouveau() {
         if (done.nv) return; const z = $('xb-tool'); if (!z) return;

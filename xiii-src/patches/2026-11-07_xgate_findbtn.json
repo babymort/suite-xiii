@@ -1,0 +1,1 @@
+[["return rx.test(t) && /(envoyer|vers|→|transmettre|créer les|à DOSSIER|à CALL)/i.test(t) && !/(depuis|ouvrir|journal|importer|reprendre|reçu)/i.test(t); };", "return rx.test(t) && /(envoyer|vers|→|transmettre|créer les|à DOSSIER|à CALL|chiffrer)/i.test(t) && !/(depuis|ouvrir|journal|importer|reprendre|reçu)/i.test(t); }; // « 💶 Chiffrer … dans DEVISO » est aussi un envoi", 30]]
