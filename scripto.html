@@ -2253,20 +2253,24 @@ function receiveDecoup(d) {
         if (mode === 'new') { const a = P.author; P = scNormalize(null); P.author = a || (d.project && d.project.author) || ''; P.name = (d.project && d.project.name) || ''; }
         if (!P.name && d.project && d.project.name) P.name = d.project.name;
         const day = mode === 'day' ? (() => { const x = scBlankDay(P); P.days.push(x); return x; })() : DAY();
-        const ids = [];
+        const ids = []; let upd = 0;
         list.forEach(x => {
             const s = scBlankShot(P, day.id); const v = { PT: 'PT', OTS: '2S', POV: 'GP', PS: 'PG' }[x.type] || x.valeur || x.type || '';
             Object.assign(s, { seq: String(x.seq || '1'), plan: String(x.num || ''), name: x.name || x.action || '', decor: x.decor || '', valeur: SC_VAL_OK.includes(v) ? v : '', focale: x.focale || '',
                 imgTags: x.mvt ? [SC_MV_TAG[x.mvt]].filter(Boolean) : ['Fixe'], image: [x.angleLbl && 'Angle : ' + x.angleLbl, x.mvtLbl && 'Mouvement : ' + x.mvtLbl, x.dur && 'Durée prévue : ' + x.dur + ' s'].filter(Boolean).join(' · '),
                 son: x.son || '', notes: [x.dialogue, x.notes].filter(Boolean).join('\n'), status: 'todo', takes: [], photos: [] });
+            s.xsrc = x.srcId ? 'dc:' + x.srcId : '';
+            if (mode === 'maj') { const o = P.shots.find(q => s.xsrc && q.xsrc === s.xsrc) || P.shots.find(q => !q.xsrc && s.plan && q.plan === s.plan && String(q.seq) === String(s.seq)); // 🔄 mise à jour : prises, statut et photos gardés
+                if (o) { ['seq', 'plan', 'name', 'decor', 'valeur', 'focale', 'imgTags', 'image', 'son', 'notes'].forEach(k => { o[k] = s[k]; }); o.xsrc = s.xsrc || o.xsrc; ids.push(o.id); upd++; return; } }
             P.shots.push(s); ids.push(s.id);
         });
         P.cur = { day: day.id, shot: ids[0] }; dirty(); renderAll(); setView('shot'); $('author-name').value = P.author || '';
-        toast('📝 ' + list.length + ' plans reçus de DECOUP TECHNICO dans ' + day.label + ' : prêts pour le tournage', 5000);
+        toast(mode === 'maj' ? '🔄 Script mis à jour depuis DECOUP TECHNICO : ' + upd + ' plan(s) actualisé(s)' + (list.length - upd ? ', ' + (list.length - upd) + ' ajouté(s) dans ' + day.label : '') + ', prises conservées' : '📝 ' + list.length + ' plans reçus de DECOUP TECHNICO dans ' + day.label + ' : prêts pour le tournage', 5000);
     };
     if (!P.shots.length) { go('cur'); return; }
-    modal('<h3>📝 Découpage reçu<span class="close-x" onclick="closeModal()">✕</span></h3><p>« <b>' + esc(d.title || 'Découpage') + '</b> » : ' + list.length + ' plans de DECOUP TECHNICO XIII.</p><div class="mb-actions" style="justify-content:flex-start;flex-wrap:wrap"><button class="btn-big" id="rd-cur">➕ Dans ' + esc(DAY().label) + '</button><button id="rd-day">📅 Nouvelle journée</button><button class="btn-danger" id="rd-new">♻️ Nouveau script</button><button onclick="closeModal()">Annuler</button></div>');
-    $('rd-cur').onclick = () => { closeModal(); go('cur'); }; $('rd-day').onclick = () => { closeModal(); go('day'); }; $('rd-new').onclick = () => { closeModal(); go('new'); };
+    const known = list.filter(x => P.shots.some(q => (x.srcId && q.xsrc === 'dc:' + x.srcId) || (!q.xsrc && x.num && q.plan === String(x.num) && String(q.seq) === String(x.seq || '1')))).length; // déjà reçus : mise à jour plutôt que doublon
+    modal('<h3>📝 Découpage reçu<span class="close-x" onclick="closeModal()">✕</span></h3><p>« <b>' + esc(d.title || 'Découpage') + '</b> » : ' + list.length + ' plans de DECOUP TECHNICO XIII.</p><div class="mb-actions" style="justify-content:flex-start;flex-wrap:wrap">' + (known ? '<button class="btn-big" id="rd-maj">🔄 Mettre à jour (' + known + ' plan(s) déjà reçu(s), prises conservées)</button>' : '') + '<button class="' + (known ? '' : 'btn-big') + '" id="rd-cur">➕ Dans ' + esc(DAY().label) + '</button><button id="rd-day">📅 Nouvelle journée</button><button class="btn-danger" id="rd-new">♻️ Nouveau script</button><button onclick="closeModal()">Annuler</button></div>');
+    $('rd-cur').onclick = () => { closeModal(); go('cur'); }; $('rd-day').onclick = () => { closeModal(); go('day'); }; $('rd-new').onclick = () => { closeModal(); go('new'); }; if ($('rd-maj')) $('rd-maj').onclick = () => { closeModal(); go('maj'); };
 }
 (function () {
     try {
@@ -8552,6 +8556,32 @@ var XPASS = window.XPASS || (() => {
             lab: k => k.n + ' équipement(s)',
             merge(k) { location.href = EQT[k.to](k.lid); setTimeout(() => location.reload(), 60); return 'Ouverture de l\'import…'; }
         },
+        // POSTO → PLANNO : étapes de post-production et livrables → tâches du planning (mises à jour au renvoi, jamais doublées)
+        'posto>planno': {
+            src() { const p = G(), S = (p.steps || []).filter(s => s.name && (s.start || s.due)).map(s => ({ k: 'st:' + s.id, name: s.name, who: s.who || '', start: s.start || s.due, end: s.due || s.start, status: s.status || 'todo', ms: false })),
+                    L = (p.deliv || []).filter(d => d.name && d.due).map(d => ({ k: 'lv:' + d.id, name: '📦 ' + d.name, who: d.to || '', start: d.due, end: d.due, status: d.status === 'done' || d.done ? 'done' : 'todo', ms: true }));
+                if (!S.length && !L.length) throw 'Aucune étape ni livrable daté dans POSTO'; return { items: S.concat(L), proj: p.name || '' }; },
+            lab: k => k.items.length + ' étape(s) et livrable(s) de post-production',
+            merge(k) { const p = G(); p.tasks = p.tasks || []; let a = 0, u = 0;
+                k.items.forEach(i => { const tag = 'posto:' + i.k, o = p.tasks.find(t => t.xsrc === tag) || p.tasks.find(t => !t.xsrc && F(t.name) === F(i.name) && (t.phase === 'post' || t.phase === 'livraison'));
+                    const val = { name: i.name, start: i.start, end: i.end, status: i.status, ms: i.ms, phase: i.ms ? 'livraison' : 'post' };
+                    if (o) { Object.assign(o, { start: val.start, end: val.end, status: val.status, xsrc: tag }); if (i.who && !(o.who || []).length) o.who = [i.who]; u++; }
+                    else { p.tasks.push(Object.assign({ id: id(), who: i.who ? [i.who] : [], xsrc: tag }, val)); a++; } });
+                return (a ? a + ' tâche(s) ajoutée(s)' : '') + (a && u ? ', ' : '') + (u ? u + ' tâche(s) mise(s) à jour (dates, état)' : '') + ' dans le planning'; }
+        },
+        // MOODO → REPERO : planches « Lieu / décor » → lieux à voir (pistes d'adresses, ambiance, contraintes), une seule fois par planche
+        'moodo>repero': {
+            src() { const p = G(), B = (p.boards || []).filter(b => b.type === 'lieu' && b.name);
+                if (!B.length) throw 'Aucune planche « Lieu / décor » dans MOODO'; const fi = b => b.fiche || {};
+                return { items: B.map(b => ({ k: b.id, name: b.name, pistes: String(fi(b).pistes || '').trim(), notes: [fi(b).type && 'Type : ' + fi(b).type, fi(b).ambiance && 'Ambiance : ' + fi(b).ambiance, fi(b).lumiere && 'Lumière : ' + fi(b).lumiere, fi(b).contraintes && 'Contraintes : ' + fi(b).contraintes].filter(Boolean).join(' · ') })), proj: p.name || '' }; },
+            lab: k => k.items.length + ' décor(s) recherché(s)',
+            merge(k) { const p = G(); p.spots = p.spots || []; let a = 0, u = 0;
+                k.items.forEach(i => { const tag = 'moodo:' + i.k, o = p.spots.find(s => s.xsrc === tag), line = (i.pistes.split(/\n/)[0] || '').trim(), adr = /\d/.test(line) ? line : '';
+                    const note = '🎨 MOODO — ' + (i.notes || 'planche décor') + (i.pistes ? ' · Pistes : ' + i.pistes : '');
+                    if (o) { o.notes = String(o.notes || '').replace(/🎨 MOODO — [^\n]*/, '').trim(); o.notes = (o.notes ? o.notes + '\n' : '') + note; u++; return; }
+                    p.spots.push({ id: id(), name: i.name, address: adr, city: '', cp: '', lat: null, lon: null, cat: 'decor', status: 'avoir', date: '', access: '', owner: '', phone: '', email: '', notes: note, rating: 0, chk: {}, chkN: {}, photos: [], tech: {}, radius: 1500, hosp: '', src: null, created: new Date().toISOString(), xsrc: tag }); a++; });
+                return (a ? a + ' lieu(x) « à voir » ajouté(s)' : '') + (a && u ? ', ' : '') + (u ? u + ' mis à jour' : '') + ' — à placer sur la carte (adresse)'; }
+        },
         'repero>transporto': {
             src() { const p = G(), A = (p.spots || []).filter(s => s.status !== 'ecarte' && (s.address || s.city)), K = A.filter(s => s.status === 'retenu'), L = (K.length ? K : A).map(s => ({ name: s.name || 'Lieu', addr: [s.address, s.cp, s.city].filter(Boolean).join(' '), date: s.date || '' })); if (!L.length) throw 'Aucun lieu avec une adresse dans REPERO'; return { items: L }; },
             lab: k => k.items.length + ' lieu(x) de tournage',
@@ -8885,11 +8915,21 @@ const XGATE = (() => {
         const sc = b => (to === 'dossier' && /📚/.test(b.textContent) ? 4 : 0) + (/envoyer/i.test(txt(b)) ? 1 : 0) + (rx.test(b.textContent) ? 2 : 0);
         return B.filter(ok).sort((a, b) => sc(b) - sc(a))[0] || null;
     }
+    // fenêtre d'envoi à plusieurs destinations (CASTO, REPERO…) : on ne garde cochée que la destination choisie dans 📤 Vers Suite XIII
+    function pickIn(to) { try {
+        const nm = XLINKS.T[to] ? XLINKS.T[to][1] : to, rx = nameRx(to), all = Object.keys(XLINKS.T).filter(a => a !== to).map(a => nameRx(a));
+        const inFixed = el => { for (let x = el; x && x !== document.body; x = x.parentElement) if (getComputedStyle(x).position === 'fixed') return x; return null; };
+        const boxes = [...document.querySelectorAll('label')].filter(l => l.offsetParent && l.querySelector('input[type=checkbox]') && inFixed(l)), o = (boxes.find(l => rx.test(l.textContent)) && inFixed(boxes.find(l => rx.test(l.textContent)))) || [...document.querySelectorAll('body > *')].reverse().find(x => getComputedStyle(x).position === 'fixed' && x.offsetHeight > 100 && rx.test(x.textContent)); if (!o) return;
+        const mine = boxes.filter(l => rx.test(l.textContent)), others = boxes.filter(l => !rx.test(l.textContent) && all.some(r => r.test(l.textContent)));
+        if (mine.length) { const set = (l, v) => { const i = l.querySelector('input[type=checkbox]'); if (i.checked !== v) { i.checked = v; i.dispatchEvent(new Event('change', { bubbles: true })); i.dispatchEvent(new Event('input', { bubbles: true })); } }; mine.forEach(l => set(l, true)); others.forEach(l => set(l, false)); return; }
+        const rows = [...o.querySelectorAll('[onclick],[data-to],[data-t],[data-a],[role=button],.row,div')].filter(r => r.offsetParent && r.children.length < 8 && rx.test((r.querySelector('b,strong,h4') || {}).textContent || '') && !r.querySelector('input'));
+        const r = rows.sort((a, b) => a.textContent.length - b.textContent.length)[0]; if (r) r.click();
+    } catch (e) { } }
     function go(to) {
         const k = APP + '>' + to; try { if (can(k) && SPECIAL[k]()) { close(); return; } } catch (e) { }
         if (to === 'dossier') { const f = ['openSendToDossier', 'openSendDossier'].map(fn).find(Boolean); if (f) { close(); f(); return; } }
         const b = findBtn(to); close();
-        if (b) { b.click(); return; }
+        if (b) { b.click(); setTimeout(() => pickIn(to), 200); return; }
         if (to === 'dossier') { const d = [...document.querySelectorAll('button')].find(x => /📚/.test(x.textContent) && /DOSSIER/.test(x.textContent + x.title) && !/journal|ouvrir/i.test(x.textContent)); if (d) { d.click(); return; } }
         location.href = to + '.html#xfrom=' + APP; // l'outil d'arrivée ouvre son import depuis cet outil (ou explique ce qu'il reprend tout seul)
     }
