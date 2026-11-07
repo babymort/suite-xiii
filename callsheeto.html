@@ -9899,11 +9899,12 @@ var XPASS = window.XPASS || (() => {
                 return { u: U, n: X.reduce((a, f) => a + (+f.qty || 1), 0), proj: p.name || '' }; },
             lab: k => 'éclairage : ' + k.n + ' projecteur(s), ' + k.u.length + ' univers DMX',
             merge(k) { const A = typeof XCAT !== 'undefined' && XCAT.ADD && XCAT.ADD.syno; if (!A) throw 'SYNO pas encore prêt'; const U = k.u.length; let n = 0;
-                const add = it => { try { A.run(Object.assign({ brand: '', cat: 'lum' }, it)); n++; } catch (e) { } };
+                const have = [...document.querySelectorAll('.node .node-title')].map(t => F(t.textContent)), sk = []; // déjà dans le synoptique (renvoi) : on ne double pas
+                const add = it => { const base = F(it.model.split(' (')[0]); if (have.some(h => h.includes(base))) { sk.push(it.model.split(' (')[0]); return; } try { A.run(Object.assign({ brand: '', cat: 'lum' }, it)); n++; } catch (e) { } };
                 add({ model: 'Console lumière (' + U + ' univers DMX)', inp: 'ETHERNET', outp: 'DMX OUT ×' + Math.min(4, U) + '; ETHERNET' });
                 if (U > 1) { add({ model: 'Switch réseau lumière (Art-Net / sACN)', inp: 'ETHERNET', outp: 'ETHERNET ×' + (Math.ceil(U / 4) + 1) }); for (let i = 0; i < Math.ceil(U / 4); i++) add({ model: 'Nœud Art-Net / sACN ' + (i + 1) + ' (univers ' + k.u.slice(i * 4, i * 4 + 4).join(', ') + ')', inp: 'ETHERNET', outp: 'DMX OUT ×' + Math.min(4, U - i * 4) }); }
                 add({ model: 'Splitter DMX (' + k.n + ' projecteurs)', inp: 'DMX IN', outp: 'DMX OUT ×6' });
-                return n + ' élément(s) d\'éclairage ajoutés au synoptique (console, réseau DMX)'; }
+                return n + ' élément(s) d\'éclairage ajoutés au synoptique (console, réseau DMX)' + (sk.length ? ' · déjà présents, non doublés : ' + sk.join(', ') : ''); }
         },
         'cadro>matos': {
             src() { const S0 = typeof S !== 'undefined' ? S : (J('cadro.state', {}) || {}).S || {}; const L = []; if (S0.name) L.push({ name: String(S0.name).split(' · ')[0], qty: 1, grp: 'IMAGE' });
@@ -9940,7 +9941,9 @@ var XPASS = window.XPASS || (() => {
             lab: k => k.items.reduce((a, e) => a + e.qty, 0) + ' équipement(s) du devis « ' + (k.v || k.proj) + ' »',
             merge(k) { const p = G(); p.resas = p.resas || []; const used = new Set(), got = [], miss = [];
                 k.items.forEach(e => { const f = F(e.name); for (let i = 0; i < e.qty; i++) { const u = (p.units || []).find(u => !used.has(u.id) && u.state !== 'hs' && (F(u.name) === f || F(u.name).includes(f) || f.includes(F(u.name)))); if (u) { used.add(u.id); got.push(u.id); } else { miss.push(e.name); break; } } });
-                p.resas.push({ id: id(), proj: k.proj, from: k.from, to: k.to, status: 'option', units: got, note: '💶 DEVISO' + (k.v ? ' · ' + k.v : '') + (miss.length ? ' · absent du parc : ' + [...new Set(miss)].join(', ') : '') });
+                const tag = 'deviso:' + F(k.proj) + ':' + F(k.v || ''), old = p.resas.find(r => r.xsrc === tag && r.status === 'option'), note = '💶 DEVISO' + (k.v ? ' · ' + k.v : '') + (miss.length ? ' · absent du parc : ' + [...new Set(miss)].join(', ') : '');
+                if (old) { Object.assign(old, { from: k.from, to: k.to, units: got, note }); try { if (typeof setView === 'function') setTimeout(() => setView('resa'), 50); } catch (e) { } return 'Réservation en option mise à jour (même devis, pas de doublon) : ' + got.length + ' unité(s)' + (miss.length ? ', ' + new Set(miss).size + ' modèle(s) absent(s) du parc' : ''); }
+                p.resas.push({ id: id(), proj: k.proj, from: k.from, to: k.to, status: 'option', units: got, note, xsrc: tag });
                 try { if (typeof setView === 'function') setTimeout(() => setView('resa'), 50); } catch (e) { }
                 return 'Réservation en option créée : ' + got.length + ' unité(s)' + (miss.length ? ', ' + new Set(miss).size + ' modèle(s) absent(s) du parc' : '') + ' — conflits signalés dans 📅 Réservations'; }
         },
@@ -9962,9 +9965,9 @@ var XPASS = window.XPASS || (() => {
         'conduco>soustitro': {
             src() { const p = G(), t = (p.tabs || [])[p.active || 0] || (p.tabs || [])[0]; const L = ((t && t.items) || []).filter(i => i.script && i.script.trim()).map(i => ({ title: i.title || '', script: i.script.trim() })); if (!L.length) throw 'Aucun texte prompteur dans ce conducteur'; return { items: L, name: (p.name || '') + (t && t.name ? ' — ' + t.name : '') }; },
             lab: k => k.items.length + ' texte(s) prompteur',
-            merge(k) { const p = G(); p.cues = p.cues || []; let a = p.cues.reduce((m, c) => Math.max(m, +c.e || 0), 0) + (p.cues.length ? 1 : 0), n = 0;
-                k.items.forEach(it => it.script.split(/(?<=[.!?…])\s+|\n+/).map(x => x.trim()).filter(Boolean).forEach(x => { const len = Math.max(1.2, Math.min(7, x.length / 15)); p.cues.push({ id: id(), s: +a.toFixed(2), e: +(a + len).toFixed(2), t: typeof breakLines === 'function' ? breakLines(x) : x }); a += len + 0.1; n++; }));
-                if (!p.name) p.name = k.name; return n + ' sous-titre(s) préparé(s) à partir du prompteur (temps estimés, à caler sur le direct)'; }
+            merge(k) { const p = G(); p.cues = p.cues || []; const was = p.cues.filter(c => c.xsrc === 'conduco').length; p.cues = p.cues.filter(c => c.xsrc !== 'conduco'); let a = p.cues.reduce((m, c) => Math.max(m, +c.e || 0), 0) + (p.cues.length ? 1 : 0), n = 0; // renvoi : on remplace les sous-titres déjà préparés depuis CONDUCO au lieu de les doubler
+                k.items.forEach(it => it.script.split(/(?<=[.!?…])\s+|\n+/).map(x => x.trim()).filter(Boolean).forEach(x => { const len = Math.max(1.2, Math.min(7, x.length / 15)); p.cues.push({ id: id(), s: +a.toFixed(2), e: +(a + len).toFixed(2), t: typeof breakLines === 'function' ? breakLines(x) : x, xsrc: 'conduco' }); a += len + 0.1; n++; }));
+                if (!p.name) p.name = k.name; return n + ' sous-titre(s) préparé(s) à partir du prompteur (temps estimés, à caler sur le direct)' + (was ? ' — remplacent les ' + was + ' préparés au dernier envoi' : ''); }
         },
         'backupo>posto': {
             src() { const p = G(), D = {}; (p.days || []).forEach(d => D[d.id] = d.date || ''); const req = (p.prod && p.prod.copiesReq) || 2;
@@ -10139,7 +10142,7 @@ const XGATE = (() => {
         const rx = nameRx(to);
         const B = [...document.querySelectorAll('button,[role=button]')].filter(b => !b.closest('#xgt-ov,#xb-menu'));
         const txt = b => ((b.title || '') + ' ' + (b.textContent || '')).replace(/\s+/g, ' ');
-        const ok = b => { const t = txt(b); return rx.test(t) && /(envoyer|vers|→|transmettre|créer les|à DOSSIER|à CALL)/i.test(t) && !/(depuis|ouvrir|journal|importer|reprendre|reçu)/i.test(t); };
+        const ok = b => { const t = txt(b); return rx.test(t) && /(envoyer|vers|→|transmettre|créer les|à DOSSIER|à CALL|chiffrer)/i.test(t) && !/(depuis|ouvrir|journal|importer|reprendre|reçu)/i.test(t); }; // « 💶 Chiffrer … dans DEVISO » est aussi un envoi
         const sc = b => (to === 'dossier' && /📚/.test(b.textContent) ? 4 : 0) + (/envoyer/i.test(txt(b)) ? 1 : 0) + (rx.test(b.textContent) ? 2 : 0);
         return B.filter(ok).sort((a, b) => sc(b) - sc(a))[0] || null;
     }
@@ -10149,7 +10152,7 @@ const XGATE = (() => {
         const b = findBtn(to); close();
         if (b) { b.click(); return; }
         if (to === 'dossier') { const d = [...document.querySelectorAll('button')].find(x => /📚/.test(x.textContent) && /DOSSIER/.test(x.textContent + x.title) && !/journal|ouvrir/i.test(x.textContent)); if (d) { d.click(); return; } }
-        location.href = to + '.html';
+        location.href = to + '.html#xfrom=' + APP; // l'outil d'arrivée ouvre son import depuis cet outil (ou explique ce qu'il reprend tout seul)
     }
     // ---- ⚡ tout envoyer d'un coup (matériel → MATOS + PACKINGO + DEVISO) ----
     const ALLT = () => ['matos', 'packingo', 'deviso'].filter(t => t !== APP);
@@ -13594,6 +13597,23 @@ var XZZB = window.XZZB || (() => {
     if (APP === 'index') { window.XSET_HELP = window.XSET_HELP || []; if (!window.XSET_HELP.some(x => x.k === 'xpbg')) window.XSET_HELP.unshift({ k: 'xpbg', icon: '🖼️', label: 'Photo de fond de l’accueil', sub: 'Choisie par le Master pour toute l’équipe (avec le thème et les outils visibles)', run: () => { try { XPROJET.open('p'); } catch (e) { } } }); }
     // sélecteurs sur plusieurs lignes (thèmes de ⚙️ Paramètres) : coins moins arrondis, posés en style direct (les skins utilisent des sélecteurs très précis)
     try { new MutationObserver(() => { document.querySelectorAll('.xs-seg').forEach(g => { if (g.dataset.xzzr || !/wrap/.test(g.style.flexWrap)) return; g.dataset.xzzr = 1; g.style.setProperty('border-radius', '16px', 'important'); }); }).observe(document.documentElement, { childList: true, subtree: true }); } catch (e) { }
+    // ---------- 📥 arrivée depuis un autre outil (📤 Vers Suite XIII sans envoi direct) : #xfrom=<outil> ----------
+    // on ouvre l'import de cet outil s'il existe ici (« Depuis PLANO », « Importer depuis SYNO… »), sinon on dit ce qui est repris et comment
+    function xfrom() {
+        const m = /[#&]xfrom=([a-z]+)/.exec(location.hash || ''); if (!m || typeof XLINKS === 'undefined') return; const src = m[1];
+        try { history.replaceState(null, '', location.pathname + location.search + location.hash.replace(/[#&]?xfrom=[a-z]+/, '')); } catch (e) { }
+        const T = XLINKS.T, me = APP === 'calendrier' && /v=prod/.test(location.search) ? 'planno' : APP, nm = (T[src] || ['', src.toUpperCase()])[1], ic = (T[src] || ['📤'])[0];
+        const L = XLINKS.L.find(x => x[0] === src && x[1] === me), what = L ? L[2] : '';
+        const rx = new RegExp(nm.replace(/ /g, '\\s?').replace('Ô', '[OÔ]'), 'i');
+        const B = [...document.querySelectorAll('button,[role=button]')].filter(b => { const t = (b.title || '') + ' ' + (b.textContent || ''); return rx.test(t) && /(depuis|import|reprendre|charger|récupérer)/i.test(t) && !b.closest('#xb-menu,#xgt-ov'); });
+        const say = h => { document.querySelectorAll('#xzz-from').forEach(x => x.remove()); const d = document.createElement('div'); d.id = 'xzz-from'; d.setAttribute('role', 'status');
+            d.style.cssText = 'position:fixed;left:50%;top:64px;transform:translateX(-50%);z-index:9985;max-width:min(620px,94vw);background:#2b2723;color:#f2ede6;border:1px solid #f0b378;border-radius:12px;padding:10px 14px;font:13.5px/1.45 system-ui,sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.45)';
+            d.innerHTML = h + ' <button style="margin-left:8px;font:600 12.5px system-ui;background:#f0b378;color:#1b1206;border:0;border-radius:7px;padding:4px 10px;cursor:pointer">OK</button>'; d.querySelector('button').onclick = () => d.remove(); document.body.appendChild(d); setTimeout(() => d.remove(), 14000); };
+        const esc = s => String(s || '').replace(/[<>&]/g, '');
+        if (B.length) { const b = B.find(x => x.offsetParent) || B[0]; try { b.click(); } catch (e) { } say('📥 <b>Depuis ' + ic + ' ' + esc(nm) + '</b> : import ouvert — ' + esc(what || b.title || '')); return; }
+        say('📥 <b>Depuis ' + ic + ' ' + esc(nm) + '</b>' + (what ? ' : ' + esc(what) : '') + '<br><small>Ici, ces informations sont reprises automatiquement à l’ouverture (projet et données partagés de la suite) : rien d’autre à faire.</small>');
+    }
+    if (typeof XBOOT !== 'undefined') XBOOT.ready(() => setTimeout(xfrom, 600), 2100); else addEventListener('load', () => setTimeout(xfrom, 2500));
     // ---------- 🗒️ Nouveau ▾ ----------
     function nouveau() {
         if (done.nv) return; const z = $('xb-tool'); if (!z) return;
