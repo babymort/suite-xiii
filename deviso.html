@@ -14996,7 +14996,12 @@ var XZZB = window.XZZB || (() => {
             d.innerHTML = h + ' <button style="margin-left:8px;font:600 12.5px system-ui;background:#f0b378;color:#1b1206;border:0;border-radius:7px;padding:4px 10px;cursor:pointer">OK</button>'; d.querySelector('button').onclick = () => d.remove(); document.body.appendChild(d); setTimeout(() => d.remove(), 14000); };
         const esc = s => String(s || '').replace(/[<>&]/g, '');
         if (B.length) { const b = B.find(x => x.offsetParent) || B[0]; try { b.click(); } catch (e) { } say('📥 <b>Depuis ' + ic + ' ' + esc(nm) + '</b> : import ouvert — ' + esc(what || b.title || '')); return; }
-        say('📥 <b>Depuis ' + ic + ' ' + esc(nm) + '</b>' + (what ? ' : ' + esc(what) : '') + '<br><small>Ici, ces informations sont reprises automatiquement à l’ouverture (projet et données partagés de la suite) : rien d’autre à faire.</small>');
+        // trajets vérifiés (phase ZZ) : lecture directe des données de la suite par l'outil d'arrivée
+        const AUTO = { jour: ['callsheeto', 'repero'], calendrier: ['planno', 'matos'], planno: [], storyboardo: ['cadro'], posto: ['scripto'], callsheeto: ['decoup'] };
+        const how = { 'decoup>callsheeto': 'le plan de travail de DECOUP est lu par 🤖 Préremplir et par les journées', 'scripto>posto': 'les prises cerclées de SCRIPTO sont lues au dérushage', 'cadro>storyboardo': 'le boîtier et la focale de CADRO sont repris dans 🎯 Optique de chaque plan' }[src + '>' + me];
+        if (src === 'importo') { say('📥 <b>Depuis 📥 IMPORTO</b> : les fichiers importés dans IMPORTO (' + esc(what) + ') sont versés ici au moment de l’import, depuis IMPORTO.'); return; }
+        if ((AUTO[me] || []).indexOf(src) > -1) { say('📥 <b>Depuis ' + ic + ' ' + esc(nm) + '</b>' + (what ? ' : ' + esc(what) : '') + '<br><small>' + (how ? esc(how) : 'Cet outil lit directement ces informations à l’ouverture') + ' : rien d’autre à faire.</small>'); return; }
+        say('📥 <b>Depuis ' + ic + ' ' + esc(nm) + '</b>' + (what ? ' : ' + esc(what) : '') + '<br><small>⚠️ Ce trajet n’a pas encore d’envoi automatique : reprenez ces éléments à la main pour l’instant (prévu dans une prochaine version).</small>');
     }
     if (typeof XBOOT !== 'undefined') XBOOT.ready(() => setTimeout(xfrom, 600), 2100); else addEventListener('load', () => setTimeout(xfrom, 2500));
     // ---------- 🗒️ Nouveau ▾ ----------
