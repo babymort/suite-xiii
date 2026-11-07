@@ -47,6 +47,7 @@ var XZZB = window.XZZB || (() => {
     try { new MutationObserver(() => { document.querySelectorAll('.xs-seg').forEach(g => { if (g.dataset.xzzr || !/wrap/.test(g.style.flexWrap)) return; g.dataset.xzzr = 1; g.style.setProperty('border-radius', '16px', 'important'); }); }).observe(document.documentElement, { childList: true, subtree: true }); } catch (e) { }
     // ---------- 📥 arrivée depuis un autre outil (📤 Vers Suite XIII sans envoi direct) : #xfrom=<outil> ----------
     // on ouvre l'import de cet outil s'il existe ici (« Depuis PLANO », « Importer depuis SYNO… »), sinon on dit ce qui est repris et comment
+    const H0 = location.hash || ''; // adresse d'arrivée, lue avant que les outils ne la nettoient
     function xfrom() {
         const m = /[#&]xfrom=([a-z]+)/.exec(location.hash || ''); if (!m || typeof XLINKS === 'undefined') return; const src = m[1];
         try { history.replaceState(null, '', location.pathname + location.search + location.hash.replace(/[#&]?xfrom=[a-z]+/, '')); } catch (e) { }
@@ -64,6 +65,7 @@ var XZZB = window.XZZB || (() => {
         const how = { 'decoup>callsheeto': 'le plan de travail de DECOUP est lu par 🤖 Préremplir et par les journées', 'scripto>posto': 'les prises cerclées de SCRIPTO sont lues au dérushage', 'cadro>storyboardo': 'le boîtier et la focale de CADRO sont repris dans 🎯 Optique de chaque plan' }[src + '>' + me];
         if (src === 'importo') { say('📥 <b>Depuis 📥 IMPORTO</b> : les fichiers importés dans IMPORTO (' + esc(what) + ') sont versés ici au moment de l’import, depuis IMPORTO.'); return; }
         if ((AUTO[me] || []).indexOf(src) > -1) { say('📥 <b>Depuis ' + ic + ' ' + esc(nm) + '</b>' + (what ? ' : ' + esc(what) : '') + '<br><small>' + (how ? esc(how) : 'Cet outil lit directement ces informations à l’ouverture') + ' : rien d’autre à faire.</small>'); return; }
+        if (/[#&]xlink=/.test(H0) || (window.XPASS && XPASS.R && XPASS.R[src + '>' + me])) return; // envoi direct (#xlink) ou boîte de réception : l'outil affiche lui-même ce qu'il a reçu (l'avertissement s'affichait à tort, ex. SYNO → PLANO) // passerelle par boîte de réception : son propre bandeau « Reçu de … » s'affiche (l'avertissement s'affichait à tort, ex. SYNO → PLANO)
         say('📥 <b>Depuis ' + ic + ' ' + esc(nm) + '</b>' + (what ? ' : ' + esc(what) : '') + '<br><small>⚠️ Ce trajet n’a pas encore d’envoi automatique : reprenez ces éléments à la main pour l’instant (prévu dans une prochaine version).</small>');
     }
     if (typeof XBOOT !== 'undefined') XBOOT.ready(() => setTimeout(xfrom, 600), 2100); else addEventListener('load', () => setTimeout(xfrom, 2500));

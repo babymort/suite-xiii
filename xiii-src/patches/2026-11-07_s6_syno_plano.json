@@ -1,0 +1,1 @@
+[["        'plano>deviso': thenClick('openMaterialExport', '#xpk-deviso'),", "        'plano>deviso': thenClick('openMaterialExport', '#xpk-deviso'),\n        'syno>plano': thenClick('openMaterialExport', '#xl-plano'), // le bouton « 📐 Envoyer vers PLANO » est dans la fenêtre 📋 Liste du matériel (sinon : arrivée sans rien, avec un faux avertissement)", 30]]
