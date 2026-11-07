@@ -70,7 +70,28 @@ body.nocrumb #empty{inset:46px 0 0}#empty{position:absolute;inset:72px 0 0;displ
 #pick{top:auto;bottom:66px;left:8px;right:8px;width:auto;grid-template-columns:repeat(3,1fr)}#pmenu{max-width:calc(100vw - 16px)}
 }
 .t .prs{display:flex;align-items:center;margin-left:auto;margin-right:2px;flex:none;pointer-events:none}.t .prs u{display:inline-grid;place-items:center;width:17px;height:17px;border-radius:50%;color:#fff;font:700 8px/1 system-ui,sans-serif;text-decoration:none;border:1.5px solid rgba(20,18,16,.9);margin-left:-5px;box-sizing:border-box}.t .prs u:first-child{margin-left:0}.t .prs u.ed{box-shadow:0 0 0 1.5px #ff9800}
+
+/* ---- Saison 6 : thème « ◼️ Sobre » et thème de la suite repris par la barre d'onglets ---- */
+:root[data-skin=sobre]{--tabon:#16171b;--bg:#0e0f12;--glass:#121317;--line:#1f2126;--txt:#ececee;--dim:#858991;--acc:#ff8a3d;--acc2:#f0b429}
+:root[data-skin=sobre] *,:root[data-skin=sobre] *::before,:root[data-skin=sobre] *::after{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;text-shadow:none!important}
+:root[data-skin=sobre] #bar{background:var(--bg)!important;border-bottom:1px solid var(--line)!important;box-shadow:none!important}
+:root[data-skin=sobre] #bar::after{background:var(--line)!important;opacity:1!important}
+:root[data-skin=sobre] .t{background-image:none!important;border-radius:8px 8px 0 0}
+:root[data-skin=sobre] .t:hover{background:#121317!important}
+:root[data-skin=sobre] .t.on{background:var(--tabon)!important;box-shadow:inset 0 -2px 0 var(--acc),inset 0 3px 0 var(--pc)!important}
+:root[data-skin=sobre] .t.on::before,:root[data-skin=sobre] .t.on>b::before,:root[data-skin=sobre] .t .gl{display:none!important}
+:root[data-skin=sobre] #home img,:root[data-skin=sobre] .ld img{filter:none!important}
+:root[data-skin=sobre] #proj{border-radius:8px!important;background:#16171b!important;border-color:#2a2c32!important}:root[data-skin=sobre] #proj i,:root[data-skin=sobre] .t i,:root[data-skin=sobre] .t em{box-shadow:none!important}
+:root[data-skin=sobre] #crumb{background:var(--bg)!important}
+:root[data-skin=sobre] #prev,:root[data-skin=sobre] #pmenu,:root[data-skin=sobre] #pick{background:#121317!important;border:1px solid #2a2c32!important;box-shadow:none!important;border-radius:10px!important}
+:root[data-skin=sobre] #pick button,:root[data-skin=sobre] #pmenu button{border-radius:8px!important}
+:root[data-skin=sobre] .ld{background:var(--bg)!important}:root[data-skin=sobre] .ld b{animation:none!important;background:none!important;color:var(--acc)!important;-webkit-text-fill-color:var(--acc)!important}
+:root[data-skin=sobre] #sdiv{background:linear-gradient(90deg,transparent 5px,var(--line) 5px,var(--line) 7px,transparent 7px)!important}
 </style><link rel="icon" type="image/png" href="xiii-icon-192.png">
+<script>// thème de la suite (⚙️ › Thème) repris par la barre d'onglets : clair / sombre / Sobre…, mis à jour dès qu'il change dans un outil
+(function(){var SK={w2k:'light',xp:'light',cyber:'dark',rainbow:'dark',mac9:'light',term:'dark',sepia:'light',regie:'dark',soleil:'light',gb:'light',sobre:'dark'},R=document.documentElement;
+function ap(){var m='';try{m=localStorage.getItem('xiii.theme.mode')||'';}catch(e){}var b=m==='auto'||!m?'':(SK[m]||m);if(b==='light'||b==='dark')R.setAttribute('data-theme',b);else R.removeAttribute('data-theme');if(SK[m])R.setAttribute('data-skin',m);else R.removeAttribute('data-skin');}
+ap();addEventListener('storage',function(e){if(!e.key||e.key==='xiii.theme.mode')ap();});})();</script>
 </head><body>
 <div id="bar"><button id="home" title="Accueil SUITE XIII"><img src="logos/index.png" alt="" onerror="this.replaceWith(document.createTextNode('XIII'))"></button><button id="proj" title="Projet XIII en cours · changer, créer"><i></i><span></span>▾</button><div id="tabs"><span id="ind"></span></div><button id="net" title=""></button><button id="add" title="Nouvel onglet (Accueil) · clic droit : choisir un outil">＋</button></div>
 <div id="crumb"></div><div id="pick"></div><div id="pmenu"></div><div id="prev"></div>

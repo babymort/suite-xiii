@@ -2439,7 +2439,7 @@ var XRED = (function () {
         try { savePrefs(); renderQueue(); } catch (e) { }
     }
     XSET.init({
-        app: 'encodo', title: 'ENCODO', version: 'v1.19',
+        app: 'encodo', title: 'ENCODO', version: 'v1.20',
         help: [{ icon: '📖', label: 'Comment convertir', sub: 'Glisser, choisir, régler, convertir', run: () => toast('Glissez vos fichiers, choisissez Vidéo / Audio / Image / PDF puis une fonction, ajustez les réglages à droite et lancez ▶️ Convertir (Ctrl+Entrée).', 9000) }],
         sections: [
             { id: 'out', icon: '📁', title: 'Fichiers produits', open: true, desc: 'Nom et téléchargement des fichiers convertis.', fields: [
@@ -4197,7 +4197,7 @@ const XSPACE = (() => {
 //  • Focus clavier visible partout.
 // =====================================================================
 const XUX = (() => {
-    const SK = ['w2k', 'xp', 'cyber', 'rainbow', 'mac9', 'term', 'sepia', 'regie', 'soleil', 'gb'].map(k => ':not(.x' + k + ')').join('');
+    const SK = ['w2k', 'xp', 'cyber', 'rainbow', 'mac9', 'term', 'sepia', 'regie', 'soleil', 'gb', 'sobre'].map(k => ':not(.x' + k + ')').join('');
     const D = 'body' + SK + ':not(.light-theme)', L = 'body' + SK + '.light-theme';
     const KF = 'xiii.ux.fs', KC = 'xiii.ux.hc';
     const J = (k, d) => { try { const v = localStorage.getItem(k); return v == null ? d : v; } catch (e) { return d; } };
@@ -4364,7 +4364,7 @@ XCONF.init('encodo');
 //  • progression lumineuse : signale au bandeau d'onglets les exports en cours (barre orange sous l'onglet)
 // =====================================================================
 const XGLOW = (() => {
-    const SK = ['w2k', 'xp', 'cyber', 'rainbow', 'mac9', 'term', 'sepia', 'regie', 'soleil', 'gb'].map(k => ':not(.x' + k + ')').join('');
+    const SK = ['w2k', 'xp', 'cyber', 'rainbow', 'mac9', 'term', 'sepia', 'regie', 'soleil', 'gb', 'sobre'].map(k => ':not(.x' + k + ')').join('');
     const D = 'body' + SK + ':not(.light-theme)', L = 'body' + SK + '.light-theme', A = 'body' + SK;
     const KI = 'xiii.ux.icons';
     const tb = s => s.split(',').map(x => x.trim()).map(x => [D + ' #top-bar ' + x, D + ' #toolbar ' + x]).flat().join(',');
@@ -6243,7 +6243,7 @@ const XTHEME = (() => {
     const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } };
     const mq = window.matchMedia ? matchMedia('(prefers-color-scheme: light)') : null;
     const mode = () => localStorage.getItem(K) || (J(SUITE, {}).globalTheme === 'light' ? 'light' : (J('hubXIII.prefs', {}).theme === 'light' ? 'light' : 'dark'));
-    const SKINS = { w2k: 'light', xp: 'light', cyber: 'dark', rainbow: 'dark', mac9: 'light', term: 'dark', sepia: 'light', regie: 'dark', soleil: 'light', gb: 'light' };
+    const SKINS = { w2k: 'light', xp: 'light', cyber: 'dark', rainbow: 'dark', mac9: 'light', term: 'dark', sepia: 'light', regie: 'dark', soleil: 'light', gb: 'light', sobre: 'dark' };
     const base = m => m === 'auto' ? (mq && mq.matches ? 'light' : 'dark') : SKINS[m] || m;
     function apply() {
         const m = mode(), b = base(m), s = J(SUITE, {});
@@ -6252,14 +6252,14 @@ const XTHEME = (() => {
         if (!document.body) return;
         document.body.classList.toggle('light-theme', b === 'light'); // y compris les outils sans bascule propre
         Object.keys(SKINS).forEach(k => document.body.classList.toggle('x' + k, m === k));
-        const meta = document.querySelector('meta[name=theme-color]'); if (meta) meta.content = ({ w2k: '#0a246a', xp: '#0a5fd8', cyber: '#0d0221', rainbow: '#1a1033', mac9: '#dddddd', term: '#000000', sepia: '#e9dcc2', regie: '#000000', soleil: '#ffffff', gb: '#9bbc0f' })[m] || (b === 'light' ? '#f4f1ec' : '#222222');
+        const meta = document.querySelector('meta[name=theme-color]'); if (meta) meta.content = ({ w2k: '#0a246a', xp: '#0a5fd8', cyber: '#0d0221', rainbow: '#1a1033', mac9: '#dddddd', term: '#000000', sepia: '#e9dcc2', regie: '#000000', soleil: '#ffffff', gb: '#9bbc0f', sobre: '#0e0f12' })[m] || (b === 'light' ? '#f4f1ec' : '#222222');
     }
-    function set(m) { try { localStorage.setItem(K, m); } catch (e) { } apply(); try { const T = { w2k: '🪟 Thème Win 2000', xp: '🟦 Thème Win XP', cyber: '🌆 Thème Cyberpunk', rainbow: '🌈 Thème Rainbow', mac9: '🍎 Thème Mac OS 9', term: '📟 Thème Terminal', sepia: '🎞️ Thème Pellicule', regie: '🔴 Thème Régie nuit', soleil: '☀️ Thème Plein soleil', gb: '🎮 Thème Game Boy' }; if (T[m] && typeof toast === 'function') toast(T[m] + ' activé'); } catch (e) { } }
+    function set(m) { try { localStorage.setItem(K, m); } catch (e) { } apply(); try { const T = { w2k: '🪟 Thème Win 2000', xp: '🟦 Thème Win XP', cyber: '🌆 Thème Cyberpunk', rainbow: '🌈 Thème Rainbow', mac9: '🍎 Thème Mac OS 9', term: '📟 Thème Terminal', sepia: '🎞️ Thème Pellicule', regie: '🔴 Thème Régie nuit', soleil: '☀️ Thème Plein soleil', gb: '🎮 Thème Game Boy', sobre: '◼️ Thème Sobre' }; if (T[m] && typeof toast === 'function') toast(T[m] + ' activé'); } catch (e) { } }
     // ---------- ⚙️ Paramètres : les 4 thèmes à la place de Sombre / Clair ----------
     function inSettings() {
         const pan = document.getElementById('xs-panel'); if (!pan) return; const seg = pan.querySelector('[data-theme]'); if (!seg || seg.parentNode.dataset.xt) return;
         const box = seg.parentNode; box.dataset.xt = 1; const m = mode();
-        box.innerHTML = [['dark', '🌙 Sombre'], ['light', '☀️ Clair'], ['auto', '🖥️ Auto'], ['w2k', '🪟 Win 2000'], ['xp', '🟦 Win XP'], ['cyber', '🌆 Cyberpunk'], ['rainbow', '🌈 Rainbow'], ['mac9', '🍎 Mac OS 9'], ['term', '📟 Terminal'], ['sepia', '🎞️ Pellicule'], ['regie', '🔴 Régie nuit'], ['soleil', '🔆 Plein soleil'], ['gb', '🎮 Game Boy']].map(([k, l]) => '<button type="button" data-xtm="' + k + '" class="' + (m === k ? 'on' : '') + '" title="' + ({ auto: 'Suit le réglage clair / sombre de l\'ordinateur', w2k: 'L\'esprit Windows 2000 : gris, biseaux, barres de titre bleues', xp: 'L\'esprit Windows XP : bleu Luna, boutons arrondis, barre verte', cyber: 'Néons magenta et cyan sur fond nuit, typo technique', rainbow: 'Arc-en-ciel : dégradés animés et couleurs vives', mac9: 'L\'esprit Mac OS 9 Platinum : gris rayé, boutons arrondis', term: 'Vert phosphore sur noir, police à chasse fixe', sepia: 'Papier vieilli, tons sépia, perforations de pellicule', regie: 'Rouge sur noir : préserve la vision de nuit en régie ou en tournage nocturne', soleil: 'Contraste maximal et gros caractères pour une tablette en extérieur', gb: 'Quatre verts, look pixel', dark: 'Thème sombre', light: 'Thème clair' })[k] + '">' + l + '</button>').join('');
+        box.innerHTML = [['dark', '🌙 Sombre'], ['light', '☀️ Clair'], ['auto', '🖥️ Auto'], ['sobre', '◼️ Sobre'], ['w2k', '🪟 Win 2000'], ['xp', '🟦 Win XP'], ['cyber', '🌆 Cyberpunk'], ['rainbow', '🌈 Rainbow'], ['mac9', '🍎 Mac OS 9'], ['term', '📟 Terminal'], ['sepia', '🎞️ Pellicule'], ['regie', '🔴 Régie nuit'], ['soleil', '🔆 Plein soleil'], ['gb', '🎮 Game Boy']].map(([k, l]) => '<button type="button" data-xtm="' + k + '" class="' + (m === k ? 'on' : '') + '" title="' + ({ auto: 'Suit le réglage clair / sombre de l\'ordinateur', w2k: 'L\'esprit Windows 2000 : gris, biseaux, barres de titre bleues', xp: 'L\'esprit Windows XP : bleu Luna, boutons arrondis, barre verte', cyber: 'Néons magenta et cyan sur fond nuit, typo technique', rainbow: 'Arc-en-ciel : dégradés animés et couleurs vives', mac9: 'L\'esprit Mac OS 9 Platinum : gris rayé, boutons arrondis', term: 'Vert phosphore sur noir, police à chasse fixe', sepia: 'Papier vieilli, tons sépia, perforations de pellicule', regie: 'Rouge sur noir : préserve la vision de nuit en régie ou en tournage nocturne', soleil: 'Contraste maximal et gros caractères pour une tablette en extérieur', gb: 'Quatre verts, look pixel', dark: 'Thème sombre', light: 'Thème clair' })[k] + '">' + l + '</button>').join('');
         box.style.flexWrap = 'wrap';
         box.querySelectorAll('[data-xtm]').forEach(b => b.onclick = () => { set(b.dataset.xtm); box.querySelectorAll('[data-xtm]').forEach(x => x.classList.toggle('on', x === b)); });
         const g = pan.querySelector('[data-global]'); if (g) { const row = g.closest('.xs-f') || g.parentNode; row.style.display = 'none'; } // un seul thème pour toute la suite
@@ -7741,7 +7741,7 @@ const XPCFG = (() => {
     const W = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } };
     const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     const drive = () => J('xiii.drive', null), master = () => { const c = drive(); return !c || !c.url || !!c.code; }; // sans Drive : réglage local
-    const THEMES = [['', '— libre (chacun son thème) —'], ['dark', '🌙 Sombre'], ['light', '☀️ Clair'], ['auto', '🖥️ Auto'], ['w2k', '🪟 Win 2000'], ['xp', '🟦 Win XP'], ['cyber', '🌆 Cyberpunk'], ['rainbow', '🌈 Rainbow'], ['mac9', '🍎 Mac OS 9'], ['term', '📟 Terminal'], ['sepia', '🎞️ Pellicule'], ['regie', '🎛️ Régie'], ['soleil', '🔆 Plein soleil'], ['gb', '🎮 Game Boy']];
+    const THEMES = [['', '— libre (chacun son thème) —'], ['dark', '🌙 Sombre'], ['light', '☀️ Clair'], ['auto', '🖥️ Auto'], ['sobre', '◼️ Sobre'], ['w2k', '🪟 Win 2000'], ['xp', '🟦 Win XP'], ['cyber', '🌆 Cyberpunk'], ['rainbow', '🌈 Rainbow'], ['mac9', '🍎 Mac OS 9'], ['term', '📟 Terminal'], ['sepia', '🎞️ Pellicule'], ['regie', '🎛️ Régie'], ['soleil', '🔆 Plein soleil'], ['gb', '🎮 Game Boy']];
     let APP = '';
     const cfg = () => J(K, {}) || {};
     // ---------- 🔐 outils par secteur ----------
@@ -11001,6 +11001,92 @@ var XZZB = window.XZZB || (() => {
     const go = () => setTimeout(start, 400);
     try { if (typeof XBOOT !== 'undefined' && XBOOT.ready) XBOOT.ready(go, 2960); else throw 0; } catch (e) { if (document.readyState === 'loading') addEventListener('DOMContentLoaded', go); else go(); }
     window.XA11Y2 = { contrast, resetContrast, names, layers };
+})();
+
+
+// =====================================================================
+//  SUITE XIII — XSOBRE : thème « ◼️ Sobre » (saison 6, design)
+//  Fond noir mat, lignes fines, aucune transparence, aucun flou, aucune lueur, aucun dégradé.
+//  Les couleurs de la suite restent : orange XIII pour l'action et l'état actif, ambre pour les repères.
+//  Choix : ⚙️ › Affichage › Thème › ◼️ Sobre (comme les autres thèmes, un seul réglage pour toute la suite).
+// =====================================================================
+(function () {
+    if (document.getElementById('xsobre-css')) return;
+    const B = 'html body.xsobre:not(#xs0):not(#xs1)'; // les :not(#…) donnent à ces règles la priorité sur celles des outils
+    const CSS = `
+${B}{color-scheme:dark;
+ --s-bg:#0e0f12;--s-bg2:#121317;--s-bg3:#16171b;--s-bg4:#1c1d22;--s-line:#1f2126;--s-line2:#2a2c32;--s-txt:#ececee;--s-mut:#a3a6ad;--s-dim:#858991;--s-acc:#ff8a3d;--s-acc2:#f0b429;--s-accbg:rgba(255,138,61,.13);
+ --bg-main:var(--s-bg);--bg-panel:var(--s-bg2);--bg-panel-alt:var(--s-bg2);--bg-header:var(--s-bg);--bg-topbar:var(--s-bg);--bg-input:var(--s-bg3);--bg-menu:var(--s-bg2);
+ --border-color:var(--s-line2);--border-soft:var(--s-line);--text-main:var(--s-txt);--text-muted:var(--s-mut);--text-dim:var(--s-dim);
+ --lib-item-bg:var(--s-bg2);--lib-item-border:var(--s-line);--tab-bg:var(--s-bg2);--row-bg:transparent;--row-alt:transparent;--row-hover:var(--s-bg3);
+ --accent:255,138,61;--accent-text:#ff9d5c;--x-acc:255,138,61;--x-acc-c:#ff8a3d;
+ --btn-bg:var(--s-bg3);--btn-bg-hover:var(--s-bg4);--btn-border:var(--s-line2);--btn-border-hover:#3b3e45;--btn-bg-active:var(--s-accbg);--btn-border-active:var(--s-acc);
+ --x-r-sm:6px;--x-r:8px;--x-r-lg:10px;--x-shadow:none;--x-font:system-ui,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+ --xh-glass:var(--s-bg2);--xh-line:var(--s-line2);--xh-txt:var(--s-txt);--xh-dim:var(--s-dim);
+ --wm:rgba(255,255,255,.08);--wm2:rgba(255,255,255,.05);
+ background:var(--s-bg)!important;background-image:none!important;font-family:var(--x-font)}
+/* rien de translucide, rien de flou, aucune lueur */
+${B} *,${B} *::before,${B} *::after{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;text-shadow:none!important}
+${B} #workspace,${B} #workspace-container,${B} #content,${B} #main-layout,${B} main,${B} #app{background-color:var(--s-bg)!important;background-image:none!important}
+/* barres du haut : à plat, une ligne fine dessous */
+${B} #top-bar,${B} #toolbar,${B} header{background:var(--s-bg)!important;background-image:none!important;border-bottom:1px solid var(--s-line)!important;box-shadow:none!important}
+${B} #toolbar{background:var(--s-bg)!important}
+/* boutons : carrés arrondis sombres, liseré fin ; l'état actif passe à l'orange */
+${B} button,${B} .btn,${B} select,${B} [role=button]:not(.xs-item):not(.card){box-shadow:none!important;background-image:none!important;filter:none!important}
+${B} #top-bar button,${B} #toolbar button,${B} .btn-group button,${B} .modal-box button,${B} [class$="-box"] button,${B} #xs-panel button:not(.xs-item),${B} .m-btn,${B} .xs-seg button{background:var(--s-bg3)!important;border:1px solid var(--s-line2)!important;color:var(--s-txt)!important;border-radius:8px!important}
+${B} #top-bar button:hover,${B} #toolbar button:hover,${B} .btn-group button:hover,${B} .modal-box button:hover,${B} [class$="-box"] button:hover,${B} #xs-panel button:not(.xs-item):hover,${B} .m-btn:hover{background:var(--s-bg4)!important;border-color:#3b3e45!important}
+${B} button.btn-active,${B} button.on,${B} button.active,${B} button[aria-pressed=true],${B} .xs-seg button.on,${B} .tab.active,${B} .tab.on{background:var(--s-accbg)!important;border-color:var(--s-acc)!important;color:#ffb27f!important}
+${B} button.btn-active svg.xgl-ic,${B} button.on svg.xgl-ic{stroke:var(--s-acc)!important}
+${B} .xgl-pri,${B} #top-bar button.xgl-pri,${B} #toolbar button.xgl-pri,${B} button.primary,${B} .m-btn.primary,${B} .xnw-b .ok{background:var(--s-acc)!important;border-color:var(--s-acc)!important;color:#140a03!important;border-radius:8px!important;font-weight:700}
+${B} .xgl-pri:hover,${B} button.primary:hover{background:#ff9b57!important;filter:none!important}
+${B} .xgl-ind{display:none!important}
+${B} .xs-seg{background:var(--s-bg)!important;border:1px solid var(--s-line2)!important;border-radius:9px!important;padding:2px!important;box-shadow:none!important}
+${B} .xs-seg button,${B} #xs-panel .xs-seg button{border:0!important;background:transparent!important;color:var(--s-mut)!important}${B} #xs-panel .xs-seg button:hover{color:var(--s-txt)!important;background:var(--s-bg3)!important}${B} .xs-seg button.on,${B} #xs-panel .xs-seg button.on{background:var(--s-accbg)!important;color:#ffb27f!important;box-shadow:inset 0 0 0 1px var(--s-acc)!important}
+/* champs */
+${B} input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]),${B} select,${B} textarea{background:var(--s-bg2)!important;border:1px solid var(--s-line2)!important;color:var(--s-txt)!important;border-radius:6px!important;box-shadow:none!important}
+${B} input:focus,${B} select:focus,${B} textarea:focus{border-color:var(--s-acc)!important}
+/* tableaux et listes : en-têtes en petites capitales grises, lignes séparées d'un trait */
+${B} th,${B} thead td,${B} .th,${B} [class*=thead] > *,${B} .col-head,${B} .hdr{text-transform:uppercase;letter-spacing:.07em;font-size:11px!important;font-weight:600!important;color:var(--s-dim)!important;background:var(--s-bg)!important;border-color:var(--s-line)!important}
+${B} td{border-color:var(--s-line)!important}${B} tr{background:transparent!important}${B} tbody tr:hover{background:var(--s-bg3)!important}
+${B} table{border-color:var(--s-line)!important}
+/* cartes, panneaux, fenêtres : à plat, bord fin, coins discrets */
+${B} .card,${B} .panel,${B} aside,${B} #library-panel,${B} #props,${B} .modal-box,${B} [class$="-box"],${B} #xs-panel,${B} .xs-sec,${B} #xb-menu,${B} #xt-panel,${B} .xnw,${B} .m-sheet,${B} .xm-d,${B} #xst,${B} #xst-b,${B} .xd-c,${B} .lib-item{background:var(--s-bg2)!important;background-image:none!important;border:1px solid var(--s-line)!important;box-shadow:none!important}
+${B} .card,${B} .modal-box,${B} [class$="-box"],${B} #xs-panel,${B} .xnw,${B} .m-sheet,${B} .xm-d,${B} .xd-c{border-radius:10px!important}
+${B} #library-panel,${B} aside{background:var(--s-bg)!important;border-width:0 1px 0 0!important}
+${B} .lib-item:hover,${B} .card:hover{border-color:var(--s-line2)!important;background:var(--s-bg3)!important;transform:none!important}
+${B} .modal-overlay,${B} [id$="-ov"],${B} #m-ov{background:rgba(0,0,0,.66)!important}
+/* onglets de projets dans la barre */
+${B} #tabs-container .tab{background:transparent!important;border:1px solid transparent!important;border-radius:8px!important;box-shadow:none!important}
+${B} #tabs-container .tab.active,${B} #tabs-container .tab.on{background:var(--s-bg3)!important;border-color:var(--s-line2)!important;box-shadow:inset 0 -2px 0 var(--s-acc)!important;color:var(--s-txt)!important}
+/* titres : blancs et nets, le repère orange reste sur le grand titre */
+${B} h1,${B} h2,${B} h3{letter-spacing:-.01em}
+${B} [id*=watermark] *{color:rgba(255,255,255,.07)!important}
+/* barres de défilement fines */
+${B} *{scrollbar-width:thin;scrollbar-color:#2a2c32 transparent}
+${B} ::-webkit-scrollbar{width:8px;height:8px}${B} ::-webkit-scrollbar-thumb{background:#2a2c32;border-radius:8px;border:0}${B} ::-webkit-scrollbar-track{background:transparent}
+${B} ::selection{background:rgba(255,138,61,.35)}
+/* bulles, toasts */
+${B} #toast,${B} .toast,${B} .xtoast{background:var(--s-bg3)!important;border:1px solid var(--s-line2)!important;color:var(--s-txt)!important;box-shadow:none!important;border-radius:8px!important}
+/* accueil : barre latérale et tableau de bord à plat */
+${B} #xh-nav,${B} #xh-nav *{background-image:none!important;box-shadow:none!important}
+${B} #xh-nav{background:var(--s-bg)!important;border-right:1px solid var(--s-line)!important;border-radius:0!important}
+${B} #xh-nav a,${B} #xh-nav button{border-radius:8px!important;border:1px solid transparent!important;background:transparent!important}
+${B} #xh-nav a:hover,${B} #xh-nav button:hover{background:var(--s-bg3)!important}
+${B} #xh-nav .on,${B} #xh-nav .active,${B} #xh-nav [aria-current]{background:var(--s-bg3)!important;border-color:var(--s-line2)!important;box-shadow:inset 2px 0 0 var(--s-acc)!important}
+${B}.xh,${B}.xh.xpbg{background:var(--s-bg)!important;background-image:none!important}
+${B} img{filter:none!important}
+${B} *:not(#xt-hole):not(.color-swatch):not(input):not(.xa2-keep){box-shadow:none!important}
+${B} #xh-nav{border-radius:0!important;width:200px}${B} #xh-ind{display:none!important}
+${B} #xh-nav button{border-radius:8px!important;color:var(--s-mut)!important;background:transparent!important}
+${B} #xh-nav button .i{background:var(--s-bg3)!important;border-radius:7px!important}
+${B} #xh-nav button:hover{background:var(--s-bg3)!important;color:var(--s-txt)!important}
+${B} #xh-nav button.on{width:auto!important;border-radius:8px!important;background:var(--s-bg3)!important;color:var(--s-txt)!important;box-shadow:inset 2px 0 0 var(--s-acc)!important}
+${B} #xh-nav button.on .i{background:var(--s-accbg)!important;color:var(--s-acc)!important}
+${B} #xh-nav .cur-proj{border-radius:8px!important;border-color:var(--s-line2)!important;background:var(--s-bg2)!important}
+${B} #xd-dash .xd-c{background:var(--s-bg2)!important;border:1px solid var(--s-line)!important;border-radius:10px!important}
+${B} #xs-gear,${B} #xbug-btn,${B} #xaic-btn{background:var(--s-bg3)!important;border:1px solid var(--s-line2)!important;color:var(--s-txt)!important}
+`;
+    const s = document.createElement('style'); s.id = 'xsobre-css'; s.textContent = CSS; (document.head || document.documentElement).appendChild(s);
 })();
 
 </script>
