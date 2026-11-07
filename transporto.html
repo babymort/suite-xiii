@@ -11079,7 +11079,10 @@ var XZZB = window.XZZB || (() => {
             '.xfit2 .btn-group,.xfit2 .tool-group,.xfit2 .view-group{width:auto!important}' + // largeur réservée aux libellés inutile quand ils sont masqués
             'html body #xs-panel .xs-seg[style*="flex-wrap"],html body .xs-seg[style*="flex-wrap"]{border-radius:16px!important;justify-content:flex-start}.xs-seg>.xgl-ind{position:absolute;pointer-events:none}' + // sélecteur de thèmes sur plusieurs lignes : coins arrondis qui ne mangent plus les boutons des extrémités
             (APP === 'index' ? 'body.xh.xpbg,body.xpbg{background:var(--xpbg) center/cover fixed no-repeat!important}' : '') + // photo de fond de l'accueil choisie par le Master : passe devant le dégradé du tableau de bord
-            '#top-bar #project-name,#toolbar #project-name{field-sizing:content;min-width:120px;max-width:300px}' + // nom du projet lisible en entier (dans la limite de la barre)
+            '#top-bar #project-name,#toolbar #project-name{field-sizing:content;min-width:120px;max-width:300px}' +
+            '#top-bar button,#toolbar button{flex-shrink:0}#top-bar input[type=text],#top-bar input:not([type]),#toolbar input[type=text],#toolbar input:not([type]){flex-shrink:0;min-width:104px!important}' + // un champ (nom, « Votre nom ») ne se laisse plus écraser sous les boutons : la barre se resserre ou défile à la place
+ // nom du projet lisible en entier (dans la limite de la barre)
+            '#top-bar>#tabs-container,#top-bar>.tabs-container{flex-shrink:40!important;min-width:140px!important}#top-bar>div:last-child:not(.tabs-container):not(#tabs-container){flex-shrink:0!important}' + // les onglets (qui défilent) cèdent la place en premier, avant les boutons et le nom
             '#top-bar .tabs-container{min-width:0}#xzz-tg:empty,#xzz-tg:empty+.divider{display:none}' +
             '#toolbar button,#top-bar button{white-space:nowrap}' +
             '@media(max-width:1180px){#toolbar>.tb-label{display:none}}' +
