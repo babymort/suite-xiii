@@ -90,8 +90,8 @@ body.nocrumb #empty{inset:46px 0 0}#empty{position:absolute;inset:72px 0 0;displ
 </style><link rel="icon" type="image/png" href="xiii-icon-192.png">
 <script>// thème de la suite (⚙️ › Thème) repris par la barre d'onglets : clair / sombre / Sobre…, mis à jour dès qu'il change dans un outil
 (function(){var SK={w2k:'light',xp:'light',cyber:'dark',rainbow:'dark',mac9:'light',term:'dark',sepia:'light',regie:'dark',soleil:'light',gb:'light',sobre:'dark'},R=document.documentElement;
-function ap(){var m='';try{m=localStorage.getItem('xiii.theme.mode')||'';}catch(e){}var b=m==='auto'||!m?'':(SK[m]||m);if(b==='light'||b==='dark')R.setAttribute('data-theme',b);else R.removeAttribute('data-theme');if(SK[m])R.setAttribute('data-skin',m);else R.removeAttribute('data-skin');}
-ap();addEventListener('storage',function(e){if(!e.key||e.key==='xiii.theme.mode')ap();});})();</script>
+function ap(){var m='';try{m=localStorage.getItem('xiii.theme.mode')||'';if(!m){var h=JSON.parse(localStorage.getItem('hubXIII.prefs')||'{}');m=h.theme==='light'?'light':'dark';}}catch(e){m='dark';}var b=m==='auto'?'':(SK[m]||m);if(b==='light'||b==='dark')R.setAttribute('data-theme',b);else R.removeAttribute('data-theme');if(SK[m])R.setAttribute('data-skin',m);else R.removeAttribute('data-skin');}
+ap();addEventListener('storage',function(e){if(!e.key||e.key==='xiii.theme.mode'||e.key==='hubXIII.prefs')ap();});})();</script>
 </head><body>
 <div id="bar"><button id="home" title="Accueil SUITE XIII"><img src="logos/index.png" alt="" onerror="this.replaceWith(document.createTextNode('XIII'))"></button><button id="proj" title="Projet XIII en cours · changer, créer"><i></i><span></span>▾</button><div id="tabs"><span id="ind"></span></div><button id="net" title=""></button><button id="add" title="Nouvel onglet (Accueil) · clic droit : choisir un outil">＋</button></div>
 <div id="crumb"></div><div id="pick"></div><div id="pmenu"></div><div id="prev"></div>

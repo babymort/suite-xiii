@@ -2978,11 +2978,14 @@ const XTOUR = (() => {
         if (/[#&]xtour=projet/.test(location.hash) && typeof XPROJET !== 'undefined') { history.replaceState(null, '', location.pathname); setTimeout(() => { XPROJET.open(); setTimeout(() => run('projet', T.projet, true), 300); }, 1500); return; }
         if (/[#&]xtour\b/.test(location.hash)) { history.replaceState(null, '', location.pathname + location.search); let n = 0; const go = () => { if (cfg.when && !cfg.when() && ++n < 40) { setTimeout(go, 500); return; } start(true); }; setTimeout(go, 1500); return; } // lien « tuto » depuis la recherche d'aide
         if (/[#&](j|join|ci|k)=/.test(location.hash) || /^(caisse|arrivee|kiosque|direct|vitrine)$/.test(APP)) return; // liens d'invitation / pages publiques : jamais de tuto par-dessus
-        if (hidden() || window.top !== window || /[?&](out|view|share|consult|print|embed)=/i.test(q) || /-m\.html?$/i.test(location.pathname) || (innerWidth < 760 && !cfg.mobile)) return;
+        const inShell = (() => { try { return window.parent === window.top && /espace\.html?$/i.test(window.parent.location.pathname); } catch (e) { return false; } })(); // outil ouvert dans un onglet de la suite
+        if (hidden() || (window.top !== window && !inShell) || /[?&](out|view|share|consult|print|embed)=/i.test(q) || /-m\.html?$/i.test(location.pathname) || (innerWidth < 760 && !cfg.mobile)) return;
         if (document.body.classList.contains('out-mode') || document.body.classList.contains('presentation-mode')) return;
         // attend qu'aucune fenêtre (accueil, reprise de projet…) ne soit ouverte avant de démarrer
-        const busy = () => Array.from(document.querySelectorAll('.modal-overlay, #modal, #xs-ov, #xai-ov, #xnw-ov, #xmt-ov, #xfin, #xg-ov, [role=dialog]')).some(e => !e.closest('#xt-root') && vis(e) && e.getBoundingClientRect().width > innerWidth * .4);
-        let tries = 0; const wait = () => { if (root || hidden()) return; if (!busy() && (!cfg.when || cfg.when())) { try { localStorage.setItem(KEY, '1'); } catch (e) { } start(); } else if (++tries < 600) setTimeout(wait, 700); };
+        const isGuide = e => /^\s*📖\s*Guide/.test(((e.querySelector && e.querySelector('h2,h3')) || {}).textContent || ''); // guide ouvert d'office sur un outil vide : la visite passe devant
+        const closeGuide = () => Array.from(document.querySelectorAll('.modal-overlay, #modal, #modal-ov')).filter(e => vis(e) && isGuide(e)).forEach(e => { const x = e.querySelector('.close-x,[data-x],.close,.modal-close'); if (x) x.click(); else if (typeof closeModal === 'function') closeModal(); else e.style.display = 'none'; });
+        const busy = () => Array.from(document.querySelectorAll('.modal-overlay, #modal, #xs-ov, #xai-ov, #xnw-ov, #xmt-ov, #xfin, #xg-ov, [role=dialog]')).some(e => !e.closest('#xt-root') && vis(e) && e.getBoundingClientRect().width > innerWidth * .4 && !isGuide(e) && !(e.closest('.modal-overlay, #modal, #modal-ov') && isGuide(e.closest('.modal-overlay, #modal, #modal-ov'))));
+        let tries = 0; const wait = () => { if (root || hidden()) return; if (!busy() && (!cfg.when || cfg.when())) { try { localStorage.setItem(KEY, '1'); } catch (e) { } closeGuide(); start(); } else if (++tries < 600) setTimeout(wait, 700); };
         setTimeout(wait, 1400);
     }
     if (document.readyState === 'complete') auto(); else addEventListener('load', auto);
@@ -3557,7 +3560,7 @@ var XRED = (function () {
     const _bp = blankProject;
     blankProject = function () { const p = _bp(); if (XSET.val('author')) p.author = XSET.val('author'); if (XSET.val('client')) p.client = XSET.val('client'); return p; };
     XSET.init({
-        app: 'moodo', title: 'MOODO', version: 'v1.19',
+        app: 'moodo', title: 'MOODO', version: 'v1.20',
         theme: { get: () => prefs.theme === 'light' ? 'light' : 'dark', set: t => { if ((prefs.theme === 'light' ? 'light' : 'dark') !== t) toggleTheme(); } },
         hide: ['#toolbar button[onclick="toggleTheme()"]', '#toolbar button[onclick="openGuide()"]'],
         help: [{ icon: '📖', label: 'Guide d\'utilisation', sub: 'Planches, images, sources, présentation, export', run: openGuide }],
@@ -8809,6 +8812,7 @@ const XGATE = (() => {
         'soustitro>graphico': () => { const F = fn('setView'); if (F) { F('live'); return true; } },
         'callsheeto>deviso': () => { const F = fn('openSendCrewToDeviso'); if (F) { F(); return true; } },
         'plano>deviso': thenClick('openMaterialExport', '#xpk-deviso'),
+        'syno>plano': thenClick('openMaterialExport', '#xl-plano'), // le bouton « 📐 Envoyer vers PLANO » est dans la fenêtre 📋 Liste du matériel (sinon : arrivée sans rien, avec un faux avertissement)
         'syno>deviso': thenClick('openMaterialExport', '#xpk-deviso')
     };
     ['syno', 'plano', 'packingo', 'lumo', 'sono', 'deviso'].forEach(a => { SPECIAL['matos>' + a] = () => { if (typeof PM === 'undefined') return false; PM.sendTo(a); return true; }; });
@@ -11837,6 +11841,7 @@ var XZZB = window.XZZB || (() => {
     try { new MutationObserver(() => { document.querySelectorAll('.xs-seg').forEach(g => { if (g.dataset.xzzr || !/wrap/.test(g.style.flexWrap)) return; g.dataset.xzzr = 1; g.style.setProperty('border-radius', '16px', 'important'); }); }).observe(document.documentElement, { childList: true, subtree: true }); } catch (e) { }
     // ---------- 📥 arrivée depuis un autre outil (📤 Vers Suite XIII sans envoi direct) : #xfrom=<outil> ----------
     // on ouvre l'import de cet outil s'il existe ici (« Depuis PLANO », « Importer depuis SYNO… »), sinon on dit ce qui est repris et comment
+    const H0 = location.hash || ''; // adresse d'arrivée, lue avant que les outils ne la nettoient
     function xfrom() {
         const m = /[#&]xfrom=([a-z]+)/.exec(location.hash || ''); if (!m || typeof XLINKS === 'undefined') return; const src = m[1];
         try { history.replaceState(null, '', location.pathname + location.search + location.hash.replace(/[#&]?xfrom=[a-z]+/, '')); } catch (e) { }
@@ -11854,6 +11859,7 @@ var XZZB = window.XZZB || (() => {
         const how = { 'decoup>callsheeto': 'le plan de travail de DECOUP est lu par 🤖 Préremplir et par les journées', 'scripto>posto': 'les prises cerclées de SCRIPTO sont lues au dérushage', 'cadro>storyboardo': 'le boîtier et la focale de CADRO sont repris dans 🎯 Optique de chaque plan' }[src + '>' + me];
         if (src === 'importo') { say('📥 <b>Depuis 📥 IMPORTO</b> : les fichiers importés dans IMPORTO (' + esc(what) + ') sont versés ici au moment de l’import, depuis IMPORTO.'); return; }
         if ((AUTO[me] || []).indexOf(src) > -1) { say('📥 <b>Depuis ' + ic + ' ' + esc(nm) + '</b>' + (what ? ' : ' + esc(what) : '') + '<br><small>' + (how ? esc(how) : 'Cet outil lit directement ces informations à l’ouverture') + ' : rien d’autre à faire.</small>'); return; }
+        if (/[#&]xlink=/.test(H0) || (window.XPASS && XPASS.R && XPASS.R[src + '>' + me])) return; // envoi direct (#xlink) ou boîte de réception : l'outil affiche lui-même ce qu'il a reçu (l'avertissement s'affichait à tort, ex. SYNO → PLANO) // passerelle par boîte de réception : son propre bandeau « Reçu de … » s'affiche (l'avertissement s'affichait à tort, ex. SYNO → PLANO)
         say('📥 <b>Depuis ' + ic + ' ' + esc(nm) + '</b>' + (what ? ' : ' + esc(what) : '') + '<br><small>⚠️ Ce trajet n’a pas encore d’envoi automatique : reprenez ces éléments à la main pour l’instant (prévu dans une prochaine version).</small>');
     }
     if (typeof XBOOT !== 'undefined') XBOOT.ready(() => setTimeout(xfrom, 600), 2100); else addEventListener('load', () => setTimeout(xfrom, 2500));
@@ -12159,6 +12165,65 @@ ${B} #xd-dash .xd-c{background:var(--s-bg2)!important;border:1px solid var(--s-l
 ${B} #xs-gear,${B} #xbug-btn,${B} #xaic-btn{background:var(--s-bg3)!important;border:1px solid var(--s-line2)!important;color:var(--s-txt)!important}
 `;
     const s = document.createElement('style'); s.id = 'xsobre-css'; s.textContent = CSS; (document.head || document.documentElement).appendChild(s);
+})();
+
+
+// =====================================================================
+//  SUITE XIII — XIDENT : « Votre nom » rangé dans une pastille (saison 6, ergonomie)
+//  Le champ du nom (auteur des documents : scripte, chargé·e de production…) prenait ~150 px dans la barre du haut,
+//  se faisait recouvrir par les boutons quand la barre se resserrait, et faisait doublon avec le profil de l'équipe.
+//  → une pastille compacte (initiales + prénom) ; un clic ouvre le champ, l'📇 annuaire et la 🎬 fiche projet.
+//  Le champ d'origine est déplacé tel quel (mêmes événements, même enregistrement) : rien ne change pour les outils.
+// =====================================================================
+(function () {
+    if (window.XIDENT) return;
+    const ini = n => { const p = String(n || '').trim().split(/\s+/).filter(Boolean); return p.length ? (p[0][0] + (p.length > 1 ? p[p.length - 1][0] : '')).toUpperCase() : ''; };
+    const short = n => { const p = String(n || '').trim().split(/\s+/).filter(Boolean); if (!p.length) return ''; const f = p[0][0].toUpperCase() + p[0].slice(1).toLowerCase(); return p.length > 1 ? f + ' ' + p[p.length - 1][0].toUpperCase() + '.' : f; };
+    function css() { if (document.getElementById('xid-css')) return; const s = document.createElement('style'); s.id = 'xid-css';
+        s.textContent = '#xid-chip{display:inline-flex!important;align-items:center;gap:7px;height:30px;max-width:150px;padding:0 10px 0 4px!important;border-radius:999px;cursor:pointer;font:600 12.5px system-ui,"Segoe UI",sans-serif;white-space:nowrap;flex:0 0 auto!important}' +
+            '#xid-chip i{font-style:normal;flex:0 0 auto;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:10.5px;font-weight:800;letter-spacing:.02em;background:rgba(240,179,120,.25);color:var(--text-main,#eee)}' +
+            '#xid-chip span{overflow:hidden;text-overflow:ellipsis}#xid-chip.empty span{opacity:.7;font-weight:500}#xid-chip.empty i{background:rgba(127,127,127,.25)}' +
+            '#xid-pop{position:fixed;z-index:100050;width:290px;padding:12px;border-radius:10px;background:var(--bg-panel,#2d2d2d);color:var(--text-main,#eee);border:1px solid var(--border-color,#444);box-shadow:0 12px 32px rgba(0,0,0,.4);font:13px system-ui,"Segoe UI",sans-serif}' +
+            '#xid-pop label{display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-dim,#999);margin:0 0 6px}#xid-pop .xid-f input{width:100%!important;box-sizing:border-box;min-width:0!important;height:32px;font-size:14px}' +
+            '#xid-pop .xid-f{display:block!important}#xid-pop p{margin:8px 0 10px;font-size:11.5px;line-height:1.4;color:var(--text-dim,#999)}#xid-pop .xid-a{display:flex;gap:6px}#xid-pop .xid-a>*{flex:1;display:flex!important;align-items:center;justify-content:center;gap:6px;height:30px;border-radius:8px;border:1px solid var(--border-color,#555);background:var(--bg-panel-alt,#252525);cursor:pointer;font-size:12.5px;color:inherit}' +
+            '#xid-pop .xid-a>*:hover{border-color:rgba(240,179,120,.7)}#xid-pop .xid-a .tb-label{margin:0!important;padding:0!important}' +
+            'body.light-theme #xid-pop{box-shadow:0 12px 32px rgba(0,0,0,.16)}';
+        document.head.appendChild(s); }
+    let wrap, inp, chip, pop, extras = [], home;
+    function label() { if (!chip) return; const v = (inp.value || '').trim(), ph = (inp.placeholder || 'Votre nom').replace(/\.{3}|…/g, '');
+        chip.classList.toggle('empty', !v); chip.querySelector('i').textContent = v ? ini(v) : '👤'; chip.querySelector('span').textContent = v ? short(v) : ph;
+        const role = extras.map(e => e.title || '').find(t => t && !/Fiche projet|Annuaire/.test(t));
+        chip.title = (v ? v : 'Nom non renseigné') + (role ? ' — ' + role : '') + ' · clic : modifier, annuaire, fiche projet'; }
+    function close() { if (!pop) return; home.after(inp); pop.remove(); pop = null; label(); }
+    function open() {
+        if (pop) { close(); return; }
+        pop = document.createElement('div'); pop.id = 'xid-pop'; pop.setAttribute('role', 'dialog'); pop.setAttribute('aria-label', 'Votre nom');
+        const role = extras.map(e => e.title || '').find(t => t && !/Fiche projet|Annuaire/.test(t));
+        pop.innerHTML = '<label>' + (role ? 'Nom · ' + role.replace(/[<>&]/g, '') : 'Votre nom') + '</label><div class="xid-f"></div><p>Repris de votre profil d’équipe quand il est renseigné. Il signe vos documents (PDF, rapports) et vos avis.</p><div class="xid-a"></div>';
+        pop.querySelector('.xid-f').appendChild(inp);
+        extras.forEach(e => { const t = e.title || ''; if (!/Fiche projet|Annuaire/.test(t)) return; const b = document.createElement('button'); b.type = 'button'; b.innerHTML = (/Annuaire/.test(t) ? '📇 Annuaire' : '🎬 Fiche projet'); b.title = t; b.onclick = () => { close(); e.click(); }; pop.querySelector('.xid-a').appendChild(b); });
+        if (!pop.querySelector('.xid-a').children.length) pop.querySelector('.xid-a').remove();
+        document.body.appendChild(pop); const r = chip.getBoundingClientRect(); pop.style.top = Math.round(r.bottom + 6) + 'px'; pop.style.left = Math.round(Math.max(8, Math.min(innerWidth - 298, r.right - 290))) + 'px';
+        setTimeout(() => { try { inp.focus(); inp.select(); } catch (e) { } }, 30);
+        inp.addEventListener('keydown', onEnter);
+    }
+    function onEnter(e) { if (e.key === 'Enter' || e.key === 'Escape') { e.preventDefault(); inp.dispatchEvent(new Event('change', { bubbles: true })); inp.removeEventListener('keydown', onEnter); close(); try { chip.focus(); } catch (x) { } } }
+    function mount() {
+        inp = document.getElementById('author-name'); if (!inp || document.getElementById('xid-chip')) return !!inp;
+        wrap = inp.closest('.xn-auth') || inp.parentElement; if (!wrap) return false; css();
+        extras = [...wrap.children].filter(x => x !== inp && x.tagName === 'SPAN');
+        chip = document.createElement('button'); chip.type = 'button'; chip.id = 'xid-chip'; chip.innerHTML = '<i></i><span></span>'; chip.onclick = e => { e.stopPropagation(); open(); };
+        home = document.createElement('span'); home.id = 'xid-home'; home.hidden = true;
+        inp.before(home); home.after(chip); extras.forEach(x => { x.dataset.xid = 1; x.style.setProperty('display', 'none', 'important'); }); inp.style.setProperty('display', 'none'); inp.dataset.xidHidden = 1;
+        // le champ s'affiche dans la fenêtre, caché dans la barre
+        const showFix = () => { inp.style.setProperty('display', pop ? 'block' : 'none'); };
+        const _o = open; open = function () { _o(); showFix(); }; const _c = close; close = function () { _c(); showFix(); };
+        document.addEventListener('mousedown', e => { if (pop && !pop.contains(e.target) && e.target !== chip && !chip.contains(e.target)) close(); }, true);
+        inp.addEventListener('input', label); setInterval(label, 1500); label(); return true;
+    }
+    let n = 0; const go = () => { if (!mount() && ++n < 20) setTimeout(go, 500); };
+    try { if (typeof XBOOT !== 'undefined' && XBOOT.ready) XBOOT.ready(() => setTimeout(go, 50), 2940); else throw 0; } catch (e) { addEventListener('load', () => setTimeout(go, 600)); }
+    window.XIDENT = { open: () => open(), close: () => close() };
 })();
 
 </script>

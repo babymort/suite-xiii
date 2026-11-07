@@ -989,11 +989,14 @@ const XTOUR = (() => {
         if (/[#&]xtour=projet/.test(location.hash) && typeof XPROJET !== 'undefined') { history.replaceState(null, '', location.pathname); setTimeout(() => { XPROJET.open(); setTimeout(() => run('projet', T.projet, true), 300); }, 1500); return; }
         if (/[#&]xtour\b/.test(location.hash)) { history.replaceState(null, '', location.pathname + location.search); let n = 0; const go = () => { if (cfg.when && !cfg.when() && ++n < 40) { setTimeout(go, 500); return; } start(true); }; setTimeout(go, 1500); return; } // lien « tuto » depuis la recherche d'aide
         if (/[#&](j|join|ci|k)=/.test(location.hash) || /^(caisse|arrivee|kiosque|direct|vitrine)$/.test(APP)) return; // liens d'invitation / pages publiques : jamais de tuto par-dessus
-        if (hidden() || window.top !== window || /[?&](out|view|share|consult|print|embed)=/i.test(q) || /-m\.html?$/i.test(location.pathname) || (innerWidth < 760 && !cfg.mobile)) return;
+        const inShell = (() => { try { return window.parent === window.top && /espace\.html?$/i.test(window.parent.location.pathname); } catch (e) { return false; } })(); // outil ouvert dans un onglet de la suite
+        if (hidden() || (window.top !== window && !inShell) || /[?&](out|view|share|consult|print|embed)=/i.test(q) || /-m\.html?$/i.test(location.pathname) || (innerWidth < 760 && !cfg.mobile)) return;
         if (document.body.classList.contains('out-mode') || document.body.classList.contains('presentation-mode')) return;
         // attend qu'aucune fenêtre (accueil, reprise de projet…) ne soit ouverte avant de démarrer
-        const busy = () => Array.from(document.querySelectorAll('.modal-overlay, #modal, #xs-ov, #xai-ov, #xnw-ov, #xmt-ov, #xfin, #xg-ov, [role=dialog]')).some(e => !e.closest('#xt-root') && vis(e) && e.getBoundingClientRect().width > innerWidth * .4);
-        let tries = 0; const wait = () => { if (root || hidden()) return; if (!busy() && (!cfg.when || cfg.when())) { try { localStorage.setItem(KEY, '1'); } catch (e) { } start(); } else if (++tries < 600) setTimeout(wait, 700); };
+        const isGuide = e => /^\s*📖\s*Guide/.test(((e.querySelector && e.querySelector('h2,h3')) || {}).textContent || ''); // guide ouvert d'office sur un outil vide : la visite passe devant
+        const closeGuide = () => Array.from(document.querySelectorAll('.modal-overlay, #modal, #modal-ov')).filter(e => vis(e) && isGuide(e)).forEach(e => { const x = e.querySelector('.close-x,[data-x],.close,.modal-close'); if (x) x.click(); else if (typeof closeModal === 'function') closeModal(); else e.style.display = 'none'; });
+        const busy = () => Array.from(document.querySelectorAll('.modal-overlay, #modal, #xs-ov, #xai-ov, #xnw-ov, #xmt-ov, #xfin, #xg-ov, [role=dialog]')).some(e => !e.closest('#xt-root') && vis(e) && e.getBoundingClientRect().width > innerWidth * .4 && !isGuide(e) && !(e.closest('.modal-overlay, #modal, #modal-ov') && isGuide(e.closest('.modal-overlay, #modal, #modal-ov'))));
+        let tries = 0; const wait = () => { if (root || hidden()) return; if (!busy() && (!cfg.when || cfg.when())) { try { localStorage.setItem(KEY, '1'); } catch (e) { } closeGuide(); start(); } else if (++tries < 600) setTimeout(wait, 700); };
         setTimeout(wait, 1400);
     }
     if (document.readyState === 'complete') auto(); else addEventListener('load', auto);
