@@ -4530,7 +4530,7 @@ var XRED = (function () {
     }
     const DEF_LAYERS = ['sun', 'noise', 'health', 'shops', 'air', 'drone', 'rights'];
     XSET.init({
-        app: 'repero', title: 'REPERO', version: 'v3.23',
+        app: 'repero', title: 'REPERO', version: 'v3.24',
         theme: { get: () => prefs.theme === 'light' ? 'light' : 'dark', set: t => { if ((prefs.theme === 'light' ? 'light' : 'dark') !== t) toggleTheme(); } },
         hide: ['#toolbar button[onclick="toggleTheme()"]', '#toolbar button[onclick="openGuide()"]'],
         help: [{ icon: '📖', label: 'Guide d\'utilisation', sub: 'Ajouter un lieu, analyse des alentours, fiche, comparaison, rapport', run: openGuide }],

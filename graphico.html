@@ -6280,7 +6280,7 @@ var XRED = (function () {
         const L = _al(type); const f = XSET.val('font'); if (L && f && /^(text|ticker|timer)$/.test(type) && L.font !== f) { L.font = f; try { touch(); renderProps(); } catch (e) { } } return L;
     };
     XSET.init({
-        app: 'graphico', title: 'GRAPHICO', version: 'v2.12',
+        app: 'graphico', title: 'GRAPHICO', version: 'v2.13',
         css: '#content{padding-bottom:70px}.gx-tl{margin-bottom:2px}',
         theme: { get: () => prefs.theme === 'light' ? 'light' : 'dark', set: t => { if ((prefs.theme === 'light' ? 'light' : 'dark') !== t) toggleTheme(); } },
         hide: ['#toolbar button[onclick="toggleTheme()"]', '#toolbar button[onclick="openGuide()"]'],
