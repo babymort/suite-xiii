@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bug &amp; Suggestion — SUITE XIII</title><link rel="icon" type="image/png" href="xiii-icon-192.png"><meta name="theme-color" content="#0e0f12">
+<style>
+@font-face{font-family:'Astoria';src:url(fonts/astoria.woff) format('woff');font-display:swap}
+:root{--bg:#0e0f12;--p1:#16171b;--p2:#1c1d22;--l:#2a2c32;--t:#ececee;--d:#9a9ea6;--a:#ff8a3d;--a2:#f0b429;--ok:#81c784;--bad:#ef9a9a;color-scheme:dark}
+html.light{--bg:#f6f5f2;--p1:#fff;--p2:#f1efeb;--l:#d5d1c9;--t:#1b1c1f;--d:#5d6168;--a:#c2570c;--a2:#a96d00;--ok:#2e7d32;--bad:#c62828;color-scheme:light}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font:14px/1.5 system-ui,"Segoe UI",Roboto,sans-serif;font-variant-numeric:tabular-nums}
+main{max-width:720px;margin:0 auto;padding:28px 18px 60px}
+header{display:flex;align-items:center;gap:12px;margin-bottom:18px}header a{color:var(--d);text-decoration:none;font-size:13px;border:1px solid var(--l);border-radius:8px;padding:6px 10px}header a:hover{color:var(--t)}
+h1{font-family:'Astoria',system-ui,sans-serif;font-weight:400;font-size:44px;line-height:1;margin:0;color:var(--a2);flex:1}
+p.lead{color:var(--d);margin:0 0 20px}
+.card{background:var(--p1);border:1px solid var(--l);border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:16px}
+label.f{display:flex;flex-direction:column;gap:6px;font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--d);font-weight:600}
+select,textarea,input[type=email],input[type=text]{font:14px system-ui,sans-serif;color:var(--t);background:var(--p2);border:1px solid var(--l);border-radius:8px;padding:9px 11px;width:100%;text-transform:none;letter-spacing:0}
+textarea{min-height:150px;resize:vertical;line-height:1.5}select:focus,textarea:focus,input:focus{outline:2px solid var(--a);outline-offset:0;border-color:transparent}
+.seg{display:flex;gap:8px}.seg button{flex:1;font:600 14px system-ui,sans-serif;color:var(--t);background:var(--p2);border:1px solid var(--l);border-radius:10px;padding:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px}
+.seg button small{font-weight:400;color:var(--d);font-size:12px}.seg button.on{border-color:var(--a);background:color-mix(in srgb,var(--a) 13%,transparent)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:14px}@media(max-width:600px){.row{grid-template-columns:1fr}}
+.chk{display:flex;gap:10px;align-items:flex-start;font-size:13px;color:var(--t)}.chk small{display:block;color:var(--d)}
+.tech{font-size:12px;color:var(--d);border-top:1px solid var(--l);padding-top:12px}
+.go{display:flex;gap:10px;justify-content:flex-end;align-items:center}.go span{flex:1;color:var(--d);font-size:12.5px}
+button.send{font:700 14px system-ui,sans-serif;background:var(--a);color:#140a03;border:0;border-radius:10px;padding:11px 20px;cursor:pointer}html.light button.send{color:#fff}button.send:disabled{opacity:.5;cursor:default}
+.done{text-align:center;padding:40px 10px}.done b{font-size:20px;display:block;margin-bottom:6px}.err{color:var(--bad)}
+</style>
+<script>try{var m=localStorage.getItem('xiii.theme.mode')||'';var h=JSON.parse(localStorage.getItem('hubXIII.prefs')||'{}');if(m==='light'||m==='sobrec'||(!m&&h.theme==='light'))document.documentElement.classList.add('light')}catch(e){}</script>
+</head><body><main>
+<header><h1>Bug &amp; Suggestion</h1><a href="index.html" id="back">← Revenir</a></header>
+<p class="lead">Décrivez le problème ou votre idée : votre message est envoyé directement à l'équipe de la suite XIII, pas besoin de messagerie.</p>
+<form class="card" id="f" autocomplete="off">
+  <div class="seg" role="radiogroup" aria-label="Type">
+    <button type="button" data-k="bug" class="on" role="radio" aria-checked="true">🐞 Un problème<small>quelque chose ne marche pas</small></button>
+    <button type="button" data-k="idee" role="radio" aria-checked="false">💡 Une idée<small>une amélioration, un besoin</small></button>
+  </div>
+  <div class="row">
+    <label class="f">Outil concerné<select id="app"></select></label>
+    <label class="f">Votre e-mail (facultatif, pour une réponse)<input type="email" id="contact" maxlength="120" placeholder="vous@exemple.fr"></label>
+  </div>
+  <label class="f" id="lbl">Que s'est-il passé ?<textarea id="body" maxlength="4000" required placeholder="Ce que vous faisiez, ce qui s'est passé, ce que vous attendiez…"></textarea></label>
+  <label class="chk" id="errw"><input type="checkbox" id="err" checked><span>Joindre le journal des erreurs de ce navigateur <small id="errn"></small></span></label>
+  <div class="tech" id="tech"></div>
+  <div class="go"><span id="msg"></span><button class="send" id="send" type="submit">Envoyer</button></div>
+</form>
+</main>
+<script>
+(function(){
+const T = { index: 'Accueil', moodo: 'MOODO', storyboardo: 'STORYBOARDO', decoup: 'DECOUP', scripto: 'SCRIPTO', casto: 'CASTO', planno: 'PLANNO', calendrier: 'CALENDRIER', callsheeto: 'CALL SHEETO', transporto: 'TRANSPORTO', deviso: 'DEVISO', ressourco: 'RESSOURCO', controle: 'CONTROLE', dossier: 'DOSSIER', repero: 'REPERO', cadro: 'CADRO', syno: 'SYNO', plano: 'PLANO', conduco: 'CONDUCO', graphico: 'GRAPHICO', melango: 'MELANGO', runo: 'RUNO', sono: 'SONO', lumo: 'LUMO', matos: 'MATOS', packingo: 'PACKINGO', posto: 'POSTO', soustitro: 'SOUSTITRO', backupo: 'BACKUPO', encodo: 'ENCODO' };
+var URL='https://abvvsoccbdftticlmpgi.supabase.co/rest/v1/bug_reports',KEY='sb_publishable_wB5kIn6lQtO-YWdUlt3gfg_IBIgBMuL';
+var $=function(i){return document.getElementById(i)},kind='bug',q=new URLSearchParams(location.search),from=q.get('app')||'';
+var sel=$('app');sel.innerHTML='<option value="">— toute la suite / je ne sais pas —</option>'+Object.keys(T).map(function(a){return '<option value="'+a+'"'+(a===from?' selected':'')+'>'+T[a]+'</option>'}).join('');
+if(document.referrer&&!from){var m=/\/([a-z]+)(-m)?\.html/.exec(document.referrer);if(m&&T[m[1]])sel.value=m[1];}
+$('back').href=from&&T[from]?from+'.html':'index.html';$('back').onclick=function(e){if(history.length>1){e.preventDefault();history.back();}};
+document.querySelectorAll('.seg button').forEach(function(b){b.onclick=function(){kind=b.dataset.k;document.querySelectorAll('.seg button').forEach(function(x){x.classList.toggle('on',x===b);x.setAttribute('aria-checked',x===b)});$('lbl').firstChild.nodeValue=kind==='bug'?"Que s'est-il passé ?":"Quelle est votre idée ?";$('body').placeholder=kind==='bug'?"Ce que vous faisiez, ce qui s'est passé, ce que vous attendiez…":"Ce qui vous aiderait, dans quel outil, à quel moment du tournage…";}});
+var L=[];try{L=(JSON.parse(localStorage.getItem('xiii.errl'))||[]).filter(function(x){return Date.now()-x.ts<7*864e5})}catch(e){}
+if(!L.length)$('errw').style.display='none';else $('errn').textContent=L.length+' erreur(s) ces 7 derniers jours — aucune donnée de projet, seulement les messages techniques.';
+var ua=navigator.userAgent,br=/Edg\//.test(ua)?'Edge':/Chrome\//.test(ua)?'Chrome':/Firefox\//.test(ua)?'Firefox':/Safari\//.test(ua)?'Safari':'Navigateur',os=/Windows/.test(ua)?'Windows':/Mac OS/.test(ua)?'macOS':/Android/.test(ua)?'Android':/iPhone|iPad/.test(ua)?'iOS':'Linux';
+var site=/^beta--/.test(location.host)?'beta':/netlify\.app$/.test(location.host)?'public':/localhost|127\.0/.test(location.host)?'local':'autre';
+var tech=br+' / '+os+' · écran '+screen.width+'×'+screen.height+' · site '+site;$('tech').textContent='Envoyé avec : '+tech+'.';
+$('f').onsubmit=function(e){e.preventDefault();var body=$('body').value.trim();if(body.length<5){$('msg').textContent='Écrivez quelques mots.';$('msg').className='err';return;}
+ var b=$('send');b.disabled=true;$('msg').className='';$('msg').textContent='Envoi…';
+ var err=$('err').checked&&L.length?L.slice(0,15).map(function(x){return new Date(x.ts).toLocaleString('fr-FR')+' · '+(T[x.app]||x.app)+' · '+x.msg+(x.at?' ('+x.at+')':'')+(x.n>1?' ×'+x.n:'')}).join('\n').slice(0,4000):null;
+ fetch(URL,{method:'POST',headers:{apikey:KEY,Authorization:'Bearer '+KEY,'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify({kind:kind,app:sel.value||'suite',body:body,contact:$('contact').value.trim().slice(0,120)||null,site:site,ua:tech.slice(0,200),errlog:err})})
+ .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);$('f').outerHTML='<div class="card done"><b>✅ Merci, c\'est envoyé !</b><span style="color:var(--d)">Votre message arrive directement chez l\'équipe de la suite XIII.'+($('contact')&&$('contact').value?' Une réponse vous sera faite par e-mail.':'')+'</span><p><a href="'+$('back').href+'" style="color:var(--a)">← Revenir à la suite</a></p></div>';})
+ .catch(function(x){b.disabled=false;$('msg').className='err';$('msg').innerHTML='Envoi impossible pour le moment ('+(navigator.onLine?x.message:'hors ligne')+'). <a href="mailto:mlamotte@3is.fr?subject='+encodeURIComponent('Bug & Suggestion de la suite XIII')+'&body='+encodeURIComponent((kind==='bug'?'[Problème] ':'[Idée] ')+(T[sel.value]||'Suite')+'\n\n'+body+'\n\n'+tech+(err?'\n\n'+err:'')).slice(0,1800)+'" style="color:var(--a)">Envoyer par e-mail à la place</a>';});};
+})();
+</script></body></html>

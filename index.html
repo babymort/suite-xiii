@@ -754,9 +754,9 @@ document.addEventListener('keydown', e => {
     function place() {
         const g = document.getElementById('xs-gear'); let b = document.getElementById('xbug-btn');
         if (!g || getComputedStyle(g).display === 'none') { if (b) b.style.display = 'none'; return; }
-        if (!b) { b = document.createElement('a'); b.id = 'xbug-btn'; b.href = MAIL; b.title = 'Bug & Suggestion : signaler un problème ou proposer une idée (ouvre votre messagerie)'; b.innerHTML = '<span>🐞</span><b>Bug &amp; Suggestion</b>'; document.body.appendChild(b);
+        if (!b) { b = document.createElement('a'); b.id = 'xbug-btn'; b.href = 'bug.html?app=index'; b.title = 'Bug & Suggestion : signaler un problème ou proposer une idée (page dédiée, envoi direct)'; b.innerHTML = '<span>🐞</span><b>Bug &amp; Suggestion</b>'; document.body.appendChild(b);
             const st = document.createElement('style'); st.textContent = '#xbug-btn{position:fixed;z-index:9970;display:flex;align-items:center;gap:6px;height:34px;padding:0 12px;border-radius:99px;background:var(--bg-panel,#2d2d2d);border:1px solid rgba(240,179,120,.55);color:var(--text-main,#fff);text-decoration:none;font:600 12.5px "Segoe UI",sans-serif;box-shadow:0 4px 14px rgba(0,0,0,.35);white-space:nowrap}#xbug-btn:hover{border-color:rgb(240,179,120);background:rgba(240,179,120,.15)}#xbug-btn span{font-size:15px}@media(max-width:600px){#xbug-btn b{display:none}#xbug-btn{padding:0 9px}}@media print{#xbug-btn{display:none!important}}'; document.head.appendChild(st); }
-        const ia = document.getElementById('xaic-btn'), gr = g.getBoundingClientRect(), r = ia && ia.classList.contains('fl') && ia.offsetParent ? ia.getBoundingClientRect() : gr; b.style.display = ''; b.style.right = Math.max(8, innerWidth - gr.right) + 'px'; b.style.bottom = (innerHeight - r.top + 10) + 'px';
+        const ia = document.getElementById('xaic-btn'), gr = { top: g.offsetTop, right: g.offsetLeft + g.offsetWidth } /* sans l'agrandissement au survol */, r = ia && ia.classList.contains('fl') && ia.offsetParent ? ia.getBoundingClientRect() : gr; b.style.display = ''; b.style.right = Math.max(8, innerWidth - gr.right) + 'px'; b.style.bottom = (innerHeight - r.top + 10) + 'px';
     }
     const go = () => { place(); setInterval(place, 1500); addEventListener('resize', place); };
     if (document.readyState === 'complete') setTimeout(go, 800); else addEventListener('load', () => setTimeout(go, 800));
@@ -2494,12 +2494,12 @@ XBOOT.ready(() => { try { XHOME.init(); XSTART.init(); XADAPT.init(); } catch (e
 <!-- SUITE XIII:SETTINGS:END -->
 <!-- SUITE XIII:EXTRA:START -->
 <script>var XIII_APP = window.XIII_APP || "index";</script>
-<script src="lib/suite-errl.js?v=03d9753a7b"></script>
+<script src="lib/suite-errl.js?v=75e5e7dd4f"></script>
 <script src="lib/suite-scen.js?v=aec8fb41f6"></script>
 <script src="lib/suite-coh.js?v=d9195a180f"></script>
 <script src="lib/suite-digest.js?v=7a1d3eeafc"></script>
 <script src="lib/suite-dver.js?v=23e2ca96d4"></script>
-<script src="lib/suite-aichat.js?v=c9c6282118"></script>
+<script src="lib/suite-aichat.js?v=2ddfb1e64d"></script>
 <script src="lib/suite-trad.js?v=4496a32b35"></script>
 <script src="lib/suite-mcp.js?v=cea3304e0f"></script>
 <script src="lib/suite-zzbar.js?v=409fbb531d"></script>
@@ -2516,7 +2516,7 @@ XBOOT.ready(() => { try { XHOME.init(); XSTART.init(); XADAPT.init(); } catch (e
 <script src="lib/suite-dock.js?v=253bb1bb47"></script>
 <script src="lib/suite-libtab.js?v=aa87c9659c"></script>
 <script src="lib/suite-type.js?v=ac0faf158d"></script>
-<script src="lib/suite-home.js?v=27b4f4952d"></script>
+<script src="lib/suite-home.js?v=2448460bac"></script>
 <!-- SUITE XIII:EXTRA:END -->
 </body>
 </html>
