@@ -11,6 +11,10 @@
     const hide = b => { if (!b) return; b.dataset.xtop = 'h'; b.style.setProperty('display', 'none', 'important'); };
     const mk = (id, icon, label, title, onclick) => { let b = $(id); if (!b) { b = document.createElement('button'); b.type = 'button'; b.id = id; b.innerHTML = '<span class="btn-icon">' + icon + '</span><span class="btn-label">' + label + '</span>'; b.title = title; b.onclick = onclick; } return b; };
     const dv = k => { let d = document.querySelector('[data-xtopdv="' + k + '"]'); if (!d) { d = document.createElement('div'); d.className = 'divider xb-dv'; d.dataset.xtopdv = k; } return d; };
+    // déplacer un élément SEULEMENT s'il n'est pas déjà à sa place : retirer puis remettre un bouton annule le clic en cours
+    // (appui → bouton retiré → relâché ailleurs) et relançait la mise en ordre en boucle (le clic gauche ne marchait plus)
+    const into = (p, x) => { if (x && x.parentElement !== p) p.appendChild(x); };
+    const order = (p, L) => { let prev = null; L.forEach(x => { if (prev) { if (prev.nextElementSibling !== x) prev.after(x); } else into(p, x); prev = x; }); };
     const menu = (e, at, title, sub, items) => { if (window.XZZB_MENU) window.XZZB_MENU(e, at, title, sub, items); else if (items[0]) items[0][2](); };
     (() => { const st = document.createElement('style'); st.id = 'xtop-css'; st.textContent = '#top-bar #xb-brand{margin-right:10px!important}#top-bar #tabs-container{justify-content:flex-start!important;flex:0 1 auto!important}#top-bar>#xb-file,#top-bar #xb-file{margin-left:auto}#xb-menu [data-i]{justify-content:flex-start!important;text-align:left!important}#xb-menu [data-i]>span:last-child{flex:1;min-width:0}'; document.head.appendChild(st); })();
     let busy = false, done = false, EXPI = () => [], NEWI = () => [];
@@ -75,14 +79,14 @@
             // ordre de la partie « fichier » : 🔎 │ 🗒️ 📂 💾 ⬇️ │ 📤 🔗
             const share = $('xsh-btn') || $('xpb-btn');
             const seq = [search, dv('a'), N, open, save, X, dv('b'), gate, share].filter(Boolean);
-            seq.forEach(x => file.appendChild(x));
+            order(file, seq);
             // restent dans xb-file : boutons propres à l'outil ajoutés après coup → seconde barre
             // 👥 Équipe · ☁️ Drive · pastille du nom (dans certains outils, ce groupe était né dans la seconde barre : il remonte)
-            if (bar && !tb.contains(bar)) { file.after(bar); bar.style.marginLeft = '0'; }
+            if (bar && !tb.contains(bar)) { file.after(bar); bar.style.marginLeft = '0'; } else if (bar && file.nextElementSibling !== bar && bar.parentElement === file.parentElement) file.after(bar);
             { const host = bar || file, team = $('xb-solo'), chip = $('xid-chip'), auth = chip ? chip.closest('.xn-auth') || chip : null;
                 const drive = [...tb.querySelectorAll('button')].find(b => /☁️|☁/.test(ico(b)) && b !== team && !b.closest('#tabs-container'));
-                if (bar) bar.before(dv('c')); else if (team || drive || auth) host.appendChild(dv('c'));
-                [team, drive, auth].filter(Boolean).forEach(x => host.appendChild(x)); }
+                const L = [team, drive, auth].filter(Boolean);
+                if (bar) { const d = dv('c'); if (bar.previousElementSibling !== d) bar.before(d); order(host, L); } else if (L.length) order(host, [dv('c')].concat(L)); }
             // boutons propres à l'outil : vers la seconde barre (le ＋ collé aux onglets reste)
             const tbar = $('toolbar');
             if (tool && tbar) {
@@ -91,8 +95,8 @@
                 [...tool.querySelectorAll(tool.dataset.xtopfb ? ':scope > *' : ':scope > button')].forEach((b, i) => {
                     if (b.dataset.xtop === 'h' || b === N || (!tool.dataset.xtopfb && !vis(b) && !b.dataset.xtopm)) return;
                     if (tabs && i === 0 && /➕|＋/.test(ico(b))) { if (b.previousElementSibling !== tabs) { b.dataset.xtopTab = 1; tabs.after(b); } return; }
-                    b.dataset.xtopm = 1; g.appendChild(b); });
-                if (N && N.parentElement !== file) file.insertBefore(N, open || save || X || null);
+                    b.dataset.xtopm = 1; into(g, b); });
+                if (N && N.parentElement !== file) { const r = [open, save, X].find(x => x && x.parentElement === file); file.insertBefore(N, r || null); }
                 const empty = !g.querySelector('button'); g.style.display = empty ? 'none' : ''; const d = $('xtop-moved-dv'); if (d) d.style.display = empty ? 'none' : '';
             }
             { const w = file.parentElement === tb ? file : file.closest('#top-bar > *'); if (w) { w.style.marginLeft = 'auto'; [...tb.children].forEach(c => { if (c !== w) c.style.flexGrow = '0'; }); } } // à gauche : 🏠 logo onglets ; à droite : le reste
@@ -112,7 +116,7 @@
     }
     setInterval(() => { if (!busy) dvClean(); }, 2000);
     let T = 0; const again = () => { clearTimeout(T); T = setTimeout(() => { organize(); try { dispatchEvent(new Event('resize')); } catch (e) { } }, 120); };
-    function start() { if (!organize()) { setTimeout(start, 400); return; } again(); const tb = $('top-bar'); if (tb) new MutationObserver(ms => { if (!busy && ms.some(m => [...m.addedNodes].some(n => n.nodeType === 1 && n.tagName === 'BUTTON' && !n.dataset.xtop && !/^xtop-/.test(n.id) && !n.closest('#tabs-container')))) again(); }).observe(tb, { childList: true, subtree: true }); }
+    function start() { if (!organize()) { setTimeout(start, 400); return; } again(); const tb = $('top-bar'); if (tb) new MutationObserver(ms => { if (!busy && ms.some(m => [...m.addedNodes].some(n => n.nodeType === 1 && n.tagName === 'BUTTON' && !n.dataset.xtop && !n.dataset.xtopSeen && !/^xtop-/.test(n.id) && !n.closest('#tabs-container')))) again(); tb.querySelectorAll('button').forEach(b => { b.dataset.xtopSeen = 1; }); }).observe(tb, { childList: true, subtree: true }); }
     try { if (typeof XBOOT !== 'undefined' && XBOOT.ready) XBOOT.ready(() => setTimeout(start, 80), 2990); else throw 0; } catch (e) { addEventListener('load', () => setTimeout(start, 700)); }
     window.XTOP = { organize, exportItems: () => EXPI(), newItems: () => NEWI() };
 })();

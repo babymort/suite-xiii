@@ -28,5 +28,6 @@
         'html body .xem-trio .i{font-size:24px!important}#xid-chip i{font-size:var(--xt-1)!important}.stat b,.stat strong,.kpi b,[class*="clock"],[id*="clock"],#ws-stats b{font-family:var(--xt-mono)!important;font-variant-numeric:tabular-nums;letter-spacing:0}';
     // barres : le libellé ne s'ouvre plus au survol (le bouton grandissait, la barre bougeait, le survol se perdait : ouverture / fermeture en boucle) — bulle à la place
     css += ['#top-bar', '#toolbar'].map(b => 'html:not(.xreduce) ' + b + ' button:hover .btn-label:not(.keep):not(.show),html:not(.xreduce) ' + b + ' button:focus-visible .btn-label:not(.keep):not(.show)').join(',') + '{max-width:0!important;opacity:0!important;margin-left:0!important}';
+    css += 'html body:has(#xs-ov) #xt-tab,html body:has(#xs-ov) #xlib-tab{display:none!important}'; // ⚙️ ouvert : la languette 🧺 ne recouvre plus les interrupteurs
     const s = document.createElement('style'); s.id = 'xtype-css'; s.textContent = css; (document.head || document.documentElement).appendChild(s);
 })();
