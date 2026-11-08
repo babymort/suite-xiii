@@ -174,6 +174,7 @@ body.xm a { color: var(--accent-text); }
 
 </style>
 <link rel="icon" type="image/png" href="xiii-icon-192.png">
+<!-- SUITE XIII:MEXTRA:START --><script src="lib/suite-sobre-m.js?v=474365830e"></script><!-- SUITE XIII:MEXTRA:END -->
 </head>
 <body class="xm">
 <header class="m-top">
@@ -386,14 +387,14 @@ const XM = (() => {
     function desktopBoot(cfg) { return fromHash(cfg.app, async env => { if (env.kind === 'return' && cfg.apply) { const m = await cfg.apply(env); if (m) toast(m, 5000); } }); }
     // ---------- thème, en-tête et menu des pages mobiles ----------
     function initTheme() { let p = {}; try { p = JSON.parse(localStorage.getItem('hubXIII.prefs')) || {}; } catch (e) { } document.body.classList.add('xm'); document.body.classList.toggle('light-theme', p.theme === 'light'); const m = document.querySelector('meta[name=theme-color]'); if (m) m.content = p.theme === 'light' ? '#ffffff' : '#222222'; }
-    function toggleTheme() { let p = {}; try { p = JSON.parse(localStorage.getItem('hubXIII.prefs')) || {}; } catch (e) { } p.theme = p.theme === 'light' ? 'dark' : 'light'; try { localStorage.setItem('hubXIII.prefs', JSON.stringify(p)); } catch (e) { } initTheme(); }
+    function toggleTheme() { if (window.XSOBREM) { const r = XSOBREM.cycle(); initTheme(); try { if (typeof toast === 'function') toast('Thème : ' + r.label); } catch (e) { } return; } let p = {}; try { p = JSON.parse(localStorage.getItem('hubXIII.prefs')) || {}; } catch (e) { } p.theme = p.theme === 'light' ? 'dark' : 'light'; try { localStorage.setItem('hubXIII.prefs', JSON.stringify(p)); } catch (e) { } initTheme(); }
     //  menu standard ⋯ : cfg = { app, deskPage, items:[{icon,label,sub,run}] , onImport(env, via) , sendReturn() }
     function menu(cfg) {
         const items = (cfg.items || []).concat([
             cfg.onImport ? { icon: '📂', label: 'Importer un fichier', sub: 'Envoi du bureau (.xiii-m.json)', run: () => importFile(cfg.app, cfg.onImport) } : null,
             cfg.onImport ? { icon: '🔗', label: 'Coller un lien', sub: 'Lien ou QR reçu du bureau', run: () => importLink(cfg.app, cfg.onImport) } : null,
             cfg.sendReturn ? { icon: '📤', label: 'Renvoyer au bureau', sub: 'QR code, lien ou fichier', run: cfg.sendReturn } : null,
-            { icon: '🌓', label: 'Thème clair / sombre', run: toggleTheme },
+            { icon: '🌓', label: 'Thème : sombre · clair · sobre · sobre clair', run: toggleTheme },
             cfg.deskPage ? { icon: '🖥️', label: 'Version bureau', sub: 'Interface complète', run: () => { try { sessionStorage.setItem('xiiiDesk', '1'); } catch (e) { } location.href = cfg.deskPage + '?desktop=1'; } } : null,
             { icon: '🏠', label: 'Accueil SUITE XIII', run: () => { location.href = 'index.html'; } }].filter(Boolean));
         const s = sheet('<div class="m-list" style="margin:0">' + items.map((it, i) => '<button class="m-item" data-i="' + i + '"><span class="ico">' + it.icon + '</span><span class="grow"><b>' + esc(it.label) + '</b>' + (it.sub ? '<small>' + esc(it.sub) + '</small>' : '') + '</span></button>').join('') + '</div><p class="m-credit">Application développée par Matthieu Lamotte</p>', { title: 'Menu' });
