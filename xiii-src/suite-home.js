@@ -31,5 +31,38 @@
     const s = document.createElement('style'); s.id = 'xh6-css'; s.textContent = css; document.head.appendChild(s); apply();
     const go = () => { mod(); apply(); }; addEventListener('load', () => setTimeout(go, 300)); setTimeout(go, 1500); setInterval(mod, 60000); setInterval(pinNames, 2000);
     new MutationObserver(() => { if (document.getElementById('xs-panel') && !document.getElementById('xh6-sw')) { sw(); apply(); } }).observe(document.body || document.documentElement, { childList: true, subtree: true });
-    window.XHOME6 = { apply };
+    // ---------- Phase D · ouverture animée du tableau de bord ----------
+    // cascade des widgets (fondu + légère montée), compteurs qui défilent jusqu'à leur valeur, barres qui se remplissent.
+    // Coupée si ⚙️ › « Réduire les animations du Dashboard » ou si l'appareil demande moins d'animations.
+    const calm = () => { try { if (localStorage.getItem('xiii.anim.dash') === '1') return true; } catch (e) { } return !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches); };
+    const st2 = document.createElement('style'); st2.id = 'xd-intro-css';
+    st2.textContent = 'html.xd-intro #xd-dash .xd-c{opacity:0;transform:translateY(14px) scale(.985);will-change:transform,opacity}' +
+        'html.xd-go #xd-dash .xd-c{opacity:1;transform:none;transition:opacity .5s cubic-bezier(.2,.7,.2,1) calc(var(--xi,0) * 55ms),transform .6s cubic-bezier(.2,.7,.2,1) calc(var(--xi,0) * 55ms)}' +
+        'html.xd-intro #xd-dash .xd-hd,html.xd-intro .title-row{opacity:0}html.xd-go #xd-dash .xd-hd,html.xd-go .title-row{opacity:1;transition:opacity .45s ease}' +
+        'html.xd-go #xd-dash .xd-c [style*="width"]{transition:width .9s cubic-bezier(.2,.7,.2,1) .25s}';
+    document.head.appendChild(st2);
+    function intro() {
+        if (calm()) return; const d = document.getElementById('xd-dash'); if (!d) return;
+        const C = [...d.querySelectorAll('.xd-c')]; C.forEach((c, i) => c.style.setProperty('--xi', i));
+        // barres : partent de 0
+        const bars = [...d.querySelectorAll('.xd-c [style*="width"]')].filter(e => /width:\s*[\d.]+%/.test(e.getAttribute('style') || '')).map(e => [e, e.style.width]);
+        bars.forEach(([e]) => { e.style.width = '0%'; });
+        // compteurs : nombres seuls (0 %, 36, 12,5…) dans des éléments sans enfant
+        const nums = [...d.querySelectorAll('.xd-c *')].filter(e => !e.children.length && /^\s*[J-]*\s*-?\d[\d\s.,]*\s*(%|€|h|j)?\s*$/.test(e.textContent) && e.textContent.trim().length < 12).map(e => { const t = e.textContent, m = /-?\d[\d\s]*([.,]\d+)?/.exec(t); return m ? [e, t, m[0], parseFloat(m[0].replace(/\s/g, '').replace(',', '.'))] : null; }).filter(Boolean);
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+            R.classList.add('xd-go'); R.classList.remove('xd-intro');
+            bars.forEach(([e, w]) => { e.style.width = w; });
+            const t0 = performance.now(), D = 900, ease = x => 1 - Math.pow(1 - x, 3);
+            const step = now => { const k = Math.min(1, (now - t0 - 150) / D); if (k < 0) { requestAnimationFrame(step); return; }
+                nums.forEach(([e, t, raw, v]) => { const dec = /[.,]\d/.test(raw) ? 1 : 0, x = v * ease(k); e.textContent = t.replace(raw, (dec ? x.toFixed(1).replace('.', ',') : String(Math.round(x)))); });
+                if (k < 1) requestAnimationFrame(step); else nums.forEach(([e, t]) => { e.textContent = t; }); };
+            requestAnimationFrame(step);
+            setTimeout(() => R.classList.remove('xd-go'), 2500);
+        }));
+    }
+    const R = document.documentElement;
+    if (!calm()) R.classList.add('xd-intro');
+    const waitDash = (n) => { const d = document.getElementById('xd-dash'), hid = R.classList.contains('xb0') || document.visibilityState === 'hidden'; if (d && d.querySelector('.xd-c') && !hid) { setTimeout(intro, 120); return; } /* après l'écran de chargement (sinon l'animation se joue sous le voile) */ if (n < 120) setTimeout(() => waitDash(n + 1), 50); else R.classList.remove('xd-intro'); };
+    waitDash(0);
+    window.XHOME6 = { apply, intro };
 })();

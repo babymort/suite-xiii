@@ -1,0 +1,1 @@
+[["['xsh-btn', 'xhs-btn'].forEach(id => { const v = $(id); if (v && v.parentNode === g.parentNode", "['xsh-btn', 'xhs-btn'].forEach(id => { const v = $(id); if (v && v.closest('#xb-file')) return; /* rangé par la barre du haut commune (XTOP) : ne plus le déplacer (🔗 apparaissait / disparaissait) */ if (v && v.parentNode === g.parentNode", 1]]

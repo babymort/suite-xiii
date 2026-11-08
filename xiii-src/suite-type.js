@@ -9,7 +9,7 @@
     const UI = '#top-bar,#toolbar,#xb-menu,[role=dialog],.modal-box,#xs-panel,.xinsp,#library-panel,.xem-trio,.xem-card,#pmenu,#xdock-btn';
     const q = (sel) => UI.split(',').map(u => 'html body ' + u + ' ' + sel).join(',');
     const self = (sel) => UI.split(',').map(u => 'html body ' + u + sel).join(',');
-    const css = ':root{--xt-1:11px;--xt-2:12.5px;--xt-3:14px;--xt-4:18px;--xt-mono:ui-monospace,"SF Mono","Cascadia Mono",Consolas,monospace}' +
+    let css = ':root{--xt-1:11px;--xt-2:12.5px;--xt-3:14px;--xt-4:18px;--xt-mono:ui-monospace,"SF Mono","Cascadia Mono",Consolas,monospace}' +
         // chiffres alignés partout (n'a d'effet que sur les chiffres)
         'html body{font-variant-numeric:tabular-nums}' +
         'input[type=time],input[type=number],input[type=date],.tc,.time,.timecode,.dur,.duration,.price,.amount,.num,[class*="-time"],[class*="time-"],td.r,.mono{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}' +
@@ -26,5 +26,7 @@
         q('textarea') + '{font-size:var(--xt-3)!important}' +
         // les grands compteurs des outils (horloges, totaux) gardent leur taille mais en chiffres à chasse fixe
         'html body .xem-trio .i{font-size:24px!important}#xid-chip i{font-size:var(--xt-1)!important}.stat b,.stat strong,.kpi b,[class*="clock"],[id*="clock"],#ws-stats b{font-family:var(--xt-mono)!important;font-variant-numeric:tabular-nums;letter-spacing:0}';
+    // barres : le libellé ne s'ouvre plus au survol (le bouton grandissait, la barre bougeait, le survol se perdait : ouverture / fermeture en boucle) — bulle à la place
+    css += ['#top-bar', '#toolbar'].map(b => 'html:not(.xreduce) ' + b + ' button:hover .btn-label:not(.keep):not(.show),html:not(.xreduce) ' + b + ' button:focus-visible .btn-label:not(.keep):not(.show)').join(',') + '{max-width:0!important;opacity:0!important;margin-left:0!important}';
     const s = document.createElement('style'); s.id = 'xtype-css'; s.textContent = css; (document.head || document.documentElement).appendChild(s);
 })();
