@@ -3136,7 +3136,7 @@ body.presentation-mode #xs-gear,body.exporting #xs-gear,body.xs-hide-gear #xs-ge
             '<details class="xs-sec" data-sec="aff"><summary>🎨 Affichage</summary><div class="xs-in">' +
             '<div class="xs-f"><label>Thème</label><div class="xs-c"><span class="xs-seg"><button type="button" data-theme="dark" class="' + (th === 'dark' ? 'on' : '') + '">🌙 Sombre</button><button type="button" data-theme="light" class="' + (th === 'light' ? 'on' : '') + '">☀️ Clair</button></span></div></div>' +
             '<div class="xs-f"><label>Même thème pour toute la suite<small>Les autres outils XIII adoptent ce thème à leur ouverture.</small></label><div class="xs-c"><label class="xs-sw"><input type="checkbox" data-global' + (s.globalTheme ? ' checked' : '') + '><span></span></label></div></div>' +
-            (typeof XDASH !== 'undefined' && XDASH.master() && /(^|\/)(index\.html)?$/.test(location.pathname) ? '<div class="xs-f"><label>Zone de widgets de l\'accueil<small>Compte à rebours, outils à remplir, messages… en haut de l\'accueil, pour toute l\'équipe (Master).</small></label><div class="xs-c"><label class="xs-sw"><input type="checkbox" data-xdz' + (XDASH.zone() ? ' checked' : '') + '><span></span></label></div></div>' : '') + (document.getElementById('xt-tab') || XRED.tray() ? '<div class="xs-f"><label>Afficher le panier 🧺<small>L\'onglet panier sur le bord de l\'écran, dans tous les outils.</small></label><div class="xs-c"><label class="xs-sw"><input type="checkbox" data-xtray' + (XRED.tray() ? '' : ' checked') + '><span></span></label></div></div>' : '') + '<div class="xs-f"><label>Réduction des animations<small>Boutons en icônes seules, texte en bulle au survol : les barres ne bougent plus. Pour toute la suite.</small></label><div class="xs-c"><label class="xs-sw"><input type="checkbox" data-xred' + (XRED.on() ? ' checked' : '') + '><span></span></label></div></div>' + (c.display || []).map(fieldHtml).join('') + '</div></details>' +
+            (typeof XDASH !== 'undefined' && XDASH.master() && /(^|\/)(index\.html)?$/.test(location.pathname) ? '<div class="xs-f"><label>Zone de widgets de l\'accueil<small>Compte à rebours, outils à remplir, messages… en haut de l\'accueil, pour toute l\'équipe (Master).</small></label><div class="xs-c"><label class="xs-sw"><input type="checkbox" data-xdz' + (XDASH.zone() ? ' checked' : '') + '><span></span></label></div></div>' : '') + (document.getElementById('xt-tab') || XRED.tray() ? '<div class="xs-f"><label>Afficher le panier 🧺<small>L\'onglet panier sur le bord de l\'écran, dans tous les outils.</small></label><div class="xs-c"><label class="xs-sw"><input type="checkbox" data-xtray' + (XRED.tray() ? '' : ' checked') + '><span></span></label></div></div>' : '') + '<div class="xs-f"><label>Réduire les animations des outils<small>Boutons en icônes seules, texte en bulle au survol, aucune transition. Pour toute la suite.</small></label><div class="xs-c"><label class="xs-sw"><input type="checkbox" data-xred' + (XRED.on() ? ' checked' : '') + '><span></span></label></div></div><div class="xs-f"><label>Réduire les animations du Dashboard<small>À l\'ouverture de l\'accueil : widgets affichés d\'un coup, sans cascade, compteurs ni graphiques animés.</small></label><div class="xs-c"><label class="xs-sw"><input type="checkbox" data-xreddash' + ((function () { try { return localStorage.getItem('xiii.anim.dash') === '1'; } catch (e) { return false; } })() ? ' checked' : '') + '><span></span></label></div></div>' + (c.display || []).map(fieldHtml).join('') + '</div></details>' +
             (MOBILE ? '<details class="xs-sec" data-sec="mob"><summary>📱 Version mobile</summary><div class="xs-in"><button type="button" class="xs-item" data-mobile><span class="i">📱</span><span class="g">Passer sur le téléphone<small>' + esc((MOBILE.title || '').replace(/^Version mobile\s*:\s*/i, '')) + '</small></span><span>›</span></button></div></details>' : '') + (help.length ? '<details class="xs-sec" data-sec="help"><summary>🎓 Aide</summary><div class="xs-in" data-list="help">' + (typeof XTOUR !== 'undefined' && XTOUR.search ? '<div style="padding:6px 4px 8px"><input id="xs-hq" type="search" placeholder="🔎 Chercher un tuto : devis, QR, signature, câble…" style="width:100%;box-sizing:border-box;padding:8px 10px;border-radius:8px;border:1px solid var(--border-color,#444);background:var(--bg-input,#333);color:var(--text-main,#fff);font:13px \'Segoe UI\',sans-serif"><div id="xs-hr"></div></div>' : '') + items(help) + '</div></details>' : '') +
             secs.map(x => '<details class="xs-sec" data-sec="' + x.id + '"' + (x.id === sectionId ? ' open' : '') + '><summary>' + (x.icon || '') + ' ' + esc(x.title) + (x.badge ? ' <small>' + esc(x.badge()) + '</small>' : '') + '</summary><div class="xs-in">' + (x.desc ? '<p class="xs-desc">' + x.desc + '</p>' : '') + (x.fields || []).map(fieldHtml).join('') + (x.actions ? '<div class="xs-acts">' + x.actions.map((a, i) => '<button type="button" class="xs-btn' + (a.danger ? ' danger' : '') + '" data-sact="' + x.id + ':' + i + '">' + esc(a.label) + '</button>').join('') + '</div>' : '') + '</div></details>').join('') +
             (tools.length ? '<details class="xs-sec" data-sec="tools"' + '' + '><summary>🧰 Options de l\'outil</summary><div class="xs-in" data-list="tools">' + items(tools) + '</div></details>' : '') +
@@ -3253,7 +3253,7 @@ var XRED = (function () {
     window.addEventListener('storage', function (e) { if (e.key === K || e.key === KT) apply(); });
     var tip;
     document.addEventListener('mouseover', function (e) {
-        if (!on()) return;
+        if (!on() && !(e.target.closest && e.target.closest('#top-bar,#toolbar'))) return; // dans les barres : bulle toujours, le bouton ne s'élargit plus au survol
         var b = e.target.closest && e.target.closest('button,.btn,a');
         var l = b && b.querySelector('.btn-label');
         if (!l || !l.textContent.trim()) { if (tip) tip.style.display = 'none'; return; }
@@ -3265,7 +3265,7 @@ var XRED = (function () {
         tip.style.left = x + 'px'; tip.style.top = y + 'px';
     }, true);
     document.addEventListener('mousedown', function () { if (tip) tip.style.display = 'none'; }, true);
-    document.addEventListener('change', function (e) { if (e.target.matches && e.target.matches('[data-xred]')) set(e.target.checked); if (e.target.matches && e.target.matches('[data-xdz]') && typeof XDASH !== 'undefined') XDASH.setZone(e.target.checked); if (e.target.matches && e.target.matches('[data-xtray]')) { try { localStorage.setItem(KT, e.target.checked ? '0' : '1'); } catch (er) { } apply(); } }, true);
+    document.addEventListener('change', function (e) { if (e.target.matches && e.target.matches('[data-xreddash]')) { try { localStorage.setItem('xiii.anim.dash', e.target.checked ? '1' : '0'); } catch (x) { } } if (e.target.matches && e.target.matches('[data-xred]')) set(e.target.checked); if (e.target.matches && e.target.matches('[data-xdz]') && typeof XDASH !== 'undefined') XDASH.setZone(e.target.checked); if (e.target.matches && e.target.matches('[data-xtray]')) { try { localStorage.setItem(KT, e.target.checked ? '0' : '1'); } catch (er) { } apply(); } }, true);
     return { on: on, set: set, tray: tray };
 })();
 
@@ -3301,7 +3301,7 @@ var XRED = (function () {
     const _bs = scBlankShot;
     scBlankShot = function (P0, day, from) { const s = _bs(P0, day, from); const st = XSET.val('sonDef'); if (!from && !P0.shots.length && st) s.sonTags = String(st).split(/[;,]/).map(x => x.trim()).filter(Boolean); return s; };
     XSET.init({
-        app: 'scripto', title: 'SCRIPTO', version: 'v1.46',
+        app: 'scripto', title: 'SCRIPTO', version: 'v1.47',
         theme: { get: () => prefs.theme === 'light' ? 'light' : 'dark', set: t => { if ((prefs.theme === 'light' ? 'light' : 'dark') !== t) toggleTheme(); } },
         hide: ['#toolbar button[onclick="toggleTheme()"]', '#toolbar button[onclick="openGuide()"]'],
         help: [{ icon: '📖', label: 'Guide d\'utilisation', sub: 'Journées, plans, prises, raccords, tablette, rapports', run: openGuide }],
@@ -3495,7 +3495,7 @@ var XPRS = window.XPRS || (() => {
 
 XPRS.init('scripto');
 
-</script><script src="lib/core-04.js?v=9e9faa299f"></script><script>// =====================================================================
+</script><script src="lib/core-04.js?v=1af0731c09"></script><script>// =====================================================================
 //  SUITE XIII — XFIT : la barre des outils tient sur une ligne
 //  Plutôt que de passer sur deux lignes, les boutons se resserrent par paliers (espaces, puis libellés,
 //  puis tailles) jusqu'à tout faire rentrer ; en dernier recours la barre défile horizontalement.
@@ -4158,7 +4158,7 @@ XSC2PO.init();
 <script src="lib/suite-empty.js?v=dc3fbb36b9"></script>
 <script src="lib/suite-dock.js?v=253bb1bb47"></script>
 <script src="lib/suite-libtab.js?v=aa87c9659c"></script>
-<script src="lib/suite-type.js?v=ac0faf158d"></script>
+<script src="lib/suite-type.js?v=cab45f0fa5"></script>
 <script src="lib/suite-density.js?v=6bdffebeaa"></script>
 <!-- SUITE XIII:EXTRA:END -->
 </body>
