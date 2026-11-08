@@ -1,0 +1,5 @@
+const {chromium}=require('playwright');(async()=>{const b=await chromium.launch();const c=await b.newContext({viewport:{width:1280,height:800}});const p=await c.newPage();const E=[];p.on('pageerror',e=>E.push(e.message));
+await p.addInitScript(()=>{if(!localStorage.getItem('xiii.ws'))localStorage.setItem('xiii.ws',JSON.stringify({list:[{id:'main',name:'Concert Khaled',color:'#f0b429'},{id:'wb',name:'TEST',color:'#4fc3f7'},{id:'wc',name:'TEST CO',color:'#81c784'}],cur:'wb'}))});
+await p.goto('http://localhost:8765/espace.html');await p.waitForTimeout(4000);await p.click('#proj');await p.waitForTimeout(300);
+for(const id of ['wb','main']){const bb=await (await p.$('#pmenu button[data-w='+id+'] span')).boundingBox();await p.mouse.click(bb.x+10,bb.y+5,{button:'right'});await p.waitForTimeout(300);console.log(id,'→',await p.evaluate(()=>document.getElementById('pmenu').innerText.split('\n').slice(0,4).join(' · ')));await p.click('#proj');await p.waitForTimeout(200);if(!(await p.evaluate(()=>document.getElementById('pmenu').classList.contains('on'))))await p.click('#proj');await p.waitForTimeout(200);}
+console.log(E);await b.close()})();
