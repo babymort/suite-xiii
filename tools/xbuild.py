@@ -27,7 +27,7 @@ for f in pages:
     app = f[:-5]; s = open(R + f, encoding='utf-8').read()
     tags = []
     for name, who in EXTRA:
-        if who == '*' and app.endswith('-m'): continue
+        if who == '@m' or (who == '*' and app.endswith('-m')): continue
         if who == '*' or app in who: tags.append('<script src="lib/' + name + '?v=' + V[name] + '"></script>')
     s = re.sub(r'\n?<!-- SUITE XIII:EXTRA:START -->.*?<!-- SUITE XIII:EXTRA:END -->', '', s, flags=re.S)
     if tags:
@@ -35,6 +35,14 @@ for f in pages:
         s = s.replace('<!-- SUITE XIII:SETTINGS:END -->', '<!-- SUITE XIII:SETTINGS:END -->' + blk, 1)
     # empreintes des fichiers communs appelés dans la page
     s = re.sub(r'lib/(core-\d+\.(?:js|css))\?v=(?:@@[^@]+@@|[0-9a-f]+)', lambda m: 'lib/' + m.group(1) + '?v=' + V[m.group(1)], s)
+    open(R + f, 'w', encoding='utf-8').write(s)
+# 2 bis. pages sans bloc SETTINGS (téléphone -m, app équipe) : modules « @m » de extra.json, chargés dans <head>
+MP = sorted(f for f in os.listdir(R) if f.endswith('.html') and (f.endswith('-m.html') or f in ('equipe.html', 'team.html')))
+for f in MP:
+    s = open(R + f, encoding='utf-8').read()
+    s = re.sub(r'\n?<!-- SUITE XIII:MEXTRA:START -->.*?<!-- SUITE XIII:MEXTRA:END -->', '', s, flags=re.S)
+    tags = ['<script src="lib/' + name + '?v=' + V[name] + '"></script>' for name, who in EXTRA if who == '@m']
+    if tags and '</head>' in s: s = s.replace('</head>', '<!-- SUITE XIII:MEXTRA:START -->' + ''.join(tags) + '<!-- SUITE XIII:MEXTRA:END -->\n</head>', 1)
     open(R + f, 'w', encoding='utf-8').write(s)
 # 3. service worker : version et fichiers à garder hors ligne
 h = hashlib.md5()
