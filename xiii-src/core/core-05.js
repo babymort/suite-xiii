@@ -264,7 +264,7 @@ const XTIPS = (() => {
         if (APP === 'index') return; // pas de bulle d'astuce sur l'accueil (supprimée à la demande)
         if (typeof XTOUR === 'undefined') tip('open.' + APP, null, 'Bienvenue dans ' + NAME(), 'Des astuces apparaîtront au fil de votre travail, au moment où elles servent. La visite guidée complète reste dans ⚙️ › Aide.', tourBtn);
         // 2. outils communs (une seule fois pour toute la suite)
-        setTimeout(() => tip('common.file', '#xb-file', 'Toujours au même endroit', 'Dans tous les outils : 💾 enregistrer, 📂 ouvrir, ⬇️ exporter le projet, 🖨️ <b>Exporter ▾</b> pour les PDF et tableaux, 📤 <b>Vers Suite XIII</b> pour envoyer à DOSSIER et aux autres outils.'), 2500);
+        setTimeout(() => tip('common.file', '#xb-file', 'Toujours au même endroit', 'La barre du haut est la même dans tous les outils : 🔎 rechercher, 🗒️ <b>Nouveau ▾</b>, 📂 ouvrir, 💾 enregistrer, ⬇️ <b>Exporter ▾</b> (PDF, tableaux, impression, fichier du projet), 📤 <b>Vers Suite XIII</b> et 🔗 partager. En dessous, la barre de l’outil est rangée pareil partout : ① Créer · ② Afficher · ③ Modifier · ④ Outils métier · ⑤ Assistants.'), 2500);
         setTimeout(() => { if (!document.getElementById('xf-ov')) tip('common.ctrlk', '#xb-file', 'Gagnez du temps avec Ctrl + K', 'Tapez ce que vous voulez faire (« pdf », « ajouter », « équipe »…) : la commande se lance avec Entrée. La recherche fouille aussi tous vos projets.'); }, 180000);
         // 3. au premier usage d'un élément
         document.addEventListener('click', e => {
