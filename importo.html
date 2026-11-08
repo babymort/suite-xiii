@@ -7837,7 +7837,7 @@ const XOFF = (() => {
     }
     function init(app) {
         APP = app;
-        const s = document.createElement('style'); s.textContent = '#xoff{position:fixed;left:50%;transform:translateX(-50%);top:8px;z-index:10050;max-width:min(720px,calc(100vw - 24px));padding:7px 12px;border-radius:12px;background:var(--bg-menu,#2a2622);color:var(--text-main,#eee);border:1px solid rgba(240,179,120,.6);box-shadow:0 8px 24px rgba(0,0,0,.4);font:12.5px/1.4 "Segoe UI",system-ui,sans-serif}#xoff small{color:var(--text-dim,#aaa)}#xoff .w{color:#ffb74d}#xoff button{margin-left:6px;font:inherit;font-size:12px;color:inherit;background:var(--bg-panel-alt,#2c2c31);border:1px solid var(--border-color,#45454b);border-radius:7px;padding:2px 8px;cursor:pointer}#xoff button[data-p]{background:rgba(240,179,120,.28);border-color:rgba(240,179,120,.75)}';
+        const s = document.createElement('style'); s.textContent = '#xoff{position:fixed;left:50%;transform:translateX(-50%);bottom:16px;z-index:10050;max-width:min(720px,calc(100vw - 24px));padding:7px 12px;border-radius:12px;background:var(--bg-menu,#2a2622);color:var(--text-main,#eee);border:1px solid rgba(240,179,120,.6);box-shadow:0 8px 24px rgba(0,0,0,.4);font:12.5px/1.4 "Segoe UI",system-ui,sans-serif}#xoff small{color:var(--text-dim,#aaa)}#xoff .w{color:#ffb74d}#xoff button{margin-left:6px;font:inherit;font-size:12px;color:inherit;background:var(--bg-panel-alt,#2c2c31);border:1px solid var(--border-color,#45454b);border-radius:7px;padding:2px 8px;cursor:pointer}#xoff button[data-p]{background:rgba(240,179,120,.28);border-color:rgba(240,179,120,.75)}';
         document.head.appendChild(s);
         const run = async () => { await check(); chip(); };
         addEventListener('online', run); addEventListener('offline', run);
@@ -9598,7 +9598,7 @@ XVIT.init();
 <script src="lib/suite-empty.js?v=dc3fbb36b9"></script>
 <script src="lib/suite-dock.js?v=253bb1bb47"></script>
 <script src="lib/suite-libtab.js?v=aa87c9659c"></script>
-<script src="lib/suite-type.js?v=cab45f0fa5"></script>
+<script src="lib/suite-type.js?v=c58a339c69"></script>
 <script src="lib/suite-density.js?v=6bdffebeaa"></script>
 <!-- SUITE XIII:EXTRA:END -->
 </body>
