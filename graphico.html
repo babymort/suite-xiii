@@ -5919,7 +5919,7 @@ var XRED = (function () {
         const L = _al(type); const f = XSET.val('font'); if (L && f && /^(text|ticker|timer)$/.test(type) && L.font !== f) { L.font = f; try { touch(); renderProps(); } catch (e) { } } return L;
     };
     XSET.init({
-        app: 'graphico', title: 'GRAPHICO', version: 'v2.23',
+        app: 'graphico', title: 'GRAPHICO', version: 'v2.24',
         css: '#content{padding-bottom:70px}.gx-tl{margin-bottom:2px}',
         theme: { get: () => prefs.theme === 'light' ? 'light' : 'dark', set: t => { if ((prefs.theme === 'light' ? 'light' : 'dark') !== t) toggleTheme(); } },
         hide: ['#toolbar button[onclick="toggleTheme()"]', '#toolbar button[onclick="openGuide()"]'],
@@ -6737,6 +6737,7 @@ XVIT.init();
 <script src="lib/suite-ident.js?v=360116005c"></script>
 <script src="lib/suite-topbar.js?v=7ac5dbcd1f"></script>
 <script src="lib/suite-sectors.js?v=fa65e1cd5e"></script>
+<script src="lib/suite-focus.js?v=4c5df42ea0"></script>
 <!-- SUITE XIII:EXTRA:END -->
 </body>
 </html>

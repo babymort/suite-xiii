@@ -2045,7 +2045,7 @@ var XRED = (function () {
     if (typeof XSET === 'undefined' || typeof prefs === 'undefined' || typeof FX === 'undefined') return;
     function apply(S) { try { render(); } catch (e) { } }
     XSET.init({
-        app: 'lumo', title: 'LUMO', version: 'v1.25',
+        app: 'lumo', title: 'LUMO', version: 'v1.26',
         sections: [{ id: 'aff', icon: '💡', title: 'Plan de feu', open: true, desc: 'Alimentation, calibre des circuits et tension se règlent dans ⚡ Puissance. Puissances et canaux du catalogue : valeurs indicatives.', fields: [{ k: 'view', label: 'Vue à l\'ouverture', type: 'select', def: 'fx', options: [['fx', 'Projecteurs'], ['dmx', 'Univers DMX'], ['pow', 'Puissance']] }] }],
         apply
     });
@@ -3971,6 +3971,7 @@ XCAT.initTool('lumo');
 <script src="lib/suite-ident.js?v=360116005c"></script>
 <script src="lib/suite-topbar.js?v=7ac5dbcd1f"></script>
 <script src="lib/suite-sectors.js?v=fa65e1cd5e"></script>
+<script src="lib/suite-focus.js?v=4c5df42ea0"></script>
 <!-- SUITE XIII:EXTRA:END -->
 <!-- SUITE XIII:DEVISO:START -->
 <script>
