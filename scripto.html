@@ -3301,7 +3301,7 @@ var XRED = (function () {
     const _bs = scBlankShot;
     scBlankShot = function (P0, day, from) { const s = _bs(P0, day, from); const st = XSET.val('sonDef'); if (!from && !P0.shots.length && st) s.sonTags = String(st).split(/[;,]/).map(x => x.trim()).filter(Boolean); return s; };
     XSET.init({
-        app: 'scripto', title: 'SCRIPTO', version: 'v1.42',
+        app: 'scripto', title: 'SCRIPTO', version: 'v1.43',
         theme: { get: () => prefs.theme === 'light' ? 'light' : 'dark', set: t => { if ((prefs.theme === 'light' ? 'light' : 'dark') !== t) toggleTheme(); } },
         hide: ['#toolbar button[onclick="toggleTheme()"]', '#toolbar button[onclick="openGuide()"]'],
         help: [{ icon: '📖', label: 'Guide d\'utilisation', sub: 'Journées, plans, prises, raccords, tablette, rapports', run: openGuide }],
@@ -3407,7 +3407,7 @@ const XUNDO = (() => {
 
 (function(){ const go = () => (typeof XBOOT !== 'undefined' ? XBOOT.ready(() => XUNDO.init('scripto'), 600) : setTimeout(() => XUNDO.init('scripto'), 600)); if (document.readyState === 'complete') go(); else window.addEventListener('load', go); })();
 
-</script><script src="lib/core-02.js?v=6d5e12a4de"></script><script src="lib/core-03.js?v=49f378ccf6"></script><script>// =====================================================================
+</script><script src="lib/core-02.js?v=6d5e12a4de"></script><script src="lib/core-03.js?v=7a4c6a0425"></script><script>// =====================================================================
 //  SUITE XIII — XPRS : 👥 présence en direct — qui est dans quel outil
 //  Deux sources fusionnées : le Drive (battement toutes les 20 s, fiable) et XLIVE (signal instantané à
 //  l'ouverture, au retour sur l'onglet, à la frappe, au départ). Affichage :
@@ -4150,7 +4150,7 @@ XSC2PO.init();
 <script src="lib/suite-a11y2.js?v=06b1aa6f24"></script>
 <script src="lib/suite-sobre.js?v=21dc837de1"></script>
 <script src="lib/suite-ident.js?v=360116005c"></script>
-<script src="lib/suite-topbar.js?v=d4cc19f1ed"></script>
+<script src="lib/suite-topbar.js?v=337feb5cc5"></script>
 <script src="lib/suite-sectors.js?v=e25124f82e"></script>
 <script src="lib/suite-focus.js?v=4c5df42ea0"></script>
 <script src="lib/suite-keys.js?v=f5024fc78d"></script>
