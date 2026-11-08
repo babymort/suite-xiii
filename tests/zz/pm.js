@@ -1,0 +1,4 @@
+const {chromium}=require('playwright');(async()=>{const b=await chromium.launch();const p=await b.newPage({viewport:{width:1440,height:900}});await p.addInitScript(()=>{localStorage.setItem('xiii.tour2.scripto.hide','1')});await p.goto('http://localhost:8765/scripto.html');await p.waitForTimeout(5000);
+await p.evaluate(()=>{try{closeModal()}catch(e){};document.activeElement.blur()});const t0=await p.evaluate(()=>document.body.innerText.length);await p.keyboard.press('n');await p.waitForTimeout(2500);
+console.log(t0,await p.evaluate(()=>document.body.innerText.length),'pmod',await p.evaluate(()=>Storage.prototype.getItem.call(Object.getPrototypeOf(localStorage)===Storage.prototype?localStorage:localStorage,'xiii.pmod')));
+console.log(await p.evaluate(()=>{const o=[];for(let i=0;i<window.localStorage.length;i++)o.push(localStorage.key(i));return o.filter(k=>/scripto|pmod/i.test(k))}));await b.close()})();

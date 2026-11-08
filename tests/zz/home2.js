@@ -1,0 +1,2 @@
+const {chromium}=require('playwright');(async()=>{const b=await chromium.launch();const p=await b.newPage({viewport:{width:1440,height:900}});await p.goto('http://localhost:8765/index.html?embed=1');await p.waitForTimeout(5000);
+console.log(await p.evaluate(()=>{const c=document.querySelector('.phase .card');return c.outerHTML.slice(0,1800)}));console.log(await p.evaluate(()=>localStorage.getItem('xiii.mod.scripto')));await b.close()})();

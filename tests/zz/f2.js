@@ -1,0 +1,2 @@
+const {chromium}=require('playwright');(async()=>{const b=await chromium.launch();const p=await b.newPage({viewport:{width:1440,height:900}});await p.goto('http://localhost:8765/scripto.html');await p.waitForTimeout(3500);
+console.log(await p.evaluate(()=>[...document.querySelectorAll('[role=dialog],.modal,.modal-overlay,#xf-ov,#xtour-ov,.xtour')].filter(e=>e.offsetWidth>0&&getComputedStyle(e).display!=='none'&&getComputedStyle(e).visibility!=='hidden').map(e=>e.id+'.'+e.className)));await b.close()})();
