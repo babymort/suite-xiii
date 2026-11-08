@@ -1,0 +1,8 @@
+const {chromium}=require('playwright');(async()=>{const b=await chromium.launch();const c=await b.newContext({viewport:{width:1440,height:900}});const p=await c.newPage();await p.addInitScript(()=>{localStorage.setItem('xiii.tour2.casto.hide','1');localStorage.setItem('xiii.tips.off','1')});await p.goto('http://localhost:8765/casto.html');await p.waitForTimeout(6000);
+const open=async()=>{await p.evaluate(()=>[...document.querySelectorAll('#toolbar button')].find(b=>/Coller une liste/.test(b.title)).click());await p.waitForTimeout(500)};
+await open();console.log('1re ouverture :',await p.evaluate(()=>document.querySelector('[data-xdock]').dataset.xdock));
+// travail à gauche pendant que le panneau est ouvert : clic sur la zone de gauche
+const el=await p.evaluate(()=>{const e=document.elementFromPoint(300,500);return e.tagName+'.'+e.className});console.log('à gauche, sous la souris :',el);
+await p.click('#xdock-btn');await p.waitForTimeout(300);console.log('après ▣ :',await p.evaluate(()=>document.querySelector('[data-xdock]').dataset.xdock),await p.evaluate(()=>localStorage.getItem('xiii.dock.casto')));
+await p.keyboard.press('Escape');await p.waitForTimeout(300);await p.evaluate(()=>{try{closeModal()}catch(e){}});await p.waitForTimeout(300);await open();console.log('réouverture (choix retenu) :',await p.evaluate(()=>(document.querySelector('[data-xdock]')||{dataset:{}}).dataset.xdock));
+await p.click('#xdock-btn');await p.waitForTimeout(300);console.log('remis sur le côté :',await p.evaluate(()=>document.querySelector('[data-xdock]').dataset.xdock));await p.screenshot({path:'/tmp/zz/dock_casto.png'});await b.close()})();
