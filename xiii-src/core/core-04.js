@@ -16,7 +16,15 @@ const XBAR = (() => {
     const teamOn = () => localStorage.getItem('xiii.bar.team') === '1' || linked() || has('xiii.notes.' + APP) || has('xiii.memo.' + APP) || !!J('xiii.deleg.active.' + APP, null) || (J('xiii.deleg.sent', []) || []).some(x => x && x.app === APP);
     const TEAM = ['xtb-btn', 'xdl-btn', 'xnt-btn', 'xmm-btn', 'xdr-btn', 'xdr-chip'];
     function build() {
-        let first = $('xdl-btn') || $('xnt-btn'); if (!first) return false;
+        let first = $('xdl-btn') || $('xnt-btn');
+        // outil sans délégation par lien (CADRO, DOSSIER, CALENDRIER, CONTRÔLE, ENCODO, LUDO) : le bouton 👥 Équipe existe quand même,
+        // au même endroit que partout (barre du haut), après 4 s pour laisser les autres modules poser leurs boutons
+        if (!first && !$('xb-team')) { const tb = $('top-bar'); if (!tb || performance.now() < 4000) return false;
+            const at = $('xb-file') || [...tb.children].pop(); if (!at) return false;
+            at.insertAdjacentHTML('afterend', '<span class="btn-group" id="xb-bar" data-solo="1"><span id="xb-anchor"></span></span>'); first = $('xb-anchor');
+            first.insertAdjacentHTML('beforebegin', '<button id="xb-solo" title="Travailler en équipe : relier le Drive du projet"><span class="btn-icon">👥</span><span class="btn-label">Équipe</span></button><span id="xb-team" class="xb-g"></span>');
+            $('xb-solo').onclick = menu; }
+        if (!first) return false;
         let g = $('xb-team');
         if (!g) {
             // un groupe à nous, à droite du groupe d'origine (ou du dernier groupe visible si celui-ci est masqué dans cette vue)
@@ -40,7 +48,8 @@ const XBAR = (() => {
     }
     function apply() { try { master(); } catch (e) { }
         const on = teamOn(), g = $('xb-team'), s = $('xb-solo'); if (!g || !s) return;
-        g.style.display = on ? '' : 'none'; s.style.display = on ? 'none' : '';
+        const show = on && g.children.length > 0; // groupe vide (outil sans délégation) : on garde 👥 Équipe
+        g.style.display = show ? '' : 'none'; s.style.display = show ? 'none' : '';
         document.querySelectorAll('#xdr-ban').forEach(x => x.style.display = on ? '' : 'none');
     }
     function menu(e) {
@@ -52,6 +61,7 @@ const XBAR = (() => {
             '<button data-a="drive"><span>☁️</span><span><b>Relier le Drive du projet</b><small>Toute l\'équipe travaille dans votre Google Drive : synchronisation, droits, journal, mots, avis.</small></span></button>' +
             '<button data-a="deleg"><span>🤝</span><span><b>Déléguer par un lien</b><small>Sans Drive : un membre remplit cet outil et vous le renvoie.</small></span></button>' +
             '<button data-a="show"><span>👁</span><span><b>Afficher les boutons d\'équipe</b><small>Déléguer, Avis, Mots, Drive — sur ce poste.</small></span></button>';
+        if (!$('xdl-btn')) m.querySelector('[data-a=deleg]').remove(); if (!TEAM.some(id => $(id))) { m.querySelector('[data-a=show]').remove(); m.querySelector('p').textContent = 'Reliez le Drive du projet pour que toute l\'équipe partage la suite (les autres outils du projet suivent).'; }
         document.body.appendChild(m);
         m.querySelector('[data-a=drive]').onclick = () => { location.href = 'drive.html'; };
         m.querySelector('[data-a=deleg]').onclick = () => { m.remove(); const b = $('xdl-btn'); if (b) b.click(); };
@@ -152,7 +162,7 @@ const XBAR = (() => {
         if (app === 'catalogue' && window.top === window && !/[?&](embed|out|view|share|pub)=/.test(location.search) && !/#xlink=/.test(location.hash)) { location.replace('matos.html?v=cat' + location.hash); return; } // CATALOGUE vit dans MATOS › 🗃️ Catalogue
         APP = app; homeFix(); brand(); setTimeout(() => { try { master(); } catch (e) { } }, 1200); if (!document.getElementById('xb-css')) css();
         const lay = () => { try { layout(); } catch (e) { console.warn('XBAR', e); } };
-        if (typeof XDELEG === 'undefined' || !XDELEG.KEYS[app]) { XBOOT.ready(lay, 1800); return; }
+        if (typeof XDELEG === 'undefined' || !XDELEG.KEYS[app]) { XBOOT.ready(lay, 1800); const iv0 = setInterval(() => { if (build() || performance.now() > 15000) clearInterval(iv0); }, 700); setInterval(apply, 4000); return; } // 👥 Équipe seul (pas de délégation)
         XBOOT.ready(() => { try { if (build()) lay(); } catch (e) { } }, 1800); // rangé avant l'affichage de la page
         const iv = setInterval(() => { if (build()) lay(); if (performance.now() > 15000) clearInterval(iv); }, 700);
         addEventListener('storage', e => { if (/^xiii\.(drive|notes|memo|deleg|bar)/.test(e.key || '')) apply(); });

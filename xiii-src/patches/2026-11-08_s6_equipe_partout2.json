@@ -1,0 +1,1 @@
+[["        g.style.display = on ? '' : 'none'; s.style.display = on ? 'none' : '';", "        const show = on && g.children.length > 0; // groupe vide (outil sans délégation) : on garde 👥 Équipe\n        g.style.display = show ? '' : 'none'; s.style.display = show ? 'none' : '';", 1]]
