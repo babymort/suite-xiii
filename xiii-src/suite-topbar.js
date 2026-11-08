@@ -48,7 +48,7 @@
             if (exp.length || sel) {
                 EXPI = () => {
                     const it = [];
-                    if (sel && render) [...sel.options].forEach(o => it.push([/pdf/i.test(o.value) ? '📄' : '🖼️', o.textContent.trim() + (/pdf/i.test(o.value) ? '' : (/jpe?g/i.test(o.value) ? ' — fichier plus léger' : ' — qualité maximale')), () => { sel.value = o.value; sel.dispatchEvent(new Event('change', { bubbles: true })); render.click(); }]));
+                    if (sel && render) [...sel.options].forEach(o => { const img = /^(png|jpe?g|webp)$/i.test(o.value); it.push([img ? '🖼️' : '📄', o.textContent.trim() + (!img ? '' : (/jpe?g/i.test(o.value) ? ' — fichier plus léger' : ' — qualité maximale')), () => { sel.value = o.value; sel.dispatchEvent(new Event('change', { bubbles: true })); render.click(); }]); });
                     // le sous-menu 🖨️ « Exporter, imprimer » est déplié : tous les exports au même niveau
                     others.forEach(b => { const h = b.id === 'xb-exp' && $('xb-hold'); if (h) [...h.querySelectorAll('button')].forEach(x => it.push([ico(x).slice(0, 3) || '📄', tip(x), () => x.click()])); else it.push([ico(b).slice(0, 3) || '📄', tip(b), () => b.click()]); });
                     if (json) it.push(['📦', 'Fichier du projet : ' + tip(json).replace(/^Exporter\s*/i, ''), () => json.click()]);
