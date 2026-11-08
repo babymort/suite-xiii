@@ -1,0 +1,1 @@
+[["(root || document).querySelectorAll('#top-bar button,#toolbar button,#top-bar a,#toolbar a,#top-bar label,#toolbar label,' + IN)", "(root || document).querySelectorAll('#top-bar button,#toolbar button,#top-bar a,#toolbar a,#top-bar label,#toolbar label,#toolbar span:not(.btn-label):not(.xgl-e),#top-bar span:not(.btn-label):not(.xgl-e),#xoff b,#xoff button,' + IN)", 1]]

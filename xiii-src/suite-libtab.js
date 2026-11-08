@@ -15,7 +15,7 @@
         const top = Math.max(r.top, ($('toolbar') || {}).getBoundingClientRect ? $('toolbar').getBoundingClientRect().bottom : 0), bot = r.height > 40 ? r.bottom : innerHeight;
         tab.style.top = Math.round(top + (bot - top) * 0.46 - 26) + 'px';
         const t = (src.title || '').replace(/^(Masquer|Afficher)\s*/i, '') || 'la bibliothèque';
-        tab.classList.toggle('open', open); tab.querySelector('i').textContent = open ? '‹' : '›';
+        if (tab.classList.contains('open') !== open || !tab.querySelector('svg')) { tab.classList.toggle('open', open); tab.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="' + (open ? 'M15 5l-7 7 7 7' : 'M9 5l7 7-7 7') + '"/></svg>'; }
         tab.title = (open ? 'Masquer ' : 'Afficher ') + t; tab.setAttribute('aria-expanded', open ? 'true' : 'false');
     }
     function mount() {
@@ -23,7 +23,7 @@
         if (!$('xlib-css')) { const s = document.createElement('style'); s.id = 'xlib-css';
             s.textContent = '#lib-toggle-btn[data-xlib]{display:none!important}' +
                 '#xlib-tab{position:fixed;z-index:90;width:22px;height:52px;padding:0;display:flex;align-items:center;justify-content:center;border-radius:0 10px 10px 0;border:1px solid rgba(240,179,120,.6);border-left:0;background:var(--bg-menu,#232327);color:var(--text-main,#eee);cursor:pointer;box-shadow:4px 4px 16px rgba(0,0,0,.35);transition:background .15s}' +
-                '#xlib-tab i{font-style:normal;font-size:20px;line-height:1;font-weight:700;margin-left:-1px}#xlib-tab:hover{background:rgba(240,179,120,.22)}#xlib-tab:focus-visible{outline:2px solid rgb(240,179,120);outline-offset:2px}' +
+                '#xlib-tab svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}#xlib-tab:hover{background:rgba(240,179,120,.22)}#xlib-tab:focus-visible{outline:2px solid rgb(240,179,120);outline-offset:2px}' +
                 'body.xfocus #xlib-tab{display:none}@media print{#xlib-tab{display:none!important}}';
             document.head.appendChild(s); }
         if (!src.dataset.xlib) { src.dataset.xlib = 1; try { if (window.XSECT) XSECT.arrange(); } catch (e) { } }
