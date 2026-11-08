@@ -2119,7 +2119,7 @@ var XRED = (function () {
     if (typeof XSET === 'undefined' || typeof prefs === 'undefined' || typeof CATS === 'undefined') return;
     function apply(S) { if (S.fps && P) P.fps = +S.fps; try { render(); } catch (e) { } }
     XSET.init({
-        app: 'posto', title: 'POSTO', version: 'v1.36',
+        app: 'posto', title: 'POSTO', version: 'v1.37',
         sections: [{ id: 'aff', icon: '🎞️', title: 'Post-production', open: true, desc: 'Retours au timecode → marqueurs EDL pour DaVinci Resolve / Premiere ; étapes → PLANNO.', fields: [{ k: 'view', label: 'Vue à l\'ouverture', type: 'select', def: 'versions', options: [['versions', 'Versions & retours'], ['steps', 'Étapes'], ['deliv', 'Livrables']] }, { k: 'fps', label: 'Images par seconde (timecode)', type: 'select', def: '25', options: [['25', '25'], ['24', '24'], ['30', '30'], ['50', '50']] }] }],
         apply
     });
@@ -2197,7 +2197,7 @@ const XUNDO = (() => {
 
 (function(){ const go = () => (typeof XBOOT !== 'undefined' ? XBOOT.ready(() => XUNDO.init('posto'), 600) : setTimeout(() => XUNDO.init('posto'), 600)); if (document.readyState === 'complete') go(); else window.addEventListener('load', go); })();
 
-</script><script src="lib/core-02.js?v=6d5e12a4de"></script><script src="lib/core-03.js?v=7a4c6a0425"></script><script>// =====================================================================
+</script><script src="lib/core-02.js?v=6d5e12a4de"></script><script src="lib/core-03.js?v=4adc04f142"></script><script>// =====================================================================
 //  SUITE XIII — XPRS : 👥 présence en direct — qui est dans quel outil
 //  Deux sources fusionnées : le Drive (battement toutes les 20 s, fiable) et XLIVE (signal instantané à
 //  l'ouverture, au retour sur l'onglet, à la frappe, au départ). Affichage :
@@ -3123,7 +3123,7 @@ XDER.init();
 <script src="lib/suite-ctx.js?v=98b9b65103"></script>
 <script src="lib/suite-empty.js?v=dc3fbb36b9"></script>
 <script src="lib/suite-dock.js?v=253bb1bb47"></script>
-<script src="lib/suite-libtab.js?v=7799b0b307"></script>
+<script src="lib/suite-libtab.js?v=aa87c9659c"></script>
 <!-- SUITE XIII:EXTRA:END -->
 </body>
 </html>

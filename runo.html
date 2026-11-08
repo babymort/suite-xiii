@@ -2182,7 +2182,7 @@ var XRED = (function () {
     if (typeof XSET === 'undefined' || typeof prefs === 'undefined' || typeof AK === 'undefined') return;
     function apply(S) { try { render(); } catch (e) { } }
     XSET.init({
-        app: 'runo', title: 'RUNO', version: 'v1.34',
+        app: 'runo', title: 'RUNO', version: 'v1.35',
         sections: [{ id: 'aff', icon: '🔴', title: 'Direct stream', open: true, desc: 'Chat Twitch en lecture sans compte ; objectifs et alertes affichés par GRAPHICO ouvert dans le même navigateur ; chat à l\'écran pour OBS via 💬.', fields: [{ k: 'view', label: 'Vue à l\'ouverture', type: 'select', def: 'live', options: [['live', 'Direct'], ['plan', 'Déroulé'], ['goals', 'Objectifs']] }] }],
         apply
     });
@@ -2260,7 +2260,7 @@ const XUNDO = (() => {
 
 (function(){ const go = () => (typeof XBOOT !== 'undefined' ? XBOOT.ready(() => XUNDO.init('runo'), 600) : setTimeout(() => XUNDO.init('runo'), 600)); if (document.readyState === 'complete') go(); else window.addEventListener('load', go); })();
 
-</script><script src="lib/core-02.js?v=6d5e12a4de"></script><script src="lib/core-03.js?v=7a4c6a0425"></script><script>// =====================================================================
+</script><script src="lib/core-02.js?v=6d5e12a4de"></script><script src="lib/core-03.js?v=4adc04f142"></script><script>// =====================================================================
 //  SUITE XIII — XPRS : 👥 présence en direct — qui est dans quel outil
 //  Deux sources fusionnées : le Drive (battement toutes les 20 s, fiable) et XLIVE (signal instantané à
 //  l'ouverture, au retour sur l'onglet, à la frappe, au départ). Affichage :
@@ -2978,7 +2978,7 @@ XVIT.init();
 <script src="lib/suite-ctx.js?v=98b9b65103"></script>
 <script src="lib/suite-empty.js?v=dc3fbb36b9"></script>
 <script src="lib/suite-dock.js?v=253bb1bb47"></script>
-<script src="lib/suite-libtab.js?v=7799b0b307"></script>
+<script src="lib/suite-libtab.js?v=aa87c9659c"></script>
 <!-- SUITE XIII:EXTRA:END -->
 </body>
 </html>

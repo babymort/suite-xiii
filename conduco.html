@@ -5027,7 +5027,7 @@ var XRED = (function () {
     const typeOpts = () => TYPES.map(t => [t.id, t.ico + ' ' + t.name]);
 
     const CFG = {
-        app: 'conduco', title: 'CONDUCO', version: 'v60',
+        app: 'conduco', title: 'CONDUCO', version: 'v61',
         theme: { get: () => prefs.theme === 'light' ? 'light' : 'dark', set: t => { prefs.theme = t; applyTheme(); savePrefs(); } },
         hide: ['#settings-btn'],
         // ancien ⚙️ masqué ; zoom/horloge alignés à gauche du nouveau ⚙️ (hors badge Netlify) ; panneau de propriétés raccourci ; ⚙️ absent du Direct
@@ -5171,7 +5171,7 @@ const XNDI = (() => {
     return { probe, sender, stream, ptz, ZIP: 'ndi-xiii.zip', base: BASE };
 })();
 
-</script><script src="lib/core-03.js?v=7a4c6a0425"></script><script>// =====================================================================
+</script><script src="lib/core-03.js?v=4adc04f142"></script><script>// =====================================================================
 //  SUITE XIII — XPRS : 👥 présence en direct — qui est dans quel outil
 //  Deux sources fusionnées : le Drive (battement toutes les 20 s, fiable) et XLIVE (signal instantané à
 //  l'ouverture, au retour sur l'onglet, à la frappe, au départ). Affichage :
@@ -6047,5 +6047,5 @@ XLIVEED.init();
 <script src="lib/suite-empty.js?v=dc3fbb36b9"></script>
 <script src="lib/suite-dock.js?v=253bb1bb47"></script>
 <script src="lib/suite-insp.js?v=cfc0e797e8"></script>
-<script src="lib/suite-libtab.js?v=7799b0b307"></script>
+<script src="lib/suite-libtab.js?v=aa87c9659c"></script>
 <!-- SUITE XIII:EXTRA:END -->
