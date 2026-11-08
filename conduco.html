@@ -5027,7 +5027,7 @@ var XRED = (function () {
     const typeOpts = () => TYPES.map(t => [t.id, t.ico + ' ' + t.name]);
 
     const CFG = {
-        app: 'conduco', title: 'CONDUCO', version: 'v54',
+        app: 'conduco', title: 'CONDUCO', version: 'v56',
         theme: { get: () => prefs.theme === 'light' ? 'light' : 'dark', set: t => { prefs.theme = t; applyTheme(); savePrefs(); } },
         hide: ['#settings-btn'],
         // ancien ⚙️ masqué ; zoom/horloge alignés à gauche du nouveau ⚙️ (hors badge Netlify) ; panneau de propriétés raccourci ; ⚙️ absent du Direct
@@ -6040,10 +6040,11 @@ XLIVEED.init();
 <script src="lib/suite-sobre.js?v=46384a8210"></script>
 <script src="lib/suite-ident.js?v=360116005c"></script>
 <script src="lib/suite-topbar.js?v=d4cc19f1ed"></script>
-<script src="lib/suite-sectors.js?v=fa65e1cd5e"></script>
+<script src="lib/suite-sectors.js?v=d552ed1520"></script>
 <script src="lib/suite-focus.js?v=4c5df42ea0"></script>
-<script src="lib/suite-keys.js?v=7ab47caaff"></script>
-<script src="lib/suite-ctx.js?v=4f9e6a8a17"></script>
+<script src="lib/suite-keys.js?v=f5024fc78d"></script>
+<script src="lib/suite-ctx.js?v=98b9b65103"></script>
 <script src="lib/suite-empty.js?v=dc3fbb36b9"></script>
-<script src="lib/suite-dock.js?v=2e35c327e3"></script>
+<script src="lib/suite-dock.js?v=09279b9c91"></script>
+<script src="lib/suite-insp.js?v=3ad0675700"></script>
 <!-- SUITE XIII:EXTRA:END -->
