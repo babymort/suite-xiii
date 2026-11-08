@@ -1,0 +1,11 @@
+const {chromium}=require('playwright');(async()=>{const b=await chromium.launch();const c=await b.newContext({viewport:{width:1440,height:900}});
+for(const a of ['scripto','plano','deviso','cadro']){const p=await c.newPage();await p.addInitScript(a=>{localStorage.setItem('xiii.tour2.'+a+'.hide','1');localStorage.setItem('xiii.tips.off','1')},a);const E=[];p.on('pageerror',e=>E.push(e.message));await p.goto('http://localhost:8765/'+a+'.html');await p.waitForTimeout(5000);
+await p.keyboard.press('Escape');await p.evaluate(()=>{try{closeModal()}catch(e){};document.querySelectorAll('.modal-overlay').forEach(e=>e.remove());const x=document.getElementById('xoff');if(x)x.remove();document.activeElement.blur()});
+const r={};let fc=false;p.on('filechooser',()=>fc=true);
+await p.keyboard.press('Control+e');await p.waitForTimeout(400);r.ctrlE=await p.evaluate(()=>{const m=document.getElementById('xb-menu');return m?m.innerText.split('\n')[0]:'rien'});await p.keyboard.press('Escape');await p.evaluate(()=>{const m=document.getElementById('xb-menu');if(m)m.remove()});
+await p.keyboard.press('Control+o');await p.waitForTimeout(500);r.ctrlO=fc?'sélecteur de fichier':await p.evaluate(()=>{const o=[...document.querySelectorAll('[role=dialog],.modal-overlay,#xb-menu')].filter(e=>e.offsetWidth>0).map(e=>(e.innerText||'').split('\n')[0]);return o.join('|')||'rien'});
+await p.keyboard.press('Escape');await p.evaluate(()=>{document.querySelectorAll('#xb-menu,.modal-overlay').forEach(e=>e.remove());document.activeElement.blur()});
+await p.keyboard.press('f');await p.waitForTimeout(300);r.F=await p.evaluate(()=>document.body.classList.contains('xfocus'));await p.keyboard.press('f');
+await p.keyboard.press('?');await p.waitForTimeout(300);r.fiche=await p.evaluate(()=>{const o=document.getElementById('xux-ov');return o?[...o.querySelectorAll('.r kbd')].slice(0,13).map(k=>k.textContent).join(' · '):'absente'});
+if(a==='scripto')await p.screenshot({path:'/tmp/zz/fiche.png'});
+console.log(a,JSON.stringify(r),E.slice(0,1));await p.close()}await b.close()})();
