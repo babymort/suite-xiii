@@ -1,0 +1,4 @@
+const {chromium}=require('playwright');const apps=(process.argv[2]||'scripto,deviso,conduco,plano,casto,index').split(',');
+(async()=>{const b=await chromium.launch();for(const a of apps){const c=await b.newContext({viewport:{width:1280,height:800}});const p=await c.newPage();const E=[];p.on('pageerror',e=>E.push(e.message));await p.addInitScript(a=>{localStorage.setItem('xiii.theme.mode','sobrec');localStorage.setItem('xiii.tour2.'+a+'.hide','1');localStorage.setItem('xiii.tips.off','1')},a);await p.goto('http://localhost:8765/'+a+'.html');await p.waitForTimeout(5500);
+await p.evaluate(()=>{const x=document.getElementById('xoff');if(x)x.remove();if(typeof window.XIII_FIRST==='function'){const f=window.XIII_FIRST;window.XIII_FIRST=null;f()}});await p.waitForTimeout(1200);
+console.log(a,await p.evaluate(()=>document.body.className.match(/x?sobre\w*|light-theme/g)),E.slice(0,1));await p.screenshot({path:'/tmp/zz/sc_'+a+'.png'});await c.close()}await b.close()})();

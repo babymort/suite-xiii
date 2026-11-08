@@ -9,7 +9,7 @@ const XPCFG = (() => {
     const W = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } };
     const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     const drive = () => J('xiii.drive', null), master = () => { const c = drive(); return !c || !c.url || !!c.code; }; // sans Drive : réglage local
-    const THEMES = [['', '— libre (chacun son thème) —'], ['dark', '🌙 Sombre'], ['light', '☀️ Clair'], ['auto', '🖥️ Auto'], ['sobre', '◼️ Sobre'], ['w2k', '🪟 Win 2000'], ['xp', '🟦 Win XP'], ['cyber', '🌆 Cyberpunk'], ['rainbow', '🌈 Rainbow'], ['mac9', '🍎 Mac OS 9'], ['term', '📟 Terminal'], ['sepia', '🎞️ Pellicule'], ['regie', '🎛️ Régie'], ['soleil', '🔆 Plein soleil'], ['gb', '🎮 Game Boy']];
+    const THEMES = [['', '— libre (chacun son thème) —'], ['dark', '🌙 Sombre'], ['light', '☀️ Clair'], ['auto', '🖥️ Auto'], ['sobre', '◼️ Sobre'], ['sobrec', '◻️ Sobre clair'], ['w2k', '🪟 Win 2000'], ['xp', '🟦 Win XP'], ['cyber', '🌆 Cyberpunk'], ['rainbow', '🌈 Rainbow'], ['mac9', '🍎 Mac OS 9'], ['term', '📟 Terminal'], ['sepia', '🎞️ Pellicule'], ['regie', '🎛️ Régie'], ['soleil', '🔆 Plein soleil'], ['gb', '🎮 Game Boy']];
     let APP = '';
     const cfg = () => J(K, {}) || {};
     // ---------- 🔐 outils par secteur ----------
