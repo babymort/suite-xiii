@@ -72,7 +72,8 @@
             const seq = [search, dv('a'), N, open, save, X, dv('b'), gate, share].filter(Boolean);
             seq.forEach(x => file.appendChild(x));
             // restent dans xb-file : boutons propres à l'outil ajoutés après coup → seconde barre
-            // 👥 Équipe · ☁️ Drive · pastille du nom
+            // 👥 Équipe · ☁️ Drive · pastille du nom (dans certains outils, ce groupe était né dans la seconde barre : il remonte)
+            if (bar && !tb.contains(bar)) { file.after(bar); bar.style.marginLeft = '0'; }
             { const host = bar || file, team = $('xb-solo'), chip = $('xid-chip'), auth = chip ? chip.closest('.xn-auth') || chip : null;
                 const drive = [...tb.querySelectorAll('button')].find(b => /☁️|☁/.test(ico(b)) && b !== team && !b.closest('#tabs-container'));
                 if (!bar && (team || drive || auth)) host.appendChild(dv('c'));
