@@ -1,0 +1,7 @@
+const {chromium}=require('playwright');(async()=>{const b=await chromium.launch();for(const a of ['conduco','decoup','plano'])for(const k of ['ex','zero']){const c=await b.newContext({viewport:{width:1280,height:800},acceptDownloads:true});const p=await c.newPage();const E=[];p.on('pageerror',e=>E.push(e.message));await p.addInitScript(a=>{localStorage.setItem('xiii.tour2.'+a+'.hide','1');localStorage.setItem('xiii.tips.off','1')},a);await p.goto('http://localhost:8765/'+a+'.html');await p.waitForTimeout(6000);await p.evaluate(()=>{const x=document.getElementById('xoff');if(x)x.remove()});
+const has=await p.evaluate(()=>!!document.getElementById('xem-first'));if(k==='ex')await p.screenshot({path:'/tmp/zz/first_'+a+'.png'});
+const before=await p.evaluate(()=>JSON.stringify(P.tabs).length);await p.click('#xem-first [data-k='+k+']');await p.waitForTimeout(1500);
+const after=await p.evaluate(()=>({len:JSON.stringify(P.tabs).length,name:P.name}));
+// rechargement : la carte revient-elle ?
+await p.reload();await p.waitForTimeout(6000);const again=await p.evaluate(()=>!!document.getElementById('xem-first'));const saved=await p.evaluate(()=>P.name+' / '+JSON.stringify(P.tabs).length);
+console.log(a,k,'| carte :',has,'| contenu',before,'→',after.len,after.name||'(sans nom)','| après rechargement : carte',again,'· projet',saved,E.length?'ERR '+E[0]:'');await c.close()}await b.close()})();

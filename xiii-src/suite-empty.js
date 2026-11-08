@@ -11,7 +11,8 @@
     const APPX = XIII_APP, $ = id => document.getElementById(id);
     // écran d'accueil de chaque outil (SYNO n'en avait pas : il est créé quand le schéma est vide)
     const CARD = { casto: '.empty', deviso: '.welcome', graphico: '.gx-empty', lumo: '.empty', matos: '.ct-empty', moodo: '.welcome', packingo: '.welcome', posto: '.empty', repero: '.side-empty', scripto: '.welcome', sono: '.empty', transporto: '.empty', syno: '#xem-syno' };
-    if (!CARD[APPX]) return;
+    const FIRST = () => typeof window.XIII_FIRST === 'function'; // outils qui chargeaient un exemple d'office (CONDUCO, DECOUP, PLANO) : vierges + choix à la première ouverture
+    if (!CARD[APPX] && !/^(conduco|decoup|plano)$/.test(APPX)) return;
     const vis = b => b && b.offsetWidth > 0 && !b.disabled && getComputedStyle(b).display !== 'none';
     const txt = b => ((b.title || '') + ' ' + (b.textContent || '')).replace(/\s+/g, ' ').trim();
     const lab = b => b.label || (((b.querySelector && b.querySelector('.btn-label')) || b).textContent || '').replace(/\s+/g, ' ').trim() || (b.title || '').split(/ : | — | \(/)[0];
@@ -56,16 +57,37 @@
         if (!empty) { if (c) c.remove(); return; }
         if (!c) { c = document.createElement('div'); c.id = 'xem-syno'; c.innerHTML = '<h3>🔀 Synoptique vide</h3><p>Placez vos équipements et reliez-les par des câbles : le synoptique, la liste du matériel et le patch se font en même temps.</p>'; ws.appendChild(c); }
     }
+    const save = () => { try { if (typeof autosave === 'function') autosave(); else if (typeof commit === 'function') commit(); else if (typeof saveProject === 'function') saveProject(false); } catch (e) { } };
+    function firstCard() {
+        let c = $('xem-first');
+        // arrivée par une passerelle, un lien ou un import : l'outil a déjà du contenu, pas de choix à proposer
+        if (FIRST()) { let cur = ''; try { cur = JSON.stringify(P.tabs); } catch (e) { } if (firstCard.base == null) firstCard.base = cur; if (/xfrom=|xlink=|#x?import/.test(location.hash) || cur !== firstCard.base) window.XIII_FIRST = null; }
+        if (!FIRST()) { if (c) c.remove(); return; }
+        const tour = $('xt-pop'), busy = tour && tour.offsetWidth > 0; // la visite guidée d'abord : jamais deux fenêtres l'une sur l'autre
+        if (c) { c.style.display = busy ? 'none' : ''; return; } if (busy) return;
+        const name = (document.title || '').split(/ [—-] /)[0].replace(/\s*XIII.*$/i, '').trim() || APPX.toUpperCase();
+        const top = $('xb-file'), open = top && [...top.querySelectorAll('button')].find(b => vis(b) && /📂/.test(b.textContent));
+        c = document.createElement('div'); c.id = 'xem-first'; c.className = 'xem-card'; c.setAttribute('role', 'dialog'); c.setAttribute('aria-label', 'Pour commencer');
+        c.innerHTML = '<h3>' + name.replace(/[<>&]/g, '') + ' — nouveau projet</h3><p>Choisissez comment commencer.</p><div class="xem-trio"><div class="xem-h">Pour commencer</div>' +
+            '<button type="button" data-k="ex"><span class="i">📐</span><b>Partir d’un exemple</b><small>Un projet type complet, à adapter</small></button>' +
+            (open ? '<button type="button" data-k="imp"><span class="i">📥</span><b>Charger un fichier</b><small>Ouvrir un fichier du projet</small></button>' : '') +
+            '<button type="button" data-k="zero"><span class="i">➕</span><b>Commencer de zéro</b><small>Une page vierge</small></button></div>';
+        const done = () => { window.XIII_FIRST = null; c.remove(); };
+        c.querySelector('[data-k=ex]').onclick = () => { const f = window.XIII_FIRST; done(); try { f(); } catch (e) { } };
+        if (open) c.querySelector('[data-k=imp]').onclick = () => { done(); save(); open.click(); };
+        c.querySelector('[data-k=zero]').onclick = () => { done(); save(); };
+        document.body.appendChild(c); setTimeout(() => { const b = c.querySelector('[data-k=ex]'); try { b.focus({ preventScroll: true }); } catch (e) { } }, 50);
+    }
     function css() {
         if ($('xem-css')) return; const s = document.createElement('style'); s.id = 'xem-css';
         s.textContent = '.xem-trio{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;width:100%;max-width:640px;margin:14px auto 12px;text-align:center}.xem-h{grid-column:1/-1;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim,#999);margin-bottom:-2px}' +
             '.xem-trio button{all:unset;box-sizing:border-box;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;padding:14px 10px 12px;border-radius:12px;border:1px solid var(--border-color,#444);background:var(--bg-panel-alt,rgba(255,255,255,.03));color:var(--text-main,#eee);transition:border-color .15s,background .15s}' +
             '.xem-trio button:hover,.xem-trio button:focus-visible{border-color:rgb(240,179,120);background:rgba(240,179,120,.10)}.xem-trio .i{font-size:24px;line-height:1}.xem-trio b{font-size:13.5px}.xem-trio small{font-size:11.5px;color:var(--text-dim,#999);line-height:1.3;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}' +
-            '#xem-syno{position:fixed;left:50%;top:52%;transform:translate(-50%,-50%);z-index:5;width:min(600px,90%);padding:20px 22px;border-radius:14px;background:var(--bg-panel,#2d2d2d);border:1px solid var(--border-color,#444);box-shadow:0 12px 34px rgba(0,0,0,.35);text-align:center;color:var(--text-main,#eee)}#xem-syno h3{margin:0 0 6px;font-size:16px}#xem-syno p{margin:0;font-size:13px;color:var(--text-dim,#aaa);line-height:1.45}' +
-            'body.xfocus #xem-syno{display:none}@media print{.xem-trio,#xem-syno{display:none!important}}';
+            '#xem-first,#xem-syno{position:fixed;left:50%;top:52%;transform:translate(-50%,-50%);z-index:5;width:min(600px,90%);padding:20px 22px;border-radius:14px;background:var(--bg-panel,#2d2d2d);border:1px solid var(--border-color,#444);box-shadow:0 12px 34px rgba(0,0,0,.35);text-align:center;color:var(--text-main,#eee)}#xem-first h3,#xem-syno h3{margin:0 0 6px;font-size:16px}#xem-first p,#xem-syno p{margin:0;font-size:13px;color:var(--text-dim,#aaa);line-height:1.45}' +
+            'body.xfocus #xem-syno{display:none}#xem-first{z-index:60}@media print{.xem-trio,#xem-syno,#xem-first{display:none!important}}';
         document.head.appendChild(s);
     }
-    function tick() { try { css(); if (APPX === 'syno') synoCard(); document.querySelectorAll(CARD[APPX]).forEach(decorate); } catch (e) { } }
+    function tick() { try { css(); if (APPX === 'syno') synoCard(); firstCard(); if (CARD[APPX]) document.querySelectorAll(CARD[APPX]).forEach(decorate); } catch (e) { } }
     const go = () => { tick(); setInterval(tick, 900); };
     try { if (typeof XBOOT !== 'undefined' && XBOOT.ready) XBOOT.ready(() => setTimeout(go, 600), 2998); else throw 0; } catch (e) { addEventListener('load', () => setTimeout(go, 1400)); }
     window.XEMPTY = { tick };
