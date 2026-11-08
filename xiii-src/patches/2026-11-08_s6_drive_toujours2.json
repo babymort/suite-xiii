@@ -1,0 +1,1 @@
+[["const tb = $('top-bar'); if (!tb || performance.now() < 4000) return false;", "const tb = $('top-bar'); if (!tb || (typeof XDELEG !== 'undefined' && XDELEG.KEYS[APP] && performance.now() < 4000)) return false;", 1]]
