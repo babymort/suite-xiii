@@ -2044,7 +2044,7 @@ var XRED = (function () {
     if (typeof XSET === 'undefined' || typeof prefs === 'undefined' || typeof HFT === 'undefined') return;
     function apply(S) { try { render(); } catch (e) { } }
     XSET.init({
-        app: 'sono', title: 'SONO', version: 'v1.37',
+        app: 'sono', title: 'SONO', version: 'v1.38',
         sections: [{ id: 'aff', icon: '🎚️', title: 'Fiche son', open: true, desc: 'Écart minimal entre fréquences, tolérance d\'intermodulation et canaux TNT occupés se règlent dans 📡 Plan HF. Bandes : repères France, à vérifier auprès de l\'ANFR.', fields: [{ k: 'view', label: 'Vue à l\'ouverture', type: 'select', def: 'patch', options: [['patch', 'Patch'], ['hf', 'Plan HF'], ['mix', 'Retours']] }] }],
         apply
     });
@@ -3975,6 +3975,7 @@ XCAT.initTool('sono');
 <script src="lib/suite-ctx.js?v=98b9b65103"></script>
 <script src="lib/suite-empty.js?v=dc3fbb36b9"></script>
 <script src="lib/suite-dock.js?v=253bb1bb47"></script>
+<script src="lib/suite-libtab.js?v=7799b0b307"></script>
 <!-- SUITE XIII:EXTRA:END -->
 <!-- SUITE XIII:DEVISO:START -->
 <script>

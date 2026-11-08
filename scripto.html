@@ -2192,7 +2192,7 @@ function openGuide() {
         '<h4>Tablette sur le plateau</h4><ul><li>⚙️ → 📱 <b>Version mobile</b> : envoyez le script à la tablette (QR code, lien ou fichier). Tout se saisit sur la tablette, photos comprises (appareil photo intégré).</li><li>Le soir, « Renvoyer au bureau » sur la tablette, puis 📂 Ouvrir ici : <b>fusion</b> automatique, rien n\'est perdu.</li></ul>' +
         '<h4>🎬 CLAP !</h4><ul><li>Bouton <b>CLAP !</b> (C) : ardoise plein écran du plan affiché (production, séquence, plan, prise, date, décor, image, son, réalisation) à montrer à la caméra.</li><li><b>CLAP !</b> (Espace) : bip et flash orange (durée dans ⚙️), la prise est notée automatiquement et le numéro passe à la suivante. ← → plan, ↑ ↓ prise, Échap pour sortir.</li></ul>' +
         '<h4>Rapports</h4><ul><li>📋 Rapport de la journée, 🖨️ PDF (journée ou tout), page HTML, CSV pour Excel, 📚 DOSSIER XIII.</li></ul>' +
-        '<h4>Raccourcis</h4><ul><li>1 Plan · 2 Tableau · 3 Rapport · C clap · N nouveau plan · T prise · F photo · D dupliquer · ↑ ↓ plan précédent / suivant · Ctrl+S · Ctrl+Z</li></ul>', 'wide');
+        '<h4>Raccourcis</h4><ul><li>1 Plan · 2 Tableau · 3 Rapport · C clap · N nouveau plan · T prise · P photo · Ctrl+D dupliquer · ↑ ↓ plan précédent / suivant · Ctrl+S · Ctrl+Z</li></ul>', 'wide');
 }
 window.xsOpenMobile = () => { if (typeof window.xmOpenScripto === 'function') window.xmOpenScripto(); else toast('Version mobile indisponible'); };
 
@@ -3301,7 +3301,7 @@ var XRED = (function () {
     const _bs = scBlankShot;
     scBlankShot = function (P0, day, from) { const s = _bs(P0, day, from); const st = XSET.val('sonDef'); if (!from && !P0.shots.length && st) s.sonTags = String(st).split(/[;,]/).map(x => x.trim()).filter(Boolean); return s; };
     XSET.init({
-        app: 'scripto', title: 'SCRIPTO', version: 'v1.41',
+        app: 'scripto', title: 'SCRIPTO', version: 'v1.42',
         theme: { get: () => prefs.theme === 'light' ? 'light' : 'dark', set: t => { if ((prefs.theme === 'light' ? 'light' : 'dark') !== t) toggleTheme(); } },
         hide: ['#toolbar button[onclick="toggleTheme()"]', '#toolbar button[onclick="openGuide()"]'],
         help: [{ icon: '📖', label: 'Guide d\'utilisation', sub: 'Journées, plans, prises, raccords, tablette, rapports', run: openGuide }],
@@ -4157,6 +4157,7 @@ XSC2PO.init();
 <script src="lib/suite-ctx.js?v=98b9b65103"></script>
 <script src="lib/suite-empty.js?v=dc3fbb36b9"></script>
 <script src="lib/suite-dock.js?v=253bb1bb47"></script>
+<script src="lib/suite-libtab.js?v=7799b0b307"></script>
 <!-- SUITE XIII:EXTRA:END -->
 </body>
 </html>
