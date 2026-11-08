@@ -3048,7 +3048,7 @@ var XRED = (function () {
 (function () {
     if (typeof XSET === 'undefined' || typeof XCAT === 'undefined') return;
     XSET.init({
-        app: 'catalogue', title: 'CATALOGUE', version: 'v1.20',
+        app: 'catalogue', title: 'CATALOGUE', version: 'v1.21',
         theme: { get: () => prefs.theme, set: t => { prefs.theme = t; applyTheme(); savePrefs(); } },
         help: [{ icon: '🗃️', label: 'Comment ça marche ?', sub: 'Catalogue commun, insertion dans les outils, partage', run: () => modal('<h3>🗃️ Catalogue matériel<span class="close-x" onclick="closeModal()">✕</span></h3><p>Chaque équipement saisi ici une seule fois est disponible dans <b>SYNO</b> (nœud avec ses ports), <b>PLANO</b> (placé sur le plan), <b>LUMO</b> (projecteur et puissance), <b>SONO</b> (patch), <b>PACKINGO</b> (caisse, poids) et <b>DEVISO</b> (ligne de devis et prix) par le bouton 🗃️ Catalogue de chaque outil.</p><p>Avec le ☁️ Drive du projet relié, le catalogue se partage avec l\'équipe comme un outil.</p><p>Raccourci : <b>N</b> nouvel équipement.</p><div class="mb-actions"><button onclick="closeModal()">Compris</button></div>') }],
         sections: [], apply() { }
@@ -10341,8 +10341,8 @@ XVIT.init();
 <script src="lib/suite-a11y2.js?v=06b1aa6f24"></script>
 <script src="lib/suite-sobre.js?v=46384a8210"></script>
 <script src="lib/suite-ident.js?v=360116005c"></script>
-<script src="lib/suite-topbar.js?v=e3043d6129"></script>
-<script src="lib/suite-sectors.js?v=e2ba203522"></script>
+<script src="lib/suite-topbar.js?v=7ac5dbcd1f"></script>
+<script src="lib/suite-sectors.js?v=fa65e1cd5e"></script>
 <!-- SUITE XIII:EXTRA:END -->
 </body>
 </html>

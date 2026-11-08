@@ -2075,7 +2075,7 @@ var XRED = (function () {
     if (typeof XSET === 'undefined' || typeof prefs === 'undefined' || typeof ZW === 'undefined') return;
     function apply(S) { if (S.zoom != null) { prefs.zoom = +S.zoom; } try { render(); } catch (e) { } }
     XSET.init({
-        app: 'planno', title: 'PLANNO', version: 'v1.22',
+        app: 'planno', title: 'PLANNO', version: 'v1.23',
         sections: [{ id: 'aff', icon: '📊', title: 'Frise', open: true, desc: 'Échelle par défaut de la frise (modifiable avec − / +).',
             fields: [{ k: 'zoom', label: 'Échelle', type: 'select', def: 2, options: [[0, 'Trimestre'], [1, 'Mois'], [2, 'Semaines'], [3, 'Jours'], [4, 'Jours (large)']] }] }],
         apply
@@ -2865,8 +2865,8 @@ XVIT.init();
 <script src="lib/suite-a11y2.js?v=06b1aa6f24"></script>
 <script src="lib/suite-sobre.js?v=46384a8210"></script>
 <script src="lib/suite-ident.js?v=360116005c"></script>
-<script src="lib/suite-topbar.js?v=e3043d6129"></script>
-<script src="lib/suite-sectors.js?v=e2ba203522"></script>
+<script src="lib/suite-topbar.js?v=7ac5dbcd1f"></script>
+<script src="lib/suite-sectors.js?v=fa65e1cd5e"></script>
 <!-- SUITE XIII:EXTRA:END -->
 </body>
 </html>

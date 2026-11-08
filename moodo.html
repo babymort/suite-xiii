@@ -3196,7 +3196,7 @@ var XRED = (function () {
     const _bp = blankProject;
     blankProject = function () { const p = _bp(); if (XSET.val('author')) p.author = XSET.val('author'); if (XSET.val('client')) p.client = XSET.val('client'); return p; };
     XSET.init({
-        app: 'moodo', title: 'MOODO', version: 'v1.24',
+        app: 'moodo', title: 'MOODO', version: 'v1.25',
         theme: { get: () => prefs.theme === 'light' ? 'light' : 'dark', set: t => { if ((prefs.theme === 'light' ? 'light' : 'dark') !== t) toggleTheme(); } },
         hide: ['#toolbar button[onclick="toggleTheme()"]', '#toolbar button[onclick="openGuide()"]'],
         help: [{ icon: '📖', label: 'Guide d\'utilisation', sub: 'Planches, images, sources, présentation, export', run: openGuide }],
@@ -4023,8 +4023,8 @@ XVIT.init();
 <script src="lib/suite-a11y2.js?v=06b1aa6f24"></script>
 <script src="lib/suite-sobre.js?v=46384a8210"></script>
 <script src="lib/suite-ident.js?v=360116005c"></script>
-<script src="lib/suite-topbar.js?v=e3043d6129"></script>
-<script src="lib/suite-sectors.js?v=e2ba203522"></script>
+<script src="lib/suite-topbar.js?v=7ac5dbcd1f"></script>
+<script src="lib/suite-sectors.js?v=fa65e1cd5e"></script>
 <!-- SUITE XIII:EXTRA:END -->
 </body>
 </html>
