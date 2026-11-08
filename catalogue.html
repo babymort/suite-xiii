@@ -6858,7 +6858,7 @@ const XTHEME = (() => {
     const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } };
     const mq = window.matchMedia ? matchMedia('(prefers-color-scheme: light)') : null;
     const mode = () => localStorage.getItem(K) || (J(SUITE, {}).globalTheme === 'light' ? 'light' : (J('hubXIII.prefs', {}).theme === 'light' ? 'light' : 'dark'));
-    const SKINS = { w2k: 'light', xp: 'light', cyber: 'dark', rainbow: 'dark', mac9: 'light', term: 'dark', sepia: 'light', regie: 'dark', soleil: 'light', gb: 'light', sobre: 'dark' };
+    const SKINS = { w2k: 'light', xp: 'light', cyber: 'dark', rainbow: 'dark', mac9: 'light', term: 'dark', sepia: 'light', regie: 'dark', soleil: 'light', gb: 'light', sobre: 'dark', sobrec: 'light' };
     const base = m => m === 'auto' ? (mq && mq.matches ? 'light' : 'dark') : SKINS[m] || m;
     function apply() {
         const m = mode(), b = base(m), s = J(SUITE, {});
@@ -6867,14 +6867,15 @@ const XTHEME = (() => {
         if (!document.body) return;
         document.body.classList.toggle('light-theme', b === 'light'); // y compris les outils sans bascule propre
         Object.keys(SKINS).forEach(k => document.body.classList.toggle('x' + k, m === k));
-        const meta = document.querySelector('meta[name=theme-color]'); if (meta) meta.content = ({ w2k: '#0a246a', xp: '#0a5fd8', cyber: '#0d0221', rainbow: '#1a1033', mac9: '#dddddd', term: '#000000', sepia: '#e9dcc2', regie: '#000000', soleil: '#ffffff', gb: '#9bbc0f', sobre: '#0e0f12' })[m] || (b === 'light' ? '#f4f1ec' : '#222222');
+        if (m === 'sobrec') document.body.classList.add('xsobre', 'xsobrel'); else document.body.classList.remove('xsobrel'); // ◻️ Sobre clair = Sobre + variante claire
+        const meta = document.querySelector('meta[name=theme-color]'); if (meta) meta.content = ({ w2k: '#0a246a', xp: '#0a5fd8', cyber: '#0d0221', rainbow: '#1a1033', mac9: '#dddddd', term: '#000000', sepia: '#e9dcc2', regie: '#000000', soleil: '#ffffff', gb: '#9bbc0f', sobre: '#0e0f12', sobrec: '#f6f5f2' })[m] || (b === 'light' ? '#f4f1ec' : '#222222');
     }
-    function set(m) { try { localStorage.setItem(K, m); } catch (e) { } apply(); try { const T = { w2k: '🪟 Thème Win 2000', xp: '🟦 Thème Win XP', cyber: '🌆 Thème Cyberpunk', rainbow: '🌈 Thème Rainbow', mac9: '🍎 Thème Mac OS 9', term: '📟 Thème Terminal', sepia: '🎞️ Thème Pellicule', regie: '🔴 Thème Régie nuit', soleil: '☀️ Thème Plein soleil', gb: '🎮 Thème Game Boy', sobre: '◼️ Thème Sobre' }; if (T[m] && typeof toast === 'function') toast(T[m] + ' activé'); } catch (e) { } }
+    function set(m) { try { localStorage.setItem(K, m); } catch (e) { } apply(); try { const T = { w2k: '🪟 Thème Win 2000', xp: '🟦 Thème Win XP', cyber: '🌆 Thème Cyberpunk', rainbow: '🌈 Thème Rainbow', mac9: '🍎 Thème Mac OS 9', term: '📟 Thème Terminal', sepia: '🎞️ Thème Pellicule', regie: '🔴 Thème Régie nuit', soleil: '☀️ Thème Plein soleil', gb: '🎮 Thème Game Boy', sobre: '◼️ Thème Sobre', sobrec: '◻️ Thème Sobre clair' }; if (T[m] && typeof toast === 'function') toast(T[m] + ' activé'); } catch (e) { } }
     // ---------- ⚙️ Paramètres : les 4 thèmes à la place de Sombre / Clair ----------
     function inSettings() {
         const pan = document.getElementById('xs-panel'); if (!pan) return; const seg = pan.querySelector('[data-theme]'); if (!seg || seg.parentNode.dataset.xt) return;
         const box = seg.parentNode; box.dataset.xt = 1; const m = mode();
-        box.innerHTML = [['dark', '🌙 Sombre'], ['light', '☀️ Clair'], ['auto', '🖥️ Auto'], ['sobre', '◼️ Sobre'], ['w2k', '🪟 Win 2000'], ['xp', '🟦 Win XP'], ['cyber', '🌆 Cyberpunk'], ['rainbow', '🌈 Rainbow'], ['mac9', '🍎 Mac OS 9'], ['term', '📟 Terminal'], ['sepia', '🎞️ Pellicule'], ['regie', '🔴 Régie nuit'], ['soleil', '🔆 Plein soleil'], ['gb', '🎮 Game Boy']].map(([k, l]) => '<button type="button" data-xtm="' + k + '" class="' + (m === k ? 'on' : '') + '" title="' + ({ auto: 'Suit le réglage clair / sombre de l\'ordinateur', w2k: 'L\'esprit Windows 2000 : gris, biseaux, barres de titre bleues', xp: 'L\'esprit Windows XP : bleu Luna, boutons arrondis, barre verte', cyber: 'Néons magenta et cyan sur fond nuit, typo technique', rainbow: 'Arc-en-ciel : dégradés animés et couleurs vives', mac9: 'L\'esprit Mac OS 9 Platinum : gris rayé, boutons arrondis', term: 'Vert phosphore sur noir, police à chasse fixe', sepia: 'Papier vieilli, tons sépia, perforations de pellicule', regie: 'Rouge sur noir : préserve la vision de nuit en régie ou en tournage nocturne', soleil: 'Contraste maximal et gros caractères pour une tablette en extérieur', gb: 'Quatre verts, look pixel', dark: 'Thème sombre', light: 'Thème clair' })[k] + '">' + l + '</button>').join('');
+        box.innerHTML = [['dark', '🌙 Sombre'], ['light', '☀️ Clair'], ['auto', '🖥️ Auto'], ['sobre', '◼️ Sobre'], ['sobrec', '◻️ Sobre clair'], ['w2k', '🪟 Win 2000'], ['xp', '🟦 Win XP'], ['cyber', '🌆 Cyberpunk'], ['rainbow', '🌈 Rainbow'], ['mac9', '🍎 Mac OS 9'], ['term', '📟 Terminal'], ['sepia', '🎞️ Pellicule'], ['regie', '🔴 Régie nuit'], ['soleil', '🔆 Plein soleil'], ['gb', '🎮 Game Boy']].map(([k, l]) => '<button type="button" data-xtm="' + k + '" class="' + (m === k ? 'on' : '') + '" title="' + ({ auto: 'Suit le réglage clair / sombre de l\'ordinateur', w2k: 'L\'esprit Windows 2000 : gris, biseaux, barres de titre bleues', xp: 'L\'esprit Windows XP : bleu Luna, boutons arrondis, barre verte', cyber: 'Néons magenta et cyan sur fond nuit, typo technique', rainbow: 'Arc-en-ciel : dégradés animés et couleurs vives', mac9: 'L\'esprit Mac OS 9 Platinum : gris rayé, boutons arrondis', term: 'Vert phosphore sur noir, police à chasse fixe', sepia: 'Papier vieilli, tons sépia, perforations de pellicule', regie: 'Rouge sur noir : préserve la vision de nuit en régie ou en tournage nocturne', soleil: 'Contraste maximal et gros caractères pour une tablette en extérieur', gb: 'Quatre verts, look pixel', dark: 'Thème sombre', light: 'Thème clair', sobre: 'Noir mat, lignes fines, aucune fioriture', sobrec: 'La même rigueur en clair : blanc cassé, traits gris, orange foncé' })[k] + '">' + l + '</button>').join('');
         box.style.flexWrap = 'wrap';
         box.querySelectorAll('[data-xtm]').forEach(b => b.onclick = () => { set(b.dataset.xtm); box.querySelectorAll('[data-xtm]').forEach(x => x.classList.toggle('on', x === b)); });
         const g = pan.querySelector('[data-global]'); if (g) { const row = g.closest('.xs-f') || g.parentNode; row.style.display = 'none'; } // un seul thème pour toute la suite
@@ -8359,7 +8360,7 @@ const XPCFG = (() => {
     const W = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } };
     const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     const drive = () => J('xiii.drive', null), master = () => { const c = drive(); return !c || !c.url || !!c.code; }; // sans Drive : réglage local
-    const THEMES = [['', '— libre (chacun son thème) —'], ['dark', '🌙 Sombre'], ['light', '☀️ Clair'], ['auto', '🖥️ Auto'], ['sobre', '◼️ Sobre'], ['w2k', '🪟 Win 2000'], ['xp', '🟦 Win XP'], ['cyber', '🌆 Cyberpunk'], ['rainbow', '🌈 Rainbow'], ['mac9', '🍎 Mac OS 9'], ['term', '📟 Terminal'], ['sepia', '🎞️ Pellicule'], ['regie', '🎛️ Régie'], ['soleil', '🔆 Plein soleil'], ['gb', '🎮 Game Boy']];
+    const THEMES = [['', '— libre (chacun son thème) —'], ['dark', '🌙 Sombre'], ['light', '☀️ Clair'], ['auto', '🖥️ Auto'], ['sobre', '◼️ Sobre'], ['sobrec', '◻️ Sobre clair'], ['w2k', '🪟 Win 2000'], ['xp', '🟦 Win XP'], ['cyber', '🌆 Cyberpunk'], ['rainbow', '🌈 Rainbow'], ['mac9', '🍎 Mac OS 9'], ['term', '📟 Terminal'], ['sepia', '🎞️ Pellicule'], ['regie', '🎛️ Régie'], ['soleil', '🔆 Plein soleil'], ['gb', '🎮 Game Boy']];
     let APP = '';
     const cfg = () => J(K, {}) || {};
     // ---------- 🔐 outils par secteur ----------
@@ -10355,7 +10356,7 @@ XVIT.init();
 <script src="lib/suite-mcp.js?v=cea3304e0f"></script>
 <script src="lib/suite-zzbar.js?v=409fbb531d"></script>
 <script src="lib/suite-a11y2.js?v=06b1aa6f24"></script>
-<script src="lib/suite-sobre.js?v=46384a8210"></script>
+<script src="lib/suite-sobre.js?v=21dc837de1"></script>
 <script src="lib/suite-ident.js?v=360116005c"></script>
 <script src="lib/suite-topbar.js?v=d4cc19f1ed"></script>
 <script src="lib/suite-sectors.js?v=d552ed1520"></script>
@@ -10363,7 +10364,7 @@ XVIT.init();
 <script src="lib/suite-keys.js?v=f5024fc78d"></script>
 <script src="lib/suite-ctx.js?v=98b9b65103"></script>
 <script src="lib/suite-empty.js?v=dc3fbb36b9"></script>
-<script src="lib/suite-dock.js?v=09279b9c91"></script>
+<script src="lib/suite-dock.js?v=253bb1bb47"></script>
 <!-- SUITE XIII:EXTRA:END -->
 </body>
 </html>

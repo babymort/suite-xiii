@@ -92,9 +92,24 @@ body.nocrumb #empty{inset:46px 0 0}#empty{position:absolute;inset:72px 0 0;displ
 :root[data-skin=sobre] #pick button,:root[data-skin=sobre] #pmenu button{border-radius:8px!important}
 :root[data-skin=sobre] .ld{background:var(--bg)!important}:root[data-skin=sobre] .ld b{animation:none!important;background:none!important;color:var(--acc)!important;-webkit-text-fill-color:var(--acc)!important}
 :root[data-skin=sobre] #sdiv{background:linear-gradient(90deg,transparent 5px,var(--line) 5px,var(--line) 7px,transparent 7px)!important}
+:root[data-skin=sobrec]{--tabon:#f1efeb;--bg:#f6f5f2;--glass:#ffffff;--line:#e4e1db;--txt:#1b1c1f;--dim:#6d7178;--acc:#c2570c;--acc2:#a96d00}
+:root[data-skin=sobrec] *,:root[data-skin=sobrec] *::before,:root[data-skin=sobrec] *::after{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;text-shadow:none!important}
+:root[data-skin=sobrec] #bar{background:var(--bg)!important;border-bottom:1px solid var(--line)!important;box-shadow:none!important}
+:root[data-skin=sobrec] #bar::after{background:var(--line)!important;opacity:1!important}
+:root[data-skin=sobrec] .t{background-image:none!important;border-radius:8px 8px 0 0}
+:root[data-skin=sobrec] .t:hover{background:#ffffff!important}
+:root[data-skin=sobrec] .t.on{background:var(--tabon)!important;box-shadow:inset 0 -2px 0 var(--acc),inset 0 3px 0 var(--pc)!important}
+:root[data-skin=sobrec] .t.on::before,:root[data-skin=sobrec] .t.on>b::before,:root[data-skin=sobrec] .t .gl{display:none!important}
+:root[data-skin=sobrec] #home img,:root[data-skin=sobrec] .ld img{filter:none!important}
+:root[data-skin=sobrec] #proj{border-radius:8px!important;background:#f1efeb!important;border-color:#d5d1c9!important}:root[data-skin=sobrec] #proj i,:root[data-skin=sobrec] .t i,:root[data-skin=sobrec] .t em{box-shadow:none!important}
+:root[data-skin=sobrec] #crumb{background:var(--bg)!important}
+:root[data-skin=sobrec] #prev,:root[data-skin=sobrec] #pmenu,:root[data-skin=sobrec] #pick{background:#ffffff!important;border:1px solid #d5d1c9!important;box-shadow:none!important;border-radius:10px!important}
+:root[data-skin=sobrec] #pick button,:root[data-skin=sobrec] #pmenu button{border-radius:8px!important}
+:root[data-skin=sobrec] .ld{background:var(--bg)!important}:root[data-skin=sobrec] .ld b{animation:none!important;background:none!important;color:var(--acc)!important;-webkit-text-fill-color:var(--acc)!important}
+:root[data-skin=sobrec] #sdiv{background:linear-gradient(90deg,transparent 5px,var(--line) 5px,var(--line) 7px,transparent 7px)!important}
 </style><link rel="icon" type="image/png" href="xiii-icon-192.png">
 <script>// thème de la suite (⚙️ › Thème) repris par la barre d'onglets : clair / sombre / Sobre…, mis à jour dès qu'il change dans un outil
-(function(){var SK={w2k:'light',xp:'light',cyber:'dark',rainbow:'dark',mac9:'light',term:'dark',sepia:'light',regie:'dark',soleil:'light',gb:'light',sobre:'dark'},R=document.documentElement;
+(function(){var SK={w2k:'light',xp:'light',cyber:'dark',rainbow:'dark',mac9:'light',term:'dark',sepia:'light',regie:'dark',soleil:'light',gb:'light',sobre:'dark',sobrec:'light'},R=document.documentElement;
 function ap(){var m='';try{m=localStorage.getItem('xiii.theme.mode')||'';if(!m){var h=JSON.parse(localStorage.getItem('hubXIII.prefs')||'{}');m=h.theme==='light'?'light':'dark';}}catch(e){m='dark';}var b=m==='auto'?'':(SK[m]||m);if(b==='light'||b==='dark')R.setAttribute('data-theme',b);else R.removeAttribute('data-theme');if(SK[m])R.setAttribute('data-skin',m);else R.removeAttribute('data-skin');}
 ap();addEventListener('storage',function(e){if(!e.key||e.key==='xiii.theme.mode'||e.key==='hubXIII.prefs')ap();});})();</script>
 </head><body>
