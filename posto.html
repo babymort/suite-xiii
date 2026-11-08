@@ -1604,7 +1604,7 @@ GMD(GMCFG.posto);})();
 <!-- SUITE XIII:MOBILE:END -->
 <!-- SUITE XIII:SETTINGS:START --><script>var XIII_APP = "posto"; // nom de l'outil, utilisé par le code commun (lib/core-*.js)</script>
 
-<script src="lib/core-01.js?v=259d3941bc"></script><script>// =====================================================================
+<script src="lib/core-01.js?v=32f457fb0a"></script><script>// =====================================================================
 //  SUITE XIII — connexion IA multi-services (XAI)
 //  Claude (Anthropic), Gemini (Google), ChatGPT (OpenAI), Mistral, OpenRouter, Groq, DeepSeek, Ollama (local), API compatible OpenAI.
 //  La clé reste dans ce navigateur (localStorage « xiii.ai ») et n'est envoyée qu'au service choisi.
@@ -2114,7 +2114,7 @@ var XRED = (function () {
     if (typeof XSET === 'undefined' || typeof prefs === 'undefined' || typeof CATS === 'undefined') return;
     function apply(S) { if (S.fps && P) P.fps = +S.fps; try { render(); } catch (e) { } }
     XSET.init({
-        app: 'posto', title: 'POSTO', version: 'v1.20',
+        app: 'posto', title: 'POSTO', version: 'v1.21',
         sections: [{ id: 'aff', icon: '🎞️', title: 'Post-production', open: true, desc: 'Retours au timecode → marqueurs EDL pour DaVinci Resolve / Premiere ; étapes → PLANNO.', fields: [{ k: 'view', label: 'Vue à l\'ouverture', type: 'select', def: 'versions', options: [['versions', 'Versions & retours'], ['steps', 'Étapes'], ['deliv', 'Livrables']] }, { k: 'fps', label: 'Images par seconde (timecode)', type: 'select', def: '25', options: [['25', '25'], ['24', '24'], ['30', '30'], ['50', '50']] }] }],
         apply
     });
@@ -2316,7 +2316,7 @@ const XFIT = (() => {
 
 XFIT.init();
 
-</script><script src="lib/core-05.js?v=c439f778e4"></script><script>// =====================================================================
+</script><script src="lib/core-05.js?v=a7d954a6bc"></script><script>// =====================================================================
 //  SUITE XIII — XDASH : l'accueil en tableau de bord du projet en cours
 //  En tête : projet (type, dates, compte à rebours, lieu), prochaines échéances (PLANNO, POSTO, fiche),
 //  ce qui manque selon le type de production, derniers retours de l'équipe (avis, mots, travaux reçus,

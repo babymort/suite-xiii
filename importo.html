@@ -1630,9 +1630,10 @@ const XTOUR = (() => {
         // barre du haut et barre d'outils : un arrêt par groupe de boutons
         [['#top-bar', '⬆️ Barre du haut'], ['#toolbar', '🧰 Barre d\'outils']].forEach(([sel, name]) => {
             const bar = document.querySelector(sel); if (!vis(bar)) return;
-            let groups = Array.from(bar.querySelectorAll('.btn-group')).filter(vis);
+            let groups = Array.from(bar.querySelectorAll('.btn-group')).filter(vis); if (bar.querySelector(':scope > .xsec')) groups = Array.from(bar.querySelectorAll(':scope > .xsec')).filter(vis); // seconde barre rangée par secteurs : un arrêt par secteur
             const loose = Array.from(bar.querySelectorAll('button, select')).filter(b => vis(b) && !b.closest('.btn-group') && !b.closest('#tabs-container'));
-            groups.forEach((g, i) => { const it = describeButtons(g); if (it.length) S.push({ el: g, t: name + (groups.length > 1 ? ' · ' + (i + 1) + '/' + groups.length : ''), h: '<ul>' + it.slice(0, 10).join('') + '</ul>' }); });
+            const SECN = { cre: ['① Créer', 'Ajouter ce que l’outil fabrique.'], aff: ['② Afficher', 'Vues, panneau, filtres, navigation, présentation.'], mod: ['③ Modifier', 'Annuler, rétablir, historique et outils d’édition.'], met: ['④ Outils métier', 'Ce qui n’existe que dans cet outil.'], ass: ['⑤ Assistants', 'IA, vérifications et reprises depuis les autres outils.'], etat: ['État', 'Compteurs et enregistrement.'] };
+            groups.forEach((g, i) => { const it = describeButtons(g); const sn = (g.dataset && SECN[g.dataset.sec]) || ({ 'xb-file': ['Fichier et envois', 'Rechercher, Nouveau, Ouvrir, Enregistrer, Exporter, puis 📤 Vers Suite XIII et 🔗 Partager : les mêmes boutons, dans le même ordre, dans tous les outils.'], 'xb-bar': ['Équipe', 'Travailler à plusieurs, Drive du projet et votre nom.'] })[g.id] || (g.classList && g.classList.contains('xn-homeg') ? ['Accueil', 'Revenir à l’accueil de la suite.'] : null); if (it.length) S.push({ el: g, t: sn ? name + ' · ' + sn[0] : name + (groups.length > 1 ? ' · ' + (i + 1) + '/' + groups.length : ''), h: (sn ? '<p>' + sn[1] + ' Ce secteur est au même endroit dans tous les outils.</p>' : '') + '<ul>' + it.slice(0, 10).join('') + '</ul>' }); });
             if (loose.length) { const box = document.createElement('div'); loose.forEach(b => box.appendChild(b.cloneNode(true))); document.body.appendChild(box); box.style.cssText = 'position:fixed;left:-9999px;top:0'; const it = []; loose.forEach(b => { const tip = (b.getAttribute('title') || '').trim(), lab = b.textContent.trim().slice(0, 40); if (tip || lab) it.push('<li><b>' + esc(lab || '•') + '</b>' + (tip && tip !== lab ? ' — ' + esc(tip) : '') + '</li>'); }); box.remove(); if (it.length && !groups.length) S.push({ el: bar, t: name, h: '<ul>' + it.slice(0, 12).join('') + '</ul>' }); else if (it.length) loose.slice(0, 6).forEach(b => { const tip = b.getAttribute('title'); if (tip && vis(b)) S.push({ el: b, t: name, h: '<p><b>' + esc(b.textContent.trim().slice(0, 40)) + '</b> — ' + esc(tip) + '</p>' }); }); }
         });
         add('#library-panel', '📚 Panneau de gauche', '<p>' + cfg.lib + '</p><p>Le bouton ◀ de la barre d\'outils le masque pour agrandir la zone de travail.</p>');
@@ -2268,7 +2269,7 @@ var XRED = (function () {
 // IMPORT XIII — ⚙️ Paramètres
 (function () {
     if (typeof XSET === 'undefined' || typeof records !== 'function') return;
-    XSET.init({ app: 'importo', title: 'IMPORT', version: 'v1.18', theme: { get: () => prefs.theme, set: t => { prefs.theme = t; applyTheme(); savePrefs(); } },
+    XSET.init({ app: 'importo', title: 'IMPORT', version: 'v1.19', theme: { get: () => prefs.theme, set: t => { prefs.theme = t; applyTheme(); savePrefs(); } },
         help: [{ icon: '📥', label: 'Comment ça marche ?', sub: 'Excel, CSV, PDF, StudioBinder, Movie Magic', run: () => alert('IMPORT XIII lit vos fichiers Excel, CSV, PDF, les copier-coller de Google Sheets et les exports StudioBinder / Movie Magic, reconnaît personnes, matériel ou dépouillement, puis les envoie vers l\'annuaire, CASTO, PACKINGO, DEVISO, le CATALOGUE ou PLANNO.') }],
         sections: [], apply() { } });
 })();
@@ -5971,7 +5972,7 @@ const XTIPS = (() => {
         if (APP === 'index') return; // pas de bulle d'astuce sur l'accueil (supprimée à la demande)
         if (typeof XTOUR === 'undefined') tip('open.' + APP, null, 'Bienvenue dans ' + NAME(), 'Des astuces apparaîtront au fil de votre travail, au moment où elles servent. La visite guidée complète reste dans ⚙️ › Aide.', tourBtn);
         // 2. outils communs (une seule fois pour toute la suite)
-        setTimeout(() => tip('common.file', '#xb-file', 'Toujours au même endroit', 'Dans tous les outils : 💾 enregistrer, 📂 ouvrir, ⬇️ exporter le projet, 🖨️ <b>Exporter ▾</b> pour les PDF et tableaux, 📤 <b>Vers Suite XIII</b> pour envoyer à DOSSIER et aux autres outils.'), 2500);
+        setTimeout(() => tip('common.file', '#xb-file', 'Toujours au même endroit', 'La barre du haut est la même dans tous les outils : 🔎 rechercher, 🗒️ <b>Nouveau ▾</b>, 📂 ouvrir, 💾 enregistrer, ⬇️ <b>Exporter ▾</b> (PDF, tableaux, impression, fichier du projet), 📤 <b>Vers Suite XIII</b> et 🔗 partager. En dessous, la barre de l’outil est rangée pareil partout : ① Créer · ② Afficher · ③ Modifier · ④ Outils métier · ⑤ Assistants.'), 2500);
         setTimeout(() => { if (!document.getElementById('xf-ov')) tip('common.ctrlk', '#xb-file', 'Gagnez du temps avec Ctrl + K', 'Tapez ce que vous voulez faire (« pdf », « ajouter », « équipe »…) : la commande se lance avec Entrée. La recherche fouille aussi tous vos projets.'); }, 180000);
         // 3. au premier usage d'un élément
         document.addEventListener('click', e => {
