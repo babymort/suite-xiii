@@ -4552,7 +4552,7 @@ var XRED = (function () {
         askConfirm('Effacer tous les records de ce navigateur&nbsp;?', () => { records = {}; Store.set(KEY_REC, records); renderLib(); updateStats(); toast('🧹 Records effacés'); });
     }
     XSET.init({
-        app: 'ludo', title: 'LUDO', version: 'v35',
+        app: 'ludo', title: 'LUDO', version: 'v36',
         // horloges « Fin de pause / Heure » : en colonne, à gauche du ⚙️, au-dessus du badge Netlify
         css: '#zoom-controls{right:72px;bottom:80px;flex-direction:column;align-items:flex-end;gap:6px;padding:30px 0 0 40px}#zoom-controls::before{display:none}#zoom-controls .clock{margin-right:0;text-align:right}',
         theme: { get: () => prefs.theme === 'light' ? 'light' : 'dark', set: t => { prefs.theme = t === 'light' ? 'light' : 'dark'; applyTheme(); savePrefs(); } },
@@ -4700,7 +4700,7 @@ var XPRS = window.XPRS || (() => {
 
 XPRS.init('ludo');
 
-</script><script src="lib/core-04.js?v=877d4f1bf2"></script><script>// =====================================================================
+</script><script src="lib/core-04.js?v=9e9faa299f"></script><script>// =====================================================================
 //  SUITE XIII — XFIT : la barre des outils tient sur une ligne
 //  Plutôt que de passer sur deux lignes, les boutons se resserrent par paliers (espaces, puis libellés,
 //  puis tailles) jusqu'à tout faire rentrer ; en dernier recours la barre défile horizontalement.
@@ -5324,7 +5324,7 @@ XVIT.init();
 <script src="lib/suite-sobre.js?v=21dc837de1"></script>
 <script src="lib/suite-ident.js?v=360116005c"></script>
 <script src="lib/suite-topbar.js?v=d4cc19f1ed"></script>
-<script src="lib/suite-sectors.js?v=d552ed1520"></script>
+<script src="lib/suite-sectors.js?v=e25124f82e"></script>
 <script src="lib/suite-focus.js?v=4c5df42ea0"></script>
 <script src="lib/suite-keys.js?v=f5024fc78d"></script>
 <script src="lib/suite-ctx.js?v=98b9b65103"></script>
