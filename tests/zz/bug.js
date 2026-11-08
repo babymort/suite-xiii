@@ -1,0 +1,8 @@
+const {chromium}=require('playwright');(async()=>{const b=await chromium.launch();const c=await b.newContext({viewport:{width:1280,height:900}});const p=await c.newPage();const E=[];p.on('pageerror',e=>E.push(e.message));
+await c.route(/supabase\.co/,r=>r.fulfill({status:201,body:''}));
+await p.addInitScript(()=>{localStorage.setItem('xiii.errl',JSON.stringify([{app:'plano',msg:'TypeError: x is null',at:'plano.html:120',ts:Date.now(),n:2}]))});
+await p.goto('http://localhost:8765/bug.html?app=plano');await p.waitForTimeout(800);await p.screenshot({path:'/tmp/zz/bug1.png'});
+let sent=null;p.on('request',r=>{if(/bug_reports/.test(r.url()))sent=r.postData()});
+await p.fill('#body','La flèche de mouvement ne se place pas.');await p.click('#send');await p.waitForTimeout(800);console.log('envoyé :',sent);console.log(await p.evaluate(()=>document.querySelector('.done')?document.querySelector('.done').innerText.split('\n')[0]:'?'),E);
+// gear hover : le bouton bug bouge-t-il ?
+const q=await c.newPage();await q.goto('http://localhost:8765/index.html?embed=1');await q.waitForTimeout(5000);await q.evaluate(()=>document.querySelectorAll('#xnw-ov').forEach(e=>e.remove()));const r0=await q.evaluate(()=>JSON.stringify(document.getElementById('xbug-btn').getBoundingClientRect()));const g=await q.$('#xs-gear');await g.hover();await q.waitForTimeout(700);const r1=await q.evaluate(()=>JSON.stringify(document.getElementById('xbug-btn').getBoundingClientRect()));console.log('bug immobile au survol de ⚙️ :',r0===r1,'| lien :',await q.evaluate(()=>document.getElementById('xbug-btn').getAttribute('href')));await b.close()})();

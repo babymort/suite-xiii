@@ -56,8 +56,9 @@ var XAIC = window.XAIC || (() => {
     function place() {
         const b = document.getElementById('xaic-btn'); if (!b || !b.classList.contains('fl')) return;
         const g = document.getElementById('xs-gear'), bug = document.getElementById('xbug-btn'), H = innerHeight;
-        if (g) { const r = g.getBoundingClientRect(); b.style.right = Math.max(8, innerWidth - r.right) + 'px'; b.style.bottom = (H - r.top + 10) + 'px'; }
-        if (bug) { bug.style.removeProperty('bottom'); const rb = b.getBoundingClientRect(), g2 = g && g.getBoundingClientRect(); bug.style.bottom = (H - rb.top + 10) + 'px'; if (g2) bug.style.right = Math.max(8, innerWidth - g2.right) + 'px'; }
+        const R0 = e => ({ top: e.offsetTop, right: e.offsetLeft + e.offsetWidth }); // sans l'agrandissement au survol de ⚙️ (le bouton 🐞 ne bouge plus)
+        if (g) { const r = R0(g); b.style.right = Math.max(8, innerWidth - r.right) + 'px'; b.style.bottom = (H - r.top + 10) + 'px'; }
+        if (bug) { bug.style.removeProperty('bottom'); const rb = b.getBoundingClientRect(), g2 = g && R0(g); bug.style.bottom = (H - rb.top + 10) + 'px'; if (g2) bug.style.right = Math.max(8, innerWidth - g2.right) + 'px'; }
     }
     function toggle() { const o = document.getElementById('xaic'); if (o) { o.remove(); return; } open(); }
     function open() {
