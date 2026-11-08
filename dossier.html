@@ -5603,7 +5603,7 @@ var XRED = (function () {
     // ---------- paramètres ----------
     const cvf = (k, label, ph, hint) => ({ k: 'cv_' + k, label, hint, type: 'text', def: '', placeholder: ph });
     XSET.init({
-        app: 'dossier', title: 'DOSSIER', version: 'v41',
+        app: 'dossier', title: 'DOSSIER', version: 'v42',
         theme: { get: () => prefs.theme === 'light' ? 'light' : 'dark', set: t => { if ((prefs.theme === 'light' ? 'light' : 'dark') !== t) toggleTheme(); } },
         // écran peu haut : l'aperçu collant de la page de garde (≈ 500 px) dépassait sous le badge Netlify et cachait « Générer »
         css: '@media (max-height: 900px) { .cover-prev { position: static; } }',
@@ -6483,10 +6483,11 @@ XSLIDES.hook();
 <script src="lib/suite-a11y2.js?v=06b1aa6f24"></script>
 <script src="lib/suite-sobre.js?v=46384a8210"></script>
 <script src="lib/suite-ident.js?v=360116005c"></script>
-<script src="lib/suite-topbar.js?v=1845fe5980"></script>
+<script src="lib/suite-topbar.js?v=d4cc19f1ed"></script>
 <script src="lib/suite-sectors.js?v=fa65e1cd5e"></script>
 <script src="lib/suite-focus.js?v=4c5df42ea0"></script>
 <script src="lib/suite-keys.js?v=7ab47caaff"></script>
+<script src="lib/suite-ctx.js?v=5b0ece62d0"></script>
 <!-- SUITE XIII:EXTRA:END -->
 </body>
 </html>
