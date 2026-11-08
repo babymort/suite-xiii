@@ -14,16 +14,33 @@
     const menu = (e, at, title, sub, items) => { if (window.XZZB_MENU) window.XZZB_MENU(e, at, title, sub, items); else if (items[0]) items[0][2](); };
     (() => { const st = document.createElement('style'); st.id = 'xtop-css'; st.textContent = '#top-bar #xb-brand{margin-right:10px!important}#top-bar #tabs-container{justify-content:flex-start!important;flex:0 1 auto!important}#top-bar>#xb-file,#top-bar #xb-file{margin-left:auto}#xb-menu [data-i]{justify-content:flex-start!important;text-align:left!important}#xb-menu [data-i]>span:last-child{flex:1;min-width:0}'; document.head.appendChild(st); })();
     let busy = false, done = false;
+    // outils dont la barre du haut est construite autrement (CALENDRIER, PLANNO, CONTRÔLE, ENCODO, LUDO…) :
+    // on crée les mêmes zones (xb-tool à vider vers la seconde barre, xb-file à droite) pour leur appliquer la même mise en ordre
+    function prepare() {
+        const tb = $('top-bar'); if (!tb || $('xb-file')) return;
+        const STD = el => el.closest('#xb-home,.xn-homeg>#xb-home,#xb-brand,#tabs-container,[class$="-brand"],#xid-chip,.xn-auth');
+        const w = document.createElement('div'); w.id = 'xtop-wrap'; w.style.cssText = 'display:flex;align-items:center;gap:6px';
+        const file = document.createElement('span'); file.id = 'xb-file'; file.className = 'btn-group';
+        const tool = document.createElement('span'); tool.id = 'xb-tool'; tool.dataset.xtopfb = 1; tool.style.display = 'none';
+        w.append(tool, file); tb.appendChild(w);
+        const fileLike = b => b.id === 'xf-btn' || b.id === 'xgt-btn' || b.id === 'xsh-btn' || b.id === 'xmd-btn' || b.id === 'xb-solo' || (/🖨️|⬇️|💾|📂/.test(ico(b)) && /(imprim|pdf|export|télécharg|enregistr|ouvrir)/i.test(tip(b)));
+        [...tb.querySelectorAll('button')].filter(b => !STD(b) && !b.closest('#xtop-wrap') && fileLike(b)).forEach(b => file.appendChild(b));
+        // le reste (boutons, champs, pastilles propres à l'outil) part vers la seconde barre
+        const rest = []; [...tb.children].forEach(c => { if (c === w || STD(c) || c.matches('.xn-homeg')) { if (c.matches('.xn-homeg')) [...c.children].forEach(x => { if (x.id !== 'xb-home') rest.push(x); }); return; } if (!c.querySelector('#xb-home,#xb-brand,#tabs-container')) rest.push(c); else [...c.children].forEach(x => { if (!STD(x) && !x.querySelector('#tabs-container')) rest.push(x); }); });
+        rest.forEach(x => { if (x.offsetParent || x.matches('button')) tool.appendChild(x); });
+    }
     function organize() {
+        prepare();
+        { const t0 = $('xb-tool'); if (t0 && t0.dataset.xtopfb) document.querySelectorAll('#top-bar .xn-homeg > button:not(#xb-home)').forEach(b => t0.appendChild(b)); }
         const tb = $('top-bar'), file = $('xb-file'), bar = $('xb-bar'), tool = $('xb-tool'); if (!tb || !file || busy) return false; busy = true;
         try {
             const FB = [...file.querySelectorAll(':scope > button, :scope > select')];
             const search = $('xf-btn'), gate = $('xgt-btn');
             const save = FB.find(b => b.tagName === 'BUTTON' && /💾/.test(ico(b)) && b.dataset.xtop !== 'h'), open = FB.find(b => /📂/.test(ico(b)));
             const sel = $('export-format');
-            const exp = FB.filter(b => b !== search && b !== gate && b !== save && b !== open && b.tagName === 'BUTTON' && !/^(xtop-|xsh-btn|xpb-btn|xb-solo|xid-chip)/.test(b.id) && !b.closest('.xn-auth') && (b.dataset.xtop === 'h' || vis(b)));
+            const exp = FB.filter(b => b !== search && b !== gate && b !== save && b !== open && b.tagName === 'BUTTON' && !/^(xtop-|xsh-btn|xpb-btn|xb-solo|xid-chip|xmd-btn|xzz-ex|xzz-new)/.test(b.id) && !b.closest('.xn-auth') && (b.dataset.xtop === 'h' || vis(b)));
             // ⬇️ Exporter ▾ : formats de rendu + autres exports + fichier du projet
-            const json = exp.find(b => /⬇️/.test(ico(b)) && /(\.json|fichier)/i.test(tip(b))), render = exp.find(b => /🖨️/.test(ico(b)) && /rendu choisi/i.test(tip(b)));
+            const json = exp.find(b => /⬇️/.test(ico(b)) && /(\.json|en fichier|fichier du projet)/i.test(tip(b))), render = exp.find(b => /🖨️/.test(ico(b)) && /rendu choisi/i.test(tip(b)));
             const others = exp.filter(b => b !== json && b !== render);
             let X = null;
             if (exp.length || sel) {
@@ -65,8 +82,8 @@
             if (tool && tbar) {
                 let g = $('xtop-moved'); if (!g) { g = document.createElement('span'); g.id = 'xtop-moved'; g.className = 'btn-group'; g.title = 'Boutons de l’outil'; tbar.insertBefore(g, tbar.firstChild); const d = document.createElement('div'); d.className = 'divider'; d.id = 'xtop-moved-dv'; g.after(d); }
                 const tabs = $('tabs-container');
-                [...tool.querySelectorAll(':scope > button')].forEach((b, i) => {
-                    if (b.dataset.xtop === 'h' || b === N || !vis(b) && !b.dataset.xtopm) return;
+                [...tool.querySelectorAll(tool.dataset.xtopfb ? ':scope > *' : ':scope > button')].forEach((b, i) => {
+                    if (b.dataset.xtop === 'h' || b === N || (!tool.dataset.xtopfb && !vis(b) && !b.dataset.xtopm)) return;
                     if (tabs && i === 0 && /➕|＋/.test(ico(b))) { if (b.previousElementSibling !== tabs) { b.dataset.xtopTab = 1; tabs.after(b); } return; }
                     b.dataset.xtopm = 1; g.appendChild(b); });
                 if (N && N.parentElement !== file) file.insertBefore(N, open || save || X || null);
