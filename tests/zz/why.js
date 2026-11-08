@@ -1,0 +1,10 @@
+const {chromium}=require('playwright');
+(async()=>{const b=await chromium.launch();for(const [app,s] of [['callsheeto','#xtop-exp'],['dossier','#xtop-exp'],['planno','#xtop-exp'],['graphico','#xtop-new']]){const pg=await b.newPage({viewport:{width:1500,height:900}});
+await pg.addInitScript(a=>{try{localStorage.setItem('xiii.tour2.'+a+'.hide','1')}catch(e){}},app);
+pg.on('pageerror',e=>console.log(' ERR',e.message.slice(0,120)));
+await pg.goto('http://localhost:8765/'+app+'.html');await pg.waitForTimeout(5500);
+const l=pg.locator(s).first();const bx=await l.boundingBox();
+const info=await pg.evaluate(([x,y,s])=>{const e=document.elementFromPoint(x,y);const b=document.querySelector(s);return 'hit='+(e?(e.closest('button')||e).id||e.tagName+'.'+e.className:'')+' onclick='+String(b.onclick).slice(0,60)},[bx.x+bx.width/2,bx.y+bx.height/2,s]);
+await pg.mouse.click(bx.x+bx.width/2,bx.y+bx.height/2);await pg.waitForTimeout(800);
+const after=await pg.evaluate(()=>[...document.body.children].filter(e=>getComputedStyle(e).position==='fixed'&&e.offsetWidth>200&&getComputedStyle(e).display!=='none').map(e=>e.id||e.className).join(','));
+console.log(app,s,info,'→',after);await pg.close()}await b.close()})();
