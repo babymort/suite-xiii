@@ -3273,7 +3273,7 @@ function editInfos() {
         '<label class="fld full"><span>Notes et conditions (imprimées sur le devis)</span><textarea id="if-notes" placeholder="Ex. Hors droits musicaux. Repas pris en charge par le lieu…">' + esc(P.notes) + '</textarea></label></div>' +
         '<p class="hint">Les dates du tournage fixent les jours de tournage si vous ne les avez pas modifiés. Frais généraux et imprévus s\'appliquent au sous-total, la marge au total après imprévus.</p>' +
         '<div class="mb-actions"><button onclick="closeModal()">Annuler</button><button class="btn-big" id="if-ok">Valider</button></div>');
-    const a = document.querySelector('#modal .mb-actions'); if (typeof XProj !== 'undefined') { const b = XProj.addBtn(a, a.firstChild, 'margin-right:auto;'); if (b) b.dataset.close = '1'; }
+    const a = document.querySelector('#modal .mb-actions'); if (typeof XProj !== 'undefined' && XProj.addBtn) { const b = XProj.addBtn(a, a.firstChild, 'margin-right:auto;'); if (b) b.dataset.close = '1'; }
     $('if-ok').onclick = () => {
         const deb = $('if-deb').value, fin = $('if-fin').value, oldDays = daysBetween(P.debut, P.fin || P.debut);
         Object.assign(P, { name: $('if-name').value.trim(), client: $('if-client').value.trim(), ref: $('if-ref').value.trim(), lieu: $('if-lieu').value.trim(), debut: deb, fin, validite: num($('if-val').value), notes: $('if-notes').value });
@@ -5304,7 +5304,7 @@ var XRED = (function () {
 
     ready = true;
     XSET.init({
-        app: 'deviso', title: 'DEVISO', version: 'v48',
+        app: 'deviso', title: 'DEVISO', version: 'v49',
         theme: { get: () => prefs.theme === 'light' ? 'light' : 'dark', set: t => { if ((prefs.theme === 'light' ? 'light' : 'dark') !== t) toggleTheme(); } },
         hide: ['#toolbar button[onclick="toggleTheme()"]', '#toolbar button[onclick="openGuide()"]'],
         // tableaux (type list) sur toute la largeur du panneau, bouton « ＋ » dessous
@@ -7218,6 +7218,7 @@ XCAT.initTool('deviso');
 <script src="lib/suite-keys.js?v=7ab47caaff"></script>
 <script src="lib/suite-ctx.js?v=4f9e6a8a17"></script>
 <script src="lib/suite-empty.js?v=dc3fbb36b9"></script>
+<script src="lib/suite-dock.js?v=2e35c327e3"></script>
 <!-- SUITE XIII:EXTRA:END -->
 </body>
 </html>
