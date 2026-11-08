@@ -4366,7 +4366,7 @@ var XRED = (function () {
 
     ready = true;
     XSET.init({
-        app: 'ressourco', title: 'RESSOURCO', version: 'v48',
+        app: 'ressourco', title: 'RESSOURCO', version: 'v49',
         theme: { get: () => prefs.theme === 'light' ? 'light' : 'dark', set: t => { if ((prefs.theme === 'light' ? 'light' : 'dark') !== t) toggleTheme(); } },
         hide: ['#toolbar button[onclick="toggleTheme()"]', '#toolbar button[onclick="openGuide()"]'],
         css: '#xs-panel .xs-c:has(>table.xs-t){flex-direction:column;align-items:stretch}#xs-panel .xs-c:has(>table.xs-t)>.xs-acts{align-self:flex-start}#xs-panel table.xs-t select{width:100%;max-width:none;padding:4px 3px;font-size:12px}#xs-panel table.xs-t td:first-child input{min-width:96px}',
@@ -5503,6 +5503,7 @@ XVIT.init();
 <script src="lib/suite-dock.js?v=253bb1bb47"></script>
 <script src="lib/suite-libtab.js?v=aa87c9659c"></script>
 <script src="lib/suite-type.js?v=ac0faf158d"></script>
+<script src="lib/suite-density.js?v=6bdffebeaa"></script>
 <!-- SUITE XIII:EXTRA:END -->
 </body>
 </html>

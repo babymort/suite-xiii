@@ -3201,7 +3201,7 @@ var XRED = (function () {
     const _bp = blankProject;
     blankProject = function () { const p = _bp(); if (XSET.val('author')) p.author = XSET.val('author'); if (XSET.val('client')) p.client = XSET.val('client'); return p; };
     XSET.init({
-        app: 'moodo', title: 'MOODO', version: 'v1.43',
+        app: 'moodo', title: 'MOODO', version: 'v1.44',
         theme: { get: () => prefs.theme === 'light' ? 'light' : 'dark', set: t => { if ((prefs.theme === 'light' ? 'light' : 'dark') !== t) toggleTheme(); } },
         hide: ['#toolbar button[onclick="toggleTheme()"]', '#toolbar button[onclick="openGuide()"]'],
         help: [{ icon: '📖', label: 'Guide d\'utilisation', sub: 'Planches, images, sources, présentation, export', run: openGuide }],
@@ -4037,6 +4037,7 @@ XVIT.init();
 <script src="lib/suite-dock.js?v=253bb1bb47"></script>
 <script src="lib/suite-libtab.js?v=aa87c9659c"></script>
 <script src="lib/suite-type.js?v=ac0faf158d"></script>
+<script src="lib/suite-density.js?v=6bdffebeaa"></script>
 <!-- SUITE XIII:EXTRA:END -->
 </body>
 </html>

@@ -2119,7 +2119,7 @@ var XRED = (function () {
     if (typeof XSET === 'undefined' || typeof prefs === 'undefined' || typeof CATS === 'undefined') return;
     function apply(S) { if (S.fps && P) P.fps = +S.fps; try { render(); } catch (e) { } }
     XSET.init({
-        app: 'posto', title: 'POSTO', version: 'v1.38',
+        app: 'posto', title: 'POSTO', version: 'v1.39',
         sections: [{ id: 'aff', icon: '🎞️', title: 'Post-production', open: true, desc: 'Retours au timecode → marqueurs EDL pour DaVinci Resolve / Premiere ; étapes → PLANNO.', fields: [{ k: 'view', label: 'Vue à l\'ouverture', type: 'select', def: 'versions', options: [['versions', 'Versions & retours'], ['steps', 'Étapes'], ['deliv', 'Livrables']] }, { k: 'fps', label: 'Images par seconde (timecode)', type: 'select', def: '25', options: [['25', '25'], ['24', '24'], ['30', '30'], ['50', '50']] }] }],
         apply
     });
@@ -3125,6 +3125,7 @@ XDER.init();
 <script src="lib/suite-dock.js?v=253bb1bb47"></script>
 <script src="lib/suite-libtab.js?v=aa87c9659c"></script>
 <script src="lib/suite-type.js?v=ac0faf158d"></script>
+<script src="lib/suite-density.js?v=6bdffebeaa"></script>
 <!-- SUITE XIII:EXTRA:END -->
 </body>
 </html>
