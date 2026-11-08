@@ -4539,7 +4539,7 @@ var XRED = (function () {
 
     const isView = viewing();
     const CFG = {
-        app: 'callsheeto', title: 'CALL SHEETO', version: 'v58',
+        app: 'callsheeto', title: 'CALL SHEETO', version: 'v59',
         theme: { get: () => prefs.theme === 'light' ? 'light' : 'dark', set: t => { if ((prefs.theme === 'light' ? 'light' : 'dark') !== t) toggleTheme(); } },
         hide: ['#toolbar button[onclick="toggleTheme()"]', '#toolbar button[onclick="openGuide()"]'],
         // fin de la feuille dégagée du ⚙️ et du badge Netlify quand on fait défiler jusqu'en bas
@@ -4710,7 +4710,7 @@ const XUNDO = (() => {
 
 (function(){ const go = () => (typeof XBOOT !== 'undefined' ? XBOOT.ready(() => XUNDO.init('callsheeto'), 600) : setTimeout(() => XUNDO.init('callsheeto'), 600)); if (document.readyState === 'complete') go(); else window.addEventListener('load', go); })();
 
-</script><script src="lib/core-02.js?v=eda40d325a"></script><script src="lib/core-03.js?v=2bb2b6eb9f"></script><script>// =====================================================================
+</script><script src="lib/core-02.js?v=6d5e12a4de"></script><script src="lib/core-03.js?v=2bb2b6eb9f"></script><script>// =====================================================================
 //  SUITE XIII — XPRS : 👥 présence en direct — qui est dans quel outil
 //  Deux sources fusionnées : le Drive (battement toutes les 20 s, fiable) et XLIVE (signal instantané à
 //  l'ouverture, au retour sur l'onglet, à la frappe, au départ). Affichage :
@@ -4857,7 +4857,7 @@ var XCI = window.XCI || (() => {
 
 XCI.init('callsheeto');
 
-</script><script src="lib/core-04.js?v=18a05689e9"></script><script>// =====================================================================
+</script><script src="lib/core-04.js?v=877d4f1bf2"></script><script>// =====================================================================
 //  SUITE XIII — XFIT : la barre des outils tient sur une ligne
 //  Plutôt que de passer sur deux lignes, les boutons se resserrent par paliers (espaces, puis libellés,
 //  puis tailles) jusqu'à tout faire rentrer ; en dernier recours la barre défile horizontalement.
@@ -4893,7 +4893,7 @@ const XFIT = (() => {
 
 XFIT.init();
 
-</script><script src="lib/core-05.js?v=082630de4d"></script><script>// =====================================================================
+</script><script src="lib/core-05.js?v=f432fd9bb0"></script><script>// =====================================================================
 //  SUITE XIII — XDASH : l'accueil en tableau de bord du projet en cours
 //  En tête : projet (type, dates, compte à rebours, lieu), prochaines échéances (PLANNO, POSTO, fiche),
 //  ce qui manque selon le type de production, derniers retours de l'équipe (avis, mots, travaux reçus,
@@ -5708,7 +5708,7 @@ XWXS.init('callsheeto');
 <script src="lib/suite-a11y2.js?v=06b1aa6f24"></script>
 <script src="lib/suite-sobre.js?v=46384a8210"></script>
 <script src="lib/suite-ident.js?v=360116005c"></script>
-<script src="lib/suite-topbar.js?v=7ac5dbcd1f"></script>
+<script src="lib/suite-topbar.js?v=1845fe5980"></script>
 <script src="lib/suite-sectors.js?v=fa65e1cd5e"></script>
 <script src="lib/suite-focus.js?v=4c5df42ea0"></script>
 <!-- SUITE XIII:EXTRA:END -->

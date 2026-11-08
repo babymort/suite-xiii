@@ -4685,7 +4685,7 @@ const XDELEG = (() => {
         const go = () => {
             const after = J('xiii.deleg.after', null); if (after) { W('xiii.deleg.after', null); if (after.m) setTimeout(() => say(after.m, 6000), 300); }
             banner();
-            if (!document.getElementById('xdl-btn')) { let ref = document.getElementById('xsh-btn') || [...document.querySelectorAll('#top-bar button,#toolbar button')].find(x => /Dossier/i.test(x.getAttribute('onclick') || '') || /Vers DOSSIER/i.test(x.title || x.textContent || '')); if (!ref) { const g = [...document.querySelectorAll('#top-bar .btn-group, #top-bar .tb-group, #toolbar .btn-group')].pop(); if (g) ref = g.lastElementChild; }
+            if (!document.getElementById('xdl-btn')) { let ref = document.getElementById('xsh-btn') || [...document.querySelectorAll('#top-bar button,#toolbar button')].find(x => /Dossier/i.test(x.getAttribute('onclick') || '') || /Vers DOSSIER/i.test(x.title || x.textContent || '')); if (!ref) { const g = [...document.querySelectorAll('#top-bar .btn-group, #top-bar .tb-group, #toolbar .btn-group')].pop(); if (g) ref = g.lastElementChild; } if (!ref) ref = [...document.querySelectorAll('#top-bar button')].filter(b => !b.closest('#tabs-container')).pop();
                 if (ref) { ref.insertAdjacentHTML('afterend', '<button id="xdl-btn" title="Déléguer cet outil à un membre de l\'équipe : il le remplit et vous le renvoie par un lien"><span class="btn-icon">🤝</span><span class="btn-label">Déléguer</span></button>'); document.getElementById('xdl-btn').onclick = () => J(K_ACT(APP), null) ? finish() : openInvite(); } }
             if (!document.getElementById('xnt-btn')) { const d = document.getElementById('xdl-btn'); if (d) { d.insertAdjacentHTML('afterend', '<button id="xnt-btn" title="Commentaires et validations"><span class="btn-icon">💬</span><span class="btn-label">Avis</span></button>'); document.getElementById('xnt-btn').onclick = () => openNotes(); refreshNoteBtn(); } }
             const inbox = J(K_IN, null);
@@ -6061,7 +6061,15 @@ const XBAR = (() => {
     const teamOn = () => localStorage.getItem('xiii.bar.team') === '1' || linked() || has('xiii.notes.' + APP) || has('xiii.memo.' + APP) || !!J('xiii.deleg.active.' + APP, null) || (J('xiii.deleg.sent', []) || []).some(x => x && x.app === APP);
     const TEAM = ['xtb-btn', 'xdl-btn', 'xnt-btn', 'xmm-btn', 'xdr-btn', 'xdr-chip'];
     function build() {
-        let first = $('xdl-btn') || $('xnt-btn'); if (!first) return false;
+        let first = $('xdl-btn') || $('xnt-btn');
+        // outil sans délégation par lien (CADRO, DOSSIER, CALENDRIER, CONTRÔLE, ENCODO, LUDO) : le bouton 👥 Équipe existe quand même,
+        // au même endroit que partout (barre du haut), après 4 s pour laisser les autres modules poser leurs boutons
+        if (!first && !$('xb-team')) { const tb = $('top-bar'); if (!tb || performance.now() < 4000) return false;
+            const at = $('xb-file') || [...tb.children].pop(); if (!at) return false;
+            at.insertAdjacentHTML('afterend', '<span class="btn-group" id="xb-bar" data-solo="1"><span id="xb-anchor"></span></span>'); first = $('xb-anchor');
+            first.insertAdjacentHTML('beforebegin', '<button id="xb-solo" title="Travailler en équipe : relier le Drive du projet"><span class="btn-icon">👥</span><span class="btn-label">Équipe</span></button><span id="xb-team" class="xb-g"></span>');
+            $('xb-solo').onclick = menu; }
+        if (!first) return false;
         let g = $('xb-team');
         if (!g) {
             // un groupe à nous, à droite du groupe d'origine (ou du dernier groupe visible si celui-ci est masqué dans cette vue)
@@ -6085,7 +6093,8 @@ const XBAR = (() => {
     }
     function apply() { try { master(); } catch (e) { }
         const on = teamOn(), g = $('xb-team'), s = $('xb-solo'); if (!g || !s) return;
-        g.style.display = on ? '' : 'none'; s.style.display = on ? 'none' : '';
+        const show = on && g.children.length > 0; // groupe vide (outil sans délégation) : on garde 👥 Équipe
+        g.style.display = show ? '' : 'none'; s.style.display = show ? 'none' : '';
         document.querySelectorAll('#xdr-ban').forEach(x => x.style.display = on ? '' : 'none');
     }
     function menu(e) {
@@ -6097,6 +6106,7 @@ const XBAR = (() => {
             '<button data-a="drive"><span>☁️</span><span><b>Relier le Drive du projet</b><small>Toute l\'équipe travaille dans votre Google Drive : synchronisation, droits, journal, mots, avis.</small></span></button>' +
             '<button data-a="deleg"><span>🤝</span><span><b>Déléguer par un lien</b><small>Sans Drive : un membre remplit cet outil et vous le renvoie.</small></span></button>' +
             '<button data-a="show"><span>👁</span><span><b>Afficher les boutons d\'équipe</b><small>Déléguer, Avis, Mots, Drive — sur ce poste.</small></span></button>';
+        if (!$('xdl-btn')) m.querySelector('[data-a=deleg]').remove(); if (!TEAM.some(id => $(id))) { m.querySelector('[data-a=show]').remove(); m.querySelector('p').textContent = 'Reliez le Drive du projet pour que toute l\'équipe partage la suite (les autres outils du projet suivent).'; }
         document.body.appendChild(m);
         m.querySelector('[data-a=drive]').onclick = () => { location.href = 'drive.html'; };
         m.querySelector('[data-a=deleg]').onclick = () => { m.remove(); const b = $('xdl-btn'); if (b) b.click(); };
@@ -6197,7 +6207,7 @@ const XBAR = (() => {
         if (app === 'catalogue' && window.top === window && !/[?&](embed|out|view|share|pub)=/.test(location.search) && !/#xlink=/.test(location.hash)) { location.replace('matos.html?v=cat' + location.hash); return; } // CATALOGUE vit dans MATOS › 🗃️ Catalogue
         APP = app; homeFix(); brand(); setTimeout(() => { try { master(); } catch (e) { } }, 1200); if (!document.getElementById('xb-css')) css();
         const lay = () => { try { layout(); } catch (e) { console.warn('XBAR', e); } };
-        if (typeof XDELEG === 'undefined' || !XDELEG.KEYS[app]) { XBOOT.ready(lay, 1800); return; }
+        if (typeof XDELEG === 'undefined' || !XDELEG.KEYS[app]) { XBOOT.ready(lay, 1800); const iv0 = setInterval(() => { if (build() || performance.now() > 15000) clearInterval(iv0); }, 700); setInterval(apply, 4000); return; } // 👥 Équipe seul (pas de délégation)
         XBOOT.ready(() => { try { if (build()) lay(); } catch (e) { } }, 1800); // rangé avant l'affichage de la page
         const iv = setInterval(() => { if (build()) lay(); if (performance.now() > 15000) clearInterval(iv); }, 700);
         addEventListener('storage', e => { if (/^xiii\.(drive|notes|memo|deleg|bar)/.test(e.key || '')) apply(); });
@@ -6763,7 +6773,7 @@ const XTIPS = (() => {
             else if (/💾/.test(t.textContent) || /^Enregistrer/.test(t.title || '')) setTimeout(() => tip('common.save', t, 'Enregistré dans ce navigateur', 'Votre travail est aussi enregistré automatiquement. Pour le garder ailleurs ou le transmettre : ⬇️ Exporter le projet (fichier), ou 🗂️ Versions pour revenir en arrière.'), 400);
             else if (t.id === 'xhs-btn') setTimeout(() => tip('common.versions', '#xhs-ov .xhs-new', 'Versions', 'Donnez un nom à une étape importante (« validé client ») : elle ne sera jamais effacée. Une version est aussi créée automatiquement avant chaque import.'), 400);
             else if (t.id === 'xt-tab') setTimeout(() => tip('common.tray', '#xt-panel .xt-tabs', 'Le panier XIII', 'Glissez un élément de « 📦 Cet outil » ou de l\'annuaire dans le panier, puis déposez-le dans un autre outil : contact → équipe du jour, caméra → plan…'), 400);
-            else if (t.id === 'xb-solo') setTimeout(() => tip('common.team', '#xb-menu', 'Travailler à plusieurs', 'Reliez votre Google Drive : l\'équipe travaille dans le même projet, sans compte. Ou déléguez juste cet outil par un lien.'), 300);
+            else if (t.id === 'xb-solo') setTimeout(() => tip('common.team', '#xb-menu', 'Travailler à plusieurs', 'Reliez votre Google Drive : l\'équipe travaille dans le même projet, sans compte.' + (document.getElementById('xdl-btn') ? ' Ou déléguez juste cet outil par un lien.' : '')), 300);
             else if (t.matches('[data-view],#view-group button,.view-btn') && !seen('view.' + APP)) setTimeout(() => tip('view.' + APP, t, 'Nouvelle vue', 'Chaque vue montre le même projet autrement : vos changements sont repris partout. Les raccourcis clavier de la vue sont dans ⚙️ Paramètres.'), 500);
         }, true);
         // 4. le groupe Équipe vient d'apparaître (Drive relié)
@@ -10342,7 +10352,7 @@ XVIT.init();
 <script src="lib/suite-a11y2.js?v=06b1aa6f24"></script>
 <script src="lib/suite-sobre.js?v=46384a8210"></script>
 <script src="lib/suite-ident.js?v=360116005c"></script>
-<script src="lib/suite-topbar.js?v=7ac5dbcd1f"></script>
+<script src="lib/suite-topbar.js?v=1845fe5980"></script>
 <script src="lib/suite-sectors.js?v=fa65e1cd5e"></script>
 <script src="lib/suite-focus.js?v=4c5df42ea0"></script>
 <!-- SUITE XIII:EXTRA:END -->
