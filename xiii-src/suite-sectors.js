@@ -8,9 +8,10 @@
 (function () {
     if (window.XSECT) return;
     const APPX = XIII_APP;
-    const ON = ['moodo']; // outils validés (ou en essai)
+    const ON = ['moodo', 'storyboardo']; // outils validés (ou en essai)
     const RULES = { // corrections par outil : début de l'info-bulle (ou #id) → secteur
-        moodo: [['Présentation plein écran', 'aff']]
+        moodo: [['Présentation plein écran', 'aff']],
+        storyboardo: [['Personnages et poses', 'cre'], ['Mobilier et décor', 'cre'], ['Flèche de mouvement', 'cre'], ['Bulle de dialogue', 'cre'], ['Fond du plan', 'cre']]
     };
     const SECT = [['cre', 'Créer'], ['aff', 'Afficher'], ['mod', 'Modifier'], ['met', 'Outils métier'], ['ass', 'Assistants']];
     const $ = id => document.getElementById(id);
