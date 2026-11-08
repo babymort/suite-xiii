@@ -4045,7 +4045,7 @@ const XUX = (() => {
     function open() {
         if (document.getElementById('xux-ov')) return; const S = shortcuts(), z = +J(KF, '100') || 100, hc = J(KC, '0') === '1';
         const o = document.createElement('div'); o.id = 'xux-ov';
-        o.innerHTML = '<div><h3>⌨️ Raccourcis et confort</h3><h4>Partout dans la suite</h4>' + [['Ctrl K', 'Rechercher, ou lancer une action de n\'importe quel outil'], ['Ctrl Maj P', 'Présentation client (masque les boutons d\'édition)'], ['?', 'Cette fiche'], ['Ctrl S', 'Enregistrer (dans la plupart des outils)'], ['Ctrl Z / Ctrl Y', 'Annuler / rétablir (outils équipés)'], ['Échap', 'Fermer une fenêtre']].map(r => '<div class="r"><span>' + r[1] + '</span><kbd>' + r[0] + '</kbd></div>').join('') +
+        o.innerHTML = '<div><h3>⌨️ Raccourcis et confort</h3><h4>Partout dans la suite</h4>' + (window.XKEYS ? XKEYS.LIST : [['Ctrl K', 'Rechercher, ou lancer une action de n\'importe quel outil'], ['Ctrl Maj P', 'Présentation client (masque les boutons d\'édition)'], ['?', 'Cette fiche'], ['Ctrl S', 'Enregistrer (dans la plupart des outils)'], ['Ctrl Z / Ctrl Y', 'Annuler / rétablir (outils équipés)'], ['Échap', 'Fermer une fenêtre']]).map(r => '<div class="r"><span>' + r[1] + '</span><kbd>' + r[0] + '</kbd></div>').join('') +
             (S.length ? '<h4>Dans cet outil</h4>' + S.slice(0, 40).map(r => '<div class="r"><span>' + r[1].replace(/[<>&]/g, '') + '</span><kbd>' + r[0].replace(/[<>&]/g, '') + '</kbd></div>').join('') : '') +
             '<h4>Taille du texte</h4><div class="seg" data-g="fs">' + [90, 100, 112, 125, 140].map(v => '<button data-v="' + v + '" class="' + (v === z ? 'on' : '') + '">' + v + ' %</button>').join('') + '</div><h4>Contraste</h4><div class="seg" data-g="hc"><button data-v="0" class="' + (hc ? '' : 'on') + '">Normal</button><button data-v="1" class="' + (hc ? 'on' : '') + '">Renforcé</button></div><p style="opacity:.6;font-size:12px;margin:12px 0 0">Taille du texte et contraste valent pour toute la suite, sur cet appareil.</p><div style="text-align:right;margin-top:10px"><button data-x style="font:inherit;padding:7px 16px;border-radius:10px;cursor:pointer;background:rgba(240,180,41,.2);border:1px solid #f0b429;color:inherit">Fermer</button></div></div>';
         document.body.appendChild(o);
@@ -4137,7 +4137,7 @@ const XCONF = (() => {
     function commands() { const seen = new Set(), out = []; document.querySelectorAll('#toolbar button, #top-bar button, .btn-group button, header button, [data-view], button[title]').forEach(b => { if (b.closest('#xux-ov,#xf-ov,#xst,#xs-ov,#xcf-draft') || b.disabled) return; const l = labOf(b); if (!l || seen.has(l)) return; seen.add(l); out.push([l, b]); }); return out; }
     function keys() { document.addEventListener('keydown', e => { const t = e.target; if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return; const K = J(KK(), {}), c = combo(e); if (!c || !K[c]) return; const hit = commands().find(x => x[0] === K[c]); if (!hit) { toastX('⌨️ « ' + K[c] + ' » est introuvable sur cette vue'); return; } e.preventDefault(); e.stopPropagation(); hit[1].click(); }, true); }
     function printSheet() {
-        const K = J(KK(), {}), gl = [['Ctrl+K', 'Rechercher, ouvrir un outil, changer d\'onglet ou de projet'], ['?', 'Fiche des raccourcis et du confort'], ['Ctrl+Z / Ctrl+Y', 'Annuler / rétablir'], ['Ctrl+S', 'Enregistrer'], ['Ctrl+Maj+P', 'Présentation client'], ['Ctrl+Tab', 'Onglet suivant (espace onglets)'], ['Alt+1…9', 'Aller à l\'onglet n°'], ['Alt+W', 'Fermer l\'onglet'], ['Alt+Maj+T', 'Rouvrir le dernier onglet fermé']];
+        const K = J(KK(), {}), gl = (window.XKEYS ? XKEYS.LIST.map(r => [r[0].replace(/(Ctrl|Maj) /g, '$1+'), r[1]]).concat([['Ctrl+Tab', 'Onglet suivant (espace onglets)'], ['Alt+1…9', 'Aller à l\'onglet n°'], ['Alt+W', 'Fermer l\'onglet'], ['Alt+Maj+T', 'Rouvrir le dernier onglet fermé']]) : [['Ctrl+K', 'Rechercher, ouvrir un outil, changer d\'onglet ou de projet'], ['?', 'Fiche des raccourcis et du confort'], ['Ctrl+Z / Ctrl+Y', 'Annuler / rétablir'], ['Ctrl+S', 'Enregistrer'], ['Ctrl+Maj+P', 'Présentation client'], ['Ctrl+Tab', 'Onglet suivant (espace onglets)'], ['Alt+1…9', 'Aller à l\'onglet n°'], ['Alt+W', 'Fermer l\'onglet'], ['Alt+Maj+T', 'Rouvrir le dernier onglet fermé']]);
         const rows = (L, t) => '<h2>' + t + '</h2><table>' + L.map(r => '<tr><td><kbd>' + esc(r[0]) + '</kbd></td><td>' + esc(r[1]) + '</td></tr>').join('') + '</table>';
         const own = Object.keys(K).map(k => [k, K[k]]), tool = [...document.querySelectorAll('#xux-ov .r')].map(r => [(r.querySelector('kbd') || {}).textContent || '', (r.querySelector('span') || {}).textContent || '']).filter(r => r[0]);
         const w = window.open('', '_blank'); if (!w) { toastX('Autorisez les fenêtres pour imprimer'); return; }
@@ -9574,6 +9574,7 @@ XVIT.init();
 <script src="lib/suite-topbar.js?v=1845fe5980"></script>
 <script src="lib/suite-sectors.js?v=fa65e1cd5e"></script>
 <script src="lib/suite-focus.js?v=4c5df42ea0"></script>
+<script src="lib/suite-keys.js?v=7ab47caaff"></script>
 <!-- SUITE XIII:EXTRA:END -->
 </body>
 </html>

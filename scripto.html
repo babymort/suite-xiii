@@ -705,8 +705,8 @@ body.dropping #drop-hint { display: flex; }
     <span class="btn-group">
         <button onclick="addShot()" title="Nouveau plan (N) — reprend séquence, décor et son du plan précédent"><span class="btn-icon">➕</span><span class="btn-label">Plan</span></button>
         <button onclick="addTake()" title="Nouvelle prise sur le plan affiché (T)"><span class="btn-icon">🎞️</span><span class="btn-label">Prise</span></button>
-        <button onclick="pickPhoto()" title="Ajouter une photo de raccord (F) — ou glissez / collez une image"><span class="btn-icon">📷</span><span class="btn-label">Photo</span></button>
-        <button onclick="dupShot()" title="Dupliquer le plan affiché (D)"><span class="btn-icon">⧉</span><span class="btn-label">Dupliquer</span></button>
+        <button onclick="pickPhoto()" title="Ajouter une photo de raccord (P) — ou glissez / collez une image"><span class="btn-icon">📷</span><span class="btn-label">Photo</span></button>
+        <button onclick="dupShot()" title="Dupliquer le plan affiché (Ctrl+D)"><span class="btn-icon">⧉</span><span class="btn-label">Dupliquer</span></button>
     </span>
     <div class="divider"></div>
     <span class="btn-group">
@@ -2083,7 +2083,7 @@ function viewShot(s) {
     const best = scBest(s);
     h += '<div class="sc-card"><h3>🎞️ Prises <span class="sc-best">' + (best.length ? '✔ ' + esc(best.join(', ')) : '') + '</span><span class="r"><button class="btn-sm btn-big" onclick="addTake()">＋ Prise (T)</button></span></h3>' +
         (s.takes.length ? '<table class="sc-tk"><tr><th>N°</th><th>Statut</th><th>Durée</th><th>Clip</th><th>Commentaire</th><th></th><th></th></tr>' + s.takes.map(t => '<tr class="' + (t.st || '') + '"><td class="n"><input data-tk="' + t.id + '" data-k="n" value="' + esc(t.n) + '"></td><td><div class="tst">' + SC_TAKE.slice(1).map(k => '<button style="--sc:' + k[3] + '" class="' + (t.st === k[0] ? 'on' : '') + '" title="' + esc(k[1]) + '" onclick="takeSt(\'' + t.id + '\',\'' + k[0] + '\')">' + k[2] + '</button>').join('') + '</div></td><td style="width:70px"><input data-tk="' + t.id + '" data-k="dur" value="' + esc(t.dur) + '" placeholder="0:42"></td><td style="width:84px"><input data-tk="' + t.id + '" data-k="clip" value="' + esc(t.clip) + '" placeholder="A012"></td><td><input data-tk="' + t.id + '" data-k="note" value="' + esc(t.note) + '" placeholder="Bonne pour le jeu, perche dans le champ…"></td><td class="hm">' + scHM(t.t) + '</td><td class="x" onclick="delTake(\'' + t.id + '\')" title="Supprimer la prise">✕</td></tr>').join('') + '</table>' : '<p class="hint" style="margin:0">Aucune prise. ＋ Prise (ou T) à chaque « Moteur… Action ! ».</p>') + '</div>';
-    h += '<div class="sc-card"><h3>🔗 Raccords <span class="r"><button class="btn-sm" onclick="pickPhoto()">📷 Photo (F)</button></span></h3>' + (prev ? '<div class="sc-prev"><img src="' + IMG.get(prev.photos[prev.photos.length - 1].id) + '" alt="" onclick="selShot(\'' + prev.id + '\')" style="cursor:pointer"><span>Dernière photo de la séquence : <b>' + esc(scLabel(prev)) + '</b>' + (prev.raccord ? '<br>' + esc(prev.raccord.slice(0, 120)) : '') + '</span></div>' : '') +
+    h += '<div class="sc-card"><h3>🔗 Raccords <span class="r"><button class="btn-sm" onclick="pickPhoto()">📷 Photo (P)</button></span></h3>' + (prev ? '<div class="sc-prev"><img src="' + IMG.get(prev.photos[prev.photos.length - 1].id) + '" alt="" onclick="selShot(\'' + prev.id + '\')" style="cursor:pointer"><span>Dernière photo de la séquence : <b>' + esc(scLabel(prev)) + '</b>' + (prev.raccord ? '<br>' + esc(prev.raccord.slice(0, 120)) : '') + '</span></div>' : '') +
         '<textarea data-f="raccord" placeholder="Costume, accessoires, coiffure, position des comédiens, verre à moitié plein, main gauche…">' + esc(s.raccord) + '</textarea><div class="sc-ph" style="margin-top:10px">' + s.photos.map(p => '<figure><img src="' + IMG.get(p.id) + '" alt="" onclick="lightbox(\'' + p.id + '\')"><span class="x" onclick="delPhoto(\'' + p.id + '\')" title="Supprimer la photo">✕</span><figcaption><input data-ph="' + p.id + '" value="' + esc(p.cap) + '" placeholder="Légende"></figcaption></figure>').join('') + '<div class="add" onclick="pickPhoto()" data-drop="1"><b>📷</b>Ajouter / glisser</div></div></div>';
     h += '</div></div>';
     const l = dayShots(), i = l.findIndex(x => x.id === s.id);
@@ -2183,7 +2183,7 @@ function openGuide() {
     modal('<h3>📖 Guide SCRIPTO XIII<span class="close-x" onclick="closeModal()">✕</span></h3>' +
         '<h4>Journées et plans</h4><ul><li>Une <b>journée</b> par onglet (➕ Journée ; double-clic pour son nom, sa date et ses notes).</li><li>➕ <b>Plan</b> (N) reprend la séquence, le décor et le son du plan précédent et numérote la suite (3 → 4, 4B → 4C). Donnez-lui un <b>nom</b>.</li><li>Statut : ⚪ à tourner, 🟡 en cours, 🟢 tourné, ✕ abandonné. La liste de gauche se filtre par statut.</li></ul>' +
         '<h4>Pendant les prises</h4><ul><li>🎞️ <b>Prise</b> (T) à chaque « Action ! » : notez durée, clip caméra et commentaire (Entrée = prise suivante).</li><li>✔ bonne (cerclée), ~ moyenne, ✗ NG, ↯ faux départ. Une prise ✔ passe le plan en « tourné ».</li><li>🎥 <b>Image</b> et 🎙️ <b>son</b> : boutons rapides + texte libre.</li></ul>' +
-        '<h4>Raccords</h4><ul><li>📷 <b>Photo</b> (F), glisser-déposer ou coller (Ctrl+V) : les photos sont réduites et gardées dans ce navigateur. La dernière photo de la même séquence est rappelée en haut des raccords.</li></ul>' +
+        '<h4>Raccords</h4><ul><li>📷 <b>Photo</b> (P), glisser-déposer ou coller (Ctrl+V) : les photos sont réduites et gardées dans ce navigateur. La dernière photo de la même séquence est rappelée en haut des raccords.</li></ul>' +
         '<h4>Tablette sur le plateau</h4><ul><li>⚙️ → 📱 <b>Version mobile</b> : envoyez le script à la tablette (QR code, lien ou fichier). Tout se saisit sur la tablette, photos comprises (appareil photo intégré).</li><li>Le soir, « Renvoyer au bureau » sur la tablette, puis 📂 Ouvrir ici : <b>fusion</b> automatique, rien n\'est perdu.</li></ul>' +
         '<h4>🎬 CLAP !</h4><ul><li>Bouton <b>CLAP !</b> (C) : ardoise plein écran du plan affiché (production, séquence, plan, prise, date, décor, image, son, réalisation) à montrer à la caméra.</li><li><b>CLAP !</b> (Espace) : bip et flash orange (durée dans ⚙️), la prise est notée automatiquement et le numéro passe à la suivante. ← → plan, ↑ ↓ prise, Échap pour sortir.</li></ul>' +
         '<h4>Rapports</h4><ul><li>📋 Rapport de la journée, 🖨️ PDF (journée ou tout), page HTML, CSV pour Excel, 📚 DOSSIER XIII.</li></ul>' +
@@ -2220,10 +2220,11 @@ window.xsOpenMobile = () => { if (typeof window.xmOpenScripto === 'function') wi
         if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') { e.preventDefault(); saveProject(true); return; }
         const t = e.target; if (t && (t.isContentEditable || /INPUT|TEXTAREA|SELECT/.test(t.tagName))) return;
         if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') { e.preventDefault(); undo(); return; }
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'd' && !$('modal')) { e.preventDefault(); dupShot(); return; } // Ctrl+D = dupliquer, comme dans toute la suite
         if (e.ctrlKey || e.metaKey || e.altKey || $('modal')) return;
         const k = e.key.toLowerCase();
         if (k === '1') setView('shot'); else if (k === '2') setView('table'); else if (k === '3') setView('report');
-        else if (k === 'c') openClap(); else if (k === 'n') { e.preventDefault(); addShot(); } else if (k === 't') { e.preventDefault(); addTake(); } else if (k === 'f') pickPhoto(); else if (k === 'd') dupShot();
+        else if (k === 'c') openClap(); else if (k === 'n') { e.preventDefault(); addShot(); } else if (k === 't') { e.preventDefault(); addTake(); } else if (k === 'p') pickPhoto(); else if (k === 'd') { e.preventDefault(); dupShot(); }
         else if (e.key === 'ArrowDown') { e.preventDefault(); navShot(1); } else if (e.key === 'ArrowUp') { e.preventDefault(); navShot(-1); }
         else if (e.key === 'Escape') document.querySelectorAll('.sc-lb').forEach(x => x.remove());
     });
@@ -3295,7 +3296,7 @@ var XRED = (function () {
     const _bs = scBlankShot;
     scBlankShot = function (P0, day, from) { const s = _bs(P0, day, from); const st = XSET.val('sonDef'); if (!from && !P0.shots.length && st) s.sonTags = String(st).split(/[;,]/).map(x => x.trim()).filter(Boolean); return s; };
     XSET.init({
-        app: 'scripto', title: 'SCRIPTO', version: 'v1.31',
+        app: 'scripto', title: 'SCRIPTO', version: 'v1.32',
         theme: { get: () => prefs.theme === 'light' ? 'light' : 'dark', set: t => { if ((prefs.theme === 'light' ? 'light' : 'dark') !== t) toggleTheme(); } },
         hide: ['#toolbar button[onclick="toggleTheme()"]', '#toolbar button[onclick="openGuide()"]'],
         help: [{ icon: '📖', label: 'Guide d\'utilisation', sub: 'Journées, plans, prises, raccords, tablette, rapports', run: openGuide }],
@@ -3401,7 +3402,7 @@ const XUNDO = (() => {
 
 (function(){ const go = () => (typeof XBOOT !== 'undefined' ? XBOOT.ready(() => XUNDO.init('scripto'), 600) : setTimeout(() => XUNDO.init('scripto'), 600)); if (document.readyState === 'complete') go(); else window.addEventListener('load', go); })();
 
-</script><script src="lib/core-02.js?v=6d5e12a4de"></script><script src="lib/core-03.js?v=2bb2b6eb9f"></script><script>// =====================================================================
+</script><script src="lib/core-02.js?v=6d5e12a4de"></script><script src="lib/core-03.js?v=49f378ccf6"></script><script>// =====================================================================
 //  SUITE XIII — XPRS : 👥 présence en direct — qui est dans quel outil
 //  Deux sources fusionnées : le Drive (battement toutes les 20 s, fiable) et XLIVE (signal instantané à
 //  l'ouverture, au retour sur l'onglet, à la frappe, au départ). Affichage :
@@ -4147,6 +4148,7 @@ XSC2PO.init();
 <script src="lib/suite-topbar.js?v=1845fe5980"></script>
 <script src="lib/suite-sectors.js?v=fa65e1cd5e"></script>
 <script src="lib/suite-focus.js?v=4c5df42ea0"></script>
+<script src="lib/suite-keys.js?v=7ab47caaff"></script>
 <!-- SUITE XIII:EXTRA:END -->
 </body>
 </html>

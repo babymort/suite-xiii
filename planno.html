@@ -2075,7 +2075,7 @@ var XRED = (function () {
     if (typeof XSET === 'undefined' || typeof prefs === 'undefined' || typeof ZW === 'undefined') return;
     function apply(S) { if (S.zoom != null) { prefs.zoom = +S.zoom; } try { render(); } catch (e) { } }
     XSET.init({
-        app: 'planno', title: 'PLANNO', version: 'v1.27',
+        app: 'planno', title: 'PLANNO', version: 'v1.28',
         sections: [{ id: 'aff', icon: '📊', title: 'Frise', open: true, desc: 'Échelle par défaut de la frise (modifiable avec − / +).',
             fields: [{ k: 'zoom', label: 'Échelle', type: 'select', def: 2, options: [[0, 'Trimestre'], [1, 'Mois'], [2, 'Semaines'], [3, 'Jours'], [4, 'Jours (large)']] }] }],
         apply
@@ -2154,7 +2154,7 @@ const XUNDO = (() => {
 
 (function(){ const go = () => (typeof XBOOT !== 'undefined' ? XBOOT.ready(() => XUNDO.init('planno'), 600) : setTimeout(() => XUNDO.init('planno'), 600)); if (document.readyState === 'complete') go(); else window.addEventListener('load', go); })();
 
-</script><script src="lib/core-02.js?v=6d5e12a4de"></script><script src="lib/core-03.js?v=2bb2b6eb9f"></script><script>// =====================================================================
+</script><script src="lib/core-02.js?v=6d5e12a4de"></script><script src="lib/core-03.js?v=49f378ccf6"></script><script>// =====================================================================
 //  SUITE XIII — XPRS : 👥 présence en direct — qui est dans quel outil
 //  Deux sources fusionnées : le Drive (battement toutes les 20 s, fiable) et XLIVE (signal instantané à
 //  l'ouverture, au retour sur l'onglet, à la frappe, au départ). Affichage :
@@ -2868,6 +2868,7 @@ XVIT.init();
 <script src="lib/suite-topbar.js?v=1845fe5980"></script>
 <script src="lib/suite-sectors.js?v=fa65e1cd5e"></script>
 <script src="lib/suite-focus.js?v=4c5df42ea0"></script>
+<script src="lib/suite-keys.js?v=7ab47caaff"></script>
 <!-- SUITE XIII:EXTRA:END -->
 </body>
 </html>

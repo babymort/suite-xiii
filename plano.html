@@ -488,7 +488,7 @@ body.light-theme #scale-bar-line { border-color: #333; box-shadow: none; }
         <button data-tool="room" onclick="setTool('room')" title="Dessiner une pièce avec sa surface (P)"><span class="btn-icon">🏠</span><span class="btn-label">Pièce</span></button>
         <button data-tool="zone" onclick="setTool('zone')" title="Zone colorée (Z)"><span class="btn-icon">🔲</span><span class="btn-label">Zone</span></button>
         <button data-tool="dim" onclick="setTool('dim')" title="Cote / mesure (M)"><span class="btn-icon">📏</span><span class="btn-label">Cote</span></button>
-        <button data-tool="arrow" onclick="setTool('arrow')" title="Flèche de mouvement caméra / comédien (F)"><span class="btn-icon">➰</span><span class="btn-label">Mouvement</span></button>
+        <button data-tool="arrow" onclick="setTool('arrow')" title="Flèche de mouvement caméra / comédien (A)"><span class="btn-icon">➰</span><span class="btn-label">Mouvement</span></button>
         <button data-tool="text" onclick="setTool('text')" title="Texte (T)"><span class="btn-icon">🔤</span><span class="btn-label">Texte</span></button>
     </span>
     <div class="divider"></div>
@@ -2292,7 +2292,7 @@ document.addEventListener('keydown', e => {
         const d = { ArrowLeft: [-st, 0], ArrowRight: [st, 0], ArrowUp: [0, -st], ArrowDown: [0, st] }[e.key];
         selItems().filter(i => !i.locked).forEach(i => shiftItem(i, d[0], d[1])); render(); clearTimeout(keyCommitT); keyCommitT = setTimeout(commit, 400); return;
     }
-    const map = { v: 'select', w: 'wall', p: 'room', z: 'zone', m: 'dim', f: 'arrow', t: 'text' };
+    const map = { v: 'select', w: 'wall', p: 'room', z: 'zone', m: 'dim', a: 'arrow', t: 'text' }; // F est réservé au mode focus (toute la suite) : flèche de mouvement → A
     if (map[k]) return setTool(map[k]);
     if (k === 'r') return rotateSel(90);
     if (k === 'q') return rotateSel(-15);
@@ -8079,7 +8079,7 @@ var XRED = (function () {
 
     const opt = (a) => a.map(x => [String(x[0]), x[1]]);
     XSET.init({
-        app: 'plano', title: 'PLANO', version: 'v75',
+        app: 'plano', title: 'PLANO', version: 'v76',
         theme: { get: () => prefs.theme === 'light' ? 'light' : 'dark', set: t => { prefs.theme = t; applyTheme(); savePrefs(); } },
         hide: ['#settings-btn', '#settings-menu'],
         css: [
@@ -8175,7 +8175,7 @@ var XRED = (function () {
     });
 })();
 
-</script><script src="lib/core-02.js?v=6d5e12a4de"></script><script src="lib/core-03.js?v=2bb2b6eb9f"></script><script>// =====================================================================
+</script><script src="lib/core-02.js?v=6d5e12a4de"></script><script src="lib/core-03.js?v=49f378ccf6"></script><script>// =====================================================================
 //  SUITE XIII — XPRS : 👥 présence en direct — qui est dans quel outil
 //  Deux sources fusionnées : le Drive (battement toutes les 20 s, fiable) et XLIVE (signal instantané à
 //  l'ouverture, au retour sur l'onglet, à la frappe, au départ). Affichage :
@@ -10026,4 +10026,5 @@ XCAT.initTool('plano');
 <script src="lib/suite-topbar.js?v=1845fe5980"></script>
 <script src="lib/suite-sectors.js?v=fa65e1cd5e"></script>
 <script src="lib/suite-focus.js?v=4c5df42ea0"></script>
+<script src="lib/suite-keys.js?v=7ab47caaff"></script>
 <!-- SUITE XIII:EXTRA:END -->

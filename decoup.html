@@ -4951,7 +4951,7 @@ var XRED = (function () {
     const typeOpts = () => TYPES.map(t => [t.id, t.ico + ' ' + t.name]);
 
     const CFG = {
-        app: 'decoup', title: 'DECOUP TECHNICO', version: 'v1.33',
+        app: 'decoup', title: 'DECOUP TECHNICO', version: 'v1.34',
         theme: { get: () => prefs.theme === 'light' ? 'light' : 'dark', set: t => { prefs.theme = t; applyTheme(); savePrefs(); } },
         hide: ['#settings-btn'],
         // ancien ⚙️ masqué ; ⚙️ absent de la lecture plein écran
@@ -5031,7 +5031,7 @@ var XRED = (function () {
     try { if (XSET.isSet('typeVals') || XSET.isSet('myTypes') || XSET.isSet('myGfx')) rerender(); } catch (e) { }
 })();
 
-</script><script src="lib/core-02.js?v=6d5e12a4de"></script><script src="lib/core-03.js?v=2bb2b6eb9f"></script><script>// =====================================================================
+</script><script src="lib/core-02.js?v=6d5e12a4de"></script><script src="lib/core-03.js?v=49f378ccf6"></script><script>// =====================================================================
 //  SUITE XIII — XPRS : 👥 présence en direct — qui est dans quel outil
 //  Deux sources fusionnées : le Drive (battement toutes les 20 s, fiable) et XLIVE (signal instantané à
 //  l'ouverture, au retour sur l'onglet, à la frappe, au départ). Affichage :
@@ -5746,4 +5746,5 @@ XVIT.init();
 <script src="lib/suite-topbar.js?v=1845fe5980"></script>
 <script src="lib/suite-sectors.js?v=fa65e1cd5e"></script>
 <script src="lib/suite-focus.js?v=4c5df42ea0"></script>
+<script src="lib/suite-keys.js?v=7ab47caaff"></script>
 <!-- SUITE XIII:EXTRA:END -->
