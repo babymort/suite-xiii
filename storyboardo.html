@@ -4722,7 +4722,7 @@ var XRED = (function () {
     // personnage ajouté : type et couleur par défaut quand on clique « Personnage » sans choisir
     const _ap = addPuppet; addPuppet = function (type) { return _ap(type || XSET.val('pupType') || 'homme'); };
     XSET.init({
-        app: 'storyboardo', title: 'STORYBOARDO', version: 'v4.30',
+        app: 'storyboardo', title: 'STORYBOARDO', version: 'v4.31',
         css: '.sb-props{max-height:calc(100vh - 370px)!important}#content{padding-bottom:90px}',
         theme: { get: () => prefs.theme === 'light' ? 'light' : 'dark', set: t => { if ((prefs.theme === 'light' ? 'light' : 'dark') !== t) toggleTheme(); } },
         hide: ['#toolbar button[onclick="toggleTheme()"]', '#toolbar button[onclick="openGuide()"]'],
@@ -4886,7 +4886,7 @@ const XFIT = (() => {
 
 XFIT.init();
 
-</script><script src="lib/core-05.js?v=a7d954a6bc"></script><script>// =====================================================================
+</script><script src="lib/core-05.js?v=082630de4d"></script><script>// =====================================================================
 //  SUITE XIII — XDASH : l'accueil en tableau de bord du projet en cours
 //  En tête : projet (type, dates, compte à rebours, lieu), prochaines échéances (PLANNO, POSTO, fiche),
 //  ce qui manque selon le type de production, derniers retours de l'équipe (avis, mots, travaux reçus,

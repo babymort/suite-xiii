@@ -5603,7 +5603,7 @@ var XRED = (function () {
     // ---------- paramètres ----------
     const cvf = (k, label, ph, hint) => ({ k: 'cv_' + k, label, hint, type: 'text', def: '', placeholder: ph });
     XSET.init({
-        app: 'dossier', title: 'DOSSIER', version: 'v37',
+        app: 'dossier', title: 'DOSSIER', version: 'v38',
         theme: { get: () => prefs.theme === 'light' ? 'light' : 'dark', set: t => { if ((prefs.theme === 'light' ? 'light' : 'dark') !== t) toggleTheme(); } },
         // écran peu haut : l'aperçu collant de la page de garde (≈ 500 px) dépassait sous le badge Netlify et cachait « Générer »
         css: '@media (max-height: 900px) { .cover-prev { position: static; } }',
@@ -5878,7 +5878,7 @@ const XFIT = (() => {
 
 XFIT.init();
 
-</script><script src="lib/core-05.js?v=a7d954a6bc"></script><script>// =====================================================================
+</script><script src="lib/core-05.js?v=082630de4d"></script><script>// =====================================================================
 //  SUITE XIII — XDASH : l'accueil en tableau de bord du projet en cours
 //  En tête : projet (type, dates, compte à rebours, lieu), prochaines échéances (PLANNO, POSTO, fiche),
 //  ce qui manque selon le type de production, derniers retours de l'équipe (avis, mots, travaux reçus,

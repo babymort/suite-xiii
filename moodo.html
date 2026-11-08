@@ -3196,7 +3196,7 @@ var XRED = (function () {
     const _bp = blankProject;
     blankProject = function () { const p = _bp(); if (XSET.val('author')) p.author = XSET.val('author'); if (XSET.val('client')) p.client = XSET.val('client'); return p; };
     XSET.init({
-        app: 'moodo', title: 'MOODO', version: 'v1.26',
+        app: 'moodo', title: 'MOODO', version: 'v1.27',
         theme: { get: () => prefs.theme === 'light' ? 'light' : 'dark', set: t => { if ((prefs.theme === 'light' ? 'light' : 'dark') !== t) toggleTheme(); } },
         hide: ['#toolbar button[onclick="toggleTheme()"]', '#toolbar button[onclick="openGuide()"]'],
         help: [{ icon: '📖', label: 'Guide d\'utilisation', sub: 'Planches, images, sources, présentation, export', run: openGuide }],
@@ -3436,7 +3436,7 @@ const XFIT = (() => {
 
 XFIT.init();
 
-</script><script src="lib/core-05.js?v=a7d954a6bc"></script><script>// =====================================================================
+</script><script src="lib/core-05.js?v=082630de4d"></script><script>// =====================================================================
 //  SUITE XIII — XDASH : l'accueil en tableau de bord du projet en cours
 //  En tête : projet (type, dates, compte à rebours, lieu), prochaines échéances (PLANNO, POSTO, fiche),
 //  ce qui manque selon le type de production, derniers retours de l'équipe (avis, mots, travaux reçus,

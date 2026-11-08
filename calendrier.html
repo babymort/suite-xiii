@@ -1323,7 +1323,7 @@ var XRED = (function () {
 // CALENDRIER XIII — ⚙️ Paramètres
 (function () {
     if (typeof XSET === 'undefined' || typeof events !== 'function') return;
-    XSET.init({ app: 'calendrier', title: 'CALENDRIER', version: 'v1.25', theme: { get: () => prefs.theme, set: t => { prefs.theme = t; applyTheme(); savePrefs(); } },
+    XSET.init({ app: 'calendrier', title: 'CALENDRIER', version: 'v1.26', theme: { get: () => prefs.theme, set: t => { prefs.theme = t; applyTheme(); savePrefs(); } },
         help: [{ icon: '🗓️', label: 'Comment ça marche ?', sub: 'Toutes les dates, export .ics', run: () => alert('CALENDRIER XIII rassemble les dates de tous les outils : tâches PLANNO, journées de tournage CALL SHEETO, directs CONDUCO, repérages REPERO, réservations et révisions MATOS, factures et échéances DEVISO, versions et livraisons POSTO, contrats et expirations de droits RESSOURCO, dates limites de candidature DOSSIER. Export .ics pour votre agenda. Raccourcis : 1 mois, 2 liste, ← →.') }],
         sections: [], apply() { } });
 })();
@@ -1452,7 +1452,7 @@ const XFIT = (() => {
 
 XFIT.init();
 
-</script><script src="lib/core-05.js?v=a7d954a6bc"></script><script>// =====================================================================
+</script><script src="lib/core-05.js?v=082630de4d"></script><script>// =====================================================================
 //  SUITE XIII — XDASH : l'accueil en tableau de bord du projet en cours
 //  En tête : projet (type, dates, compte à rebours, lieu), prochaines échéances (PLANNO, POSTO, fiche),
 //  ce qui manque selon le type de production, derniers retours de l'équipe (avis, mots, travaux reçus,
