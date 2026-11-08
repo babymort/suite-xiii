@@ -99,6 +99,35 @@
         const b = t.closest('button'); e.preventDefault(); e.stopPropagation();
         if (b && !b.disabled) forButton(e, b); else forBar(e);
     }, true);
+    // ---------- clic droit dans la zone de travail (outils qui n'ont pas leur propre menu) ----------
+    // ordre commun : actions de l'élément (Modifier, Dupliquer, Copier, Supprimer, puis les siennes) │ Nouveau, Annuler, Rétablir │ Exporter, Envoyer │ Focus, Rechercher
+    const OWNCTX = /^(conduco|decoup|plano|syno|storyboardo|sono|ludo)$/; // ces outils gardent leur menu (déjà riche) ; le reste de la page suit le menu commun
+    const RANK = [[/modifier|éditer|renommer|ouvrir|détails?|fiche/i, 0], [/dupliquer|copie/i, 1], [/copier/i, 2], [/supprimer|retirer|effacer|✕|🗑/i, 9]];
+    const rank = b => { const t = labOf(b) + ' ' + (b.title || '') + ' ' + ico(b); for (const [r, n] of RANK) if (r.test(t)) return n; return 5; };
+    const ITEM = '[data-id],[data-uid],[data-key],[data-idx],[data-i],tr,li,.card,.row,[class*=card],[class*=item]';
+    function elemActions(t) {
+        const out = []; let el = t.closest(ITEM);
+        for (let k = 0; el && k < 3; k++) { const B = [...el.querySelectorAll('button,[role=button]')].filter(b => b.offsetWidth > 0 && !b.disabled && !b.closest('#top-bar,#toolbar') && labOf(b)); if (B.length) { B.sort((a, b) => rank(a) - rank(b)).slice(0, 8).forEach(b => out.push([ico(b) || '•', (labOf(b) + (b.title && b.title !== labOf(b) ? ' : ' + b.title : '')).slice(0, 120), () => b.click()])); break; } el = el.parentElement && el.parentElement.closest(ITEM); }
+        return out;
+    }
+    const tbBtn = rx => { const tb = $('toolbar'); return tb ? [...tb.querySelectorAll('button')].find(b => b.offsetWidth > 0 && !b.disabled && rx.test(ico(b) + ' ' + (b.title || ''))) : null; };
+    function forWork(e, t) {
+        const it = [], sel = String(getSelection ? getSelection() : '').trim();
+        if (sel) it.push(['📋', 'Copier la sélection : ' + sel.slice(0, 40), () => { try { navigator.clipboard.writeText(sel); say('📋 Copié'); } catch (x) { document.execCommand('copy'); } }]);
+        it.push(...elemActions(t));
+        const add = tbBtn(/^[➕＋]/); if (add) it.push(['➕', 'Nouvel élément (N) : ' + (add.title || labOf(add)), () => add.click()]);
+        const un = tbBtn(/^↶|Annuler/), re = tbBtn(/^↷|Rétablir/); if (un) it.push(['↶', 'Annuler (Ctrl Z)', () => un.click()]); if (re) it.push(['↷', 'Rétablir (Ctrl Y)', () => re.click()]);
+        if (window.XTOP && XTOP.exportItems && XTOP.exportItems().length) it.push(['⬇️', 'Exporter… (Ctrl E)', () => setTimeout(() => forButton(e, $('xtop-exp') || document.body), 0)]);
+        const g = $('xgt-btn'); if (g && g.offsetWidth) it.push(['📤', 'Envoyer vers un autre outil…', () => setTimeout(() => forButton(e, g), 0)]);
+        if (window.XFOCUS && $('xfocus-btn')) it.push(['⛶', (XFOCUS.on() ? 'Quitter le mode focus' : 'Mode focus') + ' (F)', () => XFOCUS.toggle()]);
+        const s = $('xf-btn'); if (s) it.push(['🔎', 'Rechercher (Ctrl K)', () => s.click()]);
+        if (it.length) show(e, '🧰 ' + (document.title || '').split(/ [—-] /)[0].slice(0, 30), 'Maj + clic droit : menu du navigateur.', it);
+    }
+    document.addEventListener('contextmenu', e => {
+        if (e.shiftKey || e.defaultPrevented || OWNCTX.test(APPX)) return;
+        const t = e.target; if (!t.closest || !$('toolbar') || t.closest('#top-bar,#toolbar,input,select,textarea,[contenteditable],a[href],img,video,canvas,[role=dialog],.modal,.modal-overlay,#xb-menu,#xt-pop,#xt-block,#xt-bar,#xs-ov,#xs-gear')) return;
+        e.preventDefault(); forWork(e, t);
+    }); // phase de propagation : un outil qui a son propre menu (preventDefault) garde la main
     // ---------- styles de la fenêtre « tapez la combinaison » ----------
     const st = document.createElement('style'); st.id = 'xctx-css';
     st.textContent = '#xctx-key{position:fixed;left:50%;top:84px;transform:translateX(-50%);z-index:2147483002;display:flex;flex-direction:column;gap:6px;max-width:420px;padding:14px 16px;border-radius:12px;background:var(--bg-panel,#2d2d2d);color:var(--text-main,#eee);border:1px solid rgb(240,179,120);box-shadow:0 12px 32px rgba(0,0,0,.45);font:13px system-ui,"Segoe UI",sans-serif}#xctx-key span{color:var(--text-dim,#aaa);font-size:12.5px}';
