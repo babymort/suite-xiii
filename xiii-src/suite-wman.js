@@ -69,6 +69,10 @@
         '#xwm .xwm-pvw{border-radius:12px;overflow:hidden;max-height:170px;position:relative;pointer-events:none}#xwm .xwm-pvw>.xd-c{margin:0!important;transform-origin:top left}' +
         '#xwm .xwm-row{display:flex;align-items:center;justify-content:space-between;gap:10px}' +
         '#xwm .xwm-sw{position:relative;width:38px;height:22px;border-radius:999px;background:#555;border:0;transition:background .15s}#xwm .xwm-sw::after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .18s cubic-bezier(.2,.7,.2,1)}#xwm .xwm-sw.on{background:#c79a63}#xwm .xwm-sw.on::after{transform:translateX(16px)}' +
+        '#xwm [hidden]{display:none!important}' +
+        '#xwm .xwm-tg{display:inline-flex;align-items:center;gap:6px;margin-left:6px}#xwm .xwm-tg label{font-size:11px;opacity:.6;text-transform:uppercase;letter-spacing:.05em;font-weight:700}#xwm .xwm-tg select{height:30px;border-radius:8px;border:1px solid var(--border-color,#555);background:var(--bg-panel,#26262b);color:inherit;font:inherit;padding:0 8px}' +
+        '#xwm .xwm-hint{opacity:.6;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#xwm .xwm-w.lk{cursor:not-allowed;background-image:repeating-linear-gradient(135deg,rgba(255,255,255,.035) 0 8px,transparent 8px 16px)}#xwm .xwm-w.lk .xwm-h{display:none}' +
+        '#xwm .xwm-lkm{padding:12px;border-radius:10px;background:rgba(240,179,120,.08);border:1px solid rgba(240,179,120,.35);line-height:1.5}' +
         '#xwm .xwm-del{margin-top:auto;height:32px;border-radius:8px;border:1px solid rgba(229,115,115,.5);background:transparent;color:#ef9a9a}#xwm .xwm-del:hover{background:rgba(229,115,115,.12)}' +
         /* zone 3 : liste */
         '#xwm .xwm-ls{grid-area:ls;border-top:1px solid var(--border-color,#333);padding:12px 16px;overflow:auto;scrollbar-width:thin}#xwm .xwm-ls h5{margin:0 0 8px;font-size:11px;letter-spacing:.06em;text-transform:uppercase;opacity:.6;font-weight:700}' +
@@ -84,9 +88,34 @@
     const fits = (L, k, x, y, w, h) => { if (x < 0 || y < 0 || w < 1 || h < 1 || x + w > COLS || h > MAXH) return false;
         for (const o in L) { if (o === k) continue; const b = L[o]; if (x < b.x + b.w && b.x < x + w && y < b.y + b.h && b.y < y + h) return false; } return true; };
     const free = (L, w, h) => { for (let y = 0; y < 200; y++) for (let x = 0; x + w <= COLS; x++) if (fits(L, null, x, y, w, h)) return { x, y }; return { x: 0, y: 0 }; };
+    // ---------------- dispositions imposées par le Master ----------------
+    // conf().imp = { '*': {lay, sty, lock:[…], at}, '<secteur>': {…} } — enregistré avec les réglages du projet (partagés par le Drive).
+    // Un membre sans disposition personnelle reçoit celle de son secteur (sinon celle de toute l'équipe) ; les widgets verrouillés
+    // restent à leur place imposée, même s'il a sa propre disposition.
+    const SECT = [['*', 'Toute l’équipe'], ['production', 'Production'], ['realisation', 'Réalisation'], ['image', 'Image'], ['son', 'Son'], ['lumiere', 'Lumière'], ['regie', 'Régie'], ['technique', 'Technique'], ['decor', 'Décor'], ['hmc', 'HMC'], ['post', 'Post-production'], ['artistes', 'Artistes'], ['client', 'Client']];
+    const fold = x => String(x || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
+    const JJ = k => { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } };
+    const mySecs = () => { const d = JJ('xiii.drive'); return d && d.tok && !d.code ? String(d.secteur || '').split(',').map(fold).filter(Boolean) : []; };
+    const isM = () => { try { return D().master(); } catch (e) { return true; } };
+    function imposed() { const I = (D().conf().imp) || {}; for (const s of mySecs()) { const k = Object.keys(I).find(x => fold(x) === s); if (k && I[k] && I[k].lay) return Object.assign({ who: k }, I[k]); } return I['*'] && I['*'].lay ? Object.assign({ who: '*' }, I['*']) : null; }
+    function eff() {
+        const U = D().me(), mine = { lay: U.lay, sty: U.sty || {}, lock: {}, src: 'me' }; if (isM()) return mine; const I = imposed(); if (!I) return mine;
+        const lock = {}; (I.lock || []).forEach(k => { if (I.lay[k]) lock[k] = 1; });
+        if (!U.lay || !Object.keys(U.lay).length) return { lay: I.lay, sty: Object.assign({}, I.sty || {}, U.sty || {}), lock, src: I.who };
+        const L = JSON.parse(JSON.stringify(U.lay)); Object.keys(lock).forEach(k => { delete L[k]; });
+        const N = {}; Object.keys(lock).forEach(k => { N[k] = Object.assign({}, I.lay[k]); });
+        Object.keys(L).forEach(k => { const b = L[k]; const p = fits(N, k, b.x, b.y, b.w, b.h) ? b : Object.assign({ w: b.w, h: b.h }, free(N, b.w, b.h)); N[k] = { x: p.x, y: p.y, w: b.w, h: b.h }; });
+        const S = Object.assign({}, U.sty || {}); Object.keys(lock).forEach(k => { if (I.sty && I.sty[k]) S[k] = I.sty[k]; else delete S[k]; });
+        return { lay: N, sty: S, lock, src: 'me+' + I.who };
+    }
+    // les widgets d'une disposition imposée doivent être affichés (pas masqués par d'anciens choix)
+    let syncing = false;
+    function sync() { if (syncing || isM()) return; const E = eff(); if (!E.lay) return; const X = D(), U = X.me(), C = X.conf(), off = new Set(U.off || C.off || []), need = Object.keys(E.lay).filter(k => off.has(k)); if (!need.length) return;
+        syncing = true; need.forEach(k => off.delete(k)); U.off = [...off]; U.order = (U.order || C.order || []).filter(k => !need.includes(k)).concat(need); X.setMe(U); setTimeout(() => { X.render(); syncing = false; }, 0); }
     function initial() {
         const X = D(), U = X.me(), C = X.conf(), CARDS = X.cards();
-        if (U.lay && Object.keys(U.lay).length) return JSON.parse(JSON.stringify(U.lay));
+        if (tgt !== 'me') { const I = (C.imp || {})[tgt]; if (I && I.lay) return JSON.parse(JSON.stringify(I.lay)); }
+        else { const E = eff(); if (E.lay && Object.keys(E.lay).length) return JSON.parse(JSON.stringify(E.lay)); }
         const ord = (U.order || C.order).filter(k => CARDS[k]), off = new Set(U.off || C.off), L = {};
         ord.filter(k => !off.has(k)).forEach(k => { const el = $('#xd-dash .xd-c[data-card="' + k + '"]'); const w = Math.min(COLS, (U.size || {})[k] || 1);
             const h = el ? Math.max(1, Math.min(MAXH, Math.ceil((el.offsetHeight + GAP) / (ROWH + GAP)))) : 1; const p = free(L, w, h); L[k] = { x: p.x, y: p.y, w, h }; });
@@ -173,7 +202,7 @@
     function apply(flip) {
         const X = D(), g = $('#xd-dash .xd-g'); if (!X || !g || applying) return; applying = true;
         try {
-            const U = X.me(), L = U.lay, S = U.sty || {}, on = !!(L && Object.keys(L).length) && wide();
+            sync(); const E = eff(), L = E.lay, S = E.sty || {}, on = !!(L && Object.keys(L).length) && wide();
             const before = flip ? new Map([...g.children].map(c => [c.dataset.card, c.getBoundingClientRect()])) : null;
             g.classList.toggle('xwm-on', on);
             [...g.querySelectorAll(':scope>.xd-c[data-card]')].forEach(c => {
@@ -197,23 +226,38 @@
     addEventListener('resize', () => apply(false));
 
     // ---------------- la fenêtre ----------------
-    let L = {}, S = {}, sel = null, ov = null, dirty = false;
+    let L = {}, S = {}, LK = {}, tgt = 'me', sel = null, ov = null, dirty = false;
     function open() {
         const X = D(); if (!X) return; close(true);
-        L = initial(); S = JSON.parse(JSON.stringify(X.me().sty || {})); sel = Object.keys(L)[0] || null; dirty = false;
+        load(tgt); dirty = false;
         ov = document.createElement('div'); ov.id = 'xwm'; ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-label', 'Gestionnaire de widgets');
-        ov.innerHTML = '<div class="xwm-b"><div class="xwm-hd"><b>🧩 Widgets de l’accueil</b><small>Glissez les blocs sur la grille · poignée en bas à droite pour la taille · cliquez un bloc pour le régler</small>' +
+        const M = isM(), E0 = eff();
+        ov.innerHTML = '<div class="xwm-b"><div class="xwm-hd"><b>🧩 Widgets de l’accueil</b>' + (M ? '<span class="xwm-tg"><label>Disposition</label><select data-tgt aria-label="Disposition à modifier"><option value="me">👤 La mienne</option>' + SECT.map(x => '<option value="' + x[0] + '">' + (x[0] === '*' ? '👥 ' : '🏷️ ') + esc(x[1]) + (((X.conf().imp || {})[x[0]] || {}).lay ? ' ●' : '') + '</option>').join('') + '</select></span>' : '') + '<small class="xwm-hint"></small>' +
+            (!M && E0.src !== 'me' ? '' : '') + '<button class="xwm-btn" data-reset title="" hidden></button>' +
             '<button class="xwm-btn" data-auto title="Ranger automatiquement les widgets placés, sans trou">↺ Ranger</button><button class="xwm-btn" data-cancel>Annuler</button><button class="xwm-btn pri" data-ok>✓ Enregistrer</button></div>' +
             '<div class="xwm-gr"><div class="xwm-bd"></div></div><div class="xwm-sd"></div><div class="xwm-ls"><h5>Tous les widgets — glissez-les sur la grille</h5><div class="xwm-li"></div></div></div>';
         document.body.appendChild(ov);
         ov.addEventListener('pointerdown', e => { if (e.target === ov) close(); });
         $('[data-cancel]', ov).onclick = () => close();
         $('[data-ok]', ov).onclick = saveAll;
+        const tg = $('[data-tgt]', ov); if (tg) { tg.value = tgt; tg.onchange = () => { if (dirty && !confirm('Changer de disposition sans enregistrer ?')) { tg.value = tgt; return; } tgt = tg.value; load(tgt); dirty = false; drawAll(); hint(); }; }
+        $('[data-reset]', ov).onclick = () => { const X2 = D(); if (tgt !== 'me') { if (!confirm('Supprimer la disposition imposée « ' + SECT.find(x => x[0] === tgt)[1] + ' » ?')) return; X2.save(C => { const I = Object.assign({}, C.imp || {}); delete I[tgt]; C.imp = I; }); dirty = false; close(true); flipNext = true; return; }
+            if (!confirm('Revenir à la disposition du Master ? Votre disposition personnelle sera effacée.')) return; const U = X2.me(); delete U.lay; delete U.sty; X2.setMe(U); dirty = false; close(true); flipNext = true; X2.render(); setTimeout(() => apply(true), 30); };
+        hint();
         $('[data-auto]', ov).onclick = () => { const ks = Object.keys(L).sort((a, b) => L[a].y - L[b].y || L[a].x - L[b].x), N = {}; ks.forEach(k => { const p = free(N, L[k].w, L[k].h); N[k] = { x: p.x, y: p.y, w: L[k].w, h: L[k].h }; }); L = N; dirty = true; drawBoard(); };
         addEventListener('keydown', key, true); addEventListener('resize', drawBoard);
         try { new ResizeObserver(drawBoard).observe($('.xwm-gr', ov)); } catch (e) { }
         drawAll();
     }
+    function load(t) { const X = D(), C = X.conf(); tgt = t;
+        if (t === 'me') { const E = eff(); L = initial(); S = JSON.parse(JSON.stringify(E.sty || {})); LK = Object.assign({}, E.lock); }
+        else { const I = (C.imp || {})[t] || {}; L = I.lay ? JSON.parse(JSON.stringify(I.lay)) : (() => { const t0 = tgt; tgt = 'me'; const x = initial(); tgt = t0; return x; })(); S = JSON.parse(JSON.stringify(I.sty || {})); LK = {}; (I.lock || []).forEach(k => { LK[k] = 1; }); }
+        sel = Object.keys(L).find(k => !(tgt === 'me' && LK[k])) || Object.keys(L)[0] || null; }
+    const locked = k => tgt === 'me' && !!LK[k];
+    function hint() { if (!ov) return; const h = $('.xwm-hint', ov), r = $('[data-reset]', ov), E = eff(), X = D(), U = X.me();
+        if (tgt !== 'me') { h.textContent = 'Disposition imposée à « ' + SECT.find(x => x[0] === tgt)[1] + ' » · 🔒 = le membre ne peut ni la déplacer ni la retirer'; r.hidden = !((X.conf().imp || {})[tgt] || {}).lay; r.textContent = '🗑 Supprimer'; r.title = 'Supprimer cette disposition imposée'; }
+        else if (!isM() && E.src !== 'me') { h.textContent = E.src.indexOf('me+') === 0 ? 'Votre disposition · les widgets 🔒 sont imposés par le Master' : 'Disposition du Master (' + (SECT.find(x => x[0] === E.src) || [, E.src])[1] + ') · modifiez-la pour en faire la vôtre'; r.hidden = !(U.lay && Object.keys(U.lay).length); r.textContent = '↺ Disposition du Master'; r.title = 'Revenir à la disposition imposée par le Master'; }
+        else { h.textContent = 'Glissez les blocs · poignée en bas à droite pour la taille · cliquez un bloc pour le régler'; r.hidden = true; } }
     function close(silent) {
         if (!ov) return; if (!silent && dirty && !confirm('Fermer sans enregistrer la nouvelle disposition ?')) return;
         removeEventListener('keydown', key, true); removeEventListener('resize', drawBoard);
@@ -222,6 +266,8 @@
     }
     function saveAll() {
         const X = D(), CARDS = X.cards(), U = X.me(), ks = Object.keys(L).sort((a, b) => L[a].y - L[b].y || L[a].x - L[b].x);
+        if (tgt !== 'me') { const T = tgt, lay = L, sty = S, lock = Object.keys(LK).filter(k => L[k]); X.save(C => { const I = Object.assign({}, C.imp || {}); I[T] = { lay, sty, lock, at: Date.now() }; C.imp = I; if (T === '*') { C.order = ks.concat(Object.keys(CARDS).filter(k => !lay[k])); C.off = Object.keys(CARDS).filter(k => !lay[k]); } });
+            dirty = false; close(true); try { if (window.XTOAST) XTOAST('✓ Disposition imposée enregistrée'); } catch (e) { } return; }
         U.lay = L; U.sty = S; U.order = ks.concat(Object.keys(CARDS).filter(k => !L[k])); U.off = Object.keys(CARDS).filter(k => !L[k]);
         U.size = Object.assign({}, U.size || {}); ks.forEach(k => { U.size[k] = Math.min(3, L[k].w); });
         X.setMe(U); dirty = false; close(true); flipNext = true; X.render(); setTimeout(() => apply(true), 30);
@@ -246,7 +292,7 @@
             if (!w) { born = true; w = document.createElement('div'); w.className = 'xwm-w'; w.dataset.k = k; w.tabIndex = 0;
                 w.innerHTML = '<span class="i">' + esc(ico(CARDS[k])) + '</span><span class="n">' + esc(lab(CARDS[k])) + '</span><span class="z"></span><i class="xwm-h" title="Glisser pour redimensionner"></i>';
                 w.addEventListener('pointerdown', down); bd.appendChild(w); }
-            const b = L[k], s = S[k] || {}; w.querySelector('.z').textContent = b.w + ' × ' + b.h; w.classList.toggle('sel', k === sel);
+            const b = L[k], s = S[k] || {}; w.querySelector('.z').textContent = (LK[k] ? '🔒 ' : '') + b.w + ' × ' + b.h; w.classList.toggle('sel', k === sel); w.classList.toggle('lk', locked(k));
             w.dataset.s = s.s || 'std'; if (s.c) w.style.setProperty('--c', s.c); else w.style.removeProperty('--c');
             if (!w.classList.contains('drag')) setBox(w, box(G, b));
             if (born) try { w.animate([{ opacity: 0, transform: 'scale(.92)' }, { opacity: 1, transform: 'none' }], { duration: 220, easing: 'cubic-bezier(.2,.7,.2,1)' }); } catch (e) { }
@@ -254,7 +300,7 @@
     }
     // déplacer / redimensionner un bloc
     function down(e) {
-        if (e.button !== 0) return; const w = e.currentTarget, k = w.dataset.k, rs = !!e.target.closest('.xwm-h'), bd = $('.xwm-bd', ov), pv = $('.xwm-pv', ov), G = geo();
+        if (e.button !== 0) return; if (locked(e.currentTarget.dataset.k)) { select(e.currentTarget.dataset.k); return; } const w = e.currentTarget, k = w.dataset.k, rs = !!e.target.closest('.xwm-h'), bd = $('.xwm-bd', ov), pv = $('.xwm-pv', ov), G = geo();
         e.preventDefault(); w.setPointerCapture(e.pointerId); const b0 = Object.assign({}, L[k]), r0 = box(G, b0), x0 = e.clientX, y0 = e.clientY; let moved = false, tgt = b0;
         const mv = ev => { const dx = ev.clientX - x0, dy = ev.clientY - y0; if (!moved && Math.abs(dx) + Math.abs(dy) < 4) return;
             if (!moved) { moved = true; w.classList.add('drag'); pv.style.display = 'block'; }
@@ -270,8 +316,8 @@
         w.addEventListener('pointermove', mv); w.addEventListener('pointerup', up); w.addEventListener('pointercancel', up);
     }
     function select(k) { sel = k; drawBoard(); drawSide(); drawList(); const w = ov && $('.xwm-w[data-k="' + k + '"]', ov); if (w) try { w.focus({ preventScroll: true }); } catch (e) { } }
-    function set(k, nb) { if (!fits(L, k, nb.x, nb.y, nb.w, nb.h)) { const w = $('.xwm-w[data-k="' + k + '"]', ov); if (w) try { w.animate([{ transform: 'translateX(0)' }, { transform: 'translateX(-4px)' }, { transform: 'translateX(4px)' }, { transform: 'translateX(0)' }], { duration: 180 }); } catch (e) { } return false; } L[k] = nb; dirty = true; drawBoard(); drawSide(); return true; }
-    function remove(k) { delete L[k]; dirty = true; if (sel === k) sel = null; drawAll(); }
+    function set(k, nb) { if (locked(k) || !fits(L, k, nb.x, nb.y, nb.w, nb.h)) { const w = $('.xwm-w[data-k="' + k + '"]', ov); if (w) try { w.animate([{ transform: 'translateX(0)' }, { transform: 'translateX(-4px)' }, { transform: 'translateX(4px)' }, { transform: 'translateX(0)' }], { duration: 180 }); } catch (e) { } return false; } L[k] = nb; dirty = true; drawBoard(); drawSide(); return true; }
+    function remove(k) { if (locked(k)) return; delete L[k]; dirty = true; if (sel === k) sel = null; drawAll(); }
     function place(k, at) { const p = at && fits(L, k, at.x, at.y, 1, 1) ? at : free(L, 1, 1); L[k] = { x: p.x, y: p.y, w: 1, h: 1 }; dirty = true; sel = k; drawAll(); const g = $('.xwm-gr', ov), w = $('.xwm-w[data-k="' + k + '"]', ov); if (g && w) w.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }
     function key(e) {
         if (!ov) return; if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); close(); return; }
@@ -284,6 +330,7 @@
         if (!ov) return; const sd = $('.xwm-sd', ov), X = D(), CARDS = X.cards();
         if (!sel || !L[sel]) { sd.innerHTML = '<div class="xwm-empty"><i>👆</i>Cliquez un widget de la grille<br>pour afficher ses réglages.</div>'; return; }
         const k = sel, b = L[k], s = S[k] || {}, real = $('#xd-dash .xd-c[data-card="' + k + '"]'), gear = real && real.querySelector('.xd-gear');
+        if (locked(k)) { sd.innerHTML = '<h3><span style="font-size:22px">' + esc(ico(CARDS[k])) + '</span>' + esc(lab(CARDS[k])) + '</h3><div class="xwm-lkm">🔒 Widget imposé par le Master : sa place, sa taille et son style sont fixés pour l’équipe.</div>'; sd.onclick = null; return; }
         const seg = (name, vals, cur, okf) => '<div class="xwm-seg" data-f="' + name + '">' + vals.map(v => '<button type="button" data-v="' + v[0] + '"' + (String(v[0]) === String(cur) ? ' class="on"' : '') + (okf && !okf(v[0]) ? ' disabled' : '') + '>' + v[1] + '</button>').join('') + '</div>';
         const n = a => a.map(x => [x, String(x)]);
         sd.innerHTML = '<h3><span style="font-size:22px">' + esc(ico(CARDS[k])) + '</span>' + esc(lab(CARDS[k])) + '</h3>' +
@@ -296,6 +343,7 @@
             '<div><h5>Couleur</h5><div class="xwm-seg" data-f="c">' + COLORS.map(c => '<button type="button" class="xwm-col' + ((s.c || '') === c ? ' on' : '') + '" data-v="' + c + '" title="' + (c ? c : 'Couleur du thème') + '" style="background:' + (c || 'conic-gradient(#f0b378,#4fc3f7,#81c784,#f0b378)') + '"></button>').join('') + '</div></div>' +
             '<div class="xwm-row"><span>Afficher le titre</span><button type="button" class="xwm-sw' + (s.t === false ? '' : ' on') + '" data-f="t" aria-label="Afficher le titre"></button></div>' +
             (gear ? '<button type="button" class="xwm-btn" data-f="gear">⚙️ Réglages du contenu (Master)</button>' : '') +
+            (tgt !== 'me' ? '<div class="xwm-row"><span>🔒 Verrouiller pour l’équipe<small style="display:block;opacity:.6;font-size:11px">Le membre ne peut ni le déplacer ni le retirer</small></span><button type="button" class="xwm-sw' + (LK[k] ? ' on' : '') + '" data-f="lk" aria-label="Verrouiller"></button></div>' : '') +
             '<button type="button" class="xwm-del" data-f="del">Retirer de la grille</button>';
         if (real) { const pw = $('.xwm-pvw', sd), cl = real.cloneNode(true); cl.querySelectorAll('[id]').forEach(x => x.removeAttribute('id')); cl.style.cssText = ''; cl.style.width = real.offsetWidth + 'px';
             const sc = Math.min(1, (sd.clientWidth - 32) / (real.offsetWidth || 1)); cl.style.transform = 'scale(' + sc + ')'; pw.style.height = Math.min(170, real.offsetHeight * sc) + 'px';
@@ -309,6 +357,7 @@
             else if (f === 'c') { S[k] = Object.assign({}, s, { c: v }); if (!v) delete S[k].c; dirty = true; drawBoard(); drawSide(); }
             else if (f === 't') { S[k] = Object.assign({}, s, { t: s.t === false }); dirty = true; drawSide(); }
             else if (f === 'del') remove(k);
+            else if (f === 'lk') { if (LK[k]) delete LK[k]; else LK[k] = 1; dirty = true; drawBoard(); drawSide(); }
             else if (f === 'gear') { saveAll(); setTimeout(() => { const r2 = $('#xd-dash .xd-c[data-card="' + k + '"]'); if (r2) { r2.scrollIntoView({ block: 'center', behavior: 'smooth' }); setTimeout(() => D().pop(k, r2), 350); } }, 120); }
         };
     }
@@ -317,7 +366,7 @@
         if (!ov) return; const li = $('.xwm-li', ov), CARDS = D().cards();
         li.innerHTML = Object.keys(CARDS).map(k => '<div class="xwm-it' + (L[k] ? ' on' : '') + '" data-k="' + k + '" draggable="' + (L[k] ? 'false' : 'true') + '" title="' + (L[k] ? 'Déjà sur la grille : cliquez pour le régler' : 'Glissez sur la grille, ou ＋ pour la première place libre') + '"><span class="i">' + esc(ico(CARDS[k])) + '</span><span class="n">' + esc(lab(CARDS[k])) + '</span><button type="button" class="a" tabindex="-1">' + (L[k] ? '✓' : '＋') + '</button></div>').join('');
         li.querySelectorAll('.xwm-it').forEach(it => { const k = it.dataset.k;
-            it.onclick = () => { if (L[k]) select(k); else place(k); };
+            it.onclick = () => { if (L[k]) select(k); else place(k); }; if (locked(k)) it.title = 'Imposé par le Master';
             it.ondragstart = e => { e.dataTransfer.setData('text/xwm', k); e.dataTransfer.effectAllowed = 'copy'; };
         });
         const bd = $('.xwm-bd', ov), pv = $('.xwm-pv', ov);
