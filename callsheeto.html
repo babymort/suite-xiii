@@ -4544,7 +4544,7 @@ var XRED = (function () {
 
     const isView = viewing();
     const CFG = {
-        app: 'callsheeto', title: 'CALL SHEETO', version: 'v84',
+        app: 'callsheeto', title: 'CALL SHEETO', version: 'v85',
         theme: { get: () => prefs.theme === 'light' ? 'light' : 'dark', set: t => { if ((prefs.theme === 'light' ? 'light' : 'dark') !== t) toggleTheme(); } },
         hide: ['#toolbar button[onclick="toggleTheme()"]', '#toolbar button[onclick="openGuide()"]'],
         // fin de la feuille dégagée du ⚙️ et du badge Netlify quand on fait défiler jusqu'en bas
@@ -5742,6 +5742,7 @@ XWXS.init('callsheeto');
 <script src="lib/suite-density.js?v=4f4b5dc8e1"></script>
 <script src="lib/suite-trayopt.js?v=7ea261ada0"></script>
 <script src="lib/suite-tabman.js?v=def6ee12e7"></script>
+<script src="lib/suite-motion.js?v=a0217ddf48"></script>
 <!-- SUITE XIII:EXTRA:END -->
 </body>
 </html>
