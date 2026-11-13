@@ -2907,7 +2907,7 @@ var XRED = (function () {
 (function () {
     if (typeof XSET === 'undefined' || typeof MELANGO === 'undefined') return;
     XSET.init({
-        app: 'melango', title: 'MELANGO', version: 'v1.31',
+        app: 'melango', title: 'MELANGO', version: 'v1.32',
         theme: MELANGO.theme,
         help: [{ icon: '❓', label: 'Prise en main', sub: 'Entrées, bus, transitions, DDR, compositions, audio', run: MELANGO.help }, { icon: '⌨️', label: 'Raccourcis clavier', sub: 'Une touche pour chaque bouton du mélangeur', run: MELANGO.keys }],
         sections: [{ id: 'mel', icon: '🎛️', title: 'Mélangeur', desc: 'Le format de sortie, la durée des transitions et les entrées se règlent directement dans le mélangeur (Options, durée à côté d\'AUTO, onglet ENTRÉES).', fields: [] }],
@@ -3069,7 +3069,7 @@ var XPRS = window.XPRS || (() => {
 
 XPRS.init('melango');
 
-</script><script src="lib/core-04.js?v=1af0731c09"></script><script>// =====================================================================
+</script><script src="lib/core-04.js?v=1a69c21487"></script><script>// =====================================================================
 //  SUITE XIII — XFIT : la barre des outils tient sur une ligne
 //  Plutôt que de passer sur deux lignes, les boutons se resserrent par paliers (espaces, puis libellés,
 //  puis tailles) jusqu'à tout faire rentrer ; en dernier recours la barre défile horizontalement.
@@ -3081,8 +3081,11 @@ const XFIT = (() => {
     function fit() {
         if (busy) return; busy = true;
         rows().forEach(r => {
-            r.classList.add('xfit'); for (let i = 1; i <= L; i++) r.classList.remove('xfit' + i);
-            for (let i = 1; i <= L && over(r); i++) r.classList.add('xfit' + i);
+            // rien n'a changé (largeur, nombre de boutons visibles, texte) : on ne retouche pas la barre (évitait 6 remesures par seconde)
+            const sig = r.clientWidth + '|' + [...r.querySelectorAll('button,select,input')].filter(x => x.offsetWidth).length + '|' + (r.textContent || '').length;
+            if (r.__xfs === sig && r.classList.contains('xfit')) return; r.__xfs = sig;
+            r.classList.add('xfit'); const lv0 = [1, 2, 3, 4, 5].filter(i => r.classList.contains('xfit' + i)).length; for (let i = 1; i <= L; i++) r.classList.remove('xfit' + i);
+            let lv = 0; for (let i = 1; i <= L && over(r); i++) { r.classList.add('xfit' + i); lv = i; }
         });
         busy = false;
     }
@@ -3708,15 +3711,15 @@ XVIT.init();
 <script src="lib/suite-zzbar.js?v=409fbb531d"></script>
 <script src="lib/suite-a11y2.js?v=6876dd0406"></script>
 <script src="lib/suite-sobre.js?v=21dc837de1"></script>
-<script src="lib/suite-ident.js?v=360116005c"></script>
-<script src="lib/suite-topbar.js?v=cb9cc1c895"></script>
+<script src="lib/suite-ident.js?v=f1f4fc2bce"></script>
+<script src="lib/suite-topbar.js?v=74f3e00099"></script>
 <script src="lib/suite-sectors.js?v=9302270cde"></script>
 <script src="lib/suite-focus.js?v=4c5df42ea0"></script>
 <script src="lib/suite-keys.js?v=f5024fc78d"></script>
 <script src="lib/suite-ctx.js?v=98b9b65103"></script>
 <script src="lib/suite-empty.js?v=dc3fbb36b9"></script>
 <script src="lib/suite-dock.js?v=253bb1bb47"></script>
-<script src="lib/suite-libtab.js?v=9ee07aff09"></script>
+<script src="lib/suite-libtab.js?v=51bc9e105a"></script>
 <script src="lib/suite-type.js?v=c58a339c69"></script>
 <script src="lib/suite-density.js?v=4f4b5dc8e1"></script>
 <script src="lib/suite-trayopt.js?v=7ea261ada0"></script>
