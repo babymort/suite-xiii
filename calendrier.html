@@ -1328,7 +1328,7 @@ var XRED = (function () {
 // CALENDRIER XIII — ⚙️ Paramètres
 (function () {
     if (typeof XSET === 'undefined' || typeof events !== 'function') return;
-    XSET.init({ app: 'calendrier', title: 'CALENDRIER', version: 'v1.51', theme: { get: () => prefs.theme, set: t => { prefs.theme = t; applyTheme(); savePrefs(); } },
+    XSET.init({ app: 'calendrier', title: 'CALENDRIER', version: 'v1.52', theme: { get: () => prefs.theme, set: t => { prefs.theme = t; applyTheme(); savePrefs(); } },
         help: [{ icon: '🗓️', label: 'Comment ça marche ?', sub: 'Toutes les dates, export .ics', run: () => alert('CALENDRIER XIII rassemble les dates de tous les outils : tâches PLANNO, journées de tournage CALL SHEETO, directs CONDUCO, repérages REPERO, réservations et révisions MATOS, factures et échéances DEVISO, versions et livraisons POSTO, contrats et expirations de droits RESSOURCO, dates limites de candidature DOSSIER. Export .ics pour votre agenda. Raccourcis : 1 mois, 2 liste, ← →.') }],
         sections: [], apply() { } });
 })();
@@ -1702,7 +1702,7 @@ const XDASH = (() => {
         css(); const go = () => { render(); setTimeout(render, 1500); setInterval(() => { if (document.getElementById('xd-team')) team(); }, 60000); setInterval(() => document.querySelectorAll('.xd-clk b[data-tz]').forEach(b => b.textContent = new Date().toLocaleTimeString('fr-FR', { timeZone: b.dataset.tz, hour: '2-digit', minute: '2-digit' })), 20000); addEventListener('xiii-pcfg', render); addEventListener('storage', e => { if (/^(xiii\.|plannoXIII|postoXIII)/.test(e.key || '')) render(); }); };
         XBOOT.ready(go, 900);
     }
-    return { init, render, zone: () => !!conf().zone, setZone: v => save(C => { C.zone = !!v; }), master: () => isMaster(), cards: () => Object.assign({}, CARDS), me, setMe, pop, conf };
+    return { init, render, zone: () => !!conf().zone, setZone: v => save(C => { C.zone = !!v; }), master: () => isMaster(), cards: () => Object.assign({}, CARDS), me, setMe, pop, conf, save };
 })();
 
 XDASH.init('calendrier');

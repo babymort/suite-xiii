@@ -4174,7 +4174,7 @@ var XRED = (function () {
     }
     const DEF_LAYERS = ['sun', 'noise', 'health', 'shops', 'air', 'drone', 'rights'];
     XSET.init({
-        app: 'repero', title: 'REPERO', version: 'v3.60',
+        app: 'repero', title: 'REPERO', version: 'v3.61',
         theme: { get: () => prefs.theme === 'light' ? 'light' : 'dark', set: t => { if ((prefs.theme === 'light' ? 'light' : 'dark') !== t) toggleTheme(); } },
         hide: ['#toolbar button[onclick="toggleTheme()"]', '#toolbar button[onclick="openGuide()"]'],
         help: [{ icon: '📖', label: 'Guide d\'utilisation', sub: 'Ajouter un lieu, analyse des alentours, fiche, comparaison, rapport', run: openGuide }],
@@ -4677,7 +4677,7 @@ const XDASH = (() => {
         css(); const go = () => { render(); setTimeout(render, 1500); setInterval(() => { if (document.getElementById('xd-team')) team(); }, 60000); setInterval(() => document.querySelectorAll('.xd-clk b[data-tz]').forEach(b => b.textContent = new Date().toLocaleTimeString('fr-FR', { timeZone: b.dataset.tz, hour: '2-digit', minute: '2-digit' })), 20000); addEventListener('xiii-pcfg', render); addEventListener('storage', e => { if (/^(xiii\.|plannoXIII|postoXIII)/.test(e.key || '')) render(); }); };
         XBOOT.ready(go, 900);
     }
-    return { init, render, zone: () => !!conf().zone, setZone: v => save(C => { C.zone = !!v; }), master: () => isMaster(), cards: () => Object.assign({}, CARDS), me, setMe, pop, conf };
+    return { init, render, zone: () => !!conf().zone, setZone: v => save(C => { C.zone = !!v; }), master: () => isMaster(), cards: () => Object.assign({}, CARDS), me, setMe, pop, conf, save };
 })();
 
 XDASH.init('repero');

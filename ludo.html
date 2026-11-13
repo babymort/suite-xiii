@@ -4552,7 +4552,7 @@ var XRED = (function () {
         askConfirm('Effacer tous les records de ce navigateur&nbsp;?', () => { records = {}; Store.set(KEY_REC, records); renderLib(); updateStats(); toast('🧹 Records effacés'); });
     }
     XSET.init({
-        app: 'ludo', title: 'LUDO', version: 'v49',
+        app: 'ludo', title: 'LUDO', version: 'v50',
         // horloges « Fin de pause / Heure » : en colonne, à gauche du ⚙️, au-dessus du badge Netlify
         css: '#zoom-controls{right:72px;bottom:80px;flex-direction:column;align-items:flex-end;gap:6px;padding:30px 0 0 40px}#zoom-controls::before{display:none}#zoom-controls .clock{margin-right:0;text-align:right}',
         theme: { get: () => prefs.theme === 'light' ? 'light' : 'dark', set: t => { prefs.theme = t === 'light' ? 'light' : 'dark'; applyTheme(); savePrefs(); } },
@@ -4981,7 +4981,7 @@ const XDASH = (() => {
         css(); const go = () => { render(); setTimeout(render, 1500); setInterval(() => { if (document.getElementById('xd-team')) team(); }, 60000); setInterval(() => document.querySelectorAll('.xd-clk b[data-tz]').forEach(b => b.textContent = new Date().toLocaleTimeString('fr-FR', { timeZone: b.dataset.tz, hour: '2-digit', minute: '2-digit' })), 20000); addEventListener('xiii-pcfg', render); addEventListener('storage', e => { if (/^(xiii\.|plannoXIII|postoXIII)/.test(e.key || '')) render(); }); };
         XBOOT.ready(go, 900);
     }
-    return { init, render, zone: () => !!conf().zone, setZone: v => save(C => { C.zone = !!v; }), master: () => isMaster(), cards: () => Object.assign({}, CARDS), me, setMe, pop, conf };
+    return { init, render, zone: () => !!conf().zone, setZone: v => save(C => { C.zone = !!v; }), master: () => isMaster(), cards: () => Object.assign({}, CARDS), me, setMe, pop, conf, save };
 })();
 
 XDASH.init('ludo');

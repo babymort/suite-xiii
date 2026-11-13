@@ -3555,7 +3555,7 @@ var XRED = (function () {
 (function () {
     if (typeof XSET === 'undefined' || typeof STATES === 'undefined') return;
     XSET.init({
-        app: 'matos', title: 'MATOS', version: 'v1.56',
+        app: 'matos', title: 'MATOS', version: 'v1.57',
         theme: { get: () => prefs.theme, set: t => { prefs.theme = t; applyTheme(); savePrefs(); } },
         help: [{ icon: '📦', label: 'Comment ça marche ?', sub: 'Parc, réservations, conflits, sorties / retours, étiquettes QR', run: () => modal('<h3>📦 MATOS XIII<span class="close-x" onclick="closeModal()">✕</span></h3><p><b>1. Parc</b> : ajoutez vos équipements depuis le 🗃️ catalogue commun (ou à la main) avec leurs numéros de série. Chaque unité reçoit un code MAT-0001 et une 🏷️ étiquette QR à imprimer.</p><p><b>2. Réservations</b> : projet, dates, option ou ferme. MATOS signale les conflits : unité déjà réservée, en panne, en révision. Envoyez la liste vers 🧳 PACKINGO ou 💶 DEVISO.</p><p><b>3. Planning</b> : occupation de chaque unité sur 5 semaines.</p><p><b>4. Sorties / retours</b> : scannez le QR (caméra du téléphone) ou le code (douchette) : une unité au dépôt sort, une unité sortie revient, avec son état.</p><p>Raccourcis : 1 à 4 pour les vues, Ctrl+S.</p><div class="mb-actions"><button onclick="closeModal()">Compris</button></div>') }, { icon: '📐', label: 'Charger l\'exemple', run: loadExample }],
         sections: [{ id: 'mt', icon: '📦', title: 'Parc', open: true, fields: [{ k: 'view', label: 'Vue à l\'ouverture', type: 'select', def: 'parc', options: [['parc', 'Parc'], ['resa', 'Réservations'], ['plan', 'Planning'], ['scan', 'Sorties / retours']] }, { k: 'loc', label: 'Dépôt par défaut', type: 'text', def: '' }] }],
@@ -4004,7 +4004,7 @@ const XDASH = (() => {
         css(); const go = () => { render(); setTimeout(render, 1500); setInterval(() => { if (document.getElementById('xd-team')) team(); }, 60000); setInterval(() => document.querySelectorAll('.xd-clk b[data-tz]').forEach(b => b.textContent = new Date().toLocaleTimeString('fr-FR', { timeZone: b.dataset.tz, hour: '2-digit', minute: '2-digit' })), 20000); addEventListener('xiii-pcfg', render); addEventListener('storage', e => { if (/^(xiii\.|plannoXIII|postoXIII)/.test(e.key || '')) render(); }); };
         XBOOT.ready(go, 900);
     }
-    return { init, render, zone: () => !!conf().zone, setZone: v => save(C => { C.zone = !!v; }), master: () => isMaster(), cards: () => Object.assign({}, CARDS), me, setMe, pop, conf };
+    return { init, render, zone: () => !!conf().zone, setZone: v => save(C => { C.zone = !!v; }), master: () => isMaster(), cards: () => Object.assign({}, CARDS), me, setMe, pop, conf, save };
 })();
 
 XDASH.init('matos');
