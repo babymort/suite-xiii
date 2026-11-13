@@ -7367,7 +7367,7 @@ const XDASH = (() => {
     }
     function init(app) {
         if (app !== 'index') { if (NM[app]) { const R = J(KR, {}); R[app] = Date.now(); try { localStorage.setItem(KR, JSON.stringify(R)); } catch (e) { } } return; }
-        css(); const go = () => { render(); setTimeout(render, 1500); setInterval(() => { if (document.getElementById('xd-team')) team(); }, 60000); setInterval(() => document.querySelectorAll('.xd-clk b[data-tz]').forEach(b => b.textContent = new Date().toLocaleTimeString('fr-FR', { timeZone: b.dataset.tz, hour: '2-digit', minute: '2-digit' })), 20000); addEventListener('xiii-pcfg', render); addEventListener('storage', e => { if (/^(xiii\.|plannoXIII|postoXIII)/.test(e.key || '')) render(); }); };
+        css(); const go = () => { render(); setTimeout(render, 1500); setInterval(() => { if (document.getElementById('xd-team')) team(); }, 60000); setInterval(() => document.querySelectorAll('.xd-clk b[data-tz]').forEach(b => b.textContent = new Date().toLocaleTimeString('fr-FR', { timeZone: b.dataset.tz, hour: '2-digit', minute: '2-digit' })), 20000); addEventListener('xiii-pcfg', render); addEventListener('storage', e => { if (/^(xiii\.|plannoXIII|postoXIII)/.test(e.key || '') && !/^xiii\.(drive\.|dash\.|ctx\.|mod\.|pmod|ws|link|calw|wx5|home\.|anim\.|ui\.|tour|pins|alive|beat|net|focus|ux\.|recent|first|m\.)/.test(e.key || '')) render(); }); /* pas les états passagers (connexion Drive, présence, onglet…) : ils redessinaient l'accueil toutes les 2 s */ };
         XBOOT.ready(go, 900);
     }
     return { init, render, zone: () => !!conf().zone, setZone: v => save(C => { C.zone = !!v; }), master: () => isMaster(), cards: () => Object.assign({}, CARDS), me, setMe, pop, conf, save };
@@ -10398,12 +10398,12 @@ XVIT.init();
 <script src="lib/suite-ctx.js?v=98b9b65103"></script>
 <script src="lib/suite-empty.js?v=dc3fbb36b9"></script>
 <script src="lib/suite-dock.js?v=253bb1bb47"></script>
-<script src="lib/suite-libtab.js?v=51bc9e105a"></script>
+<script src="lib/suite-libtab.js?v=93b6932f63"></script>
 <script src="lib/suite-type.js?v=c58a339c69"></script>
 <script src="lib/suite-density.js?v=4f4b5dc8e1"></script>
 <script src="lib/suite-trayopt.js?v=7ea261ada0"></script>
 <script src="lib/suite-tabman.js?v=def6ee12e7"></script>
-<script src="lib/suite-motion.js?v=a0217ddf48"></script>
+<script src="lib/suite-motion.js?v=08ee5e08bd"></script>
 <!-- SUITE XIII:EXTRA:END -->
 </body>
 </html>
