@@ -1,0 +1,1 @@
+[["postes: '📊 Coûts par poste',", "cal: '🗓️ Calendrier du mois', postes: '📊 Coûts par poste',", 1], ["const NEWW = ['postes',", "const NEWW = ['cal', 'postes',", 1], ["        if (k === 'postes') {", "        if (k === 'cal') return W(typeof XCALW !== 'undefined' ? XCALW.html() : '<p class=\"xd-e\">Chargement…</p>', 'xd-calc');\n        if (k === 'postes') {", 1]]

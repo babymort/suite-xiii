@@ -1,0 +1,17 @@
+const {chromium}=require('playwright');(async()=>{const b=await chromium.launch();const pg=await b.newPage({viewport:{width:1600,height:1000}});
+pg.on('pageerror',e=>console.log('ERR',e.message));
+await pg.goto('http://localhost:8765/index.html');await pg.waitForTimeout(2500);
+await pg.evaluate(()=>{const t=new Date(),d=n=>{const x=new Date(t);x.setDate(t.getDate()+n);return x.toISOString().slice(0,10)};
+ localStorage.setItem('callsheetoXIII.project',JSON.stringify({name:'Le Phare',days:[{id:'a',name:'J1',date:d(3),crew:[{},{}],times:{general:'07:30'}},{id:'b',name:'J2',date:d(4),crew:[{}]}]}));
+ localStorage.setItem('plannoXIII.project',JSON.stringify({tasks:[{name:'Prépa déco',start:d(-2),end:d(2),phase:'Prépa'},{name:'Livraison',start:d(12),end:d(12),ms:1}]}));
+ localStorage.setItem('xiii.dash.me',JSON.stringify({order:['cal','proj'],off:[],lay:{cal:{x:0,y:0,w:1,h:3}}}));});
+await pg.reload();await pg.waitForTimeout(7000);
+const F=pg.frames().find(f=>/index\.html/.test(f.url())&&f!==pg.mainFrame())||pg.mainFrame();
+await F.evaluate(()=>{document.querySelectorAll('.modal-overlay,#xnw-ov').forEach(m=>m.remove())});
+console.log('rendu:',await F.evaluate(()=>{const c=document.querySelector('#xd-dash .xd-c[data-card=cal]');return c?c.querySelectorAll('.xcw-g button').length+' jours, '+c.querySelectorAll('.xcw-g button.has').length+' avec événement, aujourd\'hui='+!!c.querySelector('button.td'):'absent'}));
+const d3=await F.evaluate(()=>{const t=new Date();t.setDate(t.getDate()+3);return t.toISOString().slice(0,10)});
+await F.click('#xd-dash [data-cald="'+d3+'"]');await pg.waitForTimeout(300);
+console.log('jour cliqué:',await F.evaluate(()=>[...document.querySelectorAll('#xd-dash .xcw-l a')].map(a=>a.textContent).join(' | ')));
+const el=await F.$('#xd-dash .xd-c[data-card=cal]');await el.screenshot({path:'/tmp/zz/cal1.png'});
+await F.click('#xd-dash [data-calnav="1"]');await pg.waitForTimeout(300);console.log('mois suivant:',await F.evaluate(()=>document.querySelector('#xd-dash .xcw-h b').textContent));
+await b.close()})();
