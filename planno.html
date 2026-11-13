@@ -2080,7 +2080,7 @@ var XRED = (function () {
     if (typeof XSET === 'undefined' || typeof prefs === 'undefined' || typeof ZW === 'undefined') return;
     function apply(S) { if (S.zoom != null) { prefs.zoom = +S.zoom; } try { render(); } catch (e) { } }
     XSET.init({
-        app: 'planno', title: 'PLANNO', version: 'v1.45',
+        app: 'planno', title: 'PLANNO', version: 'v1.46',
         sections: [{ id: 'aff', icon: '📊', title: 'Frise', open: true, desc: 'Échelle par défaut de la frise (modifiable avec − / +).',
             fields: [{ k: 'zoom', label: 'Échelle', type: 'select', def: 2, options: [[0, 'Trimestre'], [1, 'Mois'], [2, 'Semaines'], [3, 'Jours'], [4, 'Jours (large)']] }] }],
         apply
@@ -2867,7 +2867,7 @@ XVIT.init();
 <script src="lib/suite-trad.js?v=4496a32b35"></script>
 <script src="lib/suite-mcp.js?v=cea3304e0f"></script>
 <script src="lib/suite-zzbar.js?v=409fbb531d"></script>
-<script src="lib/suite-a11y2.js?v=06b1aa6f24"></script>
+<script src="lib/suite-a11y2.js?v=6876dd0406"></script>
 <script src="lib/suite-sobre.js?v=21dc837de1"></script>
 <script src="lib/suite-ident.js?v=360116005c"></script>
 <script src="lib/suite-topbar.js?v=cb9cc1c895"></script>

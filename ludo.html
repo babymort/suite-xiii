@@ -4552,7 +4552,7 @@ var XRED = (function () {
         askConfirm('Effacer tous les records de ce navigateur&nbsp;?', () => { records = {}; Store.set(KEY_REC, records); renderLib(); updateStats(); toast('🧹 Records effacés'); });
     }
     XSET.init({
-        app: 'ludo', title: 'LUDO', version: 'v44',
+        app: 'ludo', title: 'LUDO', version: 'v45',
         // horloges « Fin de pause / Heure » : en colonne, à gauche du ⚙️, au-dessus du badge Netlify
         css: '#zoom-controls{right:72px;bottom:80px;flex-direction:column;align-items:flex-end;gap:6px;padding:30px 0 0 40px}#zoom-controls::before{display:none}#zoom-controls .clock{margin-right:0;text-align:right}',
         theme: { get: () => prefs.theme === 'light' ? 'light' : 'dark', set: t => { prefs.theme = t === 'light' ? 'light' : 'dark'; applyTheme(); savePrefs(); } },
@@ -5320,7 +5320,7 @@ XVIT.init();
 <script src="lib/suite-trad.js?v=4496a32b35"></script>
 <script src="lib/suite-mcp.js?v=cea3304e0f"></script>
 <script src="lib/suite-zzbar.js?v=409fbb531d"></script>
-<script src="lib/suite-a11y2.js?v=06b1aa6f24"></script>
+<script src="lib/suite-a11y2.js?v=6876dd0406"></script>
 <script src="lib/suite-sobre.js?v=21dc837de1"></script>
 <script src="lib/suite-ident.js?v=360116005c"></script>
 <script src="lib/suite-topbar.js?v=cb9cc1c895"></script>

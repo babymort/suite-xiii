@@ -3301,7 +3301,7 @@ var XRED = (function () {
     const _bs = scBlankShot;
     scBlankShot = function (P0, day, from) { const s = _bs(P0, day, from); const st = XSET.val('sonDef'); if (!from && !P0.shots.length && st) s.sonTags = String(st).split(/[;,]/).map(x => x.trim()).filter(Boolean); return s; };
     XSET.init({
-        app: 'scripto', title: 'SCRIPTO', version: 'v1.49',
+        app: 'scripto', title: 'SCRIPTO', version: 'v1.50',
         theme: { get: () => prefs.theme === 'light' ? 'light' : 'dark', set: t => { if ((prefs.theme === 'light' ? 'light' : 'dark') !== t) toggleTheme(); } },
         hide: ['#toolbar button[onclick="toggleTheme()"]', '#toolbar button[onclick="openGuide()"]'],
         help: [{ icon: '📖', label: 'Guide d\'utilisation', sub: 'Journées, plans, prises, raccords, tablette, rapports', run: openGuide }],
@@ -4147,7 +4147,7 @@ XSC2PO.init();
 <script src="lib/suite-trad.js?v=4496a32b35"></script>
 <script src="lib/suite-mcp.js?v=cea3304e0f"></script>
 <script src="lib/suite-zzbar.js?v=409fbb531d"></script>
-<script src="lib/suite-a11y2.js?v=06b1aa6f24"></script>
+<script src="lib/suite-a11y2.js?v=6876dd0406"></script>
 <script src="lib/suite-sobre.js?v=21dc837de1"></script>
 <script src="lib/suite-ident.js?v=360116005c"></script>
 <script src="lib/suite-topbar.js?v=cb9cc1c895"></script>
