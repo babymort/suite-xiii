@@ -1,0 +1,10 @@
+const {chromium}=require('playwright');(async()=>{const b=await chromium.launch();const pg=await b.newPage({viewport:{width:1280,height:800}});
+await pg.addInitScript(()=>{localStorage.setItem('xiii.tour2.conduco.hide','1')});
+await pg.goto('http://localhost:8765/conduco.html');await pg.waitForTimeout(4500);
+await pg.evaluate(()=>{addTab();P.tabs.forEach((t,i)=>t.name='C'+(i+1));renderTabs();});await pg.waitForTimeout(2000);
+const shots=async(name,act,times)=>{await act();let t0=Date.now();for(const t of times){const w=t-(Date.now()-t0);if(w>0)await pg.waitForTimeout(w);await pg.screenshot({path:`/tmp/zz/f_${name}_${t}.png`});}};
+await shots('set',()=>pg.click('#xs-gear'),[0,60,120,200,320]);await pg.keyboard.press('Escape');await pg.waitForTimeout(500);
+await shots('exp',()=>pg.click('#xtop-exp'),[0,50,100,180]);await pg.keyboard.press('Escape');await pg.evaluate(()=>{const m=document.querySelector('#xb-menu');if(m)m.remove()});await pg.waitForTimeout(400);
+await shots('lib',()=>pg.click('#xlib-tab'),[0,80,160,260,400]);await pg.waitForTimeout(400);
+await shots('tab',()=>pg.locator('#tabs-container .tab .tab-title').first().click(),[0,60,120,200]);
+await b.close()})();

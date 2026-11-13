@@ -1,0 +1,11 @@
+const {chromium}=require('playwright');(async()=>{const b=await chromium.launch();const pg=await b.newPage({viewport:{width:1500,height:950}});
+await pg.goto('http://localhost:8765/index.html');await pg.waitForTimeout(2500);
+await pg.evaluate(()=>{localStorage.setItem('devisoXIII.summary',JSON.stringify({ht:20000,crew:11000,eq:6000,fees:2000}));localStorage.setItem('xiii.dash.me',JSON.stringify({order:['postes','budget','proj','check','fav'],off:[]}));});
+await pg.reload();await pg.waitForTimeout(7000);
+const F=pg.frames().find(f=>/index\.html/.test(f.url())&&f!==pg.mainFrame())||pg.mainFrame();
+console.log(await F.evaluate(()=>new Promise(r=>{const L=[];const r0=XDASH.render;let n=0;
+ const sp=Storage.prototype.setItem;Storage.prototype.setItem=function(k,v){if(this===localStorage&&!/^xiii\.dash\.hist/.test(k))L.push('setItem '+k+' @ '+new Error().stack.split('\n')[2].trim().slice(0,90));return sp.apply(this,arguments)};
+ const g=document.getElementById('xd-dash');new MutationObserver(ms=>{if(ms.some(m=>m.target===g))n++}).observe(g,{childList:true});
+ addEventListener('storage',e=>L.push('storage '+e.key));
+ setTimeout(()=>r('redessins en 6 s : '+n+'\n'+[...new Set(L)].slice(0,10).join('\n')),6000)})));
+await b.close()})();

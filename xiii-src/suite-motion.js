@@ -19,7 +19,7 @@
         '#top-bar button:active:not(:disabled),#toolbar button:active:not(:disabled){transform:translateY(1px)}' +
         'input:not([type=range]):not([type=checkbox]):not([type=radio]),select,textarea{transition:border-color .15s ease,box-shadow .15s ease,background-color .15s ease}' +
         '.xs-sw span,.xs-sw span::before,.xs-sw span::after{transition:background-color .18s ease,transform .2s ' + EASE + '}' +
-        '#library-panel{transition:width .24s ' + EASE + ',min-width .24s ' + EASE + ',flex-basis .24s ' + EASE + ',opacity .2s ease}' +
+        
         'details>summary{transition:color .15s}details[open]>*:not(summary){animation:xmoIn .2s ' + EASE + '}' +
         '}@keyframes xmoIn{from{opacity:0;transform:translateY(-3px)}}' +
         'html.xreduce #top-bar button:active,html.xreduce #toolbar button:active{transform:none}';
@@ -56,6 +56,10 @@
             const ml = document.getElementById('main-layout'); if (!ml) return; [...ml.children].filter(c => c.id !== 'library-panel' && !SKIP.test(c.id || '') && vis(c)).forEach(c => { try { c.animate([{ opacity: .35 }, { opacity: 1 }], { duration: 180, easing: 'ease-out' }); } catch (e) { } }); })
             .observe(tc, { subtree: true, attributes: true, attributeFilter: ['class'], childList: true }); }
     }
-    if (document.body) start(); else addEventListener('DOMContentLoaded', start);
+    // volet bibliothèque : glisse à sa taille finale (une transition de largeur écrasait son contenu pendant l'ouverture)
+    function libWatch() { let was = document.body.classList.contains('lib-hidden');
+        new MutationObserver(() => { const h = document.body.classList.contains('lib-hidden'); if (h === was) return; was = h; if (h || off() || !armed) return; const p = document.getElementById('library-panel'); if (!p) return;
+            try { p.animate([{ opacity: 0, transform: 'translateX(-14px)' }, { opacity: 1, transform: 'none' }], { duration: 200, easing: EASE }); } catch (e) { } }).observe(document.body, { attributes: true, attributeFilter: ['class'] }); }
+    if (document.body) { start(); libWatch(); } else addEventListener('DOMContentLoaded', () => { start(); libWatch(); });
     window.XMOTION = { enter };
 })();
