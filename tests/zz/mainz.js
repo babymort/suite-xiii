@@ -1,0 +1,4 @@
+const {chromium}=require('playwright');(async()=>{const b=await chromium.launch();
+for(const app of process.argv.slice(2)){const pg=await b.newPage({viewport:{width:1440,height:900}});await pg.addInitScript(a=>{try{localStorage.setItem('xiii.tour2.'+a+'.hide','1')}catch(e){}},app);
+try{await pg.goto('http://localhost:8765/'+app+'.html');await pg.waitForTimeout(3000);}catch(e){continue}
+console.log(app.padEnd(12),await pg.evaluate(()=>{const tb=document.getElementById('toolbar');const cands=[...document.querySelectorAll('body *')].filter(e=>{const r=e.getBoundingClientRect();const cs=getComputedStyle(e);return r.width>innerWidth*.5&&r.height>innerHeight*.45&&r.top>60&&cs.position!=='fixed'&&e.id!=='library-panel'});const top=cands.filter(e=>!cands.some(o=>o!==e&&o.contains(e)));return top.slice(0,3).map(e=>(e.id?'#'+e.id:e.tagName.toLowerCase()+'.'+String(e.className).split(' ')[0])).join(' , ')}));await pg.close()}await b.close()})();
