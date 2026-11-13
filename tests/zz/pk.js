@@ -1,10 +1,14 @@
-const { chromium } = require('playwright'); const L = process.argv.slice(2).map(x => x.split('>'));
-(async () => { const b = await chromium.launch(); const ctx = await b.newContext({ viewport: { width: 1440, height: 900 } }); await ctx.route('**/*', r => r.request().url().startsWith('http://localhost') ? r.continue() : r.abort());
-  await ctx.addInitScript(() => { try { localStorage.setItem('xiii.tips.off', 'true'); } catch (e) { } window.open = u => { window.__op = (window.__op || []).concat([String(u)]); return null; }; });
-  for (const [f, t] of L) { const pg = await ctx.newPage(); const E = []; pg.on('pageerror', e => E.push(e.message)); pg.on('dialog', d => { E.push('dlg ' + d.message().slice(0, 100)); d.accept(); });
-    await pg.goto('http://localhost:8766/' + f + '.html?desktop=1'); await pg.waitForTimeout(2300); await pg.evaluate(async p => { try { await XMODELS.apply(p, 'fiction', false); } catch (e) { } }, f); await pg.reload(); await pg.waitForTimeout(2500);
-    await pg.evaluate(t => { document.querySelectorAll('#xt-root,#xtp').forEach(m => m.remove()); XGATE.go(t); }, t); await pg.waitForTimeout(900);
-    const st = await pg.evaluate(() => [...document.querySelectorAll('label')].filter(l => l.offsetParent && l.querySelector('input[type=checkbox]')).map(l => (l.querySelector('input').checked ? '☑' : '☐') + l.textContent.trim().slice(0, 18)).join(' | '));
-    let nav = ''; try { await pg.waitForTimeout(800); nav = pg.url(); } catch (e) { }
-    console.log(f + '>' + t, '|', st.slice(0, 200), '|', nav.split('/').pop(), E.join(';')); await pg.close(); }
-  await b.close(); })();
+const {chromium}=require('playwright');(async()=>{const b=await chromium.launch();const pg=await b.newPage({viewport:{width:1440,height:900}});
+await pg.addInitScript(()=>{try{localStorage.setItem('xiii.tour2.packingo.hide','1')}catch(e){}});
+await pg.goto('http://localhost:8765/packingo.html');await pg.waitForTimeout(4000);
+console.log(await pg.evaluate(()=>{const c=document.getElementById('tabs-container');return [...c.children].map(x=>x.tagName+'.'+x.className).join(' , ')+' || parent '+c.parentElement.id}));
+const tb=await pg.locator('#tabs-container .tab').first().boundingBox();
+console.log(await pg.evaluate(([x,y])=>{const e=document.elementFromPoint(x,y);let p=e,c=[];while(p&&c.length<5){c.push(p.id||p.tagName+'.'+p.className);p=p.parentElement}return c.join(' < ')},[tb.x+10,tb.y+tb.height/2]));
+await b.close()})();
+;(async()=>{const {chromium}=require('playwright');const b=await chromium.launch();const pg=await b.newPage({viewport:{width:1440,height:900}});
+pg.on('pageerror',e=>console.log(' ERR',e.message));
+await pg.addInitScript(()=>{try{localStorage.setItem('xiii.tour2.packingo.hide','1')}catch(e){}});
+await pg.goto('http://localhost:8765/packingo.html');await pg.waitForTimeout(4000);
+const tb=await pg.locator('#tabs-container .tab').first().boundingBox();await pg.mouse.click(tb.x+10,tb.y+tb.height/2,{button:'right'});await pg.waitForTimeout(500);
+console.log('xtm:',await pg.evaluate(()=>!!document.getElementById('xtm')), 'XTABMAN:',await pg.evaluate(()=>typeof XTABMAN), await pg.evaluate(()=>[...document.body.children].filter(e=>getComputedStyle(e).position==='fixed'&&e.offsetWidth>200&&getComputedStyle(e).display!=='none').map(e=>e.id||e.className).join(',')));
+await b.close()})();

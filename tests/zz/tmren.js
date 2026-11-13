@@ -1,0 +1,12 @@
+const {chromium}=require('playwright');(async()=>{const b=await chromium.launch();
+for(const app of ['conduco','deviso','scripto','syno']){const pg=await b.newPage({viewport:{width:1440,height:900}});
+await pg.addInitScript(a=>{try{localStorage.setItem('xiii.tour2.'+a+'.hide','1')}catch(e){}},app);
+await pg.goto('http://localhost:8765/'+app+'.html');await pg.waitForTimeout(4000);
+await pg.evaluate(()=>{const m=document.getElementById('modal');if(m&&/Guide/.test(m.textContent))m.style.display='none'});
+await pg.evaluate(()=>XTABMAN.open());await pg.waitForTimeout(400);
+await pg.evaluate(()=>{const r=document.querySelector('#xtm [data-k=ren]');r&&r.click()});await pg.waitForTimeout(600);
+const res=await pg.evaluate(()=>{const inp=[...document.querySelectorAll('input[type=text],input:not([type]),textarea')].filter(i=>i.offsetParent&&!i.closest('#xtm')&&i.getBoundingClientRect().top>100).pop();if(!inp)return 'pas de champ';const r=inp.getBoundingClientRect();const e=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);return (e.closest('#xtm')?'CACHÉ par #xtm':'champ visible ✓')+' (xtm opacity '+document.getElementById('xtm').style.opacity+')'});
+console.log(app,res);
+await pg.keyboard.press('Control+A');await pg.keyboard.type('Renommé');await pg.keyboard.press('Enter');await pg.waitForTimeout(900);
+console.log('   tuile:',await pg.evaluate(()=>{const t=document.querySelector('#xtm .xtm-nm');const o=document.getElementById('xtm');return t?t.textContent+' | page revenue: '+(o.style.opacity===''):'(fenêtre fermée)'}));
+await pg.close()}await b.close()})();
