@@ -1,0 +1,11 @@
+const {chromium}=require('playwright');(async()=>{const b=await chromium.launch();const pg=await b.newPage({viewport:{width:1500,height:950}});
+await pg.goto('http://localhost:8765/index.html');await pg.waitForTimeout(2500);
+await pg.evaluate(()=>{const n=Date.now(),R={};['planno','plano','dossier','packingo','repero','syno'].forEach((a,i)=>R[a]=n-i*1000);
+ const ks=['xiii.recent','xiii.dash.recent'];for(const k of Object.keys(localStorage))if(/recent/i.test(k))ks.push(k);ks.forEach(k=>localStorage.setItem(k,JSON.stringify(R)));
+ localStorage.setItem('xiii.dash.me',JSON.stringify({order:['fav','proj'],off:[],lay:{fav:{x:0,y:0,w:1,h:2},proj:{x:1,y:0,w:1,h:1}}}));});
+await pg.reload();await pg.waitForTimeout(6500);
+const F=pg.frames().find(f=>/index\.html/.test(f.url())&&f!==pg.mainFrame())||pg.mainFrame();
+await F.evaluate(()=>{document.querySelectorAll('.modal-overlay,#xnw-ov,#xt-root').forEach(m=>m.remove())});
+console.log(await F.evaluate(()=>{const c=document.querySelector('#xd-dash .xd-c[data-card=fav]');if(!c)return 'absent';const a=[...c.querySelectorAll('.xd-tools a')];return a.length+' outils | débordement : '+a.filter(x=>{const s=x.querySelector('span:not(.xd-ic)');return s&&s.scrollWidth>s.clientWidth+1}).length+' | logo '+(a[0]?a[0].querySelector('img').getBoundingClientRect().height:0)+'px'}));
+const el=await F.$('#xd-dash .xd-c[data-card=fav]');if(el)await el.screenshot({path:'/tmp/zz/fav.png'});
+await b.close()})();
