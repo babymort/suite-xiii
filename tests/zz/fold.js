@@ -1,0 +1,14 @@
+const {chromium}=require('playwright');(async()=>{const b=await chromium.launch();const pg=await b.newPage({viewport:{width:1440,height:900}});
+pg.on('pageerror',e=>console.log('ERR',e.message));
+await pg.goto('http://localhost:8765/index.html');await pg.waitForTimeout(6000);
+const F=pg.frames().find(f=>/index\.html/.test(f.url())&&f!==pg.mainFrame())||pg.mainFrame();
+await F.evaluate(()=>{document.querySelectorAll('.modal-overlay,#xnw-ov,#xt-root').forEach(m=>m.remove())});
+const m=()=>F.evaluate(()=>{const n=document.getElementById('xh-nav'),mn=document.querySelector('main'),g=document.querySelector('#xd-dash');return 'nav '+n.offsetWidth+'px · main gauche '+Math.round(mn.getBoundingClientRect().left)+' · widgets '+(g?g.offsetWidth:0)+'px'});
+console.log('déplié :',await m());await pg.screenshot({path:'/tmp/zz/fold0.png'});
+await F.click('#xnf-btn');await pg.waitForTimeout(600);console.log('replié :',await m());
+const bb=await F.locator('#xh-nav button[data-t]').nth(1).boundingBox();await pg.mouse.move(bb.x+bb.width/2,bb.y+bb.height/2+72);await pg.waitForTimeout(300);
+console.log('bulle :',await F.evaluate(()=>{const t=document.getElementById('xnf-tip');return t.classList.contains('on')?t.textContent:'(aucune)'}));
+await pg.screenshot({path:'/tmp/zz/fold1.png'});
+await F.evaluate(()=>document.dispatchEvent(new KeyboardEvent('keydown',{key:'[',bubbles:true})));await pg.waitForTimeout(500);console.log('touche [ :',await m());
+await F.evaluate(()=>document.dispatchEvent(new KeyboardEvent('keydown',{key:'[',bubbles:true})));await pg.waitForTimeout(400);await pg.reload();await pg.waitForTimeout(6000);const F2=pg.frames().find(f=>/index\.html/.test(f.url())&&f!==pg.mainFrame())||pg.mainFrame();console.log('après rechargement, replié :',await F2.evaluate(()=>document.documentElement.classList.contains('xnf')));
+await b.close()})();
