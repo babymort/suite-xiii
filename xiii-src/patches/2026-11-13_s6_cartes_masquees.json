@@ -1,0 +1,1 @@
+[["cards().forEach(a => { a.style.display = hid.has(a.getAttribute('href')) || a.dataset.pcfg || a.dataset.merged ? 'none' : ''; });", "cards().forEach(a => { const h = hid.has(a.getAttribute('href')) || a.dataset.pcfg || a.dataset.merged; if (h) a.style.setProperty('display', 'none', 'important'); else a.style.removeProperty('display'); });", 1]]
