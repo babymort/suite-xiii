@@ -2017,7 +2017,7 @@ var XRED = (function () {
     if (typeof XSET === 'undefined' || typeof prefs === 'undefined' || typeof STATUS === 'undefined') return;
     function apply(S) { if (S.view) { } try { render(); } catch (e) { } }
     XSET.init({
-        app: 'casto', title: 'CASTO', version: 'v1.41',
+        app: 'casto', title: 'CASTO', version: 'v1.42',
         sections: [{ id: 'aff', icon: '🎭', title: 'Casting', open: true, desc: 'Les talents confirmés partent vers CALL SHEETO, RESSOURCO, DEVISO et l\'annuaire avec 📤 Envoyer.', fields: [{ k: 'view', label: 'Vue à l\'ouverture', type: 'select', def: 'cards', options: [['cards', 'Fiches'], ['avail', 'Disponibilités'], ['list', 'Tableau']] }] }],
         apply
     });
@@ -2817,6 +2817,7 @@ XVIT.init();
 <script src="lib/suite-type.js?v=c58a339c69"></script>
 <script src="lib/suite-density.js?v=6bdffebeaa"></script>
 <script src="lib/suite-trayopt.js?v=7ea261ada0"></script>
+<script src="lib/suite-tabman.js?v=def6ee12e7"></script>
 <!-- SUITE XIII:EXTRA:END -->
 </body>
 </html>

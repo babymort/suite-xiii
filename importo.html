@@ -2274,7 +2274,7 @@ var XRED = (function () {
 // IMPORT XIII — ⚙️ Paramètres
 (function () {
     if (typeof XSET === 'undefined' || typeof records !== 'function') return;
-    XSET.init({ app: 'importo', title: 'IMPORT', version: 'v1.20', theme: { get: () => prefs.theme, set: t => { prefs.theme = t; applyTheme(); savePrefs(); } },
+    XSET.init({ app: 'importo', title: 'IMPORT', version: 'v1.21', theme: { get: () => prefs.theme, set: t => { prefs.theme = t; applyTheme(); savePrefs(); } },
         help: [{ icon: '📥', label: 'Comment ça marche ?', sub: 'Excel, CSV, PDF, StudioBinder, Movie Magic', run: () => alert('IMPORT XIII lit vos fichiers Excel, CSV, PDF, les copier-coller de Google Sheets et les exports StudioBinder / Movie Magic, reconnaît personnes, matériel ou dépouillement, puis les envoie vers l\'annuaire, CASTO, PACKINGO, DEVISO, le CATALOGUE ou PLANNO.') }],
         sections: [], apply() { } });
 })();
@@ -9601,6 +9601,7 @@ XVIT.init();
 <script src="lib/suite-type.js?v=c58a339c69"></script>
 <script src="lib/suite-density.js?v=6bdffebeaa"></script>
 <script src="lib/suite-trayopt.js?v=7ea261ada0"></script>
+<script src="lib/suite-tabman.js?v=def6ee12e7"></script>
 <!-- SUITE XIII:EXTRA:END -->
 </body>
 </html>
