@@ -1,0 +1,1 @@
+[["cal: '🗓️ Calendrier du mois',", "cal: '🗓️ Calendrier du mois', frise: '🧭 Frise du projet',", 1], ["const NEWW = ['cal',", "const NEWW = ['frise', 'cal',", 1], ["        if (k === 'cal') return", "        if (k === 'frise') return W(typeof XFRISE !== 'undefined' ? XFRISE.html(f) : '<p class=\"xd-e\">Chargement…</p>', 'xd-frc');\n        if (k === 'cal') return", 1]]
