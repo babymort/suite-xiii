@@ -1,0 +1,2 @@
+[["        dot.style.display = f ? 'block' : 'none';\n        trig.title = f ? ", "        { const dd = f ? 'block' : 'none'; if (dot.style.display !== dd) dot.style.display = dd; }\n        const _tt = f ? ", 1],
+ ["communs à tous les outils');", "communs à tous les outils'); if (trig.title !== _tt) trig.title = _tt;", 1]]

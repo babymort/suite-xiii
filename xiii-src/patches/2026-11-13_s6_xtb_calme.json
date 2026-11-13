@@ -1,0 +1,1 @@
+[["b.dataset.n = t || ''; b.title = '👥 Équipe : déléguer, avis, mots' + (t ? ' — ' + t + ' à traiter' : ''); }", "const nn = String(t || ''), tt = '👥 Équipe : déléguer, avis, mots' + (t ? ' — ' + t + ' à traiter' : ''); if (b.dataset.n !== nn) b.dataset.n = nn; if (b.title !== tt) b.title = tt; }", 1]]

@@ -49,7 +49,7 @@
         // dock : la colonne n'existe que si l'outil affiche le panneau (un élément sélectionné)
         const o = C.mode === 'dock' ? (getComputedStyle(p).display !== 'none' && p.childElementCount > 0) : true;
         if (o !== lastOpen) { lastOpen = o; document.documentElement.classList.toggle('xinsp-open', !!o); try { dispatchEvent(new Event('resize')); } catch (e) { } }
-        const b = $('xinsp-btn'); if (b) b.setAttribute('aria-pressed', hidden() ? 'false' : 'true');
+        const b = $('xinsp-btn'); if (b) { const v = hidden() ? 'false' : 'true'; if (b.getAttribute('aria-pressed') !== v) b.setAttribute('aria-pressed', v); }
     }
     function set(on) { try { localStorage.setItem(K, on ? '1' : '0'); } catch (e) { } tick(); try { dispatchEvent(new Event('resize')); } catch (e) { } }
     function mount() {

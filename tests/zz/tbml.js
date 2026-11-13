@@ -1,0 +1,5 @@
+const {chromium}=require('playwright');(async()=>{const b=await chromium.launch();const pg=await b.newPage({viewport:{width:1440,height:900}});
+await pg.addInitScript(()=>{localStorage.setItem('xiii.tour2.conduco.hide','1')});
+await pg.goto('http://localhost:8765/conduco.html');await pg.waitForTimeout(5000);
+console.log(await pg.evaluate(()=>new Promise(r=>{const C={};const mo=new MutationObserver(ms=>ms.forEach(m=>{if(m.type==='attributes'&&(m.attributeName==='class'&&/top-bar|toolbar/.test(m.target.id)))return;if(m.attributeName==='data-xtop-seen')return;const t=m.target.nodeType===1?m.target:m.target.parentElement;const k=(t.id||t.tagName+'.'+String(t.className).slice(0,20))+' '+m.type+(m.attributeName?'@'+m.attributeName+'='+String(t.getAttribute(m.attributeName)).slice(0,40):'')+' +'+[...m.addedNodes].map(n=>n.nodeName).join('');C[k]=(C[k]||0)+1}));['top-bar','toolbar'].forEach(id=>mo.observe(document.getElementById(id),{subtree:true,childList:true,attributes:true,characterData:true}));setTimeout(()=>{mo.disconnect();r(Object.entries(C).sort((a,b)=>b[1]-a[1]).slice(0,8).map(x=>x[1]+' × '+x[0]).join('\n'))},3000)})));
+await b.close()})();

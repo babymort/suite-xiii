@@ -39,7 +39,7 @@
     const calm = () => { try { return localStorage.getItem('xiii.anim.dash') === '1'; } catch (e) { return false; } }; // seul le réglage ⚙️ du Dashboard décide (pas le réglage de l'appareil)
     const st2 = document.createElement('style'); st2.id = 'xd-intro-css';
     st2.textContent = 'html.xd-intro #xd-dash .xd-c{opacity:0;transform:translateY(-10px);clip-path:inset(0 0 100% 0 round 14px);will-change:transform,opacity,clip-path}' +
-        'html.xd-go #xd-dash .xd-c{opacity:1;transform:none;clip-path:inset(0 0 0 0 round 14px);transition:opacity .55s ease calc(var(--xi,0) * 250ms),transform .6s cubic-bezier(.2,.7,.2,1) calc(var(--xi,0) * 250ms),clip-path .7s cubic-bezier(.3,.7,.2,1) calc(var(--xi,0) * 250ms)}' +
+        'html.xd-go #xd-dash .xd-c{opacity:1;transform:none;clip-path:inset(0 0 0 0 round 14px);transition:opacity .55s ease calc(var(--xi,0) * 125ms),transform .6s cubic-bezier(.2,.7,.2,1) calc(var(--xi,0) * 125ms),clip-path .7s cubic-bezier(.3,.7,.2,1) calc(var(--xi,0) * 125ms)}' +
         'html.xd-intro #xd-dash .xd-hd,html.xd-intro .title-row{opacity:0}html.xd-go #xd-dash .xd-hd,html.xd-go .title-row{opacity:1;transition:opacity .45s ease}' +
         'html.xd-go #xd-dash .xd-c [style*="width"]{transition:width .9s cubic-bezier(.2,.7,.2,1) .25s}';
     document.head.appendChild(st2);
@@ -47,7 +47,7 @@
     // Le Dashboard se redessine quand ses données arrivent (~1,8 s après l'ouverture) : les widgets sont REMPLACÉS.
     // Avant, les nouveaux widgets n'avaient plus d'animation → « 2/3 s'animent puis tout apparaît d'un coup ».
     // Maintenant chaque widget (ancien ou redessiné) est calé sur la même horloge : il reprend exactement où il en était.
-    const EASE = 'cubic-bezier(.2,.7,.2,1)', STEP = 250, DUR = 650;
+    const EASE = 'cubic-bezier(.2,.7,.2,1)', STEP = 125, DUR = 550;
     let T0 = 0, G = 0, END = 0, NUMS = [], mo = null, raf = 0;
     const NUMRX = /^\s*[J-]*\s*-?\d[\d\s.,]*\s*(%|€|h|j)?\s*$/;
     function dress() {

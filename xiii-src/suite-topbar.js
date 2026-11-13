@@ -107,16 +107,18 @@
     // un seul trait entre deux groupes visibles : ni en tête, ni en fin, ni deux de suite (boutons absents selon l'outil, groupe 👥 posé plus tard…)
     function dvClean() {
         const tb = $('top-bar'); if (!tb) return;
-        tb.querySelectorAll('[data-xdvh]').forEach(d => { d.style.removeProperty('display'); delete d.dataset.xdvh; });
+        // on calcule d'abord quels traits masquer (en ignorant notre propre masquage), puis on n'écrit que les différences
         const L = [...tb.querySelectorAll('button,select,input,.divider,#tabs-container')].filter(e => e.id === 'tabs-container' || !e.closest('#tabs-container'));
-        const hid = d => { d.dataset.xdvh = 1; d.style.setProperty('display', 'none', 'important'); };
+        const H = new Set();
         let prev = 'start', last = null;
-        L.forEach(e => { if (!(e.offsetWidth > 0)) return; if (e.classList.contains('divider')) { if (prev !== 'el') hid(e); else { prev = 'dv'; last = e; } } else if (!e.closest('.divider')) prev = 'el'; });
-        if (prev === 'dv' && last) hid(last);
+        L.forEach(e => { if (e.classList.contains('divider') ? (e.dataset.xdvh ? !(e.parentElement && getComputedStyle(e.parentElement).display !== 'none' && e.parentElement.getClientRects().length + (getComputedStyle(e.parentElement).display === 'contents' ? 1 : 0) > 0) : !(e.offsetWidth > 0)) : !(e.offsetWidth > 0)) return;
+            if (e.classList.contains('divider')) { if (prev !== 'el') H.add(e); else { prev = 'dv'; last = e; } } else if (!e.closest('.divider')) prev = 'el'; });
+        if (prev === 'dv' && last) H.add(last);
+        tb.querySelectorAll('.divider').forEach(d => { const want = H.has(d), has = !!d.dataset.xdvh; if (want === has) return; if (want) { d.dataset.xdvh = 1; d.style.setProperty('display', 'none', 'important'); } else { d.style.removeProperty('display'); delete d.dataset.xdvh; } });
     }
     setInterval(() => { if (!busy) dvClean(); }, 2000);
     let T = 0; const again = () => { clearTimeout(T); T = setTimeout(() => { organize(); try { dispatchEvent(new Event('resize')); } catch (e) { } }, 120); };
-    function start() { if (!organize()) { setTimeout(start, 400); return; } again(); const tb = $('top-bar'); if (tb) new MutationObserver(ms => { if (!busy && ms.some(m => [...m.addedNodes].some(n => n.nodeType === 1 && n.tagName === 'BUTTON' && !n.dataset.xtop && !n.dataset.xtopSeen && !/^xtop-/.test(n.id) && !n.closest('#tabs-container')))) again(); tb.querySelectorAll('button').forEach(b => { b.dataset.xtopSeen = 1; }); }).observe(tb, { childList: true, subtree: true }); }
+    function start() { if (!organize()) { setTimeout(start, 400); return; } again(); const tb = $('top-bar'); if (tb) new MutationObserver(ms => { if (!busy && ms.some(m => [...m.addedNodes].some(n => n.nodeType === 1 && n.tagName === 'BUTTON' && !n.dataset.xtop && !n.dataset.xtopSeen && !/^xtop-/.test(n.id) && !n.closest('#tabs-container')))) again(); tb.querySelectorAll('button:not([data-xtop-seen])').forEach(b => { b.dataset.xtopSeen = 1; }); }).observe(tb, { childList: true, subtree: true }); }
     try { if (typeof XBOOT !== 'undefined' && XBOOT.ready) XBOOT.ready(() => setTimeout(start, 80), 2990); else throw 0; } catch (e) { addEventListener('load', () => setTimeout(start, 700)); }
     window.XTOP = { organize, exportItems: () => EXPI(), newItems: () => NEWI() };
 })();
