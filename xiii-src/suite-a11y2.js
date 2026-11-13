@@ -51,7 +51,7 @@
                 const fs = parseFloat(cs.fontSize), need = (fs >= 24 || (fs >= 18.6 && +cs.fontWeight >= 700)) ? 3.05 : 4.55;
                 if (ratio(f, bg) >= need) continue;
                 if (+cs.opacity < 1) { el.dataset.xa2op = el.style.getPropertyValue('opacity') || '-'; el.style.setProperty('opacity', '1', 'important'); f = fg.slice(0, 3); const a0 = fg[3] / +cs.opacity; if (a0 < 1) f = f.map((v, i) => v * a0 + bg[i] * (1 - a0)); if (ratio(f, bg) >= need) { n++; continue; } }
-                const c = fixColor(f, bg, need); if (!el.dataset.xa2c) el.dataset.xa2c = el.style.getPropertyValue('color') || '-';
+                const c = fixColor(f, bg, need); if (!el.dataset.xa2c) el.dataset.xa2c = el.style.getPropertyValue('color') || '-'; el.dataset.xa2bg = bg.slice(0, 3).map(Math.round).join(',');
                 el.style.setProperty('color', 'rgb(' + c.join(',') + ')', 'important'); n++; }
         } catch (e) { } busy = false; return n;
     }
@@ -117,7 +117,9 @@
             clearTimeout(T); T = setTimeout(pass, 900);
         }).observe(document.body, { childList: true, subtree: true, characterData: true });
         // un état qui change (onglet actif, bouton allumé…) : les textes concernés repartent de leur couleur d'origine et sont revérifiés
-        const restore = e => { const o = e.dataset.xa2c; if (o === undefined) return; if (o === '-') e.style.removeProperty('color'); else e.style.setProperty('color', o); delete e.dataset.xa2c; };
+        // …mais seulement si le fond derrière le texte a vraiment changé : sinon la couleur corrigée était effacée puis remise
+        // sans fin à chaque changement de classe d'un parent (nom d'onglet qui clignotait blanc / noir)
+        const restore = e => { const o = e.dataset.xa2c; if (o === undefined) return; try { gen++; const b = bgOf(e); gen--; if (b && e.dataset.xa2bg === b.slice(0, 3).map(Math.round).join(',')) return; } catch (x) { } delete e.dataset.xa2bg; if (o === '-') e.style.removeProperty('color'); else e.style.setProperty('color', o); delete e.dataset.xa2c; };
         new MutationObserver(ms => { let any = false; for (const m of ms) { const t = m.target; if (t === document.body || !t.isConnected) continue; any = true; restore(t); t.querySelectorAll('[data-xa2c]').forEach(restore); }
             if (any) { clearTimeout(T); T = setTimeout(() => { gen++; pass(); }, 500); } }).observe(document.body, { attributes: true, attributeFilter: ['class'], subtree: true });
         // overlays affichés/masqués par classe ou style (sans ajout au DOM)

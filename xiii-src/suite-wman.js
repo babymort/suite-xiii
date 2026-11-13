@@ -27,6 +27,11 @@
         '#xd-dash .xd-c[data-xwms=solid]{background:color-mix(in srgb,var(--xwmc,#f0b378) 14%,var(--bg-panel,#1c1c1f))!important;border-color:color-mix(in srgb,var(--xwmc,#f0b378) 40%,transparent)!important}' +
         '#xd-dash .xd-c[data-xwms=glass]{background:rgba(255,255,255,.045)!important;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-color:rgba(255,255,255,.12)!important}' +
         '#xd-dash .xd-c[data-xwms=ghost]{background:transparent!important;border-style:dashed!important;box-shadow:none!important}' +
+        /* la taille se règle dans le gestionnaire : plus de coin de redimensionnement sur l'accueil */'#xd-dash .xd-rs{display:none!important}' +
+        /* formats : anneau, jauge, barre */'#xd-dash .xwm-fmt{display:flex;align-items:center;gap:14px;margin:4px 0 6px}#xd-dash .xwm-fmt svg{flex:none;overflow:visible}#xd-dash .xwm-fmt .tr{fill:none;stroke:rgba(255,255,255,.09)}#xd-dash .xwm-fmt .vl{fill:none;stroke:var(--xwmc,#f0b378);stroke-linecap:round;transition:stroke-dashoffset 1s cubic-bezier(.2,.7,.2,1)}' +
+        '#xd-dash .xwm-fmt text{fill:var(--text-main,#eee);font:800 19px system-ui,"Segoe UI",sans-serif;text-anchor:middle;dominant-baseline:central}#xd-dash .xwm-fmt .sb{font-size:12px;opacity:.65;line-height:1.35}' +
+        '#xd-dash .xwm-fmt.bar{flex-direction:column;align-items:stretch;gap:6px;width:100%;align-self:stretch}#xd-dash .xwm-fmt.bar .bt{width:100%}#xd-dash .xwm-fmt .bt{height:12px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden}#xd-dash .xwm-fmt .bv{height:100%;border-radius:999px;background:linear-gradient(90deg,color-mix(in srgb,var(--xwmc,#f0b378) 70%,#fff 0%),var(--xwmc,#f0b378));transition:width 1s cubic-bezier(.2,.7,.2,1)}#xd-dash .xwm-fmt .bn{font:800 22px system-ui,sans-serif}' +
+        '#xd-dash .xd-c[data-xwmf] .xwm-hid{display:none!important}' +
         '#xd-dash .xd-c[data-xwmt="0"]>h4{display:none!important}#xd-dash .xd-c[data-xwmc]>h4{color:var(--xwmc)}' +
         /* fenêtre */
         '#xwm{position:fixed;inset:0;z-index:99990;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;padding:14px;animation:xwmF .18s ease-out}' +
@@ -80,6 +85,31 @@
         return L;
     }
 
+    // ---------------- formats d'un widget (texte, anneau, jauge, barre) ----------------
+    // Un widget qui affiche un pourcentage (ex. Checklist « 36 % ») peut le montrer autrement. Le contenu d'origine reste dans la page.
+    const FMTS = [['text', 'Texte'], ['ring', 'Anneau'], ['gauge', 'Jauge'], ['bar', 'Barre']];
+    const PCT = /^\s*(\d+(?:[.,]\d+)?)\s*%\s*$/;
+    const pctEl = c => [...c.querySelectorAll('*')].find(e => !e.children.length && PCT.test(e.textContent) && !e.closest('.xwm-fmt'));
+    const hasPct = c => !!(c && pctEl(c));
+    const SHOWN = new Map();
+    function fmt(c, f) {
+        c.querySelectorAll(':scope .xwm-fmt').forEach(x => x.remove()); c.querySelectorAll('.xwm-hid').forEach(x => x.classList.remove('xwm-hid'));
+        const pe = f && f !== 'text' ? pctEl(c) : null; if (!pe) { delete c.dataset.xwmf; return; }
+        const v = Math.max(0, Math.min(100, parseFloat(pe.textContent.replace(',', '.')))), k = c.dataset.card, from = SHOWN.has(k) ? SHOWN.get(k) : 0; SHOWN.set(k, v);
+        // ce qui accompagne le pourcentage (« 3 / 24 faites ») reste affiché sous la forme choisie
+        const blk = pe.parentElement && pe.parentElement !== c ? pe.parentElement : pe, sub = [...blk.querySelectorAll('*')].filter(e => e !== pe && !e.children.length && e.textContent.trim()).map(e => e.textContent.trim()).join(' · ');
+        const bars = [...c.querySelectorAll('[style*="width"]')].filter(e => /%/.test(e.style.width) && !e.closest('.xwm-fmt'));
+        const box = document.createElement('div'); box.className = 'xwm-fmt ' + f; const lbl = Math.round(v) + ' %';
+        if (f === 'ring') { const r = 30, C = 2 * Math.PI * r; box.innerHTML = '<svg width="78" height="78" viewBox="0 0 78 78" role="img" aria-label="' + lbl + '"><circle class="tr" cx="39" cy="39" r="' + r + '" stroke-width="8"/><circle class="vl" cx="39" cy="39" r="' + r + '" stroke-width="8" stroke-dasharray="' + C + '" stroke-dashoffset="' + C * (1 - from / 100) + '" transform="rotate(-90 39 39)"/><text x="39" y="40">' + lbl + '</text></svg>' + (sub ? '<div class="sb">' + esc(sub) + '</div>' : '');
+            requestAnimationFrame(() => requestAnimationFrame(() => { const e = box.querySelector('.vl'); if (e) e.setAttribute('stroke-dashoffset', C * (1 - v / 100)); })); }
+        else if (f === 'gauge') { const r = 40, L = Math.PI * r; box.innerHTML = '<svg width="100" height="60" viewBox="0 0 100 60" role="img" aria-label="' + lbl + '"><path class="tr" d="M10 52 A40 40 0 0 1 90 52" stroke-width="9"/><path class="vl" d="M10 52 A40 40 0 0 1 90 52" stroke-width="9" stroke-dasharray="' + L + '" stroke-dashoffset="' + L * (1 - from / 100) + '"/><text x="50" y="44">' + lbl + '</text></svg>' + (sub ? '<div class="sb">' + esc(sub) + '</div>' : '');
+            requestAnimationFrame(() => requestAnimationFrame(() => { const e = box.querySelector('.vl'); if (e) e.setAttribute('stroke-dashoffset', L * (1 - v / 100)); })); }
+        else { box.innerHTML = '<span class="bn">' + lbl + '</span><div class="bt"><div class="bv" style="width:' + from + '%"></div></div>' + (sub ? '<div class="sb">' + esc(sub) + '</div>' : '');
+            requestAnimationFrame(() => requestAnimationFrame(() => { const e = box.querySelector('.bv'); if (e) e.style.width = v + '%'; })); }
+        blk.before(box); blk.classList.add('xwm-hid'); bars.forEach(b => { const t = b.parentElement && b.parentElement.children.length === 1 ? b.parentElement : b; t.classList.add('xwm-hid'); });
+        c.dataset.xwmf = f;
+    }
+
     // ---------------- application au Dashboard ----------------
     let applying = false;
     function apply(flip) {
@@ -95,6 +125,7 @@
                 if (s.s && s.s !== 'std') c.dataset.xwms = s.s; else delete c.dataset.xwms;
                 if (s.c) { c.style.setProperty('--xwmc', s.c); c.dataset.xwmc = 1; } else { c.style.removeProperty('--xwmc'); delete c.dataset.xwmc; }
                 if (s.t === false) c.dataset.xwmt = '0'; else delete c.dataset.xwmt;
+                if (s.f || c.dataset.xwmf) fmt(c, s.f);
             });
             // FLIP : chaque widget glisse doucement de son ancienne place à la nouvelle
             if (before) [...g.children].forEach(c => { const a = before.get(c.dataset.card); if (!a) { try { c.animate([{ opacity: 0, transform: 'scale(.97)' }, { opacity: 1, transform: 'none' }], { duration: 260, easing: 'ease-out' }); } catch (e) { } return; }
@@ -202,6 +233,7 @@
             '<div><h5>Largeur</h5>' + seg('w', n([1, 2, 3, 4]), b.w, v => fits(L, k, b.x, b.y, v, b.h)) + '</div>' +
             '<div><h5>Hauteur</h5>' + seg('h', n([1, 2, 3, 4]), b.h, v => fits(L, k, b.x, b.y, b.w, v)) + '</div>' +
             '<div><h5>Position</h5><div class="xwm-row"><span>Colonne ' + (b.x + 1) + ' · ligne ' + (b.y + 1) + '</span>' + seg('mv', [['L', '←'], ['U', '↑'], ['D', '↓'], ['R', '→']], '') + '</div></div>' +
+            (hasPct(real) ? '<div><h5>Format</h5>' + seg('f', FMTS, s.f || 'text') + '</div>' : '') +
             '<div><h5>Style</h5>' + seg('s', STY, s.s || 'std') + '</div>' +
             '<div><h5>Couleur</h5><div class="xwm-seg" data-f="c">' + COLORS.map(c => '<button type="button" class="xwm-col' + ((s.c || '') === c ? ' on' : '') + '" data-v="' + c + '" title="' + (c ? c : 'Couleur du thème') + '" style="background:' + (c || 'conic-gradient(#f0b378,#4fc3f7,#81c784,#f0b378)') + '"></button>').join('') + '</div></div>' +
             '<div class="xwm-row"><span>Afficher le titre</span><button type="button" class="xwm-sw' + (s.t === false ? '' : ' on') + '" data-f="t" aria-label="Afficher le titre"></button></div>' +
@@ -214,6 +246,7 @@
             const t = e.target.closest('button'); if (!t || t.disabled) return; const f = (t.closest('[data-f]') || {}).dataset ? t.closest('[data-f]').dataset.f : '', v = t.dataset.v;
             if (f === 'w') set(k, Object.assign({}, b, { w: +v })); else if (f === 'h') set(k, Object.assign({}, b, { h: +v }));
             else if (f === 'mv') { const d = { L: [-1, 0], R: [1, 0], U: [0, -1], D: [0, 1] }[v]; set(k, Object.assign({}, b, { x: b.x + d[0], y: b.y + d[1] })); }
+            else if (f === 'f') { S[k] = Object.assign({}, s, { f: v }); dirty = true; drawSide(); }
             else if (f === 's') { S[k] = Object.assign({}, s, { s: v }); dirty = true; drawBoard(); drawSide(); }
             else if (f === 'c') { S[k] = Object.assign({}, s, { c: v }); if (!v) delete S[k].c; dirty = true; drawBoard(); drawSide(); }
             else if (f === 't') { S[k] = Object.assign({}, s, { t: s.t === false }); dirty = true; drawSide(); }

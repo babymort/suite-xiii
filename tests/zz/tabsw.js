@@ -1,0 +1,11 @@
+const {chromium}=require('playwright');(async()=>{const b=await chromium.launch();
+for(const app of ['plano','deviso','syno']){const pg=await b.newPage({viewport:{width:1440,height:900}});
+await pg.addInitScript(a=>{try{localStorage.setItem('xiii.tour2.'+a+'.hide','1')}catch(e){}},app);
+await pg.goto('http://localhost:8765/'+app+'.html');await pg.waitForTimeout(3500);
+await pg.evaluate(()=>{const m=document.getElementById('modal');if(m&&/Guide/.test(m.textContent))m.style.display='none'});
+await pg.locator('#tabs-container + button').click({force:true});await pg.waitForTimeout(500);
+await pg.evaluate(()=>{const ok=[...document.querySelectorAll('button')].find(b=>b.offsetParent&&/^(OK|Valider|Créer|Ajouter)$/i.test(b.textContent.trim()));if(ok)ok.click()});await pg.waitForTimeout(2500);
+const col=()=>pg.evaluate(()=>[...document.querySelectorAll('#tabs-container .tab')].map(t=>{const ti=t.querySelector('.tab-title')||t;return (t.classList.contains('active')?'ACTIF ':'')+getComputedStyle(ti).color}).join(' | '));
+console.log(app,'avant:',await col());
+await pg.locator('#tabs-container .tab .tab-title').first().click();await pg.waitForTimeout(2500);
+console.log('   après:',await col());await pg.close()}await b.close()})();
