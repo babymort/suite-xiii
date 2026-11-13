@@ -1276,7 +1276,7 @@ var XRED = (function () {
     const name = a => (a.querySelector('.card-name, .break-txt b') || a).textContent.replace(/\s+/g, ' ').trim();
     function apply(S) {
         const hid = new Set(String(S.hidden || '').split(',').filter(Boolean));
-        cards().forEach(a => { a.style.display = hid.has(a.getAttribute('href')) || a.dataset.pcfg || a.dataset.merged ? 'none' : ''; });
+        cards().forEach(a => { const h = hid.has(a.getAttribute('href')) || a.dataset.pcfg || a.dataset.merged; if (h) a.style.setProperty('display', 'none', 'important'); else a.style.removeProperty('display'); });
         document.querySelectorAll('.phase').forEach(ph => { const vis = Array.from(ph.querySelectorAll('a.card')).some(a => a.style.display !== 'none'); ph.style.display = vis ? '' : 'none'; });
         const intro = document.querySelector('.intro'); if (intro) intro.style.display = S.intro === false ? 'none' : '';
         document.body.classList.toggle('xs-nokeys', S.keys === false);
@@ -2533,7 +2533,7 @@ XBOOT.ready(() => { try { XHOME.init(); XSTART.init(); XADAPT.init(); } catch (e
 <script src="lib/suite-dock.js?v=253bb1bb47"></script>
 <script src="lib/suite-libtab.js?v=aa87c9659c"></script>
 <script src="lib/suite-type.js?v=c58a339c69"></script>
-<script src="lib/suite-home.js?v=cdea31a207"></script>
+<script src="lib/suite-home.js?v=bbd6af6275"></script>
 <script src="lib/suite-density.js?v=6bdffebeaa"></script>
 <script src="lib/suite-trayopt.js?v=7ea261ada0"></script>
 <script src="lib/suite-wman.js?v=1403738821"></script>
