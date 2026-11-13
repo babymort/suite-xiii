@@ -12,7 +12,7 @@
         D + ' #top-bar button,' + D + ' #toolbar button{height:26px!important;min-height:26px!important;min-width:28px!important}' + D + ' #toolbar select,' + D + ' #toolbar input:not([type=checkbox]):not([type=radio]){height:26px!important;min-height:26px!important;padding-top:0!important;padding-bottom:0!important}' +
         D + ' td,' + D + ' th{padding-top:3px!important;padding-bottom:3px!important}' +
         D + ' #content,' + D + ' #view-area,' + D + ' #workspace{line-height:1.3}' +
-        D + ' .item,' + D + ' .row,' + D + ' .line,' + D + ' .ln,' + D + ' .it,' + D + ' .crate,' + D + ' .card-b>div,' + D + ' #library-panel li,' + D + ' #library-panel .lib-item{padding-top:3px!important;padding-bottom:3px!important;min-height:0!important}' +
+        D + ' .item,' + D + ' .row,' + D + ' .line,' + D + ' .ln,' + D + ' .it,' + D + ' .crate,' + D + ' .card-b>div,' + D + ' #library-panel li,' + D + ' #library-panel .lib-item{padding-top:3px!important;padding-bottom:3px!important;min-height:0!important;flex-shrink:0!important}' +
         D + ' .card,' + D + ' .panel,' + D + ' section{margin-bottom:8px}' + D + ' .card-h{padding-top:6px!important;padding-bottom:6px!important}' +
         D + ' input:not([type=checkbox]):not([type=radio]):not([type=range]),' + D + ' select{min-height:26px!important;padding-top:2px!important;padding-bottom:2px!important}';
     const s = document.createElement('style'); s.id = 'xdense-css'; s.textContent = css; (document.head || R).appendChild(s);
