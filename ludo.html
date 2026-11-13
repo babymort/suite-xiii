@@ -248,7 +248,8 @@ body.lib-hidden #library-panel { width: 0; border-right: none; overflow: hidden;
 #lib-count { font-size: 11px; color: var(--text-dim); font-weight: normal; }
 #lib-content-area { display: flex; flex: 1; overflow: hidden; }
 #lib-categories-bar { width: 26px; background: var(--bg-header); border-right: 1px solid var(--border-soft); display: flex; flex-direction: column; gap: 4px; padding: 6px 2px; overflow-y: auto; align-items: center; flex-shrink: 0; }
-.cat-tab { width: 20px; min-height: 64px; border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: bold; text-align: center; cursor: pointer; border: 2px solid transparent; overflow: hidden; padding: 4px 2px; transition: 0.15s; writing-mode: vertical-rl; transform: rotate(180deg); color: #fff; background: #555; box-sizing: border-box; flex-shrink: 0; text-shadow: 0 1px 1px rgba(0,0,0,0.5); letter-spacing: .05em; }
+#tabs-container .tab { width: 52px; min-width: 52px; max-width: 52px; box-sizing: border-box; justify-content: center; flex: 0 0 52px; }
+.cat-tab { white-space: nowrap; height: auto !important; width: 22px; min-height: 64px; border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: bold; text-align: center; cursor: pointer; border: 2px solid transparent; overflow: hidden; padding: 4px 2px; transition: 0.15s; writing-mode: vertical-rl; transform: rotate(180deg); color: #fff; background: #555; box-sizing: border-box; flex-shrink: 0; text-shadow: 0 1px 1px rgba(0,0,0,0.5); letter-spacing: .05em; }
 .cat-tab:hover { filter: brightness(1.2); }
 .cat-tab.active { border-color: var(--text-main); box-shadow: 0 0 6px rgba(255,255,255,0.6); }
 #lib-main-pane { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--bg-panel-alt); min-width: 0; }
@@ -3766,7 +3767,7 @@ function frame(t) {
 // ---------- Interface ----------
 function renderTabs() {
     $('tabs-container').innerHTML = GAMES.map((g, i) =>
-        `<div class="tab${g === cur ? ' active' : ''}${g.state === 'play' ? ' playing' : ''}" data-g="${g.id}" title="${esc(g.name)}${gameKey(i) ? ' (' + gameKey(i) + ')' : ''}"><span>${g.icon}</span>${g === cur ? `<span>${esc(g.name)}</span>` : ''}<span class="live"></span>${gameKey(i) ? `<span class="k">${gameKey(i)}</span>` : ''}</div>`).join('');
+        `<div class="tab${g === cur ? ' active' : ''}${g.state === 'play' ? ' playing' : ''}" data-g="${g.id}" title="${esc(g.name)}${gameKey(i) ? ' (' + gameKey(i) + ')' : ''}"><span>${g.icon}</span><span class="live"></span>${gameKey(i) ? `<span class="k">${gameKey(i)}</span>` : ''}</div>`).join('');
 }
 $('tabs-container').onclick = e => { const t = e.target.closest('[data-g]'); if (t) selectGame(t.dataset.g); };
 const CATS = [{ id: 'games', l: 'JEUX', c: '#007acc' }, { id: 'records', l: 'RECORDS', c: '#b86a1e' }, { id: 'help', l: 'COMMANDES', c: '#43a047' }];
@@ -4552,7 +4553,7 @@ var XRED = (function () {
         askConfirm('Effacer tous les records de ce navigateur&nbsp;?', () => { records = {}; Store.set(KEY_REC, records); renderLib(); updateStats(); toast('🧹 Records effacés'); });
     }
     XSET.init({
-        app: 'ludo', title: 'LUDO', version: 'v50',
+        app: 'ludo', title: 'LUDO', version: 'v51',
         // horloges « Fin de pause / Heure » : en colonne, à gauche du ⚙️, au-dessus du badge Netlify
         css: '#zoom-controls{right:72px;bottom:80px;flex-direction:column;align-items:flex-end;gap:6px;padding:30px 0 0 40px}#zoom-controls::before{display:none}#zoom-controls .clock{margin-right:0;text-align:right}',
         theme: { get: () => prefs.theme === 'light' ? 'light' : 'dark', set: t => { prefs.theme = t === 'light' ? 'light' : 'dark'; applyTheme(); savePrefs(); } },
@@ -5347,9 +5348,9 @@ XVIT.init();
 <script src="lib/suite-ctx.js?v=98b9b65103"></script>
 <script src="lib/suite-empty.js?v=dc3fbb36b9"></script>
 <script src="lib/suite-dock.js?v=253bb1bb47"></script>
-<script src="lib/suite-libtab.js?v=aa87c9659c"></script>
+<script src="lib/suite-libtab.js?v=9ee07aff09"></script>
 <script src="lib/suite-type.js?v=c58a339c69"></script>
-<script src="lib/suite-density.js?v=6bdffebeaa"></script>
+<script src="lib/suite-density.js?v=4f4b5dc8e1"></script>
 <script src="lib/suite-trayopt.js?v=7ea261ada0"></script>
 <script src="lib/suite-tabman.js?v=def6ee12e7"></script>
 <!-- SUITE XIII:EXTRA:END -->
