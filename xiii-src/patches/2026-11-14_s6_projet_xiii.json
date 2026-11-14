@@ -1,0 +1,3 @@
+[["        const teamTiles = [T('👥', 'Membres et droits',", "        const teamTiles = [T('🎬', 'Projet XIII', 'Fiche du projet : nom, dates, lieux, équipe clé, réglages', () => typeof XPROJET !== 'undefined' && XPROJET.open()),\n            T('☁️', 'Drive', 'Données partagées avec l\\'équipe, sauvegardes, liens', () => location.href = 'drive.html'),\n            T('👥', 'Membres et droits',", 1],
+ ["mk('xh-team', 'Gestion d\\'equipe', 'Réservé au Master du projet.', teamTiles);", "mk('xh-team', 'Projet XIII', 'Le projet, son Drive et son équipe — réservé au Master.', teamTiles);", 1],
+ ["[['xh-team', '👥', 'Équipe']]", "[['xh-team', '🎬', 'Projet XIII']]", 1]]
