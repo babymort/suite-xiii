@@ -321,4 +321,4 @@ const q = new URLSearchParams(location.search).get('open');
 S.ws = reg().cur || 'main'; if (!reg().list.some(w => w.id === S.ws)) S.ws = 'main'; S.list = S.list.filter(t => !t.pin); S.list.forEach(t => { if (!t.ws || !reg().list.some(w => w.id === t.ws)) t.ws = 'main'; }); S.list.unshift({ id: 'home', url: 'index.html', pin: 1 });
 S.split = S.split || null; S.sw = S.sw || .5;
 if (q && /^[\w-]+\.html([?#].*)?$/.test(q)) { history.replaceState(null, '', location.pathname); open(q); } else show((S.list.find(x => x.id === S.act) || S.list[0]).id);
-</script><!-- SUITE XIII:XEXTRA:START --><script>var XIII_APP = window.XIII_APP || "espace";</script><script src="lib/suite-color.js?v=44db6d9900"></script><!-- SUITE XIII:XEXTRA:END --></body></html>
+</script><!-- SUITE XIII:XEXTRA:START --><script>var XIII_APP = window.XIII_APP || "espace";</script><script src="lib/suite-color.js?v=44db6d9900"></script><script src="lib/suite-ctheme.js?v=74527a3f6a"></script><!-- SUITE XIII:XEXTRA:END --></body></html>
