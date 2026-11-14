@@ -4267,7 +4267,7 @@ var XRED = (function () {
 
     ready = true;
     XSET.init({
-        app: 'backupo', title: 'BACKUPO', version: 'v75',
+        app: 'backupo', title: 'BACKUPO', version: 'v76',
         theme: { get: () => prefs.theme === 'light' ? 'light' : 'dark', set: t => { if ((prefs.theme === 'light' ? 'light' : 'dark') !== t) toggleTheme(); } },
         hide: ['#toolbar button[onclick="toggleTheme()"]', '#toolbar button[onclick="openGuide()"]'],
         // tableaux (type list) sur toute la largeur du panneau, bouton « ＋ » dessous
@@ -5202,6 +5202,7 @@ XVIT.init();
 <script src="lib/suite-color.js?v=44db6d9900"></script>
 <script src="lib/suite-barcfg.js?v=3bcd4cdd2f"></script>
 <script src="lib/suite-ctheme.js?v=74527a3f6a"></script>
+<script src="lib/suite-projpage.js?v=f2c3586bc7"></script>
 <!-- SUITE XIII:EXTRA:END -->
 </body>
 </html>
