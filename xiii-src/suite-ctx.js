@@ -90,6 +90,7 @@
         if (window.XFOCUS && $('xfocus-btn')) it.push(['⛶', 'Mode focus (F) : seulement la zone de travail', () => XFOCUS.toggle()]);
         const s = $('xf-btn'); if (s) it.push(['🔎', 'Rechercher (Ctrl K)', () => s.click()]);
         it.push(['⌨️', 'Fiche des raccourcis (?)', () => document.dispatchEvent(new KeyboardEvent('keydown', { key: '?', bubbles: true }))]);
+        if (window.XBARCFG) it.unshift(['🧰', 'Personnaliser les barres… (ordre, favoris, boutons masqués)', () => XBARCFG.open()]);
         const g = $('xs-gear'); if (g) it.push(['⚙️', 'Paramètres de l\'outil', () => g.click()]);
         show(e, '🧰 Barres', H.length ? H.length + ' bouton(s) masqué(s) dans cet outil.' : 'Astuce : clic droit sur un bouton pour ses raccourcis.', it);
     }
