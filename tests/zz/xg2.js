@@ -1,0 +1,12 @@
+const {chromium}=require('playwright');(async()=>{const b=await chromium.launch();const pg=await b.newPage({viewport:{width:1440,height:900}});
+await pg.goto('http://localhost:8765/index.html');await pg.waitForTimeout(6000);
+const F=pg.frames().find(f=>/index\.html/.test(f.url())&&f!==pg.mainFrame())||pg.mainFrame();
+await F.evaluate(()=>{document.querySelectorAll('.modal-overlay,#xnw-ov,#xt-root').forEach(m=>m.remove());XGUIDE.start()});await pg.waitForTimeout(800);
+const off=F===pg.mainFrame()?[0,0]:await pg.evaluate(()=>{const f=[...document.querySelectorAll('iframe')].find(x=>x.offsetWidth>300);const r=f.getBoundingClientRect();return [r.x,r.y]});
+const clickTxt=async t=>{const bx=await F.locator('#xg-ov button:has-text("'+t+'")').first().boundingBox();await pg.mouse.click(bx.x+bx.width/2,bx.y+bx.height/2);await pg.waitForTimeout(400)};
+await clickTxt('Documentaire');console.log('type choisi :',await F.evaluate(()=>(document.querySelector('#xg-ov .xg-types .on,#xg-ov [aria-pressed=true],#xg-ov .xg-types button.sel')||{}).textContent||'?'));
+const inp=await F.locator('#xg-ov input').first().boundingBox();await pg.mouse.click(inp.x+20,inp.y+inp.height/2);await pg.keyboard.type('Test');
+console.log('nom saisi :',await F.evaluate(()=>document.querySelector('#xg-ov input').value));
+await clickTxt('Suivant');console.log('étape :',await F.evaluate(()=>(document.querySelector('#xg-ov .xg-steps .on,#xg-ov .xg-steps b')||{}).textContent));
+await clickTxt('Suivant');console.log('étape :',await F.evaluate(()=>(document.querySelector('#xg-ov .xg-steps .on,#xg-ov .xg-steps b')||{}).textContent),'| voile traversable ?',await F.evaluate(()=>getComputedStyle(document.getElementById('xg-ov')).pointerEvents));
+await b.close()})();

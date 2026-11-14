@@ -10,7 +10,7 @@
     if (window.XDOCK) return;
     const APPX = XIII_APP, $ = id => document.getElementById(id), K = 'xiii.dock.' + APPX;
     const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } };
-    const SKIP = '#xf-ov,#xnw-ov,#xux-ov,#xs-ov,#xb-menu,#xem-first,#xctx-key,#wsdlg,#xid-pop,#xfocus-out,#xdock-btn,#xoff,#xau-ban,#xs-gear,#xt-tab,#xt-pop,#xt-bar,#xt-block,#xt-hole,#xb-master,#xem-syno,#xpres,#export-loader,.xtoast,#toast,.toast';
+    const SKIP = '#xg-ov,#xf-ov,#xnw-ov,#xux-ov,#xs-ov,#xb-menu,#xem-first,#xctx-key,#wsdlg,#xid-pop,#xfocus-out,#xdock-btn,#xoff,#xau-ban,#xs-gear,#xt-tab,#xt-pop,#xt-bar,#xt-block,#xt-hole,#xb-master,#xem-syno,#xpres,#export-loader,.xtoast,#toast,.toast';
     const big = r => r.width >= innerWidth * 0.9 && r.height >= innerHeight * 0.85;
     let T = 0;
     function boxOf(ov) {
@@ -29,7 +29,8 @@
         }
         document.querySelectorAll('[data-xdock]').forEach(ov => { if (cand.indexOf(ov) < 0) undock(ov, true); });
         cand.forEach(ov => {
-            let b = ov.dataset.xdock === '1' ? ov.querySelector('[data-xdockbox]') : boxOf(ov); if (!b) return;
+            // la fenêtre a pu redessiner sa boîte (assistant en étapes…) : on retrouve la nouvelle, sinon le voile « traversable » laissait passer les clics
+            let b = ov.querySelector('[data-xdockbox]'); if (!b && ov.dataset.xdock === '1') { b = boxOf(ov); if (b) { b.classList.add('xdock-box'); } else { undock(ov, true); return; } } if (!b) b = boxOf(ov); if (!b) return;
             const r0 = b.dataset.xw ? { width: +b.dataset.xw, height: +b.dataset.xh } : b.getBoundingClientRect();
             if (r0.width > 640 || r0.height < 200 || b.querySelectorAll('input,select,textarea,button').length < 3) return; // petite question, ou grande fenêtre : au centre
             const key = titleOf(b), pref = J(K, {})[key];
