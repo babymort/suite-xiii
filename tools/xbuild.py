@@ -36,6 +36,15 @@ for f in pages:
     # empreintes des fichiers communs appelés dans la page
     s = re.sub(r'lib/(core-\d+\.(?:js|css))\?v=(?:@@[^@]+@@|[0-9a-f]+)', lambda m: 'lib/' + m.group(1) + '?v=' + V[m.group(1)], s)
     open(R + f, 'w', encoding='utf-8').write(s)
+# 2 ter. pages sans bloc SETTINGS mais nommées dans extra.json (ex. l'espace de travail) : modules injectés avant </body>
+for app in sorted(set(a for n, who in EXTRA if isinstance(who, list) for a in who)):
+    f = app + '.html'
+    if f in pages or not os.path.exists(R + f): continue
+    s2 = open(R + f, encoding='utf-8').read()
+    s2 = re.sub(r'\n?<!-- SUITE XIII:XEXTRA:START -->.*?<!-- SUITE XIII:XEXTRA:END -->', '', s2, flags=re.S)
+    tags = ['<script src="lib/' + n + '?v=' + V[n] + '"></script>' for n, who in EXTRA if isinstance(who, list) and app in who]
+    if tags and '</body>' in s2: s2 = s2.replace('</body>', '<!-- SUITE XIII:XEXTRA:START --><script>var XIII_APP = window.XIII_APP || ' + json.dumps(app) + ';</script>' + ''.join(tags) + '<!-- SUITE XIII:XEXTRA:END --></body>', 1)
+    open(R + f, 'w', encoding='utf-8').write(s2)
 # 2 bis. pages sans bloc SETTINGS (téléphone -m, app équipe) : modules « @m » de extra.json, chargés dans <head>
 MP = sorted(f for f in os.listdir(R) if f.endswith('.html') and (f.endswith('-m.html') or f in ('equipe.html', 'team.html')))
 for f in MP:

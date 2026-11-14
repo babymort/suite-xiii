@@ -1,0 +1,7 @@
+const {chromium}=require('playwright');(async()=>{const b=await chromium.launch();const pg=await b.newPage({viewport:{width:1440,height:900}});
+await pg.addInitScript(()=>{localStorage.setItem('xiii.ws',JSON.stringify({cur:'w1',list:[{id:'w1',name:'Le Phare',color:'#4db6ac'}]}));localStorage.setItem('xiii.color',JSON.stringify({mode:'projet'}))});
+await pg.goto('http://localhost:8765/index.html');await pg.waitForTimeout(6000);
+const F=pg.frames().find(f=>/index\.html/.test(f.url())&&f!==pg.mainFrame())||pg.mainFrame();
+console.log('ESPACE:',await pg.evaluate(()=>{const C={};document.querySelectorAll('*').forEach(e=>{const cs=getComputedStyle(e);[cs.color,cs.borderBottomColor,cs.backgroundColor,cs.boxShadow,cs.backgroundImage].join(' ').replace(/rgba?\([^)]*\)/g,m=>{const v=m.match(/[\d.]+/g).map(Number);const[r,g,b]=v;if(r>200&&g>120&&g<200&&b<130&&r-b>100)C[m]=(C[m]||0)+1})});return Object.entries(C).sort((a,b)=>b[1]-a[1]).slice(0,8).map(x=>x[0]+'×'+x[1]).join('  ')}));
+console.log('ACCUEIL:',await F.evaluate(()=>{const C={};document.querySelectorAll('*').forEach(e=>{const cs=getComputedStyle(e);[cs.color,cs.borderBottomColor,cs.backgroundColor,cs.boxShadow,cs.backgroundImage,cs.textShadow].join(' ').replace(/rgba?\([^)]*\)/g,m=>{const v=m.match(/[\d.]+/g).map(Number);const[r,g,b]=v;if(r>200&&g>120&&g<200&&b<130&&r-b>100)C[m]=(C[m]||0)+1})});return Object.entries(C).sort((a,b)=>b[1]-a[1]).slice(0,10).map(x=>x[0]+'×'+x[1]).join('  ')}));
+await b.close()})();
