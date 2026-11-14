@@ -19,7 +19,7 @@
     var gi = SP.getItem, si = SP.setItem, ri = SP.removeItem, ki = SP.key;
     var COLORS = ['#f0b429', '#4fc3f7', '#81c784', '#e57373', '#ba68c8', '#ff8a3d', '#4db6ac', '#f06292', '#9575cd', '#d4e157'];
     // clés communes à tous les projets (préférences, bibliothèques, catalogues, IA, onglets…)
-    var G = /^(xiii\.(ws|tabs|theme|ctheme$|color$|tray\.|ctx\.hide\.|a11y|anim\.|tour2?\.|tips\.|pins|recent|start\.|pwa\.|ai$|ai\.|ux\.|bar\.|boot\.|settings\.|home\.|docs\.seen|news\.|ib\.no|inapp|catalogue|data\.|lib\.|annuaire|encodo\.|errlog|cmds|ndi\.|tally\.|gif\.)|[a-zA-Z]+XIII\.(prefs|library|lib|templates|kits|poses|parts|models|presets|base|parc|moi|xlfields|emetteur|comptes|inventory|libMigrated)$|encodoXIII|synoptique_(?!projects|snapshots)|theme$)/;
+    var G = /^(xiii\.(ws|tabs|theme|ctheme$|keys\.|color$|tray\.|ctx\.hide\.|a11y|anim\.|tour2?\.|tips\.|pins|recent|start\.|pwa\.|ai$|ai\.|ux\.|bar\.|boot\.|settings\.|home\.|docs\.seen|news\.|ib\.no|inapp|catalogue|data\.|lib\.|annuaire|encodo\.|errlog|cmds|ndi\.|tally\.|gif\.)|[a-zA-Z]+XIII\.(prefs|library|lib|templates|kits|poses|parts|models|presets|base|parc|moi|xlfields|emetteur|comptes|inventory|libMigrated)$|encodoXIII|synoptique_(?!projects|snapshots)|theme$)/;
     var rg = function (k) { return gi.call(LS, k); }, rs = function (k, v) { si.call(LS, k, v); }, rr = function (k) { ri.call(LS, k); };
     function rkeys() { var a = [], n = LS.length; for (var i = 0; i < n; i++) a.push(ki.call(LS, i)); return a; }
     function J(s) { try { return JSON.parse(s); } catch (e) { return null; } }
@@ -1403,7 +1403,7 @@ var XRED = (function () {
     if (typeof XSET === 'undefined' || typeof pref === 'undefined') return;
     function apply(S) { if (S.big != null) pref.big = !!S.big; savePref(); applyPref(); }
     XSET.init({
-        app: 'jour', title: 'MODE TOURNAGE', version: 'v1.23',
+        app: 'jour', title: 'MODE TOURNAGE', version: 'v1.24',
         sections: [{ id: 'aff', icon: '🎬', title: 'Affichage', open: true, desc: 'La journée de tournage rassemble CALL SHEETO, SCRIPTO, BACKUPO, PACKINGO et CONDUCO.',
             fields: [{ k: 'big', label: 'Grands caractères', type: 'toggle', def: false }] }],
         apply
@@ -2247,6 +2247,7 @@ XWXS.init('jour');
 <script src="lib/suite-barcfg.js?v=3bcd4cdd2f"></script>
 <script src="lib/suite-ctheme.js?v=74527a3f6a"></script>
 <script src="lib/suite-projpage.js?v=f2c3586bc7"></script>
+<script src="lib/suite-kmap.js?v=d4b0728a57"></script>
 <!-- SUITE XIII:EXTRA:END -->
 </body>
 </html>

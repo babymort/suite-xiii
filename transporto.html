@@ -19,7 +19,7 @@
     var gi = SP.getItem, si = SP.setItem, ri = SP.removeItem, ki = SP.key;
     var COLORS = ['#f0b429', '#4fc3f7', '#81c784', '#e57373', '#ba68c8', '#ff8a3d', '#4db6ac', '#f06292', '#9575cd', '#d4e157'];
     // clés communes à tous les projets (préférences, bibliothèques, catalogues, IA, onglets…)
-    var G = /^(xiii\.(ws|tabs|theme|ctheme$|color$|tray\.|ctx\.hide\.|a11y|anim\.|tour2?\.|tips\.|pins|recent|start\.|pwa\.|ai$|ai\.|ux\.|bar\.|boot\.|settings\.|home\.|docs\.seen|news\.|ib\.no|inapp|catalogue|data\.|lib\.|annuaire|encodo\.|errlog|cmds|ndi\.|tally\.|gif\.)|[a-zA-Z]+XIII\.(prefs|library|lib|templates|kits|poses|parts|models|presets|base|parc|moi|xlfields|emetteur|comptes|inventory|libMigrated)$|encodoXIII|synoptique_(?!projects|snapshots)|theme$)/;
+    var G = /^(xiii\.(ws|tabs|theme|ctheme$|keys\.|color$|tray\.|ctx\.hide\.|a11y|anim\.|tour2?\.|tips\.|pins|recent|start\.|pwa\.|ai$|ai\.|ux\.|bar\.|boot\.|settings\.|home\.|docs\.seen|news\.|ib\.no|inapp|catalogue|data\.|lib\.|annuaire|encodo\.|errlog|cmds|ndi\.|tally\.|gif\.)|[a-zA-Z]+XIII\.(prefs|library|lib|templates|kits|poses|parts|models|presets|base|parc|moi|xlfields|emetteur|comptes|inventory|libMigrated)$|encodoXIII|synoptique_(?!projects|snapshots)|theme$)/;
     var rg = function (k) { return gi.call(LS, k); }, rs = function (k, v) { si.call(LS, k, v); }, rr = function (k) { ri.call(LS, k); };
     function rkeys() { var a = [], n = LS.length; for (var i = 0; i < n; i++) a.push(ki.call(LS, i)); return a; }
     function J(s) { try { return JSON.parse(s); } catch (e) { return null; } }
@@ -2466,7 +2466,7 @@ var XRED = (function () {
     if (typeof XSET === 'undefined' || typeof prefs === 'undefined' || typeof VT === 'undefined') return;
     function apply(S) { try { render(); } catch (e) { } }
     XSET.init({
-        app: 'transporto', title: 'TRANSPORTO', version: 'v1.42',
+        app: 'transporto', title: 'TRANSPORTO', version: 'v1.43',
         sections: [{ id: 'aff', icon: '🚐', title: 'Logistique', open: true, desc: 'Équipe importée de CALL SHEETO, de l\'annuaire et de MODE TOURNAGE ; la logistique de chacun apparaît dans son espace équipe (MODE TOURNAGE).', fields: [{ k: 'view', label: 'Vue à l\'ouverture', type: 'select', def: 'team', options: [['team', 'Équipe'], ['travel', 'Voyages'], ['trips', 'Navettes'], ['hotel', 'Hébergement']] }] }],
         apply
     });
@@ -3292,6 +3292,7 @@ XVIT.init();
 <script src="lib/suite-barcfg.js?v=3bcd4cdd2f"></script>
 <script src="lib/suite-ctheme.js?v=74527a3f6a"></script>
 <script src="lib/suite-projpage.js?v=f2c3586bc7"></script>
+<script src="lib/suite-kmap.js?v=d4b0728a57"></script>
 <!-- SUITE XIII:EXTRA:END -->
 </body>
 </html>
