@@ -1,3 +1,5 @@
-const {chromium}=require('playwright');(async()=>{const b=await chromium.launch();const p=await b.newPage({viewport:{width:1440,height:900}});await p.addInitScript(()=>{window.XFOCUS={};localStorage.setItem('xiii.tour2.scripto.hide','1')});await p.goto('http://localhost:8765/scripto.html');await p.waitForTimeout(4500);
-console.log(await p.evaluate(()=>document.getElementById('modal').innerText.slice(0,300)));console.log(await p.evaluate(()=>({ae:document.activeElement&&document.activeElement.tagName+'#'+document.activeElement.id,modal:!!document.getElementById('modal'),shots:document.querySelectorAll('.shot,[data-shot]').length})));
-await p.evaluate(()=>{window.__k=[];document.addEventListener('keydown',e=>window.__k.push(e.key+(e.defaultPrevented?'(P)':'')),false)});await p.keyboard.press('n');await p.waitForTimeout(500);console.log(await p.evaluate(()=>window.__k),await p.evaluate(()=>document.body.innerText.slice(0,200)));await p.screenshot({path:'/tmp/zz/k2.png'});await b.close()})();
+const {chromium}=require('playwright');(async()=>{const b=await chromium.launch();const p=await b.newPage({viewport:{width:1400,height:850}});
+await p.goto('http://localhost:8765/plano.html');await p.waitForTimeout(3500);await p.evaluate(()=>{const x=document.getElementById('xnw-ov');if(x)x.remove()});
+await p.mouse.click(700,500);console.log(await p.evaluate(()=>[!!document.getElementById('xfocus-btn'),document.activeElement.tagName]));
+await p.keyboard.press('f');await p.waitForTimeout(300);console.log('F natif',await p.evaluate(()=>document.body.classList.contains('xfocus')));
+await b.close()})()

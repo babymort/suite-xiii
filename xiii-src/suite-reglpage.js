@@ -7,8 +7,8 @@
 // =====================================================================
 (function () {
     if (window.XREGLPAGE) return;
-    const GROUPS = [['projet', '🎬', 'Projet', /^projet|scénario|cohérence|charte/i], ['donnees', '☁️', 'Données', /drive|sauvegarde/i], ['connexions', '🔗', 'Connexions', /intelligence|automatisation/i], ['apparence', '🎨', 'Apparence', /thème|barres|accueil|couleur/i], ['install', '📲', 'Installation', /install/i]];
-    const EXTRA = [['🧩', 'Barres à la carte', 'Ordre des secteurs, favoris, boutons masqués', () => window.XBARCFG && XBARCFG.open()], ['🏠', 'Accueil sur mesure', 'Sections, ordre et widgets de l\'accueil', () => window.XHOMECFG && XHOMECFG.open()], ['🖌️', 'Thème perso', 'Couleurs de fond, de texte et d\'accent', () => window.XCTHEME && XCTHEME.open()]];
+    const GROUPS = [['projet', '🎬', 'Projet', /^projet|scénario|cohérence|charte/i], ['donnees', '☁️', 'Données', /drive|sauvegarde/i], ['connexions', '🔗', 'Connexions', /intelligence|automatisation/i], ['apparence', '🎨', 'Apparence', /thème|barres|accueil|couleur|raccourci/i], ['install', '📲', 'Installation', /install/i]];
+    const EXTRA = [['🧩', 'Barres à la carte', 'Ordre des secteurs, favoris, boutons masqués', () => window.XBARCFG && XBARCFG.open()], ['🏠', 'Accueil sur mesure', 'Sections, ordre et widgets de l\'accueil', () => window.XHOMECFG && XHOMECFG.open()], ['⌨️', 'Raccourcis clavier', 'Changer les touches, profils de touches', () => window.XKMAP && XKMAP.open()], ['🖌️', 'Thème perso', 'Couleurs de fond, de texte et d\'accent', () => window.XCTHEME && XCTHEME.open()]];
     const PAGES = [['projet', '🎬', 'Projet', 'index.html#projet'], ['drive', '☁️', 'Drive', 'drive.html'], ['team', '👥', 'Team', 'team.html'], ['reglages', '⚙️', 'Réglages', 'index.html#reglages']];
     const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
     const css = document.createElement('style'); css.id = 'xreglpage-css';
