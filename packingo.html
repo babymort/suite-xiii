@@ -19,7 +19,7 @@
     var gi = SP.getItem, si = SP.setItem, ri = SP.removeItem, ki = SP.key;
     var COLORS = ['#f0b429', '#4fc3f7', '#81c784', '#e57373', '#ba68c8', '#ff8a3d', '#4db6ac', '#f06292', '#9575cd', '#d4e157'];
     // clés communes à tous les projets (préférences, bibliothèques, catalogues, IA, onglets…)
-    var G = /^(xiii\.(ws|tabs|theme|color$|tray\.|a11y|anim\.|tour2?\.|tips\.|pins|recent|start\.|pwa\.|ai$|ai\.|ux\.|bar\.|boot\.|settings\.|home\.|docs\.seen|news\.|ib\.no|inapp|catalogue|data\.|lib\.|annuaire|encodo\.|errlog|cmds|ndi\.|tally\.|gif\.)|[a-zA-Z]+XIII\.(prefs|library|lib|templates|kits|poses|parts|models|presets|base|parc|moi|xlfields|emetteur|comptes|inventory|libMigrated)$|encodoXIII|synoptique_(?!projects|snapshots)|theme$)/;
+    var G = /^(xiii\.(ws|tabs|theme|color$|tray\.|ctx\.hide\.|a11y|anim\.|tour2?\.|tips\.|pins|recent|start\.|pwa\.|ai$|ai\.|ux\.|bar\.|boot\.|settings\.|home\.|docs\.seen|news\.|ib\.no|inapp|catalogue|data\.|lib\.|annuaire|encodo\.|errlog|cmds|ndi\.|tally\.|gif\.)|[a-zA-Z]+XIII\.(prefs|library|lib|templates|kits|poses|parts|models|presets|base|parc|moi|xlfields|emetteur|comptes|inventory|libMigrated)$|encodoXIII|synoptique_(?!projects|snapshots)|theme$)/;
     var rg = function (k) { return gi.call(LS, k); }, rs = function (k, v) { si.call(LS, k, v); }, rr = function (k) { ri.call(LS, k); };
     function rkeys() { var a = [], n = LS.length; for (var i = 0; i < n; i++) a.push(ki.call(LS, i)); return a; }
     function J(s) { try { return JSON.parse(s); } catch (e) { return null; } }
@@ -4245,7 +4245,7 @@ var XRED = (function () {
         return p;
     };
     XSET.init({
-        app: 'packingo', title: 'PACKINGO', version: 'v76',
+        app: 'packingo', title: 'PACKINGO', version: 'v77',
         theme: { get: () => prefs.theme === 'light' ? 'light' : 'dark', set: t => { if ((prefs.theme === 'light' ? 'light' : 'dark') !== t) toggleTheme(); } },
         hide: ['#toolbar button[onclick="toggleTheme()"]', '#toolbar button[onclick="openGuide()"]'],
         help: [{ icon: '📖', label: 'Guide d\'utilisation', sub: 'Caisses, chargement, vérification, rapport', run: openGuide }],
@@ -6234,10 +6234,10 @@ XCAT.initTool('packingo');
 <script src="lib/suite-sobre.js?v=21dc837de1"></script>
 <script src="lib/suite-ident.js?v=f1f4fc2bce"></script>
 <script src="lib/suite-topbar.js?v=74f3e00099"></script>
-<script src="lib/suite-sectors.js?v=9302270cde"></script>
+<script src="lib/suite-sectors.js?v=9505a5e1ef"></script>
 <script src="lib/suite-focus.js?v=4c5df42ea0"></script>
 <script src="lib/suite-keys.js?v=f5024fc78d"></script>
-<script src="lib/suite-ctx.js?v=98b9b65103"></script>
+<script src="lib/suite-ctx.js?v=65bc7e2b55"></script>
 <script src="lib/suite-empty.js?v=dc3fbb36b9"></script>
 <script src="lib/suite-dock.js?v=253bb1bb47"></script>
 <script src="lib/suite-libtab.js?v=93b6932f63"></script>
@@ -6247,6 +6247,7 @@ XCAT.initTool('packingo');
 <script src="lib/suite-tabman.js?v=def6ee12e7"></script>
 <script src="lib/suite-motion.js?v=08ee5e08bd"></script>
 <script src="lib/suite-color.js?v=44db6d9900"></script>
+<script src="lib/suite-barcfg.js?v=3bcd4cdd2f"></script>
 <!-- SUITE XIII:EXTRA:END -->
 </body>
 </html>
