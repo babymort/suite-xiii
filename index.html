@@ -2129,18 +2129,20 @@ body.xh #xb-master,body.xh #xacc-chip,body.xh #xau-chip{left:232px}
             T('🔗', 'Automatisations', 'IFTTT : fin d\'émission, rushes, convocations', () => typeof XIFTTT !== 'undefined' && XIFTTT.panel()),
             T('🌓', 'Thème', 'Clair / sombre', () => typeof toggleTheme === 'function' && toggleTheme()),
             T('📲', 'Installer la suite', 'Application sur l\'ordinateur ou le téléphone', () => typeof XPWA !== 'undefined' ? XPWA.panel() : document.getElementById('xs-gear').click())];
-        const teamTiles = [T('👥', 'Membres et droits', 'Inviter, secteurs, autorisations, en attente', () => location.href = 'team.html'),
+        const teamTiles = [T('🎬', 'Projet XIII', 'Fiche du projet : nom, dates, lieux, équipe clé, réglages', () => typeof XPROJET !== 'undefined' && XPROJET.open()),
+            T('☁️', 'Drive', 'Données partagées avec l\'équipe, sauvegardes, liens', () => location.href = 'drive.html'),
+            T('👥', 'Membres et droits', 'Inviter, secteurs, autorisations, en attente', () => location.href = 'team.html'),
             T('📱', 'App équipe', 'Lien et QR code de l\'application des équipiers', () => location.href = 'equipe.html'),
             T('📋', 'Convocations', 'Feuilles de service et envoi groupé', () => location.href = 'callsheeto.html'),
             T('📣', 'Annonces', 'Messages à toute l\'équipe, demandes, chat', () => location.href = 'annonces.html'),
             T('✅', 'Arrivées du jour', 'Pointage QR et « Je suis arrivé »', () => location.href = 'jour.html')];
         const mk = (id, h, sub, tiles) => { let s = document.getElementById(id); if (s) s.remove(); s = document.createElement('section'); s.id = id; s.dataset.xh = id; s.innerHTML = '<h2 class="xh-h">' + h + '</h2><p class="xh-sub">' + sub + '</p><div class="xh-panel">' + tiles.map((t, k) => '<button class="xh-t" data-k="' + k + '"><span class="i">' + t.i + '</span><b>' + esc(t.t) + '</b><small>' + esc(t.s) + '</small>' + (t.w ? '<em style="display:block;font-style:normal;font-size:11.5px;line-height:1.35;color:#ef9a9a" title="' + esc(t.wt || t.w) + '">' + esc(t.w) + '</em>' : '') + '</button>').join('') + '</div>'; main.appendChild(s); s.querySelectorAll('[data-k]').forEach(b => b.onclick = () => { try { tiles[+b.dataset.k].fn(); } catch (e) { } }); };
         mk('xh-set', 'Reglages du projet', 'Tout ce qui concerne le projet en cours, au même endroit.', setTiles);
-        if (!member()) mk('xh-team', 'Gestion d\'equipe', 'Réservé au Master du projet.', teamTiles);
+        if (!member()) mk('xh-team', 'Projet XIII', 'Le projet, son Drive et son équipe — réservé au Master.', teamTiles);
     }
     function nav() {
         const phases = [...document.querySelectorAll('main section.phase:not(#xpin)')].map((s, i) => { const n = (s.querySelector('.phase-name') || {}).textContent || ('Outils ' + (i + 1)); return ['p' + i, ICO[n.trim()] || '🧰', n.trim()]; });
-        TABS = [['dash', '📊', 'Dashboard']].concat(phases, [['xh-set', '⚙️', 'Réglages']], member() ? [] : [['xh-team', '👥', 'Équipe']]);
+        TABS = [['dash', '📊', 'Dashboard']].concat(phases, [['xh-set', '⚙️', 'Réglages']], member() ? [] : [['xh-team', '🎬', 'Projet XIII']]);
         let n = document.getElementById('xh-nav'); const box = document.getElementById('cur-proj'); if (n) { if (box) document.querySelector('main').prepend(box); n.remove(); } n = document.createElement('nav'); n.id = 'xh-nav'; n.setAttribute('aria-label', 'Sections de l\'accueil');
         n.innerHTML = '<div class="xh-logo"><img src="logos/index.png" alt="Suite XIII" onerror="this.src=\'xiii-logo-suite.png\'"></div>' + TABS.map((t, i) => (i === TABS.length - (member() ? 1 : 2) ? '<div class="xh-sp"></div><div class="xh-sep"></div>' : '') + '<button data-t="' + t[0] + '"><span class="i">' + t[1] + '</span><span>' + esc(t[2]) + '</span></button>').join('') + '<div class="xh-foot">SUITE XIII</div>';
         document.body.appendChild(n); const sp = n.querySelector('.xh-sp'); if (box && sp) sp.after(box); n.querySelectorAll('[data-t]').forEach(b => b.onclick = () => show(b.dataset.t));
