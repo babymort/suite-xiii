@@ -1,0 +1,14 @@
+const {chromium}=require('playwright');(async()=>{const b=await chromium.launch();const pg=await b.newPage({viewport:{width:1440,height:900}});
+await pg.addInitScript(()=>{localStorage.setItem('xiii.tour2.conduco.hide','1');localStorage.setItem('xiii.tour2.projet.hide','1')});
+await pg.goto('http://localhost:8765/conduco.html');await pg.waitForTimeout(4000);
+await pg.evaluate(()=>XPROJET.open());await pg.waitForTimeout(800);
+console.log(await pg.evaluate(()=>{const o=document.getElementById('xpj-ov');const body=o.querySelector('.xpj-body');return 'enfants ov: '+[...o.children].map(c=>c.className||c.id).join(',')+' | box: '+[...o.firstElementChild.children].map(c=>c.className||c.id).join(',')+'\nsections: '+[...body.children].map(c=>(c.id||c.tagName+'.'+c.className)+' «'+(c.querySelector('h3,h4,b')||c).textContent.trim().slice(0,30)+'»').join('\n')}));
+await pg.screenshot({path:'/tmp/zz/fiche0.png'});await b.close()})();
+;(async()=>{const {chromium}=require('playwright');const b=await chromium.launch();const pg=await b.newPage({viewport:{width:1440,height:900}});
+await pg.addInitScript(()=>{localStorage.setItem('xiii.tour2.conduco.hide','1');localStorage.setItem('xiii.tour2.projet.hide','1')});
+await pg.goto('http://localhost:8765/conduco.html#projet');await pg.waitForTimeout(5000);
+console.log('ouvert par #projet :',await pg.evaluate(()=>!!document.querySelector('#xpj-ov.xpj-page')));
+await pg.evaluate(()=>{const i=document.querySelector('#xpj-ov input[data-k]');i.value='Le Phare';i.dispatchEvent(new Event('input',{bubbles:true}))});
+await pg.click('#xpj-ov .xpj-nav a[href="#xpj-h"]');await pg.waitForTimeout(900);
+console.log('rubrique active :',await pg.evaluate(()=>(document.querySelector('#xpj-ov .xpj-nav a.on')||{}).textContent),'| compteurs :',await pg.evaluate(()=>[...document.querySelectorAll('#xpj-ov .xpj-nav a small')].map(s=>s.textContent).join(' ')));
+await pg.screenshot({path:'/tmp/zz/fiche1.png'});await b.close()})();
