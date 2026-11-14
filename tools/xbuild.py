@@ -43,7 +43,7 @@ for app in sorted(set(a for n, who in EXTRA if isinstance(who, list) for a in wh
     s2 = open(R + f, encoding='utf-8').read()
     s2 = re.sub(r'\n?<!-- SUITE XIII:XEXTRA:START -->.*?<!-- SUITE XIII:XEXTRA:END -->', '', s2, flags=re.S)
     tags = ['<script src="lib/' + n + '?v=' + V[n] + '"></script>' for n, who in EXTRA if isinstance(who, list) and app in who]
-    if tags and '</body>' in s2: s2 = s2.replace('</body>', '<!-- SUITE XIII:XEXTRA:START --><script>var XIII_APP = window.XIII_APP || ' + json.dumps(app) + ';</script>' + ''.join(tags) + '<!-- SUITE XIII:XEXTRA:END --></body>', 1)
+    if tags and '</body>' in s2: i2 = s2.rfind('</body>'); s2 = s2[:i2] + '<!-- SUITE XIII:XEXTRA:START --><script>var XIII_APP = window.XIII_APP || ' + json.dumps(app) + ';</script>' + ''.join(tags) + '<!-- SUITE XIII:XEXTRA:END -->' + s2[i2:]  # la vraie fin de page (pas un '</body>' écrit dans du code)
     open(R + f, 'w', encoding='utf-8').write(s2)
 # 2 bis. pages sans bloc SETTINGS (téléphone -m, app équipe) : modules « @m » de extra.json, chargés dans <head>
 MP = sorted(f for f in os.listdir(R) if f.endswith('.html') and (f.endswith('-m.html') or f in ('equipe.html', 'team.html')))

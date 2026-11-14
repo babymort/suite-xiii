@@ -1,3 +1,6 @@
-const {chromium}=require('playwright');const fs=require('fs');const apps=fs.readdirSync('/home/claude/suite-xiii').filter(f=>f.endsWith('.html')&&fs.readFileSync('/home/claude/suite-xiii/'+f,'utf8').includes('id="toolbar"')).map(f=>f.slice(0,-5)).filter(a=>!/-m$|^(catalogue|importo)$/.test(a));
-(async()=>{const b=await chromium.launch();const c=await b.newContext({viewport:{width:1440,height:900}});await Promise.all([0,1,2].map(async()=>{while(apps.length){const a=apps.shift();const p=await c.newPage();await p.goto('http://localhost:8765/'+a+'.html');await p.waitForTimeout(6000);
-const r=await p.evaluate(()=>['xdl-btn','xnt-btn','xmm-btn','xdr-btn','xb-solo','xb-bar'].map(i=>{const e=document.getElementById(i);return i+':'+(e?(e.offsetWidth>0?'V':'h')+(e.closest('#top-bar')?'T':e.closest('#toolbar')?'B':'?'):'-')}).join(' '));console.log(a.padEnd(12),r);await p.close()}}));await b.close()})();
+const {chromium}=require('playwright');(async()=>{const b=await chromium.launch();const pg=await b.newPage({viewport:{width:1440,height:900}});pg.on('pageerror',e=>console.log('ERR',e.message));
+await pg.goto('http://localhost:8765/team.html');await pg.waitForTimeout(3000);
+console.log('mode outil :',await pg.evaluate(()=>document.documentElement.classList.contains('xmg')));
+for(const t of ['mem','sec','link']){await pg.evaluate(t=>{const b=document.querySelector('#nav [data-t='+t+']');b&&b.click()},t);await pg.waitForTimeout(400);}
+console.log('rubrique active :',await pg.evaluate(()=>(document.querySelector('#nav .on')||{}).textContent));
+await pg.screenshot({path:'/tmp/zz/team.png'});await b.close()})();
