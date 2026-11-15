@@ -2276,7 +2276,7 @@ var XRED = (function () {
 // IMPORT XIII — ⚙️ Paramètres
 (function () {
     if (typeof XSET === 'undefined' || typeof records !== 'function') return;
-    XSET.init({ app: 'importo', title: 'IMPORT', version: 'v1.25', theme: { get: () => prefs.theme, set: t => { prefs.theme = t; applyTheme(); savePrefs(); } },
+    XSET.init({ app: 'importo', title: 'IMPORT', version: 'v1.26', theme: { get: () => prefs.theme, set: t => { prefs.theme = t; applyTheme(); savePrefs(); } },
         help: [{ icon: '📥', label: 'Comment ça marche ?', sub: 'Excel, CSV, PDF, StudioBinder, Movie Magic', run: () => alert('IMPORT XIII lit vos fichiers Excel, CSV, PDF, les copier-coller de Google Sheets et les exports StudioBinder / Movie Magic, reconnaît personnes, matériel ou dépouillement, puis les envoie vers l\'annuaire, CASTO, PACKINGO, DEVISO, le CATALOGUE ou PLANNO.') }],
         sections: [], apply() { } });
 })();
@@ -3980,6 +3980,23 @@ XDELEG.init('importo');
 //  et remplacé par une courte référence « xiiif:ID|type ». À la réception, la référence redevient le fichier
 //  (copie gardée dans ce navigateur : chaque fichier n'est téléchargé qu'une fois).
 // =====================================================================
+// saison 6 (ZZ) — XIMGS : réserve d'images de l'appareil (IndexedDB, sans la limite de ~5 Mo du stockage local).
+// Quand une photo (fond d'accueil, bannière…) ne tient plus dans le stockage local, elle part ici et le réglage garde
+// une petite référence « xiiiimg:… » ; marche hors ligne, ne dépend pas du Drive.
+const XIMGS = (() => {
+    const db = () => new Promise((res, rej) => { const r = indexedDB.open('xiiiImg', 1); r.onupgradeneeded = () => r.result.createObjectStore('i'); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
+    const tx = async (m, fn) => { const d = await db(); return new Promise((res, rej) => { const t = d.transaction('i', m), q = fn(t.objectStore('i')); t.oncomplete = () => res(q && q.result); t.onerror = () => rej(t.error); }); };
+    const C = {}, is = v => typeof v === 'string' && v.indexOf('xiiiimg:') === 0;
+    async function put(data) { const id = 'i' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7); await tx('readwrite', s => s.put(data, id)); C[id] = data; return 'xiiiimg:' + id; }
+    async function get(v) { if (!is(v)) return v || ''; const id = v.slice(8); if (C[id]) return C[id]; const d = await tx('readonly', s => s.get(id)).catch(() => null); if (d) C[id] = d; return d || ''; }
+    // enregistre l'objet dans le stockage local ; s'il est plein, l'image (champ « field ») passe dans la réserve
+    async function save(key, obj, field) { try { localStorage.setItem(key, JSON.stringify(obj)); return true; } catch (e) { }
+        if (!obj[field] || is(obj[field])) return false; try { obj[field] = await put(obj[field]); localStorage.setItem(key, JSON.stringify(obj)); return true; } catch (e) { return false; } }
+    // même chose pour une clé qui contient directement l'image
+    async function saveRaw(key, data) { try { localStorage.setItem(key, data); return true; } catch (e) { } try { localStorage.setItem(key, await put(data)); return true; } catch (e) { return false; } }
+    return { put, get, is, save, saveRaw };
+})();
+
 const XFILES = (() => {
     const RX = /data:([a-z]+\/[\w.+-]+);base64,[A-Za-z0-9+/=]{54000,}/g, RF = /xiiif:([\w-]{10,80})\|([a-z]+\/[\w.+-]+)/g;
     const MAPK = 'xiii.files.map';
@@ -7703,7 +7720,7 @@ const XPCFG = (() => {
         return Object.keys(D).filter(k => (D[k] || []).length).map(k => { const open = all.filter(a => D[k].indexOf(a) < 0), few = open.length < D[k].length; return { sec: k, label: secLabel(k), apps: D[k], open, names: D[k].map(nm), txt: few ? (open.length ? 'seulement ' + open.map(nm).join(', ') : 'aucun outil') : 'sans ' + D[k].map(nm).join(', ') }; }); }
     async function api(a, p) { const c = drive(); if (!c || !c.url) return { ok: false, err: 'off' }; try { const r = await fetch(c.url, { method: 'POST', body: JSON.stringify(Object.assign({ a }, c.tok ? { tok: c.tok } : { code: c.code, by: (c.me && c.me.name) || 'Master' }, p || {})), redirect: 'follow' }); return await r.json(); } catch (e) { return { ok: false, err: 'net' }; } }
     // ---------- appliquer ----------
-    async function bgUrl(c) { if (!c.bg) return ''; if (/^data:/.test(c.bg)) return c.bg; if (typeof XFILES === 'undefined') return ''; const r = await XFILES.unpack({ b: c.bg }); return /^data:/.test(r.b) ? r.b : ''; }
+    async function bgUrl(c) { if (!c.bg) return ''; if (/^data:/.test(c.bg)) return c.bg; if (typeof XIMGS !== 'undefined' && XIMGS.is(c.bg)) return XIMGS.get(c.bg); if (typeof XFILES === 'undefined') return ''; const r = await XFILES.unpack({ b: c.bg }); return /^data:/.test(r.b) ? r.b : ''; }
     async function apply() {
         const c = cfg();
         if (c.theme && typeof XTHEME !== 'undefined' && XTHEME.mode() !== c.theme && localStorage.getItem('xiii.pcfg.applied') !== c.theme + '|' + (c.at || 0)) { XTHEME.set(c.theme); localStorage.setItem('xiii.pcfg.applied', c.theme + '|' + (c.at || 0)); }
@@ -7732,10 +7749,11 @@ const XPCFG = (() => {
     }
     async function push(c) {
         const d = drive(); if (!d || !d.url || !d.code) return { ok: true, local: true };
-        let D = { cfg: JSON.stringify(Object.assign({}, c, { rev: undefined })) };
+        const c0 = Object.assign({}, c, { rev: undefined }); if (typeof XIMGS !== 'undefined' && XIMGS.is(c0.bg)) c0.bg = await XIMGS.get(c0.bg); // la photo de la réserve part entière vers le Drive
+        let D = { cfg: JSON.stringify(c0) };
         if (typeof XFILES !== 'undefined') { await XFILES.prepare(D, 'fond-accueil'); D = XFILES.pack(D); }
         const g = await api('get', { app: 'projet_cfg', since: -1 }); const r = await api('put', { app: 'projet_cfg', base: g.rev || 0, data: D, sum: 'personnalisation du projet' });
-        if (r.ok) { const s = JSON.parse(D.cfg); s.rev = r.rev; W(K, s); } return r;
+        if (r.ok) { const s = JSON.parse(D.cfg); s.rev = r.rev; if (!W(K, s) && typeof XIMGS !== 'undefined') { s.bg = c.bg; await XIMGS.save(K, s, 'bg'); } } return r;
     }
     // ---------- réglage (🎬 Projet XIII › 🖼️ Personnalisation) ----------
     function photo(file) { return new Promise((res, rej) => { const im = new Image(); im.onload = () => { const m = 1920, k = Math.min(1, m / Math.max(im.width, im.height)), cv = document.createElement('canvas'); cv.width = Math.round(im.width * k); cv.height = Math.round(im.height * k); cv.getContext('2d').drawImage(im, 0, 0, cv.width, cv.height); res(cv.toDataURL('image/jpeg', .82)); }; im.onerror = rej; im.src = URL.createObjectURL(file); }); }
@@ -7773,7 +7791,7 @@ const XPCFG = (() => {
         const rm = q('#xpc-rm'); if (rm) rm.onclick = () => { c.bg = ''; const p = q('#xpc-bgp'); p.style.backgroundImage = ''; p.innerHTML = '<small>Aucune photo</small>'; };
         q('#xpc-save').onclick = async () => {
             c.theme = q('#xpc-th').value; c.dim = +q('#xpc-dim').value; c.hidden = [...hid]; Object.keys(deny).forEach(k => { if (!(deny[k] || []).length) delete deny[k]; }); c.deny = deny; c.cols = cols; c.at = Date.now();
-            q('#xpc-st').textContent = '⏳ Enregistrement…'; if (!W(K, c)) { q('#xpc-st').textContent = '⚠️ Stockage plein : choisissez une photo plus légère'; return; }
+            q('#xpc-st').textContent = '⏳ Enregistrement…'; if (!W(K, c) && !(typeof XIMGS !== 'undefined' && await XIMGS.save(K, c, 'bg'))) { q('#xpc-st').textContent = '⚠️ Stockage plein : choisissez une photo plus légère'; return; }
             const r = await push(c); q('#xpc-st').textContent = r.ok ? (r.local ? '✅ Enregistré sur ce poste' : '✅ Enregistré pour toute l\'équipe') : '⚠️ Drive : ' + (r.err || 'erreur'); apply();
         };
     }
@@ -9707,7 +9725,7 @@ XVIT.init();
 <script src="lib/suite-kmap.js?v=d4b0728a57"></script>
 <script src="lib/suite-toolcfg.js?v=fd32e11e59"></script>
 <script src="lib/suite-anim.js?v=ef4d6e163a"></script>
-<script src="lib/suite-pident.js?v=ee74d9924b"></script>
+<script src="lib/suite-pident.js?v=01ef4569f2"></script>
 <script src="lib/suite-prof.js?v=cb9d806d7b"></script>
 <script src="lib/suite-notif.js?v=ac0dc3fd2e"></script>
 <script src="lib/suite-a11y3.js?v=cf542bcc3b"></script>

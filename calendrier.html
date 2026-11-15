@@ -1328,12 +1328,12 @@ var XRED = (function () {
 // CALENDRIER XIII — ⚙️ Paramètres
 (function () {
     if (typeof XSET === 'undefined' || typeof events !== 'function') return;
-    XSET.init({ app: 'calendrier', title: 'CALENDRIER', version: 'v1.32', theme: { get: () => prefs.theme, set: t => { prefs.theme = t; applyTheme(); savePrefs(); } },
+    XSET.init({ app: 'calendrier', title: 'CALENDRIER', version: 'v1.33', theme: { get: () => prefs.theme, set: t => { prefs.theme = t; applyTheme(); savePrefs(); } },
         help: [{ icon: '🗓️', label: 'Comment ça marche ?', sub: 'Toutes les dates, export .ics', run: () => alert('CALENDRIER XIII rassemble les dates de tous les outils : tâches PLANNO, journées de tournage CALL SHEETO, directs CONDUCO, repérages REPERO, réservations et révisions MATOS, factures et échéances DEVISO, versions et livraisons POSTO, contrats et expirations de droits RESSOURCO, dates limites de candidature DOSSIER. Export .ics pour votre agenda. Raccourcis : 1 mois, 2 liste, ← →.') }],
         sections: [], apply() { } });
 })();
 
-</script><script src="lib/core-02.js?v=953b064c70"></script><script src="lib/core-03.js?v=1d81197bcd"></script><script>// =====================================================================
+</script><script src="lib/core-02.js?v=953b064c70"></script><script src="lib/core-03.js?v=81e068889d"></script><script>// =====================================================================
 //  SUITE XIII — XPRS : 👥 présence en direct — qui est dans quel outil
 //  Deux sources fusionnées : le Drive (battement toutes les 20 s, fiable) et XLIVE (signal instantané à
 //  l'ouverture, au retour sur l'onglet, à la frappe, au départ). Affichage :
@@ -1818,7 +1818,7 @@ const XPUB = (() => {
 
 XPUB.init('calendrier', (typeof XDELEG !== 'undefined' && XDELEG.KEYS['calendrier']) || []);
 
-</script><script src="lib/core-07.js?v=6a1251e84c"></script><script src="lib/core-08.js?v=6d06160be1"></script><script>// =====================================================================
+</script><script src="lib/core-07.js?v=6a1251e84c"></script><script src="lib/core-08.js?v=65343cd03c"></script><script>// =====================================================================
 //  SUITE XIII — XVIT : 🌐 vitrine client du projet, en lecture seule, avec commentaires
 //  • sections automatiques : le projet (fiche), planning (PLANNO), intentions & moodboard (MOODO)
 //  • + documents des outils (ceux qu'ils envoient à DOSSIER : plan, synoptique, conducteur, storyboard…),
@@ -2044,7 +2044,7 @@ XVIT.init();
 <script src="lib/suite-kmap.js?v=d4b0728a57"></script>
 <script src="lib/suite-toolcfg.js?v=fd32e11e59"></script>
 <script src="lib/suite-anim.js?v=ef4d6e163a"></script>
-<script src="lib/suite-pident.js?v=ee74d9924b"></script>
+<script src="lib/suite-pident.js?v=01ef4569f2"></script>
 <script src="lib/suite-prof.js?v=cb9d806d7b"></script>
 <script src="lib/suite-notif.js?v=ac0dc3fd2e"></script>
 <script src="lib/suite-a11y3.js?v=cf542bcc3b"></script>

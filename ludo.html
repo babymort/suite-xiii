@@ -4553,7 +4553,7 @@ var XRED = (function () {
         askConfirm('Effacer tous les records de ce navigateur&nbsp;?', () => { records = {}; Store.set(KEY_REC, records); renderLib(); updateStats(); toast('🧹 Records effacés'); });
     }
     XSET.init({
-        app: 'ludo', title: 'LUDO', version: 'v35',
+        app: 'ludo', title: 'LUDO', version: 'v36',
         // horloges « Fin de pause / Heure » : en colonne, à gauche du ⚙️, au-dessus du badge Netlify
         css: '#zoom-controls{right:72px;bottom:80px;flex-direction:column;align-items:flex-end;gap:6px;padding:30px 0 0 40px}#zoom-controls::before{display:none}#zoom-controls .clock{margin-right:0;text-align:right}',
         theme: { get: () => prefs.theme === 'light' ? 'light' : 'dark', set: t => { prefs.theme = t === 'light' ? 'light' : 'dark'; applyTheme(); savePrefs(); } },
@@ -4613,7 +4613,7 @@ var XRED = (function () {
     });
 })();
 
-</script><script src="lib/core-02.js?v=953b064c70"></script><script src="lib/core-03.js?v=1d81197bcd"></script><script>// =====================================================================
+</script><script src="lib/core-02.js?v=953b064c70"></script><script src="lib/core-03.js?v=81e068889d"></script><script>// =====================================================================
 //  SUITE XIII — XPRS : 👥 présence en direct — qui est dans quel outil
 //  Deux sources fusionnées : le Drive (battement toutes les 20 s, fiable) et XLIVE (signal instantané à
 //  l'ouverture, au retour sur l'onglet, à la frappe, au départ). Affichage :
@@ -5138,7 +5138,7 @@ const XCALEV = (() => {
     return { SRC, events, ics };
 })();
 
-</script><script src="lib/core-07.js?v=6a1251e84c"></script><script src="lib/core-08.js?v=6d06160be1"></script><script>// =====================================================================
+</script><script src="lib/core-07.js?v=6a1251e84c"></script><script src="lib/core-08.js?v=65343cd03c"></script><script>// =====================================================================
 //  SUITE XIII — XVIT : 🌐 vitrine client du projet, en lecture seule, avec commentaires
 //  • sections automatiques : le projet (fiche), planning (PLANNO), intentions & moodboard (MOODO)
 //  • + documents des outils (ceux qu'ils envoient à DOSSIER : plan, synoptique, conducteur, storyboard…),
@@ -5364,7 +5364,7 @@ XVIT.init();
 <script src="lib/suite-kmap.js?v=d4b0728a57"></script>
 <script src="lib/suite-toolcfg.js?v=fd32e11e59"></script>
 <script src="lib/suite-anim.js?v=ef4d6e163a"></script>
-<script src="lib/suite-pident.js?v=ee74d9924b"></script>
+<script src="lib/suite-pident.js?v=01ef4569f2"></script>
 <script src="lib/suite-prof.js?v=cb9d806d7b"></script>
 <script src="lib/suite-notif.js?v=ac0dc3fd2e"></script>
 <script src="lib/suite-a11y3.js?v=cf542bcc3b"></script>
