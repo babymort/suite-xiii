@@ -32,45 +32,52 @@
         '#xpid-ov{position:fixed;inset:0;z-index:2147483000;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center}#xpid-box{width:min(560px,94vw);max-height:90vh;overflow-y:auto;background:var(--bg-panel,#1c1c20);color:var(--text-main,#eee);border:1px solid var(--border-color,#333);border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.5);font:13.5px system-ui,sans-serif}' +
         '#xpid-box h3{margin:0;padding:16px 18px 6px;font:600 16px system-ui,sans-serif}#xpid-box .f{padding:10px 18px;border-top:1px solid var(--border-color,#2a2a2e)}#xpid-box .f>b{display:block;margin-bottom:7px}#xpid-box .row{display:flex;flex-wrap:wrap;gap:5px;align-items:center}#xpid-box .em{width:34px;height:34px;font-size:19px;border-radius:9px;border:1px solid var(--border-color,#444);background:transparent;cursor:pointer;padding:0}#xpid-box .em.on,#xpid-box .sw.on{outline:2px solid #f0b378;outline-offset:1px}' +
         '#xpid-box .sw{width:26px;height:26px;border-radius:50%;border:0;cursor:pointer}#xpid-box button.b{padding:6px 11px;border-radius:8px;border:1px solid var(--border-color,#444);background:transparent;color:inherit;cursor:pointer;font:500 12.5px system-ui,sans-serif}#xpid-box button.b:hover{background:rgba(255,255,255,.06)}#xpid-box .lg{max-height:46px;max-width:140px;object-fit:contain;background:rgba(255,255,255,.06);border-radius:6px;padding:3px}#xpid-box .bn{width:100%;aspect-ratio:4/1;border-radius:10px;background:center/cover;background-color:rgba(255,255,255,.05);margin-bottom:7px}#xpid-box .ft{display:flex;gap:8px;padding:12px 18px;border-top:1px solid var(--border-color,#333)}#xpid-box .ok{color:#81c784;font-size:12px}' +
-        '.xpid-e{margin-right:4px}';
+        '.xpid-e{margin-right:.3em}main>.title-row.xpid-hero{position:relative;isolation:isolate;border-radius:20px;padding:18px 24px!important;margin-bottom:14px;overflow:hidden}main>.title-row.xpid-hero::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,rgba(10,10,12,.82),rgba(10,10,12,.35) 65%,rgba(10,10,12,.15)),var(--xpid-img) center/cover no-repeat;border-radius:inherit}main>.title-row.xpid-hero #ui-proj{text-shadow:0 2px 14px rgba(0,0,0,.6)}' +
+        '#xpj-id #xpid-box{width:auto;max-height:none;overflow:visible;box-shadow:none;border:0;background:none;border-radius:0}#xpj-id .f{padding:10px 0!important;border-top:1px solid var(--border-color,#2a2a2e)}';
     (document.head || document.documentElement).appendChild(css);
+    const KO = 'xiii.pid.banoff'; const banOff = () => { try { return localStorage.getItem(KO) === '1'; } catch (e) { return false; } };
     function home() {
-        const main = document.querySelector('main'); if (!main) return; const w = W(); if (!w) return; let b = document.getElementById('xpid-ban');
-        const f = fiche() || {}, bn = banner(), lg = typeof f.logo === 'string' && /^data:image\//.test(f.logo) ? f.logo : '';
-        const sig = [w.name, w.emoji, w.color, bn.length, lg.length].join('|'); const at = document.getElementById('xd-dash'); if (b && b.dataset.sig === sig && (at ? b.nextElementSibling === at : b.parentNode === main)) return;
-        if (!b) { b = document.createElement('div'); b.id = 'xpid-ban'; b.title = 'Identité du projet — cliquer pour modifier'; b.onclick = open; }
-        b.dataset.sig = sig; b.style.setProperty('--xpid-c', w.color || '#f0b429'); b.style.backgroundImage = bn ? 'url(' + bn + ')' : '';
-        b.innerHTML = (w.emoji ? '<span class="e">' + esc(w.emoji) + '</span>' : '') + '<div><b>' + esc(w.name || 'Projet XIII') + '</b><small>' + esc([f.production, f.client].filter(Boolean).join(' · ') || 'Projet en cours') + '</small></div>' + (lg ? '<img src="' + lg + '" alt="">' : '') + '<span class="ed">🪪 Identité du projet</span>';
-        if (at) { if (b.nextElementSibling !== at) at.before(b); } else if (main.firstElementChild !== b) main.prepend(b);
+        const tr = document.querySelector('main > .title-row'); if (!tr) return; const old = document.getElementById('xpid-ban'); if (old) old.remove();
+        const w = W(), bn = banner(), on = !!(w && bn && !banOff()); const sig = on ? bn.length + '|' + bn.slice(-40) : '';
+        if (tr.dataset.xpid === sig) return; tr.dataset.xpid = sig; tr.classList.toggle('xpid-hero', on); tr.style.setProperty('--xpid-img', on ? 'url(' + bn + ')' : 'none');
+        emojiTag(document.getElementById('ui-proj'), w && w.emoji);
     }
     function emojiTag(el, e) { if (!el) return; let s = el.querySelector(':scope > .xpid-e'); if (!e) { if (s) s.remove(); return; } if (!s) { s = document.createElement('span'); s.className = 'xpid-e'; el.prepend(s); } if (s.textContent !== e) s.textContent = e; }
-    function tool() { const w = W(); const n = document.getElementById('xpj-name'); if (n && n.style.display !== 'none') emojiTag(n, w && w.emoji); }
+    function tool_() { const w = W(); const n = document.getElementById('xpj-name'); if (n && n.style.display !== 'none') emojiTag(n, w && w.emoji); }
     function esp() { if (typeof S === 'undefined') return; const pj = document.getElementById('proj'); if (!pj) return; let r = null; try { r = JSON.parse(localStorage.getItem('xiii.ws')); } catch (e) { } const w = r && r.list && r.list.find(x => x.id === (S.ws || r.cur)); const sp = pj.querySelector('span'); if (!sp) return; emojiTag(pj, w && w.emoji); }
-    function apply() { try { if (APP === 'espace') esp(); else { if (APP === 'index') home(); tool(); } } catch (e) { } }
+    function apply() { try { if (APP === 'espace') esp(); else { if (APP === 'index') home(); tool_(); } } catch (e) { } }
     // ---------- fenêtre ----------
-    function open() {
-        close(); const w = W(); if (!w) { alert('Aucun projet XIII en cours.'); return; } const f = fiche(); const lg = f && typeof f.logo === 'string' && /^data:image\//.test(f.logo) ? f.logo : '', bn = banner();
-        const o = document.createElement('div'); o.id = 'xpid-ov'; o.setAttribute('role', 'dialog');
-        o.innerHTML = '<div id="xpid-box"><h3>🪪 Identité du projet « ' + esc(w.name) + ' »</h3>' +
+    function render(box) {
+        const w = W(); if (!w) { box.innerHTML = '<p style="opacity:.7">Aucun projet XIII en cours.</p>'; return; } const f = fiche(); const lg = f && typeof f.logo === 'string' && /^data:image\//.test(f.logo) ? f.logo : '', bn = banner();
+        const o = box;
+        o.innerHTML = '<div id="xpid-box" class="xpid-in">' +
             '<div class="f"><b>Emoji</b><div class="row">' + ['', ...EMO].map(e => '<button class="em' + ((w.emoji || '') === e ? ' on' : '') + '" data-e="' + e + '" title="' + (e ? e : 'Aucun') + '">' + (e || '∅') + '</button>').join('') + '<input data-ec maxlength="4" placeholder="autre" style="width:56px;padding:6px;border-radius:8px;border:1px solid var(--border-color,#444);background:transparent;color:inherit;text-align:center"></div></div>' +
             '<div class="f"><b>Couleur</b><div class="row">' + PAL.map(c => '<button class="sw' + ((w.color || '').toLowerCase() === c ? ' on' : '') + '" data-c="' + c + '" style="background:' + c + '"></button>').join('') + '<input type="color" data-cc value="' + (/^#[0-9a-f]{6}$/i.test(w.color || '') ? w.color : '#f0b429') + '" style="width:36px;height:28px;border:0;background:none;cursor:pointer"><span style="flex:1"></span><button class="b" data-ch>🎨 Appliquer aux exports</button><span class="ok" data-chok></span></div></div>' +
             '<div class="f"><b>Logo</b><div class="row">' + (lg ? '<img class="lg" src="' + lg + '">' : '<span style="opacity:.6">Aucun logo</span>') + '<span style="flex:1"></span><button class="b" data-lg>📁 Choisir…</button>' + (lg ? '<button class="b" data-lgx>🗑</button>' : '') + '</div>' + (f ? '' : '<div style="opacity:.6;font-size:12px;margin-top:5px">Créez d\'abord la fiche projet (Projet XIII) pour y ranger le logo.</div>') + '</div>' +
-            '<div class="f"><b>Bannière de l\'accueil</b><div class="bn" style="background-image:' + (bn ? 'url(' + bn + ')' : 'linear-gradient(120deg,' + (w.color || '#f0b429') + ',rgba(0,0,0,.6))') + '"></div><div class="row"><span style="opacity:.6;font-size:12px">Image recadrée en 4:1 (1600 × 400).</span><span style="flex:1"></span><button class="b" data-bn>📁 Choisir…</button>' + (bn ? '<button class="b" data-bnx>🗑</button>' : '') + '</div></div>' +
-            '<div class="ft"><span style="flex:1"></span><button class="b" data-ok style="font-weight:700">✓ Terminé</button></div></div>';
-        document.body.appendChild(o);
+            '<div class="f"><b>Bannière de l\'accueil (derrière le nom du projet)</b><label style="display:flex;gap:7px;align-items:center;margin-bottom:8px"><input type="checkbox" data-boff' + (banOff() ? '' : ' checked') + '> Afficher la bannière</label><div class="bn" style="background-image:' + (bn ? 'url(' + bn + ')' : 'linear-gradient(120deg,' + (w.color || '#f0b429') + ',rgba(0,0,0,.6))') + '"></div><div class="row"><span style="opacity:.6;font-size:12px">Image recadrée en 4:1 (1600 × 400).</span><span style="flex:1"></span><button class="b" data-bn>📁 Choisir…</button>' + (bn ? '<button class="b" data-bnx>🗑</button>' : '') + '</div></div>' +
+            '</div>';
+        const open = () => render(box);
         const set = x => { XWS.set(XWS.id, x); apply(); };
-        o.addEventListener('click', async e => { const t = e.target; if (t === o || t.closest('[data-ok]')) return close();
-            const em = t.closest('[data-e]'); if (em) { set({ emoji: em.dataset.e || undefined }); return open(); }
+        o.onclick = async e => { const t = e.target;             const em = t.closest('[data-e]'); if (em) { set({ emoji: em.dataset.e || undefined }); return open(); }
             const sw = t.closest('[data-c]'); if (sw) { set({ color: sw.dataset.c }); return open(); }
             if (t.closest('[data-ch]')) { if (typeof XCHARTE !== 'undefined') { await XCHARTE.save(Object.assign(XCHARTE.raw(), { color: W().color })); o.querySelector('[data-chok]').textContent = '✓ couleur des PDF mise à jour'; } return; }
             if (t.closest('[data-lg]')) { const v = await pick(false); if (v && setLogo(v)) { apply(); open(); } return; }
             if (t.closest('[data-lgx]')) { if (setLogo('')) { apply(); open(); } return; }
             if (t.closest('[data-bn]')) { const v = await pick(true); if (v) { try { localStorage.setItem(KB, v); } catch (x) { alert('Stockage plein : image trop lourde ?'); } apply(); open(); } return; }
-            if (t.closest('[data-bnx]')) { try { localStorage.removeItem(KB); } catch (x) { } apply(); open(); } });
+            if (t.closest('[data-bnx]')) { try { localStorage.removeItem(KB); } catch (x) { } apply(); open(); } };
+        o.querySelector('[data-boff]').onchange = e => { try { if (e.target.checked) localStorage.removeItem(KO); else localStorage.setItem(KO, '1'); } catch (x) { } apply(); };
         o.querySelector('[data-cc]').onchange = e => { set({ color: e.target.value }); open(); };
         o.querySelector('[data-ec]').onchange = e => { const v = e.target.value.trim(); if (v) { set({ emoji: v }); open(); } };
     }
-    function close() { const o = document.getElementById('xpid-ov'); if (o) o.remove(); }
+    // rubrique « 🪪 Identité » de la fiche projet (page de réglage du projet)
+    function mount(ov) {
+        const body = ov.querySelector('.xpj-body'), nav = ov.querySelector('.xpj-nav'); if (!body || body.querySelector('#xpj-id')) return;
+        const sec = document.createElement('section'); sec.id = 'xpj-id'; sec.innerHTML = '<h3>🪪 Identité du projet — emoji, couleur, logo, bannière de l\'accueil</h3><div></div>'; const ref = body.querySelector('#xpj-p'); if (ref) ref.before(sec); else body.appendChild(sec); render(sec.lastElementChild);
+        if (nav && !nav.querySelector('a[href="#xpj-id"]')) { const a = document.createElement('a'); a.href = '#xpj-id'; a.textContent = '🪪 Identité'; const r = nav.querySelector('a[href="#xpj-p"]'); if (r) r.before(a); else nav.appendChild(a); a.onclick = ev => { ev.preventDefault(); sec.scrollIntoView({ behavior: 'smooth', block: 'start' }); }; }
+    }
+    new MutationObserver(ms => ms.forEach(m => m.addedNodes.forEach(n => { if (n.nodeType === 1 && n.id === 'xpj-ov') setTimeout(() => mount(n), 0); }))).observe(document.documentElement, { childList: true, subtree: true });
+    function open() { if (typeof XPROJET === 'undefined' || !XPROJET.open) return; XPROJET.open(); let n = 0; const go = () => { const s = document.getElementById('xpj-id'); if (!s) { if (++n < 20) setTimeout(go, 100); return; } s.scrollIntoView({ block: 'start' }); }; setTimeout(go, 150); }
+    function close() { }
     addEventListener('keydown', e => { if (e.key === 'Escape' && document.getElementById('xpid-ov')) { e.stopImmediatePropagation(); close(); } }, true);
     addEventListener('xiii-ws', apply); addEventListener('storage', e => { if (/xiii\.(ws|projets)|pid\.banner/.test(e.key || '')) apply(); });
     function row() { if (!document.getElementById('xs-panel') || document.getElementById('xpid-row')) return; const a = document.getElementById('xan-row') || document.getElementById('xtc-row') || document.getElementById('xbc-row'); if (!a) return;
