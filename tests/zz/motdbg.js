@@ -1,0 +1,7 @@
+const { chromium } = require('playwright');
+const [pg, ...sels] = process.argv.slice(2);
+(async () => { const b = await chromium.launch(); const ctx = await b.newContext({ viewport: { width: 1440, height: 900 } }); await ctx.route('**/*', r => r.request().url().startsWith('http://localhost') ? r.continue() : r.abort());
+ await ctx.addInitScript(a => { localStorage.setItem('xiii.tips.off', 'true'); localStorage.setItem('xiii.tour2.' + a + '.hide', '1'); localStorage.setItem('xiii.news.seen', JSON.stringify({ ver: 'x', k: [] })); let seen = 0; const t0 = performance.now(); const iv = setInterval(() => { const H = document.documentElement; if (!H) return; if (H.classList.contains('xb0')) seen = 1; else if (seen || document.readyState === 'complete') { window.__up = performance.now() - t0; clearInterval(iv); } }, 10); }, pg.replace('.html', ''));
+ const p = await ctx.newPage(); await p.goto('http://localhost:8765/' + pg + '?desktop=1'); await p.waitForFunction(() => window.__up > 0); const t0 = Date.now();
+ for (let i = 0; i < 18; i++) { const r = await p.evaluate(s => s.map(q => { const e = [...document.querySelectorAll(q.split('~')[0])].find(x => !q.includes('~') || x.textContent.includes(q.split('~')[1])); if (!e) return '∅'; const r = e.getBoundingClientRect(); return Math.round(r.left) + ',' + Math.round(r.top) + ' ' + Math.round(r.width) + 'w'; }).join(' | '), sels); console.log(String(Date.now() - t0).padStart(5), r); await p.waitForTimeout(220); }
+ await b.close(); })();
