@@ -523,7 +523,7 @@ footer { border-top: 1px solid var(--border-soft); background: var(--bg-topbar);
             <a class="card" href="calendrier.html" style="--dc:#64b5f6">
                 <div class="card-top">
                     <div class="card-icon">🗓️</div>
-                    <div><div class="card-name">CALENDRIER <span>XIII</span></div><div class="card-role">Dates et planning de production</div></div>
+                    <div><div class="card-name">PLANNO <span>XIII</span></div><div class="card-role">Planning de production et calendrier</div></div>
                     <span class="card-ver">v1</span>
                 </div>
                 <p class="card-desc">Planning, tournages, directs, repérages, réservations, livraisons, factures, contrats, expirations de droits et dates limites de candidature dans un seul calendrier. Export vers votre agenda (.ics).</p>
@@ -764,7 +764,7 @@ document.addEventListener('keydown', e => {
 </script>
 <!-- SUITE XIII:SETTINGS:START --><script>var XIII_APP = "index"; // nom de l'outil, utilisé par le code commun (lib/core-*.js)</script>
 
-<script src="lib/core-01.js?v=775a669289"></script><script>// =====================================================================
+<script src="lib/core-01.js?v=cd005b7157"></script><script>// =====================================================================
 //  SUITE XIII — connexion IA multi-services (XAI)
 //  Claude (Anthropic), Gemini (Google), ChatGPT (OpenAI), Mistral, OpenRouter, Groq, DeepSeek, Ollama (local), API compatible OpenAI.
 //  La clé reste dans ce navigateur (localStorage « xiii.ai ») et n'est envoyée qu'au service choisi.
@@ -1381,7 +1381,7 @@ var XRED = (function () {
     });
 })();
 
-</script><script src="lib/core-02.js?v=953b064c70"></script><script src="lib/core-03.js?v=81e068889d"></script><script>// =====================================================================
+</script><script src="lib/core-02.js?v=bf017cc810"></script><script src="lib/core-03.js?v=81e068889d"></script><script>// =====================================================================
 //  SUITE XIII — XPRS : 👥 présence en direct — qui est dans quel outil
 //  Deux sources fusionnées : le Drive (battement toutes les 20 s, fiable) et XLIVE (signal instantané à
 //  l'ouverture, au retour sur l'onglet, à la frappe, au départ). Affichage :
@@ -1469,7 +1469,7 @@ var XPRS = window.XPRS || (() => {
 
 XPRS.init('index');
 
-</script><script src="lib/core-04.js?v=0a1449dbe9"></script><script>// =====================================================================
+</script><script src="lib/core-04.js?v=a773c48d21"></script><script>// =====================================================================
 //  SUITE XIII — XFIT : la barre des outils tient sur une ligne
 //  Plutôt que de passer sur deux lignes, les boutons se resserrent par paliers (espaces, puis libellés,
 //  puis tailles) jusqu'à tout faire rentrer ; en dernier recours la barre défile horizontalement.
@@ -1506,7 +1506,7 @@ const XFIT = (() => {
     return { init, fit };
 })();
 
-</script><script src="lib/core-05.js?v=5a5933c9c6"></script><script>// =====================================================================
+</script><script src="lib/core-05.js?v=c614af4224"></script><script>// =====================================================================
 //  SUITE XIII — XDASH : l'accueil en tableau de bord du projet en cours
 //  En tête : projet (type, dates, compte à rebours, lieu), prochaines échéances (PLANNO, POSTO, fiche),
 //  ce qui manque selon le type de production, derniers retours de l'équipe (avis, mots, travaux reçus,
@@ -1796,7 +1796,7 @@ const XCALEV = (() => {
     return { SRC, events, ics };
 })();
 
-</script><script src="lib/core-07.js?v=6a1251e84c"></script><script src="lib/core-08.js?v=65343cd03c"></script><script>// =====================================================================
+</script><script src="lib/core-07.js?v=e625ca8e15"></script><script src="lib/core-08.js?v=b4072c5810"></script><script>// =====================================================================
 //  SUITE XIII — XVIT : 🌐 vitrine client du projet, en lecture seule, avec commentaires
 //  • sections automatiques : le projet (fiche), planning (PLANNO), intentions & moodboard (MOODO)
 //  • + documents des outils (ceux qu'ils envoient à DOSSIER : plan, synoptique, conducteur, storyboard…),
@@ -2429,7 +2429,7 @@ const XSTART = (() => {
         const dp = typeof XDISPO !== 'undefined' ? '<button class="xst-more" id="xst-dp" style="width:100%;margin-bottom:8px">🙋 Disponibilités de l\'équipe · 🗳️ propositions de dates <b id="xst-dpn"></b></button>' : '';
         let E = []; try { E = XCALEV.events().filter(e => e.d1 >= t0 && e.d0 <= lim); } catch (e) { }
         const wire = () => { const b = c.querySelector('#xst-dp'); if (!b) return; b.onclick = () => { toggle(false); XDISPO.open('poll'); }; XDISPO.pending().then(n => { const i = c.querySelector('#xst-dpn'); if (i && n) i.textContent = '· ' + n + ' à répondre'; }).catch(() => { }); };
-        if (!E.length) { c.innerHTML = dp + '<p class="e">Aucune échéance dans les 45 prochains jours (PLANNO, CALL SHEETO, CONDUCO, REPERO, MATOS, DEVISO, POSTO…).</p><a class="xst-more" href="calendrier.html">📅 Ouvrir CALENDRIER</a>'; wire(); return; }
+        if (!E.length) { c.innerHTML = dp + '<p class="e">Aucune échéance dans les 45 prochains jours (PLANNO, CALL SHEETO, CONDUCO, REPERO, MATOS, DEVISO, POSTO…).</p><a class="xst-more" href="calendrier.html">📅 Ouvrir PLANNO</a>'; wire(); return; }
         const S = XCALEV.SRC || {}, day = s => { const d = new Date(s + 'T12:00'), n = Math.round((d - new Date(t0 + 'T12:00')) / 864e5); return n === 0 ? 'Aujourd\'hui' : n === 1 ? 'Demain' : d.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' }); };
         let h = '', last = ''; E.slice(0, 40).forEach(e => { const d = e.d0 < t0 ? t0 : e.d0; if (d !== last) { h += '<h4>' + esc(day(d)) + '</h4>'; last = d; } const s = S[e.src] || ['•', e.src, '#f0b429']; h += '<a class="xst-ev" href="' + esc(e.src) + '.html" style="--c:' + esc(s[2]) + '"><span>' + esc(s[0]) + '</span><b>' + esc(e.title) + '</b><small>' + esc([e.time, s[1], e.d1 !== e.d0 ? '→ ' + new Date(e.d1 + 'T12:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) : '', e.det].filter(Boolean).join(' · ')) + '</small></a>'; });
         c.innerHTML = dp + h + '<a class="xst-more" href="calendrier.html">📅 Tout le calendrier</a>'; c.querySelectorAll('a.xst-ev[href="dispo.html"]').forEach(a => { a.href = '#'; a.onclick = e => { e.preventDefault(); toggle(false); XDISPO.open('team'); }; }); wire();
@@ -2529,7 +2529,7 @@ XBOOT.ready(() => { try { XHOME.init(); XSTART.init(); XADAPT.init(); } catch (e
 <script src="lib/suite-sobre.js?v=21dc837de1"></script>
 <script src="lib/suite-ident.js?v=c9630e21d3"></script>
 <script src="lib/suite-merge.js?v=dbd6685529"></script>
-<script src="lib/suite-topbar.js?v=74f3e00099"></script>
+<script src="lib/suite-topbar.js?v=2a4e154997"></script>
 <script src="lib/suite-sectors.js?v=9505a5e1ef"></script>
 <script src="lib/suite-focus.js?v=4c5df42ea0"></script>
 <script src="lib/suite-keys.js?v=f5024fc78d"></script>
@@ -2543,7 +2543,7 @@ XBOOT.ready(() => { try { XHOME.init(); XSTART.init(); XADAPT.init(); } catch (e
 <script src="lib/suite-trayopt.js?v=7ea261ada0"></script>
 <script src="lib/suite-wman.js?v=0848a6c921"></script>
 <script src="lib/suite-tabman.js?v=def6ee12e7"></script>
-<script src="lib/suite-calw.js?v=530bfa50c8"></script>
+<script src="lib/suite-calw.js?v=92c4858c29"></script>
 <script src="lib/suite-frise.js?v=9e62a03f50"></script>
 <script src="lib/suite-wx5.js?v=319730e5e7"></script>
 <script src="lib/suite-navfold.js?v=deb2c931a9"></script>
@@ -2564,7 +2564,7 @@ XBOOT.ready(() => { try { XHOME.init(); XSTART.init(); XADAPT.init(); } catch (e
 <script src="lib/suite-notif.js?v=ac0dc3fd2e"></script>
 <script src="lib/suite-a11y3.js?v=cf542bcc3b"></script>
 <script src="lib/suite-emoji.js?v=39eccf87a9"></script>
-<script src="lib/suite-wins.js?v=c4c4ba4615"></script>
+<script src="lib/suite-wins.js?v=7c6d634547"></script>
 <script src="lib/suite-legible.js?v=9f0777bee3"></script>
 <!-- SUITE XIII:EXTRA:END -->
 </body>

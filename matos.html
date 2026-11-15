@@ -3046,7 +3046,7 @@ function caseOut(cs) {
 <!-- SUITE XIII:MOBILE:START --><!-- SUITE XIII:MOBILE:END -->
 <!-- SUITE XIII:SETTINGS:START --><script>var XIII_APP = "matos"; // nom de l'outil, utilisé par le code commun (lib/core-*.js)</script>
 
-<script src="lib/core-01.js?v=775a669289"></script><script>// =====================================================================
+<script src="lib/core-01.js?v=cd005b7157"></script><script>// =====================================================================
 //  SUITE XIII — connexion IA multi-services (XAI)
 //  Claude (Anthropic), Gemini (Google), ChatGPT (OpenAI), Mistral, OpenRouter, Groq, DeepSeek, Ollama (local), API compatible OpenAI.
 //  La clé reste dans ce navigateur (localStorage « xiii.ai ») et n'est envoyée qu'au service choisi.
@@ -3555,7 +3555,7 @@ var XRED = (function () {
 (function () {
     if (typeof XSET === 'undefined' || typeof STATES === 'undefined') return;
     XSET.init({
-        app: 'matos', title: 'MATOS', version: 'v1.44',
+        app: 'matos', title: 'MATOS', version: 'v1.45',
         theme: { get: () => prefs.theme, set: t => { prefs.theme = t; applyTheme(); savePrefs(); } },
         help: [{ icon: '📦', label: 'Comment ça marche ?', sub: 'Parc, réservations, conflits, sorties / retours, étiquettes QR', run: () => modal('<h3>📦 MATOS XIII<span class="close-x" onclick="closeModal()">✕</span></h3><p><b>1. Parc</b> : ajoutez vos équipements depuis le 🗃️ catalogue commun (ou à la main) avec leurs numéros de série. Chaque unité reçoit un code MAT-0001 et une 🏷️ étiquette QR à imprimer.</p><p><b>2. Réservations</b> : projet, dates, option ou ferme. MATOS signale les conflits : unité déjà réservée, en panne, en révision. Envoyez la liste vers 🧳 PACKINGO ou 💶 DEVISO.</p><p><b>3. Planning</b> : occupation de chaque unité sur 5 semaines.</p><p><b>4. Sorties / retours</b> : scannez le QR (caméra du téléphone) ou le code (douchette) : une unité au dépôt sort, une unité sortie revient, avec son état.</p><p>Raccourcis : 1 à 4 pour les vues, Ctrl+S.</p><div class="mb-actions"><button onclick="closeModal()">Compris</button></div>') }, { icon: '📐', label: 'Charger l\'exemple', run: loadExample }],
         sections: [{ id: 'mt', icon: '📦', title: 'Parc', open: true, fields: [{ k: 'view', label: 'Vue à l\'ouverture', type: 'select', def: 'parc', options: [['parc', 'Parc'], ['resa', 'Réservations'], ['plan', 'Planning'], ['scan', 'Sorties / retours']] }, { k: 'loc', label: 'Dépôt par défaut', type: 'text', def: '' }] }],
@@ -3635,7 +3635,7 @@ const XUNDO = (() => {
 
 (function(){ const go = () => (typeof XBOOT !== 'undefined' ? XBOOT.ready(() => XUNDO.init('matos'), 600) : setTimeout(() => XUNDO.init('matos'), 600)); if (document.readyState === 'complete') go(); else window.addEventListener('load', go); })();
 
-</script><script src="lib/core-02.js?v=953b064c70"></script><script src="lib/core-03.js?v=81e068889d"></script><script>// =====================================================================
+</script><script src="lib/core-02.js?v=bf017cc810"></script><script src="lib/core-03.js?v=81e068889d"></script><script>// =====================================================================
 //  SUITE XIII — XPRS : 👥 présence en direct — qui est dans quel outil
 //  Deux sources fusionnées : le Drive (battement toutes les 20 s, fiable) et XLIVE (signal instantané à
 //  l'ouverture, au retour sur l'onglet, à la frappe, au départ). Affichage :
@@ -3723,7 +3723,7 @@ var XPRS = window.XPRS || (() => {
 
 XPRS.init('matos');
 
-</script><script src="lib/core-04.js?v=0a1449dbe9"></script><script>// =====================================================================
+</script><script src="lib/core-04.js?v=a773c48d21"></script><script>// =====================================================================
 //  SUITE XIII — XFIT : la barre des outils tient sur une ligne
 //  Plutôt que de passer sur deux lignes, les boutons se resserrent par paliers (espaces, puis libellés,
 //  puis tailles) jusqu'à tout faire rentrer ; en dernier recours la barre défile horizontalement.
@@ -3762,7 +3762,7 @@ const XFIT = (() => {
 
 XFIT.init();
 
-</script><script src="lib/core-05.js?v=5a5933c9c6"></script><script>// =====================================================================
+</script><script src="lib/core-05.js?v=c614af4224"></script><script>// =====================================================================
 //  SUITE XIII — XDASH : l'accueil en tableau de bord du projet en cours
 //  En tête : projet (type, dates, compte à rebours, lieu), prochaines échéances (PLANNO, POSTO, fiche),
 //  ce qui manque selon le type de production, derniers retours de l'équipe (avis, mots, travaux reçus,
@@ -4068,11 +4068,12 @@ const XPUB = (() => {
         e.stopPropagation(); let m = document.getElementById('xb-menu'); if (m) { m.remove(); return; }
         const r = btn.getBoundingClientRect(), on = !!(me() && me().on); m = document.createElement('div'); m.id = 'xb-menu';
         m.style.cssText = 'position:fixed;z-index:2147483001;top:' + (r.bottom + 6) + 'px;left:' + Math.max(8, Math.min(innerWidth - 310, r.left - 120)) + 'px';
-        m.innerHTML = '<b>🔗 Partager</b><p>Lecture seule, sans compte.</p>' +
+        m.innerHTML = '<b>🔗 Partager</b><p>Envoyer dans la suite, ou partager en lecture seule, sans compte.</p>' + (document.getElementById('xgt-btn') ? '<button data-a="gate"><span>📤</span><span><b>Envoyer vers un outil ou DOSSIER</b><small>Vers Suite XIII : planning, devis, feuille de service, dossier de production…</small></span></button>' : '') +
             '<button data-a="snap"><span>📸</span><span><b>Lien instantané</b><small>L\'état actuel, figé : lien, QR code ou page autonome. Rien n\'est mis en ligne.</small></span></button>' +
             '<button data-a="one"><span>🎯</span><span><b>Une seule vue</b><small>Cet onglet, cette journée ou ce plan, sans le reste de l\'outil : lien, ou autorisation précise d\'un membre.</small></span></button>' + '<button data-a="pub"><span>🌐</span><span><b>Lien public toujours à jour' + (on ? ' · <span style="color:#81c784">● publié</span>' : '') + '</b><small>Se met à jour à chaque modification, via le ☁️ Drive du projet.</small></span></button>' +
             (window.XJOIN && XJOIN.can() ? '<p style="margin-top:8px">Équipe, avec le ☁️ Drive :</p><button data-a="join"><span>📲</span><span><b>Connecter par QR code</b><small>Une personne, un secteur ou votre téléphone : relié au projet en un geste.</small></span></button>' : '');
         document.body.appendChild(m);
+        { const gt = m.querySelector('[data-a=gate]'); if (gt) gt.onclick = () => { m.remove(); const g = document.getElementById('xgt-btn'); if (g) g.click(); }; }
         m.querySelector('[data-a=snap]').onclick = () => { m.remove(); if (typeof XSHARE !== 'undefined') XSHARE.open(); };
         m.querySelector('[data-a=pub]').onclick = () => { m.remove(); panel(); };
         m.querySelector('[data-a=one]').onclick = () => { m.remove(); if (window.XSCOPE) XSCOPE.panel(); };
@@ -4105,7 +4106,7 @@ const XPUB = (() => {
         const go = () => {
             // 🔗 Partager et 🌐 Lien public : un seul bouton, qui propose les deux façons de partager
             const sh = document.getElementById('xsh-btn');
-            if (sh && !sh.dataset.xpb) { sh.dataset.xpb = '1'; sh.title = 'Partager : lien instantané (QR, page autonome) ou lien public toujours à jour'; sh.onclick = e => shareMenu(e, sh); chip(); }
+            if (sh && !sh.dataset.xpb) { sh.dataset.xpb = '1'; sh.title = 'Partager : envoyer vers un outil ou DOSSIER, lien instantané (QR, page autonome) ou lien public toujours à jour'; sh.onclick = e => shareMenu(e, sh); chip(); }
             else if (!sh && !document.getElementById('xpb-btn')) { const host = document.getElementById('xb-file') || document.getElementById('xb-tool'); if (host) { const b2 = document.createElement('button'); b2.id = 'xpb-btn'; b2.title = '🌐 Lien public toujours à jour (lecture seule, sans compte) — via le Drive du projet'; b2.innerHTML = '<span class="btn-icon">🔗</span><span class="btn-label">Partager</span>'; b2.onclick = panel; host.appendChild(b2); chip(); } }
             setInterval(() => { const m = me(); if (m && m.on) publish(false); }, 10000);
         };
@@ -4160,7 +4161,7 @@ const XCALEV = (() => {
     return { SRC, events, ics };
 })();
 
-</script><script src="lib/core-07.js?v=6a1251e84c"></script><script>// =====================================================================
+</script><script src="lib/core-07.js?v=e625ca8e15"></script><script>// =====================================================================
 //  MATOS XIII — Phase AD
 //  • 📤 Sortie / 📥 Retour du « Matériel du projet » (demande de prêt) → CALENDRIER, rappel la veille
 //  • équipements saisis à la main absents du catalogue → proposés à l'ajout au 🗃️ catalogue
@@ -4211,7 +4212,7 @@ const XCALEV = (() => {
     setTimeout(go, 600); })();
 
 
-</script><script src="lib/core-08.js?v=65343cd03c"></script><script>// =====================================================================
+</script><script src="lib/core-08.js?v=b4072c5810"></script><script>// =====================================================================
 //  SUITE XIII — XVIT : 🌐 vitrine client du projet, en lecture seule, avec commentaires
 //  • sections automatiques : le projet (fiche), planning (PLANNO), intentions & moodboard (MOODO)
 //  • + documents des outils (ceux qu'ils envoient à DOSSIER : plan, synoptique, conducteur, storyboard…),
@@ -4419,7 +4420,7 @@ XVIT.init();
 <script src="lib/suite-sobre.js?v=21dc837de1"></script>
 <script src="lib/suite-ident.js?v=c9630e21d3"></script>
 <script src="lib/suite-merge.js?v=dbd6685529"></script>
-<script src="lib/suite-topbar.js?v=74f3e00099"></script>
+<script src="lib/suite-topbar.js?v=2a4e154997"></script>
 <script src="lib/suite-sectors.js?v=9505a5e1ef"></script>
 <script src="lib/suite-focus.js?v=4c5df42ea0"></script>
 <script src="lib/suite-keys.js?v=f5024fc78d"></script>
@@ -4444,7 +4445,7 @@ XVIT.init();
 <script src="lib/suite-notif.js?v=ac0dc3fd2e"></script>
 <script src="lib/suite-a11y3.js?v=cf542bcc3b"></script>
 <script src="lib/suite-emoji.js?v=39eccf87a9"></script>
-<script src="lib/suite-wins.js?v=c4c4ba4615"></script>
+<script src="lib/suite-wins.js?v=7c6d634547"></script>
 <script src="lib/suite-legible.js?v=9f0777bee3"></script>
 <!-- SUITE XIII:EXTRA:END -->
 </body>
