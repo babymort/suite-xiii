@@ -19,7 +19,7 @@
     var gi = SP.getItem, si = SP.setItem, ri = SP.removeItem, ki = SP.key;
     var COLORS = ['#f0b429', '#4fc3f7', '#81c784', '#e57373', '#ba68c8', '#ff8a3d', '#4db6ac', '#f06292', '#9575cd', '#d4e157'];
     // clés communes à tous les projets (préférences, bibliothèques, catalogues, IA, onglets…)
-    var G = /^(xiii\.(ws|tabs|theme|ctheme$|keys\.|tools\.|anim\.|color$|tray\.|ctx\.hide\.|a11y|anim\.|tour2?\.|tips\.|pins|recent|start\.|pwa\.|ai$|ai\.|ux\.|bar\.|boot\.|settings\.|home\.|docs\.seen|news\.|ib\.no|inapp|catalogue|data\.|lib\.|annuaire|encodo\.|errlog|cmds|ndi\.|tally\.|gif\.)|[a-zA-Z]+XIII\.(prefs|library|lib|templates|kits|poses|parts|models|presets|base|parc|moi|xlfields|emetteur|comptes|inventory|libMigrated)$|encodoXIII|synoptique_(?!projects|snapshots)|theme$)/;
+    var G = /^(xiii\.(ws|tabs|theme|ctheme$|charte\.models$|keys\.|tools\.|anim\.|color$|tray\.|ctx\.hide\.|a11y|anim\.|tour2?\.|tips\.|pins|recent|start\.|pwa\.|ai$|ai\.|ux\.|bar\.|boot\.|settings\.|home\.|docs\.seen|news\.|ib\.no|inapp|catalogue|data\.|lib\.|annuaire|encodo\.|errlog|cmds|ndi\.|tally\.|gif\.)|[a-zA-Z]+XIII\.(prefs|library|lib|templates|kits|poses|parts|models|presets|base|parc|moi|xlfields|emetteur|comptes|inventory|libMigrated)$|encodoXIII|synoptique_(?!projects|snapshots)|theme$)/;
     var rg = function (k) { return gi.call(LS, k); }, rs = function (k, v) { si.call(LS, k, v); }, rr = function (k) { ri.call(LS, k); };
     function rkeys() { var a = [], n = LS.length; for (var i = 0; i < n; i++) a.push(ki.call(LS, i)); return a; }
     function J(s) { try { return JSON.parse(s); } catch (e) { return null; } }
@@ -3054,7 +3054,7 @@ var XRED = (function () {
 (function () {
     if (typeof XSET === 'undefined' || typeof XCAT === 'undefined') return;
     XSET.init({
-        app: 'catalogue', title: 'CATALOGUE', version: 'v1.28',
+        app: 'catalogue', title: 'CATALOGUE', version: 'v1.29',
         theme: { get: () => prefs.theme, set: t => { prefs.theme = t; applyTheme(); savePrefs(); } },
         help: [{ icon: '🗃️', label: 'Comment ça marche ?', sub: 'Catalogue commun, insertion dans les outils, partage', run: () => modal('<h3>🗃️ Catalogue matériel<span class="close-x" onclick="closeModal()">✕</span></h3><p>Chaque équipement saisi ici une seule fois est disponible dans <b>SYNO</b> (nœud avec ses ports), <b>PLANO</b> (placé sur le plan), <b>LUMO</b> (projecteur et puissance), <b>SONO</b> (patch), <b>PACKINGO</b> (caisse, poids) et <b>DEVISO</b> (ligne de devis et prix) par le bouton 🗃️ Catalogue de chaque outil.</p><p>Avec le ☁️ Drive du projet relié, le catalogue se partage avec l\'équipe comme un outil.</p><p>Raccourci : <b>N</b> nouvel équipement.</p><div class="mb-actions"><button onclick="closeModal()">Compris</button></div>') }],
         sections: [], apply() { }
@@ -3076,6 +3076,7 @@ const XCHARTE = (() => {
         head: 'band', headH: 'm', headText: 'none', headCustom: '', headAlign: 'right', foot: true, footLine: true, footLeft: 'title-sub', footCustom: '', num: 'n/t', date: false,
         water: '', waterOp: 0.08, waterAngle: 'diag', waterSize: 'm', waterTone: 'main', version: '', cover: false, coverTheme: 'dark', coverInfo: true, printCover: false, printFont: '', printTitles: true, off: { ressourco: 1 } };
     const PRESETS = [['Sobre', { color: '#333333', color2: '#666666', font: 'helvetica', head: 'line', headH: 's', footLine: true }], ['Production', { color: '#b8651f', color2: '#555555', font: 'helvetica', head: 'band', headH: 'm' }], ['Cinéma', { color: '#8b1e1e', color2: '#444444', font: 'times', head: 'line', headH: 'm', headText: 'title', printFont: 'serif' }], ['Broadcast', { color: '#0d47a1', color2: '#37474f', font: 'helvetica', head: 'band', headH: 'l', headText: 'title-sub' }], ['Technique', { color: '#2e7d32', color2: '#455a64', font: 'courier', head: 'band', headH: 's', printFont: 'mono' }]];
+    const KM = 'xiii.charte.models', models = () => { try { return JSON.parse(localStorage.getItem(KM)) || {}; } catch (e) { return {}; } }, putModels = m => { try { localStorage.setItem(KM, JSON.stringify(m)); } catch (e) { alert('Stockage plein : logo du modèle trop lourd ?'); } };
     const FONTS = [['helvetica', 'Sans (Helvetica)', 'Helvetica,Arial,sans-serif'], ['times', 'Serif (Times)', '"Times New Roman",Times,serif'], ['courier', 'Machine à écrire (Courier)', '"Courier New",Courier,monospace']];
     const HH = { s: 1.5, m: 3.2, l: 6 }, LS = { s: 10, m: 16, l: 24 };
     let APP = '';
@@ -3107,31 +3108,46 @@ const XCHARTE = (() => {
     function stamp(doc) {
         const c = active(); if (!c || Object.prototype.hasOwnProperty.call(doc, '__xcDone')) return; doc.__xcDone = 1;
         try {
-            const k = doc.internal.scaleFactor, P = v => v / k, n = doc.getNumberOfPages(), cur = doc.internal.getCurrentPageInfo ? doc.internal.getCurrentPageInfo().pageNumber : n, [r, g, b] = rgb(c.color), [r2, g2, b2] = rgb(c.color2);
+            doc.__xcStamping = 1; const k = doc.internal.scaleFactor, P = v => v / k, n = doc.getNumberOfPages(), cur = doc.internal.getCurrentPageInfo ? doc.internal.getCurrentPageInfo().pageNumber : n, [r, g, b] = rgb(c.color), [r2, g2, b2] = rgb(c.color2);
             const ff = doc.getFont ? doc.getFont() : null, fs = doc.getFontSize ? doc.getFontSize() : 10, F = c.font || 'helvetica', sz = +c.size || 7.5;
             let lw = 0, lh = 0; if (c.L && c.lw && c.lh) { lh = LS[c.logoSize] || 16; lw = Math.min(lh * 5, lh * c.lw / c.lh); }
             const fmt = /png/i.test((c.L || '').slice(0, 22)) ? 'PNG' : 'JPEG', hb = HH[c.headH] || 3.2;
             for (let i = 1; i <= n; i++) {
                 doc.setPage(i); const W = doc.internal.pageSize.getWidth(), H = doc.internal.pageSize.getHeight(), M = P(18);
+                const B = ((doc.__xcB || {})[i] || []).slice(), gap = P(2), tw_ = s => { try { return doc.getTextWidth(s); } catch (e) { return s.length * P(sz) * .5; } };
+                let soft = 0; const big = b => b[2] * b[3] > .35 * W * H; // grande image (plan, synoptique) : évitée d'abord, puis acceptée en dernier recours
+                let txt = 0; const free = (x, y, w, h) => x >= 0 && y >= 0 && x + w <= W && y + h <= H && !B.some(b => (b[4] !== 'r' || (txt && b[2] * b[3] < .35 * W * H)) && !(soft && big(b)) && x < b[0] + b[2] + gap && x + w + gap > b[0] && y < b[1] + b[3] + gap && y + h + gap > b[1]);
+                const take = (x, y, w, h) => { B.push([x, y, w, h]); return true; };
+                const tbox = (s, x, y, al) => { const w = tw_(s), h = P(sz); return [al === 'right' ? x - w : al === 'center' ? x - w / 2 : x, y - h * .8, w, h]; }, tfree = (...a) => { txt = 1; const r = free(...a); txt = 0; return r; };
+                // une image : première position libre parmi les candidates, en réduisant si besoin ; sinon rien (jamais par-dessus le contenu)
+                const place = (cands, w0, h0) => { for (soft = 0; soft < 2; soft++) for (const f of [1, .78, .6]) { const w = w0 * f, h = h0 * f; for (const c of cands) { const [x, y] = c(w, h); if (free(x, y, w, h)) { take(x, y, w, h); soft = 0; return [x, y, w, h]; } } } soft = 0; return null; };
                 if (c.water) { try { if (doc.GState && doc.setGState) { doc.saveGraphicsState && doc.saveGraphicsState(); doc.setGState(new doc.GState({ opacity: +c.waterOp || 0.08 })); } doc.setFont(F, 'bold'); doc.setFontSize(Math.min(W, H) * k / Math.max(4, c.water.length) * ({ s: .8, m: 1.3, l: 1.8 }[c.waterSize] || 1.3)); if (c.waterTone === 'grey') doc.setTextColor(120, 120, 120); else doc.setTextColor(r, g, b); doc.text(c.water, W / 2, H / 2, { align: 'center', angle: c.waterAngle === 'horiz' ? 0 : 30, baseline: 'middle' }); if (doc.GState && doc.setGState) { doc.restoreGraphicsState ? doc.restoreGraphicsState() : doc.setGState(new doc.GState({ opacity: 1 })); } } catch (e) { } }
                 if (c.head === 'band') { doc.setFillColor(r, g, b); doc.rect(0, 0, W, P(hb), 'F'); }
                 else if (c.head === 'line') { doc.setDrawColor(r, g, b); doc.setLineWidth(P(hb / 2.5)); doc.line(M, P(14), W - M, P(14)); }
                 const ht = headTxt(c), hy = c.head === 'line' ? P(11) : P(hb + 9);
-                if (ht) { doc.setFont(F, 'bold'); doc.setFontSize(sz); doc.setTextColor(r2, g2, b2); doc.text(ht.slice(0, 120), c.headAlign === 'left' ? M : W - M, hy, { align: c.headAlign === 'left' ? 'left' : 'right' }); }
-                if (lw && (c.logoPos === 'head' || c.logoPos === 'both')) { try { const x = c.headAlign === 'left' && ht ? W - M - P(lw) : (ht ? M : W - M - P(lw)); doc.addImage(c.L, fmt, x, P(hb + 3), P(lw), P(lh)); } catch (e) { } }
-                const TL = window.__xcToolLogo; if (TL && TL.d && c.toolLogo !== false) { try { const th = 9, tw = Math.min(30, th * TL.w / TL.h); doc.addImage(TL.d, 'PNG', W - M - P(tw * 2.835), P(hb + 3), P(tw * 2.835), P(th * 2.835)); } catch (e) { } } // logo de l'outil (logos/OUTIL.png)
+                if (ht) { doc.setFont(F, 'bold'); doc.setFontSize(sz); const s = ht.slice(0, 120); const al = c.headAlign === 'left' ? 'left' : 'right', alt = al === 'left' ? 'right' : 'left'; const at = a => a === 'left' ? M : W - M;
+                    for (const [a, y] of [[al, hy], [alt, hy], [al, P(hb + 5)], [alt, P(hb + 5)]]) { const bx = tbox(s, at(a), y, a); if (tfree(...bx)) { take(...bx); doc.setTextColor(r2, g2, b2); doc.text(s, at(a), y, { align: a }); break; } } }
+                const top = P(hb + 3), L_ = (w, h) => [M, top], R_ = (w, h) => [W - M - w, top], C_ = (w, h) => [(W - w) / 2, top], CL_ = (w, h) => [W / 2 - w - P(6), top], CR_ = (w, h) => [W / 2 + P(6), top];
+                if (lw && (c.logoPos === 'head' || c.logoPos === 'both')) { const p = place(c.headAlign === 'left' && ht ? [R_, L_, C_, CL_, CR_] : [L_, R_, C_, CL_, CR_], P(lw), P(lh)); if (p) try { doc.addImage(c.L, fmt, p[0], p[1], p[2], p[3]); } catch (e) { } }
+                const TL = window.__xcToolLogo; if (TL && TL.d && c.toolLogo !== false) { const th = 9, tw = Math.min(30, th * TL.w / TL.h), p = place([R_, L_, C_, CR_, CL_], P(tw * 2.835), P(th * 2.835)); if (p) try { doc.addImage(TL.d, 'PNG', p[0], p[1], p[2], p[3]); } catch (e) { } } // logo de l'outil (logos/OUTIL.png), là où il ne recouvre rien
                 if (c.foot) {
-                    const y = H - P(9);
-                    if (c.footLine) { doc.setDrawColor(r, g, b); doc.setLineWidth(P(.6)); doc.line(M, H - P(19), W - M, H - P(19)); }
-                    doc.setFont(F, 'normal'); doc.setFontSize(sz); doc.setTextColor(r2, g2, b2);
-                    let x = M; if (lw && (c.logoPos === 'foot' || c.logoPos === 'both')) { const h2 = Math.min(lh, 12), w2 = h2 * lw / lh; try { doc.addImage(c.L, fmt, x, H - P(6.5 + h2), P(w2), P(h2)); x += P(w2 + 6); } catch (e) { } }
-                    const lt = leftTxt(c); if (lt) doc.text(lt.slice(0, 110), x, y);
-                    if (c.mention && c.headText !== 'mention') { doc.setFont(F, 'bold'); doc.setTextColor(r, g, b); doc.text(c.mention.slice(0, 60), W / 2, y, { align: 'center' }); doc.setFont(F, 'normal'); doc.setTextColor(r2, g2, b2); }
-                    const rt = [c.version, c.date ? today() : '', numTxt(c, i, n)].filter(Boolean).join('   ·   '); if (rt) doc.text(rt, W - M, y, { align: 'right' });
+                    // pied : rangée du bas (y), sinon tout en bas de la page ; filet seulement s'il ne coupe rien
+                    const rows = [H - P(9), H - P(4.5)], lt = (leftTxt(c) || '').slice(0, 110), mt = c.mention && c.headText !== 'mention' ? c.mention.slice(0, 60) : '', rt = [c.version, c.date ? today() : '', numTxt(c, i, n)].filter(Boolean).join('   ·   ');
+                    doc.setFont(F, 'normal'); doc.setFontSize(sz);
+                    const h2 = lw && (c.logoPos === 'foot' || c.logoPos === 'both') ? Math.min(lh, 12) : 0, w2 = h2 ? h2 * lw / lh : 0;
+                    let y = rows.find(yy => { const bl = [lt ? tbox(lt, M + (w2 ? P(w2 + 6) : 0), yy, 'left') : null, rt ? tbox(rt, W - M, yy, 'right') : null].filter(Boolean); return bl.every(bx => tfree(...bx)) && (!h2 || free(M, yy + P(2.5) - P(h2), P(w2), P(h2))); });
+                    if (y == null) { soft = 1; y = rows.find(yy => { const bl = [lt ? tbox(lt, M + (w2 ? P(w2 + 6) : 0), yy, 'left') : null, rt ? tbox(rt, W - M, yy, 'right') : null].filter(Boolean); return bl.every(bx => tfree(...bx)); }); }
+                    const solo = y == null; if (solo) y = rows[0];
+                    if (c.footLine && free(M, H - P(19.5), W - 2 * M, P(1))) { doc.setDrawColor(r, g, b); doc.setLineWidth(P(.6)); doc.line(M, H - P(19), W - M, H - P(19)); }
+                    doc.setTextColor(r2, g2, b2);
+                    let x = M; if (h2) { for (const f of [1, .7, .5]) { const hh = P(h2 * f), ww = P(w2 * f), iy = y + P(2.5) - hh; if (free(M, iy, ww, hh)) { try { doc.addImage(c.L, fmt, x, iy, ww, hh); take(x, iy, ww, hh); x += ww + P(6); } catch (e) { } break; } } }
+                    const pill = bx => { if (!soft) return; try { const tc = doc.getTextColor ? doc.getTextColor() : null; if (doc.GState && doc.setGState) { doc.saveGraphicsState && doc.saveGraphicsState(); doc.setGState(new doc.GState({ opacity: .88 })); } doc.setFillColor(255, 255, 255); doc.roundedRect(bx[0] - P(3), bx[1] - P(1.6), bx[2] + P(6), bx[3] + P(3.2), P(2), P(2), 'F'); if (doc.GState && doc.setGState) { doc.restoreGraphicsState ? doc.restoreGraphicsState() : doc.setGState(new doc.GState({ opacity: 1 })); } if (tc) doc.setTextColor(tc); } catch (e) { } }; // sur une grande image (plan, synoptique) : pastille claire derrière le texte, toujours lisible
+                    const put = (s, xx, al, bold) => { if (!s) return; doc.setFont(F, bold ? 'bold' : 'normal'); const bx = tbox(s, xx, y, al); if (!tfree(...bx)) { const y2 = rows.find(yy => tfree(...tbox(s, xx, yy, al))); if (y2 == null) return; bx[1] += y2 - y; pill(bx); doc.text(s, xx, y2, { align: al }); take(...bx); return; } pill(bx); doc.text(s, xx, y, { align: al }); take(...bx); };
+                    put(lt, x, 'left'); doc.setTextColor(r, g, b); put(mt, W / 2, 'center', true); doc.setTextColor(r2, g2, b2); put(rt, W - M, 'right'); soft = 0;
                 }
             }
             let curP = cur; if (c.cover && doc.insertPage) { try { coverPage(doc, c); curP = cur + 1; } catch (e) { console.warn('XCHARTE cover', e); } }
-            doc.setPage(curP); if (ff) try { doc.setFont(ff.fontName, ff.fontStyle); } catch (e) { } doc.setFontSize(fs); doc.setTextColor(0, 0, 0);
+            doc.__xcStamping = 0; doc.setPage(curP); if (ff) try { doc.setFont(ff.fontName, ff.fontStyle); } catch (e) { } doc.setFontSize(fs); doc.setTextColor(0, 0, 0);
         } catch (e) { console.warn('XCHARTE', e); }
     }
     const coverLines = c => { const f = fiche() || {}, d = s => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s || ''); return m ? m[3] + '/' + m[2] + '/' + m[1] : ''; }; const dt = f.debut && f.fin && f.fin !== f.debut ? 'Du ' + d(f.debut) + ' au ' + d(f.fin) : d(f.debut || f.fin); return c.coverInfo ? [f.realisation ? 'Réalisation : ' + f.realisation : '', f.lieu, dt, f.contact ? 'Contact : ' + f.contact : ''].filter(Boolean) : []; };
@@ -3156,12 +3172,24 @@ const XCHARTE = (() => {
         el.style.cssText = 'font-family:' + fam + ';background:' + (dark ? '#161618' : '#fff') + ';color:' + (dark ? '#fff' : '#191919');
         return '#xc-cover{display:none}@media print{#xc-cover{display:block!important;position:relative;height:100vh;page-break-after:always;break-after:page;-webkit-print-color-adjust:exact;print-color-adjust:exact}#xc-cover .xcc-bar{position:absolute;left:0;top:0;bottom:0;width:3mm}#xc-cover .xcc-img{position:absolute;left:0;right:0;top:0;width:100%;height:26%;object-fit:cover}#xc-cover .xcc-in{position:absolute;left:18mm;right:15mm;top:30%}#xc-cover .xcc-ft{position:absolute;left:18mm;bottom:12mm;font-size:9pt;opacity:.6}}';
     }
+    // zones occupées par l'outil, page par page (texte et images) : l'habillage se place là où il ne recouvre rien
+    function track(doc) {
+        if (doc.__xcB) return; doc.__xcB = {}; const pg = () => { try { return doc.internal.getCurrentPageInfo().pageNumber; } catch (e) { return 1; } };
+        const add = (x, y, w, h) => { if (doc.__xcStamping || !(w > 0 && h > 0) || !isFinite(x + y)) return; (doc.__xcB[pg()] = doc.__xcB[pg()] || []).push([x, y, w, h]); };
+        const T = doc.text; if (typeof T === 'function') doc.text = function (t, x, y, o) {
+            try { if (typeof t === 'string' || Array.isArray(t) || typeof t === 'number') { o = o || {}; if (!o.angle && !o.rotationDirection) { const k = doc.internal.scaleFactor, fs = doc.getFontSize() / k; let L = Array.isArray(t) ? t.map(String) : String(t).split('\n'); if (o.maxWidth) L = [].concat(...L.map(s => doc.splitTextToSize(s, o.maxWidth)));
+                const lh = fs * (doc.getLineHeightFactor ? doc.getLineHeightFactor() : 1.15) * (o.lineHeightFactor ? o.lineHeightFactor / 1.15 : 1); let w = 0; L.forEach(s => { if (s.trim()) w = Math.max(w, doc.getTextWidth(s)); }); if (w > 0) { const x0 = o.align === 'center' ? x - w / 2 : o.align === 'right' ? x - w : x; const b = o.baseline; const y0 = b === 'top' || b === 'hanging' ? y : b === 'middle' ? y - fs / 2 : b === 'bottom' ? y - fs : y - fs * .78; add(x0, y0, w, fs + lh * (L.length - 1)); } } } } catch (e) { }
+            return T.apply(this, arguments); };
+        const RC = doc.rect; if (typeof RC === 'function') doc.rect = function (x, y, w, h, s) { try { if (/F/i.test(s || '') && !doc.__xcStamping && w > 0 && h > 0) (doc.__xcB[pg()] = doc.__xcB[pg()] || []).push([x, y, w, h, 'r']); } catch (e) { } return RC.apply(this, arguments); };
+        const I = doc.addImage; if (typeof I === 'function') doc.addImage = function (a, f, x, y, w, h) { try { if (a && typeof a === 'object' && a.x != null && a.width != null && !(a instanceof Element)) add(a.x, a.y, a.width, a.height); else add(x, y, w, h); } catch (e) { } return I.apply(this, arguments); };
+    }
     function patchJsPDF() {
         const J = window.jspdf && window.jspdf.jsPDF; if (J && !window.__jsPDFPristine && !J.__xcWrap) window.__jsPDFPristine = J; if (!J || !J.API || J.API.__xcPatch) return !!J; const A = J.API; A.__xcPatch = 1;
         // jsPDF 2.x : output / save sont créés sur chaque document (pas sur API) → on les enveloppe à la création de chaque document,
         // sinon l'ancienne enveloppe appelait une fonction inexistante (« Cannot read properties of undefined (reading 'apply') »)
         const wrap = doc => {
             if (!doc || doc.__xcW) return; doc.__xcW = 1;
+            try { track(doc); } catch (e) { }
             const out = doc.output; if (typeof out === 'function') doc.output = function () { if (!window.__xcNoWrap) try { stamp(doc); } catch (e) { } return out.apply(doc, arguments); };
             const sv = doc.save; if (typeof sv === 'function') doc.save = function () { const args = arguments; if (window.__xcNoWrap) return sv.apply(doc, args); try { stamp(doc); } catch (e) { } if (preview(doc, () => sv.apply(doc, args), args[0])) return doc; return sv.apply(doc, args); };
         };
@@ -3187,6 +3215,7 @@ const XCHARTE = (() => {
         return true;
     }
     // ---------- impression ----------
+    const PLI = {};
     function applyPrint() {
         let st = document.getElementById('xc-print'), wm = document.getElementById('xc-wm'); const c = active();
         if (!c) { if (st) st.remove(); if (wm) wm.remove(); printCover(null); return; }
@@ -3195,10 +3224,14 @@ const XCHARTE = (() => {
         const bt = c.footLine ? 'border-top:.6pt solid ' + col + ';' : '', box = 'font:' + sz + ' ' + fam + ';color:' + col2 + ';vertical-align:middle;' + bt;
         const right = [c.version ? q(c.version + '   ·   ') : '', c.date ? q(today() + '   ·   ') : '', c.num === 'n/t' ? 'counter(page) " / " counter(pages)' : c.num === 'page' ? '"Page " counter(page) " sur " counter(pages)' : c.num === 'n' ? 'counter(page)' : ''].filter(Boolean).join(' ') || '""';
         const ht = headTxt(c), hb = (HH[c.headH] || 3.2) + 'pt';
+        // logos des rapports imprimés : dans les marges de la page (jamais sur le contenu), image redimensionnée et nette (×3)
+        const LI = (src, h) => { if (!src || !/^data:image\//.test(src)) return ''; const kk = src.length + ':' + src.slice(-24) + ':' + h, v = PLI[kk]; if (v) return 'image-set(url("' + v + '") 3x)'; if (v === undefined) { PLI[kk] = 0; const im = new Image(); im.onload = () => { const H3 = h * 3, W3 = Math.min(1200, Math.round(H3 * im.naturalWidth / im.naturalHeight)); const cv = document.createElement('canvas'); cv.width = W3; cv.height = Math.round(W3 * im.naturalHeight / im.naturalWidth); cv.getContext('2d').drawImage(im, 0, 0, cv.width, cv.height); PLI[kk] = cv.toDataURL('image/png'); applyPrint(); }; im.src = src; } return ''; };
+        const hl = (c.logoPos === 'head' || c.logoPos === 'both') ? LI(c.L, 30) : '', fl = (c.logoPos === 'foot' || c.logoPos === 'both') ? LI(c.L, 16) : '', TL = window.__xcToolLogo, tl = TL && TL.d && c.toolLogo !== false ? LI(TL.d, 26) : '';
         let page = (c.foot ? 'margin-bottom:14mm;' : '') + (ht || c.head !== 'none' ? 'margin-top:14mm;' : '');
-        if (c.foot) page += '@bottom-left{content:' + q(leftTxt(c)) + ';' + box + '}@bottom-center{content:' + q(c.headText === 'mention' ? '' : c.mention) + ';font:bold ' + sz + ' ' + fam + ';color:' + col + ';vertical-align:middle;' + bt + '}@bottom-right{content:' + right + ';' + box + '}';
+        if (c.foot) page += '@bottom-left{content:' + (fl ? fl + ' "   " ' : '') + q(leftTxt(c)) + ';' + box + '}@bottom-center{content:' + q(c.headText === 'mention' ? '' : c.mention) + ';font:bold ' + sz + ' ' + fam + ';color:' + col + ';vertical-align:middle;' + bt + '}@bottom-right{content:' + right + ';' + box + '}';
         const hbox = c.head === 'band' ? 'border-top:' + hb + ' solid ' + col + ';' : c.head === 'line' ? 'border-bottom:' + (parseFloat(hb) / 2.5).toFixed(1) + 'pt solid ' + col + ';' : '';
-        if (c.head !== 'none' || ht) page += (c.headAlign === 'left' ? '@top-left{content:' + q(ht) + ';' : '@top-right{content:' + q(ht) + ';') + 'font:bold ' + sz + ' ' + fam + ';color:' + col2 + ';vertical-align:' + (c.head === 'band' ? 'top;padding-top:5mm' : 'bottom;padding-bottom:2mm') + ';' + hbox + '}' + (c.headAlign === 'left' ? '@top-right' : '@top-left') + '{content:"";' + hbox + '}@top-center{content:"";' + hbox + '}';
+        if (c.head === 'none' && !ht && (hl || tl)) page += 'margin-top:14mm;' + (c.headAlign === 'left' ? '@top-right' : '@top-left') + '{content:' + (hl || '""') + '}@top-center{content:' + (tl || '""') + '}';
+        if (c.head !== 'none' || ht) page += (c.headAlign === 'left' ? '@top-left{content:' + q(ht) + ';' : '@top-right{content:' + q(ht) + ';') + 'font:bold ' + sz + ' ' + fam + ';color:' + col2 + ';vertical-align:' + (c.head === 'band' ? 'top;padding-top:5mm' : 'bottom;padding-bottom:2mm') + ';' + hbox + '}' + (c.headAlign === 'left' ? '@top-right' : '@top-left') + '{content:' + (hl || '""') + ';' + hbox + '}@top-center{content:' + (tl || '""') + ';' + hbox + '}';
         const pf = c.printFont === 'serif' ? FONTS[1][2] : c.printFont === 'mono' ? FONTS[2][2] : c.printFont === 'sans' ? FONTS[0][2] : '';
         const cv = printCover(c);
         st.textContent = cv + '@media print{@page{' + page + '}' + (c.printCover ? '@page:first{margin:0;@bottom-left{content:none;border:0}@bottom-center{content:none;border:0}@bottom-right{content:none;border:0}@top-left{content:none;border:0}@top-center{content:none;border:0}@top-right{content:none;border:0}}' : '') + (pf ? 'body,body *:not(svg):not(svg *){font-family:' + pf + '!important}' : '') + (c.printTitles ? 'h1,h2,h3{color:' + col + '!important}h1,h2{border-color:' + col + '!important}' : '') + '#xc-wm{display:flex!important}}#xc-wm{display:none}';
@@ -3206,7 +3239,9 @@ const XCHARTE = (() => {
     }
     function patchDossier() {
         if (APP !== 'dossier' || typeof buildDossierPdf !== 'function' || buildDossierPdf.__xc) return;
-        const b = buildDossierPdf; const w = async function (p, onStep) { const c = active('dossier'); if (!c) return b.apply(this, arguments); const q = JSON.parse(JSON.stringify(p)); if (!q.design.accent) q.design.accent = c.color; if (!q.design.watermark && c.water) q.design.watermark = c.water; if (c.font === 'times' && q.design.serif === false) q.design.serif = true; if (c.coverTheme === 'light' && (!q.design.theme || q.design.theme === 'xiii')) q.design.theme = 'epure'; else if (c.coverTheme === 'dark' && q.design.theme === 'epure') q.design.theme = 'xiii'; return b.call(this, q, onStep); };
+        const b = buildDossierPdf; const w = async function (p, onStep) { const c = active('dossier'); if (!c) return b.apply(this, arguments); const q = JSON.parse(JSON.stringify(p)); if (!q.design.accent) q.design.accent = c.color; if (!q.design.watermark && c.water) q.design.watermark = c.water; if (c.font === 'times' && q.design.serif === false) q.design.serif = true; if (c.coverTheme === 'light' && (!q.design.theme || q.design.theme === 'xiii')) q.design.theme = 'epure'; else if (c.coverTheme === 'dark' && q.design.theme === 'epure') q.design.theme = 'xiii';
+            window.__xcDossierLogo = c.foot && (c.logoPos === 'foot' || c.logoPos === 'both' || c.logoPos === 'head') && c.L ? c.L : ''; window.__xcDossierFoot = c.foot ? ([leftTxt(c), c.mention && c.headText !== 'mention' ? c.mention : ''].filter(Boolean).join('  ·  ')) : '';
+            try { return await b.call(this, q, onStep); } finally { window.__xcDossierLogo = ''; window.__xcDossierFoot = ''; } };
         w.__xc = 1; buildDossierPdf = w;
     }
     // ---------- formulaire (réutilisé par Projet XIII et le panneau ⚙️) ----------
@@ -3220,6 +3255,7 @@ const XCHARTE = (() => {
         host.innerHTML = '<div class="xc-wrap"><div class="xc-form">' +
             '<label class="xc-on"><input type="checkbox" data-x="on"' + (c.on ? ' checked' : '') + '> <b>Appliquer la charte à tous les PDF du projet</b></label>' +
             '<div class="xc-presets"><span>Styles prêts :</span>' + PRESETS.map((p, i) => '<button type="button" data-pre="' + i + '" style="--pc:' + p[1].color + '">' + p[0] + '</button>').join('') + '</div>' +
+            (() => { const M = models(); return '<div class="xc-presets"><span>Mes modèles :</span>' + Object.keys(M).map(n => '<span style="display:inline-flex;gap:2px"><button type="button" data-mod="' + esc(n) + '" style="--pc:' + esc(M[n].color || '#888') + '">' + esc(n) + '</button><button type="button" data-moddel="' + esc(n) + '" title="Supprimer ce modèle" style="padding:5px 7px!important;font-size:11px!important">✕</button></span>').join('') + '<button type="button" data-modsave title="Enregistre couleurs, en-tête, pied, logo, filigrane… pour les réutiliser sur d\'autres projets">💾 Enregistrer comme modèle…</button></div>'; })() +
             '<div class="xc-h">Couleurs & police</div><div class="xc-g">' + fld('Couleur principale', '<input type="color" data-x="color" value="' + esc(c.color) + '">') + fld('Couleur du texte', '<input type="color" data-x="color2" value="' + esc(c.color2) + '">') + fld('Police', sel('font', FONTS.map(x => [x[0], x[1]]))) + fld('Taille', sel('size', [[6.5, 'Petite'], [7.5, 'Normale'], [9, 'Grande']])) + '</div>' +
             '<p style="margin:4px 0 10px;font-size:12px;opacity:.85"><button type="button" data-pal style="cursor:pointer">🎨 Couleurs depuis une image</button> <input type="file" accept="image/*" data-palf hidden> exportez votre kit de marque Canva (ou un logo, une affiche) en PNG : les deux couleurs dominantes deviennent la charte.</p>' +
             '<div class="xc-h">Textes</div><div class="xc-g">' + fld('Titre', inp('title', f.title || 'Nom du projet'), 'w2') + fld('Sous-titre / société', inp('sub', [f.production, f.client].filter(Boolean).join(' · ') || 'Société de production'), 'w2') + fld('Mention', inp('mention', 'Confidentiel · Document de travail · V2…'), 'w2') + fld('Texte du filigrane (vide = aucun)', '<input data-x="water" list="xc-wl" value="' + esc(c.water) + '" placeholder="Écrivez librement ou choisissez…"><datalist id="xc-wl">' + ['BROUILLON', 'CONFIDENTIEL', 'DOCUMENT DE TRAVAIL', 'NE PAS DIFFUSER', 'COPIE', 'VERSION PROVISOIRE', 'VALIDÉ', 'ANNULE ET REMPLACE'].map(x => '<option value="' + x + '">').join('') + '</datalist>', 'w2') + fld('Version du document', inp('version', 'V1, V2 — 12/10…')) + '</div>' +
@@ -3247,6 +3283,9 @@ const XCHARTE = (() => {
         host.querySelectorAll('[data-x]').forEach(i => i.addEventListener(i.type === 'checkbox' || i.tagName === 'SELECT' || i.type === 'color' ? 'change' : 'input', () => { const k = i.dataset.x; c[k] = i.type === 'checkbox' ? i.checked : /^(size|waterOp)$/.test(k) ? +i.value : i.value; changed(); }));
         host.querySelectorAll('[data-x][type=color]').forEach(i => i.addEventListener('input', () => { c[i.dataset.x] = i.value; changed(); }));
         host.querySelectorAll('[data-app]').forEach(i => i.onchange = () => { c.off = Object.assign({}, c.off); if (i.checked) delete c.off[i.dataset.app]; else c.off[i.dataset.app] = 1; changed(); });
+        host.querySelectorAll('[data-mod]').forEach(b => b.onclick = () => { const m = models()[b.dataset.mod]; if (!m) return; Object.assign(c, m, { on: true }); form(host, c, onChange); if (onChange) onChange(Object.assign({}, c)); });
+        host.querySelectorAll('[data-moddel]').forEach(b => b.onclick = () => { const M = models(); delete M[b.dataset.moddel]; putModels(M); form(host, c, onChange); });
+        { const sb = host.querySelector('[data-modsave]'); if (sb) sb.onclick = () => { const nm = (prompt('Nom du modèle (ex. Production XIII, Client Canal+) :', '') || '').trim(); if (!nm) return; const M = models(), o = {}; Object.keys(DEF).forEach(k => { if (!/^(on|title|sub|lw|lh|off)$/.test(k)) o[k] = c[k]; }); M[nm] = o; putModels(M); form(host, c, onChange); }; }
         host.querySelectorAll('[data-pre]').forEach(b => b.onclick = () => { Object.assign(c, PRESETS[+b.dataset.pre][1], { on: true }); form(host, c, onChange); if (onChange) onChange(Object.assign({}, c)); });
         const pb = host.querySelector('[data-pal]'), pf = host.querySelector('[data-palf]'); if (pb) { pb.onclick = () => pf.click(); pf.onchange = () => { const f = pf.files[0]; if (!f) return; const u = URL.createObjectURL(f), im = new Image(); im.onload = () => { const P = palette(im); URL.revokeObjectURL(u); if (!P.length) { alert('Aucune couleur franche trouvée dans cette image.'); return; } c.color = P[0]; if (P[1]) c.color2 = P[1]; form(host, c, onChange); if (onChange) onChange(Object.assign({}, c)); }; im.src = u; }; }
         const lg = host.querySelector('[data-logo]'), lf = host.querySelector('[data-logof]'); lg.onclick = () => lf.click();
@@ -3276,7 +3315,7 @@ const XCHARTE = (() => {
         o.querySelector('#xc-ok').onclick = async () => { const n = await save(F.get()); o.remove(); try { if (typeof toast === 'function') toast(n.on ? '🎨 Charte appliquée aux PDF du projet' : 'Charte désactivée'); } catch (e) { } };
     }
     function loadToolLogo(app) { // logo personnalisé de l'outil : site/logos/OUTIL.png (repris dans les en-têtes de PDF)
-        try { fetch('logos/' + app + '.png', { cache: 'force-cache' }).then(r => r.ok ? r.blob() : null).then(b => { if (!b || !/image/.test(b.type)) return; const f = new FileReader(); f.onload = () => { const i = new Image(); i.onload = () => { window.__xcToolLogo = { d: f.result, w: i.naturalWidth, h: i.naturalHeight }; }; i.src = f.result; }; f.readAsDataURL(b); }).catch(() => { }); } catch (e) { }
+        try { fetch('logos/' + app + '.png', { cache: 'force-cache' }).then(r => r.ok ? r.blob() : null).then(b => { if (!b || !/image/.test(b.type)) return; const f = new FileReader(); f.onload = () => { const i = new Image(); i.onload = () => { window.__xcToolLogo = { d: f.result, w: i.naturalWidth, h: i.naturalHeight }; try { applyPrint(); } catch (e) { } }; i.src = f.result; }; f.readAsDataURL(b); }).catch(() => { }); } catch (e) { }
     }
     function init(app) {
         APP = app; loadToolLogo(app); const ap = () => { try { applyPrint(); } catch (e) { } }; if (document.body) ap(); else document.addEventListener('DOMContentLoaded', ap);
@@ -3284,6 +3323,8 @@ const XCHARTE = (() => {
         if (!window.jspdf) { try { let v; Object.defineProperty(window, 'jspdf', { configurable: true, enumerable: true, get() { return v; }, set(x) { v = x; setTimeout(patchJsPDF, 0); setTimeout(patchJsPDF, 500); } }); } catch (e) { } }
         let t = 0; const iv = setInterval(() => { patchJsPDF(); patchDossier(); if (++t > 120) clearInterval(iv); }, 1000);
         window.addEventListener('beforeprint', ap);
+        // rapports ouverts dans une fenêtre à part (window.open + print) : même habillage (marges, logos, pied) au moment d'imprimer
+        try { const ow = window.open; if (ow && !ow.__xc) { const w2 = function () { const w = ow.apply(window, arguments); try { if (w && w.print && !w.print.__xc) { const pr = w.print; const np = function () { try { ap(); const st = document.getElementById('xc-print'); if (st && w.document && w.document.head && !w.document.getElementById('xc-print')) { const s = w.document.createElement('style'); s.id = 'xc-print'; s.textContent = st.textContent.replace(/#xc-cover[^@]*/, '') + '@media print{@page{margin-left:12mm;margin-right:12mm}}'; w.document.head.appendChild(s); } } catch (e) { } return pr.apply(w, arguments); }; np.__xc = 1; w.print = np; } } catch (e) { } return w; }; w2.__xc = 1; window.open = w2; } } catch (e) { }
         const c = raw(); if (c.on && c.useLogo && !c.logo && !c.lw) { const L = get().L; if (L) imgSize(L).then(([w, h]) => { const n = raw(); n.lw = w; n.lh = h; try { localStorage.setItem(KEY, JSON.stringify(n)); } catch (e) { } }); }
     }
     return { init, panel, form, save, raw, get, stamp, active };

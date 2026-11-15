@@ -19,7 +19,7 @@
     var gi = SP.getItem, si = SP.setItem, ri = SP.removeItem, ki = SP.key;
     var COLORS = ['#f0b429', '#4fc3f7', '#81c784', '#e57373', '#ba68c8', '#ff8a3d', '#4db6ac', '#f06292', '#9575cd', '#d4e157'];
     // clés communes à tous les projets (préférences, bibliothèques, catalogues, IA, onglets…)
-    var G = /^(xiii\.(ws|tabs|theme|ctheme$|keys\.|tools\.|anim\.|color$|tray\.|ctx\.hide\.|a11y|anim\.|tour2?\.|tips\.|pins|recent|start\.|pwa\.|ai$|ai\.|ux\.|bar\.|boot\.|settings\.|home\.|docs\.seen|news\.|ib\.no|inapp|catalogue|data\.|lib\.|annuaire|encodo\.|errlog|cmds|ndi\.|tally\.|gif\.)|[a-zA-Z]+XIII\.(prefs|library|lib|templates|kits|poses|parts|models|presets|base|parc|moi|xlfields|emetteur|comptes|inventory|libMigrated)$|encodoXIII|synoptique_(?!projects|snapshots)|theme$)/;
+    var G = /^(xiii\.(ws|tabs|theme|ctheme$|charte\.models$|keys\.|tools\.|anim\.|color$|tray\.|ctx\.hide\.|a11y|anim\.|tour2?\.|tips\.|pins|recent|start\.|pwa\.|ai$|ai\.|ux\.|bar\.|boot\.|settings\.|home\.|docs\.seen|news\.|ib\.no|inapp|catalogue|data\.|lib\.|annuaire|encodo\.|errlog|cmds|ndi\.|tally\.|gif\.)|[a-zA-Z]+XIII\.(prefs|library|lib|templates|kits|poses|parts|models|presets|base|parc|moi|xlfields|emetteur|comptes|inventory|libMigrated)$|encodoXIII|synoptique_(?!projects|snapshots)|theme$)/;
     var rg = function (k) { return gi.call(LS, k); }, rs = function (k, v) { si.call(LS, k, v); }, rr = function (k) { ri.call(LS, k); };
     function rkeys() { var a = [], n = LS.length; for (var i = 0; i < n; i++) a.push(ki.call(LS, i)); return a; }
     function J(s) { try { return JSON.parse(s); } catch (e) { return null; } }
@@ -3545,6 +3545,7 @@ async function buildDossierPdf(p, onStep) {
 
     // ---------- Décor des pages : en-têtes, pieds, onglets, filigrane ----------
     const N = doc.getPageCount();
+    let XL = null; try { const L = window.__xcDossierLogo; if (L) XL = /png/i.test(L.slice(0, 22)) ? await doc.embedPng(L) : await doc.embedJpg(L); } catch (e) { XL = null; } // logo de la charte du projet (pied de page)
     for (let i = 0; i < N; i++) {
         const pg = doc.getPage(i), m = meta[i] || { kind: 'imported' };
         const { width: w, height: h } = pg.getSize();
@@ -3557,7 +3558,8 @@ async function buildDossierPdf(p, onStep) {
                 drawSpaced(pg, ct, { x: w - M.right - spacedW(ct, F.hr, 7, 1), y: h - 40, size: 7, font: F.hr, color: C.muted, sp: 1 });
                 pg.drawLine({ start: { x: M.left, y: h - 48 }, end: { x: w - M.right, y: h - 48 }, thickness: 0.4, color: C.rule });
                 const foot = T([cv.production, cv.subtitle || TEMPLATES[p.type].label].filter(Boolean).join('  ·  '));
-                pg.drawText(fitText(foot, F.hr, 7, w - M.left - M.right - 80), { x: M.left, y: 34, size: 7, font: F.hr, color: C.muted });
+                let fx = M.left; if (XL) { const lh = 12, lw = Math.min(70, lh * XL.width / XL.height); pg.drawImage(XL, { x: fx, y: 30, width: lw, height: lh }); fx += lw + 8; }
+                const foot2 = window.__xcDossierFoot ? T(window.__xcDossierFoot) : foot; pg.drawText(fitText(foot2, F.hr, 7, w - fx - M.right - 80), { x: fx, y: 34, size: 7, font: F.hr, color: C.muted });
                 const pn = String(i + 1), pt = ' / ' + N;
                 pg.drawRectangle({ x: w - M.right - tw(pn, F.hb, 9) - tw(pt, F.hr, 7) - 10, y: 34, width: 4, height: 4, color: C.accent });
                 pg.drawText(pn, { x: w - M.right - tw(pn, F.hb, 9) - tw(pt, F.hr, 7), y: 33, size: 9, font: F.hb, color: C.ink });
@@ -5611,7 +5613,7 @@ var XRED = (function () {
     // ---------- paramètres ----------
     const cvf = (k, label, ph, hint) => ({ k: 'cv_' + k, label, hint, type: 'text', def: '', placeholder: ph });
     XSET.init({
-        app: 'dossier', title: 'DOSSIER', version: 'v80',
+        app: 'dossier', title: 'DOSSIER', version: 'v81',
         theme: { get: () => prefs.theme === 'light' ? 'light' : 'dark', set: t => { if ((prefs.theme === 'light' ? 'light' : 'dark') !== t) toggleTheme(); } },
         // écran peu haut : l'aperçu collant de la page de garde (≈ 500 px) dépassait sous le badge Netlify et cachait « Générer »
         css: '@media (max-height: 900px) { .cover-prev { position: static; } }',
@@ -5762,7 +5764,7 @@ const XUNDO = (() => {
 
 (function(){ const go = () => (typeof XBOOT !== 'undefined' ? XBOOT.ready(() => XUNDO.init('dossier'), 600) : setTimeout(() => XUNDO.init('dossier'), 600)); if (document.readyState === 'complete') go(); else window.addEventListener('load', go); })();
 
-</script><script src="lib/core-02.js?v=6d5e12a4de"></script><script src="lib/core-03.js?v=9de0190a80"></script><script>// =====================================================================
+</script><script src="lib/core-02.js?v=489cdd0a99"></script><script src="lib/core-03.js?v=9de0190a80"></script><script>// =====================================================================
 //  SUITE XIII — XPRS : 👥 présence en direct — qui est dans quel outil
 //  Deux sources fusionnées : le Drive (battement toutes les 20 s, fiable) et XLIVE (signal instantané à
 //  l'ouverture, au retour sur l'onglet, à la frappe, au départ). Affichage :

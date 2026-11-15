@@ -16,7 +16,7 @@
     var gi = SP.getItem, si = SP.setItem, ri = SP.removeItem, ki = SP.key;
     var COLORS = ['#f0b429', '#4fc3f7', '#81c784', '#e57373', '#ba68c8', '#ff8a3d', '#4db6ac', '#f06292', '#9575cd', '#d4e157'];
     // clés communes à tous les projets (préférences, bibliothèques, catalogues, IA, onglets…)
-    var G = /^(xiii\.(ws|tabs|theme|ctheme$|keys\.|tools\.|anim\.|color$|tray\.|ctx\.hide\.|a11y|anim\.|tour2?\.|tips\.|pins|recent|start\.|pwa\.|ai$|ai\.|ux\.|bar\.|boot\.|settings\.|home\.|docs\.seen|news\.|ib\.no|inapp|catalogue|data\.|lib\.|annuaire|encodo\.|errlog|cmds|ndi\.|tally\.|gif\.)|[a-zA-Z]+XIII\.(prefs|library|lib|templates|kits|poses|parts|models|presets|base|parc|moi|xlfields|emetteur|comptes|inventory|libMigrated)$|encodoXIII|synoptique_(?!projects|snapshots)|theme$)/;
+    var G = /^(xiii\.(ws|tabs|theme|ctheme$|charte\.models$|keys\.|tools\.|anim\.|color$|tray\.|ctx\.hide\.|a11y|anim\.|tour2?\.|tips\.|pins|recent|start\.|pwa\.|ai$|ai\.|ux\.|bar\.|boot\.|settings\.|home\.|docs\.seen|news\.|ib\.no|inapp|catalogue|data\.|lib\.|annuaire|encodo\.|errlog|cmds|ndi\.|tally\.|gif\.)|[a-zA-Z]+XIII\.(prefs|library|lib|templates|kits|poses|parts|models|presets|base|parc|moi|xlfields|emetteur|comptes|inventory|libMigrated)$|encodoXIII|synoptique_(?!projects|snapshots)|theme$)/;
     var rg = function (k) { return gi.call(LS, k); }, rs = function (k, v) { si.call(LS, k, v); }, rr = function (k) { ri.call(LS, k); };
     function rkeys() { var a = [], n = LS.length; for (var i = 0; i < n; i++) a.push(ki.call(LS, i)); return a; }
     function J(s) { try { return JSON.parse(s); } catch (e) { return null; } }
@@ -2328,18 +2328,21 @@ function pdfHeader(doc, title, sub, right) {
     const W = doc.internal.pageSize.getWidth();
     doc.setFillColor(30, 30, 30); doc.rect(0, 0, W, 20, 'F');
     doc.setFont('helvetica', 'bold'); doc.setFontSize(16); doc.setTextColor(...ACC); doc.text('CONDUCO XIII', 10, 9.5, { charSpace: 1.2 });
-    doc.setFontSize(10); doc.setTextColor(255, 255, 255); doc.text(pdfSafe(title), 10, 15.5);
+    // titre et sous-titre sur la même ligne, sans se toucher ni passer sous la colonne de droite
+    doc.setFontSize(8); doc.setFont('helvetica', 'normal'); const rw = Math.max(0, ...(right || []).map(l => doc.getTextWidth(pdfSafe(l)))), lim = W - 10 - rw - 6;
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(10); doc.setTextColor(255, 255, 255); let tt = pdfSafe(title); while (tt.length > 6 && 10 + doc.getTextWidth(tt) > lim) tt = tt.slice(0, -2); if (tt !== pdfSafe(title)) tt = tt.replace(/[\s.,-]+$/, '') + '…'; doc.text(tt, 10, 15.5); const tx = 10 + doc.getTextWidth(tt) + 3;
     doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(190, 190, 190);
-    if (sub) doc.text(pdfSafe(sub), 10 + doc.getTextWidth(pdfSafe(title)) * 10 / 8 + 4, 15.5);
+    if (sub && tx + doc.getTextWidth(pdfSafe(sub)) <= lim) doc.text(pdfSafe(sub), tx, 15.5); else if (sub) doc.text(pdfSafe(sub), 10, 18.8);
     doc.setFontSize(8); doc.setTextColor(220, 220, 220);
     (right || []).forEach((l, i) => doc.text(pdfSafe(l), W - 10, 7 + i * 4.2, { align: 'right' }));
     return 26;
 }
 function pdfFooters(doc, label) {
+    { const xc = typeof XCHARTE !== 'undefined' && XCHARTE.active && XCHARTE.active(); if (xc && xc.foot) return; } // pied de la charte du projet à la place
     const n = doc.getNumberOfPages(), W = doc.internal.pageSize.getWidth(), H = doc.internal.pageSize.getHeight();
     for (let i = 1; i <= n; i++) {
         doc.setPage(i); doc.setFont('helvetica', 'normal'); doc.setFontSize(7); doc.setTextColor(140, 140, 140);
-        doc.text(pdfSafe(label), 10, H - 5); doc.text(`Page ${i} / ${n}`, W - 10, H - 5, { align: 'right' });
+        { let s = pdfSafe(label); const mx = W / 2 - doc.getTextWidth(pdfSafe('Généré le ' + new Date().toLocaleString('fr-FR'))) / 2 - 16; while (s.length > 4 && doc.getTextWidth(s) > mx) s = s.slice(0, -2); if (s !== pdfSafe(label)) s = s.replace(/[\s.,-]+$/, '') + '…'; doc.text(s, 10, H - 5); } doc.text(`Page ${i} / ${n}`, W - 10, H - 5, { align: 'right' });
         doc.text(pdfSafe('Généré le ' + new Date().toLocaleString('fr-FR')), W / 2, H - 5, { align: 'center' });
     }
 }
@@ -4961,7 +4964,7 @@ var XRED = (function () {
     const typeOpts = () => TYPES.map(t => [t.id, t.ico + ' ' + t.name]);
 
     const CFG = {
-        app: 'decoup', title: 'DECOUP TECHNICO', version: 'v1.72',
+        app: 'decoup', title: 'DECOUP TECHNICO', version: 'v1.73',
         theme: { get: () => prefs.theme === 'light' ? 'light' : 'dark', set: t => { prefs.theme = t; applyTheme(); savePrefs(); } },
         hide: ['#settings-btn'],
         // ancien ⚙️ masqué ; ⚙️ absent de la lecture plein écran
@@ -5041,7 +5044,7 @@ var XRED = (function () {
     try { if (XSET.isSet('typeVals') || XSET.isSet('myTypes') || XSET.isSet('myGfx')) rerender(); } catch (e) { }
 })();
 
-</script><script src="lib/core-02.js?v=6d5e12a4de"></script><script src="lib/core-03.js?v=9de0190a80"></script><script>// =====================================================================
+</script><script src="lib/core-02.js?v=489cdd0a99"></script><script src="lib/core-03.js?v=9de0190a80"></script><script>// =====================================================================
 //  SUITE XIII — XPRS : 👥 présence en direct — qui est dans quel outil
 //  Deux sources fusionnées : le Drive (battement toutes les 20 s, fiable) et XLIVE (signal instantané à
 //  l'ouverture, au retour sur l'onglet, à la frappe, au départ). Affichage :
