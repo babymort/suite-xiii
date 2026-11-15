@@ -2194,9 +2194,11 @@ const XBOOT = (() => {
         H.classList.add('xb1'); H.classList.remove('xb0'); H.style.background = ''; setTimeout(() => H.classList.remove('xb1'), 260);
     }
     function settle() { // attend que l'interface ne bouge plus (≈ 2 images sans changement de structure), 350 ms au plus
-        let last = performance.now(); const end = last + 350, mo = new MutationObserver(() => { last = performance.now(); });
-        try { mo.observe(document.body, { childList: true, subtree: true }); } catch (e) { }
-        const chk = () => { const n = performance.now(); if (n - last > 60 || n > end) { mo.disconnect(); try { if (typeof XFIT !== 'undefined') XFIT.fit(); } catch (e) { } requestAnimationFrame(reveal); } else requestAnimationFrame(chk); };
+        // saison 6 : tout d'un seul coup — attend que boutons, barres, thème, polices et modules ajoutés aient fini (≈ 200 ms sans changement), 1,2 s au plus
+        let last = performance.now(); const end = last + 1200, mo = new MutationObserver(ms => { if (ms.some(m => m.type === 'childList' || /^(class|style|hidden)$/.test(m.attributeName || ''))) last = performance.now(); });
+        try { mo.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'style', 'hidden'] }); } catch (e) { }
+        let fonts = false; try { document.fonts.ready.then(() => { fonts = true; }); setTimeout(() => { fonts = true; }, 800); } catch (e) { fonts = true; }
+        const chk = () => { const n = performance.now(); if ((n - last > 200 && fonts) || n > end) { mo.disconnect(); try { if (typeof XFIT !== 'undefined') XFIT.fit(); } catch (e) { } requestAnimationFrame(reveal); } else requestAnimationFrame(chk); };
         requestAnimationFrame(chk);
     }
     function run() {
