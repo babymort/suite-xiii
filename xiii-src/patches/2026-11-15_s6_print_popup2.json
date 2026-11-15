@@ -1,0 +1,1 @@
+[["s.textContent = st.textContent.replace(/#xc-cover[^@]*/, ''); w.document.head.appendChild(s);", "s.textContent = st.textContent.replace(/#xc-cover[^@]*/, '') + '@media print{@page{margin-left:12mm;margin-right:12mm}}'; w.document.head.appendChild(s);", 1]]
