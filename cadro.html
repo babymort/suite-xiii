@@ -2364,7 +2364,7 @@ var XRED = (function () {
         if (ch) { try { dirty(); renderAll(); } catch (e) { } }
     }
     XSET.init({
-        app: 'cadro', title: 'CADRO', version: 'v1.36',
+        app: 'cadro', title: 'CADRO', version: 'v1.37',
         css: '#content{padding-bottom:70px}',
         theme: { get: () => prefs.theme === 'light' ? 'light' : 'dark', set: t => { if ((prefs.theme === 'light' ? 'light' : 'dark') !== t) toggleTheme(); } },
         hide: ['#toolbar button[onclick="toggleTheme()"]', '#toolbar button[onclick="openGuide()"]'],
@@ -4267,6 +4267,7 @@ XCAT.initTool('cadro');
 <script src="lib/cadro-grade.js?v=76d9bc9e49"></script>
 <script src="lib/cadro-capture.js?v=556e793dd5"></script>
 <script src="lib/suite-emoji.js?v=39eccf87a9"></script>
+<script src="lib/suite-wins.js?v=c4c4ba4615"></script>
 <!-- SUITE XIII:EXTRA:END -->
 </body>
 </html>

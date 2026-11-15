@@ -5030,7 +5030,7 @@ var XRED = (function () {
     const typeOpts = () => TYPES.map(t => [t.id, t.ico + ' ' + t.name]);
 
     const CFG = {
-        app: 'conduco', title: 'CONDUCO', version: 'v56',
+        app: 'conduco', title: 'CONDUCO', version: 'v57',
         theme: { get: () => prefs.theme === 'light' ? 'light' : 'dark', set: t => { prefs.theme = t; applyTheme(); savePrefs(); } },
         hide: ['#settings-btn'],
         // ancien ⚙️ masqué ; zoom/horloge alignés à gauche du nouveau ⚙️ (hors badge Netlify) ; panneau de propriétés raccourci ; ⚙️ absent du Direct
@@ -6088,4 +6088,5 @@ XLIVEED.init();
 <script src="lib/suite-notif.js?v=ac0dc3fd2e"></script>
 <script src="lib/suite-a11y3.js?v=cf542bcc3b"></script>
 <script src="lib/suite-emoji.js?v=39eccf87a9"></script>
+<script src="lib/suite-wins.js?v=c4c4ba4615"></script>
 <!-- SUITE XIII:EXTRA:END -->

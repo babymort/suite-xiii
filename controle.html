@@ -1654,7 +1654,7 @@ var XRED = (function () {
 // CONTRÔLE XIII — ⚙️ Paramètres
 (function () {
     if (typeof XSET === 'undefined' || typeof checks !== 'function') return;
-    XSET.init({ app: 'controle', title: 'CONTRÔLE', version: 'v1.20', theme: { get: () => prefs.theme, set: t => { prefs.theme = t; applyTheme(); savePrefs(); } },
+    XSET.init({ app: 'controle', title: 'CONTRÔLE', version: 'v1.21', theme: { get: () => prefs.theme, set: t => { prefs.theme = t; applyTheme(); savePrefs(); } },
         help: [{ icon: '✅', label: 'Comment ça marche ?', sub: 'Vérification de tous les outils avant le tournage', run: () => alert('CONTRÔLE XIII lit les données de tous les outils (CALL SHEETO, CASTO, DEVISO, RESSOURCO, REPERO, MATOS, PACKINGO, PLANO, SYNO, TRANSPORTO, BACKUPO…) et liste ce qui est prêt, à vérifier ou bloquant pour la période choisie. Cliquez une ligne pour ouvrir l\'outil.') }],
         sections: [], apply() { } });
 })();
@@ -2416,6 +2416,7 @@ XVIT.init();
 <script src="lib/suite-notif.js?v=ac0dc3fd2e"></script>
 <script src="lib/suite-a11y3.js?v=cf542bcc3b"></script>
 <script src="lib/suite-emoji.js?v=39eccf87a9"></script>
+<script src="lib/suite-wins.js?v=c4c4ba4615"></script>
 <!-- SUITE XIII:EXTRA:END -->
 </body>
 </html>
