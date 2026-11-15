@@ -4275,8 +4275,8 @@
             const zone = document.createElement('div');
             zone.className = 'zone-box';
             zone.id = data.id;
-            zone.style.left = snapEnabled ? snapVal(parseFloat(data.x)) + 'px' : data.x;
-            zone.style.top = snapEnabled ? snapVal(parseFloat(data.y)) + 'px' : data.y;
+            zone.style.left = data.x;
+            zone.style.top = data.y;
             zone.style.width = data.width || '400px';
             zone.style.height = data.height || '300px';
             
@@ -4386,8 +4386,8 @@
             const ann = document.createElement('div');
             ann.className = 'annotation-box';
             ann.id = data.id;
-            ann.style.left = snapEnabled ? snapVal(parseFloat(data.x)) + 'px' : data.x;
-            ann.style.top = snapEnabled ? snapVal(parseFloat(data.y)) + 'px' : data.y;
+            ann.style.left = data.x;
+            ann.style.top = data.y;
             ann.style.width = data.width || '220px';
             ann.style.height = data.height || '140px';
 
@@ -4494,8 +4494,8 @@
 
         function createNodeFromData(data) {
             const node = document.createElement('div'); node.className = 'node'; node.id = data.id; 
-            node.style.left = snapEnabled ? snapVal(parseFloat(data.x)) + 'px' : data.x; 
-            node.style.top = snapEnabled ? snapVal(parseFloat(data.y)) + 'px' : data.y;
+            node.style.left = data.x; /* ZZ : position enregistrée telle quelle (la grille s'applique au déplacement, pas au chargement) */ 
+            node.style.top = data.y;
             if(data.width) node.style.width = data.width; if(data.height) node.style.height = data.height;
             
             node.dataset.bg = data.bg || '#2a2a2a'; node.dataset.hdr = data.hdr || '#3a3a3a'; node.style.setProperty('--bg', node.dataset.bg); node.style.setProperty('--hdr', node.dataset.hdr);
@@ -10720,7 +10720,7 @@ var XRED = (function () {
     }
 
     XSET.init({
-        app: 'syno', title: 'SYNO', version: 'V157',
+        app: 'syno', title: 'SYNO', version: 'V158',
         theme: { get: () => isLightTheme ? 'light' : 'dark', set: t => { if ((isLightTheme ? 'light' : 'dark') !== t) toggleTheme(); } },
         hide: ['#settings-btn', '#settings-menu'],
         css: [
