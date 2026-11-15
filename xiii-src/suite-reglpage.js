@@ -7,8 +7,8 @@
 // =====================================================================
 (function () {
     if (window.XREGLPAGE) return;
-    const GROUPS = [['projet', '🎬', 'Projet', /^projet|scénario|cohérence|charte/i], ['donnees', '☁️', 'Données', /drive|sauvegarde/i], ['connexions', '🔗', 'Connexions', /intelligence|automatisation/i], ['apparence', '🎨', 'Apparence', /thème|barres|accueil|couleur|raccourci/i], ['install', '📲', 'Installation', /install/i]];
-    const EXTRA = [['🧩', 'Barres à la carte', 'Ordre des secteurs, favoris, boutons masqués', () => window.XBARCFG && XBARCFG.open()], ['🏠', 'Accueil sur mesure', 'Sections, ordre et widgets de l\'accueil', () => window.XHOMECFG && XHOMECFG.open()], ['⌨️', 'Raccourcis clavier', 'Changer les touches, profils de touches', () => window.XKMAP && XKMAP.open()], ['🖌️', 'Thème perso', 'Couleurs de fond, de texte et d\'accent', () => window.XCTHEME && XCTHEME.open()]];
+    const GROUPS = [['projet', '🎬', 'Projet', /^projet|scénario|cohérence|charte/i], ['donnees', '☁️', 'Données', /drive|sauvegarde/i], ['connexions', '🔗', 'Connexions', /intelligence|automatisation/i], ['apparence', '🎨', 'Apparence', /thème|barres|accueil|couleur|raccourci|par outil/i], ['install', '📲', 'Installation', /install/i]];
+    const EXTRA = [['🧩', 'Barres à la carte', 'Ordre des secteurs, favoris, boutons masqués', () => window.XBARCFG && XBARCFG.open()], ['🏠', 'Accueil sur mesure', 'Sections, ordre et widgets de l\'accueil', () => window.XHOMECFG && XHOMECFG.open()], ['🧰', 'Réglages par outil', 'Nom, icône, couleur, outils de démarrage', () => window.XTOOLCFG && XTOOLCFG.open()], ['⌨️', 'Raccourcis clavier', 'Changer les touches, profils de touches', () => window.XKMAP && XKMAP.open()], ['🖌️', 'Thème perso', 'Couleurs de fond, de texte et d\'accent', () => window.XCTHEME && XCTHEME.open()]];
     const PAGES = [['projet', '🎬', 'Projet', 'index.html#projet'], ['drive', '☁️', 'Drive', 'drive.html'], ['team', '👥', 'Team', 'team.html'], ['reglages', '⚙️', 'Réglages', 'index.html#reglages']];
     const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
     const css = document.createElement('style'); css.id = 'xreglpage-css';
@@ -56,5 +56,14 @@
     new MutationObserver(addBtn).observe(document.documentElement, { childList: true, subtree: true });
     const fromHash = () => { if (!/^#reglages\b/.test(location.hash)) return; let n = 0; const go = () => { if (!document.getElementById('xh-set') && ++n < 40) return setTimeout(go, 200); try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { } open(); }; go(); };
     addEventListener('hashchange', fromHash); if (document.readyState === 'loading') addEventListener('DOMContentLoaded', fromHash); else fromHash();
+    // barre de l'accueil (rangée dans Démarrer › Outils) : un seul ☁️ Drive qui ouvre la page Drive, un seul 👥 Équipe, pas de lien vide
+    function tidyBar() {
+        const tb = document.getElementById('top-bar'); if (!tb) return;
+        tb.querySelectorAll('a[href]').forEach(a => { if (!a.textContent.trim() && !a.querySelector('img,svg')) a.remove(); });
+        [...tb.querySelectorAll('button:not(#xdr-btn)')].forEach(b => { if (/^Drive du projet/.test(b.title || '') && !b.closest('a')) b.remove(); });
+        const d = document.getElementById('xdr-btn'); if (d && !d.__xrg) { d.__xrg = 1; d.addEventListener('click', e => { e.preventDefault(); e.stopImmediatePropagation(); location.href = 'drive.html'; }, true); }
+    }
+    new MutationObserver(tidyBar).observe(document.documentElement, { childList: true, subtree: true }); tidyBar();
+    addEventListener('DOMContentLoaded', () => { const c = document.createElement('style'); c.textContent = '#xst #top-bar .btn-label{display:inline!important}#top-bar #xb-solo{display:none!important}'; document.head.appendChild(c); });
     window.XREGLPAGE = { open, close };
 })();
