@@ -1208,7 +1208,7 @@
             <input type="text" id="author-name" placeholder="Votre nom..." oninput="updateAuthorName()" style="width: 96px;">
             <div class="divider"></div>
             <span class="btn-group" style="width:240px;">
-                <button class="btn-green" onclick="saveAllToBrowser(true)" title="Enregistrer"><span class="btn-icon">💾</span><span class="btn-label">Enregistrer</span></button>
+                <button class="btn-green" onclick="saveAllToBrowser(true)" title="Enregistrer dans ce navigateur"><span class="btn-icon">💾</span><span class="btn-label">Enregistrer</span></button>
                 <button class="btn-purple" onclick="document.getElementById('project-upload').click()" title="Ouvrir un projet"><span class="btn-icon">📂</span><span class="btn-label">Ouvrir</span></button>
                 <button class="btn-purple" onclick="exportProjectToFile()" title="Exporter le projet en fichier"><span class="btn-icon">⬇️</span><span class="btn-label">Exporter Fichier</span></button>
             </span>
@@ -10720,7 +10720,7 @@ var XRED = (function () {
     }
 
     XSET.init({
-        app: 'syno', title: 'SYNO', version: 'V152',
+        app: 'syno', title: 'SYNO', version: 'V153',
         theme: { get: () => isLightTheme ? 'light' : 'dark', set: t => { if ((isLightTheme ? 'light' : 'dark') !== t) toggleTheme(); } },
         hide: ['#settings-btn', '#settings-menu'],
         css: [
@@ -12228,7 +12228,7 @@ XCOMPAT.init();
 <script src="lib/suite-zzbar.js?v=409fbb531d"></script>
 <script src="lib/suite-a11y2.js?v=6876dd0406"></script>
 <script src="lib/suite-sobre.js?v=21dc837de1"></script>
-<script src="lib/suite-ident.js?v=f1f4fc2bce"></script>
+<script src="lib/suite-ident.js?v=c9630e21d3"></script>
 <script src="lib/suite-topbar.js?v=74f3e00099"></script>
 <script src="lib/suite-sectors.js?v=9505a5e1ef"></script>
 <script src="lib/suite-focus.js?v=4c5df42ea0"></script>

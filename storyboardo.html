@@ -4727,7 +4727,7 @@ var XRED = (function () {
     // personnage ajouté : type et couleur par défaut quand on clique « Personnage » sans choisir
     const _ap = addPuppet; addPuppet = function (type) { return _ap(type || XSET.val('pupType') || 'homme'); };
     XSET.init({
-        app: 'storyboardo', title: 'STORYBOARDO', version: 'v4.36',
+        app: 'storyboardo', title: 'STORYBOARDO', version: 'v4.37',
         css: '.sb-props{max-height:calc(100vh - 370px)!important}#content{padding-bottom:90px}',
         theme: { get: () => prefs.theme === 'light' ? 'light' : 'dark', set: t => { if ((prefs.theme === 'light' ? 'light' : 'dark') !== t) toggleTheme(); } },
         hide: ['#toolbar button[onclick="toggleTheme()"]', '#toolbar button[onclick="openGuide()"]'],
@@ -5501,7 +5501,7 @@ XVIT.init();
 <script src="lib/suite-zzbar.js?v=409fbb531d"></script>
 <script src="lib/suite-a11y2.js?v=6876dd0406"></script>
 <script src="lib/suite-sobre.js?v=21dc837de1"></script>
-<script src="lib/suite-ident.js?v=f1f4fc2bce"></script>
+<script src="lib/suite-ident.js?v=c9630e21d3"></script>
 <script src="lib/suite-topbar.js?v=74f3e00099"></script>
 <script src="lib/suite-sectors.js?v=9505a5e1ef"></script>
 <script src="lib/suite-focus.js?v=4c5df42ea0"></script>

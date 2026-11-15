@@ -614,7 +614,7 @@ body.cal-prod [onclick^="move("]{display:none!important}
         <button data-view="list" onclick="setView('list')" title="Liste chronologique (2)"><span class="btn-icon">📋</span><span class="btn-label keep">Liste</span></button>
         <button data-view="prod" onclick="setView('prod')" title="Planning de production : frise des tâches, jalons et équipe (3)"><span class="btn-icon">📊</span><span class="btn-label keep">Production</span></button>
     </span>
-    <span class="btn-group"><button onclick="move(-1)" title="Précédent">◀</button><button onclick="move(0)">Aujourd'hui</button><button onclick="move(1)" title="Suivant">▶</button></span>
+    <span class="btn-group"><button onclick="move(-1)" title="Précédent">◀</button><button onclick="move(0)" title="Revenir à aujourd'hui">Aujourd'hui</button><button onclick="move(1)" title="Suivant">▶</button></span>
     <b id="cal-title" style="margin:0 8px"></b>
     <span id="cal-src" class="cal-src"></span>
 </div>
@@ -1328,7 +1328,7 @@ var XRED = (function () {
 // CALENDRIER XIII — ⚙️ Paramètres
 (function () {
     if (typeof XSET === 'undefined' || typeof events !== 'function') return;
-    XSET.init({ app: 'calendrier', title: 'CALENDRIER', version: 'v1.30', theme: { get: () => prefs.theme, set: t => { prefs.theme = t; applyTheme(); savePrefs(); } },
+    XSET.init({ app: 'calendrier', title: 'CALENDRIER', version: 'v1.31', theme: { get: () => prefs.theme, set: t => { prefs.theme = t; applyTheme(); savePrefs(); } },
         help: [{ icon: '🗓️', label: 'Comment ça marche ?', sub: 'Toutes les dates, export .ics', run: () => alert('CALENDRIER XIII rassemble les dates de tous les outils : tâches PLANNO, journées de tournage CALL SHEETO, directs CONDUCO, repérages REPERO, réservations et révisions MATOS, factures et échéances DEVISO, versions et livraisons POSTO, contrats et expirations de droits RESSOURCO, dates limites de candidature DOSSIER. Export .ics pour votre agenda. Raccourcis : 1 mois, 2 liste, ← →.') }],
         sections: [], apply() { } });
 })();
@@ -2023,7 +2023,7 @@ XVIT.init();
 <script src="lib/suite-zzbar.js?v=409fbb531d"></script>
 <script src="lib/suite-a11y2.js?v=6876dd0406"></script>
 <script src="lib/suite-sobre.js?v=21dc837de1"></script>
-<script src="lib/suite-ident.js?v=f1f4fc2bce"></script>
+<script src="lib/suite-ident.js?v=c9630e21d3"></script>
 <script src="lib/suite-topbar.js?v=74f3e00099"></script>
 <script src="lib/suite-sectors.js?v=9505a5e1ef"></script>
 <script src="lib/suite-focus.js?v=4c5df42ea0"></script>
