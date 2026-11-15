@@ -1328,7 +1328,7 @@ var XRED = (function () {
 // CALENDRIER XIII — ⚙️ Paramètres
 (function () {
     if (typeof XSET === 'undefined' || typeof events !== 'function') return;
-    XSET.init({ app: 'calendrier', title: 'CALENDRIER', version: 'v1.65', theme: { get: () => prefs.theme, set: t => { prefs.theme = t; applyTheme(); savePrefs(); } },
+    XSET.init({ app: 'calendrier', title: 'CALENDRIER', version: 'v1.66', theme: { get: () => prefs.theme, set: t => { prefs.theme = t; applyTheme(); savePrefs(); } },
         help: [{ icon: '🗓️', label: 'Comment ça marche ?', sub: 'Toutes les dates, export .ics', run: () => alert('CALENDRIER XIII rassemble les dates de tous les outils : tâches PLANNO, journées de tournage CALL SHEETO, directs CONDUCO, repérages REPERO, réservations et révisions MATOS, factures et échéances DEVISO, versions et livraisons POSTO, contrats et expirations de droits RESSOURCO, dates limites de candidature DOSSIER. Export .ics pour votre agenda. Raccourcis : 1 mois, 2 liste, ← →.') }],
         sections: [], apply() { } });
 })();
@@ -2044,7 +2044,7 @@ XVIT.init();
 <script src="lib/suite-kmap.js?v=d4b0728a57"></script>
 <script src="lib/suite-toolcfg.js?v=fd32e11e59"></script>
 <script src="lib/suite-anim.js?v=b24422b8c6"></script>
-<script src="lib/suite-pident.js?v=1648fc8fd0"></script>
+<script src="lib/suite-pident.js?v=20bfd7ffa6"></script>
 <!-- SUITE XIII:EXTRA:END -->
 </body>
 </html>

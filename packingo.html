@@ -4245,7 +4245,7 @@ var XRED = (function () {
         return p;
     };
     XSET.init({
-        app: 'packingo', title: 'PACKINGO', version: 'v84',
+        app: 'packingo', title: 'PACKINGO', version: 'v85',
         theme: { get: () => prefs.theme === 'light' ? 'light' : 'dark', set: t => { if ((prefs.theme === 'light' ? 'light' : 'dark') !== t) toggleTheme(); } },
         hide: ['#toolbar button[onclick="toggleTheme()"]', '#toolbar button[onclick="openGuide()"]'],
         help: [{ icon: '📖', label: 'Guide d\'utilisation', sub: 'Caisses, chargement, vérification, rapport', run: openGuide }],
@@ -6253,7 +6253,7 @@ XCAT.initTool('packingo');
 <script src="lib/suite-kmap.js?v=d4b0728a57"></script>
 <script src="lib/suite-toolcfg.js?v=fd32e11e59"></script>
 <script src="lib/suite-anim.js?v=b24422b8c6"></script>
-<script src="lib/suite-pident.js?v=1648fc8fd0"></script>
+<script src="lib/suite-pident.js?v=20bfd7ffa6"></script>
 <!-- SUITE XIII:EXTRA:END -->
 </body>
 </html>

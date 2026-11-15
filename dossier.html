@@ -5611,7 +5611,7 @@ var XRED = (function () {
     // ---------- paramètres ----------
     const cvf = (k, label, ph, hint) => ({ k: 'cv_' + k, label, hint, type: 'text', def: '', placeholder: ph });
     XSET.init({
-        app: 'dossier', title: 'DOSSIER', version: 'v78',
+        app: 'dossier', title: 'DOSSIER', version: 'v79',
         theme: { get: () => prefs.theme === 'light' ? 'light' : 'dark', set: t => { if ((prefs.theme === 'light' ? 'light' : 'dark') !== t) toggleTheme(); } },
         // écran peu haut : l'aperçu collant de la page de garde (≈ 500 px) dépassait sous le badge Netlify et cachait « Générer »
         css: '@media (max-height: 900px) { .cover-prev { position: static; } }',
@@ -6531,7 +6531,7 @@ XSLIDES.hook();
 <script src="lib/suite-kmap.js?v=d4b0728a57"></script>
 <script src="lib/suite-toolcfg.js?v=fd32e11e59"></script>
 <script src="lib/suite-anim.js?v=b24422b8c6"></script>
-<script src="lib/suite-pident.js?v=1648fc8fd0"></script>
+<script src="lib/suite-pident.js?v=20bfd7ffa6"></script>
 <!-- SUITE XIII:EXTRA:END -->
 </body>
 </html>
