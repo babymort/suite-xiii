@@ -2466,7 +2466,7 @@ var XRED = (function () {
     if (typeof XSET === 'undefined' || typeof prefs === 'undefined' || typeof VT === 'undefined') return;
     function apply(S) { try { render(); } catch (e) { } }
     XSET.init({
-        app: 'transporto', title: 'TRANSPORTO', version: 'v1.27',
+        app: 'transporto', title: 'TRANSPORTO', version: 'v1.28',
         sections: [{ id: 'aff', icon: '🚐', title: 'Logistique', open: true, desc: 'Équipe importée de CALL SHEETO, de l\'annuaire et de MODE TOURNAGE ; la logistique de chacun apparaît dans son espace équipe (MODE TOURNAGE).', fields: [{ k: 'view', label: 'Vue à l\'ouverture', type: 'select', def: 'team', options: [['team', 'Équipe'], ['travel', 'Voyages'], ['trips', 'Navettes'], ['hotel', 'Hébergement']] }] }],
         apply
     });
@@ -3301,6 +3301,7 @@ XVIT.init();
 <script src="lib/suite-a11y3.js?v=cf542bcc3b"></script>
 <script src="lib/suite-emoji.js?v=39eccf87a9"></script>
 <script src="lib/suite-wins.js?v=c4c4ba4615"></script>
+<script src="lib/suite-legible.js?v=9f0777bee3"></script>
 <!-- SUITE XIII:EXTRA:END -->
 </body>
 </html>
