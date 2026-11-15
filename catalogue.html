@@ -3054,7 +3054,7 @@ var XRED = (function () {
 (function () {
     if (typeof XSET === 'undefined' || typeof XCAT === 'undefined') return;
     XSET.init({
-        app: 'catalogue', title: 'CATALOGUE', version: 'v1.32',
+        app: 'catalogue', title: 'CATALOGUE', version: 'v1.33',
         theme: { get: () => prefs.theme, set: t => { prefs.theme = t; applyTheme(); savePrefs(); } },
         help: [{ icon: '🗃️', label: 'Comment ça marche ?', sub: 'Catalogue commun, insertion dans les outils, partage', run: () => modal('<h3>🗃️ Catalogue matériel<span class="close-x" onclick="closeModal()">✕</span></h3><p>Chaque équipement saisi ici une seule fois est disponible dans <b>SYNO</b> (nœud avec ses ports), <b>PLANO</b> (placé sur le plan), <b>LUMO</b> (projecteur et puissance), <b>SONO</b> (patch), <b>PACKINGO</b> (caisse, poids) et <b>DEVISO</b> (ligne de devis et prix) par le bouton 🗃️ Catalogue de chaque outil.</p><p>Avec le ☁️ Drive du projet relié, le catalogue se partage avec l\'équipe comme un outil.</p><p>Raccourci : <b>N</b> nouvel équipement.</p><div class="mb-actions"><button onclick="closeModal()">Compris</button></div>') }],
         sections: [], apply() { }
@@ -4842,6 +4842,31 @@ const XSPACE = (() => {
 //  • Touche « ? » : fiche des raccourcis de l'outil ouvert + taille du texte + contraste renforcé.
 //  • Focus clavier visible partout.
 // =====================================================================
+// =====================================================================
+//  SUITE XIII — XZOOM : taille du texte sans casser la mise en page (saison 6)
+//  La taille du texte agrandit toute la page (zoom CSS). Avec un zoom, le navigateur mélange deux unités : les positions
+//  écrites dans les styles sont en pixels de la page, mais getBoundingClientRect, innerWidth et la souris sont en pixels
+//  de l'écran → tout ce qui est placé par calcul (boutons flottants, menus, barres qui se replient, volets) partait de travers.
+//  Ici, une seule unité pour tout le code de la suite : celle de la page. Facteurs combinés : ⚙️ Taille du texte × ♿ Accessibilité.
+// =====================================================================
+const XZOOM = (() => {
+    const F = {}; let Z = 1;
+    function set(k, f) { F[k] = +f || 1; Z = Object.values(F).reduce((a, b) => a * b, 1); if (Math.abs(Z - 1) < .001) Z = 1; const R = document.documentElement; R.style.zoom = Z === 1 ? '' : String(Z); if (document.body && document.body.style.zoom) document.body.style.zoom = ''; R.classList.toggle('xzoomed', Z !== 1); try { dispatchEvent(new Event('resize')); } catch (e) { } }
+    // conversions (une seule fois par page)
+    if (!window.__xzShim) { window.__xzShim = 1;
+        const getter = (o, p, fn) => { try { const d = Object.getOwnPropertyDescriptor(o, p); if (!d || !d.get) return; Object.defineProperty(o, p, { configurable: true, enumerable: d.enumerable, get() { const v = d.get.call(this); return Z === 1 ? v : fn(v); }, set: d.set }); } catch (e) { } };
+        const div = v => v / Z;
+        ['clientX', 'clientY', 'x', 'y', 'pageX', 'pageY'].forEach(p => getter(MouseEvent.prototype, p, div));
+        if (window.Touch) ['clientX', 'clientY', 'pageX', 'pageY'].forEach(p => getter(Touch.prototype, p, div));
+        ['innerWidth', 'innerHeight'].forEach(p => getter(window, p, div));
+        const R2 = r => new DOMRect(r.x / Z, r.y / Z, r.width / Z, r.height / Z);
+        [Element.prototype, Range.prototype].forEach(P => { const g = P.getBoundingClientRect, l = P.getClientRects; if (g) P.getBoundingClientRect = function () { const r = g.call(this); return Z === 1 ? r : R2(r); }; if (l) P.getClientRects = function () { const L = l.call(this); if (Z === 1) return L; const A = [...L].map(R2); A.item = i => A[i]; return A; }; });
+        const D = Document.prototype;
+        ['elementFromPoint', 'elementsFromPoint', 'caretRangeFromPoint', 'caretPositionFromPoint'].forEach(m => { const f = D[m]; if (f) D[m] = function (x, y) { return Z === 1 ? f.call(this, x, y) : f.call(this, x * Z, y * Z); }; });
+    }
+    return { set, z: () => Z };
+})();
+
 const XUX = (() => {
     const SK = ['w2k', 'xp', 'cyber', 'rainbow', 'mac9', 'term', 'sepia', 'regie', 'soleil', 'gb', 'sobre'].map(k => ':not(.x' + k + ')').join('');
     const D = 'body' + SK + ':not(.light-theme)', L = 'body' + SK + '.light-theme';
@@ -4863,7 +4888,7 @@ const XUX = (() => {
             '#xux-ov{position:fixed;inset:0;z-index:2147483400;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:16px;font:14px/1.5 "Segoe UI",system-ui,sans-serif}#xux-ov>div{width:min(640px,100%);max-height:86vh;overflow:auto;background:var(--bg-menu,#232327);color:var(--text-main,#eee);border:1px solid rgba(240,180,41,.45);border-radius:16px;padding:18px 20px;box-shadow:0 20px 60px rgba(0,0,0,.5),0 0 30px rgba(240,180,41,.08)}#xux-ov h3{margin:0 0 10px;font-size:17px}#xux-ov h4{margin:14px 0 6px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;opacity:.7}#xux-ov .r{display:flex;justify-content:space-between;gap:14px;padding:5px 0;border-top:1px solid rgba(127,127,127,.18)}#xux-ov kbd{font:600 12px ui-monospace,Consolas,monospace;background:rgba(240,180,41,.14);border:1px solid rgba(240,180,41,.45);border-radius:6px;padding:2px 7px;white-space:nowrap}#xux-ov .seg{display:flex;gap:6px;flex-wrap:wrap}#xux-ov .seg button{font:inherit;font-size:13px;padding:6px 12px;border-radius:10px;cursor:pointer;background:rgba(255,255,255,.06);border:1px solid rgba(127,127,127,.35);color:inherit}#xux-ov .seg button.on{background:rgba(240,180,41,.28);border-color:#f0b429}';
         document.head.appendChild(st);
     }
-    function applyPrefs() { const z = +J(KF, '100') || 100; document.body.style.zoom = z === 100 ? '' : (z / 100); document.documentElement.classList.toggle('xux-hc', J(KC, '0') === '1'); }
+    function applyPrefs() { const z = +J(KF, '100') || 100; XZOOM.set('fs', z / 100); document.documentElement.classList.toggle('xux-hc', J(KC, '0') === '1'); }
     function shortcuts() {
         const out = [], seen = new Set(), add = (k, t) => { const key = k + t; if (seen.has(key)) return; seen.add(key); out.push([k, t]); };
         document.querySelectorAll('[title]').forEach(el => { const t = el.getAttribute('title') || '', m = t.match(/\(((?:Ctrl|⌘|Maj|Shift|Alt|Suppr|Échap|Espace|Entrée|F\d+|[A-Z0-9?+←→↑↓])(?:[ +][^)]{0,18})?)\)/); if (!m) return; const lab = ((el.querySelector && el.querySelector('.btn-label') || {}).textContent || t.replace(m[0], '').split(/ : | — /)[0]).replace(/\s+/g, ' ').trim(); if (lab) add(m[1].replace(/Ctrl/g, 'Ctrl'), lab.slice(0, 60)); });
@@ -6722,7 +6747,7 @@ const XA11Y = (() => {
     const SIZES = [90, 100, 110, 125, 150];
     function applyPrefs() {
         const p = J(), z = p.size || 100, root = document.documentElement;
-        root.style.zoom = z === 100 ? '' : (z / 100); root.classList.toggle('xa-contrast', !!p.contrast);
+        if (typeof XZOOM !== 'undefined') XZOOM.set('a11y', z / 100); else root.style.zoom = z === 100 ? '' : (z / 100); root.classList.toggle('xa-contrast', !!p.contrast);
     }
     function setSize(dir) { const p = J(), i = SIZES.indexOf(p.size || 100); p.size = SIZES[Math.max(0, Math.min(SIZES.length - 1, (i < 0 ? 1 : i) + dir))]; W(p); applyPrefs(); try { if (typeof toast === 'function') toast('🔠 Taille du texte : ' + p.size + ' %'); } catch (e) { } }
     // ---------- étiquettes et clavier ----------
