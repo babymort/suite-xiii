@@ -1,0 +1,14 @@
+const { chromium } = require('playwright'); const fs = require('fs'), path = require('path');
+const F = n => fs.readFileSync(path.join(__dirname, 'fake', n), 'utf8'); const ANY = F('any.js'), LIBS = [[/jspdf/i, F('jspdf-cv.js')], [/xlsx/i, F('xlsx.js')], [/html2canvas|qrcode|jsQR|lz-string/i, F('misc.js')], [/pptxgen|jszip|pdf-lib/i, ANY], [/\.css(\?|$)/i, '']];
+(async () => { const b = await chromium.launch(); const ctx = await b.newContext({ viewport: { width: 1440, height: 900 } }); const app = process.argv[2];
+ await ctx.route('**/*', r => { const u = r.request().url(); if (u.startsWith('http://localhost')) return r.continue(); const m = LIBS.find(x => x[0].test(u)); if (m) { console.log('LIB', u.slice(-50)); return r.fulfill({ status: 200, contentType: 'application/javascript', body: m[1] }); } return r.abort(); });
+ await ctx.addInitScript(a => { localStorage.setItem('xiii.tips.off', 'true'); localStorage.setItem('xiii.tour2.' + a + '.hide', '1'); }, app);
+ const p = await ctx.newPage(); p.on('dialog', d => { console.log('DIALOG', d.type(), d.message().slice(0, 80)); d.accept(); }); p.on('pageerror', e => console.log('ERR', e.message)); p.on('console', m => { if (/pdf|jspdf/i.test(m.text())) console.log('C', m.text().slice(0, 120)); });
+ await p.goto('http://localhost:8765/' + app + '.html?desktop=1'); await p.waitForTimeout(3000);
+ await p.evaluate(async a => { try { await XMODELS.apply(a, 'fiction', false); } catch (e) { } }, app); await p.waitForTimeout(1500);
+ await p.evaluate(() => document.querySelectorAll('#xt-root,#xtp,[id$=-ov],.modal-overlay').forEach(m => m.remove()));
+ await p.click('#xtop-exp'); await p.waitForTimeout(400);
+ console.log(await p.evaluate(() => [...document.querySelectorAll('#xb-menu button')].map(b => b.textContent.trim().slice(0, 50))));
+ await p.evaluate(() => { const x = [...document.querySelectorAll('#xb-menu button')].find(b => /pdf/i.test(b.textContent)); x && x.click(); }); await p.waitForTimeout(2500);
+ console.log('après:', await p.evaluate(() => [typeof window.jspdf, (window.__pdfDocs || []).length, [...document.body.children].filter(e => e.getClientRects().length && getComputedStyle(e).position === 'fixed').map(e => (e.id || e.className) + ':' + (e.textContent || '').trim().slice(0, 60))]));
+ await b.close(); })();
