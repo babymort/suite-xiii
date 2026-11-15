@@ -3056,7 +3056,7 @@ var XRED = (function () {
 (function () {
     if (typeof XSET === 'undefined' || typeof XCAT === 'undefined') return;
     XSET.init({
-        app: 'catalogue', title: 'CATALOGUE', version: 'v1.24',
+        app: 'catalogue', title: 'CATALOGUE', version: 'v1.25',
         theme: { get: () => prefs.theme, set: t => { prefs.theme = t; applyTheme(); savePrefs(); } },
         help: [{ icon: '🗃️', label: 'Comment ça marche ?', sub: 'Catalogue commun, insertion dans les outils, partage', run: () => modal('<h3>🗃️ Catalogue matériel<span class="close-x" onclick="closeModal()">✕</span></h3><p>Chaque équipement saisi ici une seule fois est disponible dans <b>SYNO</b> (nœud avec ses ports), <b>PLANO</b> (placé sur le plan), <b>LUMO</b> (projecteur et puissance), <b>SONO</b> (patch), <b>PACKINGO</b> (caisse, poids) et <b>DEVISO</b> (ligne de devis et prix) par le bouton 🗃️ Catalogue de chaque outil.</p><p>Avec le ☁️ Drive du projet relié, le catalogue se partage avec l\'équipe comme un outil.</p><p>Raccourci : <b>N</b> nouvel équipement.</p><div class="mb-actions"><button onclick="closeModal()">Compris</button></div>') }],
         sections: [], apply() { }
@@ -3460,7 +3460,7 @@ const XPROJET = (() => {
         const NAV = [['g', '🧭 Global'], ['l', '📍 Lieux'], ['t', '🎥 Technique'], ['h', '👥 Équipe'], ['o', '🗂️ Outils'], ['p', '🖼️ Personnalisation'], ['c', '🎨 Charte PDF'], ['f', '📦 Fichier']];
         const WS = typeof XWS !== 'undefined', WSL = WS ? XWS.list() : [], WC = WS ? XWS.color() : '';
         ov.innerHTML = '<div class="xpj-box"><div class="xpj-head"><div><small>' + (WS ? '<i class="xpj-wsd" style="background:' + esc(WC) + '"></i>' : '') + 'PROJET XIII</small><input id="xpj-title" data-k="title" value="' + esc(F.title) + '" placeholder="Nom du projet"></div>' +
-            '<div class="xpj-ha">' + (WS ? '<select id="xpj-sw" title="Changer de projet XIII (chaque projet a son Drive, son équipe et ses données)"><option value="">⇄ Changer de projet…</option>' + (WSL.length > 1 ? '<optgroup label="Projets XIII">' + WSL.filter(w => w.id !== XWS.id).map(w => '<option value="ws:' + w.id + '" style="color:' + esc(w.color) + '">● ' + esc(w.name) + '</option>').join('') + '</optgroup>' : '') + '<option value="__ws">＋ Nouveau projet XIII (Drive et équipe séparés)</option>' + (others.length ? '<optgroup label="Autres fiches de ce projet (même Drive)">' + others.map(f => '<option value="' + f.id + '">' + esc(f.title || 'Sans titre') + '</option>').join('') + '</optgroup>' : '') + '</select>' : others.length ? '<select id="xpj-sw" title="Changer de projet"><option value="">⇄ Changer de projet…</option>' + others.map(f => '<option value="' + f.id + '">' + esc(f.title || 'Sans titre') + '</option>').join('') + '<option value="__new">＋ Nouveau projet</option></select>' : '<button id="xpj-new">＋ Nouveau projet</button>') + '<button id="xpj-save1" title="Enregistrer sans fermer (Ctrl+S)">💾 Enregistrer</button><button id="xpj-save" class="xpj-main">✓ Enregistrer et fermer</button><button id="xpj-x" title="Fermer (Échap)">✕</button></div></div>' +
+            '<div class="xpj-ha">' + (WS ? '<select id="xpj-sw" title="Changer de projet XIII (chaque projet a son Drive, son équipe et ses données)"><option value="">⇄ Changer de projet…</option>' + (WSL.length > 1 ? '<optgroup label="Projets XIII">' + WSL.filter(w => w.id !== XWS.id).map(w => '<option value="ws:' + w.id + '" style="color:' + esc(w.color) + '">● ' + esc(w.name) + '</option>').join('') + '</optgroup>' : '') + '<option value="__ws">＋ Nouveau projet</option>' + (others.length ? '<optgroup label="Autres fiches de ce projet (même Drive)">' + others.map(f => '<option value="' + f.id + '">' + esc(f.title || 'Sans titre') + '</option>').join('') + '</optgroup>' : '') + '</select>' : others.length ? '<select id="xpj-sw" title="Changer de projet"><option value="">⇄ Changer de projet…</option>' + others.map(f => '<option value="' + f.id + '">' + esc(f.title || 'Sans titre') + '</option>').join('') + '<option value="__new">＋ Nouveau projet</option></select>' : '<button id="xpj-new">＋ Nouveau projet</button>') + '<button id="xpj-save1" title="Enregistrer sans fermer (Ctrl+S)">💾 Enregistrer</button><button id="xpj-save" class="xpj-main">✓ Enregistrer et fermer</button><button id="xpj-x" title="Fermer (Échap)">✕</button></div></div>' +
             '<nav class="xpj-nav">' + NAV.map(n => '<a href="#xpj-' + n[0] + '">' + n[1] + '</a>').join('') + '</nav><div class="xpj-body">' +
             // ----- global
             '<section id="xpj-g"><h3>🧭 Informations globales</h3><div class="xpj-types">' + TYPES.map(t => '<button data-type="' + t[0] + '" class="' + (F.ptype === t[0] ? 'on' : '') + '">' + t[1] + '</button>').join('') + '</div><p class="xpj-dim">Le type règle aussi le modèle de dossier dans <b>📚 DOSSIER</b> (' + esc(((TYPES.find(t => t[0] === F.ptype) || [])[3]) || '—') + ').</p>' + (WS ? '<div class="xpj-wsc"><span>Couleur du projet <small>liseré des onglets</small></span>' + XWS.colors.map(c => '<button data-wsc="' + c + '" title="' + c + '" style="background:' + c + '" class="' + (c.toLowerCase() === String(WC).toLowerCase() ? 'on' : '') + '"></button>').join('') + '<label title="Autre couleur"><input type="color" id="xpj-wscol" value="' + esc(WC) + '"></label></div>' : '') + '<div class="xpj-grid">' +
@@ -3520,7 +3520,7 @@ const XPROJET = (() => {
         q('#xpj-save').onclick = () => { save(); close(); };
         q('#xpj-save1').onclick = () => { save(); };
         const sw = q('#xpj-sw'); if (sw) sw.onchange = () => { const v = sw.value; if (!v) return; if (dirtyF() && !confirm('Changer de projet sans enregistrer les modifications ?')) { sw.value = ''; return; }
-            if (v === '__ws' || v.startsWith('ws:')) { close(); XWS.go(v === '__ws' ? XWS.create().id : v.slice(3)); return; } if (v === '__new' && typeof XGUIDE !== 'undefined') { close(); setTimeout(() => XGUIDE.start(), 50); return; } if (v === '__new') { F = null; const s = state(); s.active = ''; localStorage.setItem(KP, JSON.stringify(s)); } else { const s = state(); s.active = v; localStorage.setItem(KP, JSON.stringify(s)); } header(); open(); };
+            if (v === '__ws' || v.startsWith('ws:')) { close(); if (v === '__ws') { XGUIDE.fresh(); return; } XWS.go(v.slice(3)); return; } if (v === '__new' && typeof XGUIDE !== 'undefined') { close(); setTimeout(() => XGUIDE.start(), 50); return; } if (v === '__new') { F = null; const s = state(); s.active = ''; localStorage.setItem(KP, JSON.stringify(s)); } else { const s = state(); s.active = v; localStorage.setItem(KP, JSON.stringify(s)); } header(); open(); };
         if (q('#xpj-new')) q('#xpj-new').onclick = () => { if (typeof XGUIDE !== 'undefined') { if (dirtyF()) save(true); close(); setTimeout(() => XGUIDE.start(), 50); return; } if (!F.title && !F.production) { toastX('Remplissez d\'abord ce projet'); return; } if (dirtyF()) save(true); const s = state(); s.active = ''; localStorage.setItem(KP, JSON.stringify(s)); header(); open(); };
         if (q('#xpj-importo')) q('#xpj-importo').onclick = () => { // 📥 IMPORTO, intégré à la fiche projet
             document.querySelectorAll('#xim-ov').forEach(x => x.remove()); const o = document.createElement('div'); o.id = 'xim-ov';
@@ -3780,20 +3780,23 @@ const XGUIDE = (() => {
         // saison 6 : un nouveau projet = un nouveau projet XIII (son propre Drive, sa propre équipe, ses données) — jamais une fiche de plus
         // dans le projet en cours, qui garderait le Drive de ce projet. Le guide reprend tout seul dans le nouveau projet.
         try { if (typeof XWS !== 'undefined' && XWS.create && XWS.go) { const st = J('xiii.projets', null), has = st && Array.isArray(st.list) && st.list.some(f => f && String(f.title || '').trim()), dr = J('xiii.drive', null);
-            if (has || (dr && dr.url)) { const w = XWS.create({}); XWS.go(w.id); return; } } } catch (e) { }
+            if (has || (dr && dr.url)) { fresh(); return; } } } catch (e) { }
         D = { ptype: '', title: '', debut: '', fin: '', diffusion: '', lieu: '', adresse: '', cams: 1, production: '', realisation: '', team: [{ name: '', role: '' }] }; step = 0;
         if (ov) ov.remove(); ov = document.createElement('div'); ov.id = 'xg-ov'; document.body.appendChild(ov); ov.addEventListener('mousedown', e => { if (e.target === ov) close(); }); draw();
     }
     const close = () => { if (ov) ov.remove(); ov = null; };
+    // un vrai nouveau projet XIII : on note d'où il vient, pour proposer « Garder le Drive actuel » sur la page de création
+    function fresh() { const from = XWS.id, w = XWS.create({}); XWS.set(w.id, { from }); XWS.go(w.id); }
+    function keepSrc() { try { if (typeof XWS === 'undefined') return null; const m = XWS.meta() || {}, cur = J('xiii.drive', null); if (!m.from || m.from === XWS.id || (cur && cur.url)) return null; const d = JSON.parse(XWS.peek(m.from, 'xiii.drive') || 'null'); if (!(d && d.url)) return null; let name = ''; try { const st = JSON.parse(XWS.peek(m.from, 'xiii.projets') || 'null'), f = st && st.list && (st.list.find(x => x.id === st.active) || st.list[0]); name = f && f.title; } catch (e) { } return { d, name: name || (XWS.meta(m.from) || {}).name || 'projet précédent' }; } catch (e) { return null; } }
     const STEPS = ['Type', 'Dates et lieu', 'Technique', 'Équipe', 'C\'est parti'];
     function read() {
         if (!ov) return; ov.querySelectorAll('[data-f]').forEach(i => { D[i.dataset.f] = i.type === 'number' ? Math.max(0, Math.min(40, +i.value || 0)) : i.value; });
-        const rows = [...ov.querySelectorAll('.xg-tm')]; if (rows.length) D.team = rows.map(r => ({ name: r.querySelector('[data-n]').value.trim(), role: r.querySelector('[data-r]').value.trim() }));
+        const kp = ov.querySelector('[data-keep]'); if (kp) D.keep = kp.checked; const rows = [...ov.querySelectorAll('.xg-tm')]; if (rows.length) D.team = rows.map(r => ({ name: r.querySelector('[data-n]').value.trim(), role: r.querySelector('[data-r]').value.trim() }));
     }
     function draw() {
         const T = typeof XPROJET !== 'undefined' ? XPROJET.TYPES : [], R = typeof XPROJET !== 'undefined' && XPROJET.ROLES ? XPROJET.ROLES : [];
         let body = '';
-        if (step === 0) body = '<h4>Quel type de production ?</h4><div class="xg-types">' + T.map(t => '<button data-t="' + t[0] + '" class="' + (D.ptype === t[0] ? 'on' : '') + '">' + esc(t[1]) + '</button>').join('') + '</div><label>Nom du projet<input data-f="title" value="' + esc(D.title) + '" placeholder="ex. Concert Khaled — Olympia"></label>';
+        if (step === 0) body = '<h4>Quel type de production ?</h4><div class="xg-types">' + T.map(t => '<button data-t="' + t[0] + '" class="' + (D.ptype === t[0] ? 'on' : '') + '">' + esc(t[1]) + '</button>').join('') + '</div><label>Nom du projet<input data-f="title" value="' + esc(D.title) + '" placeholder="ex. Concert Khaled — Olympia"></label>'; if (step === 0) { const ks = keepSrc(); if (ks) body += '<label class="xg-keep"><input type="checkbox" data-keep' + (D.keep ? ' checked' : '') + '><span><b>🔗 Garder le Drive actuel</b><small>Celui du projet « ' + esc(ks.name) + ' ». Sinon, ce projet aura son propre Drive, à relier ensuite.</small></span></label>'; }
         if (step === 1) body = '<h4>Quand et où ?</h4><div class="xg-g"><label>Début du tournage<input type="date" data-f="debut" value="' + esc(D.debut) + '"></label><label>Fin du tournage<input type="date" data-f="fin" value="' + esc(D.fin) + '"></label><label>Diffusion / livraison <small>(facultatif)</small><input type="date" data-f="diffusion" value="' + esc(D.diffusion) + '"></label><label>Lieu principal<input data-f="lieu" value="' + esc(D.lieu) + '" placeholder="ex. Olympia"></label><label class="w">Adresse<input data-f="adresse" value="' + esc(D.adresse) + '" placeholder="28 boulevard des Capucines, Paris"></label></div>';
         if (step === 2) body = '<h4>Combien de caméras ?</h4><div class="xg-cam"><button data-c="-1">−</button><input type="number" data-f="cams" value="' + D.cams + '" min="0" max="40"><button data-c="1">＋</button><span>' + (D.cams > 1 ? 'caméras' : 'caméra') + '</span></div><p class="xg-d">Le nombre est repris dans la fiche technique du projet (vous choisirez les modèles et objectifs dans 🎯 CADRO).</p><div class="xg-g"><label>Société de production<input data-f="production" value="' + esc(D.production) + '"></label><label>Réalisation<input data-f="realisation" value="' + esc(D.realisation) + '"></label></div>';
         if (step === 3) body = '<h4>Qui est dans l\'équipe ?</h4><p class="xg-d">Nom et poste : l\'équipe est ajoutée à l\'annuaire et aux journées de CALL SHEETO. Vous pourrez compléter plus tard.</p><datalist id="xg-roles">' + R.map(r => '<option value="' + esc(r) + '">').join('') + '</datalist>' + D.team.map((m, i) => '<div class="xg-tm"><input data-n value="' + esc(m.name) + '" placeholder="Prénom Nom"><input data-r list="xg-roles" value="' + esc(m.role) + '" placeholder="Poste"><button data-del="' + i + '">✕</button></div>').join('') + '<button id="xg-add" class="xg-s">＋ Ajouter une personne</button>';
@@ -3817,7 +3820,7 @@ const XGUIDE = (() => {
     }
     function msg(m) { try { if (typeof toast === 'function') return toast(m); } catch (e) { } let t = ov.querySelector('.xg-m'); if (!t) { t = document.createElement('div'); t.className = 'xg-m'; ov.querySelector('.xg-f').prepend(t); } t.textContent = m; }
     function finish(order) {
-        const team = D.team.filter(m => m.name || m.role);
+        const team = D.team.filter(m => m.name || m.role); if (D.keep) { const ks = keepSrc(); if (ks) try { localStorage.setItem('xiii.drive', JSON.stringify(ks.d)); } catch (e) { } }
         const f = XPROJET.create({ title: D.title.trim(), ptype: D.ptype, debut: D.debut, fin: D.fin || D.debut, diffusion: D.diffusion, lieu: D.lieu, adresse: D.adresse, production: D.production, realisation: D.realisation, team, tech: { cams: D.cams ? [{ sid: '', label: D.cams > 1 ? D.cams + ' caméras' : 'Caméra', qty: D.cams }] : [] } });
         if (f) W('xiii.guide.' + f.id, { order, done: {}, at: Date.now(), type: D.ptype });
         if (f && window.XMODELS && D.ptype && D.ptype !== 'libre') try { localStorage.setItem('xiii.models.offer', JSON.stringify({ type: D.ptype, at: Date.now() })); setTimeout(() => { if (APP !== 'index') XMODELS.offer(); }, 700); } catch (e) { }
@@ -3850,7 +3853,7 @@ const XGUIDE = (() => {
         const s = document.createElement('style'); s.id = 'xg-css';
         s.textContent = '#xg-ov{position:fixed;inset:0;z-index:2147483100;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;padding:16px;font:14px/1.5 "Segoe UI",system-ui,sans-serif}.xg-box{width:min(640px,100%);max-height:92vh;display:flex;flex-direction:column;background:var(--bg-menu,#232327);color:var(--text-main,#eee);border:1px solid rgba(240,179,120,.7);border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.6)}' +
             '.xg-h{display:flex;justify-content:space-between;padding:14px 18px 6px;font-size:17px}.xg-x{cursor:pointer;opacity:.7}.xg-steps{display:flex;gap:4px;padding:0 18px 10px;flex-wrap:wrap}.xg-steps span{font-size:11.5px;padding:3px 8px;border-radius:10px;background:rgba(128,128,128,.15);color:var(--text-dim,#aaa)}.xg-steps .on{background:rgba(240,179,120,.3);color:var(--text-main,#fff);font-weight:700}.xg-steps .ok{color:#81c784}' +
-            '.xg-b{padding:4px 18px 12px;overflow:auto}.xg-b h4{margin:6px 0 10px;font-size:16px}.xg-d{color:var(--text-dim,#999);font-size:12.5px;margin:0 0 10px}.xg-b label{display:flex;flex-direction:column;gap:3px;font-size:12.5px;color:var(--text-dim,#aaa);margin:6px 0}.xg-g{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}.xg-g .w{grid-column:1/-1}' +
+            '.xg-b{padding:4px 18px 12px;overflow:auto}.xg-b h4{margin:6px 0 10px;font-size:16px}.xg-d{color:var(--text-dim,#999);font-size:12.5px;margin:0 0 10px}.xg-b label{display:flex;flex-direction:column;gap:3px;font-size:12.5px;color:var(--text-dim,#aaa);margin:6px 0}.xg-g{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}.xg-g .w{grid-column:1/-1}.xg-b label.xg-keep{flex-direction:row;align-items:flex-start;gap:10px;margin-top:12px;padding:10px 12px;border:1px solid var(--border-color,#45454b);border-radius:10px;color:var(--text-main,#eee);cursor:pointer}.xg-keep input{margin-top:3px}.xg-keep span{display:flex;flex-direction:column;gap:2px}.xg-keep small{color:var(--text-dim,#999)}' +
             '.xg-box input{font:inherit;color:inherit;background:var(--bg-input,#17171a);border:1px solid var(--border-color,#45454b);border-radius:8px;padding:8px 10px}.xg-box button{font:inherit;color:inherit;background:var(--bg-panel-alt,#2c2c31);border:1px solid var(--border-color,#45454b);border-radius:8px;padding:7px 12px;cursor:pointer;height:auto}.xg-box button.ok{background:rgba(240,179,120,.35);border-color:rgb(240,179,120);font-weight:700}' +
             '.xg-types{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:6px;margin-bottom:10px}.xg-types button{text-align:left;padding:10px 12px}.xg-types button.on{background:rgba(240,179,120,.3);border-color:rgb(240,179,120);font-weight:700}' +
             '.xg-cam{display:flex;align-items:center;gap:8px;margin-bottom:8px}.xg-cam input{width:80px;text-align:center;font-size:22px;font-weight:700}.xg-cam button{font-size:20px;width:44px}.xg-tm{display:grid;grid-template-columns:1fr 1fr auto;gap:6px;margin-bottom:6px}' +
@@ -3871,7 +3874,7 @@ const XGUIDE = (() => {
         };
         XBOOT.ready(go, 700);
     }
-    return { init, start };
+    return { init, start, fresh };
 })();
 
 XGUIDE.init('catalogue');
@@ -5173,7 +5176,7 @@ const XGLOW = (() => {
         if (!o || o.querySelector('.xgl-x')) return; const box = o.firstElementChild || o, on = iconsOn();
         const d = document.createElement('div'); d.className = 'xgl-x';
         d.innerHTML = '<h4>✏️ Icônes des barres d\'outils</h4><div class="seg"><button data-i="1" class="' + (on ? 'on' : '') + '">Icônes maison (trait fin)</button><button data-i="0" class="' + (on ? '' : 'on') + '">Émojis</button></div>';
-        d.onclick = e => { const v = e.target.dataset.i; if (v == null) return; try { localStorage.setItem(KI, v); } catch (x) { } d.querySelectorAll('[data-i]').forEach(x => x.classList.toggle('on', x === e.target)); if (v === '1') iconize(); else document.querySelectorAll('.xgl-e').forEach(s => { const g = s.nextSibling; if (g && g.classList && g.classList.contains('xgl-ic')) g.remove(); s.replaceWith(document.createTextNode(s.textContent + ' ')); }); };
+        d.onclick = e => { const v = e.target.dataset.i; if (v == null) return; try { localStorage.setItem(KI, v); } catch (x) { } d.querySelectorAll('[data-i]').forEach(x => x.classList.toggle('on', x === e.target)); try { if (window.XEMO) { if (v === '1') XEMO.run(document.body); else XEMO.undo(); } } catch (x) { } if (v === '1') iconize(); else document.querySelectorAll('.xgl-e').forEach(s => { const g = s.nextSibling; if (g && g.classList && g.classList.contains('xgl-ic')) g.remove(); s.replaceWith(document.createTextNode(s.textContent + ' ')); }); };
         box.appendChild(d);
     }
 
@@ -10487,6 +10490,7 @@ XVIT.init();
 <script src="lib/suite-prof.js?v=cb9d806d7b"></script>
 <script src="lib/suite-notif.js?v=ac0dc3fd2e"></script>
 <script src="lib/suite-a11y3.js?v=cf542bcc3b"></script>
+<script src="lib/suite-emoji.js?v=3e5b54a872"></script>
 <!-- SUITE XIII:EXTRA:END -->
 </body>
 </html>

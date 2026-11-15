@@ -1403,14 +1403,14 @@ var XRED = (function () {
     if (typeof XSET === 'undefined' || typeof pref === 'undefined') return;
     function apply(S) { if (S.big != null) pref.big = !!S.big; savePref(); applyPref(); }
     XSET.init({
-        app: 'jour', title: 'MODE TOURNAGE', version: 'v1.21',
+        app: 'jour', title: 'MODE TOURNAGE', version: 'v1.22',
         sections: [{ id: 'aff', icon: '🎬', title: 'Affichage', open: true, desc: 'La journée de tournage rassemble CALL SHEETO, SCRIPTO, BACKUPO, PACKINGO et CONDUCO.',
             fields: [{ k: 'big', label: 'Grands caractères', type: 'toggle', def: false }] }],
         apply
     });
 })();
 
-</script><script src="lib/core-02.js?v=0a3e0b455d"></script><script src="lib/core-03.js?v=9c9776b427"></script><script>// =====================================================================
+</script><script src="lib/core-02.js?v=953b064c70"></script><script src="lib/core-03.js?v=1d81197bcd"></script><script>// =====================================================================
 //  SUITE XIII — XPRS : 👥 présence en direct — qui est dans quel outil
 //  Deux sources fusionnées : le Drive (battement toutes les 20 s, fiable) et XLIVE (signal instantané à
 //  l'ouverture, au retour sur l'onglet, à la frappe, au départ). Affichage :
@@ -2254,6 +2254,7 @@ XWXS.init('jour');
 <script src="lib/suite-prof.js?v=cb9d806d7b"></script>
 <script src="lib/suite-notif.js?v=ac0dc3fd2e"></script>
 <script src="lib/suite-a11y3.js?v=cf542bcc3b"></script>
+<script src="lib/suite-emoji.js?v=3e5b54a872"></script>
 <!-- SUITE XIII:EXTRA:END -->
 </body>
 </html>
