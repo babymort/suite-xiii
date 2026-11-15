@@ -1,0 +1,1 @@
+const {chromium}=require('playwright');(async()=>{const b=await chromium.launch();const p=await b.newPage();await p.goto('http://localhost:8765/index.html');await p.waitForTimeout(2500);console.log(p.url(),await p.evaluate(()=>typeof XPROJET+' '+typeof XGUIDE+' '+typeof XWS));await b.close()})()

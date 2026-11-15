@@ -421,7 +421,7 @@ const XGLOW = (() => {
         if (!o || o.querySelector('.xgl-x')) return; const box = o.firstElementChild || o, on = iconsOn();
         const d = document.createElement('div'); d.className = 'xgl-x';
         d.innerHTML = '<h4>✏️ Icônes des barres d\'outils</h4><div class="seg"><button data-i="1" class="' + (on ? 'on' : '') + '">Icônes maison (trait fin)</button><button data-i="0" class="' + (on ? '' : 'on') + '">Émojis</button></div>';
-        d.onclick = e => { const v = e.target.dataset.i; if (v == null) return; try { localStorage.setItem(KI, v); } catch (x) { } d.querySelectorAll('[data-i]').forEach(x => x.classList.toggle('on', x === e.target)); if (v === '1') iconize(); else document.querySelectorAll('.xgl-e').forEach(s => { const g = s.nextSibling; if (g && g.classList && g.classList.contains('xgl-ic')) g.remove(); s.replaceWith(document.createTextNode(s.textContent + ' ')); }); };
+        d.onclick = e => { const v = e.target.dataset.i; if (v == null) return; try { localStorage.setItem(KI, v); } catch (x) { } d.querySelectorAll('[data-i]').forEach(x => x.classList.toggle('on', x === e.target)); try { if (window.XEMO) { if (v === '1') XEMO.run(document.body); else XEMO.undo(); } } catch (x) { } if (v === '1') iconize(); else document.querySelectorAll('.xgl-e').forEach(s => { const g = s.nextSibling; if (g && g.classList && g.classList.contains('xgl-ic')) g.remove(); s.replaceWith(document.createTextNode(s.textContent + ' ')); }); };
         box.appendChild(d);
     }
 
