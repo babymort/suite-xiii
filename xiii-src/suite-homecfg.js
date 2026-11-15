@@ -47,7 +47,7 @@
         let at = first; S.forEach(b => { if (at.nextElementSibling !== b) at.after(b); at = b; const off = c.hide.indexOf(nm(b)) > -1; b.style.display = off ? 'none' : ''; if (off && b.classList.contains('on')) { const d = n.querySelector('[data-t=dash]'); if (d) setTimeout(() => d.click(), 0); } });
     }
     function msg() {
-        const c = cfg(), dash = $('xd-dash'); let m = $('xh-msg'); const name = (() => { try { const d = J('xiii.drive', {}); const v = (d && d.me && d.me.name) || ''; if (v) return v; const i = document.querySelector('#xid-chip span'); return i && !/votre nom/i.test(i.textContent) ? i.textContent : ''; } catch (e) { return ''; } })();
+        const c = cfg(), dash = $('xd-dash'); let m = $('xh-msg'); const name = (() => { try { const d = J('xiii.drive', {}); const v = (d && d.me && d.me.name) || ''; if (v) return v; const i = document.querySelector('#xid-chip>span'); return i && !/votre nom/i.test(i.textContent) ? i.textContent : ''; } catch (e) { return ''; } })();
         const h = new Date().getHours(), hello = c.hello ? (h < 5 || h >= 18 ? 'Bonsoir' : 'Bonjour') + (name ? ' ' + name.split(/\s+/)[0] : '') + ' 👋' : '';
         if (!hello && !c.msg) { if (m) m.remove(); return; } if (!dash || !dash.parentNode) return;
         if (!m) { m = document.createElement('div'); m.id = 'xh-msg'; } const html = (hello ? '<b>' + esc(hello) + '</b>' : '') + (c.msg ? '<span>' + esc(c.msg) + '</span>' : '');
