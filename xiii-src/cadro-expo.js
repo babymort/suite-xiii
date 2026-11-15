@@ -51,7 +51,7 @@ const XCEXPO = (() => {
     function frame(v, cv) {
         if (!wk) { wk = document.createElement('canvas'); wk.width = AW; wk.height = AH; wx = wk.getContext('2d', { willReadFrequently: true }); }
         const vw = v.videoWidth, vh = v.videoHeight; if (!vw) return; const h = Math.round(AW * vh / vw); if (wk.height !== h) { wk.height = h; cv.height = h; }
-        wx.drawImage(v, 0, 0, AW, h); let D; try { D = wx.getImageData(0, 0, AW, h); } catch (e) { return; }
+        wx.drawImage(typeof XCGRADE !== 'undefined' ? XCGRADE.src(v) : v, 0, 0, AW, h); let D; try { D = wx.getImageData(0, 0, AW, h); } catch (e) { return; }
         const s = D.data, x = cv.getContext('2d'), out = x.createImageData(AW, h), o = out.data, n = AW * h; let clip = 0, crush = 0; ph = (ph + 1) % 8;
         const lum = new Float32Array(n); for (let i = 0, p = 0; p < n; p++, i += 4) { const y = Y(s[i], s[i + 1], s[i + 2]), e = ire(y); lum[p] = y; if (e >= 99.5) clip++; else if (e <= .5) crush++;
             if (C.fc) { const b = FC.find(f => e >= f[0] && e < f[1]); if (b) { o[i] = b[2][0]; o[i + 1] = b[2][1]; o[i + 2] = b[2][2]; } else { const g = Math.max(0, Math.min(255, e * 2.55)) * .85; o[i] = o[i + 1] = o[i + 2] = g; } o[i + 3] = 255; }
@@ -66,7 +66,7 @@ const XCEXPO = (() => {
         if (pins.length || hover) tips(v);
     }
     // ---------- pipette ----------
-    let px1 = null; const pick = (v, fx, fy) => { if (!px1) { const c = document.createElement('canvas'); c.width = c.height = 1; px1 = c.getContext('2d', { willReadFrequently: true }); } try { px1.drawImage(v, Math.floor(fx * v.videoWidth), Math.floor(fy * v.videoHeight), 1, 1, 0, 0, 1, 1); return px1.getImageData(0, 0, 1, 1).data; } catch (e) { return null; } };
+    let px1 = null; const pick = (v, fx, fy) => { if (!px1) { const c = document.createElement('canvas'); c.width = c.height = 1; px1 = c.getContext('2d', { willReadFrequently: true }); } try { px1.drawImage(typeof XCGRADE !== 'undefined' ? XCGRADE.src(v) : v, Math.floor(fx * v.videoWidth), Math.floor(fy * v.videoHeight), 1, 1, 0, 0, 1, 1); return px1.getImageData(0, 0, 1, 1).data; } catch (e) { return null; } };
     function pipette(mon) {
         const pos = e => { const v = mon.querySelector('video'), r = v.getBoundingClientRect(); const fx = (e.clientX - r.left) / r.width, fy = (e.clientY - r.top) / r.height; return fx >= 0 && fx <= 1 && fy >= 0 && fy <= 1 ? [fx, fy] : null; };
         mon.addEventListener('mousemove', e => { hover = C.pip ? pos(e) : null; if (!hover) mon.querySelector('.xce-tip').hidden = true; });

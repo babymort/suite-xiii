@@ -23,7 +23,7 @@ const XCSCOPES = (() => {
     // ---------- mesures ----------
     const Y = (r, g, b) => .2126 * r + .7152 * g + .0722 * b;
     const lv = v => C.range === 'video' ? (v - 16) / 219 : v / 255; // 0..1 (peut sortir : sur- / sous-exposé hors plage)
-    function sample(v) { if (!v || !v.videoWidth) return null; if (!src) { src = document.createElement('canvas'); src.width = SW; src.height = SH; sx = src.getContext('2d', { willReadFrequently: true }); } sx.drawImage(v, 0, 0, SW, SH); try { return sx.getImageData(0, 0, SW, SH).data; } catch (e) { return null; } }
+    function sample(v) { if (!v || !v.videoWidth) return null; if (!src) { src = document.createElement('canvas'); src.width = SW; src.height = SH; sx = src.getContext('2d', { willReadFrequently: true }); } sx.drawImage(typeof XCGRADE !== 'undefined' ? XCGRADE.src(v) : v, 0, 0, SW, SH); try { return sx.getImageData(0, 0, SW, SH).data; } catch (e) { return null; } }
     // graticule commun des formes d'onde : 0 → 100 (IRE ou %) avec marge -10 / 110
     const gy = (h, u) => h - 8 - (u + .07) / 1.14 * (h - 16);
     function grat(x, w, h) { x.strokeStyle = 'rgba(255,255,255,.12)'; x.fillStyle = 'rgba(255,255,255,.45)'; x.font = '10px ui-monospace,monospace'; x.lineWidth = 1;

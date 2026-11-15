@@ -85,5 +85,5 @@ const XCVIEW = (() => {
         if (did) { e.preventDefault(); e.stopImmediatePropagation(); } }, true);
     const watch = () => new MutationObserver(() => { const o = document.getElementById('xcl'); if (o && !raf) raf = requestAnimationFrame(tick); else if (!o && raf) { cancelAnimationFrame(raf); raf = 0; frozen = false; C.zoom = 0; } }).observe(document.body, { childList: true });
     if (document.body) watch(); else addEventListener('DOMContentLoaded', watch);
-    return { cfg: () => Object.assign({}, C), freeze, mem, still: () => A };
+    return { cfg: () => Object.assign({}, C), freeze, mem, still: () => A, setA: o => { A = o; if (C.cmp === 'off') C.cmp = 'wipe'; W(); draw(); } };
 })();
