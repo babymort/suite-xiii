@@ -38,7 +38,9 @@
     }
     function mark() { tk = 0; document.body.classList.toggle('xwin-on', wins().length > 0); try { tipOff(); } catch (e) { } }
     function init() {
-        const s = document.createElement('style'); s.textContent = 'body.xwin-on #xau-chip,body.xwin-on #xoff{display:none!important}'; document.head.appendChild(s);
+        const s = document.createElement('style'); s.textContent = 'body.xwin-on #xau-chip,body.xwin-on #xoff{display:none!important}' +
+            // 👥 Équipe et ☁️ Drive : un seul bouton à la fois (sans Drive relié, « Relier le Drive » est dans le menu Équipe)
+            'body:has(#xb-solo:not([style*="display: none"]):not(.xs-hidden)) #xdr-btn{display:none!important}'; document.head.appendChild(s);
         new MutationObserver(() => { if (!tk) tk = setTimeout(mark, 120); }).observe(document.body, { childList: true, subtree: false, attributes: true, attributeFilter: ['style', 'class', 'hidden'] });
         new MutationObserver(() => { if (!tk) tk = setTimeout(mark, 120); }).observe(document.body, { childList: true });
         setInterval(mark, 1500);

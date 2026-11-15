@@ -533,12 +533,12 @@ XPASS.init(XIII_APP);
 // =====================================================================
 var XLINKS = window.XLINKS || (() => {
     const T = {
-        backupo: ['💽', 'BACKUPO', 'Déchargement des rushes'], cadro: ['🎯', 'CADRO', 'Optiques et cadre'], calendrier: ['🗓️', 'CALENDRIER', 'Toutes les dates'],
+        backupo: ['💽', 'BACKUPO', 'Déchargement des rushes'], cadro: ['🎯', 'CADRO', 'Optiques et cadre'], calendrier: ['📅', 'PLANNO', 'Planning et calendrier'],
         callsheeto: ['📋', 'CALL SHEETO', 'Feuilles de service'], casto: ['🎭', 'CASTO', 'Casting'], catalogue: ['🗃️', 'CATALOGUE', 'Base matériel'],
         conduco: ['🎬', 'CONDUCO', 'Conducteur'], controle: ['✅', 'CONTRÔLE', 'Contrôle avant tournage'], decoup: ['✂️', 'DECOUP', 'Découpage'],
         deviso: ['💶', 'DEVISO', 'Devis et budget'], dossier: ['📚', 'DOSSIER', 'Dossier de production'], graphico: ['🎛️', 'GRAPHICO', 'Habillage et NDI'],
         importo: ['📥', 'IMPORTO', 'Import depuis les logiciels'], jour: ['🎥', 'MODE TOURNAGE', 'Le jour J'], lumo: ['💡', 'LUMO', 'Lumière'],
-        matos: ['📦', 'MATOS', 'Parc matériel'], moodo: ['🎨', 'MOODO', 'Moodboard'], packingo: ['🧳', 'PACKINGO', 'Colisage'], planno: ['📅', 'PLANNO', 'Planning'],
+        matos: ['📦', 'MATOS', 'Parc matériel'], moodo: ['🎨', 'MOODO', 'Moodboard'], packingo: ['🧳', 'PACKINGO', 'Colisage'], planno: ['📅', 'PLANNO', 'Planning et calendrier'],
         plano: ['📐', 'PLANO', 'Plan d\'implantation'], posto: ['🎞️', 'POSTO', 'Post-production'], repero: ['📍', 'REPERO', 'Repérages'],
         ressourco: ['📑', 'RESSOURCO', 'Contrats et droits'], runo: ['🔴', 'RUNO', 'Déroulé live'], scripto: ['📝', 'SCRIPTO', 'Script et rapports'],
         sono: ['🎚️', 'SONO', 'Son'], soustitro: ['💬', 'SOUSTITRO', 'Sous-titres'], storyboardo: ['🖼️', 'STORYBOARDO', 'Storyboard'],

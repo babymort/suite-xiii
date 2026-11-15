@@ -78,7 +78,9 @@
             }
             // ordre de la partie « fichier » : 🔎 │ 🗒️ 📂 💾 ⬇️ │ 📤 🔗
             const share = $('xsh-btn') || $('xpb-btn');
-            const seq = [search, dv('a'), N, open, save, X, dv('b'), gate, share].filter(Boolean);
+            // saison 6 (ZZ) : 📤 Vers Suite XIII rejoint le menu 🔗 Partager (« Envoyer vers un outil ou DOSSIER ») — un seul bouton pour envoyer
+            const g1 = gate && share && share.id === 'xsh-btn' ? (hide(gate), null) : gate;
+            const seq = [search, dv('a'), N, open, save, X, dv('b'), g1, share].filter(Boolean);
             order(file, seq);
             // restent dans xb-file : boutons propres à l'outil ajoutés après coup → seconde barre
             // 👥 Équipe · ☁️ Drive · pastille du nom (dans certains outils, ce groupe était né dans la seconde barre : il remonte)
