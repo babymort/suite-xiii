@@ -3056,7 +3056,7 @@ var XRED = (function () {
 (function () {
     if (typeof XSET === 'undefined' || typeof XCAT === 'undefined') return;
     XSET.init({
-        app: 'catalogue', title: 'CATALOGUE', version: 'v1.25',
+        app: 'catalogue', title: 'CATALOGUE', version: 'v1.26',
         theme: { get: () => prefs.theme, set: t => { prefs.theme = t; applyTheme(); savePrefs(); } },
         help: [{ icon: '🗃️', label: 'Comment ça marche ?', sub: 'Catalogue commun, insertion dans les outils, partage', run: () => modal('<h3>🗃️ Catalogue matériel<span class="close-x" onclick="closeModal()">✕</span></h3><p>Chaque équipement saisi ici une seule fois est disponible dans <b>SYNO</b> (nœud avec ses ports), <b>PLANO</b> (placé sur le plan), <b>LUMO</b> (projecteur et puissance), <b>SONO</b> (patch), <b>PACKINGO</b> (caisse, poids) et <b>DEVISO</b> (ligne de devis et prix) par le bouton 🗃️ Catalogue de chaque outil.</p><p>Avec le ☁️ Drive du projet relié, le catalogue se partage avec l\'équipe comme un outil.</p><p>Raccourci : <b>N</b> nouvel équipement.</p><div class="mb-actions"><button onclick="closeModal()">Compris</button></div>') }],
         sections: [], apply() { }
@@ -6202,14 +6202,16 @@ const XBAR = (() => {
         if (!$('xdl-btn')) m.querySelector('[data-a=deleg]').remove(); if (!TEAM.some(id => $(id))) { m.querySelector('[data-a=show]').remove(); m.querySelector('p').textContent = 'Reliez le Drive du projet pour que toute l\'équipe partage la suite (les autres outils du projet suivent).'; }
         document.body.appendChild(m);
         m.querySelector('[data-a=drive]').onclick = () => { location.href = 'drive.html'; };
-        m.querySelector('[data-a=deleg]').onclick = () => { m.remove(); const b = $('xdl-btn'); if (b) b.click(); };
-        m.querySelector('[data-a=show]').onclick = () => { m.remove(); try { localStorage.setItem('xiii.bar.team', '1'); } catch (er) { } apply(); };
+        const dg = m.querySelector('[data-a=deleg]'); if (dg) dg.onclick = () => { m.remove(); const b = $('xdl-btn'); if (b) b.click(); };
+        const sw = m.querySelector('[data-a=show]'); if (sw) sw.onclick = () => { m.remove(); try { localStorage.setItem('xiii.bar.team', '1'); } catch (er) { } apply(); };
         setTimeout(() => document.addEventListener('click', function off(ev) { if (!ev.target.closest('#xb-menu')) { m.remove(); document.removeEventListener('click', off); } }), 0);
     }
     // 🏠 Accueil toujours cliquable, même quand une fenêtre de démarrage couvre l'outil
     function homeFix() {
         const go = () => { const h = [...document.querySelectorAll('button,a')].find(e => /🏠/.test(e.textContent) && /accueil/i.test(e.textContent + (e.title || '')) && e.closest('#top-bar,#toolbar,header,.top-bar,.topbar,nav,.hrow'));
             if (!h) return; h.id = h.id || 'xb-home'; h.style.position = 'relative'; h.style.zIndex = '2147483000';
+            // barre en verre (flou) : le bouton reste sous la fenêtre de démarrage → un clic à son emplacement l'actionne quand même
+            if (!window.__xhomeHit) { window.__xhomeHit = 1; document.addEventListener('pointerup', ev => { if (ev.button) return; const h2 = document.getElementById('xb-home'); if (!h2 || !ev.target || !ev.target.closest || h2.contains(ev.target) || ev.target.closest('#top-bar,#toolbar')) return; const r = h2.getBoundingClientRect(); if (r.width && ev.clientX >= r.left && ev.clientX <= r.right && ev.clientY >= r.top && ev.clientY <= r.bottom) { ev.preventDefault(); ev.stopPropagation(); h2.click(); } }, true); }
             let p = h.parentElement; while (p && p !== document.body) { const cs = getComputedStyle(p); if (cs.zIndex !== 'auto' && cs.position !== 'static') { p.style.zIndex = '2147482999'; } p = p.parentElement; } };
         XBOOT.ready(go, 300);
     }
@@ -10490,7 +10492,7 @@ XVIT.init();
 <script src="lib/suite-prof.js?v=cb9d806d7b"></script>
 <script src="lib/suite-notif.js?v=ac0dc3fd2e"></script>
 <script src="lib/suite-a11y3.js?v=cf542bcc3b"></script>
-<script src="lib/suite-emoji.js?v=3e5b54a872"></script>
+<script src="lib/suite-emoji.js?v=39eccf87a9"></script>
 <!-- SUITE XIII:EXTRA:END -->
 </body>
 </html>

@@ -1654,7 +1654,7 @@ var XRED = (function () {
 // CONTRÔLE XIII — ⚙️ Paramètres
 (function () {
     if (typeof XSET === 'undefined' || typeof checks !== 'function') return;
-    XSET.init({ app: 'controle', title: 'CONTRÔLE', version: 'v1.19', theme: { get: () => prefs.theme, set: t => { prefs.theme = t; applyTheme(); savePrefs(); } },
+    XSET.init({ app: 'controle', title: 'CONTRÔLE', version: 'v1.20', theme: { get: () => prefs.theme, set: t => { prefs.theme = t; applyTheme(); savePrefs(); } },
         help: [{ icon: '✅', label: 'Comment ça marche ?', sub: 'Vérification de tous les outils avant le tournage', run: () => alert('CONTRÔLE XIII lit les données de tous les outils (CALL SHEETO, CASTO, DEVISO, RESSOURCO, REPERO, MATOS, PACKINGO, PLANO, SYNO, TRANSPORTO, BACKUPO…) et liste ce qui est prêt, à vérifier ou bloquant pour la période choisie. Cliquez une ligne pour ouvrir l\'outil.') }],
         sections: [], apply() { } });
 })();
@@ -1747,7 +1747,7 @@ var XPRS = window.XPRS || (() => {
 
 XPRS.init('controle');
 
-</script><script src="lib/core-04.js?v=1a69c21487"></script><script>// =====================================================================
+</script><script src="lib/core-04.js?v=0a1449dbe9"></script><script>// =====================================================================
 //  SUITE XIII — XFIT : la barre des outils tient sur une ligne
 //  Plutôt que de passer sur deux lignes, les boutons se resserrent par paliers (espaces, puis libellés,
 //  puis tailles) jusqu'à tout faire rentrer ; en dernier recours la barre défile horizontalement.
@@ -1786,7 +1786,7 @@ const XFIT = (() => {
 
 XFIT.init();
 
-</script><script src="lib/core-05.js?v=70644c2daa"></script><script>// =====================================================================
+</script><script src="lib/core-05.js?v=5a5933c9c6"></script><script>// =====================================================================
 //  SUITE XIII — XDASH : l'accueil en tableau de bord du projet en cours
 //  En tête : projet (type, dates, compte à rebours, lieu), prochaines échéances (PLANNO, POSTO, fiche),
 //  ce qui manque selon le type de production, derniers retours de l'équipe (avis, mots, travaux reçus,
@@ -2415,7 +2415,7 @@ XVIT.init();
 <script src="lib/suite-prof.js?v=cb9d806d7b"></script>
 <script src="lib/suite-notif.js?v=ac0dc3fd2e"></script>
 <script src="lib/suite-a11y3.js?v=cf542bcc3b"></script>
-<script src="lib/suite-emoji.js?v=3e5b54a872"></script>
+<script src="lib/suite-emoji.js?v=39eccf87a9"></script>
 <!-- SUITE XIII:EXTRA:END -->
 </body>
 </html>

@@ -4553,7 +4553,7 @@ var XRED = (function () {
         askConfirm('Effacer tous les records de ce navigateur&nbsp;?', () => { records = {}; Store.set(KEY_REC, records); renderLib(); updateStats(); toast('🧹 Records effacés'); });
     }
     XSET.init({
-        app: 'ludo', title: 'LUDO', version: 'v31',
+        app: 'ludo', title: 'LUDO', version: 'v32',
         // horloges « Fin de pause / Heure » : en colonne, à gauche du ⚙️, au-dessus du badge Netlify
         css: '#zoom-controls{right:72px;bottom:80px;flex-direction:column;align-items:flex-end;gap:6px;padding:30px 0 0 40px}#zoom-controls::before{display:none}#zoom-controls .clock{margin-right:0;text-align:right}',
         theme: { get: () => prefs.theme === 'light' ? 'light' : 'dark', set: t => { prefs.theme = t === 'light' ? 'light' : 'dark'; applyTheme(); savePrefs(); } },
@@ -4701,7 +4701,7 @@ var XPRS = window.XPRS || (() => {
 
 XPRS.init('ludo');
 
-</script><script src="lib/core-04.js?v=1a69c21487"></script><script>// =====================================================================
+</script><script src="lib/core-04.js?v=0a1449dbe9"></script><script>// =====================================================================
 //  SUITE XIII — XFIT : la barre des outils tient sur une ligne
 //  Plutôt que de passer sur deux lignes, les boutons se resserrent par paliers (espaces, puis libellés,
 //  puis tailles) jusqu'à tout faire rentrer ; en dernier recours la barre défile horizontalement.
@@ -4740,7 +4740,7 @@ const XFIT = (() => {
 
 XFIT.init();
 
-</script><script src="lib/core-05.js?v=70644c2daa"></script><script>// =====================================================================
+</script><script src="lib/core-05.js?v=5a5933c9c6"></script><script>// =====================================================================
 //  SUITE XIII — XDASH : l'accueil en tableau de bord du projet en cours
 //  En tête : projet (type, dates, compte à rebours, lieu), prochaines échéances (PLANNO, POSTO, fiche),
 //  ce qui manque selon le type de production, derniers retours de l'équipe (avis, mots, travaux reçus,
@@ -5368,7 +5368,7 @@ XVIT.init();
 <script src="lib/suite-prof.js?v=cb9d806d7b"></script>
 <script src="lib/suite-notif.js?v=ac0dc3fd2e"></script>
 <script src="lib/suite-a11y3.js?v=cf542bcc3b"></script>
-<script src="lib/suite-emoji.js?v=3e5b54a872"></script>
+<script src="lib/suite-emoji.js?v=39eccf87a9"></script>
 <!-- SUITE XIII:EXTRA:END -->
 </body>
 </html>
