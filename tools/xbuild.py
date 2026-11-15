@@ -58,6 +58,17 @@ h = hashlib.md5()
 for f in sorted(glob.glob(R + '*.html')) + sorted(glob.glob(LIB + '*')): h.update(open(f, 'rb').read())
 sw = open(R + 'sw.js', encoding='utf-8').read(); sw = re.sub(r"const VER = '[0-9a-f]+'", "const VER = '" + h.hexdigest()[:10] + "'", sw, 1)
 m = re.search(r'PAGES = (\[[^\]]*\])', sw); L = [x for x in json.loads(m.group(1)) if not x.startswith('lib/')] + ['lib/' + n + '?v=' + V[n] for n in sorted(V)]
+# saison 6 (ZZ « Tout fonctionne sans réseau ») : logos, polices et données locales gardés hors ligne
+L = [x for x in L if not re.match(r'^(logos|fonts|data)/', x)] + sorted(os.path.relpath(f, R) for d in ('logos', 'fonts', 'data') for f in glob.glob(R + d + '/*') if re.search(r'\.(png|jpe?g|webp|svg|woff2?|ttf|json)$', f))
 sw = sw[:m.start(1)] + json.dumps(L, ensure_ascii=False) + sw[m.end(1):]
+# bibliothèques externes réellement appelées par les pages → liste « Tout préparer pour le hors-ligne » (CDN)
+mc = re.search(r'CDN = (\[[^\]]*\])', sw)
+if mc:
+    found = set()
+    for f in glob.glob(R + '*.html') + glob.glob(LIB + '*.js'):
+        t = open(f, encoding='utf-8', errors='ignore').read()
+        found.update(re.findall(r'https://(?:cdnjs\.cloudflare\.com|cdn\.jsdelivr\.net|unpkg\.com)/[^\s\'"`)<>]+?\.(?:js|mjs|css)(?=[\'"`?])', t))
+    old = [u for u in json.loads(mc.group(1)) if re.search(r'\.(js|mjs|css)$', u)]
+    sw = sw[:mc.start(1)] + json.dumps(sorted(found | set(old)), ensure_ascii=False) + sw[mc.end(1):]
 open(R + 'sw.js', 'w', encoding='utf-8').write(sw)
 print('ok', len(pages), 'pages ·', len(V), 'fichiers communs (' + str(round(sum(os.path.getsize(LIB + n) for n in V) / 1e3)) + ' Ko) · sw', h.hexdigest()[:10])

@@ -1,0 +1,10 @@
+const { chromium } = require('playwright');
+(async () => { const b = await chromium.launch(); const ctx = await b.newContext({ serviceWorkers: 'allow', viewport: { width: 1440, height: 900 } }); let off = false;
+ await ctx.route('**/*', r => { const u = r.request().url(); if (u.startsWith('http://localhost')) return off ? r.abort('internetdisconnected') : r.continue(); return off ? r.abort() : r.fulfill({ status: 200, contentType: 'application/javascript', body: '' }); });
+ await ctx.addInitScript(() => { localStorage.setItem('xiii.tips.off', 'true'); localStorage.setItem('xiii.tour2.matos.hide', '1'); });
+ const p = await ctx.newPage(); await p.goto('http://localhost:8765/index.html?desktop=1'); await p.waitForTimeout(2000); await p.evaluate(async () => { await navigator.serviceWorker.register('sw.js'); await navigator.serviceWorker.ready; }); await p.reload(); await p.waitForTimeout(4000);
+ off = true; await ctx.setOffline(true);
+ await p.goto('http://localhost:8765/matos.html?desktop=1'); await p.waitForTimeout(3000);
+ await p.evaluate(() => { const b = [...document.querySelectorAll('#toolbar button')].find(x => /Catalogue/.test(x.textContent)); b && b.click(); }); await p.waitForTimeout(3000);
+ const f = p.frames().find(x => /catalogue\.html/.test(x.url())); console.log('cadre catalogue :', !!f, f ? await f.evaluate(() => [document.title, document.body.innerText.trim().length]).catch(e => 'ERR ' + e.message) : '');
+ await b.close(); })();
