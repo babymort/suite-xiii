@@ -1,0 +1,1 @@
+[["            if (b.closest('#xst')) return;\n            const w = document.createTreeWalker(b, NodeFilter.SHOW_TEXT);", "            if (b.closest('#xst,.xgl-keep')) return;\n            const w = document.createTreeWalker(b, NodeFilter.SHOW_TEXT);", 1]]
