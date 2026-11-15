@@ -64,6 +64,6 @@
         const d = document.getElementById('xdr-btn'); if (d && !d.__xrg) { d.__xrg = 1; d.addEventListener('click', e => { e.preventDefault(); e.stopImmediatePropagation(); location.href = 'drive.html'; }, true); }
     }
     new MutationObserver(tidyBar).observe(document.documentElement, { childList: true, subtree: true }); tidyBar();
-    addEventListener('DOMContentLoaded', () => { const c = document.createElement('style'); c.textContent = '#xst #top-bar .btn-label{display:inline!important}#top-bar #xb-solo{display:none!important}'; document.head.appendChild(c); });
+    addEventListener('DOMContentLoaded', () => { const c = document.createElement('style'); c.textContent = '#xst #top-bar .btn-label{display:inline!important}#top-bar #xb-solo{display:none!important}body:has(#xst.on) #xbug-btn{opacity:0!important;pointer-events:none!important}'; document.head.appendChild(c); });
     window.XREGLPAGE = { open, close };
 })();
