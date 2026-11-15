@@ -2466,7 +2466,7 @@ var XRED = (function () {
     if (typeof XSET === 'undefined' || typeof prefs === 'undefined' || typeof VT === 'undefined') return;
     function apply(S) { try { render(); } catch (e) { } }
     XSET.init({
-        app: 'transporto', title: 'TRANSPORTO', version: 'v1.30',
+        app: 'transporto', title: 'TRANSPORTO', version: 'v1.31',
         sections: [{ id: 'aff', icon: '🚐', title: 'Logistique', open: true, desc: 'Équipe importée de CALL SHEETO, de l\'annuaire et de MODE TOURNAGE ; la logistique de chacun apparaît dans son espace équipe (MODE TOURNAGE).', fields: [{ k: 'view', label: 'Vue à l\'ouverture', type: 'select', def: 'team', options: [['team', 'Équipe'], ['travel', 'Voyages'], ['trips', 'Navettes'], ['hotel', 'Hébergement']] }] }],
         apply
     });
@@ -2544,7 +2544,7 @@ const XUNDO = (() => {
 
 (function(){ const go = () => (typeof XBOOT !== 'undefined' ? XBOOT.ready(() => XUNDO.init('transporto'), 600) : setTimeout(() => XUNDO.init('transporto'), 600)); if (document.readyState === 'complete') go(); else window.addEventListener('load', go); })();
 
-</script><script src="lib/core-02.js?v=bf017cc810"></script><script src="lib/core-03.js?v=81e068889d"></script><script>// =====================================================================
+</script><script src="lib/core-02.js?v=bf017cc810"></script><script src="lib/core-03.js?v=5d72f0de9f"></script><script>// =====================================================================
 //  SUITE XIII — XPRS : 👥 présence en direct — qui est dans quel outil
 //  Deux sources fusionnées : le Drive (battement toutes les 20 s, fiable) et XLIVE (signal instantané à
 //  l'ouverture, au retour sur l'onglet, à la frappe, au départ). Affichage :
@@ -3301,7 +3301,7 @@ XVIT.init();
 <script src="lib/suite-notif.js?v=ac0dc3fd2e"></script>
 <script src="lib/suite-a11y3.js?v=cf542bcc3b"></script>
 <script src="lib/suite-emoji.js?v=39eccf87a9"></script>
-<script src="lib/suite-wins.js?v=7c6d634547"></script>
+<script src="lib/suite-wins.js?v=37f6c4e7c8"></script>
 <script src="lib/suite-legible.js?v=9f0777bee3"></script>
 <!-- SUITE XIII:EXTRA:END -->
 </body>

@@ -2182,7 +2182,7 @@ var XRED = (function () {
     if (typeof XSET === 'undefined' || typeof prefs === 'undefined' || typeof AK === 'undefined') return;
     function apply(S) { try { render(); } catch (e) { } }
     XSET.init({
-        app: 'runo', title: 'RUNO', version: 'v1.27',
+        app: 'runo', title: 'RUNO', version: 'v1.28',
         sections: [{ id: 'aff', icon: '🔴', title: 'Direct stream', open: true, desc: 'Chat Twitch en lecture sans compte ; objectifs et alertes affichés par GRAPHICO ouvert dans le même navigateur ; chat à l\'écran pour OBS via 💬.', fields: [{ k: 'view', label: 'Vue à l\'ouverture', type: 'select', def: 'live', options: [['live', 'Direct'], ['plan', 'Déroulé'], ['goals', 'Objectifs']] }] }],
         apply
     });
@@ -2260,7 +2260,7 @@ const XUNDO = (() => {
 
 (function(){ const go = () => (typeof XBOOT !== 'undefined' ? XBOOT.ready(() => XUNDO.init('runo'), 600) : setTimeout(() => XUNDO.init('runo'), 600)); if (document.readyState === 'complete') go(); else window.addEventListener('load', go); })();
 
-</script><script src="lib/core-02.js?v=bf017cc810"></script><script src="lib/core-03.js?v=81e068889d"></script><script>// =====================================================================
+</script><script src="lib/core-02.js?v=bf017cc810"></script><script src="lib/core-03.js?v=5d72f0de9f"></script><script>// =====================================================================
 //  SUITE XIII — XPRS : 👥 présence en direct — qui est dans quel outil
 //  Deux sources fusionnées : le Drive (battement toutes les 20 s, fiable) et XLIVE (signal instantané à
 //  l'ouverture, au retour sur l'onglet, à la frappe, au départ). Affichage :
@@ -3017,7 +3017,7 @@ XVIT.init();
 <script src="lib/suite-notif.js?v=ac0dc3fd2e"></script>
 <script src="lib/suite-a11y3.js?v=cf542bcc3b"></script>
 <script src="lib/suite-emoji.js?v=39eccf87a9"></script>
-<script src="lib/suite-wins.js?v=7c6d634547"></script>
+<script src="lib/suite-wins.js?v=37f6c4e7c8"></script>
 <script src="lib/suite-legible.js?v=9f0777bee3"></script>
 <!-- SUITE XIII:EXTRA:END -->
 </body>

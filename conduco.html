@@ -5030,7 +5030,7 @@ var XRED = (function () {
     const typeOpts = () => TYPES.map(t => [t.id, t.ico + ' ' + t.name]);
 
     const CFG = {
-        app: 'conduco', title: 'CONDUCO', version: 'v61',
+        app: 'conduco', title: 'CONDUCO', version: 'v62',
         theme: { get: () => prefs.theme === 'light' ? 'light' : 'dark', set: t => { prefs.theme = t; applyTheme(); savePrefs(); } },
         hide: ['#settings-btn'],
         // ancien ⚙️ masqué ; zoom/horloge alignés à gauche du nouveau ⚙️ (hors badge Netlify) ; panneau de propriétés raccourci ; ⚙️ absent du Direct
@@ -5174,7 +5174,7 @@ const XNDI = (() => {
     return { probe, sender, stream, ptz, ZIP: 'ndi-xiii.zip', base: BASE };
 })();
 
-</script><script src="lib/core-03.js?v=81e068889d"></script><script>// =====================================================================
+</script><script src="lib/core-03.js?v=5d72f0de9f"></script><script>// =====================================================================
 //  SUITE XIII — XPRS : 👥 présence en direct — qui est dans quel outil
 //  Deux sources fusionnées : le Drive (battement toutes les 20 s, fiable) et XLIVE (signal instantané à
 //  l'ouverture, au retour sur l'onglet, à la frappe, au départ). Affichage :
@@ -6089,6 +6089,6 @@ XLIVEED.init();
 <script src="lib/suite-notif.js?v=ac0dc3fd2e"></script>
 <script src="lib/suite-a11y3.js?v=cf542bcc3b"></script>
 <script src="lib/suite-emoji.js?v=39eccf87a9"></script>
-<script src="lib/suite-wins.js?v=7c6d634547"></script>
+<script src="lib/suite-wins.js?v=37f6c4e7c8"></script>
 <script src="lib/suite-legible.js?v=9f0777bee3"></script>
 <!-- SUITE XIII:EXTRA:END -->
