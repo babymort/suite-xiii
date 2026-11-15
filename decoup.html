@@ -1125,7 +1125,7 @@ $('project-upload').addEventListener('change', e => {
             (d.library || []).forEach(l => { if (!customLib.find(c => c.id === l.id)) customLib.push(l); });
             P = sanitizeProject(proj); sel.clear(); expanded.clear();
             loadProjectUI(); saveProject(false); toast('📂 Projet ouvert : ' + (P.name || f.name));
-        } catch (err) { openModal("Ce fichier n'est pas un projet CONDUCO XIII valide.", false, '', null, true); }
+        } catch (err) { openModal("Ce fichier n'est pas un projet DECOUP XIII valide.", false, '', null, true); }
     };
     fr.readAsText(f);
 });
@@ -2209,7 +2209,7 @@ function renderLive() {
     const warn = P.settings.warn || 10;
     $('lv-onair').classList.toggle('on', live.started && !live.ended && !live.paused);
     $('lv-onair').textContent = live.ended ? 'FIN' : live.paused ? 'PAUSE' : live.started ? 'ON AIR' : 'STAND-BY';
-    $('lv-show').innerHTML = `<b>CONDUCO XIII</b>${esc(P.name || '')} — ${esc(tab().name)}`;
+    $('lv-show').innerHTML = `<b>DECOUP XIII</b>${esc(P.name || '')} — ${esc(tab().name)}`;
     $('lv-clock').textContent = fmtClock(nowSec());
     $('lv-elapsed').textContent = live.started ? fmtDur(((live.ended ? (live.endAt || Date.now()) : liveNow()) - live.showStart) / 1000) : '0:00';
     const ou = overUnder();
@@ -2327,7 +2327,7 @@ const ACC = [240, 179, 120];
 function pdfHeader(doc, title, sub, right) {
     const W = doc.internal.pageSize.getWidth();
     doc.setFillColor(30, 30, 30); doc.rect(0, 0, W, 20, 'F');
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(16); doc.setTextColor(...ACC); doc.text('CONDUCO XIII', 10, 9.5, { charSpace: 1.2 });
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(16); doc.setTextColor(...ACC); doc.text('DECOUP XIII', 10, 9.5, { charSpace: 1.2 });
     // titre et sous-titre sur la même ligne, sans se toucher ni passer sous la colonne de droite
     doc.setFontSize(8); doc.setFont('helvetica', 'normal'); const rw = Math.max(0, ...(right || []).map(l => doc.getTextWidth(pdfSafe(l)))), lim = W - 10 - rw - 6;
     doc.setFont('helvetica', 'bold'); doc.setFontSize(10); doc.setTextColor(255, 255, 255); let tt = pdfSafe(title); while (tt.length > 6 && 10 + doc.getTextWidth(tt) > lim) tt = tt.slice(0, -2); if (tt !== pdfSafe(title)) tt = tt.replace(/[\s.,-]+$/, '') + '…'; doc.text(tt, 10, 15.5); const tx = 10 + doc.getTextWidth(tt) + 3;
@@ -2387,7 +2387,7 @@ function pdfTable(doc, y, cols, rows, newPage) {
     return y;
 }
 function pdfSummaryRight(c) { const t = tab(); return [`${t.date ? 'Diffusion ' + fmtDateFR(t.date) + ' · ' : ''}Début ${fmtClock(c.start)} · Fin ${fmtClock(c.end)}`, `Durée ${fmtDur(c.total, true)} · Cible ${fmtDur(t.target, true)} · Écart ${fmtGap(c.gap)}`, P.author ? 'Réalisation / auteur : ' + P.author : '']; }
-const PDF_COLS = { angle: ['Angle', 20], move: ['Mouvement', 24], focale: ['Focale', 16], trans: ['Transition', 22], script: ['Dialogue', 46], decor: ['Décor', 28], num: ['Plan', 10], type: ['Valeur', 16], time: ['TC', 15], title: ['Action / description', 0], talents: ['Personnages', 26], cams: ['Caméras', 20], decoup: ['Découpage', 46], gfx: ['Habillage', 36], source: ['Source', 22], audio: ['Son', 30], light: ['Lumière', 30], dur: ['Durée', 13, 'right'], cumul: ['Cumul', 14, 'right'], back: ['Back-time', 16], real: ['Réel', 14, 'right'], status: ['Statut', 17], notes: ['Notes réal', 44] };
+const PDF_COLS = { angle: ['Angle', 26], move: ['Mouvement', 24], focale: ['Focale', 16], trans: ['Transition', 22], script: ['Dialogue', 46], decor: ['Décor', 28], num: ['Plan', 10], type: ['Valeur', 16], time: ['TC', 15], title: ['Action / description', 0], talents: ['Personnages', 26], cams: ['Caméras', 20], decoup: ['Découpage', 46], gfx: ['Habillage', 36], source: ['Source', 22], audio: ['Son', 30], light: ['Lumière', 30], dur: ['Durée', 13, 'right'], cumul: ['Cumul', 14, 'right'], back: ['Back-time', 16], real: ['Réel', 14, 'right'], status: ['Statut', 22], notes: ['Notes réal', 44] };
 function pdfCell(k, it, r) {
     const a = tab().asrun[it.id];
     switch (k) {
@@ -4964,7 +4964,7 @@ var XRED = (function () {
     const typeOpts = () => TYPES.map(t => [t.id, t.ico + ' ' + t.name]);
 
     const CFG = {
-        app: 'decoup', title: 'DECOUP TECHNICO', version: 'v1.43',
+        app: 'decoup', title: 'DECOUP TECHNICO', version: 'v1.44',
         theme: { get: () => prefs.theme === 'light' ? 'light' : 'dark', set: t => { prefs.theme = t; applyTheme(); savePrefs(); } },
         hide: ['#settings-btn'],
         // ancien ⚙️ masqué ; ⚙️ absent de la lecture plein écran
