@@ -238,7 +238,8 @@ const XDATA = (() => {
         if (!r.ok) throw new Error('http ' + r.status); const a = await r.json(); if (!a.length) return null;
         return { data: a[0].data, source: a[0].source, updated: a[0].updated_at, checked: a[0].checked_at, at: Date.now() };
     }
-    async function bundled(n) { try { const r = await fetch('data/' + n + '.json', { cache: 'no-cache' }); if (r.ok) return { data: await r.json(), source: 'fichier livré', updated: null, at: 0 }; } catch (e) { } return null; }
+    let META = null; // data/meta.json : fichiers de données livrés avec le site (écrit à la construction) — on ne demande que ceux-là (zéro erreur 404)
+    async function bundled(n) { try { const M = await (META || (META = fetch('data/meta.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : {}).catch(() => ({})))); if (!(M.feeds || []).some(f => (f && f.name || f) === n)) return null; const r = await fetch('data/' + n + '.json', { cache: 'no-cache' }); if (r.ok) return { data: await r.json(), source: 'fichier livré', updated: null, at: 0 }; } catch (e) { } return null; }
     async function get(n, force) {
         if (!/^[a-z0-9_-]{2,40}$/.test(n)) throw new Error('nom de flux');
         const c = mem[n] || J(K(n));

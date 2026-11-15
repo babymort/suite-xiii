@@ -53,6 +53,24 @@ for f in MP:
     tags = ['<script src="lib/' + name + '?v=' + V[name] + '"></script>' for name, who in EXTRA if who == '@m']
     if tags and '</head>' in s: s = s.replace('</head>', '<!-- SUITE XIII:MEXTRA:START -->' + ''.join(tags) + '<!-- SUITE XIII:MEXTRA:END -->\n</head>', 1)
     open(R + f, 'w', encoding='utf-8').write(s)
+# 2 quater. saison 6 (ZZ « Zéro erreur dans le journal ») :
+#  • data/meta.json liste les fichiers de données livrés : les outils ne demandent que ceux-là (plus de 404 sur les flux absents)
+#  • écran de chargement : le logo animé logos/<outil>.gif n'est cherché que s'il existe
+try:
+    mp = R + 'data/meta.json'; M = json.load(open(mp, encoding='utf-8')) if os.path.exists(mp) else {}
+    have = sorted(os.path.basename(f)[:-5] for f in glob.glob(R + 'data/*.json') if os.path.basename(f) not in ('meta.json', 'openpeeps.json'))
+    keep = [f for f in M.get('feeds', []) if (f.get('name') if isinstance(f, dict) else f) in have]
+    names = set(f.get('name') if isinstance(f, dict) else f for f in keep)
+    M['feeds'] = keep + [n for n in have if n not in names]
+    open(mp, 'w', encoding='utf-8').write(json.dumps(M, ensure_ascii=False))
+except Exception as e: print('meta.json :', e)
+GIFS = json.dumps(sorted(os.path.basename(f)[:-4] for f in glob.glob(R + 'logos/*.gif')))
+for f in glob.glob(R + '*.html'):
+    s = open(f, encoding='utf-8').read(); s0 = s
+    s = re.sub(r'var (?:XGF=\[[^\]]*\],)?h=document\.documentElement,A="', 'var XGF=' + GIFS + ',h=document.documentElement,A="', s)
+    s = s.replace('if(!c||Date.now()-c.t>36e5){var i=new Image()', 'if(XGF.indexOf(A)>-1&&(!c||Date.now()-c.t>36e5)){var i=new Image()')
+    s = s.replace('if(c&&c.ok)g();if(XGF', 'if(c&&c.ok&&XGF.indexOf(A)>-1)g();if(XGF')
+    if s != s0: open(f, 'w', encoding='utf-8').write(s)
 # 3. service worker : version et fichiers à garder hors ligne
 h = hashlib.md5()
 for f in sorted(glob.glob(R + '*.html')) + sorted(glob.glob(LIB + '*')): h.update(open(f, 'rb').read())
