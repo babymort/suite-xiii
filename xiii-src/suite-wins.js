@@ -36,13 +36,21 @@
             if (r.left < a.right && r.right > a.left && r.top < a.bottom && r.bottom > a.top && (+c.zIndex || 0) > 0) { t.style.display = 'none'; return; }
         }
     }
+    // menus et bulles (Exporter, Partager, nom…) : toujours entièrement à l'écran, quelle que soit la taille du texte
+    function clamp(e) {
+        if (!e || e.nodeType !== 1 || !e.isConnected) return; const c = getComputedStyle(e); if (c.position !== 'fixed' || c.display === 'none') return;
+        const r = e.getBoundingClientRect(); if (!r.width || r.width >= innerWidth - 16 || r.height >= innerHeight - 16) return;
+        if (r.right > innerWidth - 6) e.style.left = Math.max(6, innerWidth - r.width - 6) + 'px';
+        if (r.left < 0) e.style.left = '6px';
+        if (r.bottom > innerHeight - 6) e.style.top = Math.max(6, innerHeight - r.height - 6) + 'px';
+    }
     function mark() { tk = 0; document.body.classList.toggle('xwin-on', wins().length > 0); try { tipOff(); } catch (e) { } }
     function init() {
-        const s = document.createElement('style'); s.textContent = 'body.xwin-on #xau-chip,body.xwin-on #xoff{display:none!important}' +
+        const s = document.createElement('style'); s.textContent = 'body.xwin-on #xau-chip,body.xwin-on #xoff{display:none!important}body:has(.xinsp.show) #xoff{display:none!important}' +
             // 👥 Équipe et ☁️ Drive : un seul bouton à la fois (sans Drive relié, « Relier le Drive » est dans le menu Équipe)
             'body:has(#xb-solo:not([style*="display: none"]):not(.xs-hidden)) #xdr-btn{display:none!important}'; document.head.appendChild(s);
         new MutationObserver(() => { if (!tk) tk = setTimeout(mark, 120); }).observe(document.body, { childList: true, subtree: false, attributes: true, attributeFilter: ['style', 'class', 'hidden'] });
-        new MutationObserver(() => { if (!tk) tk = setTimeout(mark, 120); }).observe(document.body, { childList: true });
+        new MutationObserver(R => { if (!tk) tk = setTimeout(mark, 120); for (const r of R) for (const n of r.addedNodes) if (n.nodeType === 1 && n.id !== 'xtp') requestAnimationFrame(() => clamp(n)); }).observe(document.body, { childList: true });
         setInterval(mark, 1500);
         // ce qui est déjà à l'écran au chargement fait partie de l'outil, pas une fenêtre
         setTimeout(() => { BASE = new Set([...document.body.children].filter(e => e.getClientRects().length && !/modal|overlay|-ov$/i.test((e.id || '') + ' ' + e.className))); }, 0);

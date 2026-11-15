@@ -1,0 +1,1 @@
+[["const R = document.documentElement; R.style.zoom = Z === 1 ? '' : String(Z);", "const R = document.documentElement; R.style.zoom = Z === 1 ? '' : String(Z); R.style.overflowX = Z === 1 ? '' : 'hidden'; /* arrondis du zoom : pas de défilement horizontal parasite (ZZ 90→150 %) */", 1]]

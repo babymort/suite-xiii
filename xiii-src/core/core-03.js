@@ -122,7 +122,7 @@ const XSPACE = (() => {
 // =====================================================================
 const XZOOM = (() => {
     const F = {}; let Z = 1;
-    function set(k, f) { F[k] = +f || 1; Z = Object.values(F).reduce((a, b) => a * b, 1); if (Math.abs(Z - 1) < .001) Z = 1; const R = document.documentElement; R.style.zoom = Z === 1 ? '' : String(Z); if (document.body && document.body.style.zoom) document.body.style.zoom = ''; R.classList.toggle('xzoomed', Z !== 1); try { dispatchEvent(new Event('resize')); } catch (e) { } }
+    function set(k, f) { F[k] = +f || 1; Z = Object.values(F).reduce((a, b) => a * b, 1); if (Math.abs(Z - 1) < .001) Z = 1; const R = document.documentElement; R.style.zoom = Z === 1 ? '' : String(Z); R.style.overflowX = Z === 1 ? '' : 'hidden'; try { vsoon(); } catch (e) { } /* arrondis du zoom : pas de défilement horizontal parasite (ZZ 90→150 %) */ if (document.body && document.body.style.zoom) document.body.style.zoom = ''; R.classList.toggle('xzoomed', Z !== 1); try { dispatchEvent(new Event('resize')); } catch (e) { } }
     // conversions (une seule fois par page)
     if (!window.__xzShim) { window.__xzShim = 1;
         const getter = (o, p, fn) => { try { const d = Object.getOwnPropertyDescriptor(o, p); if (!d || !d.get) return; Object.defineProperty(o, p, { configurable: true, enumerable: d.enumerable, get() { const v = d.get.call(this); return Z === 1 ? v : fn(v); }, set: d.set }); } catch (e) { } };
@@ -135,6 +135,19 @@ const XZOOM = (() => {
         const D = Document.prototype;
         ['elementFromPoint', 'elementsFromPoint', 'caretRangeFromPoint', 'caretPositionFromPoint'].forEach(m => { const f = D[m]; if (f) D[m] = function (x, y) { return Z === 1 ? f.call(this, x, y) : f.call(this, x * Z, y * Z); }; });
     }
+
+    // unités d'écran (vh, vw) : avec le zoom, « 85vh » valait 85 % de l'écran × zoom → fenêtres coupées en bas à 150 %.
+    // On réécrit ces valeurs, divisées par le zoom, dans une feuille ajoutée en dernier (même sélecteur, même priorité).
+    let VT = 0; const VRX = /(-?[\d.]+)(dvh|svh|lvh|vh|vw|vmin|vmax)\b/g, VP = /^(max-height|height|min-height|max-width|width|min-width|top|bottom|left|right|margin-top|margin-bottom|padding-top|padding-bottom)$/;
+    function vfix() { VT = 0; let st = document.getElementById('xz-vh'); if (Z === 1) { if (st) st.remove(); return; } if (!document.head) return;
+        const out = [], walk = (rules, wrap) => { for (const r of rules) { if (r.cssRules && !r.selectorText) { if (r.conditionText !== undefined && /^(4|12)$/.test(String(r.type))) walk(r.cssRules, (r.type === 4 ? '@media ' : '@supports ') + r.conditionText); continue; } if (!r.style || !r.selectorText) continue; const d = [];
+            for (let i = 0; i < r.style.length; i++) { const p = r.style[i]; if (!VP.test(p)) continue; const v = r.style.getPropertyValue(p); if (!/\d(dvh|svh|lvh|vh|vw|vmin|vmax)\b/.test(v)) continue; d.push(p + ':' + v.replace(VRX, (m, n, u) => 'calc(' + n + u + ' / ' + Z + ')') + (r.style.getPropertyPriority(p) ? ' !important' : '')); }
+            if (d.length) out.push((wrap ? wrap + '{' : '') + r.selectorText + '{' + d.join(';') + '}' + (wrap ? '}' : '')); } };
+        for (const sh of document.styleSheets) { if (sh.ownerNode && sh.ownerNode.id === 'xz-vh') continue; try { walk(sh.cssRules, ''); } catch (e) { } }
+        if (!st) { st = document.createElement('style'); st.id = 'xz-vh'; } st.textContent = out.join('\n'); if (document.head.lastElementChild !== st) document.head.appendChild(st); }
+    const vsoon = () => { if (!VT) VT = setTimeout(vfix, 120); };
+    try { const mo = new MutationObserver(R => { if (Z === 1) return; for (const r of R) for (const n of r.addedNodes) if ((n.tagName === 'STYLE' || n.tagName === 'LINK') && n.id !== 'xz-vh') { vsoon(); return; } });
+        const go = () => { mo.observe(document.head, { childList: true }); if (document.body) mo.observe(document.body, { childList: true }); }; if (document.head && document.body) go(); else addEventListener('DOMContentLoaded', go); } catch (e) { }
     return { set, z: () => Z };
 })();
 
