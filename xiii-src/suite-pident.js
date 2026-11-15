@@ -21,6 +21,8 @@
     const fiche = () => { const s = fiches(); return s && s.list ? s.list.find(f => f && f.id === s.active) || null : null; };
     function setLogo(v) { const s = fiches(); if (!s || !s.list) return false; const f = s.list.find(x => x && x.id === s.active); if (!f) return false; f.logo = v; try { localStorage.setItem('xiii.projets', JSON.stringify(s)); } catch (e) { alert('Stockage plein : logo trop lourd ?'); return false; } return true; }
     const banner = () => { try { return localStorage.getItem(KB) || ''; } catch (e) { return ''; } };
+    // bannière rangée dans la réserve d'images (stockage local plein) : lue une fois, puis gardée en mémoire
+    let BNC = {}; const bnUrl = bn => { if (typeof XIMGS === 'undefined' || !XIMGS.is(bn)) return bn; if (BNC.ref === bn) return BNC.u; XIMGS.get(bn).then(u => { BNC = { ref: bn, u }; try { home(); } catch (e) { } }); return ''; };
     // image → dataURL réduite (logo carré max 400 px en PNG ; bannière 1600×400 recadrée en JPEG)
     function shrink(file, ban) { return new Promise(res => { const r = new FileReader(); r.onload = () => { const im = new Image(); im.onload = () => { const cv = document.createElement('canvas'), x = cv.getContext('2d');
         if (ban) { cv.width = 1600; cv.height = 400; const k = Math.max(1600 / im.width, 400 / im.height), w = im.width * k, h = im.height * k; x.drawImage(im, (1600 - w) / 2, (400 - h) / 2, w, h); res(cv.toDataURL('image/jpeg', .82)); }
@@ -39,7 +41,7 @@
     const KO = 'xiii.pid.banoff'; const banOff = () => { try { return localStorage.getItem(KO) === '1'; } catch (e) { return false; } };
     function home() {
         const tr = document.querySelector('main > .title-row'); if (!tr) return; const old = document.getElementById('xpid-ban'); if (old) old.remove();
-        const w = W(), bn = banner(), on = !!(w && bn && !banOff()); const sig = on ? bn.length + '|' + bn.slice(-40) : '';
+        const w = W(), bn = bnUrl(banner()), on = !!(w && bn && !banOff()); const sig = on ? bn.length + '|' + bn.slice(-40) : '';
         emojiTag(document.getElementById('ui-proj'), w && w.emoji); // le nom est réécrit par l'accueil : l'emoji est remis à chaque passage
         if (tr.dataset.xpid === sig && tr.classList.contains('xpid-hero') === on) return; tr.dataset.xpid = sig; tr.classList.toggle('xpid-hero', on); tr.style.setProperty('--xpid-img', on ? 'url(' + bn + ')' : 'none');
     }
@@ -49,7 +51,7 @@
     function apply() { try { if (APP === 'espace') esp(); else { if (APP === 'index') home(); tool_(); } } catch (e) { } }
     // ---------- fenêtre ----------
     function render(box) {
-        const w = W(); if (!w) { box.innerHTML = '<p style="opacity:.7">Aucun projet XIII en cours.</p>'; return; } const f = fiche(); const lg = f && typeof f.logo === 'string' && /^data:image\//.test(f.logo) ? f.logo : '', bn = banner();
+        const w = W(); if (!w) { box.innerHTML = '<p style="opacity:.7">Aucun projet XIII en cours.</p>'; return; } const f = fiche(); const lg = f && typeof f.logo === 'string' && /^data:image\//.test(f.logo) ? f.logo : '', bn = bnUrl(banner());
         const o = box;
         o.innerHTML = '<div id="xpid-box" class="xpid-in xgl-keep">' +
             '<div class="f"><b>Emoji</b><div class="row">' + ['', ...EMO].map(e => '<button class="em' + ((w.emoji || '') === e ? ' on' : '') + '" data-e="' + e + '" title="' + (e ? e : 'Aucun') + '">' + (e || '∅') + '</button>').join('') + '<button class="b" data-more>＋ Autre…</button></div><div data-mp hidden style="margin-top:8px">' + MORE.map(g => '<div style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;opacity:.55;margin:8px 0 4px">' + g[0] + '</div><div class="row">' + g[1].split(' ').map(e => '<button class="em' + ((w.emoji || '') === e ? ' on' : '') + '" data-e="' + e + '">' + e + '</button>').join('') + '</div>').join('') + '<div class="row" style="margin-top:8px"><input data-ec maxlength="8" placeholder="ou tapez / collez un emoji" style="width:200px;padding:6px 9px;border-radius:8px;border:1px solid var(--border-color,#444);background:transparent;color:inherit"></div></div></div>' +
@@ -65,7 +67,7 @@
             if (t.closest('[data-ch]')) { if (typeof XCHARTE !== 'undefined') { await XCHARTE.save(Object.assign(XCHARTE.raw(), { color: W().color })); o.querySelector('[data-chok]').textContent = '✓ couleur des PDF mise à jour'; } return; }
             if (t.closest('[data-lg]')) { const v = await pick(false); if (v && setLogo(v)) { apply(); open(); } return; }
             if (t.closest('[data-lgx]')) { if (setLogo('')) { apply(); open(); } return; }
-            if (t.closest('[data-bn]')) { const v = await pick(true); if (v) { try { localStorage.setItem(KB, v); } catch (x) { alert('Stockage plein : image trop lourde ?'); } apply(); open(); } return; }
+            if (t.closest('[data-bn]')) { const v = await pick(true); if (v) { if (typeof XIMGS !== 'undefined') { if (!(await XIMGS.saveRaw(KB, v))) alert('Image impossible à enregistrer sur cet appareil.'); } else try { localStorage.setItem(KB, v); } catch (x) { alert('Stockage plein : image trop lourde ?'); } apply(); open(); } return; }
             if (t.closest('[data-bnx]')) { try { localStorage.removeItem(KB); } catch (x) { } apply(); open(); } };
         o.querySelector('[data-boff]').onchange = e => { try { if (e.target.checked) localStorage.removeItem(KO); else localStorage.setItem(KO, '1'); } catch (x) { } apply(); };
         o.querySelector('[data-cc]').onchange = e => { set({ color: e.target.value }); open(); };
