@@ -4389,7 +4389,8 @@ document.querySelectorAll('.pano').forEach(function(p){var x=0,d=null,v=0;functi
         const s = document.createElement('style'); s.textContent = '#xw-ov{position:fixed;inset:0;z-index:10230;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;padding:16px;font:13.5px/1.45 "Segoe UI",system-ui,sans-serif}.xw-box{width:min(620px,100%);background:var(--bg-menu,#232327);color:var(--text-main,#eee);border:1px solid rgba(240,179,120,.6);border-radius:14px;padding:16px 18px}.xw-box h3{margin:0 0 6px;display:flex;justify-content:space-between}.xw-x{cursor:pointer;opacity:.7}.xw-h{color:var(--text-dim,#a8a39b);font-size:12.5px}.xw-f{display:flex;flex-direction:column;gap:4px;margin:10px 0}.xw-f input{font:inherit;color:inherit;background:var(--bg-input,#1b1b1f);border:1px solid var(--border-color,#45454b);border-radius:7px;padding:6px 9px}.xw-b{display:flex;gap:8px;align-items:center;justify-content:flex-end}.xw-b span{margin-right:auto;font-size:12px;color:var(--text-dim,#aaa)}.xw-box button{font:inherit;color:inherit;background:var(--bg-panel-alt,#2c2c31);border:1px solid var(--border-color,#45454b);border-radius:7px;padding:5px 11px;cursor:pointer}.xw-box button.ok{background:rgba(240,179,120,.25);border-color:rgba(240,179,120,.7)}';
         document.head.appendChild(s);
         const go = () => { if (document.getElementById('xw-btn')) return; const tool = document.getElementById('xb-tool') || document.getElementById('top-bar') || document.querySelector('header'); if (!tool) return; const b = document.createElement('button'); b.id = 'xw-btn'; b.title = '🌐 Dossier interactif : version web à partager par lien (sommaire, vidéos, 360°, documents)'; b.innerHTML = '<span class="btn-icon">🌐</span><span class="btn-label">Dossier web</span>'; b.onclick = open; tool.appendChild(b); };
-        if (document.readyState === 'complete') setTimeout(go, 2600); else addEventListener('load', () => setTimeout(go, 2600));
+        // saison 6 (ZZ) : ajouté dès le démarrage, derrière l'écran de chargement — plus de bouton qui arrive après coup et décale la barre
+        if (typeof XBOOT !== 'undefined' && XBOOT.ready) XBOOT.ready(go, 0); else if (document.readyState !== 'loading') go(); else addEventListener('DOMContentLoaded', go);
     }
     return { init, build, open, page };
 })();
@@ -5613,7 +5614,7 @@ var XRED = (function () {
     // ---------- paramètres ----------
     const cvf = (k, label, ph, hint) => ({ k: 'cv_' + k, label, hint, type: 'text', def: '', placeholder: ph });
     XSET.init({
-        app: 'dossier', title: 'DOSSIER', version: 'v51',
+        app: 'dossier', title: 'DOSSIER', version: 'v52',
         theme: { get: () => prefs.theme === 'light' ? 'light' : 'dark', set: t => { if ((prefs.theme === 'light' ? 'light' : 'dark') !== t) toggleTheme(); } },
         // écran peu haut : l'aperçu collant de la page de garde (≈ 500 px) dépassait sous le badge Netlify et cachait « Générer »
         css: '@media (max-height: 900px) { .cover-prev { position: static; } }',
