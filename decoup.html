@@ -4961,7 +4961,7 @@ var XRED = (function () {
     const typeOpts = () => TYPES.map(t => [t.id, t.ico + ' ' + t.name]);
 
     const CFG = {
-        app: 'decoup', title: 'DECOUP TECHNICO', version: 'v1.69',
+        app: 'decoup', title: 'DECOUP TECHNICO', version: 'v1.70',
         theme: { get: () => prefs.theme === 'light' ? 'light' : 'dark', set: t => { prefs.theme = t; applyTheme(); savePrefs(); } },
         hide: ['#settings-btn'],
         // ancien ⚙️ masqué ; ⚙️ absent de la lecture plein écran
@@ -5794,4 +5794,5 @@ XVIT.init();
 <script src="lib/suite-kmap.js?v=d4b0728a57"></script>
 <script src="lib/suite-toolcfg.js?v=fd32e11e59"></script>
 <script src="lib/suite-anim.js?v=b24422b8c6"></script>
+<script src="lib/suite-pident.js?v=1648fc8fd0"></script>
 <!-- SUITE XIII:EXTRA:END -->

@@ -8084,7 +8084,7 @@ var XRED = (function () {
 
     const opt = (a) => a.map(x => [String(x[0]), x[1]]);
     XSET.init({
-        app: 'plano', title: 'PLANO', version: 'v111',
+        app: 'plano', title: 'PLANO', version: 'v112',
         theme: { get: () => prefs.theme === 'light' ? 'light' : 'dark', set: t => { prefs.theme = t; applyTheme(); savePrefs(); } },
         hide: ['#settings-btn', '#settings-menu'],
         css: [
@@ -10069,4 +10069,5 @@ XCAT.initTool('plano');
 <script src="lib/suite-kmap.js?v=d4b0728a57"></script>
 <script src="lib/suite-toolcfg.js?v=fd32e11e59"></script>
 <script src="lib/suite-anim.js?v=b24422b8c6"></script>
+<script src="lib/suite-pident.js?v=1648fc8fd0"></script>
 <!-- SUITE XIII:EXTRA:END -->
