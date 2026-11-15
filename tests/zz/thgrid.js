@@ -1,0 +1,9 @@
+const { chromium } = require('playwright');
+(async () => { const b = await chromium.launch(); const ctx = await b.newContext({ viewport: { width: 1440, height: 900 } }); await ctx.route('**/*', r => r.request().url().startsWith('http://localhost') ? r.continue() : r.abort());
+ const T=['light','dark','auto','sobre','sobrec','w2k','xp','mac9','cyber','term','gb','regie','soleil','rainbow','sepia'];const pos={};const shots=[];
+ for(const t of T){const pg = await ctx.newPage(); await pg.addInitScript(t => { try { localStorage.setItem('xiii.tips.off', 'true'); localStorage.setItem('xiii.tour2.plano.hide', '1'); localStorage.setItem('xiii.theme.mode', t); } catch (e) { } },t);
+  await pg.goto('http://localhost:8765/plano.html?desktop=1'); await pg.waitForTimeout(2600); await pg.evaluate(() => { document.querySelectorAll('#xt-root,#xtp').forEach(m => m.remove()); document.getElementById('xs-gear').click(); });
+  await pg.waitForTimeout(800); await pg.evaluate(() => { const h = [...document.querySelectorAll('#xs-panel summary,#xs-panel button,#xs-panel .xs-h,#xs-panel h3,#xs-panel div')].find(x => /Affichage/.test(x.textContent) && x.children.length < 4); if (h) h.click(); }); await pg.waitForTimeout(500);
+  const r = await pg.evaluate(() => { const bs=[...document.querySelectorAll('#xs-panel [data-xtm]')]; const s=bs[0].parentElement; s.scrollIntoView({block:'center'}); const o=s.getBoundingClientRect(); return {box:{x:o.left-6,y:o.top-6,width:o.width+12,height:o.height+12}, p:bs.map(x=>{const q=x.getBoundingClientRect();return x.dataset.xtm+':'+Math.round((q.left-o.left)/o.width*100)+','+Math.round((q.top-o.top)/o.height*100)}).join(' '), on:(bs.find(x=>x.classList.contains('on'))||{}).dataset}; });
+  await pg.waitForTimeout(400); await pg.screenshot({ path: '/tmp/zz/thg_'+t+'.png', clip: r.box }); console.log(t, r.p); await pg.close(); }
+ await b.close(); })();

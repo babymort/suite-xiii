@@ -68,14 +68,16 @@ const XBAR = (() => {
         if (!$('xdl-btn')) m.querySelector('[data-a=deleg]').remove(); if (!TEAM.some(id => $(id))) { m.querySelector('[data-a=show]').remove(); m.querySelector('p').textContent = 'Reliez le Drive du projet pour que toute l\'équipe partage la suite (les autres outils du projet suivent).'; }
         document.body.appendChild(m);
         m.querySelector('[data-a=drive]').onclick = () => { location.href = 'drive.html'; };
-        m.querySelector('[data-a=deleg]').onclick = () => { m.remove(); const b = $('xdl-btn'); if (b) b.click(); };
-        m.querySelector('[data-a=show]').onclick = () => { m.remove(); try { localStorage.setItem('xiii.bar.team', '1'); } catch (er) { } apply(); };
+        const dg = m.querySelector('[data-a=deleg]'); if (dg) dg.onclick = () => { m.remove(); const b = $('xdl-btn'); if (b) b.click(); };
+        const sw = m.querySelector('[data-a=show]'); if (sw) sw.onclick = () => { m.remove(); try { localStorage.setItem('xiii.bar.team', '1'); } catch (er) { } apply(); };
         setTimeout(() => document.addEventListener('click', function off(ev) { if (!ev.target.closest('#xb-menu')) { m.remove(); document.removeEventListener('click', off); } }), 0);
     }
     // 🏠 Accueil toujours cliquable, même quand une fenêtre de démarrage couvre l'outil
     function homeFix() {
         const go = () => { const h = [...document.querySelectorAll('button,a')].find(e => /🏠/.test(e.textContent) && /accueil/i.test(e.textContent + (e.title || '')) && e.closest('#top-bar,#toolbar,header,.top-bar,.topbar,nav,.hrow'));
             if (!h) return; h.id = h.id || 'xb-home'; h.style.position = 'relative'; h.style.zIndex = '2147483000';
+            // barre en verre (flou) : le bouton reste sous la fenêtre de démarrage → un clic à son emplacement l'actionne quand même
+            if (!window.__xhomeHit) { window.__xhomeHit = 1; document.addEventListener('pointerup', ev => { if (ev.button) return; const h2 = document.getElementById('xb-home'); if (!h2 || !ev.target || !ev.target.closest || h2.contains(ev.target) || ev.target.closest('#top-bar,#toolbar')) return; const r = h2.getBoundingClientRect(); if (r.width && ev.clientX >= r.left && ev.clientX <= r.right && ev.clientY >= r.top && ev.clientY <= r.bottom) { ev.preventDefault(); ev.stopPropagation(); h2.click(); } }, true); }
             let p = h.parentElement; while (p && p !== document.body) { const cs = getComputedStyle(p); if (cs.zIndex !== 'auto' && cs.position !== 'static') { p.style.zIndex = '2147482999'; } p = p.parentElement; } };
         XBOOT.ready(go, 300);
     }

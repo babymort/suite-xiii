@@ -19,8 +19,8 @@
     function glyph(e) {
         const k = e.replace(/️/g, ''), base = k.split('‍')[0];
         if (I[M[k]]) return svg(I[M[k]]);
-        if (k in DOT) return svg('<circle cx="12" cy="12" r="6.5" style="' + (DOT[k] ? 'stroke:' + DOT[k] + ';fill:' + DOT[k] + '33' : '') + '"/>');
-        if (k in SQ) return svg('<rect x="5.5" y="5.5" width="13" height="13" rx="2" style="' + (SQ[k] ? 'stroke:' + SQ[k] + ';fill:' + SQ[k] + '33' : '') + '"/>');
+        if (k in DOT) return svg('<circle cx="12" cy="12" r="6.5" style="' + (DOT[k] ? 'stroke:' + DOT[k] + ';fill:' + DOT[k] + '33' : k === '⚫' ? 'fill:currentColor' : '') + '"/>');
+        if (k in SQ) return svg('<rect x="5.5" y="5.5" width="13" height="13" rx="2" style="' + (SQ[k] ? 'stroke:' + SQ[k] + ';fill:' + SQ[k] + '33' : /[⬛◼▪◾]/.test(k) ? 'fill:currentColor' : '') + '"/>');
         if (k in HEART) { const s = svg(I.Heart); if (HEART[k]) s.style.stroke = HEART[k]; return s; }
         if (/^[\u{1F1E6}-\u{1F1FF}]{2}$/u.test(k)) { const b = document.createElement('b'); b.className = 'xemo-t'; b.textContent = [...k].map(c => String.fromCharCode(c.codePointAt(0) - 0x1F1E6 + 65)).join(''); return b; }
         if (/⃣/.test(k)) { const b = document.createElement('b'); b.className = 'xemo-t xemo-n'; b.textContent = k[0]; return b; }
