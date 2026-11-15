@@ -3054,7 +3054,7 @@ var XRED = (function () {
 (function () {
     if (typeof XSET === 'undefined' || typeof XCAT === 'undefined') return;
     XSET.init({
-        app: 'catalogue', title: 'CATALOGUE', version: 'v1.27',
+        app: 'catalogue', title: 'CATALOGUE', version: 'v1.28',
         theme: { get: () => prefs.theme, set: t => { prefs.theme = t; applyTheme(); savePrefs(); } },
         help: [{ icon: '🗃️', label: 'Comment ça marche ?', sub: 'Catalogue commun, insertion dans les outils, partage', run: () => modal('<h3>🗃️ Catalogue matériel<span class="close-x" onclick="closeModal()">✕</span></h3><p>Chaque équipement saisi ici une seule fois est disponible dans <b>SYNO</b> (nœud avec ses ports), <b>PLANO</b> (placé sur le plan), <b>LUMO</b> (projecteur et puissance), <b>SONO</b> (patch), <b>PACKINGO</b> (caisse, poids) et <b>DEVISO</b> (ligne de devis et prix) par le bouton 🗃️ Catalogue de chaque outil.</p><p>Avec le ☁️ Drive du projet relié, le catalogue se partage avec l\'équipe comme un outil.</p><p>Raccourci : <b>N</b> nouvel équipement.</p><div class="mb-actions"><button onclick="closeModal()">Compris</button></div>') }],
         sections: [], apply() { }
@@ -5057,7 +5057,7 @@ const XGLOW = (() => {
         const IN = ['button', 'a', 'label', 'h2', 'h3', 'h4', 'summary', '.card-h'].map(t => UI.split(',').map(u => u + ' ' + t).join(',')).join(',');
         (root || document).querySelectorAll('#top-bar button,#toolbar button,#top-bar a,#toolbar a,#top-bar label,#toolbar label,#toolbar span:not(.btn-label):not(.xgl-e),#top-bar span:not(.btn-label):not(.xgl-e),#xoff,#xoff *,' + IN).forEach(b => {
             if (b.matches('input,textarea,select') || b.isContentEditable || b.closest('[contenteditable=true],#xb-menu small')) return;
-            if (b.closest('#xst')) return;
+            if (b.closest('#xst,.xgl-keep')) return;
             const w = document.createTreeWalker(b, NodeFilter.SHOW_TEXT); let n, done = 0;
             while (!done && (n = w.nextNode())) {
                 if (!n.nodeValue.trim()) continue; done = 1; if (n.parentNode.classList && n.parentNode.classList.contains('xgl-e')) break;
@@ -10411,7 +10411,7 @@ XVIT.init();
 <script src="lib/suite-kmap.js?v=d4b0728a57"></script>
 <script src="lib/suite-toolcfg.js?v=fd32e11e59"></script>
 <script src="lib/suite-anim.js?v=b24422b8c6"></script>
-<script src="lib/suite-pident.js?v=20bfd7ffa6"></script>
+<script src="lib/suite-pident.js?v=ee74d9924b"></script>
 <!-- SUITE XIII:EXTRA:END -->
 </body>
 </html>

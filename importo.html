@@ -2274,7 +2274,7 @@ var XRED = (function () {
 // IMPORT XIII — ⚙️ Paramètres
 (function () {
     if (typeof XSET === 'undefined' || typeof records !== 'function') return;
-    XSET.init({ app: 'importo', title: 'IMPORT', version: 'v1.41', theme: { get: () => prefs.theme, set: t => { prefs.theme = t; applyTheme(); savePrefs(); } },
+    XSET.init({ app: 'importo', title: 'IMPORT', version: 'v1.42', theme: { get: () => prefs.theme, set: t => { prefs.theme = t; applyTheme(); savePrefs(); } },
         help: [{ icon: '📥', label: 'Comment ça marche ?', sub: 'Excel, CSV, PDF, StudioBinder, Movie Magic', run: () => alert('IMPORT XIII lit vos fichiers Excel, CSV, PDF, les copier-coller de Google Sheets et les exports StudioBinder / Movie Magic, reconnaît personnes, matériel ou dépouillement, puis les envoie vers l\'annuaire, CASTO, PACKINGO, DEVISO, le CATALOGUE ou PLANNO.') }],
         sections: [], apply() { } });
 })();
@@ -4276,7 +4276,7 @@ const XGLOW = (() => {
         const IN = ['button', 'a', 'label', 'h2', 'h3', 'h4', 'summary', '.card-h'].map(t => UI.split(',').map(u => u + ' ' + t).join(',')).join(',');
         (root || document).querySelectorAll('#top-bar button,#toolbar button,#top-bar a,#toolbar a,#top-bar label,#toolbar label,#toolbar span:not(.btn-label):not(.xgl-e),#top-bar span:not(.btn-label):not(.xgl-e),#xoff,#xoff *,' + IN).forEach(b => {
             if (b.matches('input,textarea,select') || b.isContentEditable || b.closest('[contenteditable=true],#xb-menu small')) return;
-            if (b.closest('#xst')) return;
+            if (b.closest('#xst,.xgl-keep')) return;
             const w = document.createTreeWalker(b, NodeFilter.SHOW_TEXT); let n, done = 0;
             while (!done && (n = w.nextNode())) {
                 if (!n.nodeValue.trim()) continue; done = 1; if (n.parentNode.classList && n.parentNode.classList.contains('xgl-e')) break;
@@ -9630,7 +9630,7 @@ XVIT.init();
 <script src="lib/suite-kmap.js?v=d4b0728a57"></script>
 <script src="lib/suite-toolcfg.js?v=fd32e11e59"></script>
 <script src="lib/suite-anim.js?v=b24422b8c6"></script>
-<script src="lib/suite-pident.js?v=20bfd7ffa6"></script>
+<script src="lib/suite-pident.js?v=ee74d9924b"></script>
 <!-- SUITE XIII:EXTRA:END -->
 </body>
 </html>
