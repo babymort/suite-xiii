@@ -1,0 +1,34 @@
+// ZZ : chaque fenêtre ouverte depuis les barres — tout est cliquable (rien ne la recouvre) et elle se ferme (Échap ou ✕)
+const { chromium } = require('playwright'); const fs = require('fs');
+const APPS = process.argv.slice(2);
+async function open(ctx, app) { const p = await ctx.newPage(); p.errs = []; p.on('pageerror', e => p.errs.push(e.message)); p.on('dialog', d => d.dismiss().catch(() => { })); p.on('filechooser', () => { });
+  await p.goto('http://localhost:8765/' + app + '.html?desktop=1', { timeout: 30000 }); await p.waitForTimeout(2400);
+  await p.evaluate(() => { document.querySelectorAll('#xt-root,#xtp,#xnw-ov,#xg-ban').forEach(m => m.remove()); const mo = document.getElementById('modal'); if (mo && /Bienvenue/.test(mo.textContent)) { const x = mo.querySelector('.close,[class*=close],button'); mo.style.display = 'none'; } }); return p; }
+const KEY = e => (e.id ? '#' + e.id : '') + '|' + ((e.title || e.textContent || '').trim().replace(/\s+/g, ' ').slice(0, 30));
+const LIST = () => [...document.querySelectorAll('#top-bar button,#toolbar button,#xb2 button')].filter(b => { const r = b.getBoundingClientRect(); return r.width > 4 && r.height > 4 && r.top < innerHeight && r.left < innerWidth && !b.disabled; });
+const OVL = () => [...document.querySelectorAll('body *')].filter(e => { const c = getComputedStyle(e); if (!/fixed|absolute/.test(c.position) || c.visibility === 'hidden' || c.display === 'none' || +c.opacity === 0) return false; const r = e.getBoundingClientRect(); return r.width * r.height > 20000 && r.width < innerWidth * 1.01 && !e.closest('#top-bar,#toolbar,#xb2,#xau-chip,#xoff,#xtp,#xt-root,#xred-tip') && (c.position === 'fixed' || +c.zIndex > 10); }).filter((e, i, a) => !a.some(o => o !== e && o.contains(e)));
+const CHECK = (sel) => { const out = { cov: [], n: 0 }; const D = [...document.querySelectorAll('[data-xwnew]')]; D.forEach(d => { d.querySelectorAll('button,input:not([type=hidden]),select,textarea,a[href],[role=button],label').forEach(x => { const r = x.getBoundingClientRect(); if (r.width < 6 || r.height < 6) return; const cx = r.left + r.width / 2, cy = r.top + r.height / 2; if (cx < 0 || cy < 0 || cx > innerWidth || cy > innerHeight) return; let s = x.parentElement, clip = false; while (s && s !== d.parentElement) { const cs = getComputedStyle(s); if (/auto|scroll|hidden/.test(cs.overflow + cs.overflowY + cs.overflowX)) { const q = s.getBoundingClientRect(); if (cx < q.left || cx > q.right || cy < q.top || cy > q.bottom) { clip = true; break; } } s = s.parentElement; } if (clip || getComputedStyle(x).visibility === 'hidden') return; out.n++; const h = document.elementFromPoint(cx, cy); if (!h || h === x || x.contains(h) || h.contains(x) || (x.tagName === 'LABEL' && x.control === h) || (h.closest && h.closest('label') === x)) return; if (d.contains(h) && h.closest('button,a,input,select,textarea,label') && !x.contains(h)) { /* recouvert par un autre élément de la même fenêtre */ }
+   out.cov.push(((x.title || x.textContent || x.placeholder || x.name || x.tagName).trim().replace(/\s+/g, ' ').slice(0, 25)) + ' ⟵ ' + (h.id ? '#' + h.id : h.tagName.toLowerCase() + '.' + String(h.className).split(' ')[0]).slice(0, 30)); }); }); return out; };
+(async () => { const b = await chromium.launch(); const ctx = await b.newContext({ viewport: { width: 1600, height: 900 }, acceptDownloads: false });
+ await ctx.addInitScript(() => { try { localStorage.setItem('xiii.tips.off', 'true'); } catch (e) { } window.print = () => { }; window.open = () => null; });
+ await ctx.route('**/*', r => r.request().url().startsWith('http://localhost') ? r.continue() : r.abort());
+ for (const app of APPS) { const rep = { wins: 0, ctrls: 0, cov: [], noclose: [], err: [] }; let p;
+  try { p = await open(ctx, app); const labels = await p.evaluate(s => eval(s)().map(e => eval('(' + 'e => (e.id ? "#" + e.id : "") + "|" + ((e.title || e.textContent || "").trim().replace(/\\s+/g, " ").slice(0, 30))' + ')')(e)), LIST.toString());
+   for (const lab of labels) { if (/xb-home|xdr-btn|Ouvrir|Importer|Imprimer|xb-solo/.test(lab)) continue;
+    const ok = await p.evaluate(([s, lab, ovl]) => { const x = eval(s)().find(e => ((e.id ? '#' + e.id : '') + '|' + ((e.title || e.textContent || '').trim().replace(/\s+/g, ' ').slice(0, 30))) === lab); if (!x) return null; window.__ov0 = new Set(eval(ovl)()); const r = x.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; }, [LIST.toString(), lab, OVL.toString()]).catch(() => null);
+    if (!ok) continue; const e0 = p.errs.length;
+    await p.mouse.click(ok[0], ok[1]); await p.waitForTimeout(500);
+    const nw = await p.evaluate(ovl => { const N = eval(ovl)().filter(e => !window.__ov0.has(e)); N.forEach(e => e.setAttribute('data-xwnew', '1')); return N.map(e => e.id || e.className.toString().split(' ')[0]); }, OVL.toString()).catch(() => null);
+    if (nw === null) { await p.close(); p = await open(ctx, app); continue; }
+    if (p.errs.length > e0) rep.err.push(lab + ' → ' + p.errs[e0].slice(0, 90));
+    if (process.env.DBG) console.log("  ", lab, JSON.stringify(nw)); if (!nw.length) continue; rep.wins++;
+    const c = await p.evaluate(s => eval(s)(), CHECK.toString()); rep.ctrls += c.n; c.cov.forEach(x => rep.cov.push(lab.split('|')[1].slice(0, 18) + ' » ' + x));
+    await p.keyboard.press('Escape'); await p.waitForTimeout(250);
+    let still = await p.evaluate(() => [...document.querySelectorAll('[data-xwnew]')].filter(e => e.isConnected && e.getClientRects().length && getComputedStyle(e).display !== 'none' && getComputedStyle(e).visibility !== 'hidden').length);
+    if (still) { const how = await p.evaluate(() => { const d = [...document.querySelectorAll('[data-xwnew]')].find(e => e.getClientRects().length); const x = d && [...d.querySelectorAll('button,a,span,[class*=close],[class*=-x]')].find(b => /^\s*(✕|×|✖|X|Fermer|Annuler)\s*$/i.test(b.textContent) || /close|fermer/i.test(b.className + ' ' + (b.title || '') + ' ' + (b.getAttribute('aria-label') || ''))); if (x) { x.click(); return 'x'; } return ''; }); await p.waitForTimeout(250);
+     still = await p.evaluate(() => [...document.querySelectorAll('[data-xwnew]')].filter(e => e.isConnected && e.getClientRects().length && getComputedStyle(e).display !== 'none').length);
+     rep.noclose.push(lab.split('|')[1].slice(0, 22) + (still ? ' (ni Échap ni ✕)' : ' (✕ seulement)')); if (still) { await p.close(); p = await open(ctx, app); } }
+    await p.evaluate(() => document.querySelectorAll('[data-xwnew]').forEach(e => e.removeAttribute('data-xwnew'))).catch(() => { }); }
+  } catch (e) { rep.fatal = e.message.slice(0, 120); }
+  try { await p.close(); } catch (e) { } console.log(app, JSON.stringify(rep)); }
+ await b.close(); })();
