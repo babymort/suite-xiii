@@ -4174,7 +4174,7 @@ var XRED = (function () {
     }
     const DEF_LAYERS = ['sun', 'noise', 'health', 'shops', 'air', 'drone', 'rights'];
     XSET.init({
-        app: 'repero', title: 'REPERO', version: 'v3.55',
+        app: 'repero', title: 'REPERO', version: 'v3.56',
         theme: { get: () => prefs.theme === 'light' ? 'light' : 'dark', set: t => { if ((prefs.theme === 'light' ? 'light' : 'dark') !== t) toggleTheme(); } },
         hide: ['#toolbar button[onclick="toggleTheme()"]', '#toolbar button[onclick="openGuide()"]'],
         help: [{ icon: '📖', label: 'Guide d\'utilisation', sub: 'Ajouter un lieu, analyse des alentours, fiche, comparaison, rapport', run: openGuide }],
@@ -5169,7 +5169,7 @@ XVIT.init();
 <script src="lib/suite-a11y3.js?v=cf542bcc3b"></script>
 <script src="lib/suite-emoji.js?v=39eccf87a9"></script>
 <script src="lib/suite-wins.js?v=37f6c4e7c8"></script>
-<script src="lib/suite-legible.js?v=ae70ab4e1c"></script>
+<script src="lib/suite-legible.js?v=be709ab9ee"></script>
 <!-- SUITE XIII:EXTRA:END -->
 </body>
 </html>

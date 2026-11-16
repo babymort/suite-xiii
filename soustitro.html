@@ -1073,7 +1073,7 @@ function editHtml() {
     return '<div class="sw"><div class="vp"><div class="vbox" id="vbox"' + (V.src ? '' : ' style="display:none"') + '><div class="sub" id="sub"></div><div class="tco" id="tco"></div></div>' + (V.src ? '' : '<div class="drop" id="drop">🎞️ Déposez ou choisissez la vidéo (ou l\'audio)' + (P.media ? '<br><small>Dernier média : <b>' + esc(P.media) + '</b> — rechargez-le, il n\'est pas stocké</small>' : '') + '<br><small>Le fichier reste sur votre machine.</small></div>') +
         '<div class="ctl"><button data-k="back" title="−2 s (J)">⏪</button><button data-k="play" title="Lecture / pause (K, ou Espace hors calage)">⏯️</button><button data-k="fwd" title="+2 s (L)">⏩</button><button data-k="in" title="Début du sous-titre sélectionné = lecture (I)">⇤ Entrée</button><button data-k="out" title="Fin du sous-titre sélectionné = lecture (O)">Sortie ⇥</button><button data-k="add" title="Nouveau sous-titre à la position de lecture (N)">➕ Sous-titre</button><span style="margin-left:auto" class="hint">Fenêtre</span><select id="zoom">' + [10, 20, 40, 90].map(z => '<option' + (z == prefs.zoom ? ' selected' : '') + '>' + z + '</option>').join('') + '</select><span class="hint">s</span></div>' +
         '<div class="wave" id="wave" title="Cliquez pour vous placer"><canvas></canvas></div>' +
-        '<div class="ctl hint" style="font-size:12px">Normes : <label><input type="number" id="s-cpl" value="' + S.cpl + '" style="width:52px"> car./ligne</label><label><input type="number" id="s-lines" value="' + S.lines + '" style="width:42px"> lignes</label><label><input type="number" id="s-cps" value="' + S.cps + '" style="width:52px"> car./s</label><label><input type="number" step="0.1" id="s-min" value="' + S.min + '" style="width:52px">–<input type="number" step="0.5" id="s-max" value="' + S.max + '" style="width:52px"> s</label><label>écart <input type="number" step="0.04" id="s-gap" value="' + S.gap + '" style="width:60px"> s</label><label><input type="number" id="s-fps" value="' + S.fps + '" style="width:48px"> i/s</label></div>' +
+        '<div class="ctl hint" style="font-size:12px">Normes : <label><input type="number" id="s-cpl" value="' + S.cpl + '" style="width:52px"> car./ligne</label><label><input type="number" id="s-lines" value="' + S.lines + '" style="width:42px"> lignes</label><label><input type="number" id="s-cps" value="' + S.cps + '" style="width:52px"> car./s</label><label><input type="number" step="0.1" id="s-min" value="' + S.min + '" style="width:52px">–<input type="number" step="0.5" id="s-max" aria-label="Durée maximale d\'un sous-titre (s)" value="' + S.max + '" style="width:52px"> s</label><label>écart <input type="number" step="0.04" id="s-gap" value="' + S.gap + '" style="width:60px"> s</label><label><input type="number" id="s-fps" value="' + S.fps + '" style="width:48px"> i/s</label></div>' +
         '<p class="hint" style="font-size:11.5px;margin:0">Raccourcis : K lecture · J / L ±2 s · I / O entrée et sortie · N nouveau · T calage (maintenir Espace pendant la réplique) · ↑ ↓ sous-titre précédent / suivant · Ctrl+Entrée dans un texte : couper le sous-titre au curseur.</p></div>' +
         '<div class="cl" id="cl"></div></div>';
 }
@@ -1887,7 +1887,7 @@ var XRED = (function () {
     if (typeof XSET === 'undefined' || typeof prefs === 'undefined' || typeof breakLines === 'undefined') return;
     function apply(S) { try { render(); } catch (e) { } }
     XSET.init({
-        app: 'soustitro', title: 'SOUSTITRO', version: 'v1.34',
+        app: 'soustitro', title: 'SOUSTITRO', version: 'v1.35',
         sections: [{ id: 'aff', icon: '💬', title: 'Sous-titres', open: true, desc: 'Normes (caractères par ligne, lignes, caractères par seconde, durées, écart) : réglables sous la forme d\'onde, par projet. Valeurs courantes : 42 car./ligne, 2 lignes, 17 car./s (TV), 1 à 7 s.', fields: [{ k: 'view', label: 'Vue à l\'ouverture', type: 'select', def: 'edit', options: [['edit', 'Édition'], ['live', 'Antenne']] }, { k: 'zoom', label: 'Fenêtre de la forme d\'onde (s)', type: 'select', def: '20', options: [['10', '10 s'], ['20', '20 s'], ['40', '40 s'], ['90', '90 s']] }, { k: 'follow', label: 'La liste suit la lecture', type: 'toggle', def: true }] }],
         apply
     });
@@ -2724,7 +2724,7 @@ XVIT.init();
 <script src="lib/suite-a11y3.js?v=cf542bcc3b"></script>
 <script src="lib/suite-emoji.js?v=39eccf87a9"></script>
 <script src="lib/suite-wins.js?v=37f6c4e7c8"></script>
-<script src="lib/suite-legible.js?v=ae70ab4e1c"></script>
+<script src="lib/suite-legible.js?v=be709ab9ee"></script>
 <!-- SUITE XIII:EXTRA:END -->
 </body>
 </html>

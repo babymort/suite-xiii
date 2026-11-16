@@ -615,7 +615,7 @@ body.light-theme #dev-credit { color: #555; text-shadow: none; }
         </span>
     </div>
 </div>
-<div id="toolbar"><label class="ck-d">Tournage du <input type="date" id="d0" onchange="F.d0=this.value;render()"> au <input type="date" id="d1" onchange="F.d1=this.value;render()"></label><span id="ct-stats" class="ps-stats"></span></div>
+<div id="toolbar"><label class="ck-d">Tournage du <input type="date" id="d0" aria-label="Date de début" onchange="F.d0=this.value;render()"> au <input type="date" id="d1" aria-label="Date de fin" onchange="F.d1=this.value;render()"></label><span id="ct-stats" class="ps-stats"></span></div>
 <div id="content"></div>
 <div id="toast"></div>
 <script>
@@ -1654,7 +1654,7 @@ var XRED = (function () {
 // CONTRÔLE XIII — ⚙️ Paramètres
 (function () {
     if (typeof XSET === 'undefined' || typeof checks !== 'function') return;
-    XSET.init({ app: 'controle', title: 'CONTRÔLE', version: 'v1.32', theme: { get: () => prefs.theme, set: t => { prefs.theme = t; applyTheme(); savePrefs(); } },
+    XSET.init({ app: 'controle', title: 'CONTRÔLE', version: 'v1.33', theme: { get: () => prefs.theme, set: t => { prefs.theme = t; applyTheme(); savePrefs(); } },
         help: [{ icon: '✅', label: 'Comment ça marche ?', sub: 'Vérification de tous les outils avant le tournage', run: () => alert('CONTRÔLE XIII lit les données de tous les outils (CALL SHEETO, CASTO, DEVISO, RESSOURCO, REPERO, MATOS, PACKINGO, PLANO, SYNO, TRANSPORTO, BACKUPO…) et liste ce qui est prêt, à vérifier ou bloquant pour la période choisie. Cliquez une ligne pour ouvrir l\'outil.') }],
         sections: [], apply() { } });
 })();
@@ -2418,7 +2418,7 @@ XVIT.init();
 <script src="lib/suite-a11y3.js?v=cf542bcc3b"></script>
 <script src="lib/suite-emoji.js?v=39eccf87a9"></script>
 <script src="lib/suite-wins.js?v=37f6c4e7c8"></script>
-<script src="lib/suite-legible.js?v=ae70ab4e1c"></script>
+<script src="lib/suite-legible.js?v=be709ab9ee"></script>
 <!-- SUITE XIII:EXTRA:END -->
 </body>
 </html>

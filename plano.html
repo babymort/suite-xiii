@@ -1,3 +1,6 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
 <meta charset="UTF-8">
 <!-- SUITE XIII:WS:START --><script>// =====================================================================
 //  SUITE XIII — XWS : plusieurs « Projets XIII » en parallèle, chacun cloisonné
@@ -6737,7 +6740,7 @@ const CD = (() => {
             '<div class="mv-main"><div id="mv-st" class="mv-stage"><div class="mv-wait">Chargement de la 3D…</div></div><div class="mv-side" id="mv-side"></div></div>' +
             '<div class="mv-help">Cliquez une vignette pour la régler · glisser = pan / tilt · molette = zoom · double-clic = plein écran · les réglages se font aussi à droite</div>';
         document.body.appendChild(ov);
-        let ren = null, raf = 0, S = null, T = null, cam = null, R = null, sel = null, solo = null, ov2 = null;
+        let ren = null, raf = 0, S = null, T = null, cam = null, R = null, sel = null, solo = null, ov2 = null, W = 0, H = 0; // ZZ : réglages touchés avant la fin du chargement 3D → plus d'erreur
         const m = MV(), close = () => { cancelAnimationFrame(raf); window.removeEventListener('resize', fit); document.removeEventListener('keydown', key, true); try { ren && ren.dispose(); } catch (e) { } ov.remove(); };
         const key = e => { if (e.key === 'Escape') { e.stopPropagation(); if (solo) { solo = null; fit(); } else close(); } };
         document.addEventListener('keydown', key, true); ov.querySelector('#mv-x').onclick = close;
@@ -6750,10 +6753,9 @@ const CD = (() => {
         ren = new T.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true }); ren.setPixelRatio(Math.min(2, devicePixelRatio || 1)); ren.shadowMap.enabled = true; ren.shadowMap.type = T.PCFSoftShadowMap; st.appendChild(ren.domElement); if (PL3D.pro && S.K) { PL3D.pro.configure(ren, T); PL3D.pro.attach(S, ren, T); }
         ov2 = document.createElement('canvas'); ov2.className = 'mv-ov'; st.appendChild(ov2);
         cam = new T.PerspectiveCamera(50, 1.7778, 5, 200000);
-        let W = 0, H = 0;
-        function fit() { const bw = st.clientWidth, bh = st.clientHeight; W = Math.floor(Math.min(bw, bh * 1.7778)); H = Math.floor(W / 1.7778); ren.setSize(W, H); const pr = Math.min(2, devicePixelRatio || 1); ov2.width = W * pr; ov2.height = H * pr; ov2.style.width = W + 'px'; ov2.style.height = H + 'px'; ren.domElement.style.left = ov2.style.left = ((bw - W) / 2) + 'px'; ren.domElement.style.top = ov2.style.top = ((bh - H) / 2) + 'px'; draw(); }
+        function fit() { if (!ren) return; const bw = st.clientWidth, bh = st.clientHeight; W = Math.floor(Math.min(bw, bh * 1.7778)); H = Math.floor(W / 1.7778); ren.setSize(W, H); const pr = Math.min(2, devicePixelRatio || 1); ov2.width = W * pr; ov2.height = H * pr; ov2.style.width = W + 'px'; ov2.style.height = H + 'px'; ren.domElement.style.left = ov2.style.left = ((bw - W) / 2) + 'px'; ren.domElement.style.top = ov2.style.top = ((bh - H) / 2) + 'px'; draw(); }
         function draw() {
-            cancelAnimationFrame(raf); raf = requestAnimationFrame(() => {
+            if (!ren) return; cancelAnimationFrame(raf); raf = requestAnimationFrame(() => {
                 if (solo) { // une seule source en plein cadre
                     const c = S.cams.find(x => x.it.id === solo); ren.setScissorTest(false); ren.setViewport(0, 0, W, H); ren.setClearColor(0); ren.clear(); pose(cam, c, T); if (c.grp) c.grp.visible = false; ren.render(S.sc, cam); if (c.grp) c.grp.visible = true;
                     R = { L: [{ x: 0, y: 0, w: 1920, h: 1080, solo: 1 }], map: [c] };
@@ -8084,7 +8086,7 @@ var XRED = (function () {
 
     const opt = (a) => a.map(x => [String(x[0]), x[1]]);
     XSET.init({
-        app: 'plano', title: 'PLANO', version: 'v96',
+        app: 'plano', title: 'PLANO', version: 'v97',
         theme: { get: () => prefs.theme === 'light' ? 'light' : 'dark', set: t => { prefs.theme = t; applyTheme(); savePrefs(); } },
         hide: ['#settings-btn', '#settings-menu'],
         css: [
@@ -10079,5 +10081,5 @@ XCAT.initTool('plano');
 <script src="lib/suite-a11y3.js?v=cf542bcc3b"></script>
 <script src="lib/suite-emoji.js?v=39eccf87a9"></script>
 <script src="lib/suite-wins.js?v=37f6c4e7c8"></script>
-<script src="lib/suite-legible.js?v=ae70ab4e1c"></script>
+<script src="lib/suite-legible.js?v=be709ab9ee"></script>
 <!-- SUITE XIII:EXTRA:END -->
