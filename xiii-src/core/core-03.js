@@ -26,7 +26,7 @@ const XIMGS = (() => {
 const XFILES = (() => {
     const RX = /data:([a-z]+\/[\w.+-]+);base64,[A-Za-z0-9+/=]{54000,}/g, RF = /xiiif:([\w-]{10,80})\|([a-z]+\/[\w.+-]+)/g;
     const MAPK = 'xiii.files.map';
-    const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } };
+    const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null || (d != null && typeof d === 'object' && (typeof v !== 'object' || Array.isArray(v) !== Array.isArray(d))) ? d : v; } catch (e) { return d; } };
     let MAP = J(MAPK, {}); const saveMap = () => { try { localStorage.setItem(MAPK, JSON.stringify(MAP)); } catch (e) { } };
     const key = s => { let h = 0x811c9dc5; for (let i = 0; i < s.length; i += 7) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; } return s.length.toString(36) + '-' + h.toString(36) + '-' + s.slice(-24).replace(/[^A-Za-z0-9]/g, ''); };
     // ---------- copie locale (IndexedDB) ----------
@@ -225,7 +225,7 @@ XUX.init(XIII_APP);
 // =====================================================================
 const XCONF = (() => {
     let APP = '';
-    const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } };
+    const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null || (d != null && typeof d === 'object' && (typeof v !== 'object' || Array.isArray(v) !== Array.isArray(d))) ? d : v; } catch (e) { return d; } };
     const W = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { } };
     const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     const toastX = m => { try { if (typeof toast === 'function') return toast(m); } catch (e) { } };
@@ -617,7 +617,7 @@ const XDRIVE = (() => {
     let APP = '', PRES = {}, okIds = new Set(), lastBeat = 0, busy = false, timer = null, deb = null, pend = null, lastInput = Date.now(), st = { s: 'off', m: 'Drive non relié' };
     const K_CFG = 'xiii.drive', K_BASE = a => 'xiii.drive.base.' + a, K_OWN = a => 'xiii.drive.own.' + a, K_STAT = 'xiii.drive.stat';
     const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-    const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } };
+    const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null || (d != null && typeof d === 'object' && (typeof v !== 'object' || Array.isArray(v) !== Array.isArray(d))) ? d : v; } catch (e) { return d; } };
     const RAW = Storage.prototype.setItem;
     const W = (k, v) => { try { if (v == null) localStorage.removeItem(k); else RAW.call(localStorage, k, typeof v === 'string' ? v : JSON.stringify(v)); } catch (e) { } };
     const say = (m, ms) => { try { if (typeof toast === 'function') toast(m, ms); } catch (e) { } };
@@ -899,7 +899,7 @@ const XHIST = (() => {
     let APP = '', lastAuto = 0;
     const MAXAUTO = 30, MAXALL = 60, EVERY = 30 * 60000;
     const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-    const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } };
+    const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null || (d != null && typeof d === 'object' && (typeof v !== 'object' || Array.isArray(v) !== Array.isArray(d))) ? d : v; } catch (e) { return d; } };
     const say = m => { try { if (typeof toast === 'function') toast(m); } catch (e) { } };
     const fmt = ts => { const d = new Date(ts); return d.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' }) + ' ' + d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }); };
     const me = () => { const c = J('xiii.drive', null); return (c && c.me && c.me.name) || (J('xiii.deleg.me', {}) || {}).name || 'moi'; };
@@ -1005,7 +1005,7 @@ const XMEMO = (() => {
     const TEAMS = [['production', 'Production'], ['realisation', 'Réalisation'], ['image', 'Image / caméras'], ['son', 'Son'], ['lumiere', 'Lumière'], ['regie', 'Régie'], ['technique', 'Technique / vidéo'], ['deco', 'Décor / accessoires'], ['hmc', 'Costumes / maquillage'], ['post', 'Post-production'], ['artistes', 'Artistes / talents'], ['client', 'Client / diffuseur']];
     const TN = Object.fromEntries(TEAMS);
     const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-    const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } };
+    const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null || (d != null && typeof d === 'object' && (typeof v !== 'object' || Array.isArray(v) !== Array.isArray(d))) ? d : v; } catch (e) { return d; } };
     const fold = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
     const fmt = ts => { const d = new Date(ts); return (new Date().toDateString() === d.toDateString() ? 'aujourd\'hui' : d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })) + ' ' + d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }); };
     const K = () => 'xiii.memo.' + APP;
@@ -1095,7 +1095,7 @@ XMEMO.init(XIII_APP);
 // =====================================================================
 var XMENT = window.XMENT || (() => {
     let APP = '';
-    const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } };
+    const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null || (d != null && typeof d === 'object' && (typeof v !== 'object' || Array.isArray(v) !== Array.isArray(d))) ? d : v; } catch (e) { return d; } };
     const W = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { } };
     const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     const cfg = () => { const c = J('xiii.drive', null); return c && c.url ? c : null; };

@@ -694,7 +694,7 @@ XPROJET.init(XIII_APP);
 const XGUIDE = (() => {
     let APP = '';
     const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-    const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } };
+    const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null || (d != null && typeof d === 'object' && (typeof v !== 'object' || Array.isArray(v) !== Array.isArray(d))) ? d : v; } catch (e) { return d; } };
     const W = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { } };
     const NM = { decoup: ['✂️', 'DECOUP', 'Découper le scénario en séquences et plans'], casto: ['🎭', 'CASTO', 'Trouver et réunir les talents'], repero: ['📍', 'REPERO', 'Repérer les lieux'], storyboardo: ['🖼️', 'STORYBOARDO', 'Dessiner les plans clés'], moodo: ['🎨', 'MOODO', 'Poser l\'univers visuel'], planno: ['📅', 'PLANNO', 'Bâtir le planning de production (planning type d\'après vos dates)'], deviso: ['💶', 'DEVISO', 'Chiffrer le devis'], ressourco: ['📑', 'RESSOURCO', 'Rassembler contrats et autorisations'], callsheeto: ['📋', 'CALL SHEETO', 'Préparer les feuilles de service (équipe et lieux déjà ajoutés)'], packingo: ['🧳', 'PACKINGO', 'Lister et coliser le matériel'], transporto: ['🚐', 'TRANSPORTO', 'Organiser trajets, navettes et hébergements'], scripto: ['📝', 'SCRIPTO', 'Suivre le tournage plan par plan'], backupo: ['💽', 'BACKUPO', 'Décharger et sauvegarder les rushes'], posto: ['🎞️', 'POSTO', 'Suivre le montage et les retours'], soustitro: ['💬', 'SOUSTITRO', 'Sous-titrer les livrables'], encodo: ['🔄', 'ENCODO', 'Convertir les fichiers livrés'], dossier: ['📚', 'DOSSIER', 'Assembler le dossier final'], conduco: ['🎬', 'CONDUCO', 'Écrire le conducteur minuté'], syno: ['🔀', 'SYNO', 'Dessiner le synoptique technique (caméras, régie)'], plano: ['📐', 'PLANO', 'Faire le plan d\'implantation du plateau'], lumo: ['💡', 'LUMO', 'Plan de feu et patch lumière'], sono: ['🎚️', 'SONO', 'Fiche son, patch et HF'], runo: ['🔴', 'RUNO', 'Piloter le direct'], graphico: ['🎛️', 'GRAPHICO', 'Préparer les habillages à l\'antenne'], cadro: ['🎯', 'CADRO', 'Choisir caméras et objectifs'] };
     const ORDER = {
@@ -1350,7 +1350,7 @@ const XDELEG = (() => {
     let APP = '', LOCK = null;
     const K_ME = 'xiii.deleg.me', K_SENT = 'xiii.deleg.sent', K_IN = 'xiii.deleg.inbox', K_ACT = a => 'xiii.deleg.active.' + a, K_OWN = a => 'xiii.deleg.own.' + a, K_WORK = 'xiii.deleg.works', K_BAK = a => 'xiii.deleg.bak.' + a;
     const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-    const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } };
+    const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null || (d != null && typeof d === 'object' && (typeof v !== 'object' || Array.isArray(v) !== Array.isArray(d))) ? d : v; } catch (e) { return d; } };
     // écriture brute : ignore le verrou posé pendant un rechargement
     const RAW = Storage.prototype.setItem;
     const W = (k, v) => { try { if (v == null) localStorage.removeItem(k); else RAW.call(localStorage, k, typeof v === 'string' ? v : JSON.stringify(v)); return true; } catch (e) { say('⚠️ Stockage du navigateur plein'); return false; } };

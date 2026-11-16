@@ -45,7 +45,7 @@ const XTRAY = (() => {
     let APP = '', TAB = 'tray', open = false;
     const K = 'xiii.tray', MIME = 'application/x-xiii';
     const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-    const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } };
+    const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null || (d != null && typeof d === 'object' && (typeof v !== 'object' || Array.isArray(v) !== Array.isArray(d))) ? d : v; } catch (e) { return d; } };
     const fold = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
     const say = m => { try { if (typeof toast === 'function') toast(m, 3500); } catch (e) { } };
     const NAMES = () => (typeof XDELEG !== 'undefined' && XDELEG.NAMES) || {};
@@ -227,7 +227,7 @@ XA11Y.init(XIII_APP);
 const XTIPS = (() => {
     let APP = '', queue = [], showing = false;
     const KS = 'xiii.tips.seen', KO = 'xiii.tips.off';
-    const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } };
+    const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null || (d != null && typeof d === 'object' && (typeof v !== 'object' || Array.isArray(v) !== Array.isArray(d))) ? d : v; } catch (e) { return d; } };
     const seen = id => !!J(KS, {})[id], mark = id => { const s = J(KS, {}); s[id] = Date.now(); try { localStorage.setItem(KS, JSON.stringify(s)); } catch (e) { } };
     const off = () => localStorage.getItem(KO) === '1';
     const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -351,7 +351,7 @@ XDS.init(XIII_APP);
 // =====================================================================
 const XTHEME = (() => {
     const K = 'xiii.theme.mode', SUITE = 'xiii.settings._suite';
-    const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } };
+    const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null || (d != null && typeof d === 'object' && (typeof v !== 'object' || Array.isArray(v) !== Array.isArray(d))) ? d : v; } catch (e) { return d; } };
     const mq = window.matchMedia ? matchMedia('(prefers-color-scheme: light)') : null;
     const mode = () => localStorage.getItem(K) || (J(SUITE, {}).globalTheme === 'light' ? 'light' : (J('hubXIII.prefs', {}).theme === 'light' ? 'light' : 'dark'));
     const SKINS = { w2k: 'light', xp: 'light', cyber: 'dark', rainbow: 'dark', mac9: 'light', term: 'dark', sepia: 'light', regie: 'dark', soleil: 'light', gb: 'light', sobre: 'dark', sobrec: 'light' };
@@ -527,7 +527,7 @@ XTHEME.init(XIII_APP);
 //  échéances datées de tous les outils (XCALEV), retards. Carte « Pilotage » sur l'accueil + page complète.
 // =====================================================================
 const XPDASH = (() => {
-    const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } };
+    const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null || (d != null && typeof d === 'object' && (typeof v !== 'object' || Array.isArray(v) !== Array.isArray(d))) ? d : v; } catch (e) { return d; } };
     const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     const pad = n => String(n).padStart(2, '0'), today = () => { const d = new Date(); return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); };
     const dd = s => Math.round((Date.parse(String(s).slice(0, 10) + 'T12:00:00') - Date.parse(today() + 'T12:00:00')) / 864e5);

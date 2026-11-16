@@ -7,7 +7,7 @@
 //  Avec une IA connectée : lecture enrichie (résumés, descriptions des rôles, besoins) ; sinon analyse locale.
 // =====================================================================
 var XSCEN = window.XSCEN || (() => {
-    const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } };
+    const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null || (d != null && typeof d === 'object' && (typeof v !== 'object' || Array.isArray(v) !== Array.isArray(d))) ? d : v; } catch (e) { return d; } };
     const W = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } };
     const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     const fold = x => String(x || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();

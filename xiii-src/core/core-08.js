@@ -5,7 +5,7 @@
 //  Réglage : 🎬 Projet XIII › 🖼️ Personnalisation. Partage : Drive du projet (« projet_cfg »), relu à chaque ouverture.
 // =====================================================================
 const XPCFG = (() => {
-    const K = 'xiii.pcfg', J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } };
+    const K = 'xiii.pcfg', J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null || (d != null && typeof d === 'object' && (typeof v !== 'object' || Array.isArray(v) !== Array.isArray(d))) ? d : v; } catch (e) { return d; } };
     const W = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } };
     const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     const drive = () => J('xiii.drive', null), master = () => { const c = drive(); return !c || !c.url || !!c.code; }; // sans Drive : réglage local
@@ -126,7 +126,7 @@ var XPUSH = window.XPUSH || (() => {
     const b64u = u8 => { u8 = new Uint8Array(u8); let s = ''; for (let i = 0; i < u8.length; i += 32768) s += String.fromCharCode.apply(null, u8.subarray(i, i + 32768)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
     const ub64 = s => { s = String(s || '').replace(/-/g, '+').replace(/_/g, '/'); while (s.length % 4) s += '='; return Uint8Array.from(atob(s), c => c.charCodeAt(0)); };
     const cat = (...a) => { const n = a.reduce((x, y) => x + y.length, 0), o = new Uint8Array(n); let i = 0; a.forEach(x => { o.set(x, i); i += x.length; }); return o; };
-    const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } };
+    const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null || (d != null && typeof d === 'object' && (typeof v !== 'object' || Array.isArray(v) !== Array.isArray(d))) ? d : v; } catch (e) { return d; } };
     const W = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { } };
     const S = crypto.subtle;
     async function hmac(key, data) { const k = await S.importKey('raw', key, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']); return new Uint8Array(await S.sign('HMAC', k, data)); }
@@ -587,7 +587,7 @@ const XM_KEYS = { planno: 'plannoXIII.project', deviso: 'devisoXIII.project', ca
 const XM_NAMES = { planno: '🗓️ PLANNO', deviso: '💶 DEVISO', callsheeto: '📋 CALL SHEETO', conduco: '🎬 CONDUCO', plano: '📐 PLANO', syno: '🔌 SYNO', lumo: '💡 LUMO', sono: '🎚️ SONO', packingo: '📦 PACKINGO', posto: '🎞️ POSTO', casto: '🎭 CASTO', decoup: '✂️ DECOUP', transporto: '🚐 TRANSPORTO', runo: '🔴 RUNO', ressourco: '📝 RESSOURCO', repero: '📍 REPERO', storyboardo: '🖍️ STORYBOARDO', moodo: '🎨 MOODO', scripto: '✍️ SCRIPTO' };
 const XM_ORDER = ['planno', 'casto', 'callsheeto', 'transporto', 'deviso', 'packingo', 'syno', 'plano', 'lumo', 'sono', 'conduco', 'runo', 'decoup', 'scripto', 'storyboardo', 'moodo', 'repero', 'ressourco', 'posto'];
 const XM_TYPES = ['live', 'tv', 'fiction', 'doc', 'pub', 'corporate', 'event', 'artistique'];
-const xmJ = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } };
+const xmJ = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null || (d != null && typeof d === 'object' && (typeof v !== 'object' || Array.isArray(v) !== Array.isArray(d))) ? d : v; } catch (e) { return d; } };
 const xmUid = () => Math.random().toString(36).slice(2, 10);
 const xmPad = n => String(n).padStart(2, '0');
 const xmIso = d => d.getFullYear() + '-' + xmPad(d.getMonth() + 1) + '-' + xmPad(d.getDate());
@@ -1405,7 +1405,7 @@ xmBoot();
 //  • passerelles : PLANNO (jalons de préparation), CALENDRIER / agenda (XCALEV), tableau de bord (carte), fiche projet
 // =====================================================================
 const XCHECK = (() => {
-    const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } };
+    const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null || (d != null && typeof d === 'object' && (typeof v !== 'object' || Array.isArray(v) !== Array.isArray(d))) ? d : v; } catch (e) { return d; } };
     const S = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { } };
     const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     const pad = n => String(n).padStart(2, '0'), iso = d => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()), today = () => iso(new Date());
@@ -1591,7 +1591,7 @@ XCHECK.init();
 //  Script Drive v20 (dispo_* / poll_*). Sans Drive : vos dispos restent sur cet appareil.
 // =====================================================================
 var XDISPO = window.XDISPO || (() => {
-    const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } };
+    const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null || (d != null && typeof d === 'object' && (typeof v !== 'object' || Array.isArray(v) !== Array.isArray(d))) ? d : v; } catch (e) { return d; } };
     const W = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { } };
     const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     const fold = x => String(x || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();

@@ -10,7 +10,7 @@
 // =====================================================================
 const XAUTO = (() => {
     const K = 'xiii.autosave', LOCK = 'xiii.autosave.lock', PRE = 'XIII_auto_';
-    const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } };
+    const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null || (d != null && typeof d === 'object' && (typeof v !== 'object' || Array.isArray(v) !== Array.isArray(d))) ? d : v; } catch (e) { return d; } };
     const S = () => Object.assign({ on: false, every: 30, keep: 10, last: 0, lastManual: 0, sig: '', snooze: 0, folder: '' }, J(K, {}));
     const W = o => { try { localStorage.setItem(K, JSON.stringify(Object.assign(S(), o))); } catch (e) { } };
     const say = m => { try { if (typeof toast === 'function') toast(m); } catch (e) { } };

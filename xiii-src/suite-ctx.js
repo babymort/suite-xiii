@@ -11,7 +11,7 @@
 (function () {
     if (window.XCTX) return;
     const APPX = XIII_APP, $ = id => document.getElementById(id);
-    const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } };
+    const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null || (d != null && typeof d === 'object' && (typeof v !== 'object' || Array.isArray(v) !== Array.isArray(d))) ? d : v; } catch (e) { return d; } };
     const W = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { } };
     const ico = b => ((b.querySelector('.btn-icon') || b).textContent || '').trim().slice(0, 3);
     // même libellé que la liste des commandes (Ctrl K) et les raccourcis personnels (XUX)

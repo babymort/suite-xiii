@@ -11,7 +11,7 @@
 (function () {
     if (window.XHOMECFG) return;
     const K = 'xiii.home.cfg', R = document.documentElement, $ = id => document.getElementById(id);
-    const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } };
+    const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null || (d != null && typeof d === 'object' && (typeof v !== 'object' || Array.isArray(v) !== Array.isArray(d))) ? d : v; } catch (e) { return d; } };
     const cfg = () => Object.assign({ order: [], hide: [], size: 'm', bg: 'grid', img: '', msg: '', hello: false, start: 'last' }, J(K, {}) || {});
     const save = c => { try { localStorage.setItem(K, JSON.stringify(c)); } catch (e) { alert('Image trop lourde pour ce navigateur : choisissez-en une plus légère.'); return false; } apply(); return true; };
     const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));

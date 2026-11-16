@@ -6,7 +6,7 @@
 //  …/exec?a=ical&k=… et se mettent à jour tout seuls (au rythme de rafraîchissement de chaque agenda).
 // =====================================================================
 const XICAL = (() => {
-    const K = 'xiii.ical', J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } };
+    const K = 'xiii.ical', J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null || (d != null && typeof d === 'object' && (typeof v !== 'object' || Array.isArray(v) !== Array.isArray(d))) ? d : v; } catch (e) { return d; } };
     const drv = () => { const c = J('xiii.drive', null); return c && c.url && c.code && !c.tok ? c : null; };
     const S = () => J(K, {}), W = o => { try { localStorage.setItem(K, JSON.stringify(Object.assign(S(), o))); } catch (e) { } };
     const url = s => drv() ? drv().url.split('?')[0] + '?a=ical&k=' + s.k : '';
@@ -37,7 +37,7 @@ XICAL.init();
 // =====================================================================
 var XSCOPE = window.XSCOPE || (() => {
     let APP = '', LOCK = null, busy = false;
-    const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } };
+    const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null || (d != null && typeof d === 'object' && (typeof v !== 'object' || Array.isArray(v) !== Array.isArray(d))) ? d : v; } catch (e) { return d; } };
     const E = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     const clean = s => String(s || '').replace(/[✕⧉✎✏️❌×]/g, '').replace(/\s+/g, ' ').trim();
     const tabs = () => [...document.querySelectorAll('#tabs-container > .tab')];
@@ -108,7 +108,7 @@ XSCOPE.init(XIII_APP);
 // =====================================================================
 var XJOIN = window.XJOIN || (() => {
     let APP = '';
-    const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } };
+    const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null || (d != null && typeof d === 'object' && (typeof v !== 'object' || Array.isArray(v) !== Array.isArray(d))) ? d : v; } catch (e) { return d; } };
     const E = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     const cfg = () => { const c = J('xiii.drive', null); return c && c.url && c.code ? c : null; };
     const TEAMS = [['production', 'Production'], ['realisation', 'Réalisation'], ['image', 'Image / caméras'], ['son', 'Son'], ['lumiere', 'Lumière'], ['regie', 'Régie'], ['technique', 'Technique / vidéo'], ['deco', 'Décor / accessoires'], ['hmc', 'Costumes / maquillage'], ['post', 'Post-production'], ['talents', 'Talents / comédiens']];
@@ -175,7 +175,7 @@ XJOIN.init(XIII_APP);
 // =====================================================================
 var XPHONE = window.XPHONE || (() => {
     let APP = '';
-    const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } };
+    const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null || (d != null && typeof d === 'object' && (typeof v !== 'object' || Array.isArray(v) !== Array.isArray(d))) ? d : v; } catch (e) { return d; } };
     const cfg = () => { const c = J('xiii.drive', null); return c && c.url ? c : null; };
     async function api(a, p) { const c = cfg(); if (!c) return { ok: false, err: 'off' }; try { const r = await fetch(c.url, { method: 'POST', body: JSON.stringify(Object.assign({ a }, c.tok && !c.code ? { tok: c.tok } : { code: c.code, by: (c.me && c.me.name) || 'Master' }, p || {})), redirect: 'follow' }); return await r.json(); } catch (e) { return { ok: false, err: 'net' }; } }
     // comment chaque outil ajoute des images : (fichiers, photos) → nombre ajouté
@@ -234,7 +234,7 @@ XPHONE.init(XIII_APP);
 // =====================================================================
 var XPASS = window.XPASS || (() => {
     let APP = '';
-    const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } };
+    const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null || (d != null && typeof d === 'object' && (typeof v !== 'object' || Array.isArray(v) !== Array.isArray(d))) ? d : v; } catch (e) { return d; } };
     const W = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } };
     const E = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
     const F = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/\s+/g, ' ').trim();

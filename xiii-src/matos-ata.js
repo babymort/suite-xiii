@@ -6,7 +6,7 @@
 //  Exports : Excel (.xlsx) et PDF (impression, format A4 paysage), plus rappels (délais, pays, assurance).
 // =====================================================================
 var XATA = window.XATA || (() => {
-    const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } }, W = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { } };
+    const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null || (d != null && typeof d === 'object' && (typeof v !== 'object' || Array.isArray(v) !== Array.isArray(d))) ? d : v; } catch (e) { return d; } }, W = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { } };
     const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     const fold = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
     const num = v => { const n = parseFloat(String(v == null ? '' : v).replace(/\s/g, '').replace(',', '.')); return isNaN(n) ? 0 : n; };
@@ -45,7 +45,7 @@ var XATA = window.XATA || (() => {
             '<div class="xa-a"><button data-x="xl" class="p">📊 Excel (.xlsx)</button><button data-x="pdf">🖨️ PDF / imprimer</button><button data-x="re" title="Repartir de la liste matériel du projet">↻ Recharger la liste</button></div>';
         c.querySelectorAll('[data-h]').forEach(e => e.onchange = () => { S.head[e.dataset.h] = e.value.trim(); save(); draw(); });
         c.querySelectorAll('tr[data-i]').forEach(tr => { const r = S.rows[+tr.dataset.i]; tr.querySelectorAll('[data-k]').forEach(e => e.onchange = () => { r[e.dataset.k] = e.type === 'number' ? Math.max(1, +e.value || 1) : e.value.trim(); save(); draw(); }); tr.querySelector('[data-del]').onclick = () => { S.rows.splice(+tr.dataset.i, 1); save(); draw(); }; });
-        c.querySelector('[data-x="xl"]').onclick = xlsx; c.querySelector('[data-x="pdf"]').onclick = pdf;
+        c.querySelector('[data-x="xl"]').onclick = () => xlsx().catch(e => { const m = /JSZip/.test(e.message) ? '📡 Export Excel impossible hors connexion : la première fois, il faut Internet. Utilisez 🖨️ PDF en attendant.' : '⚠️ Export Excel impossible : ' + e.message; typeof XM !== 'undefined' && XM.toast ? XM.toast(m, 6000) : alert(m); }); c.querySelector('[data-x="pdf"]').onclick = pdf;
         c.querySelector('[data-x="re"]').onclick = () => { if (!confirm('Repartir de la liste matériel du projet ? Vos corrections de lignes seront perdues (l\'en-tête est gardé).')) return; const hd = S.head; W(key(), null); S = build(); S.head = hd; save(); draw(); };
     }
     const lines = () => S.rows.map((r, i) => [i + 1, [r.desc, r.brand && !fold(r.desc).includes(fold(r.brand)) ? r.brand : ''].filter(Boolean).join(' — ') + (r.sn ? ' · N° de série : ' + r.sn : ''), num(r.qty) || 1, num(r.kg) || '', num(r.val) || '', r.orig || S.head.origDef || '']);

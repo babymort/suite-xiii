@@ -1,0 +1,1 @@
+[["const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } }", "const v = JSON.parse(localStorage.getItem(k)); return v == null || (d != null && typeof d === 'object' && (typeof v !== 'object' || Array.isArray(v) !== Array.isArray(d))) ? d : v; } catch (e) { return d; } }", 1]]
