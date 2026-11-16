@@ -1,0 +1,11 @@
+const { chromium } = require('playwright');
+const TH = ['light','dark','auto','sobre','sobrec','w2k','xp','mac9','cyber','term','gb','regie','soleil','rainbow','sepia'], PG = ['index','plano','conduco','deviso'];
+(async () => { const b = await chromium.launch(); const Q = []; TH.forEach(t => PG.forEach(p => Q.push([t, p])));
+ await Promise.all([0,1,2,3].map(async () => { while (Q.length) { const [t, a] = Q.shift(); const ctx = await b.newContext({ viewport: { width: 1440, height: 900 } });
+  await ctx.route('**/*', r => r.request().url().startsWith('http://localhost') ? r.continue() : r.abort());
+  await ctx.addInitScript(([t, a]) => { localStorage.setItem('xiii.theme.mode', t); localStorage.setItem('xiii.tips.off', 'true'); localStorage.setItem('xiii.tour2.' + a + '.hide', '1'); localStorage.setItem('xiii.news.seen', JSON.stringify({ ver: 'x', k: [] })); }, [t, a]);
+  const p = await ctx.newPage(); try { await p.goto('http://localhost:8765/' + a + '.html?desktop=1'); await p.waitForTimeout(2500);
+   await p.evaluate(async a => { try { if (XMODELS.adapters[a]) await XMODELS.apply(a, 'fiction', false); } catch (e) { } }, a); await p.reload(); await p.waitForTimeout(3000);
+   await p.evaluate(() => document.querySelectorAll('#xt-root,#xtp,#xem-first,.modal-overlay').forEach(e => e.remove()));
+   await p.screenshot({ path: '/tmp/zz/th/' + t + '_' + a + '.png' }); } catch (e) { console.log(t, a, e.message.slice(0, 60)); } await ctx.close(); } }));
+ await b.close(); })();
