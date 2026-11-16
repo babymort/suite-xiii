@@ -73,7 +73,7 @@ for f in glob.glob(R + '*.html'):
     if s != s0: open(f, 'w', encoding='utf-8').write(s)
 # 3. service worker : version et fichiers à garder hors ligne
 h = hashlib.md5()
-for f in sorted(glob.glob(R + '*.html')) + sorted(glob.glob(LIB + '*')): h.update(open(f, 'rb').read())
+for f in sorted(glob.glob(R + '*.html')) + sorted(glob.glob(LIB + '*')) + sorted(glob.glob(R + 'logos/*')) + sorted(glob.glob(R + 'fonts/*')) + sorted(glob.glob(R + 'data/*')): h.update(open(f, 'rb').read())  # images et données comprises : le hors-ligne se met à jour quand un logo change
 sw = open(R + 'sw.js', encoding='utf-8').read(); sw = re.sub(r"const VER = '[0-9a-f]+'", "const VER = '" + h.hexdigest()[:10] + "'", sw, 1)
 m = re.search(r'PAGES = (\[[^\]]*\])', sw); L = [x for x in json.loads(m.group(1)) if not x.startswith('lib/')] + ['lib/' + n + '?v=' + V[n] for n in sorted(V)]
 # saison 6 (ZZ « Tout fonctionne sans réseau ») : logos, polices et données locales gardés hors ligne
