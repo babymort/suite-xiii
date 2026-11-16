@@ -225,7 +225,7 @@ const XIMGS = (() => {
 const XFILES = (() => {
     const RX = /data:([a-z]+\/[\w.+-]+);base64,[A-Za-z0-9+/=]{54000,}/g, RF = /xiiif:([\w-]{10,80})\|([a-z]+\/[\w.+-]+)/g;
     const MAPK = 'xiii.files.map';
-    const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } };
+    const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null || (d != null && typeof d === 'object' && (typeof v !== 'object' || Array.isArray(v) !== Array.isArray(d))) ? d : v; } catch (e) { return d; } };
     let MAP = J(MAPK, {}); const saveMap = () => { try { localStorage.setItem(MAPK, JSON.stringify(MAP)); } catch (e) { } };
     const key = s => { let h = 0x811c9dc5; for (let i = 0; i < s.length; i += 7) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; } return s.length.toString(36) + '-' + h.toString(36) + '-' + s.slice(-24).replace(/[^A-Za-z0-9]/g, ''); };
     // ---------- copie locale (IndexedDB) ----------
@@ -262,7 +262,7 @@ const XFILES = (() => {
 const TEAMS = [['production','Production'],['realisation','Réalisation'],['image','Image / caméras'],['son','Son'],['lumiere','Lumière'],['regie','Régie'],['technique','Technique / vidéo'],['deco','Décor / accessoires'],['hmc','Costumes / maquillage'],['post','Post-production'],['artistes','Artistes / talents'],['client','Client / diffuseur']];
 const TN = Object.fromEntries(TEAMS);
 const $ = id => document.getElementById(id), esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } };
+const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null || (d != null && typeof d === 'object' && (typeof v !== 'object' || Array.isArray(v) !== Array.isArray(d))) ? d : v; } catch (e) { return d; } };
 const fmt = ts => ts ? new Date(ts).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) + ' à ' + new Date(ts).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : '—';
 const c = J('xiii.drive', null), admin = c && !c.tok;
 let PUB = null, REV = 0, AS = '', sig = '';

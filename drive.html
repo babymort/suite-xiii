@@ -59,7 +59,7 @@ const NAMES = Object.assign({ melango: 'MELANGO', matos: 'MATOS', catalogue: 'CA
 const TEAMS = [['','—'],['production','Production'],['realisation','Réalisation'],['image','Image / caméras'],['son','Son'],['lumiere','Lumière'],['regie','Régie'],['technique','Technique / vidéo'],['deco','Décor / accessoires'],['hmc','Costumes / maquillage'],['post','Post-production'],['artistes','Artistes / talents'],['client','Client / diffuseur']];
 const $ = id => document.getElementById(id), main = $('main');
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } };
+const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null || (d != null && typeof d === 'object' && (typeof v !== 'object' || Array.isArray(v) !== Array.isArray(d))) ? d : v; } catch (e) { return d; } };
 const W = (k, v) => { try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, typeof v === 'string' ? v : JSON.stringify(v)); } catch (e) { toast('⚠️ Stockage du navigateur indisponible'); } };
 let tT; const toast = m => { const t = $('toast'); t.textContent = m; t.classList.add('show'); clearTimeout(tT); tT = setTimeout(() => t.classList.remove('show'), 3000); };
 const fmt = ts => ts ? new Date(ts).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) + ' à ' + new Date(ts).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : '—';

@@ -148,7 +148,7 @@ if (typeof module !== 'undefined') module.exports = XQR;
 // =====================================================================
 const NAMES = { melango: 'MELANGO', matos: 'MATOS', catalogue: 'CATALOGUE', backupo: 'BACKUPO', callsheeto: 'CALL SHEETO', casto: 'CASTO', conduco: 'CONDUCO', decoup: 'DECOUP', deviso: 'DEVISO', graphico: 'GRAPHICO', lumo: 'LUMO', moodo: 'MOODO', packingo: 'PACKINGO', planno: 'PLANNO', plano: 'PLANO', posto: 'POSTO', repero: 'REPERO', ressourco: 'RESSOURCO', runo: 'RUNO', scripto: 'SCRIPTO', sono: 'SONO', soustitro: 'SOUSTITRO', storyboardo: 'STORYBOARDO', syno: 'SYNO', transporto: 'TRANSPORTO' };
 const $ = id => document.getElementById(id), esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } };
+const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null || (d != null && typeof d === 'object' && (typeof v !== 'object' || Array.isArray(v) !== Array.isArray(d))) ? d : v; } catch (e) { return d; } };
 const W = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { } };
 const toast = (m, t) => { const x = $('toast'); x.textContent = m; x.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(() => x.classList.remove('on'), t || 2600); };
 if (J('xiii.theme', null) === 'light' || localStorage.getItem('xiii.theme') === 'light') document.body.classList.add('light-theme');

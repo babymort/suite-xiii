@@ -610,7 +610,7 @@ body.light-theme #dev-credit { color: #555; text-shadow: none; }
 // =====================================================================
 const $ = id => document.getElementById(id);
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } };
+const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null || (d != null && typeof d === 'object' && (typeof v !== 'object' || Array.isArray(v) !== Array.isArray(d))) ? d : v; } catch (e) { return d; } };
 const W = (k, v) => { try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, JSON.stringify(v)); } catch (e) { toast('⚠️ Stockage plein'); } };
 let toastT = null; function toast(m) { const t = $('toast'); t.textContent = m; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 3200); }
 const NAMES = { backupo: '💽 BACKUPO', callsheeto: '📋 CALL SHEETO', casto: '🎭 CASTO', conduco: '🎬 CONDUCO', decoup: '✂️ DECOUP', deviso: '💶 DEVISO', dossier: '📚 DOSSIER', graphico: '🎛️ GRAPHICO', lumo: '💡 LUMO', moodo: '🎨 MOODO', packingo: '🧳 PACKINGO', planno: '📅 PLANNO', plano: '📐 PLANO', posto: '🎞️ POSTO', repero: '📍 REPERO', ressourco: '📑 RESSOURCO', runo: '🔴 RUNO', scripto: '📝 SCRIPTO', sono: '🎚️ SONO', soustitro: '💬 SOUSTITRO', storyboardo: '🖼️ STORYBOARDO', syno: '🔀 SYNO', transporto: '🚐 TRANSPORTO', cadro: '🎯 CADRO' };

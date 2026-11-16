@@ -203,7 +203,7 @@
 //  Une focale plus large que l'objectif du téléphone est signalée (le cadre ne peut pas être plus large).
 // =====================================================================
 const $ = id => document.getElementById(id);
-const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } };
+const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null || (d != null && typeof d === 'object' && (typeof v !== 'object' || Array.isArray(v) !== Array.isArray(d))) ? d : v; } catch (e) { return d; } };
 const W = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { } };
 const CAMS = [['ff', 'Plein format 24×36', 36, 24], ['s35', 'Super 35 (FX6, C300, FS7)', 24.9, 14], ['alexa35', 'ARRI Alexa 35', 27.99, 19.22], ['minilf', 'ARRI Alexa Mini LF', 36.7, 25.54], ['komodo', 'RED Komodo 6K', 27.03, 14.26], ['bmpcc6k', 'BMPCC 6K (S35)', 23.1, 12.99], ['mft', 'Micro 4/3 (GH6, BMPCC 4K)', 17.3, 13], ['aps', 'APS-C (FX30, a6700)', 23.5, 15.6], ['s16', 'Super 16', 12.52, 7.41], ['b4', 'Broadcast 2/3"', 9.59, 5.39]];
 const ARS = [['1.78', '16:9'], ['2.39', '2.39 Scope'], ['1.85', '1.85'], ['1.33', '4:3'], ['1', '1:1'], ['0.5625', '9:16']];

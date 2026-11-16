@@ -1075,11 +1075,11 @@ const XBook = (() => {
             '<div style="padding:14px 18px 10px;border-bottom:1px solid var(--border-color,#444);"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;"><b style="font-size:15px;">📇 Annuaire Suite XIII <span id="xb-n" style="font-weight:normal;color:var(--text-dim,#888);font-size:12px;"></span></b><span id="xb-x" style="cursor:pointer;font-weight:bold;color:var(--text-muted,#aaa);padding:0 4px;">✕</span></div>' +
             '<div style="font-size:11.5px;color:var(--text-dim,#888);margin-top:4px;">Les mêmes contacts dans tous les outils XIII : saisis une fois, proposés partout (équipe, convocations, intervenants, responsable…).</div>' +
             '<div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;"><input type="search" id="xb-q" placeholder="Rechercher (nom, poste, téléphone…)" style="flex:1;min-width:180px;"><select id="xb-d"><option value="">Tous les départements</option>' + DEPTS.map(d => '<option value="' + d[0] + '">' + E(d[1]) + '</option>').join('') + '</select>' +
-            '<button id="xb-add">＋ Contact</button><button id="xb-imp" title="Contacts Google ou Outlook (export CSV ou vCard), CSV / Excel, vCard (.vcf) ou fichier Suite XIII (.xiii.json)">📥 Importer</button><button id="xb-exp">⬇️ Exporter</button></div></div>' +
+            '<button id="xb-add">＋ Contact</button><button id="xb-imp" title="Contacts Google ou Outlook (export CSV ou vCard), CSV / Excel, vCard (.vcf) ou fichier Suite XIII (.xiii.json)">📥 Importer</button><button id="xb-cexp">⬇️ Exporter</button></div></div>' +
             '<div id="xb-list" style="flex:1;overflow-y:auto;padding:8px 18px;"></div>' +
             '<div style="padding:10px 18px;border-top:1px solid var(--border-color,#444);display:flex;gap:8px;align-items:center;flex-wrap:wrap;"><label style="display:flex;gap:6px;align-items:center;font-size:12px;cursor:pointer;"><input type="checkbox" id="xb-all"> Tout sélectionner</label><span id="xb-sel" style="font-size:12px;color:var(--text-dim,#888);margin-right:auto;"></span>' +
             acts.map((a, i) => '<button data-act="' + i + '" title="' + E(a.title || '') + '" style="border-color:rgba(var(--accent,240,179,120),.85);background:rgba(var(--accent,240,179,120),.28);">' + E(a.label) + '</button>').join('') + '</div>' +
-            '<input type="file" id="xb-file" accept=".csv,.txt,.vcf,.json" style="display:none"></div>';
+            '<input type="file" id="xb-cfile" accept=".csv,.txt,.vcf,.json" style="display:none"></div>';
         document.body.appendChild(o);
         const sel = new Set();
         const close = () => { o.remove(); };
@@ -1132,18 +1132,18 @@ const XBook = (() => {
         document.getElementById('xb-d').onchange = draw;
         document.getElementById('xb-add').onclick = () => edit(null);
         document.getElementById('xb-all').onchange = e => { const q = fold(document.getElementById('xb-q').value), dk = document.getElementById('xb-d').value; load().filter(c => (!dk || c.dept === dk) && (!q || fold([c.name, c.role, c.phone, c.email, c.company].join(' ')).includes(q))).forEach(c => { if (e.target.checked) sel.add(c.id); else sel.delete(c.id); }); draw(); };
-        document.getElementById('xb-imp').onclick = () => document.getElementById('xb-file').click();
-        document.getElementById('xb-file').onchange = async e => {
+        document.getElementById('xb-imp').onclick = () => document.getElementById('xb-cfile').click(); // ZZ « Zéro plantage » : l'identifiant xb-file était déjà pris par la barre du haut (l'import ne s'ouvrait plus)
+        document.getElementById('xb-cfile').onchange = async e => {
             const f = e.target.files[0]; e.target.value = ''; if (!f) return;
             try { const arr = await importFile(f); const r = mergeMany(arr.map(complete), false); const list = load(); arr.forEach(c => { const m = match(list, c); if (m) sel.add(m.id); }); draw(); alert('📥 ' + r.added + ' contact(s) ajouté(s), ' + r.updated + ' complété(s). Les contacts importés sont sélectionnés.'); }
             catch (err) { alert('⚠️ Import impossible : ' + (err.message || err)); }
         };
-        document.getElementById('xb-exp').onclick = () => {
+        document.getElementById('xb-cexp').onclick = () => { // ZZ : xb-exp était aussi le bouton Exporter de l'outil
             const list = load(), pick = sel.size ? list.filter(c => sel.has(c.id)) : list;
             if (!pick.length) { alert('L\'annuaire est vide'); return; }
             const m = document.createElement('div');
             m.style.cssText = 'position:absolute;z-index:3;background:var(--bg-menu,#2d2d2d);border:1px solid var(--border-color,#444);border-radius:6px;padding:6px;display:flex;flex-direction:column;gap:4px;box-shadow:0 4px 12px rgba(0,0,0,.4);';
-            const r = document.getElementById('xb-exp').getBoundingClientRect(); m.style.position = 'fixed'; m.style.top = (r.bottom + 4) + 'px'; m.style.left = Math.max(8, r.right - 250) + 'px'; m.style.width = '250px';
+            const r = document.getElementById('xb-cexp').getBoundingClientRect(); m.style.position = 'fixed'; m.style.top = (r.bottom + 4) + 'px'; m.style.left = Math.max(8, r.right - 250) + 'px'; m.style.width = '250px';
             const base = 'Annuaire_XIII' + (sel.size ? '_selection' : '');
             [['📦 Fichier Suite XIII (.xiii.json)', () => XIII.dl(new Blob([JSON.stringify(payload(pick, cfgCur.app, cfgCur.from))], { type: 'application/json' }), base + '.xiii.json')],
              ['📊 Tableur CSV (Excel)', () => XIII.dl(new Blob([toCsv(pick)], { type: 'text/csv' }), base + '.csv')],
@@ -3301,7 +3301,7 @@ var XRED = (function () {
     const _bs = scBlankShot;
     scBlankShot = function (P0, day, from) { const s = _bs(P0, day, from); const st = XSET.val('sonDef'); if (!from && !P0.shots.length && st) s.sonTags = String(st).split(/[;,]/).map(x => x.trim()).filter(Boolean); return s; };
     XSET.init({
-        app: 'scripto', title: 'SCRIPTO', version: 'v1.43',
+        app: 'scripto', title: 'SCRIPTO', version: 'v1.44',
         theme: { get: () => prefs.theme === 'light' ? 'light' : 'dark', set: t => { if ((prefs.theme === 'light' ? 'light' : 'dark') !== t) toggleTheme(); } },
         hide: ['#toolbar button[onclick="toggleTheme()"]', '#toolbar button[onclick="openGuide()"]'],
         help: [{ icon: '📖', label: 'Guide d\'utilisation', sub: 'Journées, plans, prises, raccords, tablette, rapports', run: openGuide }],
@@ -3407,7 +3407,7 @@ const XUNDO = (() => {
 
 (function(){ const go = () => (typeof XBOOT !== 'undefined' ? XBOOT.ready(() => XUNDO.init('scripto'), 600) : setTimeout(() => XUNDO.init('scripto'), 600)); if (document.readyState === 'complete') go(); else window.addEventListener('load', go); })();
 
-</script><script src="lib/core-02.js?v=bf017cc810"></script><script src="lib/core-03.js?v=5d72f0de9f"></script><script>// =====================================================================
+</script><script src="lib/core-02.js?v=213e651f4c"></script><script src="lib/core-03.js?v=35ad74dddb"></script><script>// =====================================================================
 //  SUITE XIII — XPRS : 👥 présence en direct — qui est dans quel outil
 //  Deux sources fusionnées : le Drive (battement toutes les 20 s, fiable) et XLIVE (signal instantané à
 //  l'ouverture, au retour sur l'onglet, à la frappe, au départ). Affichage :
@@ -3416,7 +3416,7 @@ const XUNDO = (() => {
 // =====================================================================
 var XPRS = window.XPRS || (() => {
     let APP = '';
-    const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } };
+    const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null || (d != null && typeof d === 'object' && (typeof v !== 'object' || Array.isArray(v) !== Array.isArray(d))) ? d : v; } catch (e) { return d; } };
     const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     const fold = x => String(x || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
     const cfg = () => { const c = J('xiii.drive', null); return c && c.url ? c : null; };
@@ -3495,7 +3495,7 @@ var XPRS = window.XPRS || (() => {
 
 XPRS.init('scripto');
 
-</script><script src="lib/core-04.js?v=d60659d5f6"></script><script>// =====================================================================
+</script><script src="lib/core-04.js?v=fe71b4a49d"></script><script>// =====================================================================
 //  SUITE XIII — XFIT : la barre des outils tient sur une ligne
 //  Plutôt que de passer sur deux lignes, les boutons se resserrent par paliers (espaces, puis libellés,
 //  puis tailles) jusqu'à tout faire rentrer ; en dernier recours la barre défile horizontalement.
@@ -3534,7 +3534,7 @@ const XFIT = (() => {
 
 XFIT.init();
 
-</script><script src="lib/core-05.js?v=c614af4224"></script><script>// =====================================================================
+</script><script src="lib/core-05.js?v=342774b737"></script><script>// =====================================================================
 //  SUITE XIII — XDASH : l'accueil en tableau de bord du projet en cours
 //  En tête : projet (type, dates, compte à rebours, lieu), prochaines échéances (PLANNO, POSTO, fiche),
 //  ce qui manque selon le type de production, derniers retours de l'équipe (avis, mots, travaux reçus,
@@ -3542,7 +3542,7 @@ XFIT.init();
 // =====================================================================
 const XDASH = (() => {
     const KR = 'xiii.recent';
-    const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } };
+    const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null || (d != null && typeof d === 'object' && (typeof v !== 'object' || Array.isArray(v) !== Array.isArray(d))) ? d : v; } catch (e) { return d; } };
     const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     const NM = { backupo: ['💽', 'BACKUPO'], callsheeto: ['📋', 'CALL SHEETO'], casto: ['🎭', 'CASTO'], conduco: ['🎬', 'CONDUCO'], decoup: ['✂️', 'DECOUP'], deviso: ['💶', 'DEVISO'], dossier: ['📚', 'DOSSIER'], graphico: ['🎛️', 'GRAPHICO'], melango: ['🎚️', 'MELANGO'], lumo: ['💡', 'LUMO'], moodo: ['🎨', 'MOODO'], packingo: ['🧳', 'PACKINGO'], planno: ['📅', 'PLANNO'], plano: ['📐', 'PLANO'], posto: ['🎞️', 'POSTO'], repero: ['📍', 'REPERO'], ressourco: ['📑', 'RESSOURCO'], runo: ['🔴', 'RUNO'], scripto: ['📝', 'SCRIPTO'], sono: ['🎚️', 'SONO'], soustitro: ['💬', 'SOUSTITRO'], encodo: ['🔄', 'ENCODO'], storyboardo: ['🖼️', 'STORYBOARDO'], syno: ['🔀', 'SYNO'], transporto: ['🚐', 'TRANSPORTO'], cadro: ['🎯', 'CADRO'], jour: ['🎥', 'MODE TOURNAGE'] };
     const today = () => new Date().toISOString().slice(0, 10);
@@ -3784,7 +3784,7 @@ const XDASH = (() => {
 
 XDASH.init('scripto');
 
-</script><script src="lib/core-06.js?v=a5b0fe7f0c"></script><script>// =====================================================================
+</script><script src="lib/core-06.js?v=ff489f1791"></script><script>// =====================================================================
 //  SUITE XIII — XPUB : 🌐 lien public toujours à jour (lecture seule) pour n'importe quel outil
 //  Le Master publie l'outil sur le ☁️ Drive du projet ; chaque modification est republiée automatiquement.
 //  Toute personne ayant le lien (sans compte ni invitation) ouvre l'outil en lecture seule, mis à jour toutes les
@@ -3792,7 +3792,7 @@ XDASH.init('scripto');
 //  Côté visiteur, ses propres données de l'outil sont mises de côté pendant la consultation puis restaurées.
 // =====================================================================
 const XPUB = (() => {
-    const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } };
+    const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null || (d != null && typeof d === 'object' && (typeof v !== 'object' || Array.isArray(v) !== Array.isArray(d))) ? d : v; } catch (e) { return d; } };
     const say = m => { try { toast(m); } catch (e) { } };
     const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     const K = 'xiii.pub', BAK = 'xiii.pub.bak', SS = 'xiii.pub.on';
@@ -3933,7 +3933,7 @@ const XCALEV = (() => {
     return { SRC, events, ics };
 })();
 
-</script><script src="lib/core-07.js?v=e625ca8e15"></script><script>// =====================================================================
+</script><script src="lib/core-07.js?v=1574ed2289"></script><script>// =====================================================================
 //  SCRIPTO XIII → DOSSIER XIII : rapports de scripte quotidiens (un document par journée)
 // =====================================================================
 (function () { const run = () => {
@@ -3951,7 +3951,7 @@ const XCALEV = (() => {
 }; if (document.readyState === 'complete') run(); else addEventListener('load', run); })();
 
 
-</script><script src="lib/core-08.js?v=b4072c5810"></script><script>// =====================================================================
+</script><script src="lib/core-08.js?v=ad73a898d6"></script><script>// =====================================================================
 //  SUITE XIII — XVIT : 🌐 vitrine client du projet, en lecture seule, avec commentaires
 //  • sections automatiques : le projet (fiche), planning (PLANNO), intentions & moodboard (MOODO)
 //  • + documents des outils (ceux qu'ils envoient à DOSSIER : plan, synoptique, conducteur, storyboard…),
@@ -3962,7 +3962,7 @@ const XCALEV = (() => {
 // =====================================================================
 const XVIT = (() => {
     const SB = 'https://abvvsoccbdftticlmpgi.supabase.co', KEY = 'sb_publishable_wB5kIn6lQtO-YWdUlt3gfg_IBIgBMuL';
-    const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } };
+    const J = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null || (d != null && typeof d === 'object' && (typeof v !== 'object' || Array.isArray(v) !== Array.isArray(d))) ? d : v; } catch (e) { return d; } };
     const W = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } };
     const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     const rid = n => { const a = new Uint8Array(n); crypto.getRandomValues(a); return Array.from(a, b => 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789'[b % 57]).join(''); };
@@ -4160,39 +4160,39 @@ XSC2PO.init();
 <!-- SUITE XIII:SETTINGS:END -->
 <!-- SUITE XIII:EXTRA:START -->
 <script>var XIII_APP = window.XIII_APP || "scripto";</script>
-<script src="lib/suite-errl.js?v=75e5e7dd4f"></script>
-<script src="lib/suite-scen.js?v=aec8fb41f6"></script>
-<script src="lib/suite-digest.js?v=7a1d3eeafc"></script>
-<script src="lib/suite-dver.js?v=23e2ca96d4"></script>
-<script src="lib/suite-aichat.js?v=2ddfb1e64d"></script>
-<script src="lib/suite-trad.js?v=4496a32b35"></script>
-<script src="lib/suite-mcp.js?v=cea3304e0f"></script>
+<script src="lib/suite-errl.js?v=5d2e3749a6"></script>
+<script src="lib/suite-scen.js?v=bb931eb755"></script>
+<script src="lib/suite-digest.js?v=811851bc66"></script>
+<script src="lib/suite-dver.js?v=4e0a176449"></script>
+<script src="lib/suite-aichat.js?v=46c7c12b95"></script>
+<script src="lib/suite-trad.js?v=c29d303be3"></script>
+<script src="lib/suite-mcp.js?v=86272b0398"></script>
 <script src="lib/suite-zzbar.js?v=409fbb531d"></script>
 <script src="lib/suite-a11y2.js?v=6876dd0406"></script>
 <script src="lib/suite-sobre.js?v=21dc837de1"></script>
 <script src="lib/suite-ident.js?v=c9630e21d3"></script>
 <script src="lib/suite-topbar.js?v=7646c5d545"></script>
-<script src="lib/suite-sectors.js?v=9505a5e1ef"></script>
+<script src="lib/suite-sectors.js?v=1e583a6ce3"></script>
 <script src="lib/suite-focus.js?v=4c5df42ea0"></script>
 <script src="lib/suite-keys.js?v=f5024fc78d"></script>
-<script src="lib/suite-ctx.js?v=65bc7e2b55"></script>
+<script src="lib/suite-ctx.js?v=311eed26cf"></script>
 <script src="lib/suite-empty.js?v=dc3fbb36b9"></script>
-<script src="lib/suite-dock.js?v=2b93b51a16"></script>
+<script src="lib/suite-dock.js?v=3f9857e3b8"></script>
 <script src="lib/suite-libtab.js?v=93b6932f63"></script>
 <script src="lib/suite-type.js?v=c58a339c69"></script>
 <script src="lib/suite-density.js?v=4f4b5dc8e1"></script>
 <script src="lib/suite-trayopt.js?v=7ea261ada0"></script>
 <script src="lib/suite-tabman.js?v=def6ee12e7"></script>
 <script src="lib/suite-motion.js?v=08ee5e08bd"></script>
-<script src="lib/suite-color.js?v=44db6d9900"></script>
-<script src="lib/suite-barcfg.js?v=3bcd4cdd2f"></script>
-<script src="lib/suite-ctheme.js?v=a5ad410ffe"></script>
+<script src="lib/suite-color.js?v=abfbae0698"></script>
+<script src="lib/suite-barcfg.js?v=374b81dbf1"></script>
+<script src="lib/suite-ctheme.js?v=021d94f6c7"></script>
 <script src="lib/suite-projpage.js?v=f2c3586bc7"></script>
 <script src="lib/suite-kmap.js?v=d4b0728a57"></script>
 <script src="lib/suite-toolcfg.js?v=fd32e11e59"></script>
 <script src="lib/suite-anim.js?v=ef4d6e163a"></script>
 <script src="lib/suite-pident.js?v=01ef4569f2"></script>
-<script src="lib/suite-prof.js?v=cb9d806d7b"></script>
+<script src="lib/suite-prof.js?v=88657470e3"></script>
 <script src="lib/suite-notif.js?v=ac0dc3fd2e"></script>
 <script src="lib/suite-a11y3.js?v=cf542bcc3b"></script>
 <script src="lib/suite-emoji.js?v=39eccf87a9"></script>
