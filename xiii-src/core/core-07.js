@@ -608,7 +608,7 @@ var XLINKS = window.XLINKS || (() => {
     const from = a => L.filter(x => x[0] === a), to = a => L.filter(x => x[1] === a);
     const peers = a => [...new Set(L.filter(x => x[0] === a || x[1] === a).map(x => x[0] === a ? x[1] : x[0]))];
     // saison 6 : CATALOGUE fait partie de MATOS (onglet Catalogue) et IMPORTO de la fiche projet — plus proposés comme outils à part
-    (() => { const seen = new Set(); for (let i = L.length - 1; i >= 0; i--) { const x = L[i]; if (x[0] === 'catalogue') x[0] = 'matos'; if (x[1] === 'catalogue') x[1] = 'matos'; const k = x[0] + '>' + x[1]; if (x[0] === 'importo' || x[1] === 'importo' || x[0] === x[1] || seen.has(k)) L.splice(i, 1); else seen.add(k); } delete T.catalogue; delete T.importo; })();
+    (() => { const seen = new Set(); for (let i = L.length - 1; i >= 0; i--) { const x = L[i]; if (x[0] === 'catalogue') x[0] = 'matos'; if (x[1] === 'catalogue') x[1] = 'matos'; if (x[0] === 'planno') x[0] = 'calendrier'; if (x[1] === 'planno') x[1] = 'calendrier'; /* ZZ « Les outils se parlent » : PLANNO = la page calendrier (planning intégré) */ const k = x[0] + '>' + x[1]; if (x[0] === 'importo' || x[1] === 'importo' || x[0] === x[1] || seen.has(k)) L.splice(i, 1); else seen.add(k); } delete T.catalogue; delete T.importo; })();
     return { T, L, from, to, peers };
 })();
 
@@ -621,7 +621,7 @@ var XLINKS = window.XLINKS || (() => {
 const XGATE = (() => {
     let APP = '';
     const $ = id => document.getElementById(id), E = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-    const fn = n => typeof window[n] === 'function' ? window[n] : null;
+    const fn = n => typeof window[n] === 'function' ? window[n] : (() => { try { const w = (document.getElementById('cal-pl') || {}).contentWindow; return w && typeof w[n] === 'function' ? w[n] : null; } catch (e) { return null; } })(); // PLANNO : le planning de production est dans un cadre de la page calendrier
     const thenClick = (f, sel) => () => { const F = fn(f); if (!F) return false; F(); setTimeout(() => { const b = document.querySelector(sel); if (b) b.click(); }, 120); return true; };
     const SPECIAL = {
         'soustitro>graphico': () => { const F = fn('setView'); if (F) { F('live'); return true; } },
@@ -656,7 +656,7 @@ const XGATE = (() => {
         const r = rows.sort((a, b) => a.textContent.length - b.textContent.length)[0]; if (r) r.click();
     } catch (e) { } }
     function go(to) {
-        const k = APP + '>' + to; try { if (can(k) && SPECIAL[k]()) { close(); return; } } catch (e) { }
+        let k = APP + '>' + to; if (to === 'calendrier' && SPECIAL[APP + '>planno']) k = APP + '>planno'; try { if (can(k) && SPECIAL[k]()) { close(); return; } } catch (e) { }
         if (to === 'dossier') { const f = ['openSendToDossier', 'openSendDossier'].map(fn).find(Boolean); if (f) { close(); f(); return; } }
         const b = findBtn(to); close();
         if (b) { b.click(); setTimeout(() => pickIn(to), 200); return; }
