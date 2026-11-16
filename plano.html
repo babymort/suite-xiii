@@ -1751,7 +1751,7 @@ function libCount(cat) { return cat === 'ALL' ? allLib().length : allLib().filte
 function renderCats() {
     const bar = $('lib-categories-bar');
     bar.innerHTML = `<div class="cat-tab${prefs.cat === 'ALL' ? ' active' : ''}" style="background:#555;" data-cat="ALL" title="Tous les éléments">ALL</div>`
-        + CATS.map(c => `<div class="cat-tab${prefs.cat === c.id ? ' active' : ''}" style="background:${c.color};" data-cat="${c.id}" title="${esc(c.name)} (${libCount(c.id)})">${esc(c.name)}</div>`).join('');
+        + CATS.map(c => `<div class="cat-tab${prefs.cat === c.id ? ' active' : ''}" style="background:${c.color};" data-cat="${c.id}" title="${esc(c.name)} · ${libCount(c.id)} élément${libCount(c.id) > 1 ? 's' : ''}">${esc(c.name)}</div>`).join('');
     bar.querySelectorAll('.cat-tab').forEach(t => t.onclick = () => { prefs.cat = t.dataset.cat; savePrefs(); renderCats(); renderLibrary(); });
     $('lib-count').textContent = '(' + allLib().length + ')';
 }
@@ -8084,7 +8084,7 @@ var XRED = (function () {
 
     const opt = (a) => a.map(x => [String(x[0]), x[1]]);
     XSET.init({
-        app: 'plano', title: 'PLANO', version: 'v89',
+        app: 'plano', title: 'PLANO', version: 'v90',
         theme: { get: () => prefs.theme === 'light' ? 'light' : 'dark', set: t => { prefs.theme = t; applyTheme(); savePrefs(); } },
         hide: ['#settings-btn', '#settings-menu'],
         css: [
@@ -10056,7 +10056,7 @@ XCAT.initTool('plano');
 <script src="lib/suite-ctx.js?v=65bc7e2b55"></script>
 <script src="lib/suite-empty.js?v=dc3fbb36b9"></script>
 <script src="lib/suite-dock.js?v=2b93b51a16"></script>
-<script src="lib/suite-insp.js?v=2dd473ffe6"></script>
+<script src="lib/suite-insp.js?v=306bea759f"></script>
 <script src="lib/suite-libtab.js?v=93b6932f63"></script>
 <script src="lib/suite-type.js?v=c58a339c69"></script>
 <script src="lib/suite-density.js?v=4f4b5dc8e1"></script>

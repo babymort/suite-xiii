@@ -1209,7 +1209,7 @@ function libAll() {
 const libById = id => libAll().find(l => l.id === id);
 function renderCats() {
     const all = libAll();
-    $('lib-categories-bar').innerHTML = CATS.map(c => `<div class="cat-tab${prefs.cat === c.id ? ' active' : ''}" style="background:${c.col}" data-cat="${c.id}" title="${esc(c.name)} (${all.filter(l => l.cat === c.id).length})">${esc(c.name)}</div>`).join('');
+    $('lib-categories-bar').innerHTML = CATS.map(c => `<div class="cat-tab${prefs.cat === c.id ? ' active' : ''}" style="background:${c.col}" data-cat="${c.id}" title="${esc(c.name)} · ${all.filter(l => l.cat === c.id).length} élément(s)">${esc(c.name)}</div>`).join('');
     $('lib-count').textContent = '(' + all.length + ')';
 }
 $('lib-categories-bar').addEventListener('click', e => { const c = e.target.closest('[data-cat]'); if (!c) return; prefs.cat = c.dataset.cat; $('lib-search').value = ''; savePrefs(); renderCats(); renderLibrary(); });
@@ -4964,7 +4964,7 @@ var XRED = (function () {
     const typeOpts = () => TYPES.map(t => [t.id, t.ico + ' ' + t.name]);
 
     const CFG = {
-        app: 'decoup', title: 'DECOUP TECHNICO', version: 'v1.46',
+        app: 'decoup', title: 'DECOUP TECHNICO', version: 'v1.47',
         theme: { get: () => prefs.theme === 'light' ? 'light' : 'dark', set: t => { prefs.theme = t; applyTheme(); savePrefs(); } },
         hide: ['#settings-btn'],
         // ancien ⚙️ masqué ; ⚙️ absent de la lecture plein écran
@@ -5784,7 +5784,7 @@ XVIT.init();
 <script src="lib/suite-ctx.js?v=65bc7e2b55"></script>
 <script src="lib/suite-empty.js?v=dc3fbb36b9"></script>
 <script src="lib/suite-dock.js?v=2b93b51a16"></script>
-<script src="lib/suite-insp.js?v=2dd473ffe6"></script>
+<script src="lib/suite-insp.js?v=306bea759f"></script>
 <script src="lib/suite-libtab.js?v=93b6932f63"></script>
 <script src="lib/suite-type.js?v=c58a339c69"></script>
 <script src="lib/suite-density.js?v=4f4b5dc8e1"></script>
