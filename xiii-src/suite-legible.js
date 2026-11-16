@@ -11,6 +11,8 @@
         'html body.xregie,html body.xh.xregie{background:#000!important;background-image:none!important}' +
         '#xh-find,#xh-find span,#xh-find kbd,#xd-dash>.xd-hd b{color:color-mix(in srgb,var(--text-main,#eee) 76%,transparent)!important}' +
         'body.xterm #xh-nav,body.xterm #xh-nav .xh-foot{background:#000!important;background-image:none!important}body.xterm #xh-nav .xh-foot{color:#33ff66!important}';
-    const add = () => { const s = document.createElement('style'); s.id = 'xlegible-css'; s.textContent = css; (document.head || document.documentElement).appendChild(s); };
+    // ZZ « Application et versions téléphone » : au doigt, zones tactiles d'au moins 32 px (onglet bibliothèque, bandeaux sauvegarde et hors ligne)
+    const touch = '@media (pointer:coarse){#xlib-tab{min-width:32px!important}#xoff button,#xau-chip button{min-height:34px!important;padding-top:6px!important;padding-bottom:6px!important}}';
+    const add = () => { const s = document.createElement('style'); s.id = 'xlegible-css'; s.textContent = css + touch; (document.head || document.documentElement).appendChild(s); };
     if (document.head) add(); else document.addEventListener('DOMContentLoaded', add);
 })();

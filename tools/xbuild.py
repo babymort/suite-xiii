@@ -71,6 +71,14 @@ for f in glob.glob(R + '*.html'):
     s = s.replace('if(!c||Date.now()-c.t>36e5){var i=new Image()', 'if(XGF.indexOf(A)>-1&&(!c||Date.now()-c.t>36e5)){var i=new Image()')
     s = s.replace('if(c&&c.ok)g();if(XGF', 'if(c&&c.ok&&XGF.indexOf(A)>-1)g();if(XGF')
     if s != s0: open(f, 'w', encoding='utf-8').write(s)
+# 2b. ZZ « Application et versions téléphone » : pages sans code commun (espace, versions -m, accueil) installables comme appli et gardées hors ligne
+PWA = '<!-- XIII:PWA --><link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#1d1b19"><link rel="apple-touch-icon" href="xiii-apple-touch.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><script>if(\'serviceWorker\' in navigator&&location.protocol!==\'file:\')addEventListener(\'load\',function(){navigator.serviceWorker.register(\'sw.js\').catch(function(){})});</script><!-- /XIII:PWA -->'
+for f in glob.glob(R + '*.html'):
+    s = open(f, encoding='utf-8').read(); s0 = s
+    s = re.sub(r'<!-- XIII:PWA -->.*?<!-- /XIII:PWA -->', '', s, flags=re.S)
+    if 'lib/core-02.js' not in s and 'rel="manifest"' not in s and os.path.basename(f) != '404.html':
+        s = re.sub(r'(<meta charset="?UTF-8"?[^>]*>)', lambda m: m.group(1) + PWA, s, count=1, flags=re.I)
+    if s != s0: open(f, 'w', encoding='utf-8').write(s)
 # 3. service worker : version et fichiers à garder hors ligne
 h = hashlib.md5()
 for f in sorted(glob.glob(R + '*.html')) + sorted(glob.glob(LIB + '*')) + sorted(glob.glob(R + 'logos/*')) + sorted(glob.glob(R + 'fonts/*')) + sorted(glob.glob(R + 'data/*')): h.update(open(f, 'rb').read())  # images et données comprises : le hors-ligne se met à jour quand un logo change
