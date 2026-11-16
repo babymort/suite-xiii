@@ -1654,7 +1654,7 @@ var XRED = (function () {
 // CONTRÔLE XIII — ⚙️ Paramètres
 (function () {
     if (typeof XSET === 'undefined' || typeof checks !== 'function') return;
-    XSET.init({ app: 'controle', title: 'CONTRÔLE', version: 'v1.30', theme: { get: () => prefs.theme, set: t => { prefs.theme = t; applyTheme(); savePrefs(); } },
+    XSET.init({ app: 'controle', title: 'CONTRÔLE', version: 'v1.31', theme: { get: () => prefs.theme, set: t => { prefs.theme = t; applyTheme(); savePrefs(); } },
         help: [{ icon: '✅', label: 'Comment ça marche ?', sub: 'Vérification de tous les outils avant le tournage', run: () => alert('CONTRÔLE XIII lit les données de tous les outils (CALL SHEETO, CASTO, DEVISO, RESSOURCO, REPERO, MATOS, PACKINGO, PLANO, SYNO, TRANSPORTO, BACKUPO…) et liste ce qui est prêt, à vérifier ou bloquant pour la période choisie. Cliquez une ligne pour ouvrir l\'outil.') }],
         sections: [], apply() { } });
 })();
@@ -2185,7 +2185,7 @@ const XCALEV = (() => {
     return { SRC, events, ics };
 })();
 
-</script><script src="lib/core-07.js?v=1574ed2289"></script><script src="lib/core-08.js?v=ad73a898d6"></script><script>// =====================================================================
+</script><script src="lib/core-07.js?v=2bcc8f98b7"></script><script src="lib/core-08.js?v=ad73a898d6"></script><script>// =====================================================================
 //  SUITE XIII — XVIT : 🌐 vitrine client du projet, en lecture seule, avec commentaires
 //  • sections automatiques : le projet (fiche), planning (PLANNO), intentions & moodboard (MOODO)
 //  • + documents des outils (ceux qu'ils envoient à DOSSIER : plan, synoptique, conducteur, storyboard…),

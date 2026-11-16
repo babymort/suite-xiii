@@ -5614,7 +5614,7 @@ var XRED = (function () {
     // ---------- paramètres ----------
     const cvf = (k, label, ph, hint) => ({ k: 'cv_' + k, label, hint, type: 'text', def: '', placeholder: ph });
     XSET.init({
-        app: 'dossier', title: 'DOSSIER', version: 'v59',
+        app: 'dossier', title: 'DOSSIER', version: 'v60',
         theme: { get: () => prefs.theme === 'light' ? 'light' : 'dark', set: t => { if ((prefs.theme === 'light' ? 'light' : 'dark') !== t) toggleTheme(); } },
         // écran peu haut : l'aperçu collant de la page de garde (≈ 500 px) dépassait sous le badge Netlify et cachait « Générer »
         css: '@media (max-height: 900px) { .cover-prev { position: static; } }',
@@ -6182,7 +6182,7 @@ const XCALEV = (() => {
     return { SRC, events, ics };
 })();
 
-</script><script src="lib/core-07.js?v=1574ed2289"></script><script src="lib/core-08.js?v=ad73a898d6"></script><script>// =====================================================================
+</script><script src="lib/core-07.js?v=2bcc8f98b7"></script><script src="lib/core-08.js?v=ad73a898d6"></script><script>// =====================================================================
 //  SUITE XIII — XVIT : 🌐 vitrine client du projet, en lecture seule, avec commentaires
 //  • sections automatiques : le projet (fiche), planning (PLANNO), intentions & moodboard (MOODO)
 //  • + documents des outils (ceux qu'ils envoient à DOSSIER : plan, synoptique, conducteur, storyboard…),
