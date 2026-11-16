@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head><!-- SUITE XIII:MERGE-REDIR --><script>/* saison 6 : IMPORTO est rangé ailleurs ; seule la version intégrée (?embed=1) reste utilisée */if(!/[?&]embed=1/.test(location.search))location.replace("index.html#ximport");</script>
-<meta charset="UTF-8">
+<meta charset="UTF-8"><!-- XIII:PWA --><link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#1d1b19"><link rel="apple-touch-icon" href="xiii-apple-touch.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><script>if('serviceWorker' in navigator&&location.protocol!=='file:')addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})});</script><!-- /XIII:PWA -->
 <!-- SUITE XIII:WS:START --><script>// =====================================================================
 //  SUITE XIII — XWS : plusieurs « Projets XIII » en parallèle, chacun cloisonné
 //  • chargé en tout premier dans <head> de chaque page (avant tout code d'outil)
@@ -2277,7 +2277,7 @@ var XRED = (function () {
 // IMPORT XIII — ⚙️ Paramètres
 (function () {
     if (typeof XSET === 'undefined' || typeof records !== 'function') return;
-    XSET.init({ app: 'importo', title: 'IMPORT', version: 'v1.33', theme: { get: () => prefs.theme, set: t => { prefs.theme = t; applyTheme(); savePrefs(); } },
+    XSET.init({ app: 'importo', title: 'IMPORT', version: 'v1.34', theme: { get: () => prefs.theme, set: t => { prefs.theme = t; applyTheme(); savePrefs(); } },
         help: [{ icon: '📥', label: 'Comment ça marche ?', sub: 'Excel, CSV, PDF, StudioBinder, Movie Magic', run: () => alert('IMPORT XIII lit vos fichiers Excel, CSV, PDF, les copier-coller de Google Sheets et les exports StudioBinder / Movie Magic, reconnaît personnes, matériel ou dépouillement, puis les envoie vers l\'annuaire, CASTO, PACKINGO, DEVISO, le CATALOGUE ou PLANNO.') }],
         sections: [], apply() { } });
 })();
@@ -9747,7 +9747,7 @@ XVIT.init();
 <script src="lib/suite-a11y3.js?v=cf542bcc3b"></script>
 <script src="lib/suite-emoji.js?v=39eccf87a9"></script>
 <script src="lib/suite-wins.js?v=37f6c4e7c8"></script>
-<script src="lib/suite-legible.js?v=9f0777bee3"></script>
+<script src="lib/suite-legible.js?v=ae70ab4e1c"></script>
 <!-- SUITE XIII:EXTRA:END -->
 </body>
 </html>
