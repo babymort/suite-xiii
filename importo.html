@@ -1418,8 +1418,9 @@ const XBOOT = (() => {
     }
     function settle() { // attend que l'interface ne bouge plus (≈ 2 images sans changement de structure), 350 ms au plus
         // saison 6 : tout d'un seul coup — attend que boutons, barres, thème, polices et modules ajoutés aient fini (≈ 200 ms sans changement), 1,2 s au plus
-        let last = performance.now(); const end = last + 1200, mo = new MutationObserver(ms => { if (ms.some(m => m.type === 'childList' || /^(class|style|hidden)$/.test(m.attributeName || ''))) last = performance.now(); });
-        try { mo.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'style', 'hidden'] }); } catch (e) { }
+        // ZZ « Pages légères et rapides » : un attribut réécrit à l'identique (ex. classe « xfit » remise) ne compte plus comme un changement
+        let last = performance.now(); const end = last + 1200, mo = new MutationObserver(ms => { if (ms.some(m => m.type === 'childList' || (/^(class|style|hidden)$/.test(m.attributeName || '') && m.oldValue !== m.target.getAttribute(m.attributeName)))) last = performance.now(); });
+        try { mo.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'style', 'hidden'], attributeOldValue: true }); } catch (e) { }
         let fonts = false; try { document.fonts.ready.then(() => { fonts = true; }); setTimeout(() => { fonts = true; }, 800); } catch (e) { fonts = true; }
         const chk = () => { const n = performance.now(); if ((n - last > 200 && fonts) || n > end) { mo.disconnect(); try { if (typeof XFIT !== 'undefined') XFIT.fit(); } catch (e) { } requestAnimationFrame(reveal); } else requestAnimationFrame(chk); };
         requestAnimationFrame(chk);
@@ -2276,7 +2277,7 @@ var XRED = (function () {
 // IMPORT XIII — ⚙️ Paramètres
 (function () {
     if (typeof XSET === 'undefined' || typeof records !== 'function') return;
-    XSET.init({ app: 'importo', title: 'IMPORT', version: 'v1.29', theme: { get: () => prefs.theme, set: t => { prefs.theme = t; applyTheme(); savePrefs(); } },
+    XSET.init({ app: 'importo', title: 'IMPORT', version: 'v1.30', theme: { get: () => prefs.theme, set: t => { prefs.theme = t; applyTheme(); savePrefs(); } },
         help: [{ icon: '📥', label: 'Comment ça marche ?', sub: 'Excel, CSV, PDF, StudioBinder, Movie Magic', run: () => alert('IMPORT XIII lit vos fichiers Excel, CSV, PDF, les copier-coller de Google Sheets et les exports StudioBinder / Movie Magic, reconnaît personnes, matériel ou dépouillement, puis les envoie vers l\'annuaire, CASTO, PACKINGO, DEVISO, le CATALOGUE ou PLANNO.') }],
         sections: [], apply() { } });
 })();

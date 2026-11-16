@@ -4957,7 +4957,7 @@ var XQT = window.XQT || (() => {
 <!-- SUITE XIII:MOBILE:END -->
 <!-- SUITE XIII:SETTINGS:START --><script>var XIII_APP = "dossier"; // nom de l'outil, utilisé par le code commun (lib/core-*.js)</script>
 
-<script src="lib/core-01.js?v=cd005b7157"></script><script>// =====================================================================
+<script src="lib/core-01.js?v=8f22d9b124"></script><script>// =====================================================================
 //  SUITE XIII — connexion IA multi-services (XAI)
 //  Claude (Anthropic), Gemini (Google), ChatGPT (OpenAI), Mistral, OpenRouter, Groq, DeepSeek, Ollama (local), API compatible OpenAI.
 //  La clé reste dans ce navigateur (localStorage « xiii.ai ») et n'est envoyée qu'au service choisi.
@@ -5614,7 +5614,7 @@ var XRED = (function () {
     // ---------- paramètres ----------
     const cvf = (k, label, ph, hint) => ({ k: 'cv_' + k, label, hint, type: 'text', def: '', placeholder: ph });
     XSET.init({
-        app: 'dossier', title: 'DOSSIER', version: 'v56',
+        app: 'dossier', title: 'DOSSIER', version: 'v57',
         theme: { get: () => prefs.theme === 'light' ? 'light' : 'dark', set: t => { if ((prefs.theme === 'light' ? 'light' : 'dark') !== t) toggleTheme(); } },
         // écran peu haut : l'aperçu collant de la page de garde (≈ 500 px) dépassait sous le badge Netlify et cachait « Générer »
         css: '@media (max-height: 900px) { .cover-prev { position: static; } }',

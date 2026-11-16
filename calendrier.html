@@ -822,7 +822,7 @@ document.addEventListener('click', e => { const a = e.target.closest && e.target
 <!-- SUITE XIII:MOBILE:START --><!-- SUITE XIII:MOBILE:END -->
 <!-- SUITE XIII:SETTINGS:START --><script>var XIII_APP = "calendrier"; // nom de l'outil, utilisé par le code commun (lib/core-*.js)</script>
 
-<script src="lib/core-01.js?v=cd005b7157"></script><script>// =====================================================================
+<script src="lib/core-01.js?v=8f22d9b124"></script><script>// =====================================================================
 //  SUITE XIII — connexion IA multi-services (XAI)
 //  Claude (Anthropic), Gemini (Google), ChatGPT (OpenAI), Mistral, OpenRouter, Groq, DeepSeek, Ollama (local), API compatible OpenAI.
 //  La clé reste dans ce navigateur (localStorage « xiii.ai ») et n'est envoyée qu'au service choisi.
@@ -1328,7 +1328,7 @@ var XRED = (function () {
 // CALENDRIER XIII — ⚙️ Paramètres
 (function () {
     if (typeof XSET === 'undefined' || typeof events !== 'function') return;
-    XSET.init({ app: 'calendrier', title: 'PLANNO', version: 'v1.36', theme: { get: () => prefs.theme, set: t => { prefs.theme = t; applyTheme(); savePrefs(); } },
+    XSET.init({ app: 'calendrier', title: 'PLANNO', version: 'v1.37', theme: { get: () => prefs.theme, set: t => { prefs.theme = t; applyTheme(); savePrefs(); } },
         help: [{ icon: '🗓️', label: 'Comment ça marche ?', sub: 'Toutes les dates, export .ics', run: () => alert('PLANNO XIII rassemble les dates de tous les outils : tâches PLANNO, journées de tournage CALL SHEETO, directs CONDUCO, repérages REPERO, réservations et révisions MATOS, factures et échéances DEVISO, versions et livraisons POSTO, contrats et expirations de droits RESSOURCO, dates limites de candidature DOSSIER. Export .ics pour votre agenda. Raccourcis : 1 mois, 2 liste, ← →.') }],
         sections: [], apply() { } });
 })();

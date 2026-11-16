@@ -4211,7 +4211,7 @@ var XQT = window.XQT || (() => {
 <!-- SUITE XIII:MOBILE:END -->
 <!-- SUITE XIII:SETTINGS:START --><script>var XIII_APP = "storyboardo"; // nom de l'outil, utilisé par le code commun (lib/core-*.js)</script>
 
-<script src="lib/core-01.js?v=cd005b7157"></script><script>// =====================================================================
+<script src="lib/core-01.js?v=8f22d9b124"></script><script>// =====================================================================
 //  SUITE XIII — connexion IA multi-services (XAI)
 //  Claude (Anthropic), Gemini (Google), ChatGPT (OpenAI), Mistral, OpenRouter, Groq, DeepSeek, Ollama (local), API compatible OpenAI.
 //  La clé reste dans ce navigateur (localStorage « xiii.ai ») et n'est envoyée qu'au service choisi.
@@ -4727,7 +4727,7 @@ var XRED = (function () {
     // personnage ajouté : type et couleur par défaut quand on clique « Personnage » sans choisir
     const _ap = addPuppet; addPuppet = function (type) { return _ap(type || XSET.val('pupType') || 'homme'); };
     XSET.init({
-        app: 'storyboardo', title: 'STORYBOARDO', version: 'v4.42',
+        app: 'storyboardo', title: 'STORYBOARDO', version: 'v4.43',
         css: '.sb-props{max-height:calc(100vh - 370px)!important}#content{padding-bottom:90px}',
         theme: { get: () => prefs.theme === 'light' ? 'light' : 'dark', set: t => { if ((prefs.theme === 'light' ? 'light' : 'dark') !== t) toggleTheme(); } },
         hide: ['#toolbar button[onclick="toggleTheme()"]', '#toolbar button[onclick="openGuide()"]'],

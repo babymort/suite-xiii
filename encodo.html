@@ -1569,7 +1569,7 @@ async function openPdfEditor(id) { const it = Q.find(x => x.id === id) || Q.find
 </script>
 <!-- SUITE XIII:SETTINGS:START --><script>var XIII_APP = "encodo"; // nom de l'outil, utilisé par le code commun (lib/core-*.js)</script>
 
-<script src="lib/core-01.js?v=cd005b7157"></script><script>// =====================================================================
+<script src="lib/core-01.js?v=8f22d9b124"></script><script>// =====================================================================
 //  SUITE XIII — connexion IA multi-services (XAI)
 //  Claude (Anthropic), Gemini (Google), ChatGPT (OpenAI), Mistral, OpenRouter, Groq, DeepSeek, Ollama (local), API compatible OpenAI.
 //  La clé reste dans ce navigateur (localStorage « xiii.ai ») et n'est envoyée qu'au service choisi.
@@ -2083,7 +2083,7 @@ var XRED = (function () {
         try { savePrefs(); renderQueue(); } catch (e) { }
     }
     XSET.init({
-        app: 'encodo', title: 'ENCODO', version: 'v1.39',
+        app: 'encodo', title: 'ENCODO', version: 'v1.40',
         help: [{ icon: '📖', label: 'Comment convertir', sub: 'Glisser, choisir, régler, convertir', run: () => toast('Glissez vos fichiers, choisissez Vidéo / Audio / Image / PDF puis une fonction, ajustez les réglages à droite et lancez ▶️ Convertir (Ctrl+Entrée).', 9000) }],
         sections: [
             { id: 'out', icon: '📁', title: 'Fichiers produits', open: true, desc: 'Nom et téléchargement des fichiers convertis.', fields: [
