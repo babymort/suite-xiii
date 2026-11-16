@@ -1710,16 +1710,19 @@ const XCAT = (() => {
     // ---------- sélecteur dans les outils ----------
     function picker(app) {
         let o = document.getElementById('xcat-ov'); if (o) o.remove(); o = document.createElement('div'); o.id = 'xcat-ov'; document.body.appendChild(o);
-        const a = ADD[app], db = { items: all() }; let cat = '', q = '';
+        const a = ADD[app], db = { items: all() }; let cat = '', q = '', lim = 60;
         const draw = () => {
-            const L = search(q, cat).slice(0, 300);
+            const all = search(q, cat), L = all.slice(0, lim); // ZZ « Tout est rapide » : 60 fiches d'abord, la suite à la demande
             o.querySelector('.xcat-l').innerHTML = L.length ? L.map(it => '<div class="xcat-it" data-id="' + it.id + '"><span class="xcat-c">' + catOf(it.cat)[2] + '</span><span class="xcat-t"><b>' + esc(name(it)) + '</b><small>' + esc([it.kg ? it.kg + ' kg' : '', it.w ? it.w + ' W' : '', it.price ? it.price + ' € / j' : '', it.inp ? '⇥ ' + it.inp : '', it.outp ? '↦ ' + it.outp : ''].filter(Boolean).join(' · ')) + '</small></span>' + (a ? '<button data-add>→ ' + esc(a.lab) + '</button>' : '<button data-cp>📋 Copier</button>') + '</div>').join('') : '<p class="xcat-e">' + (db.items.length ? 'Aucun équipement ne correspond.' : 'Le catalogue est vide : ouvrez le volet 🗃️ Catalogue pour y ajouter votre matériel ou les modèles courants.') + '</p>';
-            o.querySelectorAll('.xcat-it').forEach(r => { const it = db.items.find(x => x.id === r.dataset.id); const b = r.querySelector('button');
+            if (all.length > L.length) o.querySelector('.xcat-l').insertAdjacentHTML('beforeend', '<button class="xcat-more" style="display:block;margin:8px auto">Afficher ' + Math.min(120, all.length - L.length) + ' de plus (' + (all.length - L.length) + ' restants)</button>');
+            const mo = o.querySelector('.xcat-more'); if (mo) mo.onclick = () => { lim += 120; draw(); };
+            const byId = new Map(db.items.map(x => [x.id, x]));
+            o.querySelectorAll('.xcat-it').forEach(r => { const it = byId.get(r.dataset.id); const b = r.querySelector('button');
                 b.onclick = () => { if (a) { let m = null; try { m = a.run(it); } catch (e) { console.warn('XCAT', e); m = '⚠️ Insertion impossible dans cet écran'; } try { toast(m || '⚠️ Insertion impossible ici'); } catch (e) { } } else { try { navigator.clipboard.writeText(name(it) + (it.notes ? ' — ' + it.notes : '')); toast('📋 Copié'); } catch (e) { } } }; });
         };
         o.innerHTML = '<div class="xcat-box"><div class="xcat-h"><b>🗃️ Catalogue matériel</b><span class="xcat-n">' + db.items.length + ' équipement(s)</span><a href="catalogue.html" target="_blank">Ouvrir le volet ↗</a><span class="xcat-x">✕</span></div><div class="xcat-f"><input class="xcat-q" placeholder="🔍 marque, modèle, connectique…" autofocus><select class="xcat-s"><option value="">Toutes les familles</option>' + CATS.map(c => '<option value="' + c[0] + '">' + c[2] + ' ' + c[1] + '</option>').join('') + '</select></div><div class="xcat-l"></div>' + (a ? '' : '<p class="xcat-e">Cet outil n\'a pas d\'insertion directe : copiez la fiche.</p>') + '</div>';
         o.querySelector('.xcat-x').onclick = () => o.remove(); o.addEventListener('mousedown', e => { if (e.target === o) o.remove(); });
-        o.querySelector('.xcat-q').oninput = e => { q = e.target.value; draw(); }; o.querySelector('.xcat-s').onchange = e => { cat = e.target.value; draw(); };
+        o.querySelector('.xcat-q').oninput = e => { q = e.target.value; lim = 60; draw(); }; o.querySelector('.xcat-s').onchange = e => { cat = e.target.value; lim = 60; draw(); };
         const pre = { lumo: 'lum', sono: 'son', syno: '', plano: '', packingo: '', deviso: '', cadro: 'cam' }[app]; if (pre) { cat = pre; o.querySelector('.xcat-s').value = pre; }
         draw(); setTimeout(() => o.querySelector('.xcat-q').focus(), 30);
     }
@@ -3555,7 +3558,7 @@ var XRED = (function () {
 (function () {
     if (typeof XSET === 'undefined' || typeof STATES === 'undefined') return;
     XSET.init({
-        app: 'matos', title: 'MATOS', version: 'v1.50',
+        app: 'matos', title: 'MATOS', version: 'v1.51',
         theme: { get: () => prefs.theme, set: t => { prefs.theme = t; applyTheme(); savePrefs(); } },
         help: [{ icon: '📦', label: 'Comment ça marche ?', sub: 'Parc, réservations, conflits, sorties / retours, étiquettes QR', run: () => modal('<h3>📦 MATOS XIII<span class="close-x" onclick="closeModal()">✕</span></h3><p><b>1. Parc</b> : ajoutez vos équipements depuis le 🗃️ catalogue commun (ou à la main) avec leurs numéros de série. Chaque unité reçoit un code MAT-0001 et une 🏷️ étiquette QR à imprimer.</p><p><b>2. Réservations</b> : projet, dates, option ou ferme. MATOS signale les conflits : unité déjà réservée, en panne, en révision. Envoyez la liste vers 🧳 PACKINGO ou 💶 DEVISO.</p><p><b>3. Planning</b> : occupation de chaque unité sur 5 semaines.</p><p><b>4. Sorties / retours</b> : scannez le QR (caméra du téléphone) ou le code (douchette) : une unité au dépôt sort, une unité sortie revient, avec son état.</p><p>Raccourcis : 1 à 4 pour les vues, Ctrl+S.</p><div class="mb-actions"><button onclick="closeModal()">Compris</button></div>') }, { icon: '📐', label: 'Charger l\'exemple', run: loadExample }],
         sections: [{ id: 'mt', icon: '📦', title: 'Parc', open: true, fields: [{ k: 'view', label: 'Vue à l\'ouverture', type: 'select', def: 'parc', options: [['parc', 'Parc'], ['resa', 'Réservations'], ['plan', 'Planning'], ['scan', 'Sorties / retours']] }, { k: 'loc', label: 'Dépôt par défaut', type: 'text', def: '' }] }],
